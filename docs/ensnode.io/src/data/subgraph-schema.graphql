@@ -1,0 +1,4168 @@
+"""
+The `JSON` scalar type represents JSON values as specified by ECMA-404
+"""
+scalar JSON
+
+"""
+Arbitrary precision integer, useful for representing large numbers
+"""
+scalar BigInt
+
+"""
+Information about pagination in a connection
+"""
+type PageInfo {
+  """
+  Whether there are more records after the current page
+  """
+  hasNextPage: Boolean!
+
+  """
+  Whether there are more records before the current page
+  """
+  hasPreviousPage: Boolean!
+
+  """
+  Cursor pointing to the first record in the current page
+  """
+  startCursor: String
+
+  """
+  Cursor pointing to the last record in the current page
+  """
+  endCursor: String
+}
+
+type Query {
+  abiChanged(id: String!): AbiChanged
+  abiChangeds(
+    where: AbiChanged_filter
+    orderBy: AbiChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [AbiChanged!]!
+  account(id: String!): Account
+  accounts(
+    where: Account_filter
+    orderBy: Account_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Account!]!
+  addrChanged(id: String!): AddrChanged
+  addrChangeds(
+    where: AddrChanged_filter
+    orderBy: AddrChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [AddrChanged!]!
+  authorisationChanged(id: String!): AuthorisationChanged
+  authorisationChangeds(
+    where: AuthorisationChanged_filter
+    orderBy: AuthorisationChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [AuthorisationChanged!]!
+  contenthashChanged(id: String!): ContenthashChanged
+  contenthashChangeds(
+    where: ContenthashChanged_filter
+    orderBy: ContenthashChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [ContenthashChanged!]!
+  domain(id: String!): Domain
+  domains(
+    where: Domain_filter
+    orderBy: Domain_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Domain!]!
+  expiryExtended(id: String!): ExpiryExtended
+  expiryExtendeds(
+    where: ExpiryExtended_filter
+    orderBy: ExpiryExtended_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [ExpiryExtended!]!
+  fusesSet(id: String!): FusesSet
+  fusesSets(
+    where: FusesSet_filter
+    orderBy: FusesSet_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [FusesSet!]!
+  interfaceChanged(id: String!): InterfaceChanged
+  interfaceChangeds(
+    where: InterfaceChanged_filter
+    orderBy: InterfaceChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [InterfaceChanged!]!
+  multicoinAddrChanged(id: String!): MulticoinAddrChanged
+  multicoinAddrChangeds(
+    where: MulticoinAddrChanged_filter
+    orderBy: MulticoinAddrChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [MulticoinAddrChanged!]!
+  nameChanged(id: String!): NameChanged
+  nameChangeds(
+    where: NameChanged_filter
+    orderBy: NameChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameChanged!]!
+  nameRegistered(id: String!): NameRegistered
+  nameRegistereds(
+    where: NameRegistered_filter
+    orderBy: NameRegistered_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameRegistered!]!
+  nameRenewed(id: String!): NameRenewed
+  nameReneweds(
+    where: NameRenewed_filter
+    orderBy: NameRenewed_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameRenewed!]!
+  nameTransferred(id: String!): NameTransferred
+  nameTransferreds(
+    where: NameTransferred_filter
+    orderBy: NameTransferred_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameTransferred!]!
+  nameUnwrapped(id: String!): NameUnwrapped
+  nameUnwrappeds(
+    where: NameUnwrapped_filter
+    orderBy: NameUnwrapped_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameUnwrapped!]!
+  nameWrapped(id: String!): NameWrapped
+  nameWrappeds(
+    where: NameWrapped_filter
+    orderBy: NameWrapped_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameWrapped!]!
+  newOwner(id: String!): NewOwner
+  newOwners(
+    where: NewOwner_filter
+    orderBy: NewOwner_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NewOwner!]!
+  newResolver(id: String!): NewResolver
+  newResolvers(
+    where: NewResolver_filter
+    orderBy: NewResolver_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NewResolver!]!
+  newTTL(id: String!): NewTTL
+  newTTLs(
+    where: NewTTL_filter
+    orderBy: NewTTL_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NewTTL!]!
+  pubkeyChanged(id: String!): PubkeyChanged
+  pubkeyChangeds(
+    where: PubkeyChanged_filter
+    orderBy: PubkeyChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [PubkeyChanged!]!
+  registration(id: String!): Registration
+  registrations(
+    where: Registration_filter
+    orderBy: Registration_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Registration!]!
+  resolver(id: String!): Resolver
+  resolvers(
+    where: Resolver_filter
+    orderBy: Resolver_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Resolver!]!
+  textChanged(id: String!): TextChanged
+  textChangeds(
+    where: TextChanged_filter
+    orderBy: TextChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [TextChanged!]!
+  transfer(id: String!): Transfer
+  transfers(
+    where: Transfer_filter
+    orderBy: Transfer_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Transfer!]!
+  versionChanged(id: String!): VersionChanged
+  versionChangeds(
+    where: VersionChanged_filter
+    orderBy: VersionChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [VersionChanged!]!
+  wrappedDomain(id: String!): WrappedDomain
+  wrappedDomains(
+    where: WrappedDomain_filter
+    orderBy: WrappedDomain_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [WrappedDomain!]!
+  wrappedTransfer(id: String!): WrappedTransfer
+  wrappedTransfers(
+    where: WrappedTransfer_filter
+    orderBy: WrappedTransfer_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [WrappedTransfer!]!
+  _meta: _Meta_
+}
+
+"""
+Get a single an ABI changed event by address
+"""
+type AbiChanged implements ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event was emitted (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction in which the event was emitted (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The content type of the ABI change (exact match)
+  """
+  contentType: BigInt!
+
+  """
+  Used to derive relationships to Resolvers (exact match)
+  """
+  resolver: Resolver
+}
+
+"""
+Get a single a resolver event by address
+"""
+interface ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  The block number that the event occurred on (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the event (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+}
+
+"""
+Get a single a resolver by address
+"""
+type Resolver {
+  """
+  The unique identifier for this resolver, which is a concatenation of the domain namehash and the resolver address (exact match)
+  """
+  id: String!
+
+  """
+  The domain that this resolver is associated with (exact match)
+  """
+  domainId: String!
+
+  """
+  The address of the resolver contract (exact match)
+  """
+  address: String!
+
+  """
+  The current value of the 'addr' record for this resolver, as determined by the associated events (exact match)
+  """
+  addrId: String
+
+  """
+  The content hash for this resolver, in binary format (exact match)
+  """
+  contentHash: String
+
+  """
+  The set of observed text record keys for this resolver (exact match)
+  """
+  texts: [String!]
+
+  """
+  The set of observed SLIP-44 coin types for this resolver (exact match)
+  """
+  coinTypes: [BigInt!]
+
+  """
+  The current value of the 'addr' record for this resolver, as determined by the associated events (exact match)
+  """
+  addr: Account
+
+  """
+  The domain that this resolver is associated with (exact match)
+  """
+  domain: Domain
+  addrChangeds(
+    where: AddrChanged_filter
+    orderBy: AddrChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [AddrChanged!]!
+  multicoinAddrChangeds(
+    where: MulticoinAddrChanged_filter
+    orderBy: MulticoinAddrChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [MulticoinAddrChanged!]!
+  nameChangeds(
+    where: NameChanged_filter
+    orderBy: NameChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameChanged!]!
+  abiChangeds(
+    where: AbiChanged_filter
+    orderBy: AbiChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [AbiChanged!]!
+  pubkeyChangeds(
+    where: PubkeyChanged_filter
+    orderBy: PubkeyChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [PubkeyChanged!]!
+  textChangeds(
+    where: TextChanged_filter
+    orderBy: TextChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [TextChanged!]!
+  contenthashChangeds(
+    where: ContenthashChanged_filter
+    orderBy: ContenthashChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [ContenthashChanged!]!
+  interfaceChangeds(
+    where: InterfaceChanged_filter
+    orderBy: InterfaceChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [InterfaceChanged!]!
+  authorisationChangeds(
+    where: AuthorisationChanged_filter
+    orderBy: AuthorisationChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [AuthorisationChanged!]!
+  versionChangeds(
+    where: VersionChanged_filter
+    orderBy: VersionChanged_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [VersionChanged!]!
+
+  """
+  The events associated with this resolver (exact match)
+  """
+  events(
+    where: ResolverEvent_filter
+    orderBy: ResolverEvent_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [ResolverEvent!]!
+}
+
+"""
+Get a single an account by address
+"""
+type Account {
+  """
+  The unique identifier for the account (exact match)
+  """
+  id: String!
+
+  """
+  The domains owned by the account (exact match)
+  """
+  domains(
+    where: Domain_filter
+    orderBy: Domain_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Domain!]!
+
+  """
+  The WrappedDomains owned by the account (exact match)
+  """
+  wrappedDomains(
+    where: WrappedDomain_filter
+    orderBy: WrappedDomain_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [WrappedDomain!]!
+
+  """
+  The Registrations made by the account (exact match)
+  """
+  registrations(
+    where: Registration_filter
+    orderBy: Registration_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Registration!]!
+}
+
+"""
+Get a single a domain by address
+"""
+type Domain {
+  """
+  The namehash of the name (exact match)
+  """
+  id: String!
+
+  """
+  The human readable name, if known. Unknown portions replaced with hash in square brackets (eg, foo.[1234].eth) (exact match)
+  """
+  name: String
+
+  """
+  The human readable label name (imported from CSV), if known (exact match)
+  """
+  labelName: String
+
+  """
+  keccak256(labelName) (exact match)
+  """
+  labelhash: String
+
+  """
+  The namehash (id) of the parent name (exact match)
+  """
+  parentId: String
+
+  """
+  The number of subdomains (exact match)
+  """
+  subdomainCount: Int!
+
+  """
+  Address logged from current resolver, if any (exact match)
+  """
+  resolvedAddressId: String
+
+  """
+  The resolver that controls the domain's settings (exact match)
+  """
+  resolverId: String
+
+  """
+  The time-to-live (TTL) value of the domain's records (exact match)
+  """
+  ttl: BigInt
+
+  """
+  Indicates whether the domain has been migrated to a new registrar (exact match)
+  """
+  isMigrated: Boolean!
+
+  """
+  The time when the domain was created (exact match)
+  """
+  createdAt: BigInt!
+
+  """
+  The account that owns the domain (exact match)
+  """
+  ownerId: String!
+
+  """
+  The account that owns the ERC721 NFT for the domain (exact match)
+  """
+  registrantId: String
+
+  """
+  The account that owns the wrapped domain (exact match)
+  """
+  wrappedOwnerId: String
+
+  """
+  The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned (exact match)
+  """
+  expiryDate: BigInt
+
+  """
+  Currently resolved Address (exact match)
+  """
+  resolvedAddress: Account
+
+  """
+  The account that owns the domain (exact match)
+  """
+  owner: Account
+
+  """
+  The parent Domain of this Domain, if any (exact match)
+  """
+  parent: Domain
+
+  """
+  The resolver that controls the domain's settings (exact match)
+  """
+  resolver: Resolver
+
+  """
+  List of Domains under this Domain, if any (exact match)
+  """
+  subdomains(
+    where: Domain_filter
+    orderBy: Domain_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Domain!]!
+
+  """
+  The account that owns the ERC721 NFT for the domain (exact match)
+  """
+  registrant: Account
+
+  """
+  The account that owns the wrapped domain (exact match)
+  """
+  wrappedOwner: Account
+
+  """
+  The wrapped domain associated with the domain (exact match)
+  """
+  wrappedDomain: WrappedDomain
+
+  """
+  The registration associated with the domain (exact match)
+  """
+  registration: Registration
+  transfers(
+    where: Transfer_filter
+    orderBy: Transfer_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [Transfer!]!
+  newOwners(
+    where: NewOwner_filter
+    orderBy: NewOwner_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NewOwner!]!
+  newResolvers(
+    where: NewResolver_filter
+    orderBy: NewResolver_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NewResolver!]!
+  newTTLs(
+    where: NewTTL_filter
+    orderBy: NewTTL_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NewTTL!]!
+  wrappedTransfers(
+    where: WrappedTransfer_filter
+    orderBy: WrappedTransfer_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [WrappedTransfer!]!
+  nameWrappeds(
+    where: NameWrapped_filter
+    orderBy: NameWrapped_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameWrapped!]!
+  nameUnwrappeds(
+    where: NameUnwrapped_filter
+    orderBy: NameUnwrapped_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameUnwrapped!]!
+  fusesSets(
+    where: FusesSet_filter
+    orderBy: FusesSet_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [FusesSet!]!
+  expiryExtendeds(
+    where: ExpiryExtended_filter
+    orderBy: ExpiryExtended_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [ExpiryExtended!]!
+
+  """
+  The events associated with the domain (exact match)
+  """
+  events(
+    where: DomainEvent_filter
+    orderBy: DomainEvent_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [DomainEvent!]!
+}
+
+input Domain_filter {
+  and: [Domain_filter]
+  or: [Domain_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  name: String
+  name_not: String
+  name_in: [String]
+  name_not_in: [String]
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_ends_with: String
+  name_not_starts_with: String
+  name_not_ends_with: String
+  name_gt: String
+  name_lt: String
+  name_gte: String
+  name_lte: String
+  labelName: String
+  labelName_not: String
+  labelName_in: [String]
+  labelName_not_in: [String]
+  labelName_contains: String
+  labelName_not_contains: String
+  labelName_starts_with: String
+  labelName_ends_with: String
+  labelName_not_starts_with: String
+  labelName_not_ends_with: String
+  labelName_gt: String
+  labelName_lt: String
+  labelName_gte: String
+  labelName_lte: String
+  labelhash: String
+  labelhash_not: String
+  labelhash_in: [String]
+  labelhash_not_in: [String]
+  labelhash_contains: String
+  labelhash_not_contains: String
+  labelhash_starts_with: String
+  labelhash_ends_with: String
+  labelhash_not_starts_with: String
+  labelhash_not_ends_with: String
+  labelhash_gt: String
+  labelhash_lt: String
+  labelhash_gte: String
+  labelhash_lte: String
+  parentId: String
+  parentId_not: String
+  parentId_in: [String]
+  parentId_not_in: [String]
+  parentId_contains: String
+  parentId_not_contains: String
+  parentId_starts_with: String
+  parentId_ends_with: String
+  parentId_not_starts_with: String
+  parentId_not_ends_with: String
+  parentId_gt: String
+  parentId_lt: String
+  parentId_gte: String
+  parentId_lte: String
+  subdomainCount: Int
+  subdomainCount_not: Int
+  subdomainCount_in: [Int]
+  subdomainCount_not_in: [Int]
+  subdomainCount_gt: Int
+  subdomainCount_lt: Int
+  subdomainCount_gte: Int
+  subdomainCount_lte: Int
+  resolvedAddressId: String
+  resolvedAddressId_not: String
+  resolvedAddressId_in: [String]
+  resolvedAddressId_not_in: [String]
+  resolvedAddressId_contains: String
+  resolvedAddressId_not_contains: String
+  resolvedAddressId_starts_with: String
+  resolvedAddressId_ends_with: String
+  resolvedAddressId_not_starts_with: String
+  resolvedAddressId_not_ends_with: String
+  resolvedAddressId_gt: String
+  resolvedAddressId_lt: String
+  resolvedAddressId_gte: String
+  resolvedAddressId_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  ttl: BigInt
+  ttl_not: BigInt
+  ttl_in: [BigInt]
+  ttl_not_in: [BigInt]
+  ttl_gt: BigInt
+  ttl_lt: BigInt
+  ttl_gte: BigInt
+  ttl_lte: BigInt
+  isMigrated: Boolean
+  isMigrated_not: Boolean
+  isMigrated_in: [Boolean]
+  isMigrated_not_in: [Boolean]
+  createdAt: BigInt
+  createdAt_not: BigInt
+  createdAt_in: [BigInt]
+  createdAt_not_in: [BigInt]
+  createdAt_gt: BigInt
+  createdAt_lt: BigInt
+  createdAt_gte: BigInt
+  createdAt_lte: BigInt
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  registrantId: String
+  registrantId_not: String
+  registrantId_in: [String]
+  registrantId_not_in: [String]
+  registrantId_contains: String
+  registrantId_not_contains: String
+  registrantId_starts_with: String
+  registrantId_ends_with: String
+  registrantId_not_starts_with: String
+  registrantId_not_ends_with: String
+  registrantId_gt: String
+  registrantId_lt: String
+  registrantId_gte: String
+  registrantId_lte: String
+  wrappedOwnerId: String
+  wrappedOwnerId_not: String
+  wrappedOwnerId_in: [String]
+  wrappedOwnerId_not_in: [String]
+  wrappedOwnerId_contains: String
+  wrappedOwnerId_not_contains: String
+  wrappedOwnerId_starts_with: String
+  wrappedOwnerId_ends_with: String
+  wrappedOwnerId_not_starts_with: String
+  wrappedOwnerId_not_ends_with: String
+  wrappedOwnerId_gt: String
+  wrappedOwnerId_lt: String
+  wrappedOwnerId_gte: String
+  wrappedOwnerId_lte: String
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  resolvedAddress: String
+  resolvedAddress_not: String
+  owner: String
+  owner_not: String
+  parent: String
+  parent_not: String
+  resolver: String
+  resolver_not: String
+  registrant: String
+  registrant_not: String
+  wrappedOwner: String
+  wrappedOwner_not: String
+  wrappedDomain: String
+  wrappedDomain_not: String
+  registration: String
+  registration_not: String
+}
+
+enum Domain_orderBy {
+  id
+  name
+  labelName
+  labelhash
+  parentId
+  subdomainCount
+  resolvedAddressId
+  resolverId
+  ttl
+  isMigrated
+  createdAt
+  ownerId
+  registrantId
+  wrappedOwnerId
+  expiryDate
+}
+
+enum OrderDirection {
+  asc
+  desc
+}
+
+"""
+Get a single a wrapped domain by address
+"""
+type WrappedDomain {
+  """
+  The unique identifier for each instance of the WrappedDomain entity (exact match)
+  """
+  id: String!
+
+  """
+  The domain that is wrapped by this WrappedDomain (exact match)
+  """
+  domainId: String!
+
+  """
+  The expiry date of the wrapped domain (exact match)
+  """
+  expiryDate: BigInt!
+
+  """
+  The number of fuses remaining on the wrapped domain (exact match)
+  """
+  fuses: Int!
+
+  """
+  The account that owns this WrappedDomain (exact match)
+  """
+  ownerId: String!
+
+  """
+  The name of the wrapped domain (exact match)
+  """
+  name: String
+
+  """
+  The domain that is wrapped by this WrappedDomain (exact match)
+  """
+  domain: Domain
+
+  """
+  The account that owns this WrappedDomain (exact match)
+  """
+  owner: Account
+}
+
+"""
+Get a single a domain registration by address
+"""
+type Registration {
+  """
+  The unique identifier of the registration (exact match)
+  """
+  id: String!
+
+  """
+  The domain name associated with the registration (exact match)
+  """
+  domainId: String!
+
+  """
+  The registration date of the domain (exact match)
+  """
+  registrationDate: BigInt!
+
+  """
+  The expiry date of the domain (exact match)
+  """
+  expiryDate: BigInt!
+
+  """
+  The cost associated with the domain registration (exact match)
+  """
+  cost: BigInt
+
+  """
+  The account that registered the domain (exact match)
+  """
+  registrantId: String!
+
+  """
+  The human-readable label name associated with the domain registration (exact match)
+  """
+  labelName: String
+
+  """
+  The domain name associated with the registration (exact match)
+  """
+  domain: Domain
+
+  """
+  The account that registered the domain (exact match)
+  """
+  registrant: Account
+  nameRegistereds(
+    where: NameRegistered_filter
+    orderBy: NameRegistered_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameRegistered!]!
+  nameReneweds(
+    where: NameRenewed_filter
+    orderBy: NameRenewed_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameRenewed!]!
+  nameTransferreds(
+    where: NameTransferred_filter
+    orderBy: NameTransferred_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [NameTransferred!]!
+
+  """
+  The events associated with the domain registration (exact match)
+  """
+  events(
+    where: RegistrationEvent_filter
+    orderBy: RegistrationEvent_orderBy
+    orderDirection: OrderDirection
+    first: Int
+    skip: Int
+  ): [RegistrationEvent!]!
+}
+
+"""
+Get a single a name registered event by address
+"""
+type NameRegistered implements RegistrationEvent {
+  """
+  The unique identifier of the NameRegistered event (exact match)
+  """
+  id: String!
+
+  """
+  The block number of the event (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction ID associated with the event (exact match)
+  """
+  transactionID: String!
+  registrationId: String!
+  registrantId: String!
+
+  """
+  The expiry date of the registration (exact match)
+  """
+  expiryDate: BigInt!
+
+  """
+  The registration associated with the event (exact match)
+  """
+  registration: Registration
+
+  """
+  The account that registered the name (exact match)
+  """
+  registrant: Account
+}
+
+"""
+Get a single a registration event by address
+"""
+interface RegistrationEvent {
+  """
+  The unique identifier of the registration event (exact match)
+  """
+  id: String!
+
+  """
+  The block number of the event (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction ID associated with the event (exact match)
+  """
+  transactionID: String!
+  registrationId: String!
+}
+
+input NameRegistered_filter {
+  and: [NameRegistered_filter]
+  or: [NameRegistered_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  registrationId: String
+  registrationId_not: String
+  registrationId_in: [String]
+  registrationId_not_in: [String]
+  registrationId_contains: String
+  registrationId_not_contains: String
+  registrationId_starts_with: String
+  registrationId_ends_with: String
+  registrationId_not_starts_with: String
+  registrationId_not_ends_with: String
+  registrationId_gt: String
+  registrationId_lt: String
+  registrationId_gte: String
+  registrationId_lte: String
+  registrantId: String
+  registrantId_not: String
+  registrantId_in: [String]
+  registrantId_not_in: [String]
+  registrantId_contains: String
+  registrantId_not_contains: String
+  registrantId_starts_with: String
+  registrantId_ends_with: String
+  registrantId_not_starts_with: String
+  registrantId_not_ends_with: String
+  registrantId_gt: String
+  registrantId_lt: String
+  registrantId_gte: String
+  registrantId_lte: String
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  registration: String
+  registration_not: String
+  registrant: String
+  registrant_not: String
+}
+
+enum NameRegistered_orderBy {
+  id
+  blockNumber
+  transactionID
+  registrationId
+  registrantId
+  expiryDate
+}
+
+"""
+Get a single a name renewed event by address
+"""
+type NameRenewed implements RegistrationEvent {
+  """
+  The unique identifier of the NameRenewed event (exact match)
+  """
+  id: String!
+
+  """
+  The block number of the event (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction ID associated with the event (exact match)
+  """
+  transactionID: String!
+  registrationId: String!
+
+  """
+  The new expiry date of the registration (exact match)
+  """
+  expiryDate: BigInt!
+
+  """
+  The registration associated with the event (exact match)
+  """
+  registration: Registration
+}
+
+input NameRenewed_filter {
+  and: [NameRenewed_filter]
+  or: [NameRenewed_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  registrationId: String
+  registrationId_not: String
+  registrationId_in: [String]
+  registrationId_not_in: [String]
+  registrationId_contains: String
+  registrationId_not_contains: String
+  registrationId_starts_with: String
+  registrationId_ends_with: String
+  registrationId_not_starts_with: String
+  registrationId_not_ends_with: String
+  registrationId_gt: String
+  registrationId_lt: String
+  registrationId_gte: String
+  registrationId_lte: String
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  registration: String
+  registration_not: String
+}
+
+enum NameRenewed_orderBy {
+  id
+  blockNumber
+  transactionID
+  registrationId
+  expiryDate
+}
+
+"""
+Get a single a name transferred event by address
+"""
+type NameTransferred implements RegistrationEvent {
+  """
+  The ID of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number of the event (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction ID of the event (exact match)
+  """
+  transactionID: String!
+  registrationId: String!
+  newOwnerId: String!
+
+  """
+  The registration associated with the event (exact match)
+  """
+  registration: Registration
+
+  """
+  The new owner of the domain (exact match)
+  """
+  newOwner: Account
+}
+
+input NameTransferred_filter {
+  and: [NameTransferred_filter]
+  or: [NameTransferred_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  registrationId: String
+  registrationId_not: String
+  registrationId_in: [String]
+  registrationId_not_in: [String]
+  registrationId_contains: String
+  registrationId_not_contains: String
+  registrationId_starts_with: String
+  registrationId_ends_with: String
+  registrationId_not_starts_with: String
+  registrationId_not_ends_with: String
+  registrationId_gt: String
+  registrationId_lt: String
+  registrationId_gte: String
+  registrationId_lte: String
+  newOwnerId: String
+  newOwnerId_not: String
+  newOwnerId_in: [String]
+  newOwnerId_not_in: [String]
+  newOwnerId_contains: String
+  newOwnerId_not_contains: String
+  newOwnerId_starts_with: String
+  newOwnerId_ends_with: String
+  newOwnerId_not_starts_with: String
+  newOwnerId_not_ends_with: String
+  newOwnerId_gt: String
+  newOwnerId_lt: String
+  newOwnerId_gte: String
+  newOwnerId_lte: String
+  registration: String
+  registration_not: String
+  newOwner: String
+  newOwner_not: String
+}
+
+enum NameTransferred_orderBy {
+  id
+  blockNumber
+  transactionID
+  registrationId
+  newOwnerId
+}
+
+input RegistrationEvent_filter {
+  and: [RegistrationEvent_filter]
+  or: [RegistrationEvent_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  registrationId: String
+  registrationId_not: String
+  registrationId_in: [String]
+  registrationId_not_in: [String]
+  registrationId_contains: String
+  registrationId_not_contains: String
+  registrationId_starts_with: String
+  registrationId_ends_with: String
+  registrationId_not_starts_with: String
+  registrationId_not_ends_with: String
+  registrationId_gt: String
+  registrationId_lt: String
+  registrationId_gte: String
+  registrationId_lte: String
+  registration: String
+  registration_not: String
+}
+
+enum RegistrationEvent_orderBy {
+  id
+  blockNumber
+  transactionID
+  registrationId
+}
+
+"""
+Get a single a transfer event by address
+"""
+type Transfer implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+  ownerId: String!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+
+  """
+  The account that owns the domain after the transfer (exact match)
+  """
+  owner: Account
+}
+
+"""
+Get a single an event related to a Domain by address
+"""
+interface DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+}
+
+input Transfer_filter {
+  and: [Transfer_filter]
+  or: [Transfer_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  domain: String
+  domain_not: String
+  owner: String
+  owner_not: String
+}
+
+enum Transfer_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  ownerId
+}
+
+"""
+Get a single a new owner event by address
+"""
+type NewOwner implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+  ownerId: String!
+  parentDomainId: String!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+
+  """
+  The new account that owns the domain (exact match)
+  """
+  owner: Account
+
+  """
+  The parent domain of the domain name associated with the event (exact match)
+  """
+  parentDomain: Domain
+}
+
+input NewOwner_filter {
+  and: [NewOwner_filter]
+  or: [NewOwner_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  parentDomainId: String
+  parentDomainId_not: String
+  parentDomainId_in: [String]
+  parentDomainId_not_in: [String]
+  parentDomainId_contains: String
+  parentDomainId_not_contains: String
+  parentDomainId_starts_with: String
+  parentDomainId_ends_with: String
+  parentDomainId_not_starts_with: String
+  parentDomainId_not_ends_with: String
+  parentDomainId_gt: String
+  parentDomainId_lt: String
+  parentDomainId_gte: String
+  parentDomainId_lte: String
+  domain: String
+  domain_not: String
+  owner: String
+  owner_not: String
+  parentDomain: String
+  parentDomain_not: String
+}
+
+enum NewOwner_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  ownerId
+  parentDomainId
+}
+
+"""
+Get a single a new resolver event by address
+"""
+type NewResolver implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+  resolverId: String!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+
+  """
+  The new resolver contract address associated with the domain (exact match)
+  """
+  resolver: Resolver
+}
+
+input NewResolver_filter {
+  and: [NewResolver_filter]
+  or: [NewResolver_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  domain: String
+  domain_not: String
+  resolver: String
+  resolver_not: String
+}
+
+enum NewResolver_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  resolverId
+}
+
+"""
+Get a single a new TTL event by address
+"""
+type NewTTL implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+
+  """
+  The new TTL value (in seconds) associated with the domain (exact match)
+  """
+  ttl: BigInt!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+}
+
+input NewTTL_filter {
+  and: [NewTTL_filter]
+  or: [NewTTL_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  ttl: BigInt
+  ttl_not: BigInt
+  ttl_in: [BigInt]
+  ttl_not_in: [BigInt]
+  ttl_gt: BigInt
+  ttl_lt: BigInt
+  ttl_gte: BigInt
+  ttl_lte: BigInt
+  domain: String
+  domain_not: String
+}
+
+enum NewTTL_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  ttl
+}
+
+"""
+Get a single a wrapped transfer event by address
+"""
+type WrappedTransfer implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+  ownerId: String!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+
+  """
+  The account that owns the wrapped domain after the transfer (exact match)
+  """
+  owner: Account
+}
+
+input WrappedTransfer_filter {
+  and: [WrappedTransfer_filter]
+  or: [WrappedTransfer_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  domain: String
+  domain_not: String
+  owner: String
+  owner_not: String
+}
+
+enum WrappedTransfer_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  ownerId
+}
+
+"""
+Get a single a name wrapped event by address
+"""
+type NameWrapped implements DomainEvent {
+  """
+  The unique identifier of the wrapped domain (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the wrapped domain was wrapped (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that wrapped the domain (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+
+  """
+  The human-readable name of the wrapped domain (exact match)
+  """
+  name: String
+
+  """
+  The number of fuses associated with the wrapped domain (exact match)
+  """
+  fuses: Int!
+  ownerId: String!
+
+  """
+  The expiry date of the wrapped domain registration (exact match)
+  """
+  expiryDate: BigInt!
+
+  """
+  The domain name associated with the wrapped domain (exact match)
+  """
+  domain: Domain
+
+  """
+  The account that owns the wrapped domain (exact match)
+  """
+  owner: Account
+}
+
+input NameWrapped_filter {
+  and: [NameWrapped_filter]
+  or: [NameWrapped_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  name: String
+  name_not: String
+  name_in: [String]
+  name_not_in: [String]
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_ends_with: String
+  name_not_starts_with: String
+  name_not_ends_with: String
+  name_gt: String
+  name_lt: String
+  name_gte: String
+  name_lte: String
+  fuses: Int
+  fuses_not: Int
+  fuses_in: [Int]
+  fuses_not_in: [Int]
+  fuses_gt: Int
+  fuses_lt: Int
+  fuses_gte: Int
+  fuses_lte: Int
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  domain: String
+  domain_not: String
+  owner: String
+  owner_not: String
+}
+
+enum NameWrapped_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  name
+  fuses
+  ownerId
+  expiryDate
+}
+
+"""
+Get a single a name unwrapped event by address
+"""
+type NameUnwrapped implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+  ownerId: String!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+
+  """
+  The account that owns the domain after it was unwrapped (exact match)
+  """
+  owner: Account
+}
+
+input NameUnwrapped_filter {
+  and: [NameUnwrapped_filter]
+  or: [NameUnwrapped_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  domain: String
+  domain_not: String
+  owner: String
+  owner_not: String
+}
+
+enum NameUnwrapped_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  ownerId
+}
+
+"""
+Get a single a fuses set event by address
+"""
+type FusesSet implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+
+  """
+  The number of fuses associated with the domain after the set event (exact match)
+  """
+  fuses: Int!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+}
+
+input FusesSet_filter {
+  and: [FusesSet_filter]
+  or: [FusesSet_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  fuses: Int
+  fuses_not: Int
+  fuses_in: [Int]
+  fuses_not_in: [Int]
+  fuses_gt: Int
+  fuses_lt: Int
+  fuses_gte: Int
+  fuses_lte: Int
+  domain: String
+  domain_not: String
+}
+
+enum FusesSet_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  fuses
+}
+
+"""
+Get a single an expiry extended event by address
+"""
+type ExpiryExtended implements DomainEvent {
+  """
+  The unique identifier of the event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash of the transaction that triggered the event (exact match)
+  """
+  transactionID: String!
+  domainId: String!
+
+  """
+  The new expiry date associated with the domain after the extension event (exact match)
+  """
+  expiryDate: BigInt!
+
+  """
+  The domain name associated with the event (exact match)
+  """
+  domain: Domain
+}
+
+input ExpiryExtended_filter {
+  and: [ExpiryExtended_filter]
+  or: [ExpiryExtended_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  domain: String
+  domain_not: String
+}
+
+enum ExpiryExtended_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+  expiryDate
+}
+
+input DomainEvent_filter {
+  and: [DomainEvent_filter]
+  or: [DomainEvent_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  domain: String
+  domain_not: String
+}
+
+enum DomainEvent_orderBy {
+  id
+  blockNumber
+  transactionID
+  domainId
+}
+
+input WrappedDomain_filter {
+  and: [WrappedDomain_filter]
+  or: [WrappedDomain_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  fuses: Int
+  fuses_not: Int
+  fuses_in: [Int]
+  fuses_not_in: [Int]
+  fuses_gt: Int
+  fuses_lt: Int
+  fuses_gte: Int
+  fuses_lte: Int
+  ownerId: String
+  ownerId_not: String
+  ownerId_in: [String]
+  ownerId_not_in: [String]
+  ownerId_contains: String
+  ownerId_not_contains: String
+  ownerId_starts_with: String
+  ownerId_ends_with: String
+  ownerId_not_starts_with: String
+  ownerId_not_ends_with: String
+  ownerId_gt: String
+  ownerId_lt: String
+  ownerId_gte: String
+  ownerId_lte: String
+  name: String
+  name_not: String
+  name_in: [String]
+  name_not_in: [String]
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_ends_with: String
+  name_not_starts_with: String
+  name_not_ends_with: String
+  name_gt: String
+  name_lt: String
+  name_gte: String
+  name_lte: String
+  domain: String
+  domain_not: String
+  owner: String
+  owner_not: String
+}
+
+enum WrappedDomain_orderBy {
+  id
+  domainId
+  expiryDate
+  fuses
+  ownerId
+  name
+}
+
+input Registration_filter {
+  and: [Registration_filter]
+  or: [Registration_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  registrationDate: BigInt
+  registrationDate_not: BigInt
+  registrationDate_in: [BigInt]
+  registrationDate_not_in: [BigInt]
+  registrationDate_gt: BigInt
+  registrationDate_lt: BigInt
+  registrationDate_gte: BigInt
+  registrationDate_lte: BigInt
+  expiryDate: BigInt
+  expiryDate_not: BigInt
+  expiryDate_in: [BigInt]
+  expiryDate_not_in: [BigInt]
+  expiryDate_gt: BigInt
+  expiryDate_lt: BigInt
+  expiryDate_gte: BigInt
+  expiryDate_lte: BigInt
+  cost: BigInt
+  cost_not: BigInt
+  cost_in: [BigInt]
+  cost_not_in: [BigInt]
+  cost_gt: BigInt
+  cost_lt: BigInt
+  cost_gte: BigInt
+  cost_lte: BigInt
+  registrantId: String
+  registrantId_not: String
+  registrantId_in: [String]
+  registrantId_not_in: [String]
+  registrantId_contains: String
+  registrantId_not_contains: String
+  registrantId_starts_with: String
+  registrantId_ends_with: String
+  registrantId_not_starts_with: String
+  registrantId_not_ends_with: String
+  registrantId_gt: String
+  registrantId_lt: String
+  registrantId_gte: String
+  registrantId_lte: String
+  labelName: String
+  labelName_not: String
+  labelName_in: [String]
+  labelName_not_in: [String]
+  labelName_contains: String
+  labelName_not_contains: String
+  labelName_starts_with: String
+  labelName_ends_with: String
+  labelName_not_starts_with: String
+  labelName_not_ends_with: String
+  labelName_gt: String
+  labelName_lt: String
+  labelName_gte: String
+  labelName_lte: String
+  domain: String
+  domain_not: String
+  registrant: String
+  registrant_not: String
+}
+
+enum Registration_orderBy {
+  id
+  domainId
+  registrationDate
+  expiryDate
+  cost
+  registrantId
+  labelName
+}
+
+"""
+Get a single an address changed event by address
+"""
+type AddrChanged implements ResolverEvent {
+  """
+  Unique identifier for this event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which this event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction ID for the transaction in which this event occurred (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+  addrId: String!
+
+  """
+  The resolver associated with this event (exact match)
+  """
+  resolver: Resolver
+
+  """
+  The new address associated with the resolver (exact match)
+  """
+  addr: Account
+}
+
+input AddrChanged_filter {
+  and: [AddrChanged_filter]
+  or: [AddrChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  addrId: String
+  addrId_not: String
+  addrId_in: [String]
+  addrId_not_in: [String]
+  addrId_contains: String
+  addrId_not_contains: String
+  addrId_starts_with: String
+  addrId_ends_with: String
+  addrId_not_starts_with: String
+  addrId_not_ends_with: String
+  addrId_gt: String
+  addrId_lt: String
+  addrId_gte: String
+  addrId_lte: String
+  resolver: String
+  resolver_not: String
+  addr: String
+  addr_not: String
+}
+
+enum AddrChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  addrId
+}
+
+"""
+Get a single a multicoin address changed event by address
+"""
+type MulticoinAddrChanged implements ResolverEvent {
+  """
+  Unique identifier for the event (exact match)
+  """
+  id: String!
+
+  """
+  Block number in which this event was emitted (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  Transaction ID in which this event was emitted (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The coin type of the changed address (exact match)
+  """
+  coinType: BigInt!
+
+  """
+  The new address value for the given coin type (exact match)
+  """
+  addr: String!
+
+  """
+  Resolver associated with this event (exact match)
+  """
+  resolver: Resolver
+}
+
+input MulticoinAddrChanged_filter {
+  and: [MulticoinAddrChanged_filter]
+  or: [MulticoinAddrChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  coinType: BigInt
+  coinType_not: BigInt
+  coinType_in: [BigInt]
+  coinType_not_in: [BigInt]
+  coinType_gt: BigInt
+  coinType_lt: BigInt
+  coinType_gte: BigInt
+  coinType_lte: BigInt
+  addr: String
+  addr_not: String
+  addr_in: [String]
+  addr_not_in: [String]
+  addr_contains: String
+  addr_not_contains: String
+  addr_starts_with: String
+  addr_ends_with: String
+  addr_not_starts_with: String
+  addr_not_ends_with: String
+  addr_gt: String
+  addr_lt: String
+  addr_gte: String
+  addr_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum MulticoinAddrChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  coinType
+  addr
+}
+
+"""
+Get a single a name changed event by address
+"""
+type NameChanged implements ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  Block number where event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  Unique transaction ID where event occurred (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  New ENS name value (exact match)
+  """
+  name: String!
+
+  """
+  Used to derive relationships to Resolvers (exact match)
+  """
+  resolver: Resolver
+}
+
+input NameChanged_filter {
+  and: [NameChanged_filter]
+  or: [NameChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  name: String
+  name_not: String
+  name_in: [String]
+  name_not_in: [String]
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_ends_with: String
+  name_not_starts_with: String
+  name_not_ends_with: String
+  name_gt: String
+  name_lt: String
+  name_gte: String
+  name_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum NameChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  name
+}
+
+input AbiChanged_filter {
+  and: [AbiChanged_filter]
+  or: [AbiChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  contentType: BigInt
+  contentType_not: BigInt
+  contentType_in: [BigInt]
+  contentType_not_in: [BigInt]
+  contentType_gt: BigInt
+  contentType_lt: BigInt
+  contentType_gte: BigInt
+  contentType_lte: BigInt
+  resolver: String
+  resolver_not: String
+}
+
+enum AbiChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  contentType
+}
+
+"""
+Get a single a pubkey changed event by address
+"""
+type PubkeyChanged implements ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  Block number of the Ethereum block where the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  Transaction hash of the Ethereum transaction where the event occurred (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The x-coordinate of the new public key (exact match)
+  """
+  x: String!
+
+  """
+  The y-coordinate of the new public key (exact match)
+  """
+  y: String!
+
+  """
+  Used to derive relationships to Resolvers (exact match)
+  """
+  resolver: Resolver
+}
+
+input PubkeyChanged_filter {
+  and: [PubkeyChanged_filter]
+  or: [PubkeyChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  x: String
+  x_not: String
+  x_in: [String]
+  x_not_in: [String]
+  x_contains: String
+  x_not_contains: String
+  x_starts_with: String
+  x_ends_with: String
+  x_not_starts_with: String
+  x_not_ends_with: String
+  x_gt: String
+  x_lt: String
+  x_gte: String
+  x_lte: String
+  y: String
+  y_not: String
+  y_in: [String]
+  y_not_in: [String]
+  y_contains: String
+  y_not_contains: String
+  y_starts_with: String
+  y_ends_with: String
+  y_not_starts_with: String
+  y_not_ends_with: String
+  y_gt: String
+  y_lt: String
+  y_gte: String
+  y_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum PubkeyChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  x
+  y
+}
+
+"""
+Get a single a text changed event by address
+"""
+type TextChanged implements ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  Block number of the Ethereum block in which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  Hash of the Ethereum transaction in which the event occurred (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The key of the text record that was changed (exact match)
+  """
+  key: String!
+
+  """
+  The new value of the text record that was changed (exact match)
+  """
+  value: String
+
+  """
+  Used to derive relationships to Resolvers (exact match)
+  """
+  resolver: Resolver
+}
+
+input TextChanged_filter {
+  and: [TextChanged_filter]
+  or: [TextChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  key: String
+  key_not: String
+  key_in: [String]
+  key_not_in: [String]
+  key_contains: String
+  key_not_contains: String
+  key_starts_with: String
+  key_ends_with: String
+  key_not_starts_with: String
+  key_not_ends_with: String
+  key_gt: String
+  key_lt: String
+  key_gte: String
+  key_lte: String
+  value: String
+  value_not: String
+  value_in: [String]
+  value_not_in: [String]
+  value_contains: String
+  value_not_contains: String
+  value_starts_with: String
+  value_ends_with: String
+  value_not_starts_with: String
+  value_not_ends_with: String
+  value_gt: String
+  value_lt: String
+  value_gte: String
+  value_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum TextChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  key
+  value
+}
+
+"""
+Get a single a content hash changed event by address
+"""
+type ContenthashChanged implements ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  The block number where the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The ID of the transaction where the event occurred (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The new content hash for the domain (exact match)
+  """
+  hash: String!
+
+  """
+  Used to derive relationships to Resolvers (exact match)
+  """
+  resolver: Resolver
+}
+
+input ContenthashChanged_filter {
+  and: [ContenthashChanged_filter]
+  or: [ContenthashChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  hash: String
+  hash_not: String
+  hash_in: [String]
+  hash_not_in: [String]
+  hash_contains: String
+  hash_not_contains: String
+  hash_starts_with: String
+  hash_ends_with: String
+  hash_not_starts_with: String
+  hash_not_ends_with: String
+  hash_gt: String
+  hash_lt: String
+  hash_gte: String
+  hash_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum ContenthashChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  hash
+}
+
+"""
+Get a single an interface changed event by address
+"""
+type InterfaceChanged implements ResolverEvent {
+  """
+  Concatenation of block number and log ID (exact match)
+  """
+  id: String!
+
+  """
+  The block number in which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction ID for the transaction in which the event occurred (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The ID of the EIP-1820 interface that was changed (exact match)
+  """
+  interfaceID: String!
+
+  """
+  The address of the contract that implements the interface (exact match)
+  """
+  implementer: String!
+
+  """
+  Used to derive relationships to Resolvers (exact match)
+  """
+  resolver: Resolver
+}
+
+input InterfaceChanged_filter {
+  and: [InterfaceChanged_filter]
+  or: [InterfaceChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  interfaceID: String
+  interfaceID_not: String
+  interfaceID_in: [String]
+  interfaceID_not_in: [String]
+  interfaceID_contains: String
+  interfaceID_not_contains: String
+  interfaceID_starts_with: String
+  interfaceID_ends_with: String
+  interfaceID_not_starts_with: String
+  interfaceID_not_ends_with: String
+  interfaceID_gt: String
+  interfaceID_lt: String
+  interfaceID_gte: String
+  interfaceID_lte: String
+  implementer: String
+  implementer_not: String
+  implementer_in: [String]
+  implementer_not_in: [String]
+  implementer_contains: String
+  implementer_not_contains: String
+  implementer_starts_with: String
+  implementer_ends_with: String
+  implementer_not_starts_with: String
+  implementer_not_ends_with: String
+  implementer_gt: String
+  implementer_lt: String
+  implementer_gte: String
+  implementer_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum InterfaceChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  interfaceID
+  implementer
+}
+
+"""
+Get a single an authorisation changed event by address
+"""
+type AuthorisationChanged implements ResolverEvent {
+  """
+  Unique identifier for this event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash associated with the event (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The owner of the authorisation (exact match)
+  """
+  owner: String!
+
+  """
+  The target of the authorisation (exact match)
+  """
+  target: String!
+
+  """
+  Whether the authorisation was added or removed (exact match)
+  """
+  isAuthorized: Boolean!
+
+  """
+  The resolver associated with this event (exact match)
+  """
+  resolver: Resolver
+}
+
+input AuthorisationChanged_filter {
+  and: [AuthorisationChanged_filter]
+  or: [AuthorisationChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  owner: String
+  owner_not: String
+  owner_in: [String]
+  owner_not_in: [String]
+  owner_contains: String
+  owner_not_contains: String
+  owner_starts_with: String
+  owner_ends_with: String
+  owner_not_starts_with: String
+  owner_not_ends_with: String
+  owner_gt: String
+  owner_lt: String
+  owner_gte: String
+  owner_lte: String
+  target: String
+  target_not: String
+  target_in: [String]
+  target_not_in: [String]
+  target_contains: String
+  target_not_contains: String
+  target_starts_with: String
+  target_ends_with: String
+  target_not_starts_with: String
+  target_not_ends_with: String
+  target_gt: String
+  target_lt: String
+  target_gte: String
+  target_lte: String
+  isAuthorized: Boolean
+  isAuthorized_not: Boolean
+  isAuthorized_in: [Boolean]
+  isAuthorized_not_in: [Boolean]
+  resolver: String
+  resolver_not: String
+}
+
+enum AuthorisationChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  owner
+  target
+  isAuthorized
+}
+
+"""
+Get a single a version changed event by address
+"""
+type VersionChanged implements ResolverEvent {
+  """
+  Unique identifier for this event (exact match)
+  """
+  id: String!
+
+  """
+  The block number at which the event occurred (exact match)
+  """
+  blockNumber: Int!
+
+  """
+  The transaction hash associated with the event (exact match)
+  """
+  transactionID: String!
+  resolverId: String!
+
+  """
+  The new version number of the resolver (exact match)
+  """
+  version: BigInt!
+
+  """
+  The resolver associated with this event (exact match)
+  """
+  resolver: Resolver
+}
+
+input VersionChanged_filter {
+  and: [VersionChanged_filter]
+  or: [VersionChanged_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  version: BigInt
+  version_not: BigInt
+  version_in: [BigInt]
+  version_not_in: [BigInt]
+  version_gt: BigInt
+  version_lt: BigInt
+  version_gte: BigInt
+  version_lte: BigInt
+  resolver: String
+  resolver_not: String
+}
+
+enum VersionChanged_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+  version
+}
+
+input ResolverEvent_filter {
+  and: [ResolverEvent_filter]
+  or: [ResolverEvent_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  blockNumber: Int
+  blockNumber_not: Int
+  blockNumber_in: [Int]
+  blockNumber_not_in: [Int]
+  blockNumber_gt: Int
+  blockNumber_lt: Int
+  blockNumber_gte: Int
+  blockNumber_lte: Int
+  transactionID: String
+  transactionID_not: String
+  transactionID_in: [String]
+  transactionID_not_in: [String]
+  transactionID_contains: String
+  transactionID_not_contains: String
+  transactionID_starts_with: String
+  transactionID_ends_with: String
+  transactionID_not_starts_with: String
+  transactionID_not_ends_with: String
+  transactionID_gt: String
+  transactionID_lt: String
+  transactionID_gte: String
+  transactionID_lte: String
+  resolverId: String
+  resolverId_not: String
+  resolverId_in: [String]
+  resolverId_not_in: [String]
+  resolverId_contains: String
+  resolverId_not_contains: String
+  resolverId_starts_with: String
+  resolverId_ends_with: String
+  resolverId_not_starts_with: String
+  resolverId_not_ends_with: String
+  resolverId_gt: String
+  resolverId_lt: String
+  resolverId_gte: String
+  resolverId_lte: String
+  resolver: String
+  resolver_not: String
+}
+
+enum ResolverEvent_orderBy {
+  id
+  blockNumber
+  transactionID
+  resolverId
+}
+
+input Account_filter {
+  and: [Account_filter]
+  or: [Account_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+}
+
+enum Account_orderBy {
+  id
+}
+
+input Resolver_filter {
+  and: [Resolver_filter]
+  or: [Resolver_filter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_gt: String
+  id_lt: String
+  id_gte: String
+  id_lte: String
+  domainId: String
+  domainId_not: String
+  domainId_in: [String]
+  domainId_not_in: [String]
+  domainId_contains: String
+  domainId_not_contains: String
+  domainId_starts_with: String
+  domainId_ends_with: String
+  domainId_not_starts_with: String
+  domainId_not_ends_with: String
+  domainId_gt: String
+  domainId_lt: String
+  domainId_gte: String
+  domainId_lte: String
+  address: String
+  address_not: String
+  address_in: [String]
+  address_not_in: [String]
+  address_contains: String
+  address_not_contains: String
+  address_starts_with: String
+  address_ends_with: String
+  address_not_starts_with: String
+  address_not_ends_with: String
+  address_gt: String
+  address_lt: String
+  address_gte: String
+  address_lte: String
+  addrId: String
+  addrId_not: String
+  addrId_in: [String]
+  addrId_not_in: [String]
+  addrId_contains: String
+  addrId_not_contains: String
+  addrId_starts_with: String
+  addrId_ends_with: String
+  addrId_not_starts_with: String
+  addrId_not_ends_with: String
+  addrId_gt: String
+  addrId_lt: String
+  addrId_gte: String
+  addrId_lte: String
+  contentHash: String
+  contentHash_not: String
+  contentHash_in: [String]
+  contentHash_not_in: [String]
+  contentHash_contains: String
+  contentHash_not_contains: String
+  contentHash_starts_with: String
+  contentHash_ends_with: String
+  contentHash_not_starts_with: String
+  contentHash_not_ends_with: String
+  contentHash_gt: String
+  contentHash_lt: String
+  contentHash_gte: String
+  contentHash_lte: String
+  texts: [String]
+  texts_not: [String]
+  texts_has: String
+  texts_not_has: String
+  coinTypes: [BigInt]
+  coinTypes_not: [BigInt]
+  coinTypes_has: BigInt
+  coinTypes_not_has: BigInt
+  addr: String
+  addr_not: String
+  domain: String
+  domain_not: String
+}
+
+enum Resolver_orderBy {
+  id
+  domainId
+  address
+  addrId
+  contentHash
+  texts
+  coinTypes
+}
+
+type _Meta_ {
+  block: _Block_!
+
+  """
+  An ID representing this instance of ENSNode. It is composed of the ENSNode version (https://github.com/namehash/ensnode/releases) and the Ponder build_id (https://ponder.sh/docs/api-reference/database#instance-lifecycle).
+  """
+  deployment: String!
+
+  """
+  If true, ENSIndexer has reported an indexing error and is not actively indexing blocks.
+  """
+  hasIndexingErrors: Boolean!
+}
+
+"""
+Information about a specific block.
+"""
+type _Block_ {
+  hash: String
+  parentHash: String
+  number: Int!
+  timestamp: Int!
+}

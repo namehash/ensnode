@@ -16,11 +16,55 @@ export const integrateSidebarTopic = {
       link: "/docs/integrate/ensv2-readiness",
     },
     {
+      label: "ENS Subgraph",
+      collapsed: true,
+      badge: {
+        text: "LEGACY",
+        variant: "danger",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/subgraph",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/subgraph/examples",
+            },
+            {
+              label: "With ENSjs",
+              link: "/docs/integrate/subgraph/examples/with-ensjs",
+            },
+            {
+              label: "With Viem",
+              link: "/docs/integrate/subgraph/examples/with-viem",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/subgraph/schema-reference",
+        },
+        {
+          label: "Querying Best Practices",
+          link: "/docs/integrate/subgraph/querying-best-practices",
+        },
+        {
+          label: "Subgraph Dependents",
+          link: "/docs/integrate/subgraph/subgraph-dependents",
+        },
+      ],
+    },
+    {
       label: "ENS Omnigraph API",
       collapsed: false,
       badge: {
         text: "NEW",
-        variant: "tip",
+        variant: "success",
       },
       items: [
         {
@@ -92,26 +136,52 @@ export const integrateSidebarTopic = {
       ],
     },
     {
+      label: "ENS Unigraph SQL",
+      collapsed: false,
+      badge: {
+        text: "NEW",
+        variant: "success",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/unigraph",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/unigraph/examples",
+            },
+            {
+              label: "Domain by Name",
+              link: "/docs/integrate/unigraph/examples/domain-by-name",
+            },
+            {
+              label: "Account Domains",
+              link: "/docs/integrate/unigraph/examples/account-domains",
+            },
+            {
+              label: "Indexing Status",
+              link: "/docs/integrate/unigraph/examples/indexing-status",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/unigraph/schema-reference",
+        },
+      ],
+    },
+    {
       label: "Integration Options",
       collapsed: false,
       items: [
         {
           label: "Overview",
           link: "/docs/integrate/integration-options",
-        },
-        {
-          label: "enskit (React)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enskit",
-            },
-            {
-              label: "Interactive example ⚡",
-              link: "/docs/integrate/integration-options/enskit/example",
-            },
-          ],
         },
         {
           label: "enssdk (TypeScript)",
@@ -124,6 +194,20 @@ export const integrateSidebarTopic = {
             {
               label: "Interactive example ⚡",
               link: "/docs/integrate/integration-options/enssdk/example",
+            },
+          ],
+        },
+        {
+          label: "enskit (React)",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/integration-options/enskit",
+            },
+            {
+              label: "Interactive example ⚡",
+              link: "/docs/integrate/integration-options/enskit/example",
             },
           ],
         },

@@ -16,7 +16,7 @@ import { LinkCard, Aside } from "@astrojs/starlight/components";
 Full access to ENS data formerly required two separate data fetching strategies working in parallel:
 
 1. **ENS resolution** — RPC calls with CCIP-read support for offchain data (e.g. via a popular package such as `viem` or `wagmi`) to perform forward or reverse ENS resolution.
-2. **Indexed ENS data** — the [ENS Subgraph](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
+2. **Indexed ENS data** — the [ENS Subgraph](/docs/integrate/subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
 
 Neither system alone was complete.
 - ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpreting raw values returned by the ENS protocol.

@@ -1,0 +1,374 @@
+---
+title: Unigraph Schema Reference
+description: The unified ENSv1 + ENSv2 data model of the ENS Unigraph — every table, column, and index.
+sidebar:
+  label: Schema Reference
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+This is the canonical reference for the **Unigraph schema** — the unified, polymorphic data model that the [`unigraph` plugin](/docs/services/ensindexer) materializes into [ENSDb](/docs/services/ensdb). It models ENSv1 and ENSv2 with shared, polymorphic entities (Domains, Registries, Registrations, Renewals, Resolvers), so the same query shape works across both protocol versions.
+
+Each ENSIndexer instance owns a dedicated database schema (e.g. `ensindexer_0`) holding all of its indexed Unigraph data, fully isolated from other instances.
+
+<Aside>
+The Unigraph plugin has a hard dependency on the **Protocol Acceleration** plugin (Domain–Resolver relations, resolver records, ENSv1 Registry-migration state). Those tables, the shared **ENSNode Schema**, and the other ENSIndexer plugins (Registrars, Subgraph, tokenscope) are documented in the [ENSDb · Database Schemas](/docs/services/ensdb/concepts/database-schemas) reference.
+</Aside>
+
+Defined in [`unigraph.schema.ts`](https://github.com/namehash/ensnode/blob/main/packages/ensdb-sdk/src/ensindexer-abstract/unigraph.schema.ts).
+
+:::note[Design principles]
+While the initial approach was a highly materialized view of the ENS protocol, abstracting away
+as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
+resolution-time—full materialization of resolution behavior is impractical. The Canonical Nametree,
+however, is materialized inline via synchronous handler-side cascades; see the `canonical*` fields
+on `domains` and `canonicality-db-helpers.ts`.
+
+As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
+with the obvious exception of materializing specific state that must be trivially filterable. Then,
+resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
+behavior. This forces our implementation to match the protocol as closely as possible, with the
+obvious note that the performance tradeoffs of evm code and our app are different. For example,
+it's more expensive for us to recursively traverse the `namegraph` (like evm code does) because our
+individual roundtrips from the db are relatively more expensive.
+
+In general: the indexed schema should match on-chain state as closely as possible, and
+resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
+in ENSApi. The current obvious exception is that `domains.owner_id` for ENSv1 Domains is the
+_materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
+including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
+within this Unigraph plugin materializes the effective owner to simplify this aspect of ENS and
+enable efficient queries against `domains.owner_id`.
+
+When necessary, all data models are shared or polymorphic between ENSv1 and ENSv2, including
+Domains, Registries, Registrations, Renewals, and Resolvers.
+
+Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
+guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
+Registry Registrations do not).
+
+The `Label` entity (`labelHash` → `InterpretedLabel`) remains the source of truth for label values.
+Canonical-tree fields on `domains` (`canonical_name`, `canonical_label_hash_path`, `canonical_path`,
+`canonical_depth`, `canonical_node`) are materialized inline by the handlers in
+`canonicality-db-helpers.ts`. Label heals propagate to `canonical_name` via a GIN-indexed bulk
+UPDATE outside Ponder's cache; cascade round-trips are bounded to events that already pay a
+flush (canonicality flip, heal of an unknown label).
+
+ENSv1 and ENSv2 both fit the `Registry` → `Domain` → (`Sub`)`Registry` → `Domain` → ... `namegraph` model.
+For ENSv1, each domain that has children implicitly owns a "virtual" `Registry` (a row of type
+`ENSv1VirtualRegistry`) whose sole parent is that domain; children of the parent then point their
+`registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
+the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
+a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
+graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
+exception of the Canonical Nametree (the set of Domains with an inferrable Canonical Name), which
+_is_ materialized inline: the `registries.canonical` / `domains.canonical` membership flags plus the
+`domains.canonical*` name/path/depth fields on the rows themselves. The bidirectional canonical edge is NOT
+materialized in a parallel table; it is derived on demand by checking that the two unidirectional
+pointers agree (`registries.canonical_domain_id = domains.id` ↔ `domains.subregistry_id = registries.id`).
+Cascading canonicality flips through the subgraph run as either an in-memory PK update (when
+`registries.has_children = false`, the dominant case for fresh ENSv1 virtual registries on first
+wire-up) or a single recursive-CTE batch UPDATE otherwise (see `canonicality-db-helpers.ts`).
+
+Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
+allows us to rely on the shared logic for indexing:
+a) ENSv1RegistryOld -> ENSv1Registry migration status
+b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
+As such, none of that information is present in this `unigraph.schema.ts` file.
+
+In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
+allows us to trivially implement cursor-based pagination and allow consumers to reference these
+deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
+of multiple pieces of information (for example, a `registries` record is identified by (`chain_id`, `address`)),
+then that information is, as well, included in the entity's columns, not just encoded in the id.
+Nowhere in this application, nor in user applications, should an entity's id be parsed for its
+constituent parts; all should be available, with their various type guarantees, on the entity
+itself.
+
+Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
+Event. Then, join tables (`domain_events`, `resolver_events`, etc) track the relationship between an
+entity that has many events (`domains`, `resolvers`) to the relevant set of Events.
+
+A Registration references the event that initiated the Registration. A Renewal, too, references
+the Event responsible for its existence.
+:::
+
+## Enums
+
+**`RegistryType`**
+
+| Value                  |
+| ---------------------- |
+| `ENSv1Registry`        |
+| `ENSv1VirtualRegistry` |
+| `ENSv2Registry`        |
+
+**`DomainType`**
+
+| Value         |
+| ------------- |
+| `ENSv1Domain` |
+| `ENSv2Domain` |
+
+**`RegistrationType`**
+
+| Value                       |
+| --------------------------- |
+| `NameWrapper`               |
+| `BaseRegistrar`             |
+| `ThreeDNS`                  |
+| `ENSv2RegistryRegistration` |
+| `ENSv2RegistryReservation`  |
+
+## `events`
+
+| Column              | Type          | Nullable | Description                                                                                                                                                                                                                                                             |
+| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                | `text`        | no       | Ponder's event ID. Primary key.                                                                                                                                                                                                                                         |
+| `chain_id`          | `bigint`      | no       | Chain the event was emitted on.                                                                                                                                                                                                                                         |
+| `block_number`      | `numeric(78)` | no       | Block number.                                                                                                                                                                                                                                                           |
+| `block_hash`        | `text`        | no       | Block hash.                                                                                                                                                                                                                                                             |
+| `timestamp`         | `numeric(78)` | no       | Block timestamp.                                                                                                                                                                                                                                                        |
+| `transaction_hash`  | `text`        | no       | Transaction hash.                                                                                                                                                                                                                                                       |
+| `transaction_index` | `integer`     | no       | Index of the transaction within the block.                                                                                                                                                                                                                              |
+| `from`              | `text`        | no       | Transaction sender address (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `sender` for the HCA-aware actor.                                                                                                                  |
+| `sender`            | `text`        | no       | The HCA account address if used, otherwise `Transaction.from`. For ENSv2 events that emit an explicit `sender` / `owner` / `account` argument, this is set from that argument. For all other events (and all ENSv1 events), this falls back to `from` (i.e. `tx.from`). |
+| `to`                | `text`        | yes      | Transaction recipient address. A `null` value means this was a contract-deployment transaction.                                                                                                                                                                         |
+| `address`           | `text`        | no       | Address of the contract that emitted the log.                                                                                                                                                                                                                           |
+| `log_index`         | `integer`     | no       | Index of the log within the transaction.                                                                                                                                                                                                                                |
+| `selector`          | `text`        | no       | Event topic[0] (the event signature hash).                                                                                                                                                                                                                              |
+| `topics`            | `text[]`      | no       | All log topics.                                                                                                                                                                                                                                                         |
+| `data`              | `text`        | no       | Log data.                                                                                                                                                                                                                                                               |
+
+**Indexes:** `selector`, `from`, `sender`, `timestamp`.
+
+## `domain_events`
+
+Join table linking a `domains` record to its associated `events`.
+
+| Column      | Type   | Nullable |
+| ----------- | ------ | -------- |
+| `domain_id` | `text` | no       |
+| `event_id`  | `text` | no       |
+
+**Primary key:** `(domain_id, event_id)`.
+
+## `resolver_events`
+
+Join table linking a `resolvers` record to its associated `events`.
+
+| Column        | Type   | Nullable |
+| ------------- | ------ | -------- |
+| `resolver_id` | `text` | no       |
+| `event_id`    | `text` | no       |
+
+**Primary key:** `(resolver_id, event_id)`.
+
+## `permissions_events`
+
+Join table linking a `permissions` record to its associated `events`.
+
+| Column           | Type   | Nullable |
+| ---------------- | ------ | -------- |
+| `permissions_id` | `text` | no       |
+| `event_id`       | `text` | no       |
+
+**Primary key:** `(permissions_id, event_id)`.
+
+## `permissions_user_events`
+
+Join table linking a `permissions_users` record to its associated `events` — i.e. the per-`(contract, resource, user)` history of role grants, revokes, and bitmap mutations.
+
+| Column                | Type   | Nullable |
+| --------------------- | ------ | -------- |
+| `permissions_user_id` | `text` | no       |
+| `event_id`            | `text` | no       |
+
+**Primary key:** `(permissions_user_id, event_id)`.
+
+## `accounts`
+
+| Column | Type   | Nullable | Description                    |
+| ------ | ------ | -------- | ------------------------------ |
+| `id`   | `text` | no       | Ethereum address. Primary key. |
+
+**Relations:** has many `registrations` (as registrant), has many `domains`, has many `permissions_users`.
+
+## `registries`
+
+For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`ENSv1VirtualRegistry`) whose sole parent is that domain. Children of the parent then point their `registry_id` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry, the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a single `ENSv2Registry` RootRegistry.
+
+| Column                | Type           | Nullable | Description                                                                                                   |
+| --------------------- | -------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`                  | `text`         | no       | See `RegistryId` for guarantees. Primary key.                                                                 |
+| `type`                | `RegistryType` | no       | Registry type.                                                                                                |
+| `chain_id`            | `bigint`       | no       | Chain the registry contract is deployed on.                                                                   |
+| `address`             | `text`         | no       | Address of the registry contract.                                                                             |
+| `node`                | `text`         | yes      | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
+| `canonical_domain_id` | `text`         | yes      | The Registry's declared Canonical Domain (unidirectional). |
+| `canonical`           | `boolean`      | no       | Whether this Registry is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Default `false`. |
+| `has_children`        | `boolean`      | no       | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
+
+**Indexes:** `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
+
+**Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chain_id, address)`.
+
+## `domains`
+
+The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domains.owner_id`.
+
+:::note
+Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. Parent-domain traversal of the canonical nametree is supported directly via the materialized `canonical_path` / `canonical_label_hash_path` arrays; non-canonical traversal walks the `registries.canonical_domain_id` ↔ `domains.subregistry_id` pointers at query-time.
+:::
+
+| Column                   | Type          | Nullable | Description                                                                                                                                  |
+| ------------------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                     | `text`        | no       | ENSv1DomainId: `{ENSv1RegistryId}/{node}`. ENSv2DomainId: CAIP-19 asset identifier. Primary key.                                             |
+| `type`                   | `DomainType`  | no       | `ENSv1Domain` or `ENSv2Domain`.                                                                                                              |
+| `registry_id`            | `text`        | no       | The registry this domain belongs to.                                                                                                         |
+| `subregistry_id`         | `text`        | yes      | The registry that manages subdomains of this domain, if any.                                                                                 |
+| `token_id`               | `numeric(78)` | yes      | ENSv2 only: the TokenId within the ENSv2Registry. `null` for ENSv1 domains.                                                                  |
+| `node`                   | `text`        | yes      | ENSv1 only: the domain's namehash. `null` for ENSv2 domains.                                                                                 |
+| `label_hash`             | `text`        | no       | Represents a labelHash. References `labels.label_hash`.                                                                                      |
+| `owner_id`               | `text`        | yes      | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used).  |
+| `root_registry_owner_id` | `text`        | yes      | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains.                                                         |
+| `canonical`              | `boolean`     | no       | Whether this Domain is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Mirrors the parent Registry's flag. Default `false`. |
+| `canonical_name`             | `text`        | yes      | Materialized Canonical Name, `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Example: `"vitalik.eth"`. |
+| `canonical_label_hash_path`  | `text[]`      | yes      | Materialized Canonical LabelHashPath, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[labelhash("eth"), labelhash("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`. |
+| `canonical_path`             | `text[]`      | yes      | Materialized Canonical Domain Path, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[DomainId("eth"), DomainId("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`. |
+| `canonical_depth`            | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`. |
+| `canonical_node`             | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`. |
+
+**Indexes:** `type`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed), `(registry_id, left(canonical_name, 256), id)` (composite expression index for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N` — the `Domain.subdomains` shape; the 256-char prefix bounds the index tuple under btree's per-tuple max, and NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan), `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
+
+**Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
+
+## `labels`
+
+Internal rainbow table mapping a `label_hash` to its interpreted label string. Domains reference labels by hash; names are healed at resolution-time.
+
+| Column         | Type   | Nullable | Description                            |
+| -------------- | ------ | -------- | -------------------------------------- |
+| `label_hash`   | `text` | no       | `keccak256` of the label. Primary key. |
+| `interpreted`  | `text` | no       | The interpreted label string.          |
+
+ **Indexes:** `interpreted` (hash index for exact match), `interpreted` (GIN trigram index for prefix/substring `LIKE`)
+
+**Relations:** has many `domains`.
+
+## `registrations`
+
+A registration is keyed by `id`.
+
+| Column                | Type               | Nullable | Description                                                                                                                                                    |
+| --------------------- | ------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | `text`             | no       | A key derived from `(domain_id, registration_index)`. Primary key.                                                                                               |
+| `domain_id`           | `text`             | no       | The registered domain.                                                                                                                                         |
+| `registration_index`  | `integer`          | no       | Monotonically increasing index per domain.                                                                                                                     |
+| `type`                | `RegistrationType` | no       | The mechanism through which this registration was made.                                                                                                        |
+| `start`               | `numeric(78)`      | no       | Unix timestamp of registration start.                                                                                                                          |
+| `expiry`              | `numeric(78)`      | yes      | Unix timestamp of expiry, if applicable.                                                                                                                       |
+| `grace_period`        | `numeric(78)`      | yes      | Grace period duration in seconds. `BaseRegistrar` only.                                                                                                        |
+| `registrar_chain_id`  | `bigint`           | no       | Chain of the registrar contract.                                                                                                                               |
+| `registrar_address`   | `text`             | no       | Address of the registrar contract.                                                                                                                             |
+| `registrant_id`       | `text`             | yes      | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).                   |
+| `unregistrant_id`     | `text`             | yes      | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
+| `referrer`            | `text`             | yes      | Encoded referrer value emitted at registration time.                                                                                                           |
+| `fuses`               | `integer`          | yes      | Fuse bitmap. `NameWrapper` and wrapped `BaseRegistrar` only.                                                                                                   |
+| `base`                | `numeric(78)`      | yes      | Base registration cost in wei. `BaseRegistrar` and `ENSv2Registrar` only.                                                                                      |
+| `premium`             | `numeric(78)`      | yes      | Premium cost in wei above base. `BaseRegistrar` only.                                                                                                          |
+| `wrapped`             | `boolean`          | no       | Whether the registration is currently wrapped by the NameWrapper. Default `false`.                                                                             |
+| `event_id`            | `text`             | no       | The event that created this registration record.                                                                                                               |
+
+**Indexes:** unique on `(domain_id, registration_index)`.
+
+**Relations:** belongs to one `domains` record, has one `accounts` record (registrant), has one `accounts` record (unregistrant), has many `renewals`, has one `events` record.
+
+## `latest_registration_indexes`
+
+Tracks the highest `registration_index` seen for each domain. Used to sequence registrations.
+
+| Column               | Type      | Nullable |
+| -------------------- | --------- | -------- |
+| `domain_id`          | `text`    | no       |
+| `registration_index` | `integer` | no       |
+
+**Primary key:** `domain_id`.
+
+## `renewals`
+
+A renewal is keyed by `id` and belongs to a specific registration.
+
+| Column               | Type          | Nullable | Description                                                                    |
+| -------------------- | ------------- | -------- | ------------------------------------------------------------------------------ |
+| `id`                 | `text`        | no       | A key derived from `(domain_id, registration_index, renewal_index)`. Primary key. |
+| `domain_id`          | `text`        | no       | The renewed domain.                                                            |
+| `registration_index` | `integer`     | no       | Index of the parent registration.                                              |
+| `renewal_index`      | `integer`     | no       | Monotonically increasing index per registration.                               |
+| `duration`           | `numeric(78)` | no       | Duration added by this renewal, in seconds.                                    |
+| `referrer`           | `text`        | yes      | Encoded referrer value emitted at renewal time.                                |
+| `base`               | `numeric(78)` | yes      | Base renewal cost in wei.                                                      |
+| `premium`            | `numeric(78)` | yes      | Premium cost in wei above base. ENSv1 `RegistrarControllers` only.             |
+| `event_id`           | `text`        | no       | The event that created this renewal record.                                    |
+
+**Indexes:** unique on `(domain_id, registration_index, renewal_index)`.
+
+**Relations:** belongs to one `registrations` record via `(domain_id, registration_index)`, has one `events` record via `(event_id)`.
+
+## `latest_renewal_indexes`
+
+Tracks the highest `renewal_index` seen for each registration. Used to sequence renewals.
+
+| Column               | Type      | Nullable |
+| -------------------- | --------- | -------- |
+| `domain_id`          | `text`    | no       |
+| `registration_index` | `integer` | no       |
+| `renewal_index`      | `integer` | no       |
+
+**Primary key:** `(domain_id, registration_index)`.
+
+## `permissions`
+
+An ENSv2 permissions contract instance.
+
+| Column     | Type      | Nullable | Description                                    |
+| ---------- | --------- | -------- | ---------------------------------------------- |
+| `id`       | `text`    | no       | Primary key.                                   |
+| `chain_id` | `bigint`  | no       | Chain the permissions contract is deployed on. |
+| `address`  | `text`    | no       | Address of the permissions contract.           |
+
+**Indexes:** unique on `(chain_id, address)`.
+
+**Relations:** has many `permissions_resources`, has many `permissions_users`.
+
+## `permissions_resources`
+
+A resource managed by a `permissions` contract.
+
+| Column      | Type          | Nullable | Description                                            |
+| ----------- | ------------- | -------- | ------------------------------------------------------ |
+| `id`        | `text`        | no       | Primary key.                                           |
+| `chain_id`  | `bigint`      | no       | Chain of the parent permissions contract.              |
+| `address`   | `text`        | no       | Address of the parent permissions contract.            |
+| `resource`  | `numeric(78)` | no       | Resource identifier (a `uint256` token ID or similar). |
+
+**Indexes:** unique on `(chain_id, address, resource)`.
+
+**Relations:** belongs to one `permissions` via `(chain_id, address)`.
+
+## `permissions_users`
+
+A user's role bitmap for a specific resource within a `permissions` contract.
+
+| Column      | Type          | Nullable | Description                                                                               |
+| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `id`        | `text`        | no       | Primary key.                                                                              |
+| `chain_id`  | `bigint`      | no       | Chain of the parent permissions contract.                                                 |
+| `address`   | `text`        | no       | Address of the parent permissions contract.                                               |
+| `resource`  | `numeric(78)` | no       | Resource identifier.                                                                      |
+| `user`      | `text`        | no       | The user/grantee address this Permission is granted to (the HCA account address if used). |
+| `roles`     | `numeric(78)` | no       | Roles bitmap for this user on this resource.                                              |
+
+**Indexes:** unique on `(chain_id, address, resource, user)`.
+
+**Relations:** has one `accounts` record (user), belongs to one `permissions` record via `(chain_id, address)`, belongs to one `permissions_resource` record via `(chain_id, address, resource)`.
