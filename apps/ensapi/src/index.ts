@@ -65,7 +65,7 @@ const gracefulShutdown = async () => {
     }
 
     // Destroy DI container resources
-    di.destroy();
+    await di.destroy();
 
     process.exit(0);
   } catch (error) {

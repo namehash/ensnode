@@ -260,7 +260,12 @@ class EnsApiDiContainer {
     try {
       // Initialize the ENSDb client and verify connectivity to the database.
       logger.info("Initializing ENSDb client and verifying connectivity to ENSDb");
-      await this.context.ensDbClient.isHealthy();
+      const isEnsDbHealthy = await this.context.ensDbClient.isHealthy();
+
+      if (!isEnsDbHealthy) {
+        throw new Error("ENSDb health check failed");
+      }
+
       logger.info(
         { ensIndexerSchemaName: this.context.ensDbConfig.ensIndexerSchemaName },
         "Successfully connected to ENSDb",
@@ -312,7 +317,7 @@ class EnsApiDiContainer {
    * Destroys any resources held by the DI container, such as caches, to
    * allow for clean shutdown or re-initialization.
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     if (!this._context) {
       logger.warn(
         "DI context is not loaded, so there are no resources to destroy. If you are trying to reload the context, call `di.init()` to load the context and initialize necessary resources.",
@@ -328,7 +333,7 @@ class EnsApiDiContainer {
     logger.info("Caches destroyed");
 
     // Destroy the ENSDb client to close the connection pool to ENSDb
-    this.context.ensDbClient.destroy();
+    await this.context.ensDbClient.destroy();
     logger.info("ENSDb client destroyed");
 
     this._context = undefined;

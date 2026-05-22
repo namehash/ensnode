@@ -15,12 +15,17 @@ vi.mock("@/lib/logger", () => ({
 
 vi.mock("@ensnode/ensdb-sdk", async (importOriginal) => {
   class MockEnsDbReader {
-    ensDb = {};
+    ensDb = {
+      $client: {
+        end: vi.fn().mockResolvedValue(undefined),
+      },
+    };
     ensIndexerSchema = {};
     ensIndexerSchemaName = "ensindexer_test";
     async isHealthy() {
       return true;
     }
+    async destroy() {}
   }
 
   const mod = await importOriginal<typeof import("@ensnode/ensdb-sdk")>();
@@ -74,9 +79,17 @@ describe("ensdb singleton bootstrap", () => {
     vi.stubEnv("RPC_URL_1", "https://rpc.example.com");
   });
 
-  afterEach(() => {
-    di.destroy();
+  afterEach(async () => {
+    // Restore env before destroying to prevent validation errors during cleanup
     vi.unstubAllEnvs();
+    // Destroy might fail if init failed, but we want to clean up regardless
+    try {
+      await di.destroy();
+    } catch {
+      // If destroy fails due to process.exit mock or other issues, force reset
+      // @ts-expect-error - accessing private member for test cleanup
+      di._context = undefined;
+    }
   });
 
   it("constructs EnsDbReader from real env wiring without errors", async () => {
@@ -94,11 +107,14 @@ describe("ensdb singleton bootstrap", () => {
     const { default: logger } = await import("@/lib/logger");
 
     vi.stubEnv("ENSDB_URL", "");
-    await expect(di.init()).rejects.toThrow("process.exit");
 
-    expect(logger.error).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
+    try {
+      await expect(di.init()).rejects.toThrow("process.exit");
+      expect(logger.error).toHaveBeenCalled();
+      expect(mockExit).toHaveBeenCalledWith(1);
+    } finally {
+      mockExit.mockRestore();
+    }
   });
 
   it("exits when ENSINDEXER_SCHEMA_NAME is missing", async () => {
@@ -108,10 +124,13 @@ describe("ensdb singleton bootstrap", () => {
     const { default: logger } = await import("@/lib/logger");
 
     vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
-    await expect(di.init()).rejects.toThrow("process.exit");
 
-    expect(logger.error).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
+    try {
+      await expect(di.init()).rejects.toThrow("process.exit");
+      expect(logger.error).toHaveBeenCalled();
+      expect(mockExit).toHaveBeenCalledWith(1);
+    } finally {
+      mockExit.mockRestore();
+    }
   });
 });
