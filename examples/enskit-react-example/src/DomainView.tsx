@@ -134,9 +134,14 @@ function RenderDomain({ by }: { by: DomainBy }) {
       </p>
       <p>Version: {domain.__typename}</p>
 
-      {data.domain.parent?.canonical && (
+      {data.domain.parent && (
+        // always link the parent by its (stable) DomainId; fall back to the id as the label when the
+        // parent has no Canonical Name
         <Link to={`/domain/id/${data.domain.parent.id}`}>
-          ← {data.domain.parent.canonical.name.beautified}
+          ←{" "}
+          {data.domain.parent.canonical
+            ? data.domain.parent.canonical.name.beautified
+            : data.domain.parent.id}
         </Link>
       )}
 

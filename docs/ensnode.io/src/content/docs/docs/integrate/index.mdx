@@ -13,7 +13,17 @@ import QuickstartV1141 from "@components/walkthroughs/quickstart/v1.14.1.mdx";
 {/*
   Version-locked to the production-deployed Omnigraph schema (see `@data/omnigraph-examples/active`).
   Author one partial per supported version under `@components/walkthroughs/quickstart/` and render the
-  active one. Promote by bumping ACTIVE_OMNIGRAPH_VERSION; no edits here are needed.
+  active one. Promote by bumping ACTIVE_OMNIGRAPH_VERSION (and, for a new version, add its partial and
+  a `case` below — an unmapped version throws at build rather than silently rendering stale docs).
 */}
 
-{ACTIVE_OMNIGRAPH_VERSION === "v1.14.1" ? <QuickstartV1141 /> : <QuickstartV1131 />}
+{(() => {
+  switch (ACTIVE_OMNIGRAPH_VERSION) {
+    case "v1.13.1":
+      return <QuickstartV1131 />;
+    case "v1.14.1":
+      return <QuickstartV1141 />;
+    default:
+      throw new Error(`No quickstart partial for Omnigraph version "${ACTIVE_OMNIGRAPH_VERSION}".`);
+  }
+})()}

@@ -104,13 +104,13 @@ An **InterpretedName** is a Name whose labels are each either normalized or repr
 
 ```tsx title="src/DomainView.tsx"
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { asInterpretedName, beautifyInterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 
 const DomainByNameQuery = graphql(`
   query DomainByName($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name { interpreted } }
+      canonical { name { beautified } }
       owner { address }
     }
   }
@@ -136,7 +136,7 @@ export function DomainView() {
     <div>
       <h2>
         {domain.canonical
-          ? beautifyInterpretedName(domain.canonical.name.interpreted)
+          ? domain.canonical.name.beautified
           : "Unnamed Domain"}
       </h2>
       <p>Version: {domain.__typename}</p>
@@ -163,12 +163,12 @@ const DomainByNameQuery = graphql(`
   query DomainByName($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name { interpreted } }
+      canonical { name { beautified } }
       owner { address }
       subdomains {
         edges {
           node {
-            canonical { name { interpreted } }
+            canonical { name { beautified } }
             owner { address }
           }
         }
@@ -195,7 +195,7 @@ export function DomainView() {
 
   return (
     <div>
-      <h2>{domain.canonical ? beautifyInterpretedName(domain.canonical.name.interpreted) : "Unnamed Domain"}</h2>
+      <h2>{domain.canonical ? domain.canonical.name.beautified : "Unnamed Domain"}</h2>
       <p>Version: {domain.__typename}</p>
       <p>Owner: <code>{domain.owner?.address ?? "0x0"}</code></p>
 
@@ -204,7 +204,7 @@ export function DomainView() {
         {domain.subdomains?.edges.map(({ node }, i) => (
           <li key={i}>
             {node.canonical
-              ? beautifyInterpretedName(node.canonical.name.interpreted)
+              ? node.canonical.name.beautified
               : <em>unnamed</em>}{" "}
             — Owner <code>{node.owner?.address ?? "0x0"}</code>
           </li>
@@ -217,7 +217,7 @@ export function DomainView() {
 
 ## 7. Extract a typed fragment
 
-Notice we're selecting the same fields (`canonical { name { interpreted } }`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed shape for components that render a Domain.
+Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed shape for components that render a Domain.
 
 ```tsx title="src/DomainView.tsx" ins={1,2,5,9-15,21,23,28,31-48,66,72}
 import {
@@ -226,12 +226,12 @@ import {
   readFragment,
   useOmnigraphQuery,
 } from "enskit/react/omnigraph";
-import { asInterpretedName, beautifyInterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
-    canonical { name { interpreted } }
+    canonical { name { beautified } }
     owner { address }
   }
 `);
@@ -258,7 +258,7 @@ function RenderDomain({ data }: { data: FragmentOf<typeof DomainFragment> }) {
     <>
       <span>
         {domain.canonical
-          ? beautifyInterpretedName(domain.canonical.name.interpreted)
+          ? domain.canonical.name.beautified
           : "Unnamed Domain"}
       </span>{" "}
       <span>({domain.__typename})</span>{" "}

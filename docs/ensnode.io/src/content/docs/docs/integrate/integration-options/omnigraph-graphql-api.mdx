@@ -11,7 +11,17 @@ import WalkthroughV1141 from "@components/walkthroughs/omnigraph-graphql-api/v1.
   This walkthrough is version-locked to the production-deployed Omnigraph schema (see
   `@data/omnigraph-examples/active`). Production lags `main`, and its schema differs, so we author one
   partial per supported version under `@components/walkthroughs/omnigraph-graphql-api/` and render the
-  active one. Promote by bumping ACTIVE_OMNIGRAPH_VERSION; no edits here are needed.
+  active one. Promote by bumping ACTIVE_OMNIGRAPH_VERSION (and, for a new version, add its partial and
+  a `case` below — an unmapped version throws at build rather than silently rendering stale docs).
 */}
 
-{ACTIVE_OMNIGRAPH_VERSION === "v1.14.1" ? <WalkthroughV1141 /> : <WalkthroughV1131 />}
+{(() => {
+  switch (ACTIVE_OMNIGRAPH_VERSION) {
+    case "v1.13.1":
+      return <WalkthroughV1131 />;
+    case "v1.14.1":
+      return <WalkthroughV1141 />;
+    default:
+      throw new Error(`No walkthrough partial for Omnigraph version "${ACTIVE_OMNIGRAPH_VERSION}".`);
+  }
+})()}

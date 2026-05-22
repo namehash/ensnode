@@ -111,7 +111,7 @@ An **InterpretedName** is a Name whose labels are each either normalized or repr
 ```ts title="src/index.ts"
 // existing imports...
 
-import { asInterpretedName, beautifyInterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 import { graphql, omnigraph } from "enssdk/omnigraph";
 
 // existing client...
@@ -121,7 +121,7 @@ const HelloWorldQuery = graphql(`
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name { interpreted } }
+      canonical { name { beautified } }
       owner { address }
     }
   }
@@ -140,7 +140,7 @@ async function main() {
 
   const { domain } = result.data;
 
-  console.log(`Name: ${domain.canonical ? beautifyInterpretedName(domain.canonical.name.interpreted) : "<unnamed>"}`);
+  console.log(`Name: ${domain.canonical ? domain.canonical.name.beautified : "<unnamed>"}`);
   console.log(`Version: ${domain.__typename}`);
   console.log(`Owner: ${domain.owner?.address ?? "0x0"}`);
 }
@@ -155,7 +155,7 @@ A few things to notice:
 
 - `graphql(...)` parses your query at typecheck time. Hover over `result.data` and you'll see it's typed exactly to your selection set — try removing `owner { address }` from the query and watch the access below become a type error.
 - `domain` is a union of `ENSv1Domain | ENSv2Domain` (both implement the `Domain` interface). The Omnigraph unifies ENSv1 and ENSv2 behind the same query — `__typename` tells you which one you got.
-- `canonical` is `null` for non-canonical Domains (e.g. Domains whose name cannot be inferred). When non-null, `canonical.name.interpreted` is the Domain's Canonical Name as an InterpretedName. **Always** guard the access; TypeScript will help you.
+- `canonical` is `null` for non-canonical Domains (e.g. Domains whose name cannot be inferred). When non-null, `canonical.name.beautified` is the Domain's Canonical Name, beautified for display. **Always** guard the access; TypeScript will help you.
 
 ## 6. List subdomains
 
@@ -166,12 +166,12 @@ const HelloWorldQuery = graphql(`
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name { interpreted } }
+      canonical { name { beautified } }
       owner { address }
       subdomains(first: 20) {
         totalCount
         edges {
-          node { canonical { name { interpreted } } owner { address } }
+          node { canonical { name { beautified } } owner { address } }
         }
       }
     }
@@ -191,13 +191,13 @@ async function main() {
 
   const { domain } = result.data;
 
-  console.log(`Name: ${domain.canonical ? beautifyInterpretedName(domain.canonical.name.interpreted) : "<unnamed>"}`);
+  console.log(`Name: ${domain.canonical ? domain.canonical.name.beautified : "<unnamed>"}`);
   console.log(`Version: ${domain.__typename}`);
   console.log(`Owner: ${domain.owner?.address ?? "0x0"}`);
 
   console.log(`\nSubdomains (showing 20 of ${domain.subdomains?.totalCount ?? 0}):`);
   for (const { node } of domain.subdomains?.edges ?? []) {
-    const subName = node.canonical ? beautifyInterpretedName(node.canonical.name.interpreted) : "<unnamed>";
+    const subName = node.canonical ? node.canonical.name.beautified : "<unnamed>";
     console.log(`  - ${subName} — Owner ${node.owner?.address ?? "0x0"}`);
   }
 }
@@ -209,10 +209,10 @@ To page beyond the first 20, the connection also exposes `pageInfo { hasNextPage
 
 ## 7. Extract a typed fragment
 
-Notice we're selecting the same fields (`canonical { name { interpreted } }`, `owner { address }`) on the parent Domain _and_ on each subdomain, and rendering them the same way. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed function that formats a Domain.
+Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain, and rendering them the same way. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed function that formats a Domain.
 
 ```ts title="src/index.ts" ins={3,11-17,23,26,31,34-40,56,59}
-import { asInterpretedName, beautifyInterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 import { createEnsNodeClient } from "enssdk/core";
 import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
 
@@ -225,7 +225,7 @@ const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
-    canonical { name { interpreted } }
+    canonical { name { beautified } }
     owner { address }
   }
 `);
@@ -248,7 +248,7 @@ const HelloWorldQuery = graphql(
 function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
   // type-safe access to fragment data!
   const domain = readFragment(DomainFragment, data);
-  const name = domain.canonical ? beautifyInterpretedName(domain.canonical.name.interpreted) : "<unnamed>";
+  const name = domain.canonical ? domain.canonical.name.beautified : "<unnamed>";
   const owner = domain.owner?.address ?? "0x0";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
