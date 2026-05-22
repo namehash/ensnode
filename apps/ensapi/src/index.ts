@@ -11,8 +11,12 @@ import app from "./app";
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
-// initialize DI container and its resources
-di.init();
+// initialize DI container and its resources in a non-blocking way to
+// allow HTTP server to start immediately and serve requests
+void di.init().catch((error) => {
+  logger.error(error, "Error initializing DI container");
+  process.exit(1);
+});
 
 // start hono server
 const server = serve(
@@ -61,7 +65,7 @@ const gracefulShutdown = async () => {
     }
 
     // Destroy DI container resources
-    di.destroy();
+    await di.destroy();
 
     process.exit(0);
   } catch (error) {

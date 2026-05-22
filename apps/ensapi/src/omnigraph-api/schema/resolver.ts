@@ -10,7 +10,6 @@ import {
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import di from "@/di";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
@@ -40,7 +39,7 @@ import { ResolverRecordsRef } from "@/omnigraph-api/schema/resolver-records";
 
 export const ResolverRef = builder.loadableObjectRef("Resolver", {
   load: (ids: ResolverId[]) =>
-    ensDb.query.resolver.findMany({
+    di.context.ensDb.query.resolver.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,
@@ -83,6 +82,7 @@ ResolverRef.implement({
       description: "ResolverRecords issued by this Resolver.",
       type: ResolverRecordsRef,
       resolve: (parent, args, context) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           eq(ensIndexerSchema.resolverRecords.chainId, parent.chainId),
           eq(ensIndexerSchema.resolverRecords.address, parent.address),
@@ -151,13 +151,15 @@ ResolverRef.implement({
       args: {
         where: t.arg({ type: EventsWhereInput }),
       },
-      resolve: (parent, args) =>
-        resolveFindEvents(args, {
+      resolve: (parent, args) => {
+        const { ensIndexerSchema } = di.context;
+        return resolveFindEvents(args, {
           through: {
             table: ensIndexerSchema.resolverEvent,
             scope: eq(ensIndexerSchema.resolverEvent.resolverId, parent.id),
           },
-        }),
+        });
+      },
     }),
   }),
 });

@@ -3,10 +3,11 @@ import { getUnixTime } from "date-fns";
 import { inArray } from "drizzle-orm";
 import type { DomainId, RegistryId } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 
 const createRegistryParentDomainLoader = () =>
   new DataLoader<RegistryId, DomainId | null>(async (registryIds) => {
+    const { ensDb, ensIndexerSchema } = di.context;
     const rows = await ensDb
       .select({
         id: ensIndexerSchema.registry.id,
