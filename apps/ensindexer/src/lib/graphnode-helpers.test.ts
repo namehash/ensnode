@@ -78,26 +78,25 @@ describe("labelByLabelHash", () => {
     // hash — a hash the healed label "dan" actually hashes to, so the client's heal-integrity check
     // accepts it. A label whose hash doesn't start with '0' (e.g. "vitalik" → 0xaf2caa…) couldn't
     // exercise the prepend-'0' path without the re-padded hash diverging from the label's hash.
+    const DAN_LABEL = asLiteralLabel("dan");
+    const DAN_LABELHASH = labelhashLiteralLabel(DAN_LABEL); // 0x0d2095…
+    // drop the leading '0' to produce the 63-hex-char input the client must re-pad
+    const labelHash63 = `0x${DAN_LABELHASH.slice(3)}` as LabelHash;
+
     (fetch as any).mockResolvedValue({
       ok: true,
       json: () =>
         Promise.resolve({
           status: "success",
-          label: "dan",
+          label: DAN_LABEL,
         }),
     });
 
-    expect(
-      await labelByLabelHash(
-        "0xd2095e5cac990209cb47ca08e0614adcffe0315af614f414ab60c6230bdc988" as LabelHash, // 63 hex chars
-      ),
-    ).toEqual("dan");
+    expect(await labelByLabelHash(labelHash63)).toEqual(DAN_LABEL);
 
     const [[calledUrl]] = (fetch as any).mock.calls;
     // Verify the client prepended a '0' — the normalized 64-char hash is used in the request
-    expect(calledUrl.toString()).toContain(
-      "0x0d2095e5cac990209cb47ca08e0614adcffe0315af614f414ab60c6230bdc988",
-    );
+    expect(calledUrl.toString()).toContain(DAN_LABELHASH);
   });
 
   it("propagates a server 400 error as a thrown exception", async () => {
