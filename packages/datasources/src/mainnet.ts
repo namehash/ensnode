@@ -6,6 +6,10 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for EFP Datasource
+import { AccountMetadata as efp_AccountMetadata } from "./abis/efp/AccountMetadata";
+import { ListRecords as efp_ListRecords } from "./abis/efp/ListRecords";
+import { ListRegistry as efp_ListRegistry } from "./abis/efp/ListRegistry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -494,6 +498,75 @@ export default {
         abi: Seaport1_5, // Seaport 1.5
         address: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
         startBlock: 17129405,
+      },
+    },
+  },
+
+  /**
+   * EFP (Ethereum Follow Protocol) Datasource on Base.
+   *
+   * The `ListRegistry` (list NFTs) and `AccountMetadata` contracts are deployed only on Base.
+   * The `ListRecords` contract is also deployed on Base (one of the three "list storage location"
+   * chains a list NFT may point at via `UpdateListStorageLocation`).
+   *
+   * Addresses and start blocks cross-checked against https://docs.efp.app and
+   * ethereumfollowprotocol/api-v2.
+   */
+  [DatasourceNames.EFPBase]: {
+    chain: base,
+    contracts: {
+      ListRegistry: {
+        abi: efp_ListRegistry,
+        address: "0x0e688f5dca4a0a4729946acbc44c792341714e08",
+        startBlock: 20180000,
+      },
+      AccountMetadata: {
+        abi: efp_AccountMetadata,
+        address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+        startBlock: 20180000,
+      },
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33",
+        startBlock: 20180000,
+      },
+    },
+  },
+
+  /**
+   * EFP `ListRecords` Datasource on Optimism.
+   */
+  [DatasourceNames.EFPOptimism]: {
+    chain: optimism,
+    contracts: {
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x4ca00413d850dcfa3516e14d21dae2772f2acb85",
+        startBlock: 125792000,
+      },
+    },
+  },
+
+  /**
+   * EFP `ListRecords` Datasource on Ethereum mainnet, plus the `Resolver` subscription used to
+   * index the `eth.efp.list` ENS text record into `efp_ens_list_pointers`.
+   *
+   * The `Resolver` has no pinned address: any contract that emits the standard `TextChanged` event
+   * is in scope (the EFP plugin narrows to the `eth.efp.list` key), mirroring how Protocol
+   * Acceleration indexes Resolvers.
+   */
+  [DatasourceNames.EFPEthereum]: {
+    chain: mainnet,
+    contracts: {
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+        startBlock: 20820000,
+      },
+      Resolver: {
+        abi: ResolverABI,
+        // EFP launch on mainnet; `eth.efp.list` text records are not expected before this.
+        startBlock: 20820000,
       },
     },
   },
