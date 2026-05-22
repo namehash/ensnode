@@ -6,7 +6,7 @@ import {
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
-import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import di from "@/di";
 import { factory, producing } from "@/lib/hono-factory";
 
 /**
@@ -42,7 +42,7 @@ export type IndexingStatusMiddlewareVariables = {
 export const indexingStatusMiddleware = producing(
   ["indexingStatus"],
   factory.createMiddleware(async (c, next) => {
-    const indexingStatus = await indexingStatusCache.read();
+    const indexingStatus = await di.context.indexingStatusCache.read();
 
     if (indexingStatus instanceof Error) {
       // if indexingStatus was never fetched (and cached), propagate error to consumers

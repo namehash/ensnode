@@ -12,7 +12,7 @@ import app from "./app";
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
 // initialize DI container and its resources
-di.init();
+await di.init();
 
 // start hono server
 const server = serve(

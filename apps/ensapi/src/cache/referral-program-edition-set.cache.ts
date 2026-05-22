@@ -8,6 +8,7 @@ import { minutesToSeconds } from "date-fns";
 
 import { type CachedResult, SWRCache } from "@ensnode/ensnode-sdk";
 
+import { resolveDiDeps } from "@/di-bootstrap";
 import { lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
@@ -30,11 +31,8 @@ function partiallyRedactUrl(url: URL): string {
 async function loadReferralProgramEditionConfigSet(
   _cachedResult?: CachedResult<ReferralProgramEditionConfigSet>,
 ): Promise<ReferralProgramEditionConfigSet> {
-  // Async import `di` here to avoid circular dependency between this cache module and the DI container module.
-  // NOTE: It will not be required soon, as we plan to create a factory function for this cache
-  // that accepts the necessary dependencies as parameters, instead of importing from the DI container.
-  const di = await import("@/di").then((mod) => mod.default);
-  const { referralProgramEditionConfigSetUrl } = di.context.ensApiConfig;
+  const { ensApiConfig } = await resolveDiDeps();
+  const { referralProgramEditionConfigSetUrl } = ensApiConfig;
 
   // If no URL is configured, treat the referral program as having zero editions.
   if (!referralProgramEditionConfigSetUrl) {

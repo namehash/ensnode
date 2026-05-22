@@ -1,26 +1,67 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { buildEnsNodeStackInfo } from "@ensnode/ensnode-sdk";
+
+import { stackInfoCache } from "@/cache/stack-info.cache";
+import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
+import { BASE_ENV, indexingMetadataContextInitialized } from "@/config/config.schema.mock";
 import di from "@/di";
 
 vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   },
   makeLogger: vi.fn(() => ({
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   })),
 }));
 
-const VALID_ENSDB_URL = "postgresql://user:password@localhost:5432/mydb";
-const VALID_ENSINDEXER_SCHEMA_NAME = "ensindexer_test";
+vi.mock("@/cache/stack-info.cache", () => ({
+  stackInfoCache: {
+    read: vi.fn().mockResolvedValue(undefined),
+    peek: vi.fn(),
+    destroy: vi.fn(),
+  },
+}));
+
+vi.mock("@/cache/indexing-status.cache", () => ({
+  indexingStatusCache: {
+    read: vi.fn().mockResolvedValue(undefined),
+    peek: vi.fn(),
+    destroy: vi.fn(),
+  },
+}));
+
+vi.mock("@/cache/referral-program-edition-set.cache", () => ({
+  referralProgramEditionConfigSetCache: {
+    read: vi.fn().mockResolvedValue(undefined),
+    peek: vi.fn(),
+    destroy: vi.fn(),
+  },
+}));
+
+function makeMockStackInfo() {
+  const ensApiConfig = buildConfigFromEnvironment(process.env);
+  const { ensDb, ensIndexer, ensRainbow } = indexingMetadataContextInitialized.stackInfo;
+  return buildEnsNodeStackInfo(
+    buildEnsApiPublicConfig(ensApiConfig, ensIndexer),
+    ensDb,
+    ensIndexer,
+    ensRainbow,
+  );
+}
 
 describe("ensdb singleton bootstrap", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubEnv("ENSDB_URL", VALID_ENSDB_URL);
-    vi.stubEnv("ENSINDEXER_SCHEMA_NAME", VALID_ENSINDEXER_SCHEMA_NAME);
+    for (const [key, value] of Object.entries(BASE_ENV)) {
+      vi.stubEnv(key, value);
+    }
+    vi.mocked(stackInfoCache.peek).mockReturnValue(makeMockStackInfo());
   });
 
   afterEach(() => {
@@ -29,9 +70,9 @@ describe("ensdb singleton bootstrap", () => {
   });
 
   it("constructs EnsDbReader from real env wiring without errors", async () => {
-    di.init();
+    await di.init();
     const { ensDbClient, ensDb, ensIndexerSchema } = di.context;
-    expect(ensDbClient.ensIndexerSchemaName).toBe(VALID_ENSINDEXER_SCHEMA_NAME);
+    expect(ensDbClient.ensIndexerSchemaName).toBe(BASE_ENV.ENSINDEXER_SCHEMA_NAME);
     expect(ensDb).toBeDefined();
     expect(ensIndexerSchema).toBeDefined();
   }, 10_000);
@@ -43,8 +84,7 @@ describe("ensdb singleton bootstrap", () => {
     const { default: logger } = await import("@/lib/logger");
 
     vi.stubEnv("ENSDB_URL", "");
-    di.init();
-    expect(() => di.context.ensDbClient).toThrow("process.exit");
+    await expect(di.init()).rejects.toThrow("process.exit");
 
     expect(logger.error).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -58,8 +98,7 @@ describe("ensdb singleton bootstrap", () => {
     const { default: logger } = await import("@/lib/logger");
 
     vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
-    di.init();
-    expect(() => di.context.ensDbClient).toThrow("process.exit");
+    await expect(di.init()).rejects.toThrow("process.exit");
 
     expect(logger.error).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(1);

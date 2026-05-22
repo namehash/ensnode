@@ -1,9 +1,9 @@
 import type { ChainId } from "enssdk";
 import { createPublicClient, fallback, http, type PublicClient } from "viem";
 
-import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
+import { getENSRootChainId } from "@ensnode/datasources";
 import { type EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
-import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
+import type { ENSNamespaceId, EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { type IndexingStatusCache, indexingStatusCache } from "@/cache/indexing-status.cache";
@@ -11,12 +11,15 @@ import {
   type ReferralProgramEditionConfigSetCache,
   referralProgramEditionConfigSetCache,
 } from "@/cache/referral-program-edition-set.cache";
-import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
-import { stackInfoCache } from "@/cache/stack-info.cache";
-import type { EnsApiConfig } from "@/config/config.schema";
-import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
+import { type EnsNodeStackInfoCache, stackInfoCache } from "@/cache/stack-info.cache";
+import {
+  buildConfigFromEnvironment,
+  buildRootChainRpcConfig,
+  type EnsApiConfig,
+} from "@/config/config.schema";
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
+import { clearBootstrapDeps, setBootstrapDeps } from "@/di-bootstrap";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("di");
@@ -91,127 +94,60 @@ export interface EnsApiDiContext {
   stackInfo: EnsNodeStackInfo;
 }
 
-export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsApiDiContext {
-  const instances = {} as EnsApiDiContext;
+export async function buildEnsApiDiContext(
+  ensApiEnvironment: EnsApiEnvironment,
+): Promise<EnsApiDiContext> {
+  const ensApiConfig = buildConfigFromEnvironment(ensApiEnvironment);
+  const ensDbConfig = buildEnsDbConfigFromEnvironment(ensApiEnvironment);
+  const ensDbClient = new EnsDbReader(ensDbConfig.ensDbUrl, ensDbConfig.ensIndexerSchemaName);
+  const ensDb = ensDbClient.ensDb;
+  const ensIndexerSchema = ensDbClient.ensIndexerSchema;
 
-  const context = {
-    get ensApiConfig(): EnsApiConfig {
-      if (instances.ensApiConfig === undefined) {
-        instances.ensApiConfig = buildConfigFromEnvironment(ensApiEnvironment);
-      }
+  setBootstrapDeps({ ensDbClient, ensApiConfig });
+  try {
+    logger.info("Initializing caches");
+    await Promise.all([
+      stackInfoCache.read(),
+      indexingStatusCache.read(),
+      referralProgramEditionConfigSetCache.read(),
+    ]);
+    logger.info("Caches initialized");
 
-      return instances.ensApiConfig;
-    },
+    const stackInfoPeek = stackInfoCache.peek();
+    if (stackInfoPeek instanceof Error) {
+      throw stackInfoPeek;
+    }
+    const stackInfo: EnsNodeStackInfo = stackInfoPeek;
 
-    get ensDbConfig(): EnsDbConfig {
-      if (instances.ensDbConfig === undefined) {
-        instances.ensDbConfig = buildEnsDbConfigFromEnvironment(ensApiEnvironment);
-      }
-      return instances.ensDbConfig;
-    },
+    const namespace = stackInfo.ensIndexer.namespace;
+    const rootChainRpcConfig = buildRootChainRpcConfig(ensApiEnvironment, namespace);
+    const rootChainId: ChainId = getENSRootChainId(namespace);
+    const rootChainPublicClient: PublicClient = createPublicClient({
+      transport: fallback(rootChainRpcConfig.httpRPCs.map((url) => http(url.toString()))),
+    });
 
-    get ensDbClient(): EnsDbReader {
-      if (instances.ensDbClient === undefined) {
-        const { ensDbUrl, ensIndexerSchemaName } = context.ensDbConfig;
-        instances.ensDbClient = new EnsDbReader(ensDbUrl, ensIndexerSchemaName);
-      }
-
-      return instances.ensDbClient;
-    },
-
-    get ensDb(): EnsDbReader["ensDb"] {
-      return context.ensDbClient.ensDb;
-    },
-
-    get ensIndexerSchema(): EnsDbReader["ensIndexerSchema"] {
-      return context.ensDbClient.ensIndexerSchema;
-    },
-
-    get namespace(): ENSNamespaceId {
-      return context.stackInfo.ensIndexer.namespace;
-    },
-
-    get rootChainRpcConfig(): RpcConfig {
-      if (instances.rootChainRpcConfig === undefined) {
-        instances.rootChainRpcConfig = buildRootChainRpcConfig(
-          ensApiEnvironment,
-          context.namespace,
-        );
-      }
-
-      return instances.rootChainRpcConfig;
-    },
-
-    get rootChainId(): ChainId {
-      if (instances.rootChainId === undefined) {
-        instances.rootChainId = getENSRootChainId(context.namespace);
-      }
-
-      return instances.rootChainId;
-    },
-
-    get rootChainPublicClient(): PublicClient {
-      if (instances.rootChainPublicClient === undefined) {
-        // Create an viem#PublicClient that uses a fallback() transport with all specified HTTP RPCs
-        instances.rootChainPublicClient = createPublicClient({
-          transport: fallback(
-            context.rootChainRpcConfig.httpRPCs.map((url) => http(url.toString())),
-          ),
-        });
-      }
-
-      return instances.rootChainPublicClient;
-    },
-
-    get indexingStatusCache(): IndexingStatusCache {
-      if (instances.indexingStatusCache === undefined) {
-        instances.indexingStatusCache = indexingStatusCache;
-      }
-
-      return instances.indexingStatusCache;
-    },
-
-    get referralProgramEditionConfigSetCache(): ReferralProgramEditionConfigSetCache {
-      if (instances.referralProgramEditionConfigSetCache === undefined) {
-        instances.referralProgramEditionConfigSetCache = referralProgramEditionConfigSetCache;
-      }
-
-      return instances.referralProgramEditionConfigSetCache;
-    },
-
-    get stackInfoCache(): EnsNodeStackInfoCache {
-      if (instances.stackInfoCache === undefined) {
-        instances.stackInfoCache = stackInfoCache;
-      }
-
-      return instances.stackInfoCache;
-    },
-
-    /**
-     * Synchronous getter for stack info that reads from the stackInfoCache.
-     *
-     * Note: This assumes that the stack info has already been loaded into the cache
-     * (e.g. by calling `di.context.stackInfoCache.read()` during ENSApi startup).
-     */
-    get stackInfo(): EnsNodeStackInfo {
-      const stackInfo = context.stackInfoCache.peek();
-
-      if (stackInfo instanceof Error) {
-        throw stackInfo;
-      }
-
-      return stackInfo;
-    },
-  } satisfies EnsApiDiContext;
-
-  return context;
+    return {
+      ensApiConfig,
+      ensDbConfig,
+      ensDbClient,
+      ensDb,
+      ensIndexerSchema,
+      namespace,
+      rootChainId,
+      rootChainRpcConfig,
+      rootChainPublicClient,
+      indexingStatusCache,
+      referralProgramEditionConfigSetCache,
+      stackInfoCache,
+      stackInfo,
+    } satisfies EnsApiDiContext;
+  } finally {
+    clearBootstrapDeps();
+  }
 }
 
 /**
  * Dependency Injection Container class for ENSApi
- *
- * It allows for lazy loading of the DI context and provides methods to
- * initialize and destroy resources as needed.
  *
  * The lifecycle of the DI container is managed manually by calling
  * the `init()` and `destroy()` methods, which allows for flexibility
@@ -221,22 +157,20 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
  * @example
  * ```ts
  * const di = new EnsApiDiContainer();
- * di.init(); // Initializes the DI context and any necessary resources
- * const namespace = di.context.namespace; // Access a member of the DI context
- * di.destroy(); // Clean up resources when they are no longer needed
+ * await di.init();
+ * const namespace = di.context.namespace;
+ * await di.destroy();
  * ```
  */
 class EnsApiDiContainer {
   private _context: EnsApiDiContext | undefined;
   /**
-   * The DI context for ENSApi, which is lazily loaded on first access.
-   *
-   * Note: the context can be re-loaded by calling {@link di.loadContext()}.
+   * The DI context for ENSApi, available after {@link init} completes.
    */
   get context(): EnsApiDiContext {
     if (!this._context) {
       throw new Error(
-        "DI context has not been loaded yet. Call `di.init()` to load the context and initialize necessary resources.",
+        "DI context has not been loaded yet. Call `await di.init()` to load the context and initialize necessary resources.",
       );
     }
     return this._context;
@@ -246,22 +180,14 @@ class EnsApiDiContainer {
    * Initializes the DI container by loading the context and initializing
    * necessary resources.
    */
-  init(): void {
+  async init(): Promise<void> {
     if (this._context) {
       throw new Error(
         "DI context has already been initialized. If you want to re-initialize, call `di.destroy()` first to clean up resources.",
       );
     }
 
-    // Load the DI context
-    this.loadContext();
-
-    logger.info("Initializing caches");
-    void Promise.all([
-      this.context.indexingStatusCache.read(),
-      this.context.stackInfoCache.read(),
-      this.context.referralProgramEditionConfigSetCache.read(),
-    ]).then(() => logger.info("Caches initialized"));
+    await this.loadContext();
   }
 
   /**
@@ -271,7 +197,7 @@ class EnsApiDiContainer {
   destroy(): void {
     if (!this._context) {
       logger.warn(
-        "DI context is not loaded, so there are no resources to destroy. If you are trying to reload the context, call `di.init()` to load the context and initialize necessary resources.",
+        "DI context is not loaded, so there are no resources to destroy. If you are trying to reload the context, call `await di.init()` to load the context and initialize necessary resources.",
       );
 
       return;
@@ -297,7 +223,7 @@ class EnsApiDiContainer {
    *         overwriting of the context. Call `di.destroy()` first to clean up
    *         resources if you want to reload the context.
    */
-  private loadContext(): void {
+  private async loadContext(): Promise<void> {
     if (this._context) {
       throw new Error(
         "DI context has already been loaded. If you want to reload the context, call `di.destroy()` first to clean up resources.",
@@ -308,7 +234,7 @@ class EnsApiDiContainer {
 
     // Load the current environment variables into the DI context
     // and freeze the context to prevent modification at runtime
-    this._context = Object.freeze(buildEnsApiDiContext(process.env));
+    this._context = Object.freeze(await buildEnsApiDiContext(process.env));
 
     logger.info(
       { context: Object.keys(this.context) },

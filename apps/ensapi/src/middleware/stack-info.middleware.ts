@@ -1,6 +1,6 @@
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 
-import { stackInfoCache } from "@/cache/stack-info.cache";
+import di from "@/di";
 import { factory, producing } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 
@@ -24,7 +24,7 @@ export interface StackInfoMiddlewareVariables {
 }
 
 /**
- * Makes the ENSNode Stack Info cached in {@link stackInfoCache} available
+ * Makes the ENSNode Stack Info cached in `di.context.stackInfoCache` available
  * in the Hono context as `c.var.stackInfo`.
  *
  * If the ENSNode Stack Info cannot be retrieved, `c.var.stackInfo` will be set to
@@ -38,7 +38,7 @@ export interface StackInfoMiddlewareVariables {
 export const stackInfoMiddleware = producing(
   ["stackInfo"],
   factory.createMiddleware(async (c, next) => {
-    const stackInfo = await stackInfoCache.read();
+    const stackInfo = await di.context.stackInfoCache.read();
 
     if (stackInfo instanceof Error) {
       logger.error(
