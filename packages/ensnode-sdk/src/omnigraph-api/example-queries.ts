@@ -12,12 +12,6 @@ const SEPOLIA_V2_V2_ETH_REGISTRY = getDatasourceContract(
   "ETHRegistry",
 );
 
-const SEPOLIA_V2_V2_ETH_REGISTRAR = getDatasourceContract(
-  ENSNamespaceIds.SepoliaV2,
-  DatasourceNames.ENSv2Root,
-  "ETHRegistrar",
-);
-
 const ENS_TEST_ENV_V2_ETH_REGISTRY = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
   DatasourceNames.ENSv2Root,
@@ -32,16 +26,17 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = getDatasourceContract(
 
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
-// owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
-const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
-
+// owns ~9k v1 .eth names on sepolia-v2
 const SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES = toNormalizedAddress(
-  "0x205d2686da3bf33f64c17f21462c51b5ead462cf",
+  "0x69696969c3b3ca102eeb5c53a065a7c3ae4fb6dd",
+);
+
+// holds ETHRegistry (EnhancedAccessControl) permissions on sepolia-v2
+const SEPOLIA_V2_ADDRESS_WITH_PERMISSIONS = toNormalizedAddress(
+  "0x4c65a1c8d330ce1c3f60e00cd55709ba5fe2e090",
 );
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
-
-const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("demomigration.eth");
 
 const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
 
@@ -199,7 +194,7 @@ query DomainRegistration($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "vitalik.eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
     },
   },
 
@@ -275,7 +270,7 @@ query DomainEvents($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "newowner.eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
     },
   },
 
@@ -385,8 +380,8 @@ query PermissionsByContract(
     variables: {
       // TODO: same as above
       default: { contract: ENS_TEST_ENV_V2_ETH_REGISTRAR },
-      // TODO: example response is empty for this address on Sepolia V2
-      [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_V2_ETH_REGISTRAR },
+      // the ETHRegistrar holds no EAC permissions on sepolia-v2; the ETHRegistry does
+      [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_V2_ETH_REGISTRY },
     },
   },
 
@@ -410,8 +405,7 @@ query PermissionsByUser($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      // TODO: example response is empty for this address on Sepolia V2
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_PERMISSIONS },
     },
   },
 
@@ -462,7 +456,7 @@ query DomainResolver($name: InterpretedName!) {
     variables: {
       default: { name: "vitalik.eth" },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
-      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
     },
   },
 
@@ -550,7 +544,7 @@ query AccountMigratedNames($address: Address!) {
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
   {

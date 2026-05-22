@@ -16,6 +16,8 @@ import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
+const SEPOLIA_V2_FORK_BLOCK = 10887910;
+
 /**
  * The Sepolia V2 ENSNamespace
  *
@@ -73,7 +75,7 @@ export default {
       UniversalResolverV2: {
         abi: UniversalResolverV2,
         address: "0xfef81312438b7e578ee94bf0e8fa5c2547653d7c",
-        startBlock: 10887910,
+        startBlock: SEPOLIA_V2_FORK_BLOCK,
       },
     },
   },
@@ -82,23 +84,23 @@ export default {
     chain: sepoliaV2Chain,
     contracts: {
       // factory-pattern entries: start at the earliest deploy block of any ENSv2 contract (RootRegistry)
-      Resolver: { abi: ResolverABI, startBlock: 10887910 },
-      Registry: { abi: Registry, startBlock: 10887910 },
-      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 10887910 },
+      Resolver: { abi: ResolverABI, startBlock: SEPOLIA_V2_FORK_BLOCK },
+      Registry: { abi: Registry, startBlock: SEPOLIA_V2_FORK_BLOCK },
+      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: SEPOLIA_V2_FORK_BLOCK },
       RootRegistry: {
         abi: Registry,
         address: "0x078a7ae41974a74c62233bca5590c86218aa1f1e",
-        startBlock: 10887910,
+        startBlock: SEPOLIA_V2_FORK_BLOCK,
       },
       ETHRegistry: {
         abi: Registry,
         address: "0xc328a01a4800fb52ec5a6ab4190356962ab719e5",
-        startBlock: 10887910,
+        startBlock: SEPOLIA_V2_FORK_BLOCK,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
         address: "0xd859dac731dab4aecddb154b639d868dc951da62",
-        startBlock: 10887910,
+        startBlock: SEPOLIA_V2_FORK_BLOCK,
       },
     },
   },
