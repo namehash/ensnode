@@ -24,7 +24,7 @@ export function loadEnssdkExampleProject(): PlaygroundProject {
       fetchRawExampleProjectFromGlob(enssdkExampleSourceModules, "examples/enssdk-example"),
     envReplacements: [
       {
-        pattern: /const ENSNODE_URL = process\.env\.ENSNODE_URL!;/,
+        pattern: /const ENSNODE_URL = process\.env\.ENSNODE_URL \?\? "[^"]*";/,
         replacement: `const ENSNODE_URL = ${JSON.stringify(ENSNODE_URL)};`,
       },
     ],

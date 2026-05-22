@@ -13,7 +13,7 @@ Companion to the [enssdk integration guide](https://ensnode.io/docs/integrate/in
 pnpm install
 
 ENSNODE_URL=https://api.v2-sepolia.blue.ensnode.io pnpm -F enssdk-example start
-````
+```
 
 ## Usage (with Local ENSNode)
 

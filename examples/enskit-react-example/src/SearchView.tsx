@@ -61,14 +61,18 @@ export function SearchView() {
 
   const { data, fetching, error } = result;
 
+  // only Canonical Domains are rendered, so filter before computing the empty state — otherwise a
+  // page of entirely non-canonical edges would render as a blank list with no "No matches."
+  const visibleEdges = data?.domains?.edges.filter((edge) => edge.node.canonical !== null) ?? [];
+
   return (
     <div>
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
-        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
-        the URL as <code>?query=</code>.
+        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
+        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
+        synced to the URL as <code>?query=</code>.
       </p>
 
       <input
@@ -86,20 +90,19 @@ export function SearchView() {
         <>
           {fetching && <p>Loading...</p>}
           <ul>
-            {data?.domains?.edges.map((edge) => {
-              if (!edge.node.canonical) return null;
+            {visibleEdges.map((edge) => {
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
                   {/* link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved */}
                   <Link to={`/domain/id/${edge.node.id}`}>
-                    {edge.node.canonical.name.beautified}
+                    {edge.node.canonical?.name.beautified}
                   </Link>
                 </li>
               );
             })}
           </ul>
-          {data?.domains && data.domains.edges.length === 0 && !fetching && <p>No matches.</p>}
+          {data?.domains && visibleEdges.length === 0 && !fetching && <p>No matches.</p>}
           {data?.domains?.pageInfo.hasNextPage && (
             <button
               type="button"

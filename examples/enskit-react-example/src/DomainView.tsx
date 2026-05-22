@@ -148,16 +148,13 @@ function RenderDomain({ by }: { by: DomainBy }) {
 // Identify a Domain by its Name (`/domain/name/:name`).
 // Resolves to the name's Canonical Domain.
 export function DomainByNameView() {
-  const params = useParams();
-
-  // if a user accesses '/domain/name' directly, redirect to '/'
-  // TODO: render the set of tlds
-  if (params.name === undefined || params.name === "") return <Navigate to="/" replace />;
+  // the `/domain/name/:name` route guarantees `:name` is present
+  const { name } = useParams() as { name: string };
 
   // here we ensure that the provided /domain/name/:name parameter is an InterpretedName
   return (
     <EnsureInterpretedName
-      name={asLiteralName(params.name)}
+      name={asLiteralName(name)}
       //
       // options for how we interpret user input
       options={{
@@ -193,13 +190,9 @@ export function DomainByNameView() {
 // Renders a Domain by its DomainId (`/domain/id/:id`).
 // This is the preferred link target when a stable DomainId is already in hand.
 export function DomainByIdView() {
-  const params = useParams();
-
-  if (params.id === undefined || params.id === "")
-    return <Navigate to="/domain/name/eth" replace />;
-
-  // a DomainId is an opaque, stable identifier; it requires no normalization
-  const id = params.id as DomainId;
+  // the `/domain/id/:id` route guarantees `:id` is present; a DomainId is an opaque, stable
+  // identifier, so it requires no normalization
+  const { id } = useParams() as { id: DomainId };
 
   return <RenderDomain key={id} by={{ id }} />;
 }
