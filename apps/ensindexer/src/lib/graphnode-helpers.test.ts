@@ -73,7 +73,7 @@ describe("labelByLabelHash", () => {
   });
 
   it("normalizes a 63-char hex labelHash by prepending '0' and heals it", async () => {
-    // "dan" is chosen because its labelhash begins with a zero nibble (0x0d2095…). That lets us
+    // "dan" is chosen because its labelhash begins with a zero (0x0d2095…). That lets us
     // build a 63-char input by dropping the leading '0', which the client re-pads back to the full
     // hash — a hash the healed label "dan" actually hashes to, so the client's heal-integrity check
     // accepts it. A label whose hash doesn't start with '0' (e.g. "vitalik" → 0xaf2caa…) couldn't
