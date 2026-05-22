@@ -66,26 +66,30 @@ describe("labelByLabelHash", () => {
     ).toBeNull();
   });
 
-  it("returns null when ENSRainbow heals to a label that does not hash back to the labelHash", async () => {
-    // Malformed rainbow record: the on-chain label is `"007"` (quotes included), but a CSV-mangled
-    // label set heals it to `007` (quotes stripped), which hashes to a different labelHash. The heal
-    // must be rejected and treated as unhealable (null).
-    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
-
-    // the labelHash of the real on-chain label `"007"` (quotes included)
-    const labelHash = labelhashLiteralLabel(asLiteralLabel('"007"'));
-
+  it("normalizes a 63-char hex labelHash by prepending '0' and heals it", async () => {
+    // labelhash("dan") === 0x0d2095…; dropping its leading '0' yields a 63-char input that the
+    // client re-pads to the full hash, which the healed label "dan" then hashes back to (so the
+    // client's heal-integrity check accepts it).
     (fetch as any).mockResolvedValue({
       ok: true,
       json: () =>
         Promise.resolve({
           status: "success",
-          label: "007", // quote-stripped; does not hash back to labelHash
+          label: "dan",
         }),
     });
 
-    expect(await labelByLabelHash(labelHash)).toBeNull();
-    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(
+      await labelByLabelHash(
+        "0xd2095e5cac990209cb47ca08e0614adcffe0315af614f414ab60c6230bdc988" as LabelHash, // 63 hex chars
+      ),
+    ).toEqual("dan");
+
+    const [[calledUrl]] = (fetch as any).mock.calls;
+    // Verify the client prepended a '0' — the normalized 64-char hash is used in the request
+    expect(calledUrl.toString()).toContain(
+      "0x0d2095e5cac990209cb47ca08e0614adcffe0315af614f414ab60c6230bdc988",
+    );
   });
 
   it("propagates a server 400 error as a thrown exception", async () => {
@@ -114,6 +118,29 @@ describe("labelByLabelHash", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("normalizes a labelHash with uppercase chars and heals it", async () => {
+    (fetch as any).mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "success",
+          label: "nick",
+        }),
+    });
+
+    // Use a hash distinct from other tests to avoid LRU cache hits suppressing the fetch call
+    expect(
+      await labelByLabelHash(
+        "0x5D5727cb0fb76e4944eafb88ec9a3cf0b3c9025a4b2f947729137c5d7f84f68f" as LabelHash,
+      ),
+    ).toEqual("nick");
+
+    const [[calledUrl]] = (fetch as any).mock.calls;
+    expect(calledUrl.toString()).toContain(
+      "0x5d5727cb0fb76e4944eafb88ec9a3cf0b3c9025a4b2f947729137c5d7f84f68f",
+    );
+  });
+
   it("throws an error for an invalid labelHash missing 0x prefix and too long", async () => {
     // Validation happens client-side; fetch is never called
     await expect(
@@ -129,8 +156,9 @@ describe("labelByLabelHash", () => {
       vi.restoreAllMocks();
     });
 
-    // Use unique labelHashes in each test to prevent LRU cache hits from other tests
-    // carrying over cacheable responses (HealSuccess, HealNotFoundError) and bypassing fetch.
+    // Use a distinct label per test to prevent LRU cache hits from other tests carrying over
+    // cacheable responses (HealSuccess, HealNotFoundError) and bypassing fetch. The healed label
+    // must hash back to the requested labelHash, so derive the labelHash from the label.
 
     it("retries on network/fetch failure and succeeds on a later attempt", async () => {
       const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
@@ -140,13 +168,12 @@ describe("labelByLabelHash", () => {
         .mockRejectedValueOnce(new Error("network error"))
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "nick" }),
+          json: () => Promise.resolve({ status: "success", label: "alice" }),
         });
 
-      // healed label must hash back to the requested labelHash, so derive it from "nick"
-      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("nick")));
+      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("alice")));
 
-      expect(result).toEqual("nick");
+      expect(result).toEqual("alice");
       expect(fetch).toHaveBeenCalledTimes(3);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     });
@@ -162,13 +189,12 @@ describe("labelByLabelHash", () => {
         })
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "alice" }),
+          json: () => Promise.resolve({ status: "success", label: "bob" }),
         });
 
-      // healed label must hash back to the requested labelHash, so derive it from "alice"
-      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("alice")));
+      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("bob")));
 
-      expect(result).toEqual("alice");
+      expect(result).toEqual("bob");
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(warnSpy).toHaveBeenCalledTimes(1);
     });

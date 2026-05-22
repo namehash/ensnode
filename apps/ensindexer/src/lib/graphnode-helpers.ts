@@ -1,4 +1,4 @@
-import { asLiteralLabel, type LabelHash, type LiteralLabel, labelhashLiteralLabel } from "enssdk";
+import { asLiteralLabel, type LabelHash, type LiteralLabel } from "enssdk";
 import pRetry from "p-retry";
 
 import { type EnsRainbow, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
@@ -32,19 +32,6 @@ import { logger } from "@/lib/logger";
  * Any throw from this function is not recoverable or has exceeded the max retries. It propagates to the calling indexing handler
  * (Registry, Registrar, ThreeDNSToken, label-db-helpers) which does not catch it, causing the
  * ENSIndexer process to terminate.
- *
- * ## Malformed rainbow records
- *
- * ENSRainbow does not re-validate that a healed label actually hashes to the requested labelHash,
- * neither at ingest (`buildRainbowRecord`) nor at heal time. A label set built from a source where
- * a label's bytes were mangled while its labelHash key was preserved (e.g. CSV processing stripping
- * the surrounding quotes of the label `"007"`, leaving `007` keyed under the labelHash of `"007"`)
- * therefore heals to a label whose `labelhash` differs from the requested labelHash. Trusting such
- * a heal would write the Label row under the wrong primary key, leaving the requested labelHash
- * absent and tripping downstream invariants that assume the Label exists (e.g. canonical-name
- * materialization in `ensureDomainInRegistry`). We mirror graph-node's `ens.nameByHash`, which only
- * accepts a heal whose hash matches the request, by verifying the heal here and treating an
- * inconsistent heal as unhealable (returning null) while loudly logging the malformed record.
  *
  * @returns the original label if found, or null if not found for the labelHash.
  * @throws if ENSRainbow returns a non-retryable error response (e.g. HealBadRequestError / 400),
@@ -110,19 +97,5 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
     );
   }
 
-  const label = asLiteralLabel(response.label);
-
-  // Reject malformed rainbow records: a healed label that does not hash back to the requested
-  // labelHash must not be persisted (it would be keyed under the wrong labelHash). Treat it as
-  // unhealable so callers fall back to an Encoded LabelHash keyed by the requested labelHash.
-  if (labelhashLiteralLabel(label) !== labelHash) {
-    logger.error({
-      msg: `ENSRainbow healed labelHash to a label that does not hash back to it; ignoring malformed rainbow record`,
-      labelHash,
-      label,
-    });
-    return null;
-  }
-
-  return label;
+  return asLiteralLabel(response.label);
 }

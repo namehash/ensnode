@@ -1,5 +1,5 @@
 import type { EncodedLabelHash, Label, LabelHash } from "enssdk";
-import { parseLabelHashOrEncodedLabelHash } from "enssdk";
+import { asLiteralLabel, labelhashLiteralLabel, parseLabelHashOrEncodedLabelHash } from "enssdk";
 
 import {
   buildEnsRainbowClientLabelSet,
@@ -379,7 +379,25 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     });
 
     const response = await fetch(url);
-    const healResponse = (await response.json()) as EnsRainbow.HealResponse;
+    let healResponse = (await response.json()) as EnsRainbow.HealResponse;
+
+    // Integrity guard for malformed rainbow records. ENSRainbow returns labels exactly as stored
+    // and re-validates neither at ingest nor at heal time, so a record whose label bytes were
+    // mangled while its labelHash key was preserved (e.g. CSV processing stripping the quotes of
+    // `"007"`, leaving `007` keyed under the labelHash of `"007"`) heals to a label that does not
+    // hash back to the requested labelHash. Accepting it would let callers key data under the wrong
+    // labelHash. We treat such a heal as unhealable (NotFound), comparing against the normalized
+    // labelHash actually queried so canonical-but-non-lowercased inputs are not falsely rejected.
+    if (
+      healResponse.status === StatusCode.Success &&
+      labelhashLiteralLabel(asLiteralLabel(healResponse.label)) !== normalizedLabelHash
+    ) {
+      healResponse = {
+        status: StatusCode.Error,
+        error: "Label not found",
+        errorCode: ErrorCode.NotFound,
+      } satisfies EnsRainbow.HealNotFoundError;
+    }
 
     if (isCacheableHealResponse(healResponse)) {
       this.cache.set(normalizedLabelHash, healResponse);
