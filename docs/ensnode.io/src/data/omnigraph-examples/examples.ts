@@ -1,3 +1,4 @@
+import { ENSNODE_URL } from "src/lib/playground/constants";
 import { OmnigraphExampleQuerySchema, type OmnigraphExampleQuery } from "src/lib/playground/types";
 
 import { ACTIVE_OMNIGRAPH_VERSION } from "./active";
@@ -42,8 +43,7 @@ export const graphqlApiOmnigraphExamples: OmnigraphExampleQuery[] = Object.entri
       query: example.query.trim(),
       variables: example.variables,
       ...(response ? { response } : {}),
-      // NOTE: always pointing at production url
-      connection: "https://api.v2-sepolia.ensnode.io",
+      connection: ENSNODE_URL,
     }),
   ];
 });
