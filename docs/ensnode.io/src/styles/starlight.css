@@ -309,7 +309,7 @@ a[rel="prev"]:hover {
 
 /* Only apply hover effects to: 
 * * non-selected items 
-* * not expandable items (in all states)
+* * expandable items (in all states), including nested ones
 */
 #starlight__sidebar a:not([aria-current="page"]):hover,
 #starlight__sidebar details details > summary:hover,
@@ -323,18 +323,18 @@ a[rel="prev"]:hover {
  * expandable items in the sidebar
  */
 #starlight__sidebar details details > summary:hover {
-  transition: all 0.2s ease-in-out;
-  color: var(--sl-color-gray-2);
-  color: var(--sl-color-white);
-
   & span {
     color: var(--sl-color-white);
   }
 }
 
-#starlight__sidebar details > summary:hover {
+#starlight__sidebar details details > summary,
+#starlight__sidebar details > summary {
   transition: all 0.2s ease-in-out;
-  color: var(--sl-color-white);
+
+  &:hover {
+    color: var(--sl-color-white);
+  }
 }
 
 a.starlight-sidebar-topics-current {
