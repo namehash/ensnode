@@ -4,7 +4,7 @@ import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
 import { BASE_ENV } from "@/config/config.schema.mock";
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
-import di from "@/di";
+import logger from "@/lib/logger";
 
 vi.mock("@/lib/logger", () => ({
   default: {
@@ -27,7 +27,6 @@ describe("ensdb singleton bootstrap", () => {
   });
 
   afterEach(() => {
-    di.destroy();
     vi.unstubAllEnvs();
   });
 
@@ -40,28 +39,24 @@ describe("ensdb singleton bootstrap", () => {
     expect(ensDbClient.ensIndexerSchema).toBeDefined();
   });
 
-  it("exits when ENSDB_URL is missing", async () => {
+  it("exits when ENSDB_URL is missing", () => {
     const mockExit = vi.spyOn(process, "exit").mockImplementation((() => {
       throw new Error("process.exit");
     }) as never);
-    const { default: logger } = await import("@/lib/logger");
-
     vi.stubEnv("ENSDB_URL", "");
-    await expect(di.init()).rejects.toThrow("process.exit");
+    expect(() => buildEnsDbConfigFromEnvironment(process.env)).toThrow("process.exit");
 
     expect(logger.error).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(1);
     mockExit.mockRestore();
   });
 
-  it("exits when ENSINDEXER_SCHEMA_NAME is missing", async () => {
+  it("exits when ENSINDEXER_SCHEMA_NAME is missing", () => {
     const mockExit = vi.spyOn(process, "exit").mockImplementation((() => {
       throw new Error("process.exit");
     }) as never);
-    const { default: logger } = await import("@/lib/logger");
-
     vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
-    await expect(di.init()).rejects.toThrow("process.exit");
+    expect(() => buildEnsDbConfigFromEnvironment(process.env)).toThrow("process.exit");
 
     expect(logger.error).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(1);
