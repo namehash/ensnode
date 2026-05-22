@@ -66,27 +66,25 @@ describe("labelByLabelHash", () => {
     ).toBeNull();
   });
 
-  it("normalizes a 63-char hex labelHash by prepending '0' and heals it", async () => {
+  it("returns null when ENSRainbow heals to a label that does not hash back to the labelHash", async () => {
+    // Poisoned rainbow record: the on-chain label is `"007"` (with quotes), whose labelhash is
+    // 0x00677002…, but a CSV-mangled label set heals it to `007` (quotes stripped). `007` hashes to
+    // a different labelHash, so the heal must be rejected and treated as unhealable (null).
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
+
     (fetch as any).mockResolvedValue({
       ok: true,
       json: () =>
         Promise.resolve({
           status: "success",
-          label: "vitalik",
+          label: "007", // keccak256("007") !== 0x00677002…
         }),
     });
 
     expect(
-      await labelByLabelHash(
-        "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103c" as LabelHash, // 63 hex chars
-      ),
-    ).toEqual("vitalik");
-
-    const [[calledUrl]] = (fetch as any).mock.calls;
-    // Verify the client prepended a '0' — the normalized 64-char hash is used in the request
-    expect(calledUrl.toString()).toContain(
-      "0x0af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103c",
-    );
+      await labelByLabelHash("0x00677002a68cb48598b0a3fec5d666ecb3641db6efd494d01ca33eb0b05e98ed"),
+    ).toBeNull();
+    expect(errorSpy).toHaveBeenCalledTimes(1);
   });
 
   it("propagates a server 400 error as a thrown exception", async () => {
@@ -115,29 +113,6 @@ describe("labelByLabelHash", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("normalizes a labelHash with uppercase chars and heals it", async () => {
-    (fetch as any).mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          status: "success",
-          label: "nick",
-        }),
-    });
-
-    // Use a hash distinct from other tests to avoid LRU cache hits suppressing the fetch call
-    expect(
-      await labelByLabelHash(
-        "0x5D5727cb0fb76e4944eafb88ec9a3cf0b3c9025a4b2f947729137c5d7f84f68f" as LabelHash,
-      ),
-    ).toEqual("nick");
-
-    const [[calledUrl]] = (fetch as any).mock.calls;
-    expect(calledUrl.toString()).toContain(
-      "0x5d5727cb0fb76e4944eafb88ec9a3cf0b3c9025a4b2f947729137c5d7f84f68f",
-    );
-  });
-
   it("throws an error for an invalid labelHash missing 0x prefix and too long", async () => {
     // Validation happens client-side; fetch is never called
     await expect(
@@ -164,14 +139,15 @@ describe("labelByLabelHash", () => {
         .mockRejectedValueOnce(new Error("network error"))
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "nick" }),
+          json: () => Promise.resolve({ status: "success", label: "networkretry" }),
         });
 
+      // labelhash("networkretry"); the healed label must hash back to the requested labelHash
       const result = await labelByLabelHash(
-        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as LabelHash,
+        "0x5add779c9f3879ab11b8986aad4918f53c74eadffd021e9e69190adfc209b602" as LabelHash,
       );
 
-      expect(result).toEqual("nick");
+      expect(result).toEqual("networkretry");
       expect(fetch).toHaveBeenCalledTimes(3);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     });
@@ -187,14 +163,15 @@ describe("labelByLabelHash", () => {
         })
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "vitalik" }),
+          json: () => Promise.resolve({ status: "success", label: "servererror" }),
         });
 
+      // labelhash("servererror"); the healed label must hash back to the requested labelHash
       const result = await labelByLabelHash(
-        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as LabelHash,
+        "0x2ff233f09c5c35615c73fbcc0961cce9d3399164381467a5a9839f6434d286c3" as LabelHash,
       );
 
-      expect(result).toEqual("vitalik");
+      expect(result).toEqual("servererror");
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(warnSpy).toHaveBeenCalledTimes(1);
     });
