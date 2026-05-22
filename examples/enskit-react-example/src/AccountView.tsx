@@ -1,10 +1,5 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import {
-  beautifyInterpretedName,
-  isNormalizedAddress,
-  type NormalizedAddress,
-  toNormalizedAddress,
-} from "enssdk";
+import { isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
@@ -15,9 +10,7 @@ const AccountDomainsQuery = graphql(`
       domains(first: $first, after: $after) {
         totalCount
         edges {
-          # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-          # node { __typename id canonical { name { interpreted } } }
-          node { __typename id  name }
+          node { __typename id canonical { name { beautified } } }
         }
         pageInfo { hasNextPage endCursor }
       }
@@ -62,15 +55,10 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
           <ul>
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
-                {/*
-                TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
                 {edge.node.canonical ? (
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
-                */}
-                {edge.node.name ? (
-                  <Link to={`/domain/${edge.node.name}`}>
-                    {beautifyInterpretedName(edge.node.name)}
+                  // link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved
+                  <Link to={`/domain/id/${edge.node.id}`}>
+                    {edge.node.canonical.name.beautified}
                   </Link>
                 ) : (
                   <em>non-canonical domain</em>

@@ -4,7 +4,6 @@ import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssd
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
@@ -33,8 +32,9 @@ builder.queryType({
       allDomains: t.connection({
         description: "n/a, dev method",
         type: DomainInterfaceRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.domain),
             connection: () =>
               resolveCursorConnection(
@@ -47,7 +47,8 @@ builder.queryType({
                     with: { label: true },
                   }),
               ),
-          }),
+          });
+        },
       }),
 
       /////////////////////////////
@@ -56,8 +57,9 @@ builder.queryType({
       resolvers: t.connection({
         description: "n/a, dev method",
         type: ResolverRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.resolver),
             connection: () =>
               resolveCursorConnection(
@@ -70,7 +72,8 @@ builder.queryType({
                     .orderBy(orderPaginationBy(ensIndexerSchema.resolver.id, inverted))
                     .limit(limit),
               ),
-          }),
+          });
+        },
       }),
 
       /////////////////////////////////
@@ -79,8 +82,9 @@ builder.queryType({
       registrations: t.connection({
         description: "n/a, dev method",
         type: RegistrationInterfaceRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.registration),
             connection: () =>
               resolveCursorConnection(
@@ -93,7 +97,8 @@ builder.queryType({
                     .orderBy(orderPaginationBy(ensIndexerSchema.registration.id, inverted))
                     .limit(limit),
               ),
-          }),
+          });
+        },
       }),
     }),
 

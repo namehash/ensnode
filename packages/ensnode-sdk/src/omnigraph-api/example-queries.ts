@@ -3,28 +3,28 @@ import { asInterpretedName, toNormalizedAddress } from "enssdk";
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 import { accounts } from "@ensnode/datasources/devnet";
 
-import { maybeGetDatasourceContract } from "../shared/datasource-contract";
+import { getDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
-const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
+const SEPOLIA_V2_V2_ETH_REGISTRY = getDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
   DatasourceNames.ENSv2Root,
   "ETHRegistry",
 );
 
-const SEPOLIA_V2_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
+const SEPOLIA_V2_V2_ETH_REGISTRAR = getDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
   DatasourceNames.ENSv2Root,
   "ETHRegistrar",
 );
 
-const ENS_TEST_ENV_V2_ETH_REGISTRY = maybeGetDatasourceContract(
+const ENS_TEST_ENV_V2_ETH_REGISTRY = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
   DatasourceNames.ENSv2Root,
   "ETHRegistry",
 );
 
-const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
+const ENS_TEST_ENV_V2_ETH_REGISTRAR = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
   DatasourceNames.ENSv2Root,
   "ETHRegistrar",
@@ -44,6 +44,18 @@ const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("demomigration.eth");
 
 const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
+
+const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
+  ENSNamespaceIds.Mainnet,
+  DatasourceNames.ReverseResolverRoot,
+  "DefaultPublicResolver5",
+);
+
+const SEPOLIA_V2_PUBLIC_RESOLVER = getDatasourceContract(
+  ENSNamespaceIds.SepoliaV2,
+  DatasourceNames.ReverseResolverRoot,
+  "DefaultPublicResolver5",
+);
 
 export type GraphqlApiExampleQuery = {
   id: string;
@@ -74,7 +86,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  domain(by: { name: "eth" }) { canonical { name { interpreted } } owner { address } }
+  domain(by: { name: "eth" }) { canonical { name { interpreted beautified } } owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -99,7 +111,7 @@ query FindDomains(
         __typename
         id
         label { interpreted hash }
-        canonical { name { interpreted } }
+        canonical { name { interpreted beautified } }
 
         registration { expiry event { timestamp } }
       }
@@ -145,6 +157,52 @@ query DomainByName($name: InterpretedName!) {
     },
   },
 
+  ///////////////////////
+  // Domain Registration
+  ///////////////////////
+  {
+    id: "domain-registration",
+    query: `
+query DomainRegistration($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    canonical { name { interpreted } }
+
+    registration {
+      __typename
+      id
+      start
+      expiry
+      expired
+      referrer
+      registrar { chainId address }
+      registrant { address }
+      renewals(first: 5) {
+        totalCount
+        edges { node { duration base premium referrer } }
+      }
+
+      # ENSv1 .eth registrations (also Basenames & Lineanames)
+      ... on BaseRegistrarRegistration {
+        baseCost
+        premium
+        isInGracePeriod
+        # present when the .eth name is wrapped by the NameWrapper
+        wrapped { fuses tokenId }
+      }
+
+      # names held natively in the NameWrapper
+      ... on NameWrapperRegistration {
+        fuses
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "vitalik.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER },
+    },
+  },
+
   //////////////////////
   // Domain Subdomains
   //////////////////////
@@ -153,9 +211,35 @@ query DomainByName($name: InterpretedName!) {
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
-    canonical { name { interpreted } }
+    canonical { name { interpreted beautified } }
     subdomains(first: 10) {
       edges {
+        node {
+          canonical { name { interpreted beautified } }
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: "eth" } },
+  },
+
+  ////////////////////////
+  // Subdomains Pagination
+  ////////////////////////
+  {
+    id: "subdomains-pagination",
+    query: `
+query SubdomainsPagination($first: Int!, $after: String) {
+  domain(by: { name: "eth" }) {
+    canonical { name { interpreted } }
+
+    # paginate child names: pass pageInfo.endCursor back as $after for the next page
+    subdomains(first: $first, after: $after) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges {
+        cursor
         node {
           canonical { name { interpreted } }
         }
@@ -163,7 +247,7 @@ query DomainSubdomains($name: InterpretedName!) {
     }
   }
 }`,
-    variables: { default: { name: "eth" } },
+    variables: { default: { first: 10, after: null } },
   },
 
   /////////////////
@@ -209,7 +293,7 @@ query AccountDomains(
       edges {
         node {
           label { interpreted }
-          canonical { name { interpreted } }
+          canonical { name { interpreted beautified } }
         }
       }
     }
@@ -256,7 +340,7 @@ query RegistryDomains(
       edges {
         node {
           label { interpreted }
-          canonical { name { interpreted } }
+          canonical { name { interpreted beautified } }
         }
       }
     }
@@ -382,6 +466,39 @@ query DomainResolver($name: InterpretedName!) {
     },
   },
 
+  ////////////////////////
+  // Resolver By Address
+  ////////////////////////
+  {
+    id: "resolver-by-address",
+    query: `
+query ResolverByAddress($contract: AccountIdInput!) {
+  resolver(by: { contract: $contract }) {
+    id
+    contract { chainId address }
+
+    # records this resolver stores, keyed by node
+    records(first: 5) {
+      totalCount
+      edges {
+        node {
+          node
+          name
+          keys
+          coinTypes
+        }
+      }
+    }
+
+    events { totalCount edges { node { topics data timestamp } } }
+  }
+}`,
+    variables: {
+      default: { contract: MAINNET_PUBLIC_RESOLVER },
+      [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_PUBLIC_RESOLVER },
+    },
+  },
+
   //////////////
   // Namegraph
   //////////////
@@ -394,17 +511,17 @@ query Namegraph {
     domains {
       edges {
         node {
-          canonical { name { interpreted } }
+          canonical { name { interpreted beautified } }
 
           subdomains {
             edges {
               node {
-                canonical { name { interpreted } }
+                canonical { name { interpreted beautified } }
 
                 subdomains {
                   edges {
                     node {
-                      canonical { name { interpreted } }
+                      canonical { name { interpreted beautified } }
                     }
                   }
                 }

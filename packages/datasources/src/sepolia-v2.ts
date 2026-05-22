@@ -72,8 +72,8 @@ export default {
       },
       UniversalResolverV2: {
         abi: UniversalResolverV2,
-        address: "0xf9c120ad88e5512437ae9518f6c86145318531de",
-        startBlock: 10770794,
+        address: "0xfef81312438b7e578ee94bf0e8fa5c2547653d7c",
+        startBlock: 10887910,
       },
     },
   },
@@ -82,23 +82,23 @@ export default {
     chain: sepoliaV2Chain,
     contracts: {
       // factory-pattern entries: start at the earliest deploy block of any ENSv2 contract (RootRegistry)
-      Resolver: { abi: ResolverABI, startBlock: 10770774 },
-      Registry: { abi: Registry, startBlock: 10770774 },
-      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 10770774 },
+      Resolver: { abi: ResolverABI, startBlock: 10887910 },
+      Registry: { abi: Registry, startBlock: 10887910 },
+      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 10887910 },
       RootRegistry: {
         abi: Registry,
-        address: "0xfd43dc00ab0d0e247a2827d15dddfc5bd9646a29",
-        startBlock: 10770774,
+        address: "0x078a7ae41974a74c62233bca5590c86218aa1f1e",
+        startBlock: 10887910,
       },
       ETHRegistry: {
         abi: Registry,
-        address: "0x31a2bb5d933557cce1b3129993193896d074db92",
-        startBlock: 10770777,
+        address: "0xc328a01a4800fb52ec5a6ab4190356962ab719e5",
+        startBlock: 10887910,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0x26e5e80e8f36607ef401443fb34eea363c86e8f7",
-        startBlock: 10770785,
+        address: "0xd859dac731dab4aecddb154b639d868dc951da62",
+        startBlock: 10887910,
       },
     },
   },

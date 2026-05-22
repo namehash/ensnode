@@ -3,7 +3,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, ilike, inArray, type SQL, sql } from "drizzle-orm";
 import type { NormalizedAddress, RegistryId } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import type { context as createContext } from "@/omnigraph-api/context";
@@ -53,7 +53,7 @@ export interface DomainsWhere {
 
 const VERSION_TO_DOMAIN_TYPE: Record<
   typeof ENSProtocolVersion.$inferType,
-  (typeof ensIndexerSchema.domainType.enumValues)[number]
+  (typeof di.context.ensIndexerSchema.domainType.enumValues)[number]
 > = {
   ENSv1: "ENSv1Domain",
   ENSv2: "ENSv2Domain",
@@ -63,6 +63,7 @@ const VERSION_TO_DOMAIN_TYPE: Record<
  * Build the SQL condition for `where.name`.
  */
 function nameCondition(filter: typeof DomainsNameFilter.$inferInput): SQL {
+  const { ensIndexerSchema } = di.context;
   if (filter.starts_with) {
     return ilike(ensIndexerSchema.domain.canonicalName, `${filter.starts_with}%`);
   }
@@ -122,6 +123,8 @@ export function resolveFindDomains(
   const needsRegistrationJoin =
     orderBy === "REGISTRATION_TIMESTAMP" || orderBy === "REGISTRATION_EXPIRY";
 
+  const { ensIndexerSchema } = di.context;
+
   const filterConditions = and(
     // by ownerId
     where?.ownerId ? eq(ensIndexerSchema.domain.ownerId, where.ownerId) : undefined,
@@ -142,6 +145,7 @@ export function resolveFindDomains(
   return lazyConnection({
     totalCount: () =>
       withActiveSpanAsync(tracer, "find-domains.totalCount", {}, async () => {
+        const { ensDb } = di.context;
         const rows = await ensDb
           .select({ count: count() })
           .from(ensIndexerSchema.domain)
@@ -184,6 +188,7 @@ export function resolveFindDomains(
             }
           })();
 
+          const { ensDb } = di.context;
           let query = ensDb
             .select({
               id: ensIndexerSchema.domain.id,

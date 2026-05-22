@@ -2,7 +2,7 @@ import type { ChainId } from "enssdk";
 import { createPublicClient, fallback, http, type PublicClient } from "viem";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
-import type { EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
+import { type EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
@@ -15,9 +15,8 @@ import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
 import { stackInfoCache } from "@/cache/stack-info.cache";
 import type { EnsApiConfig } from "@/config/config.schema";
 import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
-import ensDbConfig from "@/config/ensdb-config";
+import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("di");
@@ -106,13 +105,18 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get ensDbConfig(): EnsDbConfig {
       if (instances.ensDbConfig === undefined) {
-        instances.ensDbConfig = ensDbConfig;
+        instances.ensDbConfig = buildEnsDbConfigFromEnvironment(ensApiEnvironment);
       }
       return instances.ensDbConfig;
     },
 
     get ensDbClient(): EnsDbReader {
-      return ensDbClient;
+      if (instances.ensDbClient === undefined) {
+        const { ensDbUrl, ensIndexerSchemaName } = context.ensDbConfig;
+        instances.ensDbClient = new EnsDbReader(ensDbUrl, ensIndexerSchemaName);
+      }
+
+      return instances.ensDbClient;
     },
 
     get ensDb(): EnsDbReader["ensDb"] {
@@ -240,9 +244,10 @@ class EnsApiDiContainer {
 
   /**
    * Initializes the DI container by loading the context and initializing
-   * necessary resources.
+   * necessary resources that need to be evaluated eagerly, such as
+   * ENSDb client, caches, RPC client for the ENS Root Chain, etc.
    */
-  init(): void {
+  async init(): Promise<void> {
     if (this._context) {
       throw new Error(
         "DI context has already been initialized. If you want to re-initialize, call `di.destroy()` first to clean up resources.",
@@ -252,19 +257,67 @@ class EnsApiDiContainer {
     // Load the DI context
     this.loadContext();
 
-    logger.info("Initializing caches");
-    void Promise.all([
-      this.context.indexingStatusCache.read(),
-      this.context.stackInfoCache.read(),
-      this.context.referralProgramEditionConfigSetCache.read(),
-    ]).then(() => logger.info("Caches initialized"));
+    try {
+      // Initialize the ENSDb client and verify connectivity to the database.
+      logger.info("Initializing ENSDb client and verifying connectivity to ENSDb");
+      const isEnsDbHealthy = await this.context.ensDbClient.isHealthy();
+
+      if (!isEnsDbHealthy) {
+        throw new Error("ENSDb health check failed");
+      }
+
+      logger.info(
+        { ensIndexerSchemaName: this.context.ensDbConfig.ensIndexerSchemaName },
+        "Successfully connected to ENSDb",
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(
+        `DI container initialization failed: could not connect to ENSDb due to ${errorMessage}`,
+      );
+    }
+
+    try {
+      // Initialize caches
+      logger.info("Initializing caches");
+      const [indexingStatus, stackInfo, referralProgramEditionConfigSet] = await Promise.all([
+        this.context.indexingStatusCache.read(),
+        this.context.stackInfoCache.read(),
+        this.context.referralProgramEditionConfigSetCache.read(),
+      ]);
+      logger.info(
+        { indexingStatus, stackInfo, referralProgramEditionConfigSet },
+        "Caches initialized",
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(
+        `DI container initialization failed: cache initialization error due to ${errorMessage}`,
+      );
+    }
+
+    // Initialize the RPC client for the ENS Root Chain by making a simple call to
+    // verify connectivity.
+    try {
+      logger.info("Initializing RPC client for the ENS Root Chain");
+      await this.context.rootChainPublicClient.getBlockNumber();
+      logger.info(
+        { rootChainId: this.context.rootChainId },
+        "Successfully connected to the ENS Root Chain RPC",
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(
+        `DI container initialization failed: could not connect to ENS Root Chain RPC due to ${errorMessage}`,
+      );
+    }
   }
 
   /**
    * Destroys any resources held by the DI container, such as caches, to
    * allow for clean shutdown or re-initialization.
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     if (!this._context) {
       logger.warn(
         "DI context is not loaded, so there are no resources to destroy. If you are trying to reload the context, call `di.init()` to load the context and initialize necessary resources.",
@@ -278,6 +331,10 @@ class EnsApiDiContainer {
     this.context.indexingStatusCache.destroy();
     this.context.referralProgramEditionConfigSetCache.destroy();
     logger.info("Caches destroyed");
+
+    // Destroy the ENSDb client to close the connection pool to ENSDb
+    await this.context.ensDbClient.destroy();
+    logger.info("ENSDb client destroyed");
 
     this._context = undefined;
   }

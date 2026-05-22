@@ -1,20 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ensApiVersionInfo } from "@/lib/version-info";
-
-vi.mock("@/lib/ensdb/singleton", () => ({
-  ensDbClient: {
-    getIndexingMetadataContext: vi.fn(async () => indexingMetadataContextInitialized),
-  },
-}));
-
-vi.mock("@/config/ensdb-config", () => ({
-  default: {
-    ensDbUrl: "postgresql://user:password@localhost:5432/mydb",
-    ensIndexerSchemaName: "ensindexer_0",
-  },
-}));
-
 import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
 
 import {
@@ -25,6 +10,7 @@ import {
 import { BASE_ENV, indexingMetadataContextInitialized } from "@/config/config.schema.mock";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import logger from "@/lib/logger";
+import { ensApiVersionInfo } from "@/lib/version-info";
 
 vi.mock("@/lib/logger", () => ({
   default: {

@@ -5,7 +5,7 @@ import type { DomainId } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { builder } from "@/omnigraph-api/builder";
 import {
@@ -48,12 +48,13 @@ const tracer = trace.getTracer("schema/Domain");
 
 export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
   load: (ids: DomainId[]) =>
-    withSpanAsync(tracer, "Domain.load", { count: ids.length }, () =>
-      ensDb.query.domain.findMany({
+    withSpanAsync(tracer, "Domain.load", { count: ids.length }, () => {
+      const { ensDb } = di.context;
+      return ensDb.query.domain.findMany({
         where: (t, { inArray }) => inArray(t.id, ids),
         with: { label: true },
-      }),
-    ),
+      });
+    }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -183,6 +184,7 @@ DomainInterfaceRef.implement({
       description: "All Registrations for a Domain, including the latest Registration.",
       type: RegistrationInterfaceRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.registration.domainId, parent.id);
 
         return lazyConnection({
@@ -244,13 +246,15 @@ DomainInterfaceRef.implement({
       args: {
         where: t.arg({ type: EventsWhereInput }),
       },
-      resolve: (parent, args) =>
-        resolveFindEvents(args, {
+      resolve: (parent, args) => {
+        const { ensIndexerSchema } = di.context;
+        return resolveFindEvents(args, {
           through: {
             table: ensIndexerSchema.domainEvent,
             scope: eq(ensIndexerSchema.domainEvent.domainId, parent.id),
           },
-        }),
+        });
+      },
     }),
   }),
 });
@@ -315,6 +319,7 @@ ENSv2DomainRef.implement({
         where: t.arg({ type: DomainPermissionsWhereInput }),
       },
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const userScope = (() => {
           const user = args.where?.user;
           if (!user) return undefined;
