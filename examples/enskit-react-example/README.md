@@ -8,14 +8,14 @@ This app is hosted at [https://enskit-react-example.ensnode.io/](https://enskit-
 
 ## Usage (with NameHash Hosted Instance)
 
-> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you **must** use `enskit@1.13.1` and `enssdk@1.13.1`. The latest published versions (`1.14.0+`) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. This notice will be removed once the hosted instances are upgraded.
+> **Schema version:** This example tracks the latest Omnigraph schema (ENSNode 1.14.x) via `workspace:*` `enskit`/`enssdk`. It connects to the `blue` hosted deployment, which runs 1.14.x; the default (non-`blue`) hosted instances still serve an older schema that wouldn't satisfy these queries. If you query a hosted instance from your own app, match its ENSNode version with the same `enskit`/`enssdk` version.
 
 ```sh
 # from the ENSNode monorepo root
 pnpm install
 
 # set the VITE_ENSNODE_URL to a NameHash Hosted Instance and run this example in dev mode
-VITE_ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F enskit-react-example dev
+VITE_ENSNODE_URL=https://api.v2-sepolia.blue.ensnode.io pnpm -F enskit-react-example dev
 ```
 
 ## Usage (with Local ENSNode)

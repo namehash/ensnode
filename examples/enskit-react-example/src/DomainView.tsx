@@ -13,9 +13,8 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-    # canonical { name { interpreted } }
-    name
+    # a Domain's Canonical Name; null when the Domain is not in the canonical nametree
+    canonical { name { beautified } }
     owner { id address }
   }
 `);
@@ -28,9 +27,7 @@ const DomainByQuery = graphql(
   query DomainBy($by: DomainIdInput!, $first: Int!, $after: String) {
     domain(by: $by) {
       ...DomainFragment
-      # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-      # parent { id canonical { name { interpreted } } }
-      parent { id name }
+      parent { id canonical { name { beautified } } }
       subdomains(first: $first, after: $after) {
         edges {
           node {
@@ -84,9 +81,9 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
 
   return (
     <li>
-      {domain.name ? (
+      {domain.canonical ? (
         // link by DomainId so the exact Domain (and its ENSv1/ENSv2 variant) is preserved
-        <Link to={`/domain/id/${domain.id}`}>{beautifyInterpretedName(domain.name)}</Link>
+        <Link to={`/domain/id/${domain.id}`}>{domain.canonical.name.beautified}</Link>
       ) : (
         <em>non-canonical domain</em>
       )}{" "}
@@ -124,11 +121,7 @@ function RenderDomain({ by }: { by: DomainBy }) {
 
   return (
     <div>
-      {/*
-      TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-      <h2>{beautifyInterpretedName(domain.canonical?.name.interpreted ?? domain.id)}</h2>
-      */}
-      <h2>{domain.name ? beautifyInterpretedName(domain.name) : domain.id}</h2>
+      <h2>{domain.canonical ? domain.canonical.name.beautified : domain.id}</h2>
       <p>
         Owner:{" "}
         {domain.owner ? (
@@ -141,17 +134,9 @@ function RenderDomain({ by }: { by: DomainBy }) {
       </p>
       <p>Version: {domain.__typename}</p>
 
-      {/*
-      TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
       {data.domain.parent?.canonical && (
         <Link to={`/domain/id/${data.domain.parent.id}`}>
-          ← {beautifyInterpretedName(data.domain.parent.canonical.name.interpreted)}
-        </Link>
-      )}
-       */}
-      {data.domain.parent?.name && (
-        <Link to={`/domain/id/${data.domain.parent.id}`}>
-          ← {beautifyInterpretedName(data.domain.parent.name)}
+          ← {data.domain.parent.canonical.name.beautified}
         </Link>
       )}
 

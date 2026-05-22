@@ -13,7 +13,10 @@ const EXAMPLE_ACCOUNT_ADDRESS = "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574";
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
+//
+// NOTE: we point at the `blue` deployment, which runs ENSNode 1.14.x — the version this example's
+// queries target. The non-`blue` v2-sepolia instance still serves an older Omnigraph schema.
+const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.blue.ensnode.io";
 
 console.log(`Connecting to ENSNode at ${ENSNODE_URL}`);
 

@@ -1,5 +1,4 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { beautifyInterpretedName } from "enssdk";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
@@ -7,9 +6,7 @@ const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
     domains(where: { name: $name }, first: $first, after: $after) {
       edges {
-        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-        # node { __typename id canonical { name { interpreted } } }
-        node { __typename id name }
+        node { __typename id canonical { name { beautified } } }
       }
       pageInfo {
         hasNextPage
@@ -90,13 +87,13 @@ export function SearchView() {
           {fetching && <p>Loading...</p>}
           <ul>
             {data?.domains?.edges.map((edge) => {
-              if (!edge.node.name) return null;
+              if (!edge.node.canonical) return null;
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
                   {/* link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved */}
                   <Link to={`/domain/id/${edge.node.id}`}>
-                    {beautifyInterpretedName(edge.node.name)}
+                    {edge.node.canonical.name.beautified}
                   </Link>
                 </li>
               );
