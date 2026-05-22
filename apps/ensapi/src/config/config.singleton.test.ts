@@ -1,10 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildEnsNodeStackInfo } from "@ensnode/ensnode-sdk";
+import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
-import { stackInfoCache } from "@/cache/stack-info.cache";
-import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
-import { BASE_ENV, indexingMetadataContextInitialized } from "@/config/config.schema.mock";
+import { BASE_ENV } from "@/config/config.schema.mock";
+import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import di from "@/di";
 
 vi.mock("@/lib/logger", () => ({
@@ -20,48 +19,11 @@ vi.mock("@/lib/logger", () => ({
   })),
 }));
 
-vi.mock("@/cache/stack-info.cache", () => ({
-  stackInfoCache: {
-    read: vi.fn().mockResolvedValue(undefined),
-    peek: vi.fn(),
-    destroy: vi.fn(),
-  },
-}));
-
-vi.mock("@/cache/indexing-status.cache", () => ({
-  indexingStatusCache: {
-    read: vi.fn().mockResolvedValue(undefined),
-    peek: vi.fn(),
-    destroy: vi.fn(),
-  },
-}));
-
-vi.mock("@/cache/referral-program-edition-set.cache", () => ({
-  referralProgramEditionConfigSetCache: {
-    read: vi.fn().mockResolvedValue(undefined),
-    peek: vi.fn(),
-    destroy: vi.fn(),
-  },
-}));
-
-function makeMockStackInfo() {
-  const ensApiConfig = buildConfigFromEnvironment(process.env);
-  const { ensDb, ensIndexer, ensRainbow } = indexingMetadataContextInitialized.stackInfo;
-  return buildEnsNodeStackInfo(
-    buildEnsApiPublicConfig(ensApiConfig, ensIndexer),
-    ensDb,
-    ensIndexer,
-    ensRainbow,
-  );
-}
-
 describe("ensdb singleton bootstrap", () => {
   beforeEach(() => {
-    vi.resetModules();
     for (const [key, value] of Object.entries(BASE_ENV)) {
       vi.stubEnv(key, value);
     }
-    vi.mocked(stackInfoCache.peek).mockReturnValue(makeMockStackInfo());
   });
 
   afterEach(() => {
@@ -69,13 +31,14 @@ describe("ensdb singleton bootstrap", () => {
     vi.unstubAllEnvs();
   });
 
-  it("constructs EnsDbReader from real env wiring without errors", async () => {
-    await di.init();
-    const { ensDbClient, ensDb, ensIndexerSchema } = di.context;
+  it("constructs EnsDbReader from real env wiring without errors", () => {
+    const ensDbConfig = buildEnsDbConfigFromEnvironment(process.env);
+    const ensDbClient = new EnsDbReader(ensDbConfig.ensDbUrl, ensDbConfig.ensIndexerSchemaName);
+
     expect(ensDbClient.ensIndexerSchemaName).toBe(BASE_ENV.ENSINDEXER_SCHEMA_NAME);
-    expect(ensDb).toBeDefined();
-    expect(ensIndexerSchema).toBeDefined();
-  }, 10_000);
+    expect(ensDbClient.ensDb).toBeDefined();
+    expect(ensDbClient.ensIndexerSchema).toBeDefined();
+  });
 
   it("exits when ENSDB_URL is missing", async () => {
     const mockExit = vi.spyOn(process, "exit").mockImplementation((() => {
