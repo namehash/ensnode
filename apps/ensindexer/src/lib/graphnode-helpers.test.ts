@@ -1,4 +1,4 @@
-import type { LabelHash } from "enssdk";
+import { asLiteralLabel, type LabelHash, labelhashLiteralLabel } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setupConfigMock, setupEnsDbConfigMock } from "@/lib/__test__/mockConfig";
@@ -67,23 +67,24 @@ describe("labelByLabelHash", () => {
   });
 
   it("returns null when ENSRainbow heals to a label that does not hash back to the labelHash", async () => {
-    // Poisoned rainbow record: the on-chain label is `"007"` (with quotes), whose labelhash is
-    // 0x00677002…, but a CSV-mangled label set heals it to `007` (quotes stripped). `007` hashes to
-    // a different labelHash, so the heal must be rejected and treated as unhealable (null).
+    // Malformed rainbow record: the on-chain label is `"007"` (quotes included), but a CSV-mangled
+    // label set heals it to `007` (quotes stripped), which hashes to a different labelHash. The heal
+    // must be rejected and treated as unhealable (null).
     const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
+
+    // the labelHash of the real on-chain label `"007"` (quotes included)
+    const labelHash = labelhashLiteralLabel(asLiteralLabel('"007"'));
 
     (fetch as any).mockResolvedValue({
       ok: true,
       json: () =>
         Promise.resolve({
           status: "success",
-          label: "007", // keccak256("007") !== 0x00677002…
+          label: "007", // quote-stripped; does not hash back to labelHash
         }),
     });
 
-    expect(
-      await labelByLabelHash("0x00677002a68cb48598b0a3fec5d666ecb3641db6efd494d01ca33eb0b05e98ed"),
-    ).toBeNull();
+    expect(await labelByLabelHash(labelHash)).toBeNull();
     expect(errorSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -139,15 +140,13 @@ describe("labelByLabelHash", () => {
         .mockRejectedValueOnce(new Error("network error"))
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "networkretry" }),
+          json: () => Promise.resolve({ status: "success", label: "nick" }),
         });
 
-      // labelhash("networkretry"); the healed label must hash back to the requested labelHash
-      const result = await labelByLabelHash(
-        "0x5add779c9f3879ab11b8986aad4918f53c74eadffd021e9e69190adfc209b602" as LabelHash,
-      );
+      // healed label must hash back to the requested labelHash, so derive it from "nick"
+      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("nick")));
 
-      expect(result).toEqual("networkretry");
+      expect(result).toEqual("nick");
       expect(fetch).toHaveBeenCalledTimes(3);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     });
@@ -163,15 +162,13 @@ describe("labelByLabelHash", () => {
         })
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "servererror" }),
+          json: () => Promise.resolve({ status: "success", label: "alice" }),
         });
 
-      // labelhash("servererror"); the healed label must hash back to the requested labelHash
-      const result = await labelByLabelHash(
-        "0x2ff233f09c5c35615c73fbcc0961cce9d3399164381467a5a9839f6434d286c3" as LabelHash,
-      );
+      // healed label must hash back to the requested labelHash, so derive it from "alice"
+      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("alice")));
 
-      expect(result).toEqual("servererror");
+      expect(result).toEqual("alice");
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(warnSpy).toHaveBeenCalledTimes(1);
     });
