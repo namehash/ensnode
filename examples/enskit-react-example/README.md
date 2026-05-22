@@ -8,7 +8,7 @@ This app is hosted at [https://enskit-react-example.ensnode.io/](https://enskit-
 
 ## Usage (with NameHash Hosted Instance)
 
-> **Schema version:** This example tracks the latest Omnigraph schema (ENSNode 1.14.x) via `workspace:*` `enskit`/`enssdk`. It connects to the `blue` hosted deployment, which runs 1.14.x; the default (non-`blue`) hosted instances still serve an older schema that wouldn't satisfy these queries. If you query a hosted instance from your own app, match its ENSNode version with the same `enskit`/`enssdk` version.
+> **Schema version:** This example tracks the latest Omnigraph schema (ENSNode 1.14.x). It connects to the `blue` hosted deployment by default, which runs `1.14.x`; the production hosted instances still serve an older schema (`1.13.x`) that wouldn't satisfy these queries. If you query a hosted instance from your own app, match its ENSNode version with the same `enskit`/`enssdk` version.
 
 ```sh
 # from the ENSNode monorepo root

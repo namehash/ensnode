@@ -4,8 +4,7 @@ import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigr
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-// biome-ignore lint/style/noNonNullAssertion: invariant
-const ENSNODE_URL = process.env.ENSNODE_URL!;
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.blue.ensnode.io";
 
 // create and extend an EnsNodeClient with Omnigraph support
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
@@ -13,7 +12,6 @@ const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
-    # a Domain's Canonical Name; null when the Domain is not in the canonical nametree
     canonical { name { beautified } }
     owner { address }
   }

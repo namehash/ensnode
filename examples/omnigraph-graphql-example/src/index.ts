@@ -1,7 +1,6 @@
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-// biome-ignore lint/style/noNonNullAssertion: invariant
-const ENSNODE_URL = process.env.ENSNODE_URL!;
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.blue.ensnode.io";
 
 // The Omnigraph is a standard GraphQL API following the Relay spec.
 // You can use any GraphQL client — here we just use `fetch`.
@@ -9,7 +8,6 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      # a Domain's Canonical Name; null when the Domain is not in the canonical nametree
       canonical { name { beautified } }
       owner { address }
       subdomains(first: 20) {
@@ -42,7 +40,7 @@ interface QueryResult {
 
 function formatDomain(domain: Domain): string {
   const name = domain.canonical?.name.beautified ?? "<unnamed>";
-  const owner = domain.owner?.address ?? "0x0";
+  const owner = domain.owner?.address ?? "0x0 (means reserved for ENSv2)";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
 

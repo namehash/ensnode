@@ -4,7 +4,7 @@ import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: $name }, first: $first, after: $after) {
+    domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
       edges {
         node { __typename id canonical { name { beautified } } }
       }
