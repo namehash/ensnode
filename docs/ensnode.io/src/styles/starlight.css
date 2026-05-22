@@ -309,10 +309,11 @@ a[rel="prev"]:hover {
 
 /* Only apply hover effects to: 
 * * non-selected items 
-* * not open expandable items (counterpart of non-selected for normal items) 
+* * not expandable items (in all states)
 */
 #starlight__sidebar a:not([aria-current="page"]):hover,
-#starlight__sidebar details:not([open]):hover {
+#starlight__sidebar details details > summary:hover,
+#starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
   transform: translateX(2px);
   border-radius: 6px;
@@ -321,11 +322,19 @@ a[rel="prev"]:hover {
 /** Additional styling required for the
  * expandable items in the sidebar
  */
-#starlight__sidebar details:not([open]) {
+#starlight__sidebar details details > summary:hover {
   transition: all 0.2s ease-in-out;
   color: var(--sl-color-gray-2);
   &:hover,
   &:hover span {
+    color: var(--sl-color-white);
+  }
+}
+
+#starlight__sidebar details > summary:hover {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
     color: var(--sl-color-white);
   }
 }
