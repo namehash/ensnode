@@ -73,9 +73,11 @@ describe("labelByLabelHash", () => {
   });
 
   it("normalizes a 63-char hex labelHash by prepending '0' and heals it", async () => {
-    // labelhash("dan") === 0x0d2095…; dropping its leading '0' yields a 63-char input that the
-    // client re-pads to the full hash, which the healed label "dan" then hashes back to (so the
-    // client's heal-integrity check accepts it).
+    // "dan" is chosen because its labelhash begins with a zero nibble (0x0d2095…). That lets us
+    // build a 63-char input by dropping the leading '0', which the client re-pads back to the full
+    // hash — a hash the healed label "dan" actually hashes to, so the client's heal-integrity check
+    // accepts it. A label whose hash doesn't start with '0' (e.g. "vitalik" → 0xaf2caa…) couldn't
+    // exercise the prepend-'0' path without the re-padded hash diverging from the label's hash.
     (fetch as any).mockResolvedValue({
       ok: true,
       json: () =>
