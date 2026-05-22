@@ -24,9 +24,9 @@ To ensure CI checks pass and the codebase is formatted correctly, run `pnpm lint
 
 Run `pnpm lint` from the monorepo root to apply both. CI runs `pnpm lint:ci` (check-only).
 
-> NOTE (Windows users): After running these steps, you may see many diffs with Contents have differences only in line separators comment.
+> NOTE (Windows users): After running these steps, you may see many diffs marked with Git's "Contents have differences only in line separators" notice.
 >
-> These files won't be included in your commit. For easier self-review either ignore them or (if valid in your case) run the git add --all command. This normalizes line endings and removes those entries from the diff.
+> These files won't be included in your commit. For easier self-review, either ignore them or (if valid in your case) run `git add --all`. This normalizes line endings and removes those entries from the diff.
 
 ## Getting Help
 
