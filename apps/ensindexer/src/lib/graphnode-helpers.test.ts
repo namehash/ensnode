@@ -49,9 +49,9 @@ describe("labelByLabelHash", () => {
         }),
     });
 
-    expect(
-      await labelByLabelHash("0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"),
-    ).toEqual("vitalik");
+    await expect(
+      labelByLabelHash("0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"),
+    ).resolves.toEqual("vitalik");
   });
 
   it("returns null for a valid unknown labelHash", async () => {
@@ -67,9 +67,9 @@ describe("labelByLabelHash", () => {
         }),
     });
 
-    expect(
-      await labelByLabelHash("0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da06"),
-    ).toBeNull();
+    await expect(
+      labelByLabelHash("0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da06"),
+    ).resolves.toBeNull();
   });
 
   it("normalizes a 63-char hex labelHash by prepending '0' and heals it", async () => {
@@ -92,7 +92,7 @@ describe("labelByLabelHash", () => {
         }),
     });
 
-    expect(await labelByLabelHash(labelHash63)).toEqual(DAN_LABEL);
+    await expect(labelByLabelHash(labelHash63)).resolves.toEqual(DAN_LABEL);
 
     const [[calledUrl]] = (fetch as any).mock.calls;
     // Verify the client prepended a '0' — the normalized 64-char hash is used in the request
@@ -136,11 +136,11 @@ describe("labelByLabelHash", () => {
     });
 
     // Use a hash distinct from other tests to avoid LRU cache hits suppressing the fetch call
-    expect(
-      await labelByLabelHash(
+    await expect(
+      labelByLabelHash(
         "0x5D5727cb0fb76e4944eafb88ec9a3cf0b3c9025a4b2f947729137c5d7f84f68f" as LabelHash,
       ),
-    ).toEqual("nick");
+    ).resolves.toEqual("nick");
 
     const [[calledUrl]] = (fetch as any).mock.calls;
     expect(calledUrl.toString()).toContain(
@@ -175,9 +175,7 @@ describe("labelByLabelHash", () => {
           json: () => Promise.resolve({ status: "success", label }),
         });
 
-      const result = await labelByLabelHash(labelhashLiteralLabel(label));
-
-      expect(result).toEqual(label);
+      await expect(labelByLabelHash(labelhashLiteralLabel(label))).resolves.toEqual(label);
       expect(fetch).toHaveBeenCalledTimes(3);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     });
@@ -197,9 +195,7 @@ describe("labelByLabelHash", () => {
           json: () => Promise.resolve({ status: "success", label }),
         });
 
-      const result = await labelByLabelHash(labelhashLiteralLabel(label));
-
-      expect(result).toEqual(label);
+      await expect(labelByLabelHash(labelhashLiteralLabel(label))).resolves.toEqual(label);
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(warnSpy).toHaveBeenCalledTimes(1);
     });
@@ -210,11 +206,11 @@ describe("labelByLabelHash", () => {
         json: () => Promise.resolve({ status: "error", error: "Label not found", errorCode: 404 }),
       });
 
-      const result = await labelByLabelHash(
-        "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" as LabelHash,
-      );
-
-      expect(result).toBeNull();
+      await expect(
+        labelByLabelHash(
+          "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" as LabelHash,
+        ),
+      ).resolves.toBeNull();
       expect(fetch).toHaveBeenCalledTimes(1);
     });
 
