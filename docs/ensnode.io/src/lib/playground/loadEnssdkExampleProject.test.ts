@@ -11,7 +11,6 @@ describe("loadEnssdkExampleProject", () => {
 
     expect(indexSource).toBeDefined();
     expect(indexSource).toContain("HelloWorldQuery");
-    expect(indexSource).not.toContain("process.env.ENSNODE_URL");
 
     expect(Object.keys(project.dependencies).sort()).toEqual(
       Object.keys(enssdkExamplePackageJson.dependencies).sort(),

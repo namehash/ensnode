@@ -1,4 +1,3 @@
-import { ENSNODE_URL } from "./constants";
 import {
   fetchRawExampleProjectFromGlob,
   mergeRawExampleProjects,
@@ -33,11 +32,7 @@ export function loadEnskitExampleProject(): PlaygroundProject {
         fetchRawExampleProjectFromGlob(enskitExampleSourceModules, EXAMPLE_PATH_PREFIX),
         fetchRawExampleProjectFromGlob(enskitExampleRootModules, EXAMPLE_PATH_PREFIX),
       ),
-    envReplacements: [],
     resolvePackageManifest: resolveEnskitExamplePackageManifest,
     buildTsconfig: buildViteReactPlaygroundTsconfig,
-    extraFiles: {
-      ".env": `VITE_ENSNODE_URL=${ENSNODE_URL}\n`,
-    },
   });
 }
