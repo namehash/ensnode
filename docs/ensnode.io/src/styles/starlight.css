@@ -330,19 +330,6 @@ a[rel="prev"]:hover {
   }
 }
 
-/** Add accent color to the expanded item in the sidebar
- * (like we add accent background to the selected item)
- */
-#starlight__sidebar details:is([open]) > summary {
-  & > .group-label span:not(.sl-badge) {
-    color: var(--sl-color-accent);
-  }
-
-  & > svg {
-    fill: var(--sl-color-accent);
-  }
-}
-
 a.starlight-sidebar-topics-current {
   background-color: rgb(0, 128, 188) !important;
   color: white !important;
