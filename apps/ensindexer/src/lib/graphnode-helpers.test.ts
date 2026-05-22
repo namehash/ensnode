@@ -1,4 +1,4 @@
-import { asLiteralLabel, type LabelHash, labelhashLiteralLabel } from "enssdk";
+import { asLiteralLabel, type LabelHash, type LiteralLabel, labelhashLiteralLabel } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setupConfigMock, setupEnsDbConfigMock } from "@/lib/__test__/mockConfig";
@@ -25,6 +25,12 @@ global.fetch = vi.fn();
 import { logger } from "@/lib/logger";
 
 import { labelByLabelHash } from "./graphnode-helpers";
+
+// The client singleton caches healed labels across tests, so any test expecting a fetch must use a
+// labelHash no earlier test has healed. getTestLabel() yields a fresh, unique label on each call;
+// pair it with labelhashLiteralLabel so the healed label hashes back to the requested labelHash.
+let testLabelSequence = 0;
+const getTestLabel = (): LiteralLabel => asLiteralLabel(`test-label-${testLabelSequence++}`);
 
 describe("labelByLabelHash", () => {
   beforeEach(() => {
@@ -156,30 +162,28 @@ describe("labelByLabelHash", () => {
       vi.restoreAllMocks();
     });
 
-    // Use a distinct label per test to prevent LRU cache hits from other tests carrying over
-    // cacheable responses (HealSuccess, HealNotFoundError) and bypassing fetch. The healed label
-    // must hash back to the requested labelHash, so derive the labelHash from the label.
-
     it("retries on network/fetch failure and succeeds on a later attempt", async () => {
       const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
+      const label = getTestLabel();
 
       (fetch as any)
         .mockRejectedValueOnce(new Error("network error"))
         .mockRejectedValueOnce(new Error("network error"))
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "alice" }),
+          json: () => Promise.resolve({ status: "success", label }),
         });
 
-      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("alice")));
+      const result = await labelByLabelHash(labelhashLiteralLabel(label));
 
-      expect(result).toEqual("alice");
+      expect(result).toEqual(label);
       expect(fetch).toHaveBeenCalledTimes(3);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     });
 
     it("retries on HealServerError and succeeds on a later attempt", async () => {
       const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
+      const label = getTestLabel();
 
       (fetch as any)
         .mockResolvedValueOnce({
@@ -189,12 +193,12 @@ describe("labelByLabelHash", () => {
         })
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ status: "success", label: "bob" }),
+          json: () => Promise.resolve({ status: "success", label }),
         });
 
-      const result = await labelByLabelHash(labelhashLiteralLabel(asLiteralLabel("bob")));
+      const result = await labelByLabelHash(labelhashLiteralLabel(label));
 
-      expect(result).toEqual("bob");
+      expect(result).toEqual(label);
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(warnSpy).toHaveBeenCalledTimes(1);
     });
