@@ -5,7 +5,7 @@ description: React toolkit for ENSv2 development, includes fully typed providers
 
 import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
 import WalkthroughV1131 from "@components/walkthroughs/enskit/v1.13.1.mdx";
-import WalkthroughV1141 from "@components/walkthroughs/enskit/v1.14.1.mdx";
+import WalkthroughV1150 from "@components/walkthroughs/enskit/v1.15.0.mdx";
 
 {/*
   Version-locked to the production-deployed Omnigraph schema (see `@data/omnigraph-examples/active`).
@@ -18,8 +18,8 @@ import WalkthroughV1141 from "@components/walkthroughs/enskit/v1.14.1.mdx";
   switch (ACTIVE_OMNIGRAPH_VERSION) {
     case "v1.13.1":
       return <WalkthroughV1131 />;
-    case "v1.14.1":
-      return <WalkthroughV1141 />;
+    case "v1.15.0":
+      return <WalkthroughV1150 />;
     default:
       throw new Error(`No walkthrough partial for Omnigraph version "${ACTIVE_OMNIGRAPH_VERSION}".`);
   }
