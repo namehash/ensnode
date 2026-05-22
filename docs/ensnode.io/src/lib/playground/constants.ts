@@ -5,5 +5,10 @@ import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
 export const DOCS_OMNIGRAPH_NAMESPACE = ENSNamespaceIds.SepoliaV2;
 /** Heading anchor for the docs playground instance (`#### ENSNode 'v2 Sepolia'` on /docs/hosted-instances). */
 export const DOCS_HOSTED_INSTANCE_ANCHOR = "ensnode-v2-sepolia";
-/** Sepolia v2 ENSNode URL — matches the public v2 Sepolia ENSNode URL in docs playgrounds. */
-export const ENSNODE_URL = "https://api.v2-sepolia.ensnode.io";
+/**
+ * Sepolia v2 ENSNode URL injected into the interactive playgrounds. Points at the `blue` deployment,
+ * which runs ENSNode 1.14.x — the schema the enssdk-example / enskit-example sources target. The
+ * non-`blue` v2-sepolia instance still serves the older Omnigraph schema (`canonical` as a boolean),
+ * which wouldn't satisfy these examples' `canonical { name { beautified } }` queries.
+ */
+export const ENSNODE_URL = "https://api.v2-sepolia.blue.ensnode.io";

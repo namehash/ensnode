@@ -17,20 +17,15 @@ The Unigraph plugin has a hard dependency on the **Protocol Acceleration** plugi
 
 Defined in [`unigraph.schema.ts`](https://github.com/namehash/ensnode/blob/main/packages/ensdb-sdk/src/ensindexer-abstract/unigraph.schema.ts).
 
-:::note[Design principles]
-While the initial approach was a highly materialized view of the ENS protocol, abstracting away
-as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
-resolution-time—full materialization of resolution behavior is impractical. The Canonical Nametree,
-however, is materialized inline via synchronous handler-side cascades; see the `canonical*` fields
-on `domains` and `canonicality-db-helpers.ts`.
+## Design Principles
 
-As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
-with the obvious exception of materializing specific state that must be trivially filterable. Then,
+This schema takes a balanced approach to materialization: it mimics on-chain state as closely as
+possible, with the exception of materializing specific state that must be trivially filterable. Then,
 resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
 behavior. This forces our implementation to match the protocol as closely as possible, with the
 obvious note that the performance tradeoffs of evm code and our app are different. For example,
 it's more expensive for us to recursively traverse the `namegraph` (like evm code does) because our
-individual roundtrips from the db are relatively more expensive.
+individual roundtrips from the db are relatively more expensive, but can be batched.
 
 In general: the indexed schema should match on-chain state as closely as possible, and
 resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
@@ -40,6 +35,10 @@ including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1
 within this Unigraph plugin materializes the effective owner to simplify this aspect of ENS and
 enable efficient queries against `domains.owner_id`.
 
+Additionally, a Domain's canonicality-derived fields (`canonical_name`, `canonical_label_hash_path`,
+`canonical_path`, `canonical_depth`, `canonical_node`) are materialized to facilitate query-time
+performance.
+
 When necessary, all data models are shared or polymorphic between ENSv1 and ENSv2, including
 Domains, Registries, Registrations, Renewals, and Resolvers.
 
@@ -48,11 +47,6 @@ guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePerio
 Registry Registrations do not).
 
 The `Label` entity (`labelHash` → `InterpretedLabel`) remains the source of truth for label values.
-Canonical-tree fields on `domains` (`canonical_name`, `canonical_label_hash_path`, `canonical_path`,
-`canonical_depth`, `canonical_node`) are materialized inline by the handlers in
-`canonicality-db-helpers.ts`. Label heals propagate to `canonical_name` via a GIN-indexed bulk
-UPDATE outside Ponder's cache; cascade round-trips are bounded to events that already pay a
-flush (canonicality flip, heal of an unknown label).
 
 ENSv1 and ENSv2 both fit the `Registry` → `Domain` → (`Sub`)`Registry` → `Domain` → ... `namegraph` model.
 For ENSv1, each domain that has children implicitly owns a "virtual" `Registry` (a row of type
@@ -62,13 +56,7 @@ the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraph
 a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
 graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
 exception of the Canonical Nametree (the set of Domains with an inferrable Canonical Name), which
-_is_ materialized inline: the `registries.canonical` / `domains.canonical` membership flags plus the
-`domains.canonical*` name/path/depth fields on the rows themselves. The bidirectional canonical edge is NOT
-materialized in a parallel table; it is derived on demand by checking that the two unidirectional
-pointers agree (`registries.canonical_domain_id = domains.id` ↔ `domains.subregistry_id = registries.id`).
-Cascading canonicality flips through the subgraph run as either an in-memory PK update (when
-`registries.has_children = false`, the dominant case for fresh ENSv1 virtual registries on first
-wire-up) or a single recursive-CTE batch UPDATE otherwise (see `canonicality-db-helpers.ts`).
+_is_ materialized inline.
 
 Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
 allows us to rely on the shared logic for indexing:
@@ -91,7 +79,6 @@ entity that has many events (`domains`, `resolvers`) to the relevant set of Even
 
 A Registration references the event that initiated the Registration. A Renewal, too, references
 the Event responsible for its existence.
-:::
 
 ## Enums
 

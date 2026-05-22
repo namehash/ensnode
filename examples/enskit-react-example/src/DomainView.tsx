@@ -158,9 +158,8 @@ export function DomainByNameView() {
       //
       // options for how we interpret user input
       options={{
-        // while not strictly necessary to specify, since we catch the empty string case above, we'll
-        // be explicit in this example app and tell enskit that for our purposes, we don't want our
-        // downstream `children` component to receive the ENS Root Name ("") as a `name` value
+        // we're explicit in this example app and tell enskit that, for our purposes, we don't want
+        // our downstream `children` component to receive the ENS Root Name ("") as a `name` value
         allowENSRootName: false,
 
         // allow the incoming LiteralName to contain Encoded LabelHash segments (e.g. [abcd...xyz])
