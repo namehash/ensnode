@@ -35,16 +35,26 @@ export default defineConfig({
   redirects: {
     "/docs": "/docs/integrate",
     "/ensnode": "/docs/integrate",
+    "/examples": "/docs/integrate/omnigraph/examples",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
-    "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
-    "/ensnode/concepts/what-is-the-ens-subgraph":
-      "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
-    "/docs/reference/what-is-the-ens-subgraph":
-      "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
-    "/docs/reference/querying-best-practices":
-      "/docs/reference/subgraph-legacy/querying-best-practices",
-    "/docs/reference/subgraph-compatibility-tooling":
-      "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling",
+    "/docs/integrate/subgraph/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/integrate/subgraph/subgraph-api": "/docs/integrate/subgraph/schema-reference",
+    "/docs/integrate/subgraph/with-ensjs": "/docs/integrate/subgraph/examples/with-ensjs",
+    "/docs/integrate/subgraph/with-viem": "/docs/integrate/subgraph/examples/with-viem",
+    "/docs/integrate/subgraph/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
+    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/reference/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/reference/querying-best-practices": "/docs/integrate/subgraph/querying-best-practices",
+    "/docs/reference/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
+    "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/reference/subgraph-legacy/subgraph-api": "/docs/integrate/subgraph/schema-reference",
+    "/docs/reference/subgraph-legacy/querying-best-practices":
+      "/docs/integrate/subgraph/querying-best-practices",
+    "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
+    "/docs/reference/subgraph-legacy/with-ensjs": "/docs/integrate/subgraph/examples/with-ensjs",
+    "/docs/reference/subgraph-legacy/with-viem": "/docs/integrate/subgraph/examples/with-viem",
+    "/docs/reference/subgraph-legacy/subgraph-dependents":
+      "/docs/integrate/subgraph/subgraph-dependents",
     "/ensadmin": "/docs/services/ensadmin",
     "/ensapi": "/docs/services/ensapi",
     "/ensdb": "/docs/services/ensdb",
@@ -53,6 +63,12 @@ export default defineConfig({
     "/ensrainbow/concepts/label-sets-and-versioning":
       "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
     "/docs/reference/rest-api": "/docs/services/ensapi/reference/api-reference",
+    "/docs/integrate/hosted-instances": "/docs/hosted-instances",
+    "/docs/integrate/migrate-from-subgraph": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/ensnode-v2-notes": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/mainnet-registered-subnames-of-subregistries": "/docs/integrate/omnigraph",
+    "/docs/reference/roadmap": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/what-is-ensnode": "/docs/integrate/why-ensnode",
   },
   env: {
     schema: {

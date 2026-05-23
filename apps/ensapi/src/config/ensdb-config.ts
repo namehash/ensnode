@@ -1,7 +1,7 @@
 import { type EnsDbConfig, validateEnsDbConfig } from "@ensnode/ensdb-sdk";
 import type { Unvalidated } from "@ensnode/ensnode-sdk";
+import type { EnsDbEnvironment } from "@ensnode/ensnode-sdk/internal";
 
-import { lazyProxy } from "@/lib/lazy";
 import logger from "@/lib/logger";
 
 /**
@@ -9,7 +9,7 @@ import logger from "@/lib/logger";
  *
  * Exits the process if the configuration is invalid, logging the error details.
  */
-export function buildEnsDbConfigFromEnvironment(env: NodeJS.ProcessEnv): EnsDbConfig {
+export function buildEnsDbConfigFromEnvironment(env: EnsDbEnvironment): EnsDbConfig {
   const unvalidatedConfig = {
     ensDbUrl: env.ENSDB_URL,
     ensIndexerSchemaName: env.ENSINDEXER_SCHEMA_NAME,
@@ -23,9 +23,3 @@ export function buildEnsDbConfigFromEnvironment(env: NodeJS.ProcessEnv): EnsDbCo
     process.exit(1);
   }
 }
-
-// lazyProxy defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const ensDbConfig = lazyProxy<EnsDbConfig>(() => buildEnsDbConfigFromEnvironment(process.env));
-
-export default ensDbConfig;

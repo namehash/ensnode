@@ -2,13 +2,36 @@
 // import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 // import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 
+import { GraphQLError } from "graphql";
 import { createYoga } from "graphql-yoga";
+import { ZodError } from "zod/v4";
 
 import { makeLogger } from "@/lib/logger";
 import { context } from "@/omnigraph-api/context";
 import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("omnigraph");
+
+// tests exact ZodError or GraphQLError-wrapped ZodError
+const isZodError = (value: unknown): boolean =>
+  value instanceof ZodError ||
+  (value instanceof GraphQLError && value.originalError instanceof ZodError);
+
+// Yoga logs every execution error (including GraphQL input validation errors) at `error` level, but
+// those validation errors are expected, in general, so we downgrade them to `debug` so server logs
+// aren't flooded with stack traces.
+const yogaLogger = {
+  debug: logger.debug.bind(logger),
+  info: logger.info.bind(logger),
+  warn: logger.warn.bind(logger),
+  error: (err: unknown, ..._rest: unknown[]) => {
+    if (isZodError(err)) {
+      logger.debug({ err }, "GraphQL input validation rejected");
+      return;
+    }
+    logger.error({ err }, "GraphQL execution error");
+  },
+};
 
 export const yoga = createYoga({
   graphqlEndpoint: "*",
@@ -36,7 +59,7 @@ export const yoga = createYoga({
   },
 
   // integrate logging with pino
-  logging: logger,
+  logging: yogaLogger,
 
   plugins: [
     // TODO: plugins

@@ -389,8 +389,7 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "Boolean"
-            },
-            "defaultValue": "false"
+            }
           },
           {
             "name": "name",
@@ -1032,6 +1031,14 @@ const introspection = {
       },
       {
         "kind": "SCALAR",
+        "name": "BeautifiedLabel"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "BeautifiedName"
+      },
+      {
+        "kind": "SCALAR",
         "name": "BigInt"
       },
       {
@@ -1042,6 +1049,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "CanonicalName",
         "fields": [
+          {
+            "name": "beautified",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BeautifiedName"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "interpreted",
             "type": {
@@ -3573,6 +3592,18 @@ const introspection = {
         "name": "Label",
         "fields": [
           {
+            "name": "beautified",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BeautifiedLabel"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "hash",
             "type": {
               "kind": "NON_NULL",
@@ -4566,44 +4597,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "allDomains",
-            "type": {
-              "kind": "OBJECT",
-              "name": "QueryAllDomainsConnection"
-            },
-            "args": [
-              {
-                "name": "after",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "before",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "first",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "last",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "domain",
             "type": {
               "kind": "INTERFACE",
@@ -4699,44 +4692,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "registrations",
-            "type": {
-              "kind": "OBJECT",
-              "name": "QueryRegistrationsConnection"
-            },
-            "args": [
-              {
-                "name": "after",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "before",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "first",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "last",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "registry",
             "type": {
               "kind": "INTERFACE",
@@ -4777,130 +4732,12 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "resolvers",
-            "type": {
-              "kind": "OBJECT",
-              "name": "QueryResolversConnection"
-            },
-            "args": [
-              {
-                "name": "after",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "before",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "first",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "last",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "root",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "INTERFACE",
                 "name": "Registry"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "QueryAllDomainsConnection",
-        "fields": [
-          {
-            "name": "edges",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "QueryAllDomainsConnectionEdge"
-                  }
-                }
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "pageInfo",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "totalCount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "QueryAllDomainsConnectionEdge",
-        "fields": [
-          {
-            "name": "cursor",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "INTERFACE",
-                "name": "Domain"
               }
             },
             "args": [],
@@ -4981,166 +4818,6 @@ const introspection = {
               "ofType": {
                 "kind": "INTERFACE",
                 "name": "Domain"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "QueryRegistrationsConnection",
-        "fields": [
-          {
-            "name": "edges",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "QueryRegistrationsConnectionEdge"
-                  }
-                }
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "pageInfo",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "totalCount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "QueryRegistrationsConnectionEdge",
-        "fields": [
-          {
-            "name": "cursor",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "INTERFACE",
-                "name": "Registration"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "QueryResolversConnection",
-        "fields": [
-          {
-            "name": "edges",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "QueryResolversConnectionEdge"
-                  }
-                }
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "pageInfo",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "totalCount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "QueryResolversConnectionEdge",
-        "fields": [
-          {
-            "name": "cursor",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Resolver"
               }
             },
             "args": [],

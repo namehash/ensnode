@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
 import {
   type AccountId,
@@ -30,12 +28,11 @@ import {
   isStaticResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
+import di from "@/di";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
-import { getPublicClient } from "@/lib/public-client";
 import { accelerateENSIP19ReverseResolver } from "@/lib/resolution/accelerate-ensip19-reverse-resolver";
 import { accelerateKnownOnchainStaticResolver } from "@/lib/resolution/accelerate-known-onchain-static-resolver";
 import { executeOperations } from "@/lib/resolution/execute-operations";
@@ -48,14 +45,6 @@ import {
 
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
-
-const getUniversalResolverV1 = lazy(() =>
-  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
-);
-
-const getUniversalResolverV2 = lazy(() =>
-  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
-);
 
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
@@ -98,7 +87,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // initially be ENS Root Registry: see `_resolveForward` for additional context.
   return _resolveForward(interpretedName, selection, {
     ...options,
-    registry: getENSv1RootRegistry(config.namespace),
+    registry: getENSv1RootRegistry(di.context.namespace),
   });
 }
 
@@ -168,7 +157,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // if no operations were generated, this was an empty selection; give them what they asked for
           if (operations.length === 0) return makeRecordsResponse<SELECTION>(operations);
 
-          const publicClient = getPublicClient(chainId);
+          const publicClient = di.context.rootChainPublicClient;
 
           ////////////////////////////
           /// 0. Temporary ENSv2 Bailout
@@ -177,9 +166,21 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
           // plugin being configured — a namespace may be ENSv1-only even when the Unigraph plugin is
           // defined, and forward resolution must follow the ENSv1 path in that case.
-          if (maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root)) {
+          if (maybeGetDatasource(di.context.namespace, DatasourceNames.ENSv2Root)) {
+            const universalResolverV1 = getDatasourceContract(
+              di.context.namespace,
+              DatasourceNames.ENSRoot,
+              "UniversalResolver",
+            );
+
+            const universalResolverV2 = maybeGetDatasourceContract(
+              di.context.namespace,
+              DatasourceNames.ENSRoot,
+              "UniversalResolverV2",
+            );
+
             const UniversalResolverAddress =
-              getUniversalResolverV2()?.address ?? getUniversalResolverV1().address;
+              universalResolverV2?.address ?? universalResolverV1.address;
             operations = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.ExecuteResolveCalls,
@@ -241,7 +242,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /////////////////////////////////////
           if (accelerate && canAccelerate) {
             const resolver = { chainId, address: activeResolver };
-            const bridged = isBridgedResolver(config.namespace, resolver);
+            const bridged = isBridgedResolver(di.context.namespace, resolver);
             if (bridged) {
               return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
@@ -270,7 +271,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             const resolver = { chainId, address: activeResolver };
 
             // Pass: ENSIP-19 Reverse Resolver
-            if (isKnownENSIP19ReverseResolver(config.namespace, resolver)) {
+            if (isKnownENSIP19ReverseResolver(di.context.namespace, resolver)) {
               operations = await withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
@@ -282,10 +283,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             // Pass: Known On-Chain Static Resolver with indexed records
             const resolverRecordsAreIndexed =
               areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
-                config.namespace,
+                di.context.namespace,
                 chainId,
               );
-            if (resolverRecordsAreIndexed && isStaticResolver(config.namespace, resolver)) {
+            if (resolverRecordsAreIndexed && isStaticResolver(di.context.namespace, resolver)) {
               operations = await withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,

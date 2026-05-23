@@ -1,6 +1,6 @@
 import { builder } from "@/omnigraph-api/builder";
 import { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
-import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
+import { OrderDirection, type OrderDirectionValue } from "@/omnigraph-api/schema/order-direction";
 
 //////////////////////
 // Inputs
@@ -111,8 +111,7 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
     }),
     canonical: t.boolean({
       description:
-        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).",
-      defaultValue: false,
+        "If set, filters the set of Domains by canonicality (i.e. reachability by ENS Forward Resolution): `true` for Canonical only, `false` for non-Canonical only. If omitted, returns all Domains owned by the Account regardless of canonicality.",
     }),
     version: t.field({
       type: ENSProtocolVersion,
@@ -161,5 +160,4 @@ export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
   }),
 });
 
-export const DOMAINS_DEFAULT_ORDER_BY: typeof DomainsOrderBy.$inferType = "NAME";
-export const DOMAINS_DEFAULT_ORDER_DIR: typeof OrderDirection.$inferType = "ASC";
+export type DomainsOrderValue = { by: DomainsOrderByValue; dir: OrderDirectionValue };

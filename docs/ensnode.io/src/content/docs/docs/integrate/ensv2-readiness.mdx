@@ -16,9 +16,9 @@ import { LinkCard, Aside } from "@astrojs/starlight/components";
 Full access to ENS data formerly required two separate data fetching strategies working in parallel:
 
 1. **ENS resolution** — RPC calls with CCIP-read support for offchain data (e.g. via a popular package such as `viem` or `wagmi`) to perform forward or reverse ENS resolution.
-2. **Indexed ENS data** — the [ENS Subgraph](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
+2. **Indexed ENS data** — the [ENS Subgraph](/docs/integrate/subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
 
-Neither system alone was complete. 
+Neither system alone was complete.
 - ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpreting raw values returned by the ENS protocol.
 - The Subgraph gives you queryable indexed ENS data but has critical limitations, including:
    - The Subgraph is single-chain.
@@ -31,15 +31,27 @@ In the past, apps building on ENS have had to live with these split fetching str
 
 ## How ENSNode solves this
 
-[ENSIndexer](/docs/services/ensindexer) offers the `unigraph` plugin, which builds a **unified** polymorphic indexed data model in [ENSDb](/docs/services/ensdb) of multiple ENSv1 Nametrees (the ENSv1 onchain state model found in the ENS root registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, etc.), and the ENSv2 Namegraph (the ENSv2 onchain state model that ENSv1 domains may optionally make a dynamic upgrade to, and may contain cycles, disjoint domains, and allows domains to dynamically reposition themselves across time within the ENSv2 Namegraph).
+**The Unigraph Data Model** — [ENSIndexer](/docs/services/ensindexer) offers the `unigraph` plugin, which builds a **unified** polymorphic indexed data model in [ENSDb](/docs/services/ensdb) of multiple ENSv1 Nametrees (the ENSv1 onchain state model found in the ENS root registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, etc.), and the ENSv2 Namegraph (the ENSv2 onchain state model that ENSv1 domains may optionally be upgraded to, which allows for dynamic reconfiguration of the name hierarchy, including possible cycles, disjoint domains, and infinite aliases).
 
-The [ENS Omnigraph API](/docs/integrate/omnigraph) is delivered by the [ENSApi](/docs/services/ensapi) service which provides a highly tailored GraphQL API that builds upon and refines the "unigraph" indexed data model held in ENSDb to deliver all your ENS data access needs in a single API endpoint. The ENS Omnigraph API also understands ENS protocol implementation details including ENSIP-15 (ENS name normalization), ENSIP-10, ENSIP-19, and much more so that you can focus on building your app and not all the internal implementation complexities of the ENS protocol.
+**The Omnigraph API** — The [ENS Omnigraph API](/docs/integrate/omnigraph) is delivered by [ENSApi](/docs/services/ensapi) and builds upon and refines the Unigraph data model held in [ENSDb](/docs/services/ensdb). The Omnigraph API provides a highly tailored, fully typed GraphQL API that understands ENS protocol implementation details—including ENSIP-10, ENSIP-15, ENSIP-19, and much more—so that you can focus on building your app (and not all the internal implementation complexities of the ENS protocol).
 
-- **ENS Resolution** — The ENS Omnigraph API, through ENSApi, internally implements the ENS Universal Resolver on top of the indexed ENS Unigraph datamodel in ENSDb. We refer to this idea as "ENS Protocol Acceleration". For cases where ENS Resolution requires offchain data, ENSApi internally performs the CCIP-read operations on your behalf to ensure every resolution request accurately follows all ENS protocol standards. No need for any RPC calls in your app. Your ENS resolutions may now also be faster than ever!
-- **Indexed ENS data** — Access the multichain indexed "unigraph" state model all within a single unified, polymorphic API-level state model that understands ENS protocol implementation details including ENSIP-15 (ENS name normalization), ENSIP-10, ENSIP-19, and much more so that you can focus on building your app and not all the internal implementation complexities of the ENS protocol.
+**Accelerated ENS Resolution** — The ENS Omnigraph API, through ENSApi, internally implements the ENS Universal Resolver on top of the indexed ENS Unigraph data model in ENSDb. We refer to this idea as "ENS Protocol Acceleration". For cases where ENS Resolution requires offchain data, ENSApi internally performs the CCIP-read operations on your behalf to ensure every resolution request accurately follows all ENS protocol standards. No need for any RPC calls in your app, and your ENS resolutions for indexed names could speed up by an order of magnitude or more!
 
-## What you need to do
+## What You Need to Do
 
-:::caution[Coming Soon]
-We're actively working on this page right now. Check back by May 18th for full content!
-:::
+**Resolving Records** — If you're exclusively interested in resolving ENS names, you need to ensure that your `resolve` RPC calls go to the new `UniversalResolverV2` contract or risk stale and incorrect results being returned. Depending on your situation, this update may be handled simply by updating `viem` or `wagmi`, but for many apps building on indexed ENS data or with more advanced requirements, additional upgrade actions may be required.
+
+For many, the simple solution for ENSv2 readiness will be to adopt the ENS Omnigraph API from ENSNode for all their ENS data needs (both ENSv1 and ENSv2). ENSNode also provides **ENS Protocol Acceleration**, dramatically reducing resolution latency for most names people use.
+
+**Querying ENS Data** — If you're querying ENS names via a legacy API such as the ENS Subgraph you need to update to an ENSv2-ready service like ENSNode; as soon as ENSv2 launches, data served by the Subgraph (and any ENSv1-only indexers) will be instantly unreliable for the true state of ENS.
+
+## Pick Your Integration
+
+ENSNode meets you wherever you are — drop-in React components, a typed TypeScript SDK, raw GraphQL, direct ENSDb access, CLI tooling, or AI agent integration. Pick the surface that fits your stack and ship ENSv2-ready code today.
+
+<LinkCard
+  title="Integration Options"
+  href="/docs/integrate/integration-options"
+  description="enskit (React), enssdk (TypeScript), the ENS Omnigraph GraphQL API, direct ENSDb access, CLI tooling, and more."
+/>
+

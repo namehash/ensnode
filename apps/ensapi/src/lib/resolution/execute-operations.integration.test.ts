@@ -1,14 +1,20 @@
+import { createPublicClient, http } from "viem";
 import { vi } from "vitest";
 
-import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
+import { ENSNamespaceIds } from "@ensnode/datasources";
 
 // we're testing a function specifically, not fetching through the running ensapi instance, so
 // we need to mock the config when this worker process attempts to import ./execute-operations
 // (and this is an integration test because we want to RPC fetch against the running devnet)
-vi.mock("@/config", () => ({
+vi.mock("@/di", () => ({
   default: {
-    namespace: ENSNamespaceIds.EnsTestEnv,
-    rpcConfigs: new Map([[ensTestEnvChain.id, { httpRPCs: [new URL("http://localhost:8545")] }]]),
+    context: {
+      get rootChainPublicClient() {
+        return createPublicClient({
+          transport: http("http://localhost:8545"),
+        });
+      },
+    },
   },
 }));
 
@@ -26,7 +32,7 @@ import { describe, expect, it } from "vitest";
 import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { getPublicClient } from "@/lib/public-client";
+import di from "@/di";
 import { executeOperations } from "@/lib/resolution/execute-operations";
 import { makeOperations } from "@/lib/resolution/operations";
 
@@ -38,7 +44,7 @@ const NAME_WITH_ENCODED_LABELHASHES = interpretedLabelsToInterpretedName([
 
 const EXPECTED_DESCRIPTION = "example.eth";
 
-const publicClient = getPublicClient(ensTestEnvChain.id);
+const publicClient = di.context.rootChainPublicClient;
 
 const UniversalResolverV2 = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,

@@ -2,11 +2,10 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
-import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/internal";
-
+import { ACTIVE_OMNIGRAPH_VERSION } from "../src/data/omnigraph-examples/active.ts";
 import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
-import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/constants.ts";
+import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
+import { ENSNODE_URL } from "../src/lib/playground/constants.ts";
 
 function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
@@ -16,12 +15,33 @@ function logError(message: string, id?: string) {
   console.error(`[omnigraph-examples] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
 }
 
-const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[]).sort();
-
-const outputPath = join(
+// Target version defaults to the active one; override to fill responses for a staged version.
+const version = process.env.OMNIGRAPH_VERSION ?? ACTIVE_OMNIGRAPH_VERSION;
+// Used as a directory name; reject anything that could escape the versions/ dir.
+if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
+  logError(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
+  process.exit(1);
+}
+const versionDir = join(
   dirname(fileURLToPath(import.meta.url)),
-  "../src/data/omnigraph-examples/responses.json",
+  `../src/data/omnigraph-examples/versions/${version}`,
 );
+const examplesPath = join(versionDir, "examples.json");
+const outputPath = join(versionDir, "responses.json");
+
+if (!existsSync(examplesPath)) {
+  logError(`No examples snapshot at ${examplesPath}. Snapshot version "${version}" first.`);
+  process.exit(1);
+}
+
+const snapshotById = new Map(
+  (JSON.parse(readFileSync(examplesPath, "utf8")) as SnapshotExample[]).map((e) => [e.id, e]),
+);
+
+// Only fetch responses for the rendered set: meta entries supported by this version's snapshot.
+const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[])
+  .filter((id) => snapshotById.has(id))
+  .sort();
 
 // Optional filter: `pnpm omnigraph-examples:refresh-responses <id>,<id>`
 const argIds =
@@ -40,13 +60,14 @@ if (argIds.length > 0) {
 
 const exampleIds = argIds.length > 0 ? argIds : allExampleIds;
 
-const base = ENSNODE_URL.replace(/\/+$/, "");
-const url = `${base}/api/omnigraph`;
+// Endpoint defaults to the production v2 Sepolia URL; override to fill responses from a
+// staged deployment (e.g. blue/green) before that version is promoted to the prod URL.
+const url = new URL("/api/omnigraph", process.env.OMNIGRAPH_ENDPOINT ?? ENSNODE_URL).toString();
 
 logStep(
   argIds.length > 0
-    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples from ${url}: ${exampleIds.join(", ")}`
-    : `Fetching all ${exampleIds.length} Omnigraph examples from ${url}`,
+    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples (${version}) from ${url}: ${exampleIds.join(", ")}`
+    : `Fetching all ${exampleIds.length} Omnigraph examples (${version}) from ${url}`,
 );
 
 // When refreshing a subset, load the existing responses so unaffected entries are preserved.
@@ -58,9 +79,9 @@ const out: Record<string, unknown> =
 for (const id of exampleIds) {
   logStep("Getting example query", id);
 
-  const example = getGraphqlApiExampleQueryById(id);
+  const example = snapshotById.get(id)!;
   const query = example.query.trim();
-  const variables = getNamespaceSpecificValue(DOCS_OMNIGRAPH_NAMESPACE, example.variables);
+  const variables = example.variables;
 
   const response = await fetch(url, {
     method: "POST",

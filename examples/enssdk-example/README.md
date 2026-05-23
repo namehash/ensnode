@@ -6,12 +6,14 @@ Companion to the [enssdk integration guide](https://ensnode.io/docs/integrate/in
 
 ## Usage (with NameHash Hosted Instance)
 
+> **Schema version:** This example tracks the latest Omnigraph schema (ENSNode 1.15.0). It connects to the `blue` hosted deployment by default, which runs `1.15.0`; the production hosted instances still serve an older schema (`1.13.x`) that wouldn't satisfy these queries. If you query a hosted instance from your own app, match its ENSNode version with the same `enskit`/`enssdk` version.
+
 ```sh
 # from the ENSNode monorepo root
 pnpm install
 
-ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F enssdk-example start
-````
+ENSNODE_URL=https://api.v2-sepolia.blue.ensnode.io pnpm -F enssdk-example start
+```
 
 ## Usage (with Local ENSNode)
 

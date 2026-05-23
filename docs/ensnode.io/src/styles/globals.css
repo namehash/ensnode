@@ -96,8 +96,27 @@ div.header {
   }
 }
 
-.dialog-frame button {
-  visibility: hidden;
+.dialog-frame button.pagefind-ui__search-clear {
+  display: none;
+}
+
+.dialog-frame > button {
+  @media (min-width: 50rem) {
+    display: none;
+  }
+
+  border-radius: 8px;
+  background-color: black;
+  color: white;
+  padding: 6px 10px;
+  line-height: normal;
+  font-size: 16px;
+  height: fit-content;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #272727;
+  }
 }
 
 /* Home page search dialog styles */

@@ -2,18 +2,10 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByCanonical,
-  filterByName,
-  filterByOwner,
-  filterByVersion,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
@@ -28,10 +20,12 @@ import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-perm
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
-  load: (ids: Address[]) =>
-    ensDb.query.account.findMany({
+  load: (ids: Address[]) => {
+    const { ensDb } = di.context;
+    return ensDb.query.account.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
-    }),
+    });
+  },
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -75,15 +69,12 @@ AccountRef.implement({
         where: t.arg({ type: AccountDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = domainsBase();
-        const owned = filterByOwner(base, parent.id);
-        const { named, defaultOrder } = filterByName(owned, where?.name ?? null);
-        const canonical = where?.canonical === true ? filterByCanonical(named) : named;
-        const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
-        const domains = withOrderingMetadata(versioned);
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) =>
+        resolveFindDomains(context, {
+          where: { ...where, ownerId: parent.id },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     //////////////////
@@ -115,6 +106,7 @@ AccountRef.implement({
       },
       resolve: (parent, args) => {
         const contract = args.where?.contract;
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           // this user's permissions
           eq(ensIndexerSchema.permissionsUser.user, parent.id),
@@ -151,6 +143,7 @@ AccountRef.implement({
       description: "The Permissions on Registries granted to this Account.",
       type: RegistryPermissionsUserRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.registry.chainId),
@@ -188,6 +181,7 @@ AccountRef.implement({
       description: "The Permissions on Resolvers granted to this Account.",
       type: ResolverPermissionsUserRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.resolver.chainId),

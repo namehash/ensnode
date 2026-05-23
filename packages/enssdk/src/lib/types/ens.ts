@@ -111,6 +111,23 @@ export type LiteralLabel = Label & { __brand: "LiteralLabel" };
 export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 
 /**
+ * A Beautified Label is a Label produced for presentation in a UI from an {@link InterpretedLabel}.
+ *
+ * It is either:
+ * a) an Encoded LabelHash, preserved verbatim from the source InterpretedLabel, or
+ * b) a Label produced by passing a normalized Label through ENSIP-15 beautification, which is
+ *    guaranteed to be normalizable back to the original normalized Label but is itself NOT
+ *    necessarily normalized (e.g. `"♾"` → `"♾️"`).
+ *
+ * Because (b) is not guaranteed to be normalized, a BeautifiedLabel is NOT an InterpretedLabel and
+ * MUST NOT be used as a lookup key or anywhere else that expects an InterpretedLabel.
+ *
+ * @see https://docs.ens.domains/ensip/15
+ * @dev nominally typed to enforce usage & enhance codebase clarity
+ */
+export type BeautifiedLabel = Label & { __brand: "BeautifiedLabel" };
+
+/**
  * A Literal Name is a Name as it literally appears onchain, composed of 0 or more Literal Labels
  * joined by dots. It may be an unnormalized name for reasons including:
  * - containing empty labels,
@@ -154,6 +171,7 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * MUST NOT be used as a navigation target, lookup key, or anywhere else that expects an
  * InterpretedName.
  *
+ * @see https://docs.ens.domains/ensip/15
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
 export type BeautifiedName = Name & { __brand: "BeautifiedName" };

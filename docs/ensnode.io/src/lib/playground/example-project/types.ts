@@ -31,11 +31,6 @@ export type PlaygroundProject = {
   tsconfig?: string;
 };
 
-export type EnvReplacement = {
-  pattern: RegExp;
-  replacement: string;
-};
-
 export type ExampleProjectConfig = {
   title: string;
   description?: string;
@@ -44,9 +39,6 @@ export type ExampleProjectConfig = {
   entryFileName: string;
   openFile?: string;
   fetchRaw: () => RawExampleProject;
-  envReplacements: EnvReplacement[];
   resolvePackageManifest: () => PlaygroundPackageManifest;
   buildTsconfig?: () => string;
-  /** Merged into project files after assembly (e.g. `.env` for Vite). */
-  extraFiles?: Record<string, string>;
 };

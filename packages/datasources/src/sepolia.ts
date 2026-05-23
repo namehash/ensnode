@@ -129,9 +129,6 @@ export default {
      *
      * The owner of 'basetest.eth' in the ENS Registry on the Sepolia ENS namespace
      * (e.g. Coinbase) has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: baseSepolia,
     contracts: {
@@ -190,9 +187,6 @@ export default {
      *
      * The owner of 'linea-sepolia.eth' in the ENS Registry on the Sepolia ENS namespace
      * (e.g. Consensys) has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: lineaSepolia,
     contracts: {

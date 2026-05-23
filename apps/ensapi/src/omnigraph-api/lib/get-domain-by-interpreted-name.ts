@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
 import {
@@ -24,8 +22,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
+import di from "@/di";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
@@ -84,7 +82,7 @@ export async function getDomainIdByInterpretedName(
   }
 
   return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, () =>
-    forwardWalkNamegraph(getRootRegistryId(config.namespace), path),
+    forwardWalkNamegraph(getRootRegistryId(di.context.namespace), path),
   );
 }
 
@@ -129,10 +127,10 @@ async function forwardWalkNamegraph(
   // otherwise, identify the deepest element with a Resolver
   const deepestResolver = rows.find(hasResolver);
   if (deepestResolver) {
-    const resolverEq = makeContractMatcher(config.namespace, deepestResolver);
+    const resolverEq = makeContractMatcher(di.context.namespace, deepestResolver);
     // Bridged Resolvers
     // if the deepest Resolver is a Bridged Resolver, recurse to the target Registry
-    const bridged = isBridgedResolver(config.namespace, deepestResolver);
+    const bridged = isBridgedResolver(di.context.namespace, deepestResolver);
     if (bridged) {
       // to follow a Bridged Resolver, continue walking the namegraph from the target `registryId`
       // with the remaining portion of `path`
@@ -151,13 +149,13 @@ async function forwardWalkNamegraph(
     // if the deepest Resolver is the ENSv1Resolver, fallback to ENSv1
     if (resolverEq(DatasourceNames.ENSv2Root, "ENSv1Resolver")) {
       // to implement the ENSv1Resolver, walk the ENSv1 disjoint namegraph with the full path
-      return forwardWalkNamegraph(getENSv1RootRegistryId(config.namespace), path, depth + 1);
+      return forwardWalkNamegraph(getENSv1RootRegistryId(di.context.namespace), path, depth + 1);
     }
 
     // ENSv2Resolver (ENSv2 Fallback)
     if (resolverEq(DatasourceNames.ENSv2Root, "ENSv2Resolver")) {
       // to implement the ENSv2Resolver, walk the ENSv2 disjoint namegraph with the full path
-      return forwardWalkNamegraph(getENSv2RootRegistryId(config.namespace), path, depth + 1);
+      return forwardWalkNamegraph(getENSv2RootRegistryId(di.context.namespace), path, depth + 1);
     }
   }
 
@@ -177,7 +175,10 @@ async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelH
   // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(path)}::text[]`;
 
-  const result = await ensDb.execute(sql`
+  const { ensDb, ensIndexerSchema } = di.context;
+
+  const result = await withSpanAsync(tracer, "forward-walk", { registryId, path }, () =>
+    ensDb.execute(sql`
     WITH RECURSIVE path AS (
       SELECT
         ${registryId}::text         AS next_registry_id,
@@ -209,7 +210,8 @@ async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelH
       ON drr.domain_id = path."domainId"
     WHERE path."domainId" IS NOT NULL
     ORDER BY path.depth DESC;
-  `);
+  `),
+  );
 
   return result.rows as unknown as WalkResultRow[];
 }
