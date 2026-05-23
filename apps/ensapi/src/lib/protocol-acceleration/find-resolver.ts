@@ -17,7 +17,6 @@ import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import { accountIdEqual, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
-import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 type FindResolverResult =
@@ -198,6 +197,7 @@ async function findResolverWithIndex(
         async () => {
           // NOTE: because DRRs are now canonicalized against the managedName's Registry, we no longer
           // need to also join ENSv1RegistryOld DRRs if the registry is the ENSv1Registry
+          const { ensDb } = di.context;
           const records = await ensDb.query.domainResolverRelation.findMany({
             where: (t, { inArray, and, eq }) =>
               and(

@@ -16,7 +16,12 @@ const executeMock = vi.fn();
 const whereMock = vi.fn(async () => [] as Array<{ value: unknown }>);
 const fromMock = vi.fn(() => ({ where: whereMock }));
 const selectMock = vi.fn(() => ({ from: fromMock }));
-const drizzleClientMock = { select: selectMock, execute: executeMock } as any;
+const endMock = vi.fn().mockResolvedValue(undefined);
+const drizzleClientMock = {
+  select: selectMock,
+  execute: executeMock,
+  $client: { end: endMock },
+} as any;
 
 vi.mock("drizzle-orm/node-postgres", () => ({
   drizzle: vi.fn(() => drizzleClientMock),
@@ -35,6 +40,7 @@ describe("EnsDbReader", () => {
     fromMock.mockClear();
     selectMock.mockClear();
     executeMock.mockClear();
+    endMock.mockClear();
   });
 
   describe("getters", () => {
@@ -204,6 +210,22 @@ describe("EnsDbReader", () => {
       await expect(createEnsDbReader().getIndexingMetadataContext()).rejects.toThrow(
         /There must be exactly one ENSNodeMetadata record/,
       );
+    });
+  });
+
+  describe("destroy", () => {
+    it("calls $client.end() to close the connection pool", async () => {
+      const ensDbReader = createEnsDbReader();
+
+      await ensDbReader.destroy();
+
+      expect(endMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("propagates errors from $client.end()", async () => {
+      endMock.mockRejectedValueOnce(new Error("Connection already closed"));
+
+      await expect(createEnsDbReader().destroy()).rejects.toThrow("Connection already closed");
     });
   });
 });

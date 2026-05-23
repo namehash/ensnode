@@ -1,5 +1,17 @@
 # @ensnode/ensnode-sdk
 
+## 1.15.0
+
+### Minor Changes
+
+- [#2159](https://github.com/namehash/ensnode/pull/2159) [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429) Thanks [@tk-o](https://github.com/tk-o)! - Added `peek` method to `SWRCache` class.
+
+### Patch Changes
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1)]:
+  - enssdk@1.15.0
+  - @ensnode/datasources@1.15.0
+
 ## 1.14.0
 
 ### Minor Changes

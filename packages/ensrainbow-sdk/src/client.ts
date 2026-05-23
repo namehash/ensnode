@@ -1,5 +1,5 @@
 import type { EncodedLabelHash, Label, LabelHash } from "enssdk";
-import { parseLabelHashOrEncodedLabelHash } from "enssdk";
+import { asLiteralLabel, labelhashLiteralLabel, parseLabelHashOrEncodedLabelHash } from "enssdk";
 
 import {
   buildEnsRainbowClientLabelSet,
@@ -379,7 +379,19 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     });
 
     const response = await fetch(url);
-    const healResponse = (await response.json()) as EnsRainbow.HealResponse;
+    let healResponse = (await response.json()) as EnsRainbow.HealResponse;
+
+    // Sanity Check: avoid returning malformed heals to consumers, treating as not-found
+    if (
+      healResponse.status === StatusCode.Success &&
+      labelhashLiteralLabel(asLiteralLabel(healResponse.label)) !== normalizedLabelHash
+    ) {
+      healResponse = {
+        status: StatusCode.Error,
+        error: "Label not found",
+        errorCode: ErrorCode.NotFound,
+      } satisfies EnsRainbow.HealNotFoundError;
+    }
 
     if (isCacheableHealResponse(healResponse)) {
       this.cache.set(normalizedLabelHash, healResponse);

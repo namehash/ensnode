@@ -10,7 +10,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { lazyProxy } from "@/lib/lazy";
 import logger from "@/lib/logger";
 
@@ -41,6 +40,12 @@ export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
   () =>
     new SWRCache<EnsNodeStackInfo>({
       fn: async function loadEnsNodeStackInfo() {
+        // Async import `di` here to avoid circular dependency between this cache module and the DI container module.
+        // NOTE: It will not be required soon, as we plan to create a factory function for this cache
+        // that accepts the necessary dependencies as parameters, instead of importing from the DI container.
+        const di = await import("@/di").then((mod) => mod.default);
+        const { ensDbClient } = di.context;
+
         try {
           const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
@@ -53,11 +58,6 @@ export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
             // Therefore, throw an error to trigger the subsequent catch handler.
             throw new Error("Indexing Metadata Context was uninitialized in ENSDb.");
           }
-
-          // Async import `di` here to avoid circular dependency between this cache module and the DI container module.
-          // NOTE: It will not be required soon, as we plan to create a factory function for this cache
-          // that accepts the necessary dependencies as parameters, instead of importing from the DI container.
-          const di = await import("@/di").then((mod) => mod.default);
 
           const ensIndexerStackInfo = indexingMetadataContext.stackInfo;
           const ensNodeStackInfo = buildEnsNodeStackInfo(

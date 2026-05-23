@@ -16,7 +16,7 @@ import { zeroAddress } from "viem";
 
 import { deserializeDuration, priceEth, RegistrarActionTypes } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import logger from "@/lib/logger";
 
 /**
@@ -44,6 +44,7 @@ export const getReferrerMetrics = async (
    */
 
   try {
+    const { ensDb, ensIndexerSchema } = di.context;
     const records = await ensDb
       .select({
         referrer: ensIndexerSchema.registrarActions.decodedReferrer,
@@ -115,6 +116,7 @@ export const getReferrerMetrics = async (
  */
 export const getReferralEvents = async (rules: ReferralProgramRules): Promise<ReferralEvent[]> => {
   try {
+    const { ensDb, ensIndexerSchema } = di.context;
     const records = await ensDb
       .select({
         id: ensIndexerSchema.registrarActions.id,

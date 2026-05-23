@@ -1,3 +1,4 @@
+import { asLiteralLabel, labelhashLiteralLabel } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -123,6 +124,29 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Success,
       label: "vitalik",
     } satisfies EnsRainbow.HealSuccess);
+  });
+
+  it("should return a not found error for a malformed record whose label does not hash back to the labelHash", async () => {
+    // Malformed rainbow record: the on-chain label is `"007"` (quotes included), but a CSV-mangled
+    // label set heals it to `007` (quotes stripped), which hashes to a different labelHash. The
+    // client must reject it as unhealable rather than returning a label keyed under the wrong hash.
+    const labelHash = labelhashLiteralLabel(asLiteralLabel('"007"'));
+
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          label: "007", // quote-stripped; does not hash back to labelHash
+        } satisfies EnsRainbow.HealSuccess),
+    });
+
+    const response = await client.heal(labelHash);
+
+    expect(response).toEqual({
+      status: StatusCode.Error,
+      error: "Label not found",
+      errorCode: ErrorCode.NotFound,
+    } satisfies EnsRainbow.HealNotFoundError);
   });
 
   it("should return a not found error for an unknown labelHash", async () => {

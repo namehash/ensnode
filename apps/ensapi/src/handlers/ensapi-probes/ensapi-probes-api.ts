@@ -1,8 +1,8 @@
+import di from "@/di";
 import {
   healthCheckRoute,
   readinessCheckRoute,
 } from "@/handlers/ensapi-probes/ensapi-probes-api.routes";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { createApp } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 
@@ -10,6 +10,7 @@ const app = createApp();
 
 app.openapi(healthCheckRoute, async (c) => {
   try {
+    const { ensDbClient } = di.context;
     const isEnsDbHealthy = await ensDbClient.isHealthy();
 
     if (!isEnsDbHealthy) {
@@ -25,6 +26,7 @@ app.openapi(healthCheckRoute, async (c) => {
 
 app.openapi(readinessCheckRoute, async (c) => {
   try {
+    const { ensDbClient } = di.context;
     const isEnsDbReady = await ensDbClient.isReady();
 
     if (!isEnsDbReady) {

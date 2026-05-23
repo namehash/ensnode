@@ -1,5 +1,14 @@
 # @ensnode/ensrainbow-sdk
 
+## 1.15.0
+
+### Patch Changes
+
+- [#2181](https://github.com/namehash/ensnode/pull/2181) [`55a6f23`](https://github.com/namehash/ensnode/commit/55a6f239cb6e1235f07160cb6faca58ca3f6d12d) Thanks [@shrugs](https://github.com/shrugs)! - `@ensnode/ensrainbow-sdk` now rejects malformed rainbow records: a healed label whose `labelHash` does not match the requested `labelHash` is considered `NotFound`.
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1)]:
+  - enssdk@1.15.0
+
 ## 1.14.0
 
 ### Patch Changes
