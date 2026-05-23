@@ -1,4 +1,4 @@
-import type { LabelHash } from "enssdk";
+import { asLiteralLabel, type LabelHash, labelhashLiteralLabel } from "enssdk";
 import type { ByteArray } from "viem";
 
 import { labelHashToBytes, validateSupportedLabelSetAndVersion } from "@ensnode/ensnode-sdk";
@@ -11,7 +11,7 @@ import {
 } from "@ensnode/ensrainbow-sdk";
 
 import type { DbConfig } from "@/config/types";
-import { type ENSRainbowDB, NoPrecalculatedCountError } from "@/lib/database";
+import { byteArraysEqual, type ENSRainbowDB, NoPrecalculatedCountError } from "@/lib/database";
 import type { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -198,6 +198,23 @@ export class ENSRainbowServer {
       }
 
       const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = versionedRainbowRecord;
+
+      // avoid returning malformed heals, treating as not-found
+      const computedLabelHashBytes = labelHashToBytes(
+        labelhashLiteralLabel(asLiteralLabel(actualLabel)),
+      );
+      if (!byteArraysEqual(computedLabelHashBytes, labelHashBytes)) {
+        logger.error(
+          `Hash mismatch for healed label "${actualLabel}": requested=${labelHash}, computed=0x${Buffer.from(
+            computedLabelHashBytes,
+          ).toString("hex")}`,
+        );
+        return {
+          status: StatusCode.Error,
+          error: "Label not found",
+          errorCode: ErrorCode.NotFound,
+        } satisfies EnsRainbow.HealError;
+      }
 
       logger.info(
         `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetVersionNumber})`,
