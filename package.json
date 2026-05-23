@@ -4,10 +4,10 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "lint": "pnpm run \"/^lint:(prettier|biome)$/\"",
+    "lint": "pnpm run lint:biome && pnpm run lint:prettier",
     "lint:ci": "pnpm run \"/^lint:(prettier|biome):ci$/\"",
-    "lint:prettier": "pnpm exec prettier --write \"**/*.md\" && pnpm -r lint:prettier",
-    "lint:prettier:ci": "pnpm exec prettier --check \"**/*.md\" && pnpm -r lint:prettier:ci",
+    "lint:prettier": "pnpm exec prettier --write \"**/*.{md,mdx}\" && pnpm -r lint:prettier",
+    "lint:prettier:ci": "pnpm exec prettier --check \"**/*.{md,mdx}\" && pnpm -r lint:prettier:ci",
     "lint:biome": "biome check --write .",
     "lint:biome:ci": "biome ci",
     "test": "vitest --silent passed-only",

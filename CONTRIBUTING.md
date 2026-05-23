@@ -11,22 +11,21 @@ For detailed contribution guidelines and setup instructions:
 
 ## Using Biome and Prettier together
 
-We use Biome as our primary code formatter, and our long-term goal is to rely on it exclusively.
+Biome is our primary formatter; the long-term goal is to use it for everything. Two gaps remain today:
 
-However, support for Astro files is still experimental. Currently, Biome only formats the frontmatter section of .astro files, so we use Prettier to format the JSX portions.
+- Biome doesn't format Markdown, so Prettier handles `**/*.{md,mdx}` repo-wide.
+- Biome's `.astro` support only covers the frontmatter (the `---` script block). Prettier with `prettier-plugin-astro` handles the template portion in `docs/ensnode.io` and `docs/ensrainbow.io`. The `astroSkipFrontmatter: true` option keeps Biome in charge of the frontmatter so the two formatters don't fight over the same code.
 
-### Applying both formatters
+Run `pnpm lint` at the monorepo root to apply both. CI runs `pnpm lint:ci` (check-only).
 
-To ensure CI checks pass and the codebase is formatted correctly, run `pnpm lint` command from the repository root. This will run both Biome and Prettier formatting.
+### Windows: line-ending diffs
 
-- Prettier formats `**/*.md` at the monorepo root.
-- Each docs site (`docs/ensnode.io`, `docs/ensrainbow.io`) uses `prettier-plugin-astro` to format the template portion of its `.astro` files. The `astroSkipFrontmatter: true` option keeps Biome in charge of the frontmatter so the two formatters don't fight over the same code.
+Git on Windows defaults to checking files out with CRLF (`\r\n`) line endings, but Biome and Prettier always write LF (`\n`). After running `pnpm lint`, files can show as modified even though Git will normalize them back to LF when staged — so the change wouldn't actually land in a commit.
 
-Run `pnpm lint` from the monorepo root to apply both. CI runs `pnpm lint:ci` (check-only).
+To clear the noise, pick one:
 
-> NOTE (Windows users): After running these steps, you may see many diffs marked with Git's "Contents have differences only in line separators" notice.
->
-> These files won't be included in your commit. For easier self-review, either ignore them or (if valid in your case) run `git add --all`. This normalizes line endings and removes those entries from the diff.
+- One-off: `git add --all`. Staging normalizes the line endings and the entries drop out of `git status`.
+- Permanent: `git config --global core.autocrlf input`, then `git checkout -- .` to convert your working tree to LF. Future checkouts won't reintroduce CRLF.
 
 ## Getting Help
 
