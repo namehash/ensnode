@@ -7,7 +7,7 @@ sidebar:
 
 We use Biome as the primary formatter. Biome doesn't cover everything, so Prettier handles two cases it misses:
 
-- Markdown (`**/*.{md,mdx}`) across the repo.
+- Markdown (`.md` and `.mdx`) across the repo.
 - The template portion of `.astro` files in `docs/ensnode.io` and `docs/ensrainbow.io`, via [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro). Biome still formats the `.astro` frontmatter (the `---` block); Prettier skips it with `astroSkipFrontmatter: true`.
 
 ## Running the formatters
