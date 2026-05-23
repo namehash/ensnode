@@ -5,10 +5,10 @@ sidebar:
   order: 6
 ---
 
-We use Biome as the primary formatter. Biome doesn't cover everything, so Prettier handles two cases it misses:
+We use Biome to format most of the codebase, and Prettier to cover the rest:
 
-- Markdown (`.md` and `.mdx`) across the repo.
-- The template portion of `.astro` files in `docs/ensnode.io` and `docs/ensrainbow.io`, via [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro). Biome still formats the `.astro` frontmatter (the `---` block); Prettier skips it with `astroSkipFrontmatter: true`.
+- Biome handles JS, TS, JSON, CSS, and the frontmatter of `.astro` files.
+- Prettier handles Markdown (`.md` and `.mdx`) across the repo, and the template portion of `.astro` files in `docs/ensnode.io` and `docs/ensrainbow.io` via [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro). The `astroSkipFrontmatter: true` option keeps the frontmatter under Biome's ownership.
 
 ## Running the formatters
 
