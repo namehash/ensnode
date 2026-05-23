@@ -536,7 +536,7 @@ async function cascadeCanonicality(
     await context.ensDb.sql.execute(sql`
       UPDATE ${ensIndexerSchema.domain} AS d
         SET canonical_node = upd.canonical_node
-        FROM unnest(${ids}::text[], ${nodes}::text[]) AS upd(id, canonical_node)
+        FROM unnest(${sql.param(ids)}::text[], ${sql.param(nodes)}::text[]) AS upd(id, canonical_node)
         WHERE d.id = upd.id;
     `);
   }
