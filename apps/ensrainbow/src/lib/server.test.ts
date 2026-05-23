@@ -143,8 +143,10 @@ describe("ENSRainbowServer", () => {
     });
 
     afterEach(async () => {
-      await server.close();
-      await rm(tempDir, { recursive: true, force: true });
+      await server?.close();
+      if (tempDir) {
+        await rm(tempDir, { recursive: true, force: true });
+      }
     });
 
     it("should heal a label when the stored label matches the requested labelHash", async () => {
