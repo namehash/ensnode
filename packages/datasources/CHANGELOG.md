@@ -1,5 +1,12 @@
 # @ensnode/ens-deployments
 
+## 1.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1)]:
+  - enssdk@1.15.0
+
 ## 1.14.0
 
 ### Patch Changes

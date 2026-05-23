@@ -12,40 +12,6 @@ export const referenceSidebarTopic = {
       link: "/docs/reference/terminology",
     },
     {
-      label: "Subgraph API (Legacy)",
-      collapsed: true,
-      items: [
-        {
-          label: "What is the ENS Subgraph?",
-          link: "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
-        },
-        {
-          label: "Subgraph API",
-          link: "/docs/reference/subgraph-legacy/subgraph-api",
-        },
-        {
-          label: "Querying Best Practices",
-          link: "/docs/reference/subgraph-legacy/querying-best-practices",
-        },
-        {
-          label: "Subgraph Compatibility Tooling",
-          link: "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling",
-        },
-        {
-          label: "With ENSjs",
-          link: "/docs/reference/subgraph-legacy/with-ensjs",
-        },
-        {
-          label: "With Viem",
-          link: "/docs/reference/subgraph-legacy/with-viem",
-        },
-        {
-          label: "Subgraph Dependents",
-          link: "/docs/reference/subgraph-legacy/subgraph-dependents",
-        },
-      ],
-    },
-    {
       label: "Contributing",
       collapsed: false,
       items: [

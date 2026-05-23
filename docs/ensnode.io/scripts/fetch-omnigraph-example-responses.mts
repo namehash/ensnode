@@ -60,8 +60,9 @@ if (argIds.length > 0) {
 
 const exampleIds = argIds.length > 0 ? argIds : allExampleIds;
 
-const base = ENSNODE_URL.replace(/\/+$/, "");
-const url = `${base}/api/omnigraph`;
+// Endpoint defaults to the production v2 Sepolia URL; override to fill responses from a
+// staged deployment (e.g. blue/green) before that version is promoted to the prod URL.
+const url = new URL("/api/omnigraph", process.env.OMNIGRAPH_ENDPOINT ?? ENSNODE_URL).toString();
 
 logStep(
   argIds.length > 0
