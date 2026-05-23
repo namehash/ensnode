@@ -10,7 +10,7 @@ const VERSION = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
 ---
 
 <Aside type="caution" title="Version compatibility with hosted instances">
-  <a href="/docs/hosted-instances">Our hosted ENSNode instances</a> currently run ENSNode <code>v{VERSION}</code>. The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the <code>gql.tada</code> TypeScript plugin to type your queries, so pin an <strong>exact</strong> version (no <code>^</code> or <code>~</code>) of <code>enssdk@{VERSION}</code> (and <code>enskit@{VERSION}</code> when using React) to keep your generated types matched to the deployed schema. Use these exact install commands:
+  <a href="/docs/hosted-instances">Our hosted ENSNode instances</a> currently run ENSNode <code>{VERSION}</code>. The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the <code>gql.tada</code> TypeScript plugin to type your queries, so pin an <strong>exact</strong> version (no <code>^</code> or <code>~</code>) of <code>enssdk@{VERSION}</code> (and <code>enskit@{VERSION}</code> when using React) to keep your generated types matched to the deployed schema. Use these exact install commands:
   <pre>{`npm install enssdk@${VERSION}
 # or, for React apps:
 npm install enskit@${VERSION} enssdk@${VERSION}`}</pre>
