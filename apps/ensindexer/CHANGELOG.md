@@ -1,5 +1,19 @@
 # ensindexer
 
+## 1.15.1
+
+### Patch Changes
+
+- [#2184](https://github.com/namehash/ensnode/pull/2184) [`2a7b0de`](https://github.com/namehash/ensnode/commit/2a7b0de5d9102dfe75ece66b7f710c1c7b833e35) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer no longer crashes at Basenames/Lineanames L1 Resolver update block.
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/datasources@1.15.1
+  - @ensnode/ensrainbow-sdk@1.15.1
+  - @ensnode/ensdb-sdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+  - @ensnode/ponder-sdk@1.15.1
+
 ## 1.15.0
 
 ### Patch Changes
