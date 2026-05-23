@@ -5,15 +5,16 @@ sidebar:
   order: 6
 ---
 
-Biome is our primary formatter; the long-term goal is to use it for everything. Two gaps remain today:
+We use Biome as the primary formatter. Biome doesn't cover everything, so Prettier handles two cases it misses:
 
-- Biome doesn't format Markdown, so Prettier handles `**/*.{md,mdx}` repo-wide.
-- Biome's `.astro` support only covers the frontmatter (the `---` script block). Prettier with [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro) handles the template portion in `docs/ensnode.io` and `docs/ensrainbow.io`. The `astroSkipFrontmatter: true` option keeps Biome in charge of the frontmatter so the two formatters don't fight over the same code.
+- Markdown (`**/*.{md,mdx}`) across the repo.
+- The template portion of `.astro` files in `docs/ensnode.io` and `docs/ensrainbow.io`, via [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro). Biome still formats the `.astro` frontmatter (the `---` block); Prettier skips it with `astroSkipFrontmatter: true`.
 
 ## Running the formatters
 
+From the monorepo root:
+
 ```bash
-# from the monorepo root
 pnpm lint
 ```
 
@@ -21,9 +22,9 @@ CI runs `pnpm lint:ci` (check-only) on every PR.
 
 ## Windows: line-ending diffs
 
-Git on Windows defaults to checking files out with CRLF (`\r\n`) line endings, but Biome and Prettier always write LF (`\n`). After running `pnpm lint`, files can show as modified even though Git will normalize them back to LF when staged — so the change wouldn't actually land in a commit.
+Git on Windows checks files out with CRLF (`\r\n`) line endings by default. Biome and Prettier write LF (`\n`). After `pnpm lint`, files may appear modified, but Git normalizes the endings back to LF when staging, so nothing changes in the resulting commit.
 
-To clear the noise, pick one:
+To clear the noise from your working tree:
 
-- **One-off**: `git add --all`. Staging normalizes the line endings and the entries drop out of `git status`.
-- **Permanent**: `git config --global core.autocrlf input`, then `git checkout -- .` to convert your working tree to LF. Future checkouts won't reintroduce CRLF.
+- One-off: run `git add --all`. The index normalizes the endings and the files drop out of `git status`.
+- Permanent: run `git config --global core.autocrlf input`, then `git checkout -- .`. Your working tree converts to LF and future checkouts keep it that way.
