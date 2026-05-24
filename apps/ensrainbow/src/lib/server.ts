@@ -200,6 +200,7 @@ export class ENSRainbowServer {
       const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = versionedRainbowRecord;
 
       // avoid returning malformed heals, treating as not-found
+      // TODO: remove after fixing https://github.com/namehash/ensnode/issues/2188
       const computedLabelHashBytes = labelHashToBytes(
         labelhashLiteralLabel(asLiteralLabel(actualLabel)),
       );
