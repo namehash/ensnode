@@ -165,11 +165,11 @@ When you specify `LABEL_SET_VERSION=N`, the system:
 - **Contains cumulative data**: This file includes **all** label-to-labelhash mappings from version 0 through version N
 - **Provides deterministic results**: The server will only use data up through version N, ensuring consistent healing results even if newer versions become available
 
-:::note[Version Behavior]
+:::caution[Version Behavior]
 Setting `LABEL_SET_VERSION=2` does **not** download separate files for versions 0, 1, and 2. Instead, it downloads one prebuilt database snapshot that contains the cumulative data from all those versions.
 :::
 
-:::tip[Port Mapping]
+:::note[Port Mapping]
 The port mapping (`-p 3223:3223` or `ports` in docker-compose) is only needed if you want to access ENSRainbow from the host machine. If you're only accessing it from other containers in the same network, you can omit the port mapping.
 :::
 

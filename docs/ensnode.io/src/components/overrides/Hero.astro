@@ -1,20 +1,12 @@
 ---
 import { Image } from "astro:assets";
 import { Balancer } from "react-wrap-balancer";
-import backgroundImage from "@assets/hero_bg_image.png";
 import heroImage from "@assets/hero_image.png";
 import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 ---
 
 <section
-  class="w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-black relative">
-  <Image
-    src={backgroundImage}
-    alt=""
-    aria-hidden="true"
-    class="absolute w-full h-screen z-0 object-center object-cover select-none"
-    quality={100}
-  />
+  class="w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-[#011A25] relative overflow-hidden">
   <div
     class="w-full max-w-[1280px] flex flex-col lg:flex-row justify-center sm:justify-between items-center gap-10 px-5 sm:px-8 max-lg:pt-20 max-sm:pb-8">
     <div
@@ -37,22 +29,38 @@ import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
         class={legacyButtonVariants({
           variant: "secondary",
           size: "medium",
-          className: "hover:bg-gray-100",
+          className: "hover:bg-gray-100 relative z-10",
         })}>
         Quickstart guide
       </a>
+      <div class="sm:hidden relative w-full max-w-[300px] pt-2 flex items-center justify-center">
+        <div
+          aria-hidden="true"
+          class="absolute -translate-x-1/10 inset-0 -z-0 m-auto aspect-square w-[130%] rounded-full
+                           bg-[radial-gradient(circle,rgba(24,125,176,0.45)_0%,rgba(24,125,176,0.4)_40%,transparent_70%)]
+                           blur-3xl">
+        </div>
+        <Image
+          src={heroImage}
+          alt="ENSv2 badge"
+          class="relative z-10 w-full h-auto object-contain"
+          quality={100}
+        />
+      </div>
+    </div>
+    <div class="relative shrink-0 hidden sm:flex items-center justify-center">
+      <div
+        aria-hidden="true"
+        class="absolute -translate-x-1/10 inset-0 -z-0 m-auto aspect-square w-[130%] max-w-[700px] rounded-full
+           bg-[radial-gradient(circle,rgba(24,125,176,0.45)_0%,rgba(24,125,176,0.4)_40%,transparent_70%)]
+           blur-3xl">
+      </div>
       <Image
         src={heroImage}
         alt="ENSv2 badge"
-        class="sm:hidden w-full max-w-[300px] pt-2 h-auto object-contain"
+        class="relative z-10 w-full max-w-[400px] lg:max-w-[490px] h-auto object-contain"
         quality={100}
       />
     </div>
-    <Image
-      src={heroImage}
-      alt="ENSv2 badge"
-      class="hidden sm:block w-full max-w-[400px] lg:max-w-[505px] h-auto object-contain relative z-10"
-      quality={100}
-    />
   </div>
 </section>
