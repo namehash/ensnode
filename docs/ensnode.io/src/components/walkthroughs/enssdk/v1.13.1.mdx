@@ -1,5 +1,5 @@
-import { LinkCard } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
+import { LinkCard } from "@astrojs/starlight/components";
+import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
 `enssdk` is the foundational TypeScript/JavaScript SDK for ENS development. It's a fully modular and tree-shakeable modern TypeScript/JavaScript package that provides ENS-specific types and helpers — usable from any JS runtime, browser or server.
 
@@ -33,7 +33,6 @@ npm install -D tsx typescript @types/node
 :::caution[Pin exact versions]
 Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking the exact version keeps types and runtime in sync, and matched to the ENSNode version your hosted instance runs.
 :::
-
 
 ## 3. Configure the `gql.tada` TypeScript plugin
 
@@ -122,7 +121,9 @@ const HelloWorldQuery = graphql(`
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
     }
   }
 `);
@@ -167,11 +168,18 @@ const HelloWorldQuery = graphql(`
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
       subdomains(first: 20) {
         totalCount
         edges {
-          node { name owner { address } }
+          node {
+            name
+            owner {
+              address
+            }
+          }
         }
       }
     }
@@ -226,22 +234,28 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     name
-    owner { address }
+    owner {
+      address
+    }
   }
 `);
 
 const HelloWorldQuery = graphql(
   `
-  query HelloWorld($name: InterpretedName!) {
-    domain(by: { name: $name }) {
-      ...DomainFragment
-      subdomains(first: 20) {
-        totalCount
-        edges { node { ...DomainFragment } }
+    query HelloWorld($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        ...DomainFragment
+        subdomains(first: 20) {
+          totalCount
+          edges {
+            node {
+              ...DomainFragment
+            }
+          }
+        }
       }
     }
-  }
-`,
+  `,
   [DomainFragment],
 );
 

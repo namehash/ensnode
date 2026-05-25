@@ -11,11 +11,11 @@ ENSRainbow stores its rainbow table in a **LevelDB** database. The schema is int
 
 ## Database Schema
 
-| Component | Encoding | Description |
-|-----------|----------|-------------|
-| **Record Key** | 32-byte raw `labelhash` (no `0x` prefix) | Guarantees optimal prefix lookups & avoids hex-string parsing overhead. |
+| Component        | Encoding                                              | Description                                                                                                                                            |
+| ---------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Record Key**   | 32-byte raw `labelhash` (no `0x` prefix)              | Guarantees optimal prefix lookups & avoids hex-string parsing overhead.                                                                                |
 | **Record Value** | UTF-8 string formatted as `{labelSetVersion}:{label}` | This is produced by [`buildEncodedVersionedRainbowRecord`](https://github.com/ensdomains/ensnode/blob/main/apps/ensrainbow/src/lib/rainbow-record.ts). |
-| **System Keys** | Byte arrays _not_ length 32 prefixed with `0xff…` | Hold metadata such as schema version, ingestion status, precalculated count, etc. |
+| **System Keys**  | Byte arrays _not_ length 32 prefixed with `0xff…`     | Hold metadata such as schema version, ingestion status, precalculated count, etc.                                                                      |
 
 ## Versioned Rainbow Record
 
@@ -23,8 +23,8 @@ A [rainbow record](/docs/services/ensrainbow/concepts/glossary#rainbow-record) w
 
 ```ts
 interface VersionedRainbowRecord {
-  label: string;          // original label
-  labelSetVersion: number;// version it belongs to
+  label: string; // original label
+  labelSetVersion: number; // version it belongs to
 }
 // Encoded on disk as: "{labelSetVersion}:{label}"
 ```
@@ -35,11 +35,11 @@ Storing the version alongside the label allows **incremental snapshots** to coex
 
 The database keeps a handful of **system keys** that do not clash with labelhashes (their length ≠ 32 bytes):
 
-* `0xff 0xff 0xff 0xff` → precalculated record count
-* `0xff 0xff 0xff 0xfe` → ingestion status (`unstarted`/`unfinished`/`finished`)
-* `0xff 0xff 0xff 0xfd` → database schema version (currently `3`)
-* `0xff 0xff 0xff 0xfc` → highest label set version
-* `0xff 0xff 0xff 0xfb` → label set id
+- `0xff 0xff 0xff 0xff` → precalculated record count
+- `0xff 0xff 0xff 0xfe` → ingestion status (`unstarted`/`unfinished`/`finished`)
+- `0xff 0xff 0xff 0xfd` → database schema version (currently `3`)
+- `0xff 0xff 0xff 0xfc` → highest label set version
+- `0xff 0xff 0xff 0xfb` → label set id
 
 ## ENSRainbow File Format
 
@@ -50,7 +50,7 @@ A **`.ensrainbow` file** is the _on-disk representation_ of a label set. It is a
 Protocol Buffers is Google's language-neutral, platform-neutral extensible mechanism for serializing structured data. ENSRainbow uses protobuf because it provides:
 
 - **Compact binary encoding** - Much smaller than JSON or XML
-- **Schema evolution** - Forward and backward compatibility as the format evolves  
+- **Schema evolution** - Forward and backward compatibility as the format evolves
 - **Cross-language support** - Can be read by any language with protobuf support
 - **Cross-system and cross-architecture compatibility** - Works seamlessly across different operating systems (Linux, Windows, macOS) and CPU architectures (x86, ARM, etc.) without endianness concerns
 - **Self-delimiting messages** - Protobuf uses **varint encoding** for field delimiters, where each field is prefixed with a tag that combines the field number and wire type. This eliminates the need for explicit field separators since the encoding itself contains all necessary boundary information.
@@ -67,9 +67,9 @@ message RainbowRecord {
 }
 
 message RainbowRecordCollection {
-  string format_identifier = 1;              // always "ensrainbow" 
+  string format_identifier = 1;              // always "ensrainbow"
   uint32 ensrainbow_file_format_version = 2;  // file format version
-  string label_set_id = 3;                    // e.g., "subgraph" 
+  string label_set_id = 3;                    // e.g., "subgraph"
   uint32 label_set_version = 4;               // version number
   repeated RainbowRecord records = 5;         // the actual records
 }
@@ -84,15 +84,19 @@ ENSRainbow uses protobuf's **length-delimited encoding** (`encodeDelimited`/`dec
 The `.ensrainbow` file consists of length-delimited protobuf messages in the following order:
 
 ### 1. Header Message
+
 A single `RainbowRecordCollection` message containing metadata (with empty `records` array):
+
 - `format_identifier` – always "ensrainbow" (file format identifier)
 - `ensrainbow_file_format_version` – file format version number
 - `label_set_id` – identifier like "subgraph" (lowercase ASCII letters and hyphens, 1-50 chars)
-- `label_set_version` – version number 
+- `label_set_version` – version number
 - `records` – empty array (records are stored separately)
 
-### 2. Record Stream  
+### 2. Record Stream
+
 A sequence of individual `RainbowRecord` messages, each containing:
+
 - `labelhash` – 32-byte hash of the label
 - `label` – the original label string
 
@@ -141,4 +145,4 @@ graph LR;
 
 - **[Glossary](/docs/services/ensrainbow/concepts/glossary)** - Key terms like [System Key](/docs/services/ensrainbow/concepts/glossary#system-key), [Ingestion](/docs/services/ensrainbow/concepts/glossary#ingestion), etc.
 - **[Label Sets & Versioning](/docs/services/ensrainbow/concepts/label-sets-and-versioning)** - Understanding the versioning system
-- **[TypeScript Interfaces](/docs/services/ensrainbow/concepts/typescript-interfaces)** - Type definitions for working with the data 
+- **[TypeScript Interfaces](/docs/services/ensrainbow/concepts/typescript-interfaces)** - Type definitions for working with the data

@@ -5,7 +5,7 @@ sidebar:
   label: Overview
 ---
 
-import { LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+import { LinkCard, Tabs, TabItem } from "@astrojs/starlight/components";
 
 These examples show the same queries two ways: in **raw SQL** (any PostgreSQL client, any language) and with the typed **[`@ensnode/ensdb-sdk`](https://www.npmjs.com/package/@ensnode/ensdb-sdk)** for TypeScript projects.
 
@@ -27,6 +27,7 @@ Discover the available ENSIndexer Schemas:
 SELECT DISTINCT ens_indexer_schema_name
 FROM ensnode.metadata;
 ```
+
   </TabItem>
   <TabItem label="ensdb-sdk (TypeScript)">
 ```bash
@@ -34,12 +35,13 @@ npm install @ensnode/ensdb-sdk
 ```
 
 ```typescript
-import { EnsDbReader } from '@ensnode/ensdb-sdk';
+import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
 // Connect by providing a connection string and the ENSIndexer Schema Name to query
 const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
 const { ensDb, ensIndexerSchema } = ensDbReader;
 ```
+
   </TabItem>
 </Tabs>
 

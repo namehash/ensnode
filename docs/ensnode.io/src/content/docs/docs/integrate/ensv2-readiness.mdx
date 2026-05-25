@@ -5,11 +5,10 @@ description: How building with ENSNode today prepares your application for ENSv2
 
 import { LinkCard, Aside } from "@astrojs/starlight/components";
 
-
 <Aside type="note" icon="approve-check-circle" title="Be ready!">
-  Build with the **ENS Omnigraph** today and your app will support **ENSv2** the moment it launches — with zero downtime or code changes.
+  Build with the **ENS Omnigraph** today and your app will support **ENSv2** the moment it launches
+  — with zero downtime or code changes.
 </Aside>
-
 
 ## Historical limitations of building on ENS
 
@@ -19,13 +18,14 @@ Full access to ENS data formerly required two separate data fetching strategies 
 2. **Indexed ENS data** — the [ENS Subgraph](/docs/integrate/subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
 
 Neither system alone was complete.
+
 - ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpreting raw values returned by the ENS protocol.
 - The Subgraph gives you queryable indexed ENS data but has critical limitations, including:
-   - The Subgraph is single-chain.
-   - The Subgraph has no support for ENSv2's fundamental data model changes.
-   - The Subgraph cannot perform ENS resolutions.
-   - The Subgraph doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.
-   - The Subgraph exposes too many internal implementation detail complexities of ENS for app developers.
+  - The Subgraph is single-chain.
+  - The Subgraph has no support for ENSv2's fundamental data model changes.
+  - The Subgraph cannot perform ENS resolutions.
+  - The Subgraph doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.
+  - The Subgraph exposes too many internal implementation detail complexities of ENS for app developers.
 
 In the past, apps building on ENS have had to live with these split fetching strategies, their limitations, and their downstream complexities. And we should note, **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
 
@@ -54,4 +54,3 @@ ENSNode meets you wherever you are — drop-in React components, a typed TypeScr
   href="/docs/integrate/integration-options"
   description="enskit (React), enssdk (TypeScript), the ENS Omnigraph GraphQL API, direct ENSDb access, CLI tooling, and more."
 />
-

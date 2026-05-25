@@ -5,7 +5,7 @@ sidebar:
   label: Domain by Name
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 Fetch a Domain by its canonical name. Because `canonical_name` is materialized across both ENSv1 and ENSv2, the same lookup works regardless of protocol version. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
@@ -21,9 +21,11 @@ WHERE canonical_name = 'vitalik.eth';
 import { eq } from 'drizzle-orm';
 
 const [vitalik] = await ensDb
-  .select()
-  .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+.select()
+.from(ensIndexerSchema.domain)
+.where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+
 ```
   </TabItem>
 </Tabs>
+```

@@ -62,11 +62,13 @@ DB_SCHEMA_VERSION=3 LABEL_SET_ID=discovery-a LABEL_SET_VERSION=0
 The database download variables (`ENSRAINBOW_LABELSET_SERVER_URL`, `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are **only used by download scripts** and Docker's entrypoint script to fetch pre-built databases. **The ENSRainbow application itself does not read these environment variables** - it gets label set information from the database after it's been set up.
 
 **When you need these variables:**
+
 - Running with Docker (handled automatically by entrypoint script)
 - Using manual download scripts to fetch pre-built databases
 - Initial database setup
 
 **When you DON'T need these variables:**
+
 - Running ENSRainbow directly after database is already set up
 - Normal ENSRainbow operations (server reads label set info from database)
-:::
+  :::

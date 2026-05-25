@@ -18,7 +18,7 @@ Use these **currently available** identifiers with the [download script](/docs/s
 ```bash
 # Syntax: download-ensrainbow-files.sh <LABEL_SET_ID> <LABEL_SET_VERSION>
 ./scripts/download-ensrainbow-files.sh subgraph 0        # Production dataset
-./scripts/download-ensrainbow-files.sh ens-test-env 0    # Test dataset  
+./scripts/download-ensrainbow-files.sh ens-test-env 0    # Test dataset
 ./scripts/download-ensrainbow-files.sh discovery-a 0     # Discovery dataset
 ./scripts/download-ensrainbow-files.sh searchlight 1     # Extended discovery dataset
 ```
@@ -32,65 +32,74 @@ The information below reflects actual availability as of the last check.
 ### Currently Available
 
 #### `subgraph`
+
 **Source**: The Graph's official ENS Subgraph  
 **Description**: Main production dataset containing labelhash-to-label mappings from The Graph's ENS subgraph.
 
-| Version | Status | Description |
-|---------|--------|-------------|
-| `0` | ✅ Available | Initial production dataset |
+| Version | Status       | Description                |
+| ------- | ------------ | -------------------------- |
+| `0`     | ✅ Available | Initial production dataset |
 
 #### `ens-test-env`
+
 **Source**: [ens-test-env](https://github.com/ensdomains/ens-test-env) project  
 **Description**: Small, curated test dataset perfectly aligned with the ens-test-env labels for development and testing.
 
-| Version | Status | Description |
-|---------|--------|-------------|
-| `0` | ✅ Available | Test dataset for local development |
+| Version | Status       | Description                        |
+| ------- | ------------ | ---------------------------------- |
+| `0`     | ✅ Available | Test dataset for local development |
 
 #### `discovery-a`
+
 **Source**: Dynamic discovery pipeline  
 **Description**: Dataset for dynamically discovered labels, initially empty but grows over time.
 
-| Version | Status | Description |
-|---------|--------|-------------|
-| `0` | ✅ Available | Initial empty dataset for dynamic discoveries |
+| Version | Status       | Description                                   |
+| ------- | ------------ | --------------------------------------------- |
+| `0`     | ✅ Available | Initial empty dataset for dynamic discoveries |
 
 #### `searchlight`
+
 **Source**: Extended discovery mechanisms  
 **Description**: Enhanced dataset with additional label discoveries beyond the subgraph, providing maximum healing coverage.
 
-| Version | Status | Description |
-|---------|--------|-------------|
-| `0` | ✅ Available | Extended dataset with additional discoveries |
-| `1` | ✅ Available | Extended dataset with a few more additional discoveries |
+| Version | Status       | Description                                             |
+| ------- | ------------ | ------------------------------------------------------- |
+| `0`     | ✅ Available | Extended dataset with additional discoveries            |
+| `1`     | ✅ Available | Extended dataset with a few more additional discoveries |
 
 ## Usage Examples
 
 ### For Local Development
+
 ```bash title="Download test data"
 cd apps/ensrainbow
 ./scripts/download-ensrainbow-files.sh ens-test-env 0
 ```
 
 ### For Production Use
+
 ```bash title="Download production data"
 cd apps/ensrainbow
 ./scripts/download-ensrainbow-files.sh subgraph 0
 ```
 
 ### For Discovery/Research
+
 ```bash title="Download discovery dataset"
 cd apps/ensrainbow
 ./scripts/download-ensrainbow-files.sh discovery-a 0
 ```
 
 ### For Maximum Coverage
+
 ```bash title="Download extended discovery dataset"
 cd apps/ensrainbow
 ./scripts/download-ensrainbow-files.sh searchlight 1
 ```
 
 ### For API Configuration
+
 ```bash title="Environment variables"
 export LABEL_SET_ID=subgraph
 export LABEL_SET_VERSION=0
@@ -100,6 +109,7 @@ export DB_SCHEMA_VERSION=3
 ## Checking Availability
 
 ### Manual Verification
+
 You can manually verify if a label set is available by checking the ENSRainbow labelset server:
 
 ```bash title="Check if a label set exists"
@@ -111,9 +121,14 @@ wget --spider "https://bucket.ensrainbow.io/labelsets/${LABEL_SET_ID}_${LABEL_SE
 
 ## Understanding Versions
 
-<LinkCard title="Label Sets & Versioning" href="/docs/services/ensrainbow/concepts/label-sets-and-versioning" description="Learn more about how ENSRainbow's versioning system works" />
+<LinkCard
+  title="Label Sets & Versioning"
+  href="/docs/services/ensrainbow/concepts/label-sets-and-versioning"
+  description="Learn more about how ENSRainbow's versioning system works"
+/>
 
 ### Key Points:
+
 - **Version 0** is always the initial dataset for any label set
 - **Higher versions** contain incremental additions (not replacements)
 - **Versions must be ingested sequentially** (0 → 1 → 2, etc.)
@@ -121,8 +136,20 @@ wget --spider "https://bucket.ensrainbow.io/labelsets/${LABEL_SET_ID}_${LABEL_SE
 
 ## Related Resources
 
-<LinkCard title="Local Development Setup" href="/docs/services/ensrainbow/contributing/local-development" description="Step-by-step guide for setting up ENSRainbow locally" />
+<LinkCard
+  title="Local Development Setup"
+  href="/docs/services/ensrainbow/contributing/local-development"
+  description="Step-by-step guide for setting up ENSRainbow locally"
+/>
 
-<LinkCard title="Configuration Guide" href="/docs/services/ensrainbow/usage/configuration" description="Complete configuration options for ENSRainbow deployment" />
+<LinkCard
+  title="Configuration Guide"
+  href="/docs/services/ensrainbow/usage/configuration"
+  description="Complete configuration options for ENSRainbow deployment"
+/>
 
-<LinkCard title="TypeScript Interfaces" href="/docs/services/ensrainbow/concepts/typescript-interfaces" description="Type definitions for label sets in the ENSRainbow SDK" />
+<LinkCard
+  title="TypeScript Interfaces"
+  href="/docs/services/ensrainbow/concepts/typescript-interfaces"
+  description="Type definitions for label sets in the ENSRainbow SDK"
+/>

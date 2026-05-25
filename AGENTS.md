@@ -88,10 +88,10 @@ Fail fast and loudly on invalid inputs.
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
 - Before declaring work complete, run validation in the affected project(s):
   1. If OpenAPI Defs or the Omnigraph GraphQL Schema was affected, run `pnpm generate`
-    - always run `pnpm generate` from the monorepo root, do NOT scope to a specific package
+  - always run `pnpm generate` from the monorepo root, do NOT scope to a specific package
   2. `pnpm -F <affected-project> typecheck`
-    - at the end of a work session, always run `pnpm typecheck` from the monorepo root
+  - at the end of a work session, always run `pnpm typecheck` from the monorepo root
   3. `pnpm lint`
-    - at the end of a work session, always run `pnpm lint` from the monorepo root
+  - at the end of a work session, always run `pnpm lint` from the monorepo root
   4. `pnpm test --project <affected-project> [--project <other-affected-project>]`
-    - at the end of a work session, always run `pnpm test` from the monorepo root
+  - at the end of a work session, always run `pnpm test` from the monorepo root

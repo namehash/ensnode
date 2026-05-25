@@ -6,14 +6,14 @@ sidebar:
 keywords: [ensrainbow, cli]
 ---
 
-| Command | Purpose | Most useful flags | Example |
-|---------|---------|-------------------|---------|
-| `convert` | Convert CSV files to `.ensrainbow` format. **This is the primary method for creating new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--existing-db-path`, `--silent` | `pnpm run convert --input-file labels.csv --output-file my-dataset_0.ensrainbow --label-set-id my-dataset` |
-| `convert-sql` | Convert legacy `.sql.gz` rainbow tables (ENS Subgraph data) to `.ensrainbow` format | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version` | `pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0` |
-| `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB | `--input-file`, `--data-dir` | `pnpm run ingest-ensrainbow --input-file my-dataset_0.ensrainbow --data-dir ./data` |
-| `validate` | Verify DB integrity | `--data-dir`, `--lite` | `pnpm run validate --lite` |
-| `purge` | Delete all DB files in a directory | `--data-dir` | `pnpm run purge --data-dir ./data` |
-| `serve` | Launch the HTTP API server | `--data-dir`, `--port` | `pnpm run serve --port 3223` |
+| Command             | Purpose                                                                                                       | Most useful flags                                                                   | Example                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `convert`           | Convert CSV files to `.ensrainbow` format. **This is the primary method for creating new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--existing-db-path`, `--silent` | `pnpm run convert --input-file labels.csv --output-file my-dataset_0.ensrainbow --label-set-id my-dataset`                             |
+| `convert-sql`       | Convert legacy `.sql.gz` rainbow tables (ENS Subgraph data) to `.ensrainbow` format                           | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version`            | `pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0` |
+| `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB                                                                      | `--input-file`, `--data-dir`                                                        | `pnpm run ingest-ensrainbow --input-file my-dataset_0.ensrainbow --data-dir ./data`                                                    |
+| `validate`          | Verify DB integrity                                                                                           | `--data-dir`, `--lite`                                                              | `pnpm run validate --lite`                                                                                                             |
+| `purge`             | Delete all DB files in a directory                                                                            | `--data-dir`                                                                        | `pnpm run purge --data-dir ./data`                                                                                                     |
+| `serve`             | Launch the HTTP API server                                                                                    | `--data-dir`, `--port`                                                              | `pnpm run serve --port 3223`                                                                                                           |
 
 ## Creating .ensrainbow Files
 
@@ -22,6 +22,7 @@ keywords: [ensrainbow, cli]
 The `convert` command is the **primary method** for creating new `.ensrainbow` files from CSV data.
 
 **Full convert command syntax:**
+
 ```bash
 pnpm run convert \
   --input-file path/to/labels.csv \
@@ -45,4 +46,4 @@ pnpm run convert-sql \
 
 :::tip[Want more help?]
 Append `--help` to any command, e.g. `pnpm run serve --help`.
-::: 
+:::
