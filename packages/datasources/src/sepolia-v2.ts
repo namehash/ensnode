@@ -26,13 +26,16 @@ import { ResolverABI } from "./lib/ResolverABI";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
- * The block after which ENSv1 contracts (like Resolver) must be indexed, since they way still be
+ * The block after which ENSv1 contracts (like Resolver) must be indexed, since they could still be
  * used with a sepolia-v2 deployment.
  */
 const SEPOLIA_ENSV1_DEPLOYMENT_BLOCK = 3702721;
 
 /**
  * The earliest deploy block of the Sepolia ENSv1+v2 test deployment.
+ *
+ * @dev this is the earliest block of _any_ Sepolia ENSv1+v2 test deployment, since the ENS Team
+ * has shown in the past that a previous deployment's contracts may be used with a future deployment.
  */
 const SEPOLIA_ENSV2_DEPLOYMENT_BLOCK = 10400000;
 
