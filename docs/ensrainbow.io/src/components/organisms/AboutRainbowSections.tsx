@@ -107,8 +107,8 @@ const rainbowSections: AboutRainbowProps[] = [
     alignImageEnd: true,
     normalImage: {
       source: ensNode.src,
-      tagWidth: 640,
-      tagHeight: 340,
+      tagWidth: 149,
+      tagHeight: 28,
       alt: "ENSNode sidecar service ENSRainbow",
     },
     svgImage: (
