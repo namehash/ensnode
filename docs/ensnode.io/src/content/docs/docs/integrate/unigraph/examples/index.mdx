@@ -11,6 +11,10 @@ These examples show the same queries two ways: in **raw SQL** (any PostgreSQL cl
 
 SQL access requires connecting to your own [self-hosted](/docs/self-host) ENSDb instance.
 
+:::caution[`unigraph` plugin required]
+Using the Unigraph SQL requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
+:::
+
 ## Connect
 
 The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each ENSIndexer instance writes to its own **ENSIndexer Schema** (e.g. `ensindexer_0`); shared operational metadata lives in the `ensnode` schema.

@@ -15,7 +15,7 @@ The semantic version of the Node.js application itself (e.g. `0.4.2`).
 - Bumped when new features, fixes, or breaking changes are released.
 - Shown in `/v1/config` under the `version` field.
 
-## 2. Database Schema Version (`DB_SCHEMA_VERSION`)
+## 2. Database Schema Version (DB_SCHEMA_VERSION)
 
 Specifies the expected on-disk structure of the LevelDB database as well as the expected format of the downloadable pre-built LevelDB databases.
 
@@ -25,7 +25,7 @@ Specifies the expected on-disk structure of the LevelDB database as well as the 
 The API server will refuse to start if the on-disk database schema is different than the running software's expected schema.
 :::
 
-## 3. Label-set Version (`LABEL_SET_VERSION`)
+## 3. Label-set Version (LABEL_SET_VERSION)
 
 Identifies incremental sets of rainbow records for a given label-set (`LABEL_SET_ID`).
 
