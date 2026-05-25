@@ -380,3 +380,82 @@ starlight-tabs ul[role="tablist"] {
   padding-left: 0;
   border-bottom: none;
 }
+
+/* Add custom styling to aside tip/caution/note components */
+.starlight-aside {
+  padding: 20px 16px;
+
+  border-radius: 12px;
+}
+
+.starlight-aside__title {
+  color: var(--sl-color-white);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 125% */
+}
+
+.starlight-aside__content {
+  color: var(--color-text-primary);
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 171.429% */
+
+  margin-top: 10px;
+
+  & pre {
+    margin-top: 10px;
+  }
+}
+
+.starlight-aside__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.starlight-aside--tip {
+  border: 1px solid #f43f5e33;
+  background-color: #f43f5e1a;
+
+  & .starlight-aside__icon {
+    color: #f43f5e;
+  }
+
+  & a {
+    color: #f43f5e;
+  }
+}
+
+.starlight-aside--caution {
+  border: 1px solid #f9731633;
+  background-color: #f973161a;
+
+  & .starlight-aside__icon {
+    color: #f97316;
+  }
+
+  & a {
+    color: #f97316;
+  }
+
+  & pre {
+    background-color: rgba(103, 61, 73, 0.05);
+    border: 1px solid #f9731633;
+  }
+}
+
+.starlight-aside--note {
+  border: 1px solid #3b82f633;
+  background-color: #3b82f61a;
+
+  & .starlight-aside__icon {
+    color: #3b82f6;
+  }
+
+  & a {
+    color: #3b82f6;
+  }
+}
