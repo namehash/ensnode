@@ -44,9 +44,10 @@
   --sidebar-icon-color: #9ca3af;
 
   /* Aside colors */
-  --aside-tip-color: #f43f5e;
+  --aside-danger-color: #f43f5e;
   --aside-caution-color: #f97316;
   --aside-note-color: #3b82f6;
+  --aside-tip-color: #007c23;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -392,6 +393,12 @@ ul.top-level details details > summary .group-label span {
   color: var(--sl-color-gray-2);
 }
 
+/* Customize badge styles in the sidebar */
+.sl-badge:is(.danger) {
+  border-color: var(--aside-danger-color);
+  background-color: var(--aside-danger-color);
+}
+
 /* Make sure that social icons in the sidebar do not move on hover */
 .sidebar-content .social-icons a {
   transform: none !important;
@@ -436,6 +443,14 @@ starlight-tabs ul[role="tablist"] {
   & pre {
     margin-top: 10px;
   }
+
+  & .sl-link-card {
+    background-color: var(--sl-color-black);
+
+    & a {
+      text-decoration: none;
+    }
+  }
 }
 
 .starlight-aside__icon {
@@ -453,6 +468,43 @@ starlight-tabs ul[role="tablist"] {
 
   & a {
     color: var(--aside-tip-color);
+  }
+
+  & .sl-link-card:hover {
+    border-color: var(--aside-tip-color);
+
+    & .title {
+      color: var(--aside-tip-color);
+    }
+
+    & .icon {
+      color: var(--aside-tip-color);
+    }
+  }
+}
+
+.starlight-aside--danger {
+  border: 1px solid color-mix(in srgb, var(--aside-danger-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-danger-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-danger-color);
+  }
+
+  & a {
+    color: var(--aside-danger-color);
+  }
+
+  & .sl-link-card:hover {
+    border-color: var(--aside-danger-color);
+
+    & .title {
+      color: var(--aside-danger-color);
+    }
+
+    & .icon {
+      color: var(--aside-danger-color);
+    }
   }
 }
 
@@ -472,6 +524,18 @@ starlight-tabs ul[role="tablist"] {
     background-color: rgba(103, 61, 73, 0.05);
     border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
   }
+
+  & .sl-link-card {
+    border-color: var(--aside-caution-color);
+
+    & .title {
+      color: var(--aside-caution-color);
+    }
+
+    & .icon {
+      color: var(--aside-caution-color);
+    }
+  }
 }
 
 .starlight-aside--note {
@@ -484,6 +548,18 @@ starlight-tabs ul[role="tablist"] {
 
   & a {
     color: var(--aside-note-color);
+  }
+
+  & .sl-link-card {
+    border-color: var(--aside-note-color);
+
+    & .title {
+      color: var(--aside-note-color);
+    }
+
+    & .icon {
+      color: var(--aside-note-color);
+    }
   }
 }
 

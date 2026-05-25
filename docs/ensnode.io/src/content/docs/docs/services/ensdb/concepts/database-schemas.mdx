@@ -253,7 +253,7 @@ These assumptions hold for the current scope of indexing logic but may not hold 
 
 A "registration lifecycle" represents a single cycle of a name being registered once, followed by renewals (expiry date extensions) any number of times.
 
-:::note
+:::caution
 This data model only tracks the **most recently created** registration lifecycle record for a name, and does not track all registration lifecycle records for a name across time. Therefore, if a name goes through multiple cycles of (registration → expiry → release), this data model only stores data for the most recently created registration lifecycle.
 :::
 

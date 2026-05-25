@@ -11,7 +11,7 @@ This is the canonical reference for the **Unigraph schema** — the unified, pol
 
 Each ENSIndexer instance owns a dedicated database schema (e.g. `ensindexer_0`) holding all of its indexed Unigraph data, fully isolated from other instances.
 
-<Aside>
+<Aside type="caution" title="Unigraph plugin hard dependency">
   The Unigraph plugin has a hard dependency on the **Protocol Acceleration** plugin (Domain–Resolver
   relations, resolver records, ENSv1 Registry-migration state). Those tables, the shared **ENSNode
   Schema**, and the other ENSIndexer plugins (Registrars, Subgraph, tokenscope) are documented in
