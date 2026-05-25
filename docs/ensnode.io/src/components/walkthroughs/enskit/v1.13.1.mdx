@@ -1,4 +1,4 @@
-import { LinkCard, Steps } from "@astrojs/starlight/components";
+import { LinkCard, Steps, Aside } from "@astrojs/starlight/components";
 import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
 `enskit` is the React toolkit for ENSv2 development. It provides a fully typed Omnigraph API client (powered by [`urql`](https://nearform.com/open-source/urql/) and [`gql.tada`](https://gql-tada.0no.co/)), the `OmnigraphProvider`, and the `useOmnigraphQuery` hook for writing type-safe ENS queries with editor autocomplete, Relay-style pagination, and Omnigraph-specific cache directives.
@@ -25,9 +25,13 @@ npm install
 npm install enskit@1.13.1 enssdk@1.13.1
 ```
 
-:::caution[Pin exact versions]
-Always pin **exact** versions (no `^` or `~`) of `enskit` and `enssdk`, and keep them on the same version. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking exact versions keeps types and runtime in sync, and matched to the ENSNode version your hosted instance runs.
-:::
+<Aside type="caution" title="Pin exact versions">
+  Always pin **exact** versions (no `^` or `~`) of `enskit` and `enssdk`, and keep them on the same
+  version. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada`
+  TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently
+  drift your generated types away from your queries. Locking exact versions keeps types and runtime
+  in sync, and matched to the ENSNode version your hosted instance runs.
+</Aside>
 
 ## 3. Configure the gql.tada TypeScript plugin
 
@@ -97,9 +101,13 @@ export function App() {
 
 Create `src/DomainView.tsx`. We'll start with the simplest possible query — look up the `eth` Domain and render its owner and protocol version.
 
-:::tip[InterpretedName]
-An **InterpretedName** is a Name whose labels are each either normalized or represented as an [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a known-safe string as one; for user input, validate first. See [Interpreted Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
-:::
+<Aside type="tip" title="InterpretedName">
+  An **InterpretedName** is a Name whose labels are each either normalized or represented as an
+  [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the
+  canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a
+  known-safe string as one; for user input, validate first. See [Interpreted
+  Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
+</Aside>
 
 ```tsx title="src/DomainView.tsx"
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";

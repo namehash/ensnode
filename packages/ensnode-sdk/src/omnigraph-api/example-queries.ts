@@ -26,19 +26,19 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = getDatasourceContract(
 
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
-// owns ~9k v1 .eth names on sepolia-v2
-const SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES = toNormalizedAddress(
-  "0x69696969c3b3ca102eeb5c53a065a7c3ae4fb6dd",
-);
+// rich sepolia-v2 account: owns several named .eth domains (roppp/wrapnation/katrenpadu),
+// holds ETHRegistry (EnhancedAccessControl) + resolver permissions, and has event history
+const SEPOLIA_V2_ACCOUNT = toNormalizedAddress("0x801d2e48d378f161dba7ad7ad002ad557714c191");
 
-// holds ETHRegistry (EnhancedAccessControl) permissions on sepolia-v2
-const SEPOLIA_V2_ADDRESS_WITH_PERMISSIONS = toNormalizedAddress(
-  "0x4c65a1c8d330ce1c3f60e00cd55709ba5fe2e090",
+// the sepolia-v2 ENSv2 admin/controller account; the only indexed account holding both
+// ENSv1 (legacy) and ENSv2 names, so it best illustrates the v1→v2 migration split
+const SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 = toNormalizedAddress(
+  "0xffffffffff52d316b7bd028358089bc8066b8f80",
 );
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
-const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
+const SEPOLIA_V2_NAME = asInterpretedName("roppp.eth");
 
 const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
@@ -46,11 +46,11 @@ const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   "DefaultPublicResolver5",
 );
 
-const SEPOLIA_V2_PUBLIC_RESOLVER = getDatasourceContract(
-  ENSNamespaceIds.SepoliaV2,
-  DatasourceNames.ReverseResolverRoot,
-  "DefaultPublicResolver5",
-);
+// a sepolia-v2 resolver with indexed records (the DefaultPublicResolver5 has none indexed)
+const SEPOLIA_V2_RESOLVER_WITH_RECORDS = {
+  chainId: 11155111,
+  address: toNormalizedAddress("0x8fade66b79cc9f707ab26799354482eb93a5b7dd"),
+};
 
 export type GraphqlApiExampleQuery = {
   id: string;
@@ -120,7 +120,7 @@ query FindDomains(
         order: { by: "NAME", dir: "DESC" },
       },
       [ENSNamespaceIds.SepoliaV2]: {
-        name: { starts_with: "test-na" },
+        name: { starts_with: "sf" },
         order: { by: "NAME", dir: "DESC" },
       },
     },
@@ -148,7 +148,7 @@ query DomainByName($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
   },
 
@@ -194,7 +194,7 @@ query DomainRegistration($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "vitalik.eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
   },
 
@@ -270,7 +270,7 @@ query DomainEvents($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "newowner.eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
   },
 
@@ -297,7 +297,7 @@ query AccountDomains(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
     },
   },
 
@@ -317,7 +317,7 @@ query AccountEvents(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
     },
   },
 
@@ -405,7 +405,7 @@ query PermissionsByUser($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_PERMISSIONS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
     },
   },
 
@@ -432,7 +432,7 @@ query AccountResolverPermissions($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
     },
   },
 
@@ -456,7 +456,7 @@ query DomainResolver($name: InterpretedName!) {
     variables: {
       default: { name: "vitalik.eth" },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
-      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
   },
 
@@ -489,7 +489,7 @@ query ResolverByAddress($contract: AccountIdInput!) {
 }`,
     variables: {
       default: { contract: MAINNET_PUBLIC_RESOLVER },
-      [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_PUBLIC_RESOLVER },
+      [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_RESOLVER_WITH_RECORDS },
     },
   },
 
@@ -544,7 +544,7 @@ query AccountMigratedNames($address: Address!) {
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 },
     },
   },
   {
