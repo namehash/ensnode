@@ -1,0 +1,138 @@
+[
+  {
+    "id": "hello-world",
+    "query": "#\n# Welcome to this interactive playground for\n# ENSNode's GraphQL API!\n#\n# You can get started by typing your query here or by using\n# the Explorer on the left to select the data you want to query.\n#\n# There are also example queries in the tabs above ☝️\nquery HelloWorld {\n  domain(by: { name: \"eth\" }) { canonical { name { interpreted beautified } } owner { address } }\n}",
+    "variables": {}
+  },
+  {
+    "id": "find-domains",
+    "query": "query FindDomains(\n  $name: DomainsNameFilter!\n  $order: DomainsOrderInput\n) {\n  domains(\n    where: { name: $name }\n    order: $order\n    first: 20\n  ) {\n    edges {\n      node {\n        __typename\n        id\n        label { interpreted hash }\n        canonical { name { interpreted beautified } }\n\n        registration { expiry event { timestamp } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": {
+        "starts_with": "sf"
+      },
+      "order": {
+        "by": "NAME",
+        "dir": "DESC"
+      }
+    }
+  },
+  {
+    "id": "domain-by-name",
+    "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    __typename\n    id\n    label { interpreted hash }\n    canonical { name { interpreted } node path { id } }\n    owner { address }\n    subregistry { contract { chainId address } }\n\n    ... on ENSv1Domain {\n      rootRegistryOwner { address }\n    }\n  }\n}",
+    "variables": {
+      "name": "roppp.eth"
+    }
+  },
+  {
+    "id": "domain-registration",
+    "query": "query DomainRegistration($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { interpreted } }\n\n    registration {\n      __typename\n      id\n      start\n      expiry\n      expired\n      referrer\n      registrar { chainId address }\n      registrant { address }\n      renewals(first: 5) {\n        totalCount\n        edges { node { duration base premium referrer } }\n      }\n\n      # ENSv1 .eth registrations (also Basenames & Lineanames)\n      ... on BaseRegistrarRegistration {\n        baseCost\n        premium\n        isInGracePeriod\n        # present when the .eth name is wrapped by the NameWrapper\n        wrapped { fuses tokenId }\n      }\n\n      # names held natively in the NameWrapper\n      ... on NameWrapperRegistration {\n        fuses\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "roppp.eth"
+    }
+  },
+  {
+    "id": "domain-subdomains",
+    "query": "query DomainSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted beautified } }\n    subdomains(first: 10) {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "eth"
+    }
+  },
+  {
+    "id": "subdomains-pagination",
+    "query": "query SubdomainsPagination($first: Int!, $after: String) {\n  domain(by: { name: \"eth\" }) {\n    canonical { name { interpreted } }\n\n    # paginate child names: pass pageInfo.endCursor back as $after for the next page\n    subdomains(first: $first, after: $after) {\n      totalCount\n      pageInfo { hasNextPage endCursor }\n      edges {\n        cursor\n        node {\n          canonical { name { interpreted } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "first": 10,
+      "after": null
+    }
+  },
+  {
+    "id": "domain-events",
+    "query": "query DomainEvents($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    events {\n      totalCount\n      edges {\n        node {\n          from\n          to\n          topics\n          data\n          timestamp\n          transactionHash\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "roppp.eth"
+    }
+  },
+  {
+    "id": "domains-by-address",
+    "query": "query AccountDomains(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    domains {\n      edges {\n        node {\n          label { interpreted }\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+    }
+  },
+  {
+    "id": "account-events",
+    "query": "query AccountEvents(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
+    "variables": {
+      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+    }
+  },
+  {
+    "id": "registry-domains",
+    "query": "query RegistryDomains(\n  $registry: AccountIdInput!\n) {\n  registry(by: { contract: $registry }) {\n    domains {\n      edges {\n        node {\n          label { interpreted }\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "registry": {
+        "chainId": 11155111,
+        "address": "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1"
+      }
+    }
+  },
+  {
+    "id": "permissions-by-contract",
+    "query": "query PermissionsByContract(\n  $contract: AccountIdInput!\n) {\n  permissions(by: { contract: $contract }) {\n    resources {\n      edges {\n        node {\n          resource\n          users {\n            edges {\n              node {\n                id\n                user { address }\n                roles\n              }\n            }\n          }\n        }\n      }\n    }\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
+    "variables": {
+      "contract": {
+        "chainId": 11155111,
+        "address": "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1"
+      }
+    }
+  },
+  {
+    "id": "permissions-by-user",
+    "query": "query PermissionsByUser($address: Address!) {\n  account(by: { address: $address }) {\n    permissions {\n      edges {\n        node {\n          resource\n          roles\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+    }
+  },
+  {
+    "id": "account-resolver-permissions",
+    "query": "query AccountResolverPermissions($address: Address!) {\n  account(by: { address: $address }) {\n    resolverPermissions {\n      edges {\n        node {\n          resolver {\n            contract {\n              address\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+    }
+  },
+  {
+    "id": "domain-resolver",
+    "query": "query DomainResolver($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolver {\n      assigned {\n        records { edges { node { node keys coinTypes } } }\n        permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }\n        events { totalCount edges { node { topics data timestamp } } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "roppp.eth"
+    }
+  },
+  {
+    "id": "resolver-by-address",
+    "query": "query ResolverByAddress($contract: AccountIdInput!) {\n  resolver(by: { contract: $contract }) {\n    id\n    contract { chainId address }\n\n    # records this resolver stores, keyed by node\n    records(first: 5) {\n      totalCount\n      edges {\n        node {\n          node\n          name\n          keys\n          coinTypes\n        }\n      }\n    }\n\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
+    "variables": {
+      "contract": {
+        "chainId": 11155111,
+        "address": "0x8fade66b79cc9f707ab26799354482eb93a5b7dd"
+      }
+    }
+  },
+  {
+    "id": "namegraph",
+    "query": "query Namegraph {\n  root {\n    id\n    domains {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n\n          subdomains {\n            edges {\n              node {\n                canonical { name { interpreted beautified } }\n\n                subdomains {\n                  edges {\n                    node {\n                      canonical { name { interpreted beautified } }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "variables": {}
+  },
+  {
+    "id": "account-migrated-names",
+    "query": "query AccountMigratedNames($address: Address!) {\n  account(by: { address: $address }) {\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
+    "variables": {
+      "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
+    }
+  },
+  {
+    "id": "eth-by-version",
+    "query": "query GetEthDomains {\n  domains(where: { name: { eq: \"eth\" } }) {\n    edges {\n      node {\n        __typename\n        id\n      }\n    }\n  }\n}",
+    "variables": {}
+  }
+]
