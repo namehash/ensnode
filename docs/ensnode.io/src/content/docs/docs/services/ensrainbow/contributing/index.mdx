@@ -61,7 +61,7 @@ Follow these steps to start contributing to ENSRainbow:
 - **Running into issues?** → [Troubleshooting](/docs/services/ensrainbow/usage/troubleshooting)
 - **Want to understand the data flow?** → [Data Model](/docs/services/ensrainbow/concepts/data-model)
 
-### Data Ingestion (`ingest-ensrainbow`)
+### Data Ingestion (ingest-ensrainbow)
 
 Ingests data from `.ensrainbow` files into the LevelDB database.
 
@@ -72,7 +72,7 @@ pnpm run ingest-ensrainbow --input-file <path/to/LABEL_SET_ID-LABEL_SET_VERSION.
 - `--input-file`: Path to the `.ensrainbow` file. Adheres to [ingestion rules](#ingest-rainbow-tables).
 - `--data-dir`: Directory for the LevelDB database (default: `data/`). The database stores `LABEL_SET_ID` and `HIGHEST_LABEL_SET_VERSION` metadata.
 
-### Database Validation (`validate`)
+### Database Validation (validate)
 
 ```bash
 pnpm run validate [--data-dir path/to/db] [--lite]
@@ -96,7 +96,7 @@ The process will exit with:
 - Code 0: Validation successful
 - Code 1: Validation failed or errors encountered
 
-### Database Purge (`purge`)
+### Database Purge (purge)
 
 ```bash
 pnpm run purge [--data-dir path/to/db]
@@ -109,7 +109,7 @@ The process will exit with:
 - Code 0: Successful purge
 - Code 1: Error during purge operation
 
-### API Server (`serve`)
+### API Server (serve)
 
 ```bash
 pnpm run serve [--port 3223] [--data-dir path/to/db]
@@ -290,7 +290,7 @@ Using a volume ensures that your downloaded and ingested data is not lost when t
 These steps are typically performed by project maintainers for releasing official pre-built ENSRainbow database archives. Assumes `rclone` is configured with a remote named `ENSRAINBOWR2`.
 :::
 
-### 1. Prepare `.ensrainbow` Files
+### 1. Prepare .ensrainbow Files
 
 This section covers the conversion of source data (like CSV data or empty files for initial datasets) into the `.ensrainbow` format. For detailed conversion instructions and examples, see the [Creating ENSRainbow Files](/docs/services/ensrainbow/concepts/creating-files) guide.
 
@@ -318,7 +318,7 @@ This converts a test dataset CSV file into an `.ensrainbow` file for version 0 o
 time pnpm run convert --input-file test/fixtures/ens_test_env_names.csv --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env
 ```
 
-### 2. Upload `.ensrainbow` Files to R2 Storage
+### 2. Upload .ensrainbow Files to R2 Storage
 
 After generation, these `.ensrainbow` files are uploaded to the designated cloud storage (e.g., R2 via rclone).
 
@@ -328,7 +328,7 @@ rclone copy ./discovery-a_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./ens-test-env_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 ```
 
-### 3. Calculate and Upload Checksums for `.ensrainbow` Files
+### 3. Calculate and Upload Checksums for .ensrainbow Files
 
 SHA256 checksums are generated for each `.ensrainbow` file to ensure data integrity. These checksum files are then uploaded.
 
@@ -344,7 +344,7 @@ rclone copy ./discovery-a_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelse
 rclone copy ./ens-test-env_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 ```
 
-### 4. Ingest `.ensrainbow` Files into LevelDB Databases
+### 4. Ingest .ensrainbow Files into LevelDB Databases
 
 The `.ensrainbow` files are ingested into local LevelDB instances to create the actual databases.
 
