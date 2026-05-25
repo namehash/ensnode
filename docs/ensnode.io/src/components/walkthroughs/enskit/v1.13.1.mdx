@@ -39,7 +39,7 @@ npm install enskit@1.13.1 enssdk@1.13.1
 
 Add the plugin to `tsconfig.json`:
 
-```json title="tsconfig.json" {6-13}
+```json title="tsconfig.json" ins={6-12}
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -161,7 +161,7 @@ A few things to notice:
 
 Expand the query to also fetch the Domain's subdomains. `subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm), so the shape is `{ edges: [{ node }] }`.
 
-```tsx title="src/DomainView.tsx" ins={7-11,40-51}
+```tsx title="src/DomainView.tsx" ins={7-11,40-48}
 const DomainByNameQuery = graphql(`
   query DomainByName($name: InterpretedName!) {
     domain(by: { name: $name }) {
