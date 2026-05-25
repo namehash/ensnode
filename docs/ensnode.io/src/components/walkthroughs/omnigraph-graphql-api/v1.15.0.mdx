@@ -28,7 +28,7 @@ A minimum-viable hello world over `curl`:
 curl -sS -X POST \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ domain(by: { name: \"eth\" }) { canonical { name { beautified } } owner { address } } }"}' \
-  https://api.v2-sepolia.blue.ensnode.io/api/omnigraph
+  https://api.v2-sepolia.ensnode.io/api/omnigraph
 ```
 
 The rest of this guide builds the same thing in TypeScript using `fetch`, so you have something to extend.
@@ -171,7 +171,7 @@ A few things to notice:
 ## 4. Run it
 
 ```sh
-ENSNODE_URL=https://api.v2-sepolia.blue.ensnode.io npm start
+ENSNODE_URL=https://api.v2-sepolia.ensnode.io npm start
 ```
 
 You should see the `eth` Domain, its owner, and the first 20 of its subdomains.
