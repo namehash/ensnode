@@ -46,8 +46,8 @@ export default {
       // NOTE: named ENSRegistry in deployment
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
+        startBlock: 3702728,
       },
       Resolver: {
         abi: ResolverABI,
@@ -56,24 +56,24 @@ export default {
       // NOTE: named BaseRegistrarImplementation in deployment
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0xa51c9e6efe589407c72984e93b45e35a71a398ec",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        startBlock: 3702731,
       },
       // NOTE: named ETHRegistrarController in deployment
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0xb5778cf6cc9586d9ce740039c84dfb1802f307bc",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
+        startBlock: 8579988,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x250a6c640297f605b63c6e91c7cd376f04b288da",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
+        startBlock: 8579988,
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
-        address: "0x988061f048e8ff0290dd88ec8afed6b163d7ea76",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x3c85752a5d47dd09d677c645ff2a938b38fbfeba",
+        startBlock: 8928722,
       },
       UniversalResolverV2: {
         abi: UniversalResolverV2,
