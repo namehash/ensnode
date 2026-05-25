@@ -116,8 +116,8 @@ export default {
     contracts: {
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
-        address: "0x26997c9d0f3dcbae3f78c69e621a3926ee30bb98",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x4f382928805ba0e23b30cfb75fc9e848e82dfd47",
+        startBlock: 8579966,
       },
 
       // NOTE: named DefaultReverseResolver in deployment
@@ -137,8 +137,8 @@ export default {
       // NOTE: named PublicResolver in deployment
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0xb441cb480460eb8b2964dcb82b64a883b14abf3e",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0xe99638b40e4fff0129d56f03b55b6bbc4bbe49b5",
+        startBlock: 8580001,
       },
       BaseReverseResolver: {
         abi: ResolverABI,
