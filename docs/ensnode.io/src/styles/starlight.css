@@ -192,7 +192,7 @@ a[rel="prev"]:hover {
 .sl-markdown-content h4,
 .sl-markdown-content h5,
 .sl-markdown-content h6 {
-  color: var(--sl-color-accent-high);
+  color: var(--sl-color-white);
 }
 
 .sl-markdown-content a:hover:not(:where(.not-content *)) > span {
@@ -376,7 +376,7 @@ ul.top-level details details > summary .group-label span {
 /* Align "tablist" component to the left 
  * and remove the the default full-witdh underline
  */
-ul[role="tablist"] {
+starlight-tabs ul[role="tablist"] {
   padding-left: 0;
   border-bottom: none;
 }
