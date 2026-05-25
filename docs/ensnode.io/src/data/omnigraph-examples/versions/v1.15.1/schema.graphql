@@ -1,32 +1,75 @@
-"""Represents an individual Account, keyed by its Address."""
+"""
+Represents an individual Account, keyed by its Address.
+"""
 type Account {
-  """An EVM Address that uniquely identifies this Account on-chain."""
+  """
+  An EVM Address that uniquely identifies this Account on-chain.
+  """
   address: Address!
 
-  """The Domains that are owned by the Account."""
-  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection
+  """
+  The Domains that are owned by the Account.
+  """
+  domains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: AccountDomainsWhereInput
+  ): AccountDomainsConnection
 
   """
   All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
   """
-  events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: AccountEventsWhereInput
+  ): AccountEventsConnection
 
-  """A unique reference to this Account."""
+  """
+  A unique reference to this Account.
+  """
   id: Address!
 
   """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
   """
-  permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
+  permissions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: AccountPermissionsWhereInput
+  ): AccountPermissionsConnection
 
-  """The Permissions on Registries granted to this Account."""
-  registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
+  """
+  The Permissions on Registries granted to this Account.
+  """
+  registryPermissions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): AccountRegistryPermissionsConnection
 
-  """The Permissions on Resolvers granted to this Account."""
-  resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
+  """
+  The Permissions on Resolvers granted to this Account.
+  """
+  resolverPermissions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): AccountResolverPermissionsConnection
 }
 
-"""Address an Account by ID or Address."""
+"""
+Address an Account by ID or Address.
+"""
 input AccountByInput @oneOf {
   address: Address
   id: Address
@@ -43,14 +86,18 @@ type AccountDomainsConnectionEdge {
   node: Domain!
 }
 
-"""Filter for Account.domains query."""
+"""
+Filter for Account.domains query.
+"""
 input AccountDomainsWhereInput {
   """
   If set, filters the set of Domains by canonicality (i.e. reachability by ENS Forward Resolution): `true` for Canonical only, `false` for non-Canonical only. If omitted, returns all Domains owned by the Account regardless of canonicality.
   """
   canonical: Boolean
 
-  """If set, filters the set of Domains by name."""
+  """
+  If set, filters the set of Domains by name.
+  """
   name: DomainsNameFilter
 
   """
@@ -84,17 +131,23 @@ input AccountEventsWhereInput {
   """
   selector: EventsSelectorFilter
 
-  """Filter to events whose UnixTimestamp falls within the provided range."""
+  """
+  Filter to events whose UnixTimestamp falls within the provided range.
+  """
   timestamp: EventsTimestampFilter
 }
 
-"""A CAIP-10 Account ID including chainId and address."""
+"""
+A CAIP-10 Account ID including chainId and address.
+"""
 type AccountId {
   address: Address!
   chainId: ChainId!
 }
 
-"""A CAIP-10 Account ID including chainId and address."""
+"""
+A CAIP-10 Account ID including chainId and address.
+"""
 input AccountIdInput {
   address: Address!
   chainId: ChainId!
@@ -111,7 +164,9 @@ type AccountPermissionsConnectionEdge {
   node: PermissionsUser!
 }
 
-"""Filter for Account.permissions."""
+"""
+Filter for Account.permissions.
+"""
 input AccountPermissionsWhereInput {
   """
   If set, filters this Account's Permissions to those granted in this contract.
@@ -141,20 +196,28 @@ type AccountResolverPermissionsConnectionEdge {
   node: ResolverPermissionsUser!
 }
 
-"""Address represents an EVM Address in all lowercase."""
+"""
+Address represents an EVM Address in all lowercase.
+"""
 scalar Address
 
 """
 A BaseRegistrarRegistration represents a Registration within an ENSv1 BaseRegistrar contract, including those deployed by Basenames and Lineanames.
 """
 type BaseRegistrarRegistration implements Registration {
-  """The `baseCost` for registering this Domain, in wei."""
+  """
+  The `baseCost` for registering this Domain, in wei.
+  """
   baseCost: BigInt
 
-  """The Domain for which this Registration exists."""
+  """
+  The Domain for which this Registration exists.
+  """
   domain: Domain!
 
-  """The Event for which this Registration was created."""
+  """
+  The Event for which this Registration was created.
+  """
   event: Event!
 
   """
@@ -162,10 +225,14 @@ type BaseRegistrarRegistration implements Registration {
   """
   expired: Boolean!
 
-  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  """
+  A UnixTimestamp indicating the Registration's expiry, if exists.
+  """
   expiry: BigInt
 
-  """A unique reference to this Registration."""
+  """
+  A unique reference to this Registration.
+  """
   id: RegistrationId!
 
   """
@@ -173,10 +240,14 @@ type BaseRegistrarRegistration implements Registration {
   """
   isInGracePeriod: Boolean!
 
-  """The `premium` for registering this Domain, in wei."""
+  """
+  The `premium` for registering this Domain, in wei.
+  """
   premium: BigInt
 
-  """The extra `referrer` data provided with a Registration, if exists."""
+  """
+  The extra `referrer` data provided with a Registration, if exists.
+  """
   referrer: Hex
 
   """
@@ -184,7 +255,9 @@ type BaseRegistrarRegistration implements Registration {
   """
   registrant: Account
 
-  """The Registrar contract under which this Registration is managed."""
+  """
+  The Registrar contract under which this Registration is managed.
+  """
   registrar: AccountId!
 
   """
@@ -192,7 +265,9 @@ type BaseRegistrarRegistration implements Registration {
   """
   renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
 
-  """A UnixTimestamp indicating when this Registration was created."""
+  """
+  A UnixTimestamp indicating when this Registration was created.
+  """
   start: BigInt!
 
   """
@@ -216,10 +291,14 @@ BeautifiedName represents an enssdk#BeautifiedName: an InterpretedName whose nor
 """
 scalar BeautifiedName
 
-"""BigInt represents non-fractional signed whole numeric values."""
+"""
+BigInt represents non-fractional signed whole numeric values.
+"""
 scalar BigInt
 
-"""A Canonical Name, exposed in each representation we support."""
+"""
+A Canonical Name, exposed in each representation we support.
+"""
 type CanonicalName {
   """
   The Canonical Name as a BeautifiedName: the InterpretedName with its normalized labels beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. Encoded LabelHash labels are preserved verbatim. Display-only; use `interpreted` for navigation targets and lookup keys.
@@ -232,10 +311,14 @@ type CanonicalName {
   interpreted: InterpretedName!
 }
 
-"""ChainId represents an enssdk#ChainId."""
+"""
+ChainId represents an enssdk#ChainId.
+"""
 scalar ChainId
 
-"""CoinType represents an enssdk#CoinType."""
+"""
+CoinType represents an enssdk#CoinType.
+"""
 scalar CoinType
 
 """
@@ -247,13 +330,25 @@ interface Domain {
   """
   canonical: DomainCanonical
 
-  """All Events associated with this Domain."""
-  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+  """
+  All Events associated with this Domain.
+  """
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EventsWhereInput
+  ): DomainEventsConnection
 
-  """A unique and stable reference to this Domain."""
+  """
+  A unique and stable reference to this Domain.
+  """
   id: DomainId!
 
-  """The Label associated with this Domain in the ENS Namegraph."""
+  """
+  The Label associated with this Domain in the ENS Namegraph.
+  """
   label: Label!
 
   """
@@ -266,24 +361,41 @@ interface Domain {
   """
   parent: Domain
 
-  """The latest Registration for this Domain, if exists."""
+  """
+  The latest Registration for this Domain, if exists.
+  """
   registration: Registration
 
-  """All Registrations for a Domain, including the latest Registration."""
+  """
+  All Registrations for a Domain, including the latest Registration.
+  """
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists.
+  """
   registry: Registry!
 
-  """Resolver relationship metadata for this Domain."""
+  """
+  Resolver relationship metadata for this Domain.
+  """
   resolver: DomainResolver!
 
   """
   All Domains that are direct descendents of this Domain in the namegraph.
   """
-  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+  subdomains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: SubdomainsWhereInput
+  ): DomainSubdomainsConnection
 
-  """The Registry this Domain declares as its Subregistry, if exists."""
+  """
+  The Registry this Domain declares as its Subregistry, if exists.
+  """
   subregistry: Registry
 }
 
@@ -296,7 +408,9 @@ type DomainCanonical {
   """
   depth: Int!
 
-  """The Canonical Name for this Domain."""
+  """
+  The Canonical Name for this Domain.
+  """
   name: CanonicalName!
 
   """
@@ -321,10 +435,14 @@ type DomainEventsConnectionEdge {
   node: Event!
 }
 
-"""DomainId represents an enssdk#DomainId."""
+"""
+DomainId represents an enssdk#DomainId.
+"""
 scalar DomainId
 
-"""Reference a specific Domain."""
+"""
+Reference a specific Domain.
+"""
 input DomainIdInput @oneOf {
   id: DomainId
   name: InterpretedName
@@ -334,7 +452,9 @@ input DomainIdInput @oneOf {
 Filter Permissions by user address. Exactly one of `eq` or `in` must be provided.
 """
 input DomainPermissionsUserFilter @oneOf {
-  """Exact user address match."""
+  """
+  Exact user address match.
+  """
   eq: Address
 
   """
@@ -343,9 +463,13 @@ input DomainPermissionsUserFilter @oneOf {
   in: [Address!]
 }
 
-"""Filter Permissions over this Domain by user."""
+"""
+Filter Permissions over this Domain by user.
+"""
 input DomainPermissionsWhereInput {
-  """Filter Permissions to those whose user matches the provided filter."""
+  """
+  Filter Permissions to those whose user matches the provided filter.
+  """
   user: DomainPermissionsUserFilter
 }
 
@@ -360,7 +484,9 @@ type DomainRegistrationsConnectionEdge {
   node: Registration!
 }
 
-"""Metadata describing this Domain's relationship to its Resolver(s)."""
+"""
+Metadata describing this Domain's relationship to its Resolver(s).
+"""
 type DomainResolver {
   """
   The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
@@ -399,7 +525,9 @@ input DomainsNameFilter @oneOf {
   starts_with: String
 }
 
-"""Fields by which domains can be ordered"""
+"""
+Fields by which domains can be ordered
+"""
 enum DomainsOrderBy {
   DEPTH
   NAME
@@ -415,9 +543,13 @@ input DomainsOrderInput {
   dir: OrderDirection = ASC
 }
 
-"""Filter for the top-level domains query."""
+"""
+Filter for the top-level domains query.
+"""
 input DomainsWhereInput {
-  """Filter the set of Domains by name."""
+  """
+  Filter the set of Domains by name.
+  """
   name: DomainsNameFilter!
 
   """
@@ -426,29 +558,47 @@ input DomainsWhereInput {
   version: ENSProtocolVersion
 }
 
-"""An ENS protocol version."""
+"""
+An ENS protocol version.
+"""
 enum ENSProtocolVersion {
   ENSv1
   ENSv2
 }
 
-"""An ENSv1Domain represents an ENSv1 Domain."""
+"""
+An ENSv1Domain represents an ENSv1 Domain.
+"""
 type ENSv1Domain implements Domain {
   """
   Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
   """
   canonical: DomainCanonical
 
-  """All Events associated with this Domain."""
-  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+  """
+  All Events associated with this Domain.
+  """
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EventsWhereInput
+  ): DomainEventsConnection
 
-  """A unique and stable reference to this Domain."""
+  """
+  A unique and stable reference to this Domain.
+  """
   id: DomainId!
 
-  """The Label associated with this Domain in the ENS Namegraph."""
+  """
+  The Label associated with this Domain in the ENS Namegraph.
+  """
   label: Label!
 
-  """The namehash of this ENSv1 Domain."""
+  """
+  The namehash of this ENSv1 Domain.
+  """
   node: Node!
 
   """
@@ -461,16 +611,24 @@ type ENSv1Domain implements Domain {
   """
   parent: Domain
 
-  """The latest Registration for this Domain, if exists."""
+  """
+  The latest Registration for this Domain, if exists.
+  """
   registration: Registration
 
-  """All Registrations for a Domain, including the latest Registration."""
+  """
+  All Registrations for a Domain, including the latest Registration.
+  """
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists.
+  """
   registry: Registry!
 
-  """Resolver relationship metadata for this Domain."""
+  """
+  Resolver relationship metadata for this Domain.
+  """
   resolver: DomainResolver!
 
   """
@@ -481,9 +639,18 @@ type ENSv1Domain implements Domain {
   """
   All Domains that are direct descendents of this Domain in the namegraph.
   """
-  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+  subdomains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: SubdomainsWhereInput
+  ): DomainSubdomainsConnection
 
-  """The Registry this Domain declares as its Subregistry, if exists."""
+  """
+  The Registry this Domain declares as its Subregistry, if exists.
+  """
   subregistry: Registry
 }
 
@@ -491,7 +658,9 @@ type ENSv1Domain implements Domain {
 An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).
 """
 type ENSv1Registry implements Registry {
-  """Whether the Registry is Canonical."""
+  """
+  Whether the Registry is Canonical.
+  """
   canonical: Boolean!
 
   """
@@ -499,16 +668,31 @@ type ENSv1Registry implements Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
-  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+  """
+  The Domains managed by this Registry.
+  """
+  domains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: RegistryDomainsWhereInput
+  ): RegistryDomainsConnection
 
-  """A unique reference to this Registry."""
+  """
+  A unique reference to this Registry.
+  """
   id: RegistryId!
 
-  """The Domains for which this Registry is a Subregistry."""
+  """
+  The Domains for which this Registry is a Subregistry.
+  """
   parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
 
-  """The Permissions managed by this Registry."""
+  """
+  The Permissions managed by this Registry.
+  """
   permissions: Permissions
 }
 
@@ -516,7 +700,9 @@ type ENSv1Registry implements Registry {
 An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that has children. It is keyed by `(chainId, address, node)` where `(chainId, address)` identify the concrete Registry that houses the parent Domain, and `node` is the parent Domain's namehash.
 """
 type ENSv1VirtualRegistry implements Registry {
-  """Whether the Registry is Canonical."""
+  """
+  Whether the Registry is Canonical.
+  """
   canonical: Boolean!
 
   """
@@ -524,10 +710,21 @@ type ENSv1VirtualRegistry implements Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
-  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+  """
+  The Domains managed by this Registry.
+  """
+  domains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: RegistryDomainsWhereInput
+  ): RegistryDomainsConnection
 
-  """A unique reference to this Registry."""
+  """
+  A unique reference to this Registry.
+  """
   id: RegistryId!
 
   """
@@ -535,27 +732,45 @@ type ENSv1VirtualRegistry implements Registry {
   """
   node: Node!
 
-  """The Domains for which this Registry is a Subregistry."""
+  """
+  The Domains for which this Registry is a Subregistry.
+  """
   parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
 
-  """The Permissions managed by this Registry."""
+  """
+  The Permissions managed by this Registry.
+  """
   permissions: Permissions
 }
 
-"""An ENSv2Domain represents an ENSv2 Domain."""
+"""
+An ENSv2Domain represents an ENSv2 Domain.
+"""
 type ENSv2Domain implements Domain {
   """
   Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
   """
   canonical: DomainCanonical
 
-  """All Events associated with this Domain."""
-  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+  """
+  All Events associated with this Domain.
+  """
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EventsWhereInput
+  ): DomainEventsConnection
 
-  """A unique and stable reference to this Domain."""
+  """
+  A unique and stable reference to this Domain.
+  """
   id: DomainId!
 
-  """The Label associated with this Domain in the ENS Namegraph."""
+  """
+  The Label associated with this Domain in the ENS Namegraph.
+  """
   label: Label!
 
   """
@@ -571,29 +786,54 @@ type ENSv2Domain implements Domain {
   """
   Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.
   """
-  permissions(after: String, before: String, first: Int, last: Int, where: DomainPermissionsWhereInput): ENSv2DomainPermissionsConnection
+  permissions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: DomainPermissionsWhereInput
+  ): ENSv2DomainPermissionsConnection
 
-  """The latest Registration for this Domain, if exists."""
+  """
+  The latest Registration for this Domain, if exists.
+  """
   registration: Registration
 
-  """All Registrations for a Domain, including the latest Registration."""
+  """
+  All Registrations for a Domain, including the latest Registration.
+  """
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists.
+  """
   registry: Registry!
 
-  """Resolver relationship metadata for this Domain."""
+  """
+  Resolver relationship metadata for this Domain.
+  """
   resolver: DomainResolver!
 
   """
   All Domains that are direct descendents of this Domain in the namegraph.
   """
-  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+  subdomains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: SubdomainsWhereInput
+  ): DomainSubdomainsConnection
 
-  """The Registry this Domain declares as its Subregistry, if exists."""
+  """
+  The Registry this Domain declares as its Subregistry, if exists.
+  """
   subregistry: Registry
 
-  """The ENSv2Domain's current Token Id."""
+  """
+  The ENSv2Domain's current Token Id.
+  """
   tokenId: BigInt!
 }
 
@@ -608,9 +848,13 @@ type ENSv2DomainPermissionsConnectionEdge {
   node: PermissionsUser!
 }
 
-"""An ENSv2Registry represents an ENSv2 Registry contract."""
+"""
+An ENSv2Registry represents an ENSv2 Registry contract.
+"""
 type ENSv2Registry implements Registry {
-  """Whether the Registry is Canonical."""
+  """
+  Whether the Registry is Canonical.
+  """
   canonical: Boolean!
 
   """
@@ -618,16 +862,31 @@ type ENSv2Registry implements Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
-  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+  """
+  The Domains managed by this Registry.
+  """
+  domains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: RegistryDomainsWhereInput
+  ): RegistryDomainsConnection
 
-  """A unique reference to this Registry."""
+  """
+  A unique reference to this Registry.
+  """
   id: RegistryId!
 
-  """The Domains for which this Registry is a Subregistry."""
+  """
+  The Domains for which this Registry is a Subregistry.
+  """
   parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
 
-  """The Permissions managed by this Registry."""
+  """
+  The Permissions managed by this Registry.
+  """
   permissions: Permissions
 }
 
@@ -635,10 +894,14 @@ type ENSv2Registry implements Registry {
 ENSv2RegistryRegistration represents a Registration within an ENSv2 Registry.
 """
 type ENSv2RegistryRegistration implements Registration {
-  """The Domain for which this Registration exists."""
+  """
+  The Domain for which this Registration exists.
+  """
   domain: Domain!
 
-  """The Event for which this Registration was created."""
+  """
+  The Event for which this Registration was created.
+  """
   event: Event!
 
   """
@@ -646,13 +909,19 @@ type ENSv2RegistryRegistration implements Registration {
   """
   expired: Boolean!
 
-  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  """
+  A UnixTimestamp indicating the Registration's expiry, if exists.
+  """
   expiry: BigInt
 
-  """A unique reference to this Registration."""
+  """
+  A unique reference to this Registration.
+  """
   id: RegistrationId!
 
-  """The extra `referrer` data provided with a Registration, if exists."""
+  """
+  The extra `referrer` data provided with a Registration, if exists.
+  """
   referrer: Hex
 
   """
@@ -660,7 +929,9 @@ type ENSv2RegistryRegistration implements Registration {
   """
   registrant: Account
 
-  """The Registrar contract under which this Registration is managed."""
+  """
+  The Registrar contract under which this Registration is managed.
+  """
   registrar: AccountId!
 
   """
@@ -668,7 +939,9 @@ type ENSv2RegistryRegistration implements Registration {
   """
   renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
 
-  """A UnixTimestamp indicating when this Registration was created."""
+  """
+  A UnixTimestamp indicating when this Registration was created.
+  """
   start: BigInt!
 
   """
@@ -681,10 +954,14 @@ type ENSv2RegistryRegistration implements Registration {
 ENSv2RegistryReservation represents a Reservation within an ENSv2 Registry.
 """
 type ENSv2RegistryReservation implements Registration {
-  """The Domain for which this Registration exists."""
+  """
+  The Domain for which this Registration exists.
+  """
   domain: Domain!
 
-  """The Event for which this Registration was created."""
+  """
+  The Event for which this Registration was created.
+  """
   event: Event!
 
   """
@@ -692,13 +969,19 @@ type ENSv2RegistryReservation implements Registration {
   """
   expired: Boolean!
 
-  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  """
+  A UnixTimestamp indicating the Registration's expiry, if exists.
+  """
   expiry: BigInt
 
-  """A unique reference to this Registration."""
+  """
+  A unique reference to this Registration.
+  """
   id: RegistrationId!
 
-  """The extra `referrer` data provided with a Registration, if exists."""
+  """
+  The extra `referrer` data provided with a Registration, if exists.
+  """
   referrer: Hex
 
   """
@@ -706,7 +989,9 @@ type ENSv2RegistryReservation implements Registration {
   """
   registrant: Account
 
-  """The Registrar contract under which this Registration is managed."""
+  """
+  The Registrar contract under which this Registration is managed.
+  """
   registrar: AccountId!
 
   """
@@ -714,7 +999,9 @@ type ENSv2RegistryReservation implements Registration {
   """
   renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
 
-  """A UnixTimestamp indicating when this Registration was created."""
+  """
+  A UnixTimestamp indicating when this Registration was created.
+  """
   start: BigInt!
 
   """
@@ -727,19 +1014,29 @@ type ENSv2RegistryReservation implements Registration {
 An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.
 """
 type Event {
-  """Identifies the contract by which this Event was emitted."""
+  """
+  Identifies the contract by which this Event was emitted.
+  """
   address: Address!
 
-  """Identifies the Block within which this Event was emitted."""
+  """
+  Identifies the Block within which this Event was emitted.
+  """
   blockHash: Hex!
 
-  """The block number within which this Event was emitted."""
+  """
+  The block number within which this Event was emitted.
+  """
   blockNumber: BigInt!
 
-  """The ChainId upon which this Event was emitted."""
+  """
+  The ChainId upon which this Event was emitted.
+  """
   chainId: ChainId!
 
-  """The non-indexed data of this Event's log."""
+  """
+  The non-indexed data of this Event's log.
+  """
   data: Hex!
 
   """
@@ -747,13 +1044,19 @@ type Event {
   """
   from: Address!
 
-  """A unique reference to this Event."""
+  """
+  A unique reference to this Event.
+  """
   id: ID!
 
-  """The index of this Event's log within the Block."""
+  """
+  The index of this Event's log within the Block.
+  """
   logIndex: Int!
 
-  """The HCA account address if used, otherwise Transaction.from."""
+  """
+  The HCA account address if used, otherwise Transaction.from.
+  """
   sender: Address!
 
   """
@@ -766,13 +1069,19 @@ type Event {
   """
   to: Address
 
-  """The indexed topics of this Event's log."""
+  """
+  The indexed topics of this Event's log.
+  """
   topics: [Hex!]!
 
-  """Identifies the Transaction within which this Event was emitted."""
+  """
+  Identifies the Transaction within which this Event was emitted.
+  """
   transactionHash: Hex!
 
-  """The index of the Transaction within the Block."""
+  """
+  The index of the Transaction within the Block.
+  """
   transactionIndex: Int!
 }
 
@@ -780,7 +1089,9 @@ type Event {
 Filter Events by `tx.from`. Not HCA-aware — use `sender` to filter by the HCA-aware actor. Exactly one of `eq` or `in` must be provided.
 """
 input EventsFromFilter @oneOf {
-  """Exact `tx.from` match."""
+  """
+  Exact `tx.from` match.
+  """
   eq: Address
 
   """
@@ -793,7 +1104,9 @@ input EventsFromFilter @oneOf {
 Filter Events by selector (event signature). Exactly one of `eq` or `in` must be provided.
 """
 input EventsSelectorFilter @oneOf {
-  """Exact selector match."""
+  """
+  Exact selector match.
+  """
   eq: Hex
 
   """
@@ -806,7 +1119,9 @@ input EventsSelectorFilter @oneOf {
 Filter Events by HCA-aware `sender` (the HCA account address if used, otherwise Transaction.from). Exactly one of `eq` or `in` must be provided.
 """
 input EventsSenderFilter @oneOf {
-  """Exact `sender` match."""
+  """
+  Exact `sender` match.
+  """
   eq: Address
 
   """
@@ -819,20 +1134,30 @@ input EventsSenderFilter @oneOf {
 Filter Events by timestamp range. At least one bound must be provided. `gt`/`gte` are mutually exclusive; `lt`/`lte` are mutually exclusive.
 """
 input EventsTimestampFilter {
-  """Filter to events strictly after this UnixTimestamp."""
+  """
+  Filter to events strictly after this UnixTimestamp.
+  """
   gt: BigInt
 
-  """Filter to events at or after this UnixTimestamp."""
+  """
+  Filter to events at or after this UnixTimestamp.
+  """
   gte: BigInt
 
-  """Filter to events strictly before this UnixTimestamp."""
+  """
+  Filter to events strictly before this UnixTimestamp.
+  """
   lt: BigInt
 
-  """Filter to events at or before this UnixTimestamp."""
+  """
+  Filter to events at or before this UnixTimestamp.
+  """
   lte: BigInt
 }
 
-"""Filter conditions for an events connection."""
+"""
+Filter conditions for an events connection.
+"""
 input EventsWhereInput {
   """
   Filter to events whose `tx.from` matches the provided filter. Not HCA-aware — use `sender` to filter by the HCA-aware actor.
@@ -849,17 +1174,25 @@ input EventsWhereInput {
   """
   sender: EventsSenderFilter
 
-  """Filter to events whose UnixTimestamp falls within the provided range."""
+  """
+  Filter to events whose UnixTimestamp falls within the provided range.
+  """
   timestamp: EventsTimestampFilter
 }
 
-"""Hex represents viem#Hex."""
+"""
+Hex represents viem#Hex.
+"""
 scalar Hex
 
-"""InterpretedLabel represents an enssdk#InterpretedLabel."""
+"""
+InterpretedLabel represents an enssdk#InterpretedLabel.
+"""
 scalar InterpretedLabel
 
-"""InterpretedName represents an enssdk#InterpretedName."""
+"""
+InterpretedName represents an enssdk#InterpretedName.
+"""
 scalar InterpretedName
 
 """
@@ -885,7 +1218,9 @@ type Label {
   interpreted: InterpretedLabel!
 }
 
-"""Constructs a reference to a specific Node via one of `name` or `node`."""
+"""
+Constructs a reference to a specific Node via one of `name` or `node`.
+"""
 input NameOrNodeInput @oneOf {
   name: InterpretedName
   node: Node
@@ -895,10 +1230,14 @@ input NameOrNodeInput @oneOf {
 A NameWrapperRegistration represents a Registration initiated by the ENSv1 NameWrapper.
 """
 type NameWrapperRegistration implements Registration {
-  """The Domain for which this Registration exists."""
+  """
+  The Domain for which this Registration exists.
+  """
   domain: Domain!
 
-  """The Event for which this Registration was created."""
+  """
+  The Event for which this Registration was created.
+  """
   event: Event!
 
   """
@@ -906,16 +1245,24 @@ type NameWrapperRegistration implements Registration {
   """
   expired: Boolean!
 
-  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  """
+  A UnixTimestamp indicating the Registration's expiry, if exists.
+  """
   expiry: BigInt
 
-  """The Fuses for this Registration's Domain in the NameWrapper."""
+  """
+  The Fuses for this Registration's Domain in the NameWrapper.
+  """
   fuses: Int!
 
-  """A unique reference to this Registration."""
+  """
+  A unique reference to this Registration.
+  """
   id: RegistrationId!
 
-  """The extra `referrer` data provided with a Registration, if exists."""
+  """
+  The extra `referrer` data provided with a Registration, if exists.
+  """
   referrer: Hex
 
   """
@@ -923,7 +1270,9 @@ type NameWrapperRegistration implements Registration {
   """
   registrant: Account
 
-  """The Registrar contract under which this Registration is managed."""
+  """
+  The Registrar contract under which this Registration is managed.
+  """
   registrar: AccountId!
 
   """
@@ -931,7 +1280,9 @@ type NameWrapperRegistration implements Registration {
   """
   renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
 
-  """A UnixTimestamp indicating when this Registration was created."""
+  """
+  A UnixTimestamp indicating when this Registration was created.
+  """
   start: BigInt!
 
   """
@@ -940,10 +1291,14 @@ type NameWrapperRegistration implements Registration {
   unregistrant: Account
 }
 
-"""Node represents an enssdk#Node."""
+"""
+Node represents an enssdk#Node.
+"""
 scalar Node
 
-"""Sort direction"""
+"""
+Sort direction
+"""
 enum OrderDirection {
   ASC
   DESC
@@ -956,21 +1311,39 @@ type PageInfo {
   startCursor: String
 }
 
-"""Permissions"""
+"""
+Permissions
+"""
 type Permissions {
-  """The contract within which these Permissions are granted."""
+  """
+  The contract within which these Permissions are granted.
+  """
   contract: AccountId!
 
-  """All Events associated with these Permissions."""
-  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): PermissionsEventsConnection
+  """
+  All Events associated with these Permissions.
+  """
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EventsWhereInput
+  ): PermissionsEventsConnection
 
-  """A unique reference to this Permission."""
+  """
+  A unique reference to this Permission.
+  """
   id: PermissionsId!
 
-  """All PermissionResources managed by this contract."""
+  """
+  All PermissionResources managed by this contract.
+  """
   resources(after: String, before: String, first: Int, last: Int): PermissionsResourcesConnection
 
-  """The Root Resource."""
+  """
+  The Root Resource.
+  """
   root: PermissionsResource!
 }
 
@@ -985,34 +1358,52 @@ type PermissionsEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsId represents an enssdk#PermissionsId."""
+"""
+PermissionsId represents an enssdk#PermissionsId.
+"""
 scalar PermissionsId
 
-"""Address Permissions by ID or AccountId."""
+"""
+Address Permissions by ID or AccountId.
+"""
 input PermissionsIdInput @oneOf {
   contract: AccountIdInput
   id: PermissionsId
 }
 
-"""PermissionsResource"""
+"""
+PermissionsResource
+"""
 type PermissionsResource {
-  """The contract within which these Permissions are granted."""
+  """
+  The contract within which these Permissions are granted.
+  """
   contract: AccountId!
 
-  """A unique reference to this PermissionsResource."""
+  """
+  A unique reference to this PermissionsResource.
+  """
   id: PermissionsResourceId!
 
-  """The Permissions within which this Resource is managed."""
+  """
+  The Permissions within which this Resource is managed.
+  """
   permissions: Permissions!
 
-  """Identifies the Resource that this PermissionsResource represents."""
+  """
+  Identifies the Resource that this PermissionsResource represents.
+  """
   resource: BigInt!
 
-  """The PermissionUsers who have Roles within this Resource."""
+  """
+  The PermissionUsers who have Roles within this Resource.
+  """
   users(after: String, before: String, first: Int, last: Int): PermissionsResourceUsersConnection
 }
 
-"""PermissionsResourceId represents an enssdk#PermissionsResourceId."""
+"""
+PermissionsResourceId represents an enssdk#PermissionsResourceId.
+"""
 scalar PermissionsResourceId
 
 type PermissionsResourceUsersConnection {
@@ -1037,21 +1428,39 @@ type PermissionsResourcesConnectionEdge {
   node: PermissionsResource!
 }
 
-"""PermissionsUser"""
+"""
+PermissionsUser
+"""
 type PermissionsUser {
-  """The contract within which these Permissions are granted."""
+  """
+  The contract within which these Permissions are granted.
+  """
   contract: AccountId!
 
-  """All Events associated with this PermissionsUser."""
-  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): PermissionsUserEventsConnection
+  """
+  All Events associated with this PermissionsUser.
+  """
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EventsWhereInput
+  ): PermissionsUserEventsConnection
 
-  """A unique reference to this PermissionsUser."""
+  """
+  A unique reference to this PermissionsUser.
+  """
   id: PermissionsUserId!
 
-  """The Resource that this user has Roles within."""
+  """
+  The Resource that this user has Roles within.
+  """
   resource: BigInt!
 
-  """The Roles this User has been granted within this Resource."""
+  """
+  The Roles this User has been granted within this Resource.
+  """
   roles: BigInt!
 
   """
@@ -1071,20 +1480,37 @@ type PermissionsUserEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsUserId represents an enssdk#PermissionsUserId."""
+"""
+PermissionsUserId represents an enssdk#PermissionsUserId.
+"""
 scalar PermissionsUserId
 
 type Query {
-  """Identify an Account by ID or Address."""
+  """
+  Identify an Account by ID or Address.
+  """
   account(by: AccountByInput!): Account
 
-  """Identify a Domain by Name or DomainId"""
+  """
+  Identify a Domain by Name or DomainId
+  """
   domain(by: DomainIdInput!): Domain
 
-  """Find Canonical Domains by Name."""
-  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
+  """
+  Find Canonical Domains by Name.
+  """
+  domains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: DomainsWhereInput!
+  ): QueryDomainsConnection
 
-  """Identify Permissions by ID or AccountId."""
+  """
+  Identify Permissions by ID or AccountId.
+  """
   permissions(by: PermissionsIdInput!): Permissions
 
   """
@@ -1092,7 +1518,9 @@ type Query {
   """
   registry(by: RegistryIdInput!): Registry
 
-  """Identify a Resolver by ID or AccountId."""
+  """
+  Identify a Resolver by ID or AccountId.
+  """
   resolver(by: ResolverIdInput!): Resolver
 
   """
@@ -1116,10 +1544,14 @@ type QueryDomainsConnectionEdge {
 A Registration represents a Domain's registration status within the various registries.
 """
 interface Registration {
-  """The Domain for which this Registration exists."""
+  """
+  The Domain for which this Registration exists.
+  """
   domain: Domain!
 
-  """The Event for which this Registration was created."""
+  """
+  The Event for which this Registration was created.
+  """
   event: Event!
 
   """
@@ -1127,13 +1559,19 @@ interface Registration {
   """
   expired: Boolean!
 
-  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  """
+  A UnixTimestamp indicating the Registration's expiry, if exists.
+  """
   expiry: BigInt
 
-  """A unique reference to this Registration."""
+  """
+  A unique reference to this Registration.
+  """
   id: RegistrationId!
 
-  """The extra `referrer` data provided with a Registration, if exists."""
+  """
+  The extra `referrer` data provided with a Registration, if exists.
+  """
   referrer: Hex
 
   """
@@ -1141,7 +1579,9 @@ interface Registration {
   """
   registrant: Account
 
-  """The Registrar contract under which this Registration is managed."""
+  """
+  The Registrar contract under which this Registration is managed.
+  """
   registrar: AccountId!
 
   """
@@ -1149,7 +1589,9 @@ interface Registration {
   """
   renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
 
-  """A UnixTimestamp indicating when this Registration was created."""
+  """
+  A UnixTimestamp indicating when this Registration was created.
+  """
   start: BigInt!
 
   """
@@ -1158,7 +1600,9 @@ interface Registration {
   unregistrant: Account
 }
 
-"""RegistrationId represents an enssdk#RegistrationId."""
+"""
+RegistrationId represents an enssdk#RegistrationId.
+"""
 scalar RegistrationId
 
 type RegistrationRenewalsConnection {
@@ -1176,7 +1620,9 @@ type RegistrationRenewalsConnectionEdge {
 A Registry represents a Registry contract in the ENS namegraph. It may be an ENSv1Registry (a concrete ENSv1 Registry contract), an ENSv1VirtualRegistry (the virtual Registry managed by an ENSv1 domain that has children), or an ENSv2Registry.
 """
 interface Registry {
-  """Whether the Registry is Canonical."""
+  """
+  Whether the Registry is Canonical.
+  """
   canonical: Boolean!
 
   """
@@ -1184,16 +1630,31 @@ interface Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
-  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+  """
+  The Domains managed by this Registry.
+  """
+  domains(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: DomainsOrderInput
+    where: RegistryDomainsWhereInput
+  ): RegistryDomainsConnection
 
-  """A unique reference to this Registry."""
+  """
+  A unique reference to this Registry.
+  """
   id: RegistryId!
 
-  """The Domains for which this Registry is a Subregistry."""
+  """
+  The Domains for which this Registry is a Subregistry.
+  """
   parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
 
-  """The Permissions managed by this Registry."""
+  """
+  The Permissions managed by this Registry.
+  """
   permissions: Permissions
 }
 
@@ -1208,16 +1669,24 @@ type RegistryDomainsConnectionEdge {
   node: Domain!
 }
 
-"""Filter for Registry.domains query."""
+"""
+Filter for Registry.domains query.
+"""
 input RegistryDomainsWhereInput {
-  """If set, filters the set of Domains in this Registry by name."""
+  """
+  If set, filters the set of Domains in this Registry by name.
+  """
   name: DomainsNameFilter
 }
 
-"""RegistryId represents an enssdk#RegistryId."""
+"""
+RegistryId represents an enssdk#RegistryId.
+"""
 scalar RegistryId
 
-"""Address a Registry by ID or AccountId."""
+"""
+Address a Registry by ID or AccountId.
+"""
 input RegistryIdInput @oneOf {
   contract: AccountIdInput
   id: RegistryId
@@ -1235,16 +1704,24 @@ type RegistryParentsConnectionEdge {
 }
 
 type RegistryPermissionsUser {
-  """A unique reference to this RegistryPermissionsUser."""
+  """
+  A unique reference to this RegistryPermissionsUser.
+  """
   id: PermissionsUserId!
 
-  """The Registry in which this Permission is granted."""
+  """
+  The Registry in which this Permission is granted.
+  """
   registry: Registry!
 
-  """The Resource for which this Permission is granted."""
+  """
+  The Resource for which this Permission is granted.
+  """
   resource: BigInt!
 
-  """The Roles that this Permission grants."""
+  """
+  The Roles that this Permission grants.
+  """
   roles: BigInt!
 
   """
@@ -1253,53 +1730,89 @@ type RegistryPermissionsUser {
   user: Account!
 }
 
-"""A Renewal represents an extension of a Registration's expiry."""
+"""
+A Renewal represents an extension of a Registration's expiry.
+"""
 type Renewal {
-  """The `base` cost of a Renewal, in wei, if exists."""
+  """
+  The `base` cost of a Renewal, in wei, if exists.
+  """
   base: BigInt
 
-  """The duration for which a Registration was extended."""
+  """
+  The duration for which a Registration was extended.
+  """
   duration: BigInt!
 
-  """The Event for which this Renewal was created."""
+  """
+  The Event for which this Renewal was created.
+  """
   event: Event!
 
-  """A unique reference to this Renewal."""
+  """
+  A unique reference to this Renewal.
+  """
   id: RenewalId!
 
-  """The `premium` cost of a Renewal, in wei, if exists."""
+  """
+  The `premium` cost of a Renewal, in wei, if exists.
+  """
   premium: BigInt
 
-  """The extra `referrer` data provided with a Renewal, if exists."""
+  """
+  The extra `referrer` data provided with a Renewal, if exists.
+  """
   referrer: Hex
 }
 
-"""RenewalId represents an enssdk#RenewalId."""
+"""
+RenewalId represents an enssdk#RenewalId.
+"""
 scalar RenewalId
 
-"""A Resolver represents a Resolver contract on-chain."""
+"""
+A Resolver represents a Resolver contract on-chain.
+"""
 type Resolver {
   """
   If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
   """
   bridged: Registry
 
-  """Contract metadata for this Resolver."""
+  """
+  Contract metadata for this Resolver.
+  """
   contract: AccountId!
 
-  """All Events associated with this Resolver."""
-  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): ResolverEventsConnection
+  """
+  All Events associated with this Resolver.
+  """
+  events(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EventsWhereInput
+  ): ResolverEventsConnection
 
-  """A unique reference to this Resolver."""
+  """
+  A unique reference to this Resolver.
+  """
   id: ResolverId!
 
-  """Permissions granted by this Resolver."""
+  """
+  Permissions granted by this Resolver.
+  """
   permissions: Permissions
 
-  """ResolverRecords issued by this Resolver."""
+  """
+  ResolverRecords issued by this Resolver.
+  """
   records(after: String, before: String, first: Int, last: Int): ResolverRecordsConnection
 
-  """Identify a ResolverRecord by `name` or `node`."""
+  """
+  Identify a ResolverRecord by `name` or `node`.
+  """
   records_(by: NameOrNodeInput!): ResolverRecords
 }
 
@@ -1314,26 +1827,38 @@ type ResolverEventsConnectionEdge {
   node: Event!
 }
 
-"""ResolverId represents an enssdk#ResolverId."""
+"""
+ResolverId represents an enssdk#ResolverId.
+"""
 scalar ResolverId
 
-"""Address a Resolver by ID or AccountId."""
+"""
+Address a Resolver by ID or AccountId.
+"""
 input ResolverIdInput @oneOf {
   contract: AccountIdInput
   id: ResolverId
 }
 
 type ResolverPermissionsUser {
-  """A unique reference to this ResolverPermissionsUser."""
+  """
+  A unique reference to this ResolverPermissionsUser.
+  """
   id: PermissionsUserId!
 
-  """The Resolver in which this Permission is granted."""
+  """
+  The Resolver in which this Permission is granted.
+  """
   resolver: Resolver!
 
-  """The Resource for which this Permission is granted."""
+  """
+  The Resource for which this Permission is granted.
+  """
   resource: BigInt!
 
-  """The Roles that this Permission grants."""
+  """
+  The Roles that this Permission grants.
+  """
   roles: BigInt!
 
   """
@@ -1342,21 +1867,33 @@ type ResolverPermissionsUser {
   user: Account!
 }
 
-"""ResolverRecords represents the _indexed_ records within a Resolver."""
+"""
+ResolverRecords represents the _indexed_ records within a Resolver.
+"""
 type ResolverRecords {
-  """Unique CoinTypes of `addr` records for this `node`."""
+  """
+  Unique CoinTypes of `addr` records for this `node`.
+  """
   coinTypes: [CoinType!]!
 
-  """A unique reference to these ResolverRecords."""
+  """
+  A unique reference to these ResolverRecords.
+  """
   id: ResolverRecordsId!
 
-  """Unique keys of `text` records for this `node`."""
+  """
+  Unique keys of `text` records for this `node`.
+  """
   keys: [String!]!
 
-  """The `name` record for this `node`, if any."""
+  """
+  The `name` record for this `node`, if any.
+  """
   name: String
 
-  """The Node for which these ResolverRecords are issued."""
+  """
+  The Node for which these ResolverRecords are issued.
+  """
   node: Node!
 }
 
@@ -1371,21 +1908,33 @@ type ResolverRecordsConnectionEdge {
   node: ResolverRecords!
 }
 
-"""ResolverRecordsId represents an enssdk#ResolverRecordsId."""
+"""
+ResolverRecordsId represents an enssdk#ResolverRecordsId.
+"""
 scalar ResolverRecordsId
 
-"""Filter for Domain.subdomains query."""
+"""
+Filter for Domain.subdomains query.
+"""
 input SubdomainsWhereInput {
-  """If set, filters the set of subdomains by name."""
+  """
+  If set, filters the set of subdomains by name.
+  """
   name: DomainsNameFilter
 }
 
-"""ThreeDNSRegistration represents a Registration within ThreeDNSToken."""
+"""
+ThreeDNSRegistration represents a Registration within ThreeDNSToken.
+"""
 type ThreeDNSRegistration implements Registration {
-  """The Domain for which this Registration exists."""
+  """
+  The Domain for which this Registration exists.
+  """
   domain: Domain!
 
-  """The Event for which this Registration was created."""
+  """
+  The Event for which this Registration was created.
+  """
   event: Event!
 
   """
@@ -1393,13 +1942,19 @@ type ThreeDNSRegistration implements Registration {
   """
   expired: Boolean!
 
-  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  """
+  A UnixTimestamp indicating the Registration's expiry, if exists.
+  """
   expiry: BigInt
 
-  """A unique reference to this Registration."""
+  """
+  A unique reference to this Registration.
+  """
   id: RegistrationId!
 
-  """The extra `referrer` data provided with a Registration, if exists."""
+  """
+  The extra `referrer` data provided with a Registration, if exists.
+  """
   referrer: Hex
 
   """
@@ -1407,7 +1962,9 @@ type ThreeDNSRegistration implements Registration {
   """
   registrant: Account
 
-  """The Registrar contract under which this Registration is managed."""
+  """
+  The Registrar contract under which this Registration is managed.
+  """
   registrar: AccountId!
 
   """
@@ -1415,7 +1972,9 @@ type ThreeDNSRegistration implements Registration {
   """
   renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
 
-  """A UnixTimestamp indicating when this Registration was created."""
+  """
+  A UnixTimestamp indicating when this Registration was created.
+  """
   start: BigInt!
 
   """
@@ -1428,9 +1987,13 @@ type ThreeDNSRegistration implements Registration {
 Additional metadata for BaseRegistrar Registrations wrapped by the NameWrapper (i.e. in the case of a wrapped .eth name)
 """
 type WrappedBaseRegistrarRegistration {
-  """The Fuses for this Registration's Domain in the NameWrapper."""
+  """
+  The Fuses for this Registration's Domain in the NameWrapper.
+  """
   fuses: Int!
 
-  """The TokenID for this Domain in the NameWrapper."""
+  """
+  The TokenID for this Domain in the NameWrapper.
+  """
   tokenId: BigInt!
 }
