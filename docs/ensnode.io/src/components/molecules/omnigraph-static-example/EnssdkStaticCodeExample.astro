@@ -1,0 +1,58 @@
+---
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+import type { SetupPackageManager } from "@lib/omnigraph-examples/build-integration-snippets";
+
+import StaticExampleActionBar from "./StaticExampleActionBar.astro";
+import StaticExampleCodeSection from "./StaticExampleCodeSection.astro";
+import StaticExampleTabbedSection from "./StaticExampleTabbedSection.astro";
+import { buildSdkSetupTabs } from "./build-sdk-setup-tabs";
+import { exampleTabClass, staticExampleFooterClass } from "./example-tab-styles";
+
+interface Props {
+  uid: string;
+  snippet: string;
+  setupSnippets: Record<SetupPackageManager, string>;
+  responseJson: string | null;
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+}
+
+const { uid, snippet, setupSnippets, responseJson, hostedInstanceDocUrl, hostedInstanceNamespace } =
+  Astro.props;
+
+const { tabs, panels } = buildSdkSetupTabs({
+  uid,
+  prefix: "enssdk",
+  setupSnippets,
+  responseJson,
+});
+
+const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]";
+const outputNote =
+  "Output matches the GraphQL Response snapshot; live output depends on your ENSNode instance.";
+---
+
+<StaticExampleActionBar
+  variant="stackblitz"
+  hostedInstanceDocUrl={hostedInstanceDocUrl}
+  hostedInstanceNamespace={hostedInstanceNamespace}
+/>
+
+<StaticExampleCodeSection badge="TypeScript" code={snippet} lang="typescript" />
+
+<StaticExampleTabbedSection
+  tabsRootId={`${uid}-enssdk`}
+  tablistAriaLabel="Setup and output"
+  srHeading={{ id: `${uid}-enssdk-setup-heading`, label: "enssdk setup and output" }}
+  tabs={tabs}
+  panels={panels}
+  tabButtonClass={exampleTabClass}
+  tabIconClass="tab-icon"
+/>
+
+<p class={staticExampleFooterClass}>
+  {responseJson ? `${outputNote} ` : ""}
+  See the{" "}
+  <a href="/docs/integrate/integration-options/enssdk" class={docsLinkClass}>enssdk docs</a>
+  {" "}for gql.tada plugin and tsconfig setup.
+</p>

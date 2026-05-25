@@ -1,0 +1,138 @@
+---
+interface Props {
+  uid: string;
+  withIntegrationTabs?: boolean;
+}
+
+const { uid, withIntegrationTabs = false } = Astro.props;
+---
+
+<div
+  class="not-content not-prose static-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]"
+  data-static-example={uid}>
+  <slot />
+</div>
+
+<script define:vars={{ uid, withIntegrationTabs }}>
+  const root = document.querySelector(`[data-static-example="${uid}"]`);
+  if (!root) return;
+
+  if (withIntegrationTabs) {
+    const integrationTabsEl = root.querySelector(`[data-integration-tabs="${uid}"]`);
+    const integrationPanels = [...root.querySelectorAll("[data-integration-panel]")];
+    const integrationButtons = integrationTabsEl
+      ? [...integrationTabsEl.querySelectorAll("[data-integration-tab]")]
+      : [];
+
+    function activateIntegration(name) {
+      for (const btn of integrationButtons) {
+        btn.setAttribute("aria-selected", btn.dataset.integrationTab === name ? "true" : "false");
+      }
+      for (const panel of integrationPanels) {
+        const on = panel.dataset.integrationPanel === name;
+        panel.classList.toggle("hidden", !on);
+        panel.toggleAttribute("hidden", !on);
+      }
+    }
+
+    if (integrationTabsEl) {
+      integrationTabsEl.addEventListener("click", (e) => {
+        const btn = e.target instanceof Element ? e.target.closest("[data-integration-tab]") : null;
+        if (btn && integrationTabsEl.contains(btn)) {
+          activateIntegration(btn.dataset.integrationTab);
+        }
+      });
+    }
+  }
+
+  for (const tabsRoot of root.querySelectorAll("[data-tabs-root]")) {
+    if (tabsRoot.dataset.bound) continue;
+    tabsRoot.dataset.bound = "true";
+
+    const buttons = [...tabsRoot.querySelectorAll("[data-tab-target]")];
+    const panels = [...tabsRoot.querySelectorAll("[data-tab-panel]")];
+
+    function activate(targetId) {
+      for (const btn of buttons) {
+        btn.setAttribute(
+          "aria-selected",
+          btn.getAttribute("data-tab-target") === targetId ? "true" : "false",
+        );
+      }
+      for (const panel of panels) {
+        const on = panel.getAttribute("data-tab-panel") === targetId;
+        panel.classList.toggle("hidden", !on);
+        panel.toggleAttribute("hidden", !on);
+      }
+    }
+
+    tabsRoot.addEventListener("click", (e) => {
+      const btn = e.target instanceof Element ? e.target.closest("[data-tab-target]") : null;
+      if (btn && tabsRoot.contains(btn)) {
+        activate(btn.getAttribute("data-tab-target"));
+      }
+    });
+  }
+</script>
+
+<style>
+  .static-example :global(.expressive-code) {
+    --ec-brdRad: 0.5rem;
+  }
+
+  .static-example :global(.expressive-code button) {
+    cursor: pointer;
+  }
+
+  .static-example :global(.example-tab) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    line-height: 1;
+    color: var(--sl-color-gray-3);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .static-example :global(.tab-label) {
+    line-height: 1;
+  }
+
+  .static-example :global(.tab-icon) {
+    opacity: 0.9;
+    flex-shrink: 0;
+    display: block;
+    width: 1.125em;
+    height: 1.125em;
+  }
+
+  .static-example :global(.example-tab:hover) {
+    color: var(--sl-color-gray-1);
+  }
+
+  /*
+   * The ::after pseudo-element draws a 2px accent underline at bottom: -1px,
+   * overlapping (and visually cancelling) the tablist container's border-b.
+   * z-index: 1 ensures it renders above that border.
+   */
+  .static-example :global(.example-tab[aria-selected="true"]) {
+    color: var(--sl-color-text-accent);
+    z-index: 1;
+  }
+
+  .static-example :global(.example-tab[aria-selected="true"]::after) {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inset-inline-end: 1rem;
+    bottom: -1px;
+    height: 2px;
+    background: var(--sl-color-text-accent);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .static-example :global(.example-tab[aria-selected="true"] .tab-icon) {
+    opacity: 1;
+  }
+</style>

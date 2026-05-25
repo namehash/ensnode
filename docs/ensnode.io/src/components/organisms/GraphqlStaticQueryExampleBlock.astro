@@ -1,0 +1,52 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+
+import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
+import GraphqlStaticQueryExample from "@components/molecules/omnigraph-static-example/GraphqlStaticQueryExample.astro";
+import StaticExampleCard from "@components/molecules/omnigraph-static-example/StaticExampleCard.astro";
+import { resolveOmnigraphStaticExample } from "@lib/omnigraph-examples/resolve-static-example";
+
+interface Props {
+  id: string;
+  hideCurl?: boolean;
+  hideDescription?: boolean;
+  hideBackToExamples?: boolean;
+}
+
+const { id, hideCurl = false, hideDescription = false, hideBackToExamples = false } = Astro.props;
+const { description } = getOmnigraphExampleById(id);
+const data = resolveOmnigraphStaticExample(id);
+---
+
+{!hideDescription && description}
+
+<StaticExampleCard uid={data.uid}>
+  <GraphqlStaticQueryExample
+    uid={data.uid}
+    query={data.query}
+    variablesJson={data.variablesJson}
+    variablesObject={data.variablesObject}
+    responseJson={data.responseJson}
+    connectionBaseUrl={data.connectionBaseUrl}
+    adminUrl={data.adminUrl}
+    hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+    hostedInstanceNamespace={data.hostedInstanceNamespace}
+    hideCurl={hideCurl}
+  />
+</StaticExampleCard>
+
+{
+  !hideBackToExamples && (
+    <a
+      class="group w-fit flex flex-row justify-start items-center gap-2"
+      href="/docs/integrate/omnigraph/examples">
+      <Icon
+        name="left-arrow"
+        class="h-5 w-5 text-[var(--sl-color-accent)] group-hover:text-[var(--sl-color-white)] transition-colors duration-200"
+      />
+      <p class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-all duration-200">
+        Back to Examples{" "}
+      </p>
+    </a>
+  )
+}

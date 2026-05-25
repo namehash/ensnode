@@ -4,7 +4,7 @@ import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
 import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
 
-import OmnigraphExamplePlaygroundHint from "./OmnigraphExamplePlaygroundHint.astro";
+import StaticExamplePlaygroundHint from "./StaticExamplePlaygroundHint.astro";
 
 interface Props {
   variant: "ensadmin" | "stackblitz";
@@ -15,15 +15,13 @@ interface Props {
 
 const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceNamespace } = Astro.props;
 
-const stickyActionBarClass =
-  "sticky z-20 flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]/95 md:px-5";
-const stickyActionBarStyle =
-  "top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);";
+const actionBarClass =
+  "flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)] px-4 py-3 dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)] md:px-5";
 const actionButtonClass =
   "inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)]";
 ---
 
-<div class={stickyActionBarClass} style={stickyActionBarStyle}>
+<div class={actionBarClass}>
   {
     variant === "ensadmin" ? (
       <a
@@ -45,7 +43,7 @@ const actionButtonClass =
       </button>
     )
   }
-  <OmnigraphExamplePlaygroundHint
+  <StaticExamplePlaygroundHint
     hostedInstanceDocUrl={hostedInstanceDocUrl}
     hostedInstanceNamespace={hostedInstanceNamespace}
   />

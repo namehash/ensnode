@@ -1,0 +1,77 @@
+---
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+
+import StaticExampleActionBar from "./StaticExampleActionBar.astro";
+import StaticExampleCodeSection from "./StaticExampleCodeSection.astro";
+import StaticExampleTabbedSection from "./StaticExampleTabbedSection.astro";
+import { buildGraphqlFormatTabs } from "./build-graphql-format-tabs";
+import { exampleTabClass, staticExampleFooterClass } from "./example-tab-styles";
+
+interface Props {
+  uid: string;
+  query: string;
+  variablesJson: string;
+  variablesObject: Record<string, unknown>;
+  responseJson: string | null;
+  connectionBaseUrl: string;
+  adminUrl: string;
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+  hideCurl?: boolean;
+}
+
+const {
+  uid,
+  query,
+  variablesJson,
+  variablesObject,
+  responseJson,
+  connectionBaseUrl,
+  adminUrl,
+  hostedInstanceDocUrl,
+  hostedInstanceNamespace,
+  hideCurl = false,
+} = Astro.props;
+
+const { tabs, panels } = buildGraphqlFormatTabs({
+  uid,
+  query,
+  variablesJson,
+  variablesObject,
+  responseJson,
+  connectionBaseUrl,
+  hideCurl,
+});
+---
+
+<StaticExampleActionBar
+  variant="ensadmin"
+  adminUrl={adminUrl}
+  hostedInstanceDocUrl={hostedInstanceDocUrl}
+  hostedInstanceNamespace={hostedInstanceNamespace}
+/>
+
+<StaticExampleCodeSection
+  badge="GraphQL"
+  headingId={`${uid}-query-heading`}
+  code={query}
+  lang="graphql"
+/>
+
+<StaticExampleTabbedSection
+  tabsRootId={uid}
+  tablistAriaLabel="Example formats"
+  srHeading={{ id: `${uid}-secondary-heading`, label: "Payload and transport examples" }}
+  tabs={tabs}
+  panels={panels}
+  tabButtonClass={exampleTabClass}
+  tabIconClass="tab-icon"
+/>
+
+<p class={staticExampleFooterClass}>
+  Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab shows
+  a POST to
+  <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]"
+    >{connectionBaseUrl}/api/omnigraph</code
+  >
+</p>

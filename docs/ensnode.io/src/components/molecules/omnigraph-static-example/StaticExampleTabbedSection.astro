@@ -1,26 +1,16 @@
 ---
 import { Code, Icon } from "@astrojs/starlight/components";
 
-export interface OmnigraphExampleTab {
-  id: string;
-  label: string;
-  icon?: string;
-}
+import type { StaticExampleTab, StaticExampleTabPanel } from "./tab-types";
 
-export interface OmnigraphExampleTabPanel {
-  id: string;
-  code: string;
-  lang: string;
-  maxHeight: string;
-  visible?: boolean;
-}
+export type { StaticExampleTab, StaticExampleTabPanel } from "./tab-types";
 
 interface Props {
   tabsRootId: string;
   tablistAriaLabel: string;
   srHeading?: { id: string; label: string };
-  tabs: OmnigraphExampleTab[];
-  panels: OmnigraphExampleTabPanel[];
+  tabs: StaticExampleTab[];
+  panels: StaticExampleTabPanel[];
   tabButtonClass: string;
   tabIconClass?: string;
 }
@@ -40,7 +30,7 @@ const codeWrapClass = "min-w-0 overflow-auto overscroll-y-contain [&_.expressive
       </h3>
     ) : null
   }
-  <div class="omnigraph-tabs flex flex-col" data-tabs-root={tabsRootId}>
+  <div class="static-tabs flex flex-col" data-tabs-root={tabsRootId}>
     <div class={tablistClass} role="tablist" aria-label={tablistAriaLabel}>
       {
         tabs.map((tab, i) => (

@@ -1,0 +1,123 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+
+import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
+import StaticExampleCard from "@components/molecules/omnigraph-static-example/StaticExampleCard.astro";
+import EnssdkStaticCodeExample from "@components/molecules/omnigraph-static-example/EnssdkStaticCodeExample.astro";
+import EnskitStaticCodeExample from "@components/molecules/omnigraph-static-example/EnskitStaticCodeExample.astro";
+import GraphqlStaticQueryExample from "@components/molecules/omnigraph-static-example/GraphqlStaticQueryExample.astro";
+import { integrationTabClass } from "@components/molecules/omnigraph-static-example/example-tab-styles";
+import { resolveOmnigraphStaticExample } from "@lib/omnigraph-examples/resolve-static-example";
+
+interface Props {
+  id: string;
+  hideCurl?: boolean;
+  hideDescription?: boolean;
+  hideBackToExamples?: boolean;
+}
+
+const { id, hideCurl = false, hideDescription = false, hideBackToExamples = false } = Astro.props;
+const { description } = getOmnigraphExampleById(id);
+const data = resolveOmnigraphStaticExample(id);
+
+const integrationTabs = [
+  { panel: "graphql", label: "Omnigraph", icon: "seti:graphql" },
+  { panel: "enssdk", label: "Enssdk", icon: "seti:typescript" },
+  { panel: "enskit", label: "Enskit", icon: "seti:react" },
+] as const;
+---
+
+{!hideDescription && description}
+
+<StaticExampleCard uid={data.uid} withIntegrationTabs>
+  <div
+    class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08] px-4 md:px-5 pt-3"
+    role="tablist"
+    aria-label="Integration method"
+    data-integration-tabs={data.uid}>
+    {
+      integrationTabs.map((tab, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${data.uid}-int-tab-${tab.panel}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          aria-controls={`${data.uid}-int-${tab.panel}`}
+          data-integration-tab={tab.panel}
+          class={integrationTabClass}>
+          <Icon name={tab.icon} class="tab-icon" size="1.125em" />
+          <span class="tab-label">{tab.label}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div
+    id={`${data.uid}-int-graphql`}
+    data-integration-panel="graphql"
+    role="tabpanel"
+    aria-labelledby={`${data.uid}-int-tab-graphql`}>
+    <GraphqlStaticQueryExample
+      uid={data.uid}
+      query={data.query}
+      variablesJson={data.variablesJson}
+      variablesObject={data.variablesObject}
+      responseJson={data.responseJson}
+      connectionBaseUrl={data.connectionBaseUrl}
+      adminUrl={data.adminUrl}
+      hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+      hostedInstanceNamespace={data.hostedInstanceNamespace}
+      hideCurl={hideCurl}
+    />
+  </div>
+
+  <div
+    id={`${data.uid}-int-enssdk`}
+    data-integration-panel="enssdk"
+    role="tabpanel"
+    aria-labelledby={`${data.uid}-int-tab-enssdk`}
+    class="hidden"
+    hidden>
+    <EnssdkStaticCodeExample
+      uid={data.uid}
+      snippet={data.enssdkSnippet}
+      setupSnippets={data.enssdkSetupSnippets}
+      responseJson={data.responseJson}
+      hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+      hostedInstanceNamespace={data.hostedInstanceNamespace}
+    />
+  </div>
+
+  <div
+    id={`${data.uid}-int-enskit`}
+    data-integration-panel="enskit"
+    role="tabpanel"
+    aria-labelledby={`${data.uid}-int-tab-enskit`}
+    class="hidden"
+    hidden>
+    <EnskitStaticCodeExample
+      uid={data.uid}
+      snippet={data.enskitSnippet}
+      setupSnippets={data.enskitSetupSnippets}
+      responseJson={data.responseJson}
+      hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+      hostedInstanceNamespace={data.hostedInstanceNamespace}
+    />
+  </div>
+</StaticExampleCard>
+
+{
+  !hideBackToExamples && (
+    <a
+      class="group w-fit flex flex-row justify-start items-center gap-2"
+      href="/docs/integrate/omnigraph/examples">
+      <Icon
+        name="left-arrow"
+        class="h-5 w-5 text-[var(--sl-color-accent)] group-hover:text-[var(--sl-color-white)] transition-colors duration-200"
+      />
+      <p class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-all duration-200">
+        Back to Examples{" "}
+      </p>
+    </a>
+  )
+}
