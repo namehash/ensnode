@@ -67,8 +67,8 @@ export function SearchView() {
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
-        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
+        Showcases live querying via <code>Query.domains</code>. Only <b>Canonical</b> Domains (those
+        with an inferrable Canonical Name) are searched. Input is debounced by {DEBOUNCE_MS}ms and
         synced to the URL as <code>?query=</code>.
       </p>
 
