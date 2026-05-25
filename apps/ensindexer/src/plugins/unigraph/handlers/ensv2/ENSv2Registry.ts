@@ -73,14 +73,6 @@ export default function () {
     const storageId = makeStorageId(tokenId);
     const domainId = makeENSv2DomainId(registry, storageId);
 
-    console.table({
-      event: "RegistrationOrReservation",
-      registry: registry.address,
-      label,
-      storageId,
-      domainId,
-    });
-
     // Sanity Check: LabelHash must match Label
     if (labelHash !== labelhashLiteralLabel(label)) {
       throw new Error(
@@ -286,16 +278,6 @@ export default function () {
       const subregistryId = subregistry
         ? makeENSv2RegistryId({ chainId: registry.chainId, address: subregistry })
         : null;
-
-      // if (registry.address === "0x7d6175379f903e575694a503a02a3a1261805ef6") {
-      // }
-      console.table({
-        event: "SetSubregistry",
-        registry: registry.address,
-        storageId,
-        domainId,
-        subregistry,
-      });
 
       await handleSubregistryUpdated(context, domainId, subregistryId);
 
