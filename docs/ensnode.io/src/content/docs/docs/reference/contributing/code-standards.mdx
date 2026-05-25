@@ -1,16 +1,18 @@
 ---
-title: Formatting with Biome and Prettier
+title: Code Standards
 sidebar:
-  label: Formatting
+  label: Code Standards
   order: 6
 ---
+
+## Formatting / Linting
 
 We use Biome to format most of the code in the ENSNode monorepo, and Prettier to cover the rest:
 
 - Biome handles JS, TS, JSON, CSS, and the frontmatter of `.astro` files.
 - Prettier handles Markdown (`.md` and `.mdx`) across the monorepo, and the template portion of `.astro` files in `docs/ensnode.io` and `docs/ensrainbow.io` via [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro). The `astroSkipFrontmatter: true` option keeps the frontmatter under Biome's ownership.
 
-## Running the formatters
+### Running the formatters
 
 From the monorepo root:
 
@@ -20,7 +22,7 @@ pnpm lint
 
 CI runs `pnpm lint:ci` (check-only) on every PR.
 
-## Windows: line-ending diffs
+### Windows: line-ending diffs
 
 Git on Windows checks files out with CRLF (`\r\n`) line endings by default. Biome and Prettier write LF (`\n`). After `pnpm lint`, files may appear modified, but Git normalizes the endings back to LF when staging, so nothing changes in the resulting commit.
 
