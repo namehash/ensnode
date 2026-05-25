@@ -1,11 +1,11 @@
 import {
   buildEnskitSnippet,
   buildEnssdkSnippet,
-} from "@lib/omnigraph-examples/build-integration-snippets";
+} from "@lib/examples/omnigraph/build-integration-snippets";
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
 
-import { buildStaticExampleStackBlitzProject } from "./buildStaticExampleStackBlitzProject";
-import type { PlaygroundProject } from "./example-project/types";
+import type { PlaygroundProject } from "../core/types";
+import { buildStaticExampleStackBlitzProject } from "./buildProject";
 
 export type StaticExampleStackBlitzIntegration = "enssdk" | "enskit";
 

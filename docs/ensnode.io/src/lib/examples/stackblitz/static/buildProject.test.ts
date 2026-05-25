@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildStackBlitzPackageJson,
-  buildStackBlitzProjectPayload,
-} from "./buildStackBlitzProject";
-import { buildStaticExampleStackBlitzProject } from "./buildStaticExampleStackBlitzProject";
+import { buildStackBlitzPackageJson, buildStackBlitzProjectPayload } from "../sdk/buildPayload";
+import { buildStaticExampleStackBlitzProject } from "./buildProject";
 
 describe("buildStaticExampleStackBlitzProject", () => {
   it("builds an enssdk node project with the snippet as src/index.ts", () => {

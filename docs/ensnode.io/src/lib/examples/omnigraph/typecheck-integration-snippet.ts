@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
-const docsRoot = fileURLToPath(new URL("../../../", import.meta.url));
-const enssdkRoot = fileURLToPath(new URL("../../../../../packages/enssdk", import.meta.url));
+const docsRoot = fileURLToPath(new URL("../../../../", import.meta.url));
+const enssdkRoot = fileURLToPath(new URL("../../../../../../packages/enssdk", import.meta.url));
 const enssdkSchemaPath = join(enssdkRoot, "src/omnigraph/generated/schema.graphql");
 const enssdkIntrospectionPath = join(enssdkRoot, "src/omnigraph/generated/introspection.ts");
 

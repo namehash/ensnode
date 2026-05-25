@@ -1,8 +1,7 @@
-import { openStaticExampleInStackBlitz } from "./openStaticExampleInStackBlitz";
 import {
-  resolveStaticExampleStackBlitzProject,
+  openStaticExampleFromId,
   type StaticExampleStackBlitzIntegration,
-} from "./resolveStaticExampleStackBlitzProject";
+} from "@lib/examples/stackblitz/static/openFromExampleId";
 
 let initialized = false;
 
@@ -34,6 +33,6 @@ export function initStaticExampleStackBlitzButtons(): void {
     );
     if (!integration) return;
 
-    openStaticExampleInStackBlitz(resolveStaticExampleStackBlitzProject(exampleId, integration));
+    openStaticExampleFromId(exampleId, integration);
   });
 }

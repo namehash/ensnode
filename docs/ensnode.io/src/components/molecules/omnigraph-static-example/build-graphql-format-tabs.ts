@@ -1,4 +1,4 @@
-import { buildOmnigraphCurlExample } from "@lib/playground/utils";
+import { buildOmnigraphCurlExample } from "@lib/examples/omnigraph/docs-utils";
 
 import type { StaticExampleTab, StaticExampleTabPanel } from "./tab-types";
 

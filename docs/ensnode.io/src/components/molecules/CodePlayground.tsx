@@ -1,24 +1,14 @@
 import sdk, { type EmbedOptions } from "@stackblitz/sdk";
 import { useEffect, useMemo, useRef } from "react";
 
-import { buildStackBlitzProjectPayload } from "src/lib/playground/buildStackBlitzProject";
-import type { PlaygroundProject, PlaygroundView } from "src/lib/playground/example-project/types";
+import { buildStackBlitzProjectPayload } from "@lib/examples/stackblitz/sdk/buildPayload";
+import type { PlaygroundProject } from "@lib/examples/stackblitz/core/types";
+import { stackBlitzViewForPlayground } from "@lib/examples/stackblitz/sdk/viewOptions";
 
 type CodePlaygroundProps = PlaygroundProject & {
   height?: number;
   terminalHeight?: number;
 };
-
-function embedViewForPlayground(view: PlaygroundView | undefined): EmbedOptions["view"] {
-  switch (view) {
-    case "preview":
-      return "preview";
-    case "both":
-      return "default";
-    default:
-      return "editor";
-  }
-}
 
 export default function CodePlayground({
   title,
@@ -75,7 +65,7 @@ export default function CodePlayground({
         hideExplorer: true,
         hideDevTools: true,
         showSidebar: true,
-        view: embedViewForPlayground(view),
+        view: stackBlitzViewForPlayground(view),
         theme: "light",
       }) as EmbedOptions,
     [resolvedOpenFile, terminalHeight, height, view],

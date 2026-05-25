@@ -3,19 +3,22 @@ import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import { ENSADMIN_URL } from "astro:env/client";
 
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
-import { DOCS_HOSTED_INSTANCE_ANCHOR, DOCS_OMNIGRAPH_NAMESPACE } from "@lib/playground/constants";
+import {
+  DOCS_HOSTED_INSTANCE_ANCHOR,
+  DOCS_OMNIGRAPH_NAMESPACE,
+} from "@lib/examples/omnigraph/constants";
 import {
   buildEnskitSetupSnippets,
   buildEnskitSnippet,
   buildEnssdkSetupSnippets,
   buildEnssdkSnippet,
   type SetupPackageManager,
-} from "@lib/omnigraph-examples/build-integration-snippets";
+} from "@lib/examples/omnigraph/build-integration-snippets";
 import {
   buildEnsAdminOmnigraphUrl,
   getHostedEnsNodeInstanceDocUrl,
   stringifyJsonForDocs,
-} from "@lib/playground/utils";
+} from "@lib/examples/omnigraph/docs-utils";
 
 export interface OmnigraphStaticExampleData {
   exampleId: string;

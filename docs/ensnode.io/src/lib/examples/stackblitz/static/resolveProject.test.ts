@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveStaticExampleStackBlitzProject } from "./resolveStaticExampleStackBlitzProject";
+import { resolveStaticExampleStackBlitzProject } from "./resolveProject";
 
 describe("resolveStaticExampleStackBlitzProject", () => {
   it("rebuilds an enssdk project from a known example id", () => {

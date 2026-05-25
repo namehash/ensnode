@@ -2,7 +2,7 @@ import {
   SETUP_PACKAGE_MANAGERS,
   SETUP_TAB_LABELS,
   type SetupPackageManager,
-} from "@lib/omnigraph-examples/build-integration-snippets";
+} from "@lib/examples/omnigraph/build-integration-snippets";
 
 import type { StaticExampleTab, StaticExampleTabPanel } from "./tab-types";
 

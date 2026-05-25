@@ -1,6 +1,6 @@
 import type { Project } from "@stackblitz/sdk";
 
-import type { PlaygroundProject, PlaygroundRuntime } from "./example-project/types";
+import type { PlaygroundProject, PlaygroundRuntime } from "../core/types";
 
 /** StackBlitz SDK templates: https://developer.stackblitz.com/platform/api/javascript-sdk-options#projecttemplate */
 export const STACKBLITZ_WEBCONTAINERS_TEMPLATE = "node" as const;

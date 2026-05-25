@@ -16,12 +16,12 @@ import {
 import { expectIntegrationSnippetTypechecks } from "./typecheck-integration-snippet";
 
 const snapshotExamples = import.meta.glob<SnapshotExample[]>(
-  "../../data/omnigraph-examples/versions/*/examples.json",
+  "../../../data/omnigraph-examples/versions/*/examples.json",
   { eager: true, import: "default" },
 );
 const activeSnapshotExamples =
   snapshotExamples[
-    `../../data/omnigraph-examples/versions/${ACTIVE_OMNIGRAPH_VERSION}/examples.json`
+    `../../../data/omnigraph-examples/versions/${ACTIVE_OMNIGRAPH_VERSION}/examples.json`
   ] ?? [];
 
 // Minimal real-ish query fixtures

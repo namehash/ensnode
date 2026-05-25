@@ -1,19 +1,19 @@
 import {
   fetchRawExampleProjectFromGlob,
   mergeRawExampleProjects,
-} from "./example-project/fetchRawExampleProject";
-import { buildViteReactPlaygroundTsconfig } from "./example-project/buildPlaygroundTsconfig";
-import { loadExampleProject } from "./example-project/loadExampleProject";
-import { resolveEnskitExamplePackageManifest } from "./example-project/resolvePinnedDependencies";
-import type { PlaygroundProject } from "./example-project/types";
+} from "../core/fetchRawExampleProject";
+import { buildViteReactPlaygroundTsconfig } from "../core/buildPlaygroundTsconfig";
+import { loadExampleProject } from "../core/loadExampleProject";
+import { resolveEnskitExamplePackageManifest } from "../core/resolvePinnedDependencies";
+import type { PlaygroundProject } from "../core/types";
 
 const enskitExampleSourceModules = import.meta.glob(
-  "../../../../../examples/enskit-react-example/src/**/*.{ts,tsx}",
+  "../../../../../../../examples/enskit-react-example/src/**/*.{ts,tsx}",
   { query: "?raw", import: "default", eager: true },
 ) as Record<string, string>;
 
 const enskitExampleRootModules = import.meta.glob(
-  "../../../../../examples/enskit-react-example/{index.html,vite.config.ts}",
+  "../../../../../../../examples/enskit-react-example/{index.html,vite.config.ts}",
   { query: "?raw", import: "default", eager: true },
 ) as Record<string, string>;
 

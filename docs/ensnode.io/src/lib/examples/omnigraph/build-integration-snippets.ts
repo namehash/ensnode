@@ -1,5 +1,5 @@
 import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
-import { ENSNODE_URL } from "@lib/playground/constants";
+import { ENSNODE_URL } from "@lib/examples/omnigraph/constants";
 
 /** Package managers shown in Setup tabs (npm default). */
 export type SetupPackageManager = "npm" | "pnpm";

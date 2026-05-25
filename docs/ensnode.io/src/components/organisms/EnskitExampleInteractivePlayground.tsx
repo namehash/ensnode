@@ -1,6 +1,5 @@
-import { loadEnskitExampleProject } from "src/lib/playground/loadEnskitExampleProject";
-
-import CodePlayground from "../molecules/CodePlayground";
+import CodePlayground from "@components/molecules/CodePlayground";
+import { loadEnskitExampleProject } from "@lib/examples/stackblitz/interactive/loadEnskitExampleProject";
 
 type EnskitExampleInteractivePlaygroundProps = {
   height?: number;
