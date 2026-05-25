@@ -199,8 +199,8 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent);
 }
 
-.sl-markdown-content > p a:not(:has(code)),
-.sl-markdown-content :is(ul, ol) > li a:not(:has(code)),
+.sl-markdown-content > p a:not(:has(code), [role="tab"]),
+.sl-markdown-content :is(ul, ol) > li a:not(:has(code), [role="tab"]),
 .starlight-aside__content a {
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -371,4 +371,12 @@ ul.top-level details details > summary .group-label span {
 /* Make sure that social icons in the sidebar do not move on hover */
 .sidebar-content .social-icons a {
   transform: none !important;
+}
+
+/* Align "tablist" component to the left 
+ * and remove the the default full-witdh underline
+ */
+ul[role="tablist"] {
+  padding-left: 0;
+  border-bottom: none;
 }
