@@ -35,15 +35,15 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
     });
   }
 
-  // // Invariant: ENSApi & ENSRainbow must match version numbers
-  // if (ensRainbow.versionInfo.ensRainbow !== ensApi.versionInfo.ensApi) {
-  //   ctx.issues.push({
-  //     code: "custom",
-  //     path: ["ensRainbow", "versionInfo", "ensRainbow"],
-  //     input: ensRainbow.versionInfo.ensRainbow,
-  //     message: `Version Mismatch: ENSRainbow@${ensRainbow.versionInfo.ensRainbow} !== ENSApi@${ensApi.versionInfo.ensApi}`,
-  //   });
-  // }
+  // Invariant: ENSApi & ENSRainbow must match version numbers
+  if (ensRainbow.versionInfo.ensRainbow !== ensApi.versionInfo.ensApi) {
+    ctx.issues.push({
+      code: "custom",
+      path: ["ensRainbow", "versionInfo", "ensRainbow"],
+      input: ensRainbow.versionInfo.ensRainbow,
+      message: `Version Mismatch: ENSRainbow@${ensRainbow.versionInfo.ensRainbow} !== ENSApi@${ensApi.versionInfo.ensApi}`,
+    });
+  }
 
   // Invariant: `@adraffy/ens-normalize` package version must match between ENSApi & ENSIndexer
   if (ensIndexer.versionInfo.ensNormalize !== ensApi.versionInfo.ensNormalize) {
