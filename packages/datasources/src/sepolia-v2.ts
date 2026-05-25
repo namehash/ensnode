@@ -68,7 +68,7 @@ export default {
       NameWrapper: {
         abi: root_NameWrapper,
         address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
-        startBlock: 8579988,
+        startBlock: 3790153,
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
