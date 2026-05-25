@@ -43,6 +43,7 @@ async function getRegistrarAndRegistry(context: IndexingEngineContext, event: Lo
     "ETHRegistrar",
   );
 
+  // if this is the ETHRegistrar, it manages the ETHRegistry
   if (accountIdEqual(registrar, ensv2ETHRegistrar)) {
     return {
       registrar,
@@ -50,6 +51,7 @@ async function getRegistrarAndRegistry(context: IndexingEngineContext, event: Lo
     };
   }
 
+  // if we were unable to statically identify this Registrar's Registry, return null
   return { registrar, registry: null };
 }
 
