@@ -426,7 +426,6 @@ starlight-tabs ul[role="tablist"] {
 
 .starlight-aside__content {
   color: var(--color-text-primary);
-  font-family: Inter;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
