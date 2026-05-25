@@ -179,7 +179,7 @@ export default {
     chain: baseSepolia,
     contracts: {
       L2ReverseRegistrar: {
-        abi: ResolverABI,
+        abi: StandaloneReverseRegistrar,
         address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 21788010,
       },
@@ -193,7 +193,7 @@ export default {
     chain: optimismSepolia,
     contracts: {
       L2ReverseRegistrar: {
-        abi: ResolverABI,
+        abi: StandaloneReverseRegistrar,
         address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 23770766,
       },
@@ -207,7 +207,7 @@ export default {
     chain: arbitrumSepolia,
     contracts: {
       L2ReverseRegistrar: {
-        abi: ResolverABI,
+        abi: StandaloneReverseRegistrar,
         address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 123142726,
       },
@@ -221,7 +221,7 @@ export default {
     chain: scrollSepolia,
     contracts: {
       L2ReverseRegistrar: {
-        abi: ResolverABI,
+        abi: StandaloneReverseRegistrar,
         address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 8175276,
       },
@@ -235,7 +235,7 @@ export default {
     chain: lineaSepolia,
     contracts: {
       L2ReverseRegistrar: {
-        abi: ResolverABI,
+        abi: StandaloneReverseRegistrar,
         address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 9267966,
       },
