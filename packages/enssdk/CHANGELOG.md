@@ -1,5 +1,13 @@
 # enssdk
 
+## 1.15.1
+
+## 1.15.0
+
+### Minor Changes
+
+- [#2161](https://github.com/namehash/ensnode/pull/2161) [`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1) Thanks [@shrugs](https://github.com/shrugs)! - Add `beautifyInterpretedLabel`, which beautifies a single `InterpretedLabel` per [ENSIP-15](https://docs.ens.domains/ensip/15), preserving Encoded LabelHashes verbatim, and returns the new `BeautifiedLabel` branded type. `beautifyInterpretedName` is now defined in terms of `beautifyInterpretedLabel`.
+
 ## 1.14.0
 
 ## 1.13.1

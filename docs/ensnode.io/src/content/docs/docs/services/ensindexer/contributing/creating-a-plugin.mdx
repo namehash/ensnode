@@ -6,7 +6,7 @@ sidebar:
   order: 2
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 ## ENSIndexer Plugins
 
@@ -17,6 +17,7 @@ ENSIndexer will only activate the plugins you specify in the `PLUGINS` env varia
 ## Plugin Architecture
 
 Each ENSIndexer plugin is a standalone TypeScript module that can be developed, tested, and deployed independently. The ENSIndexer Plugin can define its own indexed data models and indexing logic. It must include two main files:
+
 - `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific onchain events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the relevant indexed data model inside the ENSIndexer Schema.
 - `plugin.ts`: This file defines the plugin itself, including its name, description, and any configuration options, like datasources to be used for specifying onchain contracts that will be indexed.
 
@@ -28,7 +29,7 @@ You need to import the `event-handlers.ts` file from each plugin into [`register
 
 ### Plugin definition
 
-The `plugin.ts` file has a default export with the plugin definition object returned from `createPlugin` function. The plugin definition object includes the plugin name, datasources required for the plugin to operate, and the config for contracts to be indexed by ENSIndexer when the plugin is active. 
+The `plugin.ts` file has a default export with the plugin definition object returned from `createPlugin` function. The plugin definition object includes the plugin name, datasources required for the plugin to operate, and the config for contracts to be indexed by ENSIndexer when the plugin is active.
 
 You need to import the plugin definition object into [`apps/ensindexer/src/plugins/index.ts`](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins/index.ts) file and have it included in the `ALL_PLUGINS` array. This way, you let the ENSIndexer runtime know that the plugin is available for activation, which in turn allows you to activate the plugin by including its name in the `PLUGINS` env variable.
 

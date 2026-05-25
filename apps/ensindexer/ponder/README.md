@@ -5,11 +5,13 @@ This is Ponder's `root` directory, where it looks for:
 - `./ponder.schema.ts` — where ponder actually sources the drizzle schema
 - `./src/api/index.ts` — a hono app which ponder serves on `PORT` (default 42069)
 - `./src/*.ts` — ponder.on handler registrations
-    - specifically `./src/register-handlers.ts`, where we centralize the conditional registration of our plugin-specific handlers
+  - specifically `./src/register-handlers.ts`, where we centralize the conditional registration of our plugin-specific handlers
 
 We use a custom root to keep ENSIndexer's application source files in `apps/ensindexer/src/`, without conflicting with ponder's expectation that the root (default `apps/ensindexer/src`) only contains handlers and not, for example, vitest test files.
 
 By using a custom ponder root we get the following properties:
+
 1. Code stays in `src/`, which is a nice pattern consistent with the rest of the codebase, and
 2. The Ponder app itself is logically isolated from the rest of the ensindexer codebase
-  - this allows us to colocate test files with their implementations and the import dependency graph excludes them when ponder bundles the files in the root.
+
+- this allows us to colocate test files with their implementations and the import dependency graph excludes them when ponder bundles the files in the root.

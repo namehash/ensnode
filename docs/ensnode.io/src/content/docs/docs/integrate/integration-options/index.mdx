@@ -3,28 +3,28 @@ title: Integration Options
 description: Integration options for building with ENSNode.
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 ENSNode takes the guesswork out of ENS integrations, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
 
 There are a few different ways to integrate with ENSNode, depending on your app, runtime, and needs.
 
-## 1. `enskit`
-
-With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
-
-<LinkCard
-  title='enskit Integration Documentation'
-  href="/docs/integrate/integration-options/enskit"
-/>
-
-## 2. `enssdk`
+## 1. `enssdk`
 
 With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
 
 <LinkCard
-  title='enssdk Integration Documentation'
+  title="enssdk Integration Documentation"
   href="/docs/integrate/integration-options/enssdk"
+/>
+
+## 2. `enskit`
+
+With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
+
+<LinkCard
+  title="enskit Integration Documentation"
+  href="/docs/integrate/integration-options/enskit"
 />
 
 ## 3. Omnigraph GraphQL API
@@ -32,7 +32,7 @@ With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to
 The Omnigraph API is a GraphQL API following the Relay specification, so you get built-in support for efficient infinite pagination and idiomatic access to all of the ENS protocol within a _unified_ ENSv1 + ENSv2 datamodel.
 
 <LinkCard
-  title='Omnigraph GraphQL API Documentation'
+  title="Omnigraph GraphQL API Documentation"
   href="/docs/integrate/integration-options/omnigraph-graphql-api"
 />
 
@@ -41,7 +41,7 @@ The Omnigraph API is a GraphQL API following the Relay specification, so you get
 For special use cases that go beyond what the ENS Omnigraph exposes, query the live state of ENSv2 directly via SQL. `ENSDb` stores ENS state in a PostgreSQL database — usable from any language with a Postgres driver.
 
 <LinkCard
-  title='ENSDb Integration Documentation'
+  title="ENSDb Integration Documentation"
   href="/docs/integrate/integration-options/ensdb"
 />
 
@@ -50,7 +50,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
 `enscli` is a CLI that wraps `enssdk` to bring the ENS Omnigraph to the terminal. Designed for developers exploring or validating integrations, operators wiring ENS lookups into shell pipelines, and AI coding agents driving `ensskills`.
 
 <LinkCard
-  title='enscli Integration Documentation'
+  title="enscli Integration Documentation"
   href="/docs/integrate/integration-options/enscli"
 />
 
@@ -59,7 +59,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
 `ensskills` is a collection of curated skill bundles that give AI coding agents a well-defined contract for working with ENS — powering conversational ENS lookups and streamlining integration code written with `enskit`, `enssdk`, or the raw Omnigraph API.
 
 <LinkCard
-  title='ensskills Integration Documentation'
+  title="ensskills Integration Documentation"
   href="/docs/integrate/integration-options/ensskills"
 />
 
@@ -68,7 +68,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
 `ensdb-cli` is the operator-facing tool for ENSDb snapshots — portable, versioned packages of an ENSDb instance. Pull one down, restore it into Postgres, and start querying ENS in minutes instead of waiting days to complete a full historical indexing backfill from scratch.
 
 <LinkCard
-  title='ensdb-cli & ENSDb snapshots Documentation'
+  title="ensdb-cli & ENSDb snapshots Documentation"
   href="/docs/integrate/integration-options/ensdb-cli"
 />
 
@@ -77,6 +77,6 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
 ENSEngine watches your ENSDb for changes in real time and delivers ENS-aware events — including webhooks — to any sink you configure. Stop polling and start reacting to ENS state changes.
 
 <LinkCard
-  title='ENSEngine Integration Documentation'
+  title="ENSEngine Integration Documentation"
   href="/docs/integrate/integration-options/ensengine"
 />

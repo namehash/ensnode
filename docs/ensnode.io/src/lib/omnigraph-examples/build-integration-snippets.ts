@@ -6,10 +6,11 @@ export type SetupPackageManager = "npm" | "pnpm";
 
 export const SETUP_PACKAGE_MANAGERS: SetupPackageManager[] = ["npm", "pnpm"];
 
+const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+
 /** Setup steps for enssdk per package manager: scaffold, install, copy snippet, run. */
 export function buildEnssdkSetupSnippets(): Record<SetupPackageManager, string> {
-  const version = ACTIVE_OMNIGRAPH_VERSION;
-  const deps = `enssdk@${version}`;
+  const deps = `enssdk@${npmSdkVersion}`;
   const devDeps = "tsx typescript @types/node";
   const pasteStep = "# 3. Paste the TypeScript snippet above into src/index.ts";
   const runEnv = `ENSNODE_URL=${ENSNODE_URL}`;
@@ -39,8 +40,7 @@ ${runEnv} pnpm start`,
 
 /** Setup steps for enskit per package manager: scaffold, install, copy snippet, run. */
 export function buildEnskitSetupSnippets(): Record<SetupPackageManager, string> {
-  const version = ACTIVE_OMNIGRAPH_VERSION;
-  const deps = `enskit@${version} enssdk@${version}`;
+  const deps = `enskit@${npmSdkVersion} enssdk@${npmSdkVersion}`;
   const viteFlags = "--template react-ts --no-interactive --no-immediate";
   const pasteStep = "# 3. Copy the TSX snippet above into src/App.tsx";
   const runEnv = `VITE_ENSNODE_URL=${ENSNODE_URL}`;

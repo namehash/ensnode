@@ -10,12 +10,5 @@
  * To promote a newly-deployed version: snapshot it (`pnpm omnigraph:snapshot <version>`),
  * fill its responses (`pnpm omnigraph-examples:refresh-responses`), then bump this constant
  * in a one-line PR.
- *
- * Version strings are semver without a leading `v` (e.g. `1.14.0`).
  */
-export const ACTIVE_OMNIGRAPH_VERSION = "1.13.1";
-
-/** Strip a leading `v` from version strings (`v1.14.0` → `1.14.0`). */
-export function normalizeOmnigraphVersion(version: string): string {
-  return version.replace(/^v/, "");
-}
+export const ACTIVE_OMNIGRAPH_VERSION = "v1.13.1";

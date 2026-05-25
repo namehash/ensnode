@@ -1,0 +1,34 @@
+---
+title: Indexing Status
+description: Read the indexing status snapshot for an ENSIndexer instance from ENSDb.
+sidebar:
+  label: Indexing Status
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Read the indexing status snapshot for an ENSIndexer instance from the shared `ensnode.metadata` table. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<Tabs syncKey="unigraph-client">
+  <TabItem label="SQL">
+```sql
+-- Indexing status snapshot for the `ensindexer_0` ENSIndexer Schema
+SELECT value -> 'indexingStatus' FROM "ensnode"."metadata"
+WHERE ens_indexer_schema_name = 'ensindexer_0'
+AND key = 'indexing_metadata_context';
+```
+  </TabItem>
+  <TabItem label="ensdb-sdk (TypeScript)">
+```typescript
+import { IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
+
+const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
+if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
+const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
+// Do something with the indexing status snapshot
+}
+
+```
+  </TabItem>
+</Tabs>
+```

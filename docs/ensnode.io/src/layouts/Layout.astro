@@ -10,68 +10,70 @@ import { Footer } from "@namehash/namehash-ui";
 
 const { ...props } = Astro.props;
 ---
+
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width"/>
-    <meta name="generator" content={Astro.generator}/>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
     <link rel="preload" as="image" href={heroImage.src} />
     <AstroFont
-            config={[
-                {
-                    src: [],
-                    name: "Inter",
-                    // Google Fonts URL
-                googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
-                    preload: true,
-                    display: "swap",
-                    selector: "body",
-                    fallback: "sans-serif",
-                },
-            ]}
+      config={[
+        {
+          src: [],
+          name: "Inter",
+          // Google Fonts URL
+          googleFontsURL:
+            "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+          preload: true,
+          display: "swap",
+          selector: "body",
+          fallback: "sans-serif",
+        },
+      ]}
     />
     <SEO
-            title="The full-stack development platform for ENSv2 | ENSNode"
-            description="Achieve full ENSv2 readiness even before ENSv2 launches."
-            openGraph={{
-                basic: {
-                    title: "The full-stack development platform for ENSv2",
-                    type: "website",
-                    image: "https://ensnode.io/OG_image.png",
-                    url: "https://ensnode.io/",
-                },
-                optional: {
-                    description: "Achieve full ENSv2 readiness even before ENSv2 launches.",
-                    siteName: "ENSNode"
-                }
-            }}
-            twitter={{
-                creator: "@NameHashLabs",
-                title: "The full-stack development platform for ENSv2",
-                image: "https://ensnode.io/Twitter_OG_image.png",
-                description: "Achieve full ENSv2 readiness even before ENSv2 launches.",
-                card: "summary_large_image"
-            }}
-            extend={{
-                link: [
-                    { rel: "icon", href: "/favicon.svg" },
-                    { rel: "apple-touch-icon", href: "/apple-touch-icon.png"}
-                ],
-            }}
+      title="The full-stack development platform for ENSv2 | ENSNode"
+      description="Achieve full ENSv2 readiness even before ENSv2 launches."
+      openGraph={{
+        basic: {
+          title: "The full-stack development platform for ENSv2",
+          type: "website",
+          image: "https://ensnode.io/OG_image.png",
+          url: "https://ensnode.io/",
+        },
+        optional: {
+          description: "Achieve full ENSv2 readiness even before ENSv2 launches.",
+          siteName: "ENSNode",
+        },
+      }}
+      twitter={{
+        creator: "@NameHashLabs",
+        title: "The full-stack development platform for ENSv2",
+        image: "https://ensnode.io/Twitter_OG_image.png",
+        description: "Achieve full ENSv2 readiness even before ENSv2 launches.",
+        card: "summary_large_image",
+      }}
+      extend={{
+        link: [
+          { rel: "icon", href: "/favicon.svg" },
+          { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+        ],
+      }}
     />
-</head>
-<body {...props}>
-<slot/>
-<Footer />
-</body>
+  </head>
+  <body {...props}>
+    <slot />
+    <Footer />
+  </body>
 </html>
 
 <style>
-    html,
-    body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-    }
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>

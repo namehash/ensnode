@@ -1,0 +1,56 @@
+---
+title: Unigraph SQL Examples
+description: Connect to an ENSDb instance and query the Unigraph in raw SQL or with the ensdb-sdk.
+sidebar:
+  label: Overview
+---
+
+import { LinkCard, Tabs, TabItem } from "@astrojs/starlight/components";
+
+These examples show the same queries two ways: in **raw SQL** (any PostgreSQL client, any language) and with the typed **[`@ensnode/ensdb-sdk`](https://www.npmjs.com/package/@ensnode/ensdb-sdk)** for TypeScript projects.
+
+SQL access requires connecting to your own [self-hosted](/docs/self-host) ENSDb instance.
+
+## Connect
+
+The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each ENSIndexer instance writes to its own **ENSIndexer Schema** (e.g. `ensindexer_0`); shared operational metadata lives in the `ensnode` schema.
+
+<Tabs syncKey="unigraph-client">
+  <TabItem label="SQL">
+```bash
+psql postgresql://user:password@host:5432/ensdb_devnet
+```
+
+Discover the available ENSIndexer Schemas:
+
+```sql
+SELECT DISTINCT ens_indexer_schema_name
+FROM ensnode.metadata;
+```
+
+  </TabItem>
+  <TabItem label="ensdb-sdk (TypeScript)">
+```bash
+npm install @ensnode/ensdb-sdk
+```
+
+```typescript
+import { EnsDbReader } from "@ensnode/ensdb-sdk";
+
+// Connect by providing a connection string and the ENSIndexer Schema Name to query
+const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const { ensDb, ensIndexerSchema } = ensDbReader;
+```
+
+  </TabItem>
+</Tabs>
+
+:::note[Canonical fields]
+Canonical fields (`canonical_name`, `canonical_path`, `canonical_node`, `canonical_depth`) are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`.
+:::
+
+## Examples
+
+<LinkCard title="Domain by Name" href="/docs/integrate/unigraph/examples/domain-by-name" />
+<LinkCard title="Account Domains" href="/docs/integrate/unigraph/examples/account-domains" />
+<LinkCard title="Indexing Status" href="/docs/integrate/unigraph/examples/indexing-status" />

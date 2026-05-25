@@ -1,5 +1,35 @@
 # ensapi
 
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/datasources@1.15.1
+  - @ensnode/ensdb-sdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+  - @ensnode/ponder-subgraph@1.15.1
+  - @namehash/ens-referrals@1.15.1
+
+## 1.15.0
+
+### Minor Changes
+
+- [#2161](https://github.com/namehash/ensnode/pull/2161) [`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: add `BeautifiedName` and `BeautifiedLabel` scalars, a `CanonicalName.beautified: BeautifiedName!` field, and a `Label.beautified: BeautifiedLabel!` field. These expose the Name/Label beautified per [ENSIP-15](https://docs.ens.domains/ensip/15) for display — continue using `interpreted` for navigation targets and lookup keys.
+
+### Patch Changes
+
+- [#2155](https://github.com/namehash/ensnode/pull/2155) [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: `AccountDomainsWhereInput.canonical` now filters on both `true` and `false` (previously `false` was a no-op). The `defaultValue: false` is dropped — clients omitting `canonical` will receive all Domains owned by the Account regardless of canonicality. Pass `canonical: true` for canonical-only or `canonical: false` for non-canonical-only. The underlying `DomainsWhere.canonical` in `resolveFindDomains` was generalized so `typeof === "boolean"` triggers the filter; `null`/`undefined` is "no filter".
+
+- Updated dependencies [[`bb0b244`](https://github.com/namehash/ensnode/commit/bb0b244e01b0ef7bba88c5ac5f9052fdddac4000), [`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1), [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71), [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429)]:
+  - @ensnode/ensdb-sdk@1.15.0
+  - enssdk@1.15.0
+  - @ensnode/ensnode-sdk@1.15.0
+  - @ensnode/datasources@1.15.0
+  - @namehash/ens-referrals@1.15.0
+  - @ensnode/ponder-subgraph@1.15.0
+
 ## 1.14.0
 
 ### Minor Changes

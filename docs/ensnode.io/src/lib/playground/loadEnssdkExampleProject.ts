@@ -1,4 +1,3 @@
-import { ENSNODE_URL } from "./constants";
 import { fetchRawExampleProjectFromGlob } from "./example-project/fetchRawExampleProject";
 import { loadExampleProject } from "./example-project/loadExampleProject";
 import { resolveEnssdkExamplePackageManifest } from "./example-project/resolvePinnedDependencies";
@@ -22,12 +21,6 @@ export function loadEnssdkExampleProject(): PlaygroundProject {
     entryFileName: "src/index.ts",
     fetchRaw: () =>
       fetchRawExampleProjectFromGlob(enssdkExampleSourceModules, "examples/enssdk-example"),
-    envReplacements: [
-      {
-        pattern: /const ENSNODE_URL = process\.env\.ENSNODE_URL!;/,
-        replacement: `const ENSNODE_URL = ${JSON.stringify(ENSNODE_URL)};`,
-      },
-    ],
     resolvePackageManifest: resolveEnssdkExamplePackageManifest,
   });
 }

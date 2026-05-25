@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 NameHash Labs publishes the latest version of ENSRainbow as a docker container. The Docker image is lightweight and downloads the requested database at runtime based on environment variables.
 
@@ -59,11 +59,11 @@ See the [Configuration](/docs/services/ensrainbow/usage/configuration/) page for
 
 The Docker deployment requires these three variables for data management:
 
-| Variable | Purpose | Example |
-|----------|---------|---------|
-| `DB_SCHEMA_VERSION` | Identifies the expected on-disk database schema version | `3` |
-| `LABEL_SET_ID` | Chooses which label-set to download | `subgraph`, `ens-test-env` |
-| `LABEL_SET_VERSION` | Downloads prebuilt snapshot containing all data from version 0 through this version | `0` |
+| Variable            | Purpose                                                                             | Example                    |
+| ------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
+| `DB_SCHEMA_VERSION` | Identifies the expected on-disk database schema version                             | `3`                        |
+| `LABEL_SET_ID`      | Chooses which label-set to download                                                 | `subgraph`, `ens-test-env` |
+| `LABEL_SET_VERSION` | Downloads prebuilt snapshot containing all data from version 0 through this version | `0`                        |
 
 ## Persistent Storage
 
@@ -108,7 +108,7 @@ docker run -d --name ensrainbow \
 To use ENSRainbow as part of a [Docker Compose](https://docs.docker.com/compose/) setup, use the following service definition:
 
 ```yml
-version: '3.8'
+version: "3.8"
 
 services:
   ensrainbow:
@@ -131,7 +131,7 @@ volumes:
 For the ens-test-env:
 
 ```yml
-version: '3.8'
+version: "3.8"
 
 services:
   ensrainbow:

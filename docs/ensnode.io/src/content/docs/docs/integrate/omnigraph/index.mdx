@@ -95,7 +95,9 @@ query EthAndSubdomains {
         __typename
         id
         canonical {
-          name { interpreted }
+          name {
+            interpreted
+          }
           depth
         }
         events(first: 5) {
@@ -113,9 +115,15 @@ query EthAndSubdomains {
             node {
               __typename
               id
-              canonical { name { interpreted } }
+              canonical {
+                name {
+                  interpreted
+                }
+              }
               ... on ENSv1Domain {
-                rootRegistryOwner { address }
+                rootRegistryOwner {
+                  address
+                }
               }
               ... on ENSv2Domain {
                 tokenId
@@ -124,7 +132,9 @@ query EthAndSubdomains {
           }
         }
         ... on ENSv1Domain {
-          rootRegistryOwner { address }
+          rootRegistryOwner {
+            address
+          }
         }
         ... on ENSv2Domain {
           tokenId

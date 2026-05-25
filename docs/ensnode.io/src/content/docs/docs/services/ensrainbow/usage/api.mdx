@@ -8,13 +8,13 @@ sidebar:
 
 ## Endpoint Summary
 
-| Endpoint | Purpose | Key Response Types |
-|----------|---------|--------------------|
-| `GET /health` | Liveness probe — succeeds as soon as the HTTP server is accepting requests | `{ status: "ok" }` |
-| `GET /ready` | Readiness probe — succeeds once the database has been downloaded, validated, and opened | `ReadyResponse`, `ServiceUnavailableError` |
-| `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
-| `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError`, `ServiceUnavailableError` |
-| `GET /v1/config` | Public configuration of the running instance — available immediately at startup | `ENSRainbowPublicConfig` |
+| Endpoint                   | Purpose                                                                                 | Key Response Types                                            |
+| -------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `GET /health`              | Liveness probe — succeeds as soon as the HTTP server is accepting requests              | `{ status: "ok" }`                                            |
+| `GET /ready`               | Readiness probe — succeeds once the database has been downloaded, validated, and opened | `ReadyResponse`, `ServiceUnavailableError`                    |
+| `GET /v1/heal/{labelhash}` | Heal a single labelhash                                                                 | `HealSuccess`, `HealError`                                    |
+| `GET /v1/labels/count`     | Current healable label count                                                            | `CountSuccess`, `CountServerError`, `ServiceUnavailableError` |
+| `GET /v1/config`           | Public configuration of the running instance — available immediately at startup         | `ENSRainbowPublicConfig`                                      |
 
 :::tip[Deterministic Results]
 Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/docs/services/ensrainbow/concepts/label-sets-and-versioning/) for details.
@@ -123,8 +123,6 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
-
-
   ```json
   {
     "status": "error",
@@ -211,6 +209,7 @@ Success Response:
 ```
 
 The response contains:
+
 - `serverLabelSet`: The configured label set (from `LABEL_SET_ID` / `LABEL_SET_VERSION`) used at startup
   - `serverLabelSet.labelSetId`: Configured label set ID (validated against the database during bootstrap)
   - `serverLabelSet.highestLabelSetVersion`: Configured label set version (validated against the database during bootstrap)

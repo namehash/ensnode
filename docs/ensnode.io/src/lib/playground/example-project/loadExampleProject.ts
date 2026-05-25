@@ -1,11 +1,9 @@
 import { assemblePlaygroundProject } from "./assemblePlaygroundProject";
 import { buildNodePlaygroundTsconfig } from "./buildPlaygroundTsconfig";
-import { replaceEnvWithValues } from "./replaceEnvWithValues";
 import type { ExampleProjectConfig, PlaygroundProject } from "./types";
 
 export function loadExampleProject(config: ExampleProjectConfig): PlaygroundProject {
   const raw = config.fetchRaw();
-  const transformed = replaceEnvWithValues(raw, config.envReplacements);
   const { dependencies, devDependencies } = config.resolvePackageManifest();
   const tsconfig = config.buildTsconfig?.() ?? buildNodePlaygroundTsconfig();
 
@@ -16,15 +14,11 @@ export function loadExampleProject(config: ExampleProjectConfig): PlaygroundProj
     view: config.view,
     entryFileName: config.entryFileName,
     openFile: config.openFile,
-    transformed,
+    transformed: raw,
     dependencies,
     devDependencies,
     tsconfig,
   });
-
-  if (config.extraFiles) {
-    project.files = { ...project.files, ...config.extraFiles };
-  }
 
   return project;
 }

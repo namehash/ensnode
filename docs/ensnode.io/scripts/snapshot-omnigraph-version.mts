@@ -8,7 +8,6 @@ import { buildSchema, parse, validate } from "graphql";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeOmnigraphVersion } from "../src/data/omnigraph-examples/active.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
 import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/constants.ts";
 
@@ -17,18 +16,16 @@ import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/con
 // — by construction — valid against that release's schema. Responses are filled separately
 // (`pnpm omnigraph-examples:refresh-responses`) once the version is live in production.
 //
-// Usage: pnpm omnigraph:snapshot <version>   e.g. pnpm omnigraph:snapshot 1.14.0
-// Accepts an optional leading `v` (`v1.14.0` → `1.14.0`).
+// Usage: pnpm omnigraph:snapshot <version>   e.g. pnpm omnigraph:snapshot v1.14.0
 
-const rawVersion = process.argv[2];
-if (!rawVersion) {
+const version = process.argv[2];
+if (!version) {
   console.error("Usage: pnpm omnigraph:snapshot <version>");
   process.exit(1);
 }
-const version = normalizeOmnigraphVersion(rawVersion);
 // Used as a directory name; reject anything that could escape the versions/ dir.
 if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
-  console.error(`Invalid version "${rawVersion}": use only letters, digits, '.', '_', '-'.`);
+  console.error(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
   process.exit(1);
 }
 

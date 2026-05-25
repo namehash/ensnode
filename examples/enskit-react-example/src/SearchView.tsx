@@ -1,15 +1,12 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { beautifyInterpretedName } from "enssdk";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: $name }, first: $first, after: $after) {
+    domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
       edges {
-        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-        # node { __typename id canonical { name { interpreted } } }
-        node { __typename id name }
+        node { __typename id canonical { name { beautified } } }
       }
       pageInfo {
         hasNextPage
@@ -64,14 +61,18 @@ export function SearchView() {
 
   const { data, fetching, error } = result;
 
+  // only Canonical Domains are rendered, so filter before computing the empty state — otherwise a
+  // page of entirely non-canonical edges would render as a blank list with no "No matches."
+  const visibleEdges = data?.domains?.edges.filter((edge) => edge.node.canonical !== null) ?? [];
+
   return (
     <div>
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
-        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
-        the URL as <code>?query=</code>.
+        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
+        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
+        synced to the URL as <code>?query=</code>.
       </p>
 
       <input
@@ -89,24 +90,19 @@ export function SearchView() {
         <>
           {fetching && <p>Loading...</p>}
           <ul>
-            {data?.domains?.edges.map((edge) => {
-              if (!edge.node.name) return null;
+            {visibleEdges.map((edge) => {
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  <Link to={`/domain/${edge.node.name}`}>
-                    {beautifyInterpretedName(edge.node.name)}
-                    {/* 
-                  TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
-                    */}
+                  {/* link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved */}
+                  <Link to={`/domain/id/${edge.node.id}`}>
+                    {edge.node.canonical?.name.beautified}
                   </Link>
                 </li>
               );
             })}
           </ul>
-          {data?.domains && data.domains.edges.length === 0 && !fetching && <p>No matches.</p>}
+          {data?.domains && visibleEdges.length === 0 && !fetching && <p>No matches.</p>}
           {data?.domains?.pageInfo.hasNextPage && (
             <button
               type="button"

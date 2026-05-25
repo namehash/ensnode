@@ -13,6 +13,7 @@ npm install @ensnode/ensnode-sdk
 ## EnsNodeClient
 
 The `EnsNodeClient` provides a unified interface for the ENSNode REST APIs:
+
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
 - Indexing Status API
 
@@ -31,7 +32,10 @@ const { records } = await client.resolveRecords("jesse.base.eth", {
 });
 
 // Resolution API: Primary Name Resolution
-const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", mainnet.id);
+const { name } = await client.resolvePrimaryName(
+  "0x179A862703a4adfb29896552DF9e307980D19285",
+  mainnet.id,
+);
 // name === 'gregskril.eth'
 
 // Resolution API: Primary Names Resolution
@@ -57,9 +61,8 @@ The returned `name` field, if set, is guaranteed to be a [Normalized Name](https
   - `trace`: (optional) Whether to include a trace in the response (default: false)
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: false)
 
-
 ```ts
-import { mainnet, base } from 'viem/chains';
+import { mainnet, base } from "viem/chains";
 
 const { records } = await client.resolveRecords("greg.base.eth", {
   // Resolve ETH Mainnet Address (if set) and Base Address (if set)
@@ -95,19 +98,28 @@ The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: false)
 
 ```ts
-import { mainnet, base } from 'viem/chains';
-import { DEFAULT_EVM_CHAIN_ID } from '@ensnode/ensnode-sdk';
+import { mainnet, base } from "viem/chains";
+import { DEFAULT_EVM_CHAIN_ID } from "@ensnode/ensnode-sdk";
 
 // Resolve the address' Primary Name on Ethereum Mainnet
-const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", mainnet.id);
+const { name } = await client.resolvePrimaryName(
+  "0x179A862703a4adfb29896552DF9e307980D19285",
+  mainnet.id,
+);
 // name === 'gregskril.eth'
 
 // Resolve the address' Primary Name on Base
-const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", base.id);
+const { name } = await client.resolvePrimaryName(
+  "0x179A862703a4adfb29896552DF9e307980D19285",
+  base.id,
+);
 // name === 'greg.base.eth'
 
 // Resolve the address' Default Primary Name
-const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", DEFAULT_EVM_CHAIN_ID);
+const { name } = await client.resolvePrimaryName(
+  "0x179A862703a4adfb29896552DF9e307980D19285",
+  DEFAULT_EVM_CHAIN_ID,
+);
 // name === 'gregskril.eth'
 ```
 
@@ -124,7 +136,7 @@ Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](http
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: false)
 
 ```ts
-import { mainnet, base } from 'viem/chains';
+import { mainnet, base } from "viem/chains";
 
 // Resolve an address' Primary Names on all ENSIP-19 supported chain ids
 const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285");

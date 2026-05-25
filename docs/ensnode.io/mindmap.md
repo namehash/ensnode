@@ -27,7 +27,7 @@ mindmap
               Among apps writing to the ENSDb instances
                 ENSIndexer instances
               Among apps reading from the ENSDb instance
-                ENSApi instances   
+                ENSApi instances
           ENSIndexer Schema
             At least one per ENSDb instance
             Schema Lifecycle managed by Ponder runtime

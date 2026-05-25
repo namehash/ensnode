@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   ACTIVE_OMNIGRAPH_VERSION,
-  normalizeOmnigraphVersion,
 } from "@data/omnigraph-examples/active";
 import type { SnapshotExample } from "@data/omnigraph-examples/types";
 
@@ -196,9 +195,11 @@ describe("buildEnskitSnippet", () => {
 });
 
 describe("buildEnssdkSetupSnippets", () => {
+  const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+
   it.each(SETUP_PACKAGE_MANAGERS)("includes versioned enssdk install for %s", (pm) => {
     const snippet = buildEnssdkSetupSnippets()[pm];
-    expect(snippet).toContain(`enssdk@${ACTIVE_OMNIGRAPH_VERSION}`);
+    expect(snippet).toContain(`enssdk@${npmSdkVersion}`);
     expect(snippet).toContain("my-ens-script");
     expect(snippet).toContain("src/index.ts");
   });
@@ -221,10 +222,12 @@ describe("buildEnssdkSetupSnippets", () => {
 });
 
 describe("buildEnskitSetupSnippets", () => {
+  const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+
   it.each(SETUP_PACKAGE_MANAGERS)("includes versioned enskit and enssdk for %s", (pm) => {
     const snippet = buildEnskitSetupSnippets()[pm];
-    expect(snippet).toContain(`enskit@${ACTIVE_OMNIGRAPH_VERSION}`);
-    expect(snippet).toContain(`enssdk@${ACTIVE_OMNIGRAPH_VERSION}`);
+    expect(snippet).toContain(`enskit@${npmSdkVersion}`);
+    expect(snippet).toContain(`enssdk@${npmSdkVersion}`);
     expect(snippet).toContain("my-ens-app");
     expect(snippet).toContain("--no-interactive --no-immediate");
   });
