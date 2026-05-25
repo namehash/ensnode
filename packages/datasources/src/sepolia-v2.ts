@@ -1,4 +1,6 @@
 // ABIs for ENSv2 Datasource
+import { sepolia } from "viem/chains";
+
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
@@ -11,12 +13,13 @@ import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
-import { sepoliaV2Chain } from "./lib/chains";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-const SEPOLIA_V2_FORK_BLOCK = 10887910;
+// The block number of the Sepolia ENSv2 deployment
+// which includes the creation of the updated `ENSRegistry` contract.
+const SEPOLIA_ENSV2_DEPLOYMENT_BLOCK = 10893142;
 
 /**
  * The Sepolia V2 ENSNamespace
@@ -32,7 +35,7 @@ export default {
    * omitted; consumers of this datasource must treat them as optional.
    */
   [DatasourceNames.ENSRoot]: {
-    chain: sepoliaV2Chain,
+    chain: sepolia,
     contracts: {
       // NOTE: named LegacyENSRegistry in deployment
       ENSv1RegistryOld: {
@@ -43,8 +46,8 @@ export default {
       // NOTE: named ENSRegistry in deployment
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
-        startBlock: 3702728,
+        address: "0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       Resolver: {
         abi: ResolverABI,
@@ -53,65 +56,68 @@ export default {
       // NOTE: named BaseRegistrarImplementation in deployment
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-        startBlock: 3702731,
+        address: "0xa51c9e6efe589407c72984e93b45e35a71a398ec",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       // NOTE: named ETHRegistrarController in deployment
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
-        startBlock: 8579988,
+        address: "0xb5778cf6cc9586d9ce740039c84dfb1802f307bc",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
-        startBlock: 3790153,
+        address: "0x250a6c640297f605b63c6e91c7cd376f04b288da",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
-        address: "0x3c85752a5d47dd09d677c645ff2a938b38fbfeba",
-        startBlock: 8928722,
+        address: "0x988061f048e8ff0290dd88ec8afed6b163d7ea76",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       UniversalResolverV2: {
         abi: UniversalResolverV2,
-        address: "0xfef81312438b7e578ee94bf0e8fa5c2547653d7c",
-        startBlock: SEPOLIA_V2_FORK_BLOCK,
+        address: "0x8e4ae9c494a57f15ee19c723c87971c99e014b64",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
     },
   },
 
   [DatasourceNames.ENSv2Root]: {
-    chain: sepoliaV2Chain,
+    chain: sepolia,
     contracts: {
       // factory-pattern entries: start at the earliest deploy block of any ENSv2 contract (RootRegistry)
-      Resolver: { abi: ResolverABI, startBlock: SEPOLIA_V2_FORK_BLOCK },
-      Registry: { abi: Registry, startBlock: SEPOLIA_V2_FORK_BLOCK },
-      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: SEPOLIA_V2_FORK_BLOCK },
+      Resolver: { abi: ResolverABI, startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK },
+      Registry: { abi: Registry, startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+      },
       RootRegistry: {
         abi: Registry,
-        address: "0x078a7ae41974a74c62233bca5590c86218aa1f1e",
-        startBlock: SEPOLIA_V2_FORK_BLOCK,
+        address: "0x835f0b284e78cd3f358bcf6cba3b53809f09b79e",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       ETHRegistry: {
         abi: Registry,
-        address: "0xc328a01a4800fb52ec5a6ab4190356962ab719e5",
-        startBlock: SEPOLIA_V2_FORK_BLOCK,
+        address: "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0xd859dac731dab4aecddb154b639d868dc951da62",
-        startBlock: SEPOLIA_V2_FORK_BLOCK,
+        address: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
     },
   },
 
   [DatasourceNames.ReverseResolverRoot]: {
-    chain: sepoliaV2Chain,
+    chain: sepolia,
     contracts: {
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
-        address: "0x4f382928805ba0e23b30cfb75fc9e848e82dfd47",
-        startBlock: 8579966,
+        address: "0x26997c9d0f3dcbae3f78c69e621a3926ee30bb98",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
 
       // NOTE: named DefaultReverseResolver in deployment
@@ -131,8 +137,8 @@ export default {
       // NOTE: named PublicResolver in deployment
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0xe99638b40e4fff0129d56f03b55b6bbc4bbe49b5",
-        startBlock: 8580001,
+        address: "0xb441cb480460eb8b2964dcb82b64a883b14abf3e",
+        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       BaseReverseResolver: {
         abi: ResolverABI,
