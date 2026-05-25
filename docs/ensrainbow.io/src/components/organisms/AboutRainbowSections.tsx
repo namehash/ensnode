@@ -113,7 +113,7 @@ const rainbowSections: AboutRainbowProps[] = [
     },
     svgImage: (
       <>
-        <ENSNodeSchema styles="relative z-10 ml-auto shrink-0" />
+        <ENSNodeSchema styles="relative z-10 w-full h-auto" />
       </>
     ),
   },

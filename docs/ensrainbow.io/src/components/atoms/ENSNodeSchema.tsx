@@ -37,16 +37,7 @@ export const ENSNodeSchema = (props: SVGImageProps) => (
       d="M41.7217 22V4.54541H53.074V7.19598H44.8836V11.9346H52.4859V14.5852H44.8836V19.3494H53.1421V22H41.7217Z"
       fill="black"
     />
-    <rect
-      x="1"
-      y="1"
-      width="26"
-      height="26"
-      rx="3"
-      fill="#528BFF"
-      stroke="black"
-      stroke-width="2"
-    />
+    <rect x="1" y="1" width="26" height="26" rx="3" fill="#528BFF" stroke="black" strokeWidth="2" />
     <path
       d="M8.11704 12.4324C8.29929 12.8207 8.75095 13.5893 8.75095 13.5893L13.941 5.00781L8.8698 8.54183C8.5687 8.73992 8.32306 9.01726 8.14874 9.33421C7.68123 10.3088 7.67331 11.4419 8.11704 12.4324Z"
       fill="url(#paint0_linear_521_898)"
@@ -76,9 +67,9 @@ export const ENSNodeSchema = (props: SVGImageProps) => (
         y2="12.4349"
         gradientUnits="userSpaceOnUse"
       >
-        <stop offset="0.58" stop-color="#A0A8D4" />
-        <stop offset="0.73" stop-color="#8791C7" />
-        <stop offset="0.91" stop-color="#6470B4" />
+        <stop offset="0.58" stopColor="#A0A8D4" />
+        <stop offset="0.73" stopColor="#8791C7" />
+        <stop offset="0.91" stopColor="#6470B4" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_521_898"
@@ -88,9 +79,9 @@ export const ENSNodeSchema = (props: SVGImageProps) => (
         y2="15.9291"
         gradientUnits="userSpaceOnUse"
       >
-        <stop offset="0.58" stop-color="#A0A8D4" />
-        <stop offset="0.73" stop-color="#8791C7" />
-        <stop offset="0.91" stop-color="#6470B4" />
+        <stop offset="0.58" stopColor="#A0A8D4" />
+        <stop offset="0.73" stopColor="#8791C7" />
+        <stop offset="0.91" stopColor="#6470B4" />
       </linearGradient>
     </defs>
   </svg>

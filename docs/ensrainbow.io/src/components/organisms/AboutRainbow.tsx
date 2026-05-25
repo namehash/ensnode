@@ -63,14 +63,14 @@ export default function AboutRainbow(props: AboutRainbowProps) {
         <div
           className={cc([
             "relative hidden sm:flex flex-row items-center w-full h-2/3 xl:h-full rounded-none bg-origin-border shrink-0",
-            props.alignImageEnd ? "justify-end xl:flex-1 xl:min-w-0" : "justify-center xl:w-3/5",
+            props.alignImageEnd ? "justify-end xl:w-3/5" : "justify-center xl:w-3/5",
           ])}
         >
           {props.normalImage ? (
             <img
               className={cc([
                 props.alignImageEnd
-                  ? "relative z-10 ml-auto shrink-0 w-auto h-auto"
+                  ? "relative z-10 w-full h-auto"
                   : "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                 props.normalImage.styles,
               ])}
