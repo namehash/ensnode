@@ -82,7 +82,7 @@
 /* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
 @media (min-width: 50rem) {
   .page[data-sidebar-docked] {
-    --sl-sidebar-docked-peek: 1rem;
+    --sl-sidebar-docked-peek: 4rem;
     /* Match Starlight splash / no-sidebar content width (default with sidebar is 45rem). */
     --sl-content-width: 67.5rem;
   }
@@ -94,7 +94,6 @@
   .page[data-sidebar-docked] nav.sidebar {
     position: fixed;
     inset-block: var(--sl-nav-height) 0;
-    inset-inline-start: 0;
     z-index: var(--sl-z-index-menu);
     width: var(--sl-sidebar-docked-peek);
     overflow: hidden;
@@ -116,24 +115,24 @@
     border-inline-end: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar::after {
-    content: "›";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 0;
-    width: var(--sl-sidebar-docked-peek);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sl-color-gray-3);
-    font-size: 1.125rem;
-    line-height: 1;
-    pointer-events: none;
+  /* Docked + collapsed: show only the top-level topic icons */
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    .sidebar-content
+    > :not(.starlight-sidebar-topics) {
+    display: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar:hover::after,
-  .page[data-sidebar-docked] nav.sidebar:focus-within::after {
-    opacity: 0;
+  .page[data-sidebar-docked]
+    nav.sidebar:not(:hover):not(:focus-within)
+    .starlight-sidebar-topics-icon
+    + div {
+    display: none;
+  }
+
+  /* Docked + collapsed: Highlight only the icon of the current topic */
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    a.starlight-sidebar-topics-current {
+    background-color: transparent !important;
   }
 }
 
@@ -308,11 +307,34 @@ a[rel="prev"]:hover {
     background-color 0.2s ease-in-out;
 }
 
-/* Only apply hover effects to non-selected items */
-#starlight__sidebar a:not([aria-current="page"]):hover {
+/* Only apply hover effects to: 
+* * non-selected items 
+* * expandable items (in all states), including nested ones
+*/
+#starlight__sidebar a:not([aria-current="page"]):hover,
+#starlight__sidebar details details > summary:hover,
+#starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
   transform: translateX(2px);
   border-radius: 6px;
+}
+
+/** Additional styling required for the
+ * expandable items in the sidebar
+ */
+#starlight__sidebar details details > summary:hover {
+  & span {
+    color: var(--sl-color-white);
+  }
+}
+
+#starlight__sidebar details details > summary,
+#starlight__sidebar details > summary {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    color: var(--sl-color-white);
+  }
 }
 
 a.starlight-sidebar-topics-current {
@@ -332,13 +354,18 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
     box-shadow 0.2s ease-in-out;
 }
 
-/* Make sure that all non-top-level sidebar items are not enlarged and non-bold */
+/* Make sure that all non-top-level sidebar items are:
+ * * not enlarged
+ * * not bolded 
+ * * the same color as the rest of the sidebar text
+ */
 ul.top-level details details > summary .group-label span {
   @media (min-width: 50rem) {
     font-size: var(--sl-text-sm);
   }
 
   font-weight: normal;
+  color: var(--sl-color-gray-2);
 }
 
 /* Make sure that social icons in the sidebar do not move on hover */

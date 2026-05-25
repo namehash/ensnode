@@ -1,7 +1,9 @@
 ---
 import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
 
-const { instanceURL, connectWithENSAdminURL, namespace, plugins, purpose } = Astro.props;
+const { instanceURL, connectWithENSAdminURL, namespace, ensVersions, plugins } = Astro.props;
+const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
 ---
 <table style={{marginTop: "0"}}>
     <tbody>
@@ -17,17 +19,32 @@ const { instanceURL, connectWithENSAdminURL, namespace, plugins, purpose } = Ast
         </td>
     </tr>
     <tr>
+        <td style={{verticalAlign: "middle"}}>ENSNode Version</td>
+        <td>{hostedEnsNodeVersion}</td>
+    </tr>
+    <tr>
         <td style={{verticalAlign: "middle"}}>ENS Namespace</td>
         <td>{namespace}</td>
     </tr>
     <tr>
-        <td>Active Plugins</td>
-        <td>{plugins}</td>
+        <td style={{verticalAlign: "middle"}}>ENS Versions</td>
+        <td>{ensVersions}</td>
     </tr>
     <tr>
-        <td>Purpose</td>
+        <td>ENSNode Plugins</td>
+        <td set:html={plugins} />
+    </tr>
+    <tr>
+        <td>ENS APIs</td>
         <td>
-            {purpose}
+            <dl>
+                <dt>ENS Omnigraph API</dt>
+                <dd class="pl-0"><slot name="ens-omnigraph-api" /></dd>
+                <dt>ENS Protocol Acceleration</dt>
+                <dd class="pl-0"><slot name="ens-protocol-acceleration" /></dd>
+                <dt>ENS Subgraph API</dt>
+                <dd class="pl-0"><slot name="ens-subgraph-api" /></dd>
+            </dl>
         </td>
     </tr>
     </tbody>
