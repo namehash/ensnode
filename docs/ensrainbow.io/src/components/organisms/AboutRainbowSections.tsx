@@ -104,6 +104,7 @@ const rainbowSections: AboutRainbowProps[] = [
     sectionBackgroundName: "",
     isTextOnTheLeft: true,
     mobileImageOnTop: true,
+    alignImageEnd: true,
     normalImage: {
       source: ensNode.src,
       tagWidth: 640,
@@ -112,7 +113,7 @@ const rainbowSections: AboutRainbowProps[] = [
     },
     svgImage: (
       <>
-        <ENSNodeSchema styles="relative z-10 w-full h-full" />
+        <ENSNodeSchema styles="relative z-10 ml-auto shrink-0" />
       </>
     ),
   },

@@ -12,11 +12,12 @@ export type AboutRainbowProps = {
   normalImage?: ImageCharacteristics;
   designatedMobileImage?: React.ReactNode;
   mobileImageOnTop: boolean;
+  alignImageEnd?: boolean;
 };
 export default function AboutRainbow(props: AboutRainbowProps) {
   return (
     <section className="box-border h-fit w-full flex flex-col items-center justify-center py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
-      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 max-w-[1216px]">
+      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 xl:gap-16 max-w-[1216px]">
         {!props.isTextOnTheLeft && (
           <div
             className={cc([
@@ -59,11 +60,18 @@ export default function AboutRainbow(props: AboutRainbowProps) {
           {props.descriptionExternalElements && props.descriptionExternalElements}
         </div>
 
-        <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border shrink-0">
+        <div
+          className={cc([
+            "relative hidden sm:flex flex-row items-center w-full h-2/3 xl:h-full rounded-none bg-origin-border shrink-0",
+            props.alignImageEnd ? "justify-end xl:flex-1 xl:min-w-0" : "justify-center xl:w-3/5",
+          ])}
+        >
           {props.normalImage ? (
             <img
               className={cc([
-                "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
+                props.alignImageEnd
+                  ? "relative z-10 ml-auto shrink-0 w-auto h-auto"
+                  : "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                 props.normalImage.styles,
               ])}
               src={props.normalImage.source}
