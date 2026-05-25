@@ -1,17 +1,20 @@
+import config from "@/config";
+
 import {
-  type AccountId,
   type DurationBigInt,
   makeENSv2DomainId,
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
-  toNormalizedAddress,
   type UnixTimestampBigInt,
   type Wei,
 } from "enssdk";
 
+import { DatasourceNames } from "@ensnode/datasources";
 import {
+  accountIdEqual,
   type EncodedReferrer,
+  getDatasourceContract,
   isRegistrationFullyExpired,
   PluginName,
   toJson,
@@ -33,20 +36,21 @@ const pluginName = PluginName.Unigraph;
 
 async function getRegistrarAndRegistry(context: IndexingEngineContext, event: LogEventBase) {
   const registrar = getThisAccountId(context, event);
-  const registry: AccountId = {
-    chainId: context.chain.id,
-    // ETHRegistrar (this contract) provides a handle to its backing Registry
-    // NOTE: viem returns checksummed addresses, need to normalize
-    address: toNormalizedAddress(
-      await context.client.readContract({
-        abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
-        address: event.log.address,
-        functionName: "ETH_REGISTRY",
-      }),
-    ),
-  };
 
-  return { registrar, registry };
+  const ensv2ETHRegistrar = getDatasourceContract(
+    config.namespace,
+    DatasourceNames.ENSv2Root,
+    "ETHRegistrar",
+  );
+
+  if (accountIdEqual(registrar, ensv2ETHRegistrar)) {
+    return {
+      registrar,
+      registry: getDatasourceContract(config.namespace, DatasourceNames.ENSv2Root, "ETHRegistry"),
+    };
+  }
+
+  return { registrar, registry: null };
 }
 
 export default function () {
@@ -78,6 +82,8 @@ export default function () {
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);
+      if (!registry) return; // no-op unknown Registrars
+
       const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
 
@@ -153,6 +159,8 @@ export default function () {
       // update Registration.expiry, it just needs to update the latest Renewal
 
       const { registry } = await getRegistrarAndRegistry(context, event);
+      if (!registry) return; // no-op unknown Registrars
+
       const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
 

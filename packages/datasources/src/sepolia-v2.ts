@@ -25,9 +25,16 @@ import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// The earliest deploy block of the Sepolia ENSv1+v2 test deployment (ENSv1Registry).
-// Every contract in this deployment is indexed from this block.
-const SEPOLIA_ENSV2_DEPLOYMENT_BLOCK = 10893142;
+/**
+ * The block after which ENSv1 contracts (like Resolver) must be indexed, since they way still be
+ * used with a sepolia-v2 deployment.
+ */
+const SEPOLIA_ENSV1_DEPLOYMENT_BLOCK = 3702721;
+
+/**
+ * The earliest deploy block of the Sepolia ENSv1+v2 test deployment.
+ */
+const SEPOLIA_ENSV2_DEPLOYMENT_BLOCK = 10400000;
 
 /**
  * The Sepolia V2 ENSNamespace
@@ -59,7 +66,7 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        startBlock: SEPOLIA_ENSV1_DEPLOYMENT_BLOCK,
       },
       // NOTE: named BaseRegistrarImplementation in deployment
       BaseRegistrar: {
@@ -94,7 +101,7 @@ export default {
   [DatasourceNames.ENSv2Root]: {
     chain: sepolia,
     contracts: {
-      Resolver: { abi: ResolverABI, startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK },
+      Resolver: { abi: ResolverABI, startBlock: SEPOLIA_ENSV1_DEPLOYMENT_BLOCK },
       Registry: { abi: Registry, startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK },
       EnhancedAccessControl: {
         abi: EnhancedAccessControl,
