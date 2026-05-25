@@ -35,11 +35,29 @@ Note that substantial ENS data is not directly queryable through traditional sma
 query HelloWorld {
   domain(by: { name: "eth" }) {
     __typename
-    canonical { name { interpreted } }
-    owner { address }
+    canonical {
+      name {
+        interpreted
+      }
+    }
+    owner {
+      address
+    }
     subdomains(first: 20) {
       totalCount
-      edges { node { __typename canonical { name { interpreted } } owner { address } } }
+      edges {
+        node {
+          __typename
+          canonical {
+            name {
+              interpreted
+            }
+          }
+          owner {
+            address
+          }
+        }
+      }
     }
   }
 }

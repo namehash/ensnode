@@ -5,14 +5,17 @@ sidebar:
   label: Schema Reference
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 This is the canonical reference for the **Unigraph schema** — the unified, polymorphic data model that the [`unigraph` plugin](/docs/services/ensindexer) materializes into [ENSDb](/docs/services/ensdb). It models ENSv1 and ENSv2 with shared, polymorphic entities (Domains, Registries, Registrations, Renewals, Resolvers), so the same query shape works across both protocol versions.
 
 Each ENSIndexer instance owns a dedicated database schema (e.g. `ensindexer_0`) holding all of its indexed Unigraph data, fully isolated from other instances.
 
 <Aside>
-The Unigraph plugin has a hard dependency on the **Protocol Acceleration** plugin (Domain–Resolver relations, resolver records, ENSv1 Registry-migration state). Those tables, the shared **ENSNode Schema**, and the other ENSIndexer plugins (Registrars, Subgraph, tokenscope) are documented in the [ENSDb · Database Schemas](/docs/services/ensdb/concepts/database-schemas) reference.
+  The Unigraph plugin has a hard dependency on the **Protocol Acceleration** plugin (Domain–Resolver
+  relations, resolver records, ENSv1 Registry-migration state). Those tables, the shared **ENSNode
+  Schema**, and the other ENSIndexer plugins (Registrars, Subgraph, tokenscope) are documented in
+  the [ENSDb · Database Schemas](/docs/services/ensdb/concepts/database-schemas) reference.
 </Aside>
 
 Defined in [`unigraph.schema.ts`](https://github.com/namehash/ensnode/blob/main/packages/ensdb-sdk/src/ensindexer-abstract/unigraph.schema.ts).
@@ -185,16 +188,16 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`ENSv1VirtualRegistry`) whose sole parent is that domain. Children of the parent then point their `registry_id` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry, the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a single `ENSv2Registry` RootRegistry.
 
-| Column                | Type           | Nullable | Description                                                                                                   |
-| --------------------- | -------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `id`                  | `text`         | no       | See `RegistryId` for guarantees. Primary key.                                                                 |
-| `type`                | `RegistryType` | no       | Registry type.                                                                                                |
-| `chain_id`            | `bigint`       | no       | Chain the registry contract is deployed on.                                                                   |
-| `address`             | `text`         | no       | Address of the registry contract.                                                                             |
-| `node`                | `text`         | yes      | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
-| `canonical_domain_id` | `text`         | yes      | The Registry's declared Canonical Domain (unidirectional). |
+| Column                | Type           | Nullable | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | `text`         | no       | See `RegistryId` for guarantees. Primary key.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `type`                | `RegistryType` | no       | Registry type.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `chain_id`            | `bigint`       | no       | Chain the registry contract is deployed on.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `address`             | `text`         | no       | Address of the registry contract.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `node`                | `text`         | yes      | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`.                                                                                                                                                                                                                                                                                                                                                                           |
+| `canonical_domain_id` | `text`         | yes      | The Registry's declared Canonical Domain (unidirectional).                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `canonical`           | `boolean`      | no       | Whether this Registry is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Default `false`. |
-| `has_children`        | `boolean`      | no       | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
+| `has_children`        | `boolean`      | no       | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`.                                                                                                                                                                                                                                                                                    |
 
 **Indexes:** `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
 
@@ -208,23 +211,23 @@ The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. EN
 Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. Parent-domain traversal of the canonical nametree is supported directly via the materialized `canonical_path` / `canonical_label_hash_path` arrays; non-canonical traversal walks the `registries.canonical_domain_id` ↔ `domains.subregistry_id` pointers at query-time.
 :::
 
-| Column                   | Type          | Nullable | Description                                                                                                                                  |
-| ------------------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                     | `text`        | no       | ENSv1DomainId: `{ENSv1RegistryId}/{node}`. ENSv2DomainId: CAIP-19 asset identifier. Primary key.                                             |
-| `type`                   | `DomainType`  | no       | `ENSv1Domain` or `ENSv2Domain`.                                                                                                              |
-| `registry_id`            | `text`        | no       | The registry this domain belongs to.                                                                                                         |
-| `subregistry_id`         | `text`        | yes      | The registry that manages subdomains of this domain, if any.                                                                                 |
-| `token_id`               | `numeric(78)` | yes      | ENSv2 only: the TokenId within the ENSv2Registry. `null` for ENSv1 domains.                                                                  |
-| `node`                   | `text`        | yes      | ENSv1 only: the domain's namehash. `null` for ENSv2 domains.                                                                                 |
-| `label_hash`             | `text`        | no       | Represents a labelHash. References `labels.label_hash`.                                                                                      |
-| `owner_id`               | `text`        | yes      | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used).  |
-| `root_registry_owner_id` | `text`        | yes      | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains.                                                         |
-| `canonical`              | `boolean`     | no       | Whether this Domain is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Mirrors the parent Registry's flag. Default `false`. |
-| `canonical_name`             | `text`        | yes      | Materialized Canonical Name, `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Example: `"vitalik.eth"`. |
-| `canonical_label_hash_path`  | `text[]`      | yes      | Materialized Canonical LabelHashPath, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[labelhash("eth"), labelhash("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`. |
-| `canonical_path`             | `text[]`      | yes      | Materialized Canonical Domain Path, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[DomainId("eth"), DomainId("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`. |
-| `canonical_depth`            | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`. |
-| `canonical_node`             | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`. |
+| Column                      | Type          | Nullable | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                        | `text`        | no       | ENSv1DomainId: `{ENSv1RegistryId}/{node}`. ENSv2DomainId: CAIP-19 asset identifier. Primary key.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `type`                      | `DomainType`  | no       | `ENSv1Domain` or `ENSv2Domain`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `registry_id`               | `text`        | no       | The registry this domain belongs to.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `subregistry_id`            | `text`        | yes      | The registry that manages subdomains of this domain, if any.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `token_id`                  | `numeric(78)` | yes      | ENSv2 only: the TokenId within the ENSv2Registry. `null` for ENSv1 domains.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `node`                      | `text`        | yes      | ENSv1 only: the domain's namehash. `null` for ENSv2 domains.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `label_hash`                | `text`        | no       | Represents a labelHash. References `labels.label_hash`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `owner_id`                  | `text`        | yes      | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used).                                                                                                                                                                                                                                                                                                                                                                               |
+| `root_registry_owner_id`    | `text`        | yes      | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `canonical`                 | `boolean`     | no       | Whether this Domain is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Mirrors the parent Registry's flag. Default `false`. |
+| `canonical_name`            | `text`        | yes      | Materialized Canonical Name, `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Example: `"vitalik.eth"`.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `canonical_label_hash_path` | `text[]`      | yes      | Materialized Canonical LabelHashPath, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[labelhash("eth"), labelhash("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                          |
+| `canonical_path`            | `text[]`      | yes      | Materialized Canonical Domain Path, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[DomainId("eth"), DomainId("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                              |
+| `canonical_depth`           | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                            |
+| `canonical_node`            | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                                                              |
 
 **Indexes:** `type`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed), `(registry_id, left(canonical_name, 256), id)` (composite expression index for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N` — the `Domain.subdomains` shape; the 256-char prefix bounds the index tuple under btree's per-tuple max, and NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan), `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
 
@@ -234,12 +237,12 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 
 Internal rainbow table mapping a `label_hash` to its interpreted label string. Domains reference labels by hash; names are healed at resolution-time.
 
-| Column         | Type   | Nullable | Description                            |
-| -------------- | ------ | -------- | -------------------------------------- |
-| `label_hash`   | `text` | no       | `keccak256` of the label. Primary key. |
-| `interpreted`  | `text` | no       | The interpreted label string.          |
+| Column        | Type   | Nullable | Description                            |
+| ------------- | ------ | -------- | -------------------------------------- |
+| `label_hash`  | `text` | no       | `keccak256` of the label. Primary key. |
+| `interpreted` | `text` | no       | The interpreted label string.          |
 
- **Indexes:** `interpreted` (hash index for exact match), `interpreted` (GIN trigram index for prefix/substring `LIKE`)
+**Indexes:** `interpreted` (hash index for exact match), `interpreted` (GIN trigram index for prefix/substring `LIKE`)
 
 **Relations:** has many `domains`.
 
@@ -247,25 +250,25 @@ Internal rainbow table mapping a `label_hash` to its interpreted label string. D
 
 A registration is keyed by `id`.
 
-| Column                | Type               | Nullable | Description                                                                                                                                                    |
-| --------------------- | ------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | `text`             | no       | A key derived from `(domain_id, registration_index)`. Primary key.                                                                                               |
-| `domain_id`           | `text`             | no       | The registered domain.                                                                                                                                         |
-| `registration_index`  | `integer`          | no       | Monotonically increasing index per domain.                                                                                                                     |
-| `type`                | `RegistrationType` | no       | The mechanism through which this registration was made.                                                                                                        |
-| `start`               | `numeric(78)`      | no       | Unix timestamp of registration start.                                                                                                                          |
-| `expiry`              | `numeric(78)`      | yes      | Unix timestamp of expiry, if applicable.                                                                                                                       |
-| `grace_period`        | `numeric(78)`      | yes      | Grace period duration in seconds. `BaseRegistrar` only.                                                                                                        |
-| `registrar_chain_id`  | `bigint`           | no       | Chain of the registrar contract.                                                                                                                               |
-| `registrar_address`   | `text`             | no       | Address of the registrar contract.                                                                                                                             |
-| `registrant_id`       | `text`             | yes      | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).                   |
-| `unregistrant_id`     | `text`             | yes      | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
-| `referrer`            | `text`             | yes      | Encoded referrer value emitted at registration time.                                                                                                           |
-| `fuses`               | `integer`          | yes      | Fuse bitmap. `NameWrapper` and wrapped `BaseRegistrar` only.                                                                                                   |
-| `base`                | `numeric(78)`      | yes      | Base registration cost in wei. `BaseRegistrar` and `ENSv2Registrar` only.                                                                                      |
-| `premium`             | `numeric(78)`      | yes      | Premium cost in wei above base. `BaseRegistrar` only.                                                                                                          |
-| `wrapped`             | `boolean`          | no       | Whether the registration is currently wrapped by the NameWrapper. Default `false`.                                                                             |
-| `event_id`            | `text`             | no       | The event that created this registration record.                                                                                                               |
+| Column               | Type               | Nullable | Description                                                                                                                                                    |
+| -------------------- | ------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | `text`             | no       | A key derived from `(domain_id, registration_index)`. Primary key.                                                                                             |
+| `domain_id`          | `text`             | no       | The registered domain.                                                                                                                                         |
+| `registration_index` | `integer`          | no       | Monotonically increasing index per domain.                                                                                                                     |
+| `type`               | `RegistrationType` | no       | The mechanism through which this registration was made.                                                                                                        |
+| `start`              | `numeric(78)`      | no       | Unix timestamp of registration start.                                                                                                                          |
+| `expiry`             | `numeric(78)`      | yes      | Unix timestamp of expiry, if applicable.                                                                                                                       |
+| `grace_period`       | `numeric(78)`      | yes      | Grace period duration in seconds. `BaseRegistrar` only.                                                                                                        |
+| `registrar_chain_id` | `bigint`           | no       | Chain of the registrar contract.                                                                                                                               |
+| `registrar_address`  | `text`             | no       | Address of the registrar contract.                                                                                                                             |
+| `registrant_id`      | `text`             | yes      | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).                   |
+| `unregistrant_id`    | `text`             | yes      | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
+| `referrer`           | `text`             | yes      | Encoded referrer value emitted at registration time.                                                                                                           |
+| `fuses`              | `integer`          | yes      | Fuse bitmap. `NameWrapper` and wrapped `BaseRegistrar` only.                                                                                                   |
+| `base`               | `numeric(78)`      | yes      | Base registration cost in wei. `BaseRegistrar` and `ENSv2Registrar` only.                                                                                      |
+| `premium`            | `numeric(78)`      | yes      | Premium cost in wei above base. `BaseRegistrar` only.                                                                                                          |
+| `wrapped`            | `boolean`          | no       | Whether the registration is currently wrapped by the NameWrapper. Default `false`.                                                                             |
+| `event_id`           | `text`             | no       | The event that created this registration record.                                                                                                               |
 
 **Indexes:** unique on `(domain_id, registration_index)`.
 
@@ -286,17 +289,17 @@ Tracks the highest `registration_index` seen for each domain. Used to sequence r
 
 A renewal is keyed by `id` and belongs to a specific registration.
 
-| Column               | Type          | Nullable | Description                                                                    |
-| -------------------- | ------------- | -------- | ------------------------------------------------------------------------------ |
+| Column               | Type          | Nullable | Description                                                                       |
+| -------------------- | ------------- | -------- | --------------------------------------------------------------------------------- |
 | `id`                 | `text`        | no       | A key derived from `(domain_id, registration_index, renewal_index)`. Primary key. |
-| `domain_id`          | `text`        | no       | The renewed domain.                                                            |
-| `registration_index` | `integer`     | no       | Index of the parent registration.                                              |
-| `renewal_index`      | `integer`     | no       | Monotonically increasing index per registration.                               |
-| `duration`           | `numeric(78)` | no       | Duration added by this renewal, in seconds.                                    |
-| `referrer`           | `text`        | yes      | Encoded referrer value emitted at renewal time.                                |
-| `base`               | `numeric(78)` | yes      | Base renewal cost in wei.                                                      |
-| `premium`            | `numeric(78)` | yes      | Premium cost in wei above base. ENSv1 `RegistrarControllers` only.             |
-| `event_id`           | `text`        | no       | The event that created this renewal record.                                    |
+| `domain_id`          | `text`        | no       | The renewed domain.                                                               |
+| `registration_index` | `integer`     | no       | Index of the parent registration.                                                 |
+| `renewal_index`      | `integer`     | no       | Monotonically increasing index per registration.                                  |
+| `duration`           | `numeric(78)` | no       | Duration added by this renewal, in seconds.                                       |
+| `referrer`           | `text`        | yes      | Encoded referrer value emitted at renewal time.                                   |
+| `base`               | `numeric(78)` | yes      | Base renewal cost in wei.                                                         |
+| `premium`            | `numeric(78)` | yes      | Premium cost in wei above base. ENSv1 `RegistrarControllers` only.                |
+| `event_id`           | `text`        | no       | The event that created this renewal record.                                       |
 
 **Indexes:** unique on `(domain_id, registration_index, renewal_index)`.
 
@@ -318,11 +321,11 @@ Tracks the highest `renewal_index` seen for each registration. Used to sequence 
 
 An ENSv2 permissions contract instance.
 
-| Column     | Type      | Nullable | Description                                    |
-| ---------- | --------- | -------- | ---------------------------------------------- |
-| `id`       | `text`    | no       | Primary key.                                   |
-| `chain_id` | `bigint`  | no       | Chain the permissions contract is deployed on. |
-| `address`  | `text`    | no       | Address of the permissions contract.           |
+| Column     | Type     | Nullable | Description                                    |
+| ---------- | -------- | -------- | ---------------------------------------------- |
+| `id`       | `text`   | no       | Primary key.                                   |
+| `chain_id` | `bigint` | no       | Chain the permissions contract is deployed on. |
+| `address`  | `text`   | no       | Address of the permissions contract.           |
 
 **Indexes:** unique on `(chain_id, address)`.
 
@@ -332,12 +335,12 @@ An ENSv2 permissions contract instance.
 
 A resource managed by a `permissions` contract.
 
-| Column      | Type          | Nullable | Description                                            |
-| ----------- | ------------- | -------- | ------------------------------------------------------ |
-| `id`        | `text`        | no       | Primary key.                                           |
-| `chain_id`  | `bigint`      | no       | Chain of the parent permissions contract.              |
-| `address`   | `text`        | no       | Address of the parent permissions contract.            |
-| `resource`  | `numeric(78)` | no       | Resource identifier (a `uint256` token ID or similar). |
+| Column     | Type          | Nullable | Description                                            |
+| ---------- | ------------- | -------- | ------------------------------------------------------ |
+| `id`       | `text`        | no       | Primary key.                                           |
+| `chain_id` | `bigint`      | no       | Chain of the parent permissions contract.              |
+| `address`  | `text`        | no       | Address of the parent permissions contract.            |
+| `resource` | `numeric(78)` | no       | Resource identifier (a `uint256` token ID or similar). |
 
 **Indexes:** unique on `(chain_id, address, resource)`.
 
@@ -347,14 +350,14 @@ A resource managed by a `permissions` contract.
 
 A user's role bitmap for a specific resource within a `permissions` contract.
 
-| Column      | Type          | Nullable | Description                                                                               |
-| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------- |
-| `id`        | `text`        | no       | Primary key.                                                                              |
-| `chain_id`  | `bigint`      | no       | Chain of the parent permissions contract.                                                 |
-| `address`   | `text`        | no       | Address of the parent permissions contract.                                               |
-| `resource`  | `numeric(78)` | no       | Resource identifier.                                                                      |
-| `user`      | `text`        | no       | The user/grantee address this Permission is granted to (the HCA account address if used). |
-| `roles`     | `numeric(78)` | no       | Roles bitmap for this user on this resource.                                              |
+| Column     | Type          | Nullable | Description                                                                               |
+| ---------- | ------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `id`       | `text`        | no       | Primary key.                                                                              |
+| `chain_id` | `bigint`      | no       | Chain of the parent permissions contract.                                                 |
+| `address`  | `text`        | no       | Address of the parent permissions contract.                                               |
+| `resource` | `numeric(78)` | no       | Resource identifier.                                                                      |
+| `user`     | `text`        | no       | The user/grantee address this Permission is granted to (the HCA account address if used). |
+| `roles`    | `numeric(78)` | no       | Roles bitmap for this user on this resource.                                              |
 
 **Indexes:** unique on `(chain_id, address, resource, user)`.
 

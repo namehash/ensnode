@@ -56,18 +56,15 @@ const tabList: { id: string; label: string }[] = [
 
 <div
   class="not-content not-prose omnigraph-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]"
-  data-omnigraph-example={uid}
->
+  data-omnigraph-example={uid}>
   <div
     class="z-20 flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]/95 md:px-5"
-    style="top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);"
-  >
+    style="top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);">
     <a
       class="inline-flex shrink-0 items-center justify-between gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
       href={adminUrl}
       target="_blank"
-      rel="noopener noreferrer"
-    >
+      rel="noopener noreferrer">
       <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
       Run in ENSAdmin
     </a>
@@ -75,8 +72,7 @@ const tabList: { id: string; label: string }[] = [
       Open an interactive playground to execute this query on our{" "}
       <a
         href={hostedInstanceDocUrl}
-        class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-      >
+        class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]">
         {hostedInstanceNamespace}
       </a>{" "}
       ENSNode instance.
@@ -85,15 +81,28 @@ const tabList: { id: string; label: string }[] = [
 
   <pre id={`${uid}-raw-query`} class="sr-only">{query}</pre>
   <pre id={`${uid}-raw-vars`} class="sr-only">{variablesJson}</pre>
-  {responseJson ? <pre id={`${uid}-raw-resp`} class="sr-only">{responseJson}</pre> : null}
-  {curlExample ? <pre id={`${uid}-raw-curl`} class="sr-only">{curlExample}</pre> : null}
+  {
+    responseJson ? (
+      <pre id={`${uid}-raw-resp`} class="sr-only">
+        {responseJson}
+      </pre>
+    ) : null
+  }
+  {
+    curlExample ? (
+      <pre id={`${uid}-raw-curl`} class="sr-only">
+        {curlExample}
+      </pre>
+    ) : null
+  }
 
-  <section class="border-b border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] md:px-5" aria-labelledby={`${uid}-query-heading`}>
+  <section
+    class="border-b border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] md:px-5"
+    aria-labelledby={`${uid}-query-heading`}>
     <div class="mb-2.5 flex items-center justify-between">
       <span
         id={`${uid}-query-heading`}
-        class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]"
-      >
+        class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]">
         ENS Omnigraph GraphQL
       </span>
       <button
@@ -101,8 +110,7 @@ const tabList: { id: string; label: string }[] = [
         class="example-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
         data-copy-target={`${uid}-raw-query`}
         data-default-label="Copy"
-        aria-label="Copy GraphQL query"
-      >
+        aria-label="Copy GraphQL query">
         Copy
       </button>
     </div>
@@ -118,8 +126,7 @@ const tabList: { id: string; label: string }[] = [
       <div
         class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
         role="tablist"
-        aria-label="Example formats"
-      >
+        aria-label="Example formats">
         {
           tabList.map((t, i) => (
             <button
@@ -129,21 +136,19 @@ const tabList: { id: string; label: string }[] = [
               aria-selected={i === 0 ? "true" : "false"}
               aria-controls={t.id}
               data-tab-target={t.id}
-              class="example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-            >
+              class="example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]">
               {t.label}
             </button>
           ))
         }
-        <div class="flex-1" role="none" />
+        <div class="flex-1" role="none"></div>
         <button
           type="button"
           class="example-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
           data-tab-copy
           data-copy-target={`${uid}-raw-vars`}
           data-default-label="Copy"
-          aria-label="Copy current tab content"
-        >
+          aria-label="Copy current tab content">
           Copy
         </button>
       </div>
@@ -154,10 +159,10 @@ const tabList: { id: string; label: string }[] = [
           role="tabpanel"
           aria-labelledby={`${tabIds.vars}-btn`}
           data-tab-panel={tabIds.vars}
-          class="example-tab-panel pt-3"
-        >
-          <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-            <Code code={variablesJson} lang="json"/>
+          class="example-tab-panel pt-3">
+          <div
+            class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
+            <Code code={variablesJson} lang="json" />
           </div>
         </div>
 
@@ -169,8 +174,7 @@ const tabList: { id: string; label: string }[] = [
               aria-labelledby={`${tabIds.resp}-btn`}
               data-tab-panel={tabIds.resp}
               class="example-tab-panel hidden pt-3"
-              hidden
-            >
+              hidden>
               <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
                 <Code code={responseJson} lang="json" />
               </div>
@@ -186,22 +190,23 @@ const tabList: { id: string; label: string }[] = [
               aria-labelledby={`${tabIds.curl}-btn`}
               data-tab-panel={tabIds.curl}
               class="example-tab-panel hidden pt-3"
-              hidden
-            >
+              hidden>
               <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
                 <Code code={curlExample} lang="bash" />
               </div>
             </div>
           ) : null
         }
-
       </div>
     </div>
   </section>
 
   <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
-    Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab shows a POST to
-    <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]">{connectionBaseUrl}/api/omnigraph</code>
+    Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab
+    shows a POST to
+    <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]"
+      >{connectionBaseUrl}/api/omnigraph</code
+    >
   </p>
 </div>
 
@@ -304,5 +309,4 @@ const tabList: { id: string; label: string }[] = [
     background: var(--sl-color-text-accent);
     border-radius: 2px 2px 0 0;
   }
-
 </style>

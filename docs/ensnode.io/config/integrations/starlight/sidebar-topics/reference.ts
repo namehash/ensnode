@@ -22,6 +22,7 @@ export const referenceSidebarTopic = {
           link: "/docs/reference/contributing/building",
         },
         { label: "Creating a Release", link: "/docs/reference/contributing/releases" },
+        { label: "Code Standards", link: "/docs/reference/contributing/code-standards" },
         {
           label: "REST API Documentation",
           link: "/docs/reference/contributing/rest-api-docs",

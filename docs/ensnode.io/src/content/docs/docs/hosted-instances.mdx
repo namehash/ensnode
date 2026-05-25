@@ -32,9 +32,10 @@ Each ENSNode instance is configured for a specific **ENS namespace**. An ENS nam
 Each ENS namespace is associated with a particular ENS Root Registry deployment, which may or may not have completed the transition from ENSv1 (only) to ENSv1 + ENSv2 (both v1 and v2 concurrently activated together).
 
 ENSNode supports all of the following ENS namespaces:
+
 - `mainnet` (currently ENSv1 only and not also ENSv2 yet)
 - `sepolia` (currently ENSv1 only and not also ENSv2 yet)
-- `sepolia-v2` (now ENSv1 + ENSv2 — An *all new* deployment of ENS to Sepolia that is already upgraded to ENSv1 + ENSv2 and is independent of the traditional `sepolia` ENS namespace listed above which currently remains ENSv1 only)
+- `sepolia-v2` (now ENSv1 + ENSv2 — An _all new_ deployment of ENS to Sepolia that is already upgraded to ENSv1 + ENSv2 and is independent of the traditional `sepolia` ENS namespace listed above which currently remains ENSv1 only)
 - `ens-test-env` (now ENSv1 + ENSv2 — A deployment of ENSv1 + ENSv2 to a local Anvil chain for development and testing. For details see https://github.com/ensdomains/ens-test-env and https://github.com/ensdomains/contracts-v2). Teams working on the core ENS protocol and infrastructure such as ENS Labs and NameHash Labs are using this ENSNode configuration to support ENSv2 development.
 
 More details about ENS namespaces can be found inside [ENSNode's datasources package](https://github.com/namehash/ensnode/tree/main/packages/datasources).
@@ -46,6 +47,7 @@ Each ENSNode instance is also configured for a specific set of activated **ENSNo
 The activated plugins determine the specific indexed data model and data records ENSIndexer will produce in ENSDb and therefore which APIs and data records ENSApi will make available to query.
 
 ### ENSv1 + ENSv2 Instances
+
 These instances are associated with an ENS namespace that has upgraded to ENSv1 + ENSv2 and demonstrate the latest support in ENSNode for ENSv1 and ENSv2 being concurrently activated together.
 
 #### ENSNode 'v2 Sepolia'
@@ -63,7 +65,7 @@ The `sepolia-v2` namespace is undergoing active development by the ENS Labs team
   >
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1AndEnsV2} />
 
-  <Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
+<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
 
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationAvailable} />
 </HostedEnsNodeInstance>
@@ -87,7 +89,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
 >
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
 
-  <Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
+<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
 
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationAvailable} />
 </HostedEnsNodeInstance>
@@ -103,7 +105,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
   >
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
 
-  <Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
+<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
 
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationAvailable} />
 </HostedEnsNodeInstance>
@@ -123,7 +125,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   >
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphUnactivated} />
 
-  <Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityFull} />
+<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityFull} />
 
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationUnavailable} />
 </HostedEnsNodeInstance>
@@ -139,7 +141,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   >
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphUnactivated} />
 
-  <Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityFull} />
+<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityFull} />
 
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationUnavailable} />
 </HostedEnsNodeInstance>

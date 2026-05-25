@@ -7,20 +7,21 @@ import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
 import WalkthroughV1131 from "@components/walkthroughs/enssdk/v1.13.1.mdx";
 import WalkthroughV1150 from "@components/walkthroughs/enssdk/v1.15.0.mdx";
 
-{/*
-  Version-locked to the production-deployed Omnigraph schema (see `@data/omnigraph-examples/active`).
-  Author one partial per supported version under `@components/walkthroughs/enssdk/` and render the
-  active one. Promote by bumping ACTIVE_OMNIGRAPH_VERSION (and, for a new version, add its partial and
-  a `case` below — an unmapped version throws at build rather than silently rendering stale docs).
-*/}
-
-{(() => {
-  switch (ACTIVE_OMNIGRAPH_VERSION) {
-    case "v1.13.1":
-      return <WalkthroughV1131 />;
-    case "v1.15.0":
-      return <WalkthroughV1150 />;
-    default:
-      throw new Error(`No walkthrough partial for Omnigraph version "${ACTIVE_OMNIGRAPH_VERSION}".`);
-  }
-})()}
+<>
+  {/* Version-locked to the production-deployed Omnigraph schema (see `@data/omnigraph-examples/active`). */}
+  {/* Author one partial per supported version under `@components/walkthroughs/enssdk/` and render the */}
+  {/* active one. Promote by bumping ACTIVE_OMNIGRAPH_VERSION (and, for a new version, add its partial and */}
+  {/* a `case` below — an unmapped version throws at build rather than silently rendering stale docs). */}
+  {(() => {
+    switch (ACTIVE_OMNIGRAPH_VERSION) {
+      case "v1.13.1":
+        return <WalkthroughV1131 />;
+      case "v1.15.0":
+        return <WalkthroughV1150 />;
+      default:
+        throw new Error(
+          `No walkthrough partial for Omnigraph version "${ACTIVE_OMNIGRAPH_VERSION}".`,
+        );
+    }
+  })()}
+</>

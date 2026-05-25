@@ -1,5 +1,5 @@
-import { LinkCard, Aside } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
 `enssdk` is the foundational TypeScript/JavaScript SDK for ENS development. It's a fully modular and tree-shakeable modern TypeScript/JavaScript package that provides ENS-specific types and helpers — usable from any JS runtime, browser or server.
 
@@ -122,7 +122,9 @@ const HelloWorldQuery = graphql(`
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
     }
   }
 `);
@@ -167,11 +169,18 @@ const HelloWorldQuery = graphql(`
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
       subdomains(first: 20) {
         totalCount
         edges {
-          node { name owner { address } }
+          node {
+            name
+            owner {
+              address
+            }
+          }
         }
       }
     }
@@ -226,22 +235,28 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     name
-    owner { address }
+    owner {
+      address
+    }
   }
 `);
 
 const HelloWorldQuery = graphql(
   `
-  query HelloWorld($name: InterpretedName!) {
-    domain(by: { name: $name }) {
-      ...DomainFragment
-      subdomains(first: 20) {
-        totalCount
-        edges { node { ...DomainFragment } }
+    query HelloWorld($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        ...DomainFragment
+        subdomains(first: 20) {
+          totalCount
+          edges {
+            node {
+              ...DomainFragment
+            }
+          }
+        }
       }
     }
-  }
-`,
+  `,
   [DomainFragment],
 );
 

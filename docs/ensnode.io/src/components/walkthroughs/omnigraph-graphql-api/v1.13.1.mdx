@@ -1,5 +1,5 @@
-import { LinkCard } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
+import { LinkCard } from "@astrojs/starlight/components";
+import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
 The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
 
@@ -74,10 +74,20 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
       subdomains(first: 20) {
         totalCount
-        edges { node { __typename name owner { address } } }
+        edges {
+          node {
+            __typename
+            name
+            owner {
+              address
+            }
+          }
+        }
       }
     }
   }
@@ -91,12 +101,14 @@ interface Domain {
 
 interface QueryResult {
   data?: {
-    domain: (Domain & {
-      subdomains: {
-        totalCount: number;
-        edges: { node: Domain }[];
-      } | null;
-    }) | null;
+    domain:
+      | (Domain & {
+          subdomains: {
+            totalCount: number;
+            edges: { node: Domain }[];
+          } | null;
+        })
+      | null;
   } | null;
   errors?: { message: string }[];
 }

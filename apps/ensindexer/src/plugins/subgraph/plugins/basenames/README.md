@@ -6,4 +6,3 @@ This plugin contains configuration required to run blockchain indexing with [the
 
 The Basenames contracts manage subnames of "base.eth". All contracts and their interactions were described here:
 https://github.com/base-org/basenames?tab=readme-ov-file#architecture
-

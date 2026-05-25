@@ -5,7 +5,7 @@ sidebar:
   label: Domain by Name
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 :::caution[`unigraph` plugin required]
 Using the Unigraph SQL requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
@@ -25,9 +25,11 @@ WHERE canonical_name = 'vitalik.eth';
 import { eq } from 'drizzle-orm';
 
 const [vitalik] = await ensDb
-  .select()
-  .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+.select()
+.from(ensIndexerSchema.domain)
+.where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+
 ```
   </TabItem>
 </Tabs>
+```

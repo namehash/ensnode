@@ -32,14 +32,19 @@ const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" });
 import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph, graphql } from "enssdk/omnigraph";
 
-const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" })
-  .extend(omnigraph);
+const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" }).extend(omnigraph);
 
 const MyQuery = graphql(`
   query MyQuery($name: Name!) {
     domain(by: { name: $name }) {
-      canonical { name { interpreted } }
-      registration { expiry }
+      canonical {
+        name {
+          interpreted
+        }
+      }
+      registration {
+        expiry
+      }
     }
   }
 `);

@@ -5,7 +5,7 @@ sidebar:
   label: Indexing Status
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 :::caution[`unigraph` plugin required]
 Using the Unigraph SQL requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
@@ -28,9 +28,11 @@ import { IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
 
 const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
 if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
-  const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
-  // Do something with the indexing status snapshot
+const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
+// Do something with the indexing status snapshot
 }
+
 ```
   </TabItem>
 </Tabs>
+```

@@ -1,12 +1,11 @@
-import { LinkCard, Steps, Aside } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
+import { LinkCard, Steps, Aside } from "@astrojs/starlight/components";
+import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
 `enskit` is the React toolkit for ENSv2 development. It provides a fully typed Omnigraph API client (powered by [`urql`](https://nearform.com/open-source/urql/) and [`gql.tada`](https://gql-tada.0no.co/)), the `OmnigraphProvider`, and the `useOmnigraphQuery` hook for writing type-safe ENS queries with editor autocomplete, Relay-style pagination, and Omnigraph-specific cache directives.
 
 This guide walks you from an empty directory to a working React component that renders an [ENS Domain](/docs/concepts/the-ens-protocol) and a paginated list of its subdomains — the same flow as the [`DomainView`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in our example app.
 
 <IntegrateHostedEnsNodeTip />
-
 
 ## 1. Scaffold a React app
 
@@ -77,7 +76,7 @@ import { DomainView } from "./DomainView";
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL!
+const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL!;
 
 // create and extend an EnsNodeClient with Omnigraph support
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
@@ -111,7 +110,9 @@ const DomainByNameQuery = graphql(`
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
     }
   }
 `);
@@ -134,11 +135,7 @@ export function DomainView() {
 
   return (
     <div>
-      <h2>
-        {domain.name
-          ? beautifyInterpretedName(domain.name)
-          : "Unnamed Domain"}
-      </h2>
+      <h2>{domain.name ? beautifyInterpretedName(domain.name) : "Unnamed Domain"}</h2>
       <p>Version: {domain.__typename}</p>
       <p>
         Owner: <code>{domain.owner?.address ?? "0x0"}</code>
@@ -164,12 +161,16 @@ const DomainByNameQuery = graphql(`
     domain(by: { name: $name }) {
       __typename
       name
-      owner { address }
+      owner {
+        address
+      }
       subdomains {
         edges {
           node {
             name
-            owner { address }
+            owner {
+              address
+            }
           }
         }
       }
@@ -197,16 +198,16 @@ export function DomainView() {
     <div>
       <h2>{domain.name ? beautifyInterpretedName(domain.name) : "Unnamed Domain"}</h2>
       <p>Version: {domain.__typename}</p>
-      <p>Owner: <code>{domain.owner?.address ?? "0x0"}</code></p>
+      <p>
+        Owner: <code>{domain.owner?.address ?? "0x0"}</code>
+      </p>
 
       <h3>Subdomains</h3>
       <ul>
         {domain.subdomains?.edges.map(({ node }, i) => (
           <li key={i}>
-            {node.name
-              ? beautifyInterpretedName(node.name)
-              : <em>unnamed</em>}{" "}
-            — Owner <code>{node.owner?.address ?? "0x0"}</code>
+            {node.name ? beautifyInterpretedName(node.name) : <em>unnamed</em>} — Owner{" "}
+            <code>{node.owner?.address ?? "0x0"}</code>
           </li>
         ))}
       </ul>
@@ -220,33 +221,34 @@ export function DomainView() {
 Notice we're selecting the same fields (`name`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed shape for components that render a Domain.
 
 ```tsx title="src/DomainView.tsx" ins={1,2,5,9-15,21,23,28,31-48,66,72}
-import {
-  type FragmentOf,
-  graphql,
-  readFragment,
-  useOmnigraphQuery,
-} from "enskit/react/omnigraph";
+import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { asInterpretedName, beautifyInterpretedName } from "enssdk";
 
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     name
-    owner { address }
+    owner {
+      address
+    }
   }
 `);
 
 const DomainByNameQuery = graphql(
   `
-  query DomainByName($name: InterpretedName!) {
-    domain(by: { name: $name }) {
-      ...DomainFragment
-      subdomains {
-        edges { node { ...DomainFragment } }
+    query DomainByName($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        ...DomainFragment
+        subdomains {
+          edges {
+            node {
+              ...DomainFragment
+            }
+          }
+        }
       }
     }
-  }
-`,
+  `,
   [DomainFragment],
 );
 
@@ -256,11 +258,7 @@ function RenderDomain({ data }: { data: FragmentOf<typeof DomainFragment> }) {
 
   return (
     <>
-      <span>
-        {domain.name
-          ? beautifyInterpretedName(domain.name)
-          : "Unnamed Domain"}
-      </span>{" "}
+      <span>{domain.name ? beautifyInterpretedName(domain.name) : "Unnamed Domain"}</span>{" "}
       <span>({domain.__typename})</span>{" "}
       <span>
         — Owner <code>{domain.owner?.address ?? "0x0"}</code>
@@ -285,7 +283,9 @@ export function DomainView() {
 
   return (
     <div>
-      <h2><RenderDomain data={data.domain} /></h2>
+      <h2>
+        <RenderDomain data={data.domain} />
+      </h2>
 
       <h3>Subdomains</h3>
       <ul>
@@ -312,16 +312,23 @@ import { useState } from "react";
 
 const DomainByNameQuery = graphql(
   `
-  query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
-    domain(by: { name: $name }) {
-      ...DomainFragment
-      subdomains(first: $first, after: $after) {
-        edges { node { ...DomainFragment } }
-        pageInfo { hasNextPage endCursor }
+    query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
+      domain(by: { name: $name }) {
+        ...DomainFragment
+        subdomains(first: $first, after: $after) {
+          edges {
+            node {
+              ...DomainFragment
+            }
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
       }
     }
-  }
-`,
+  `,
   [DomainFragment],
 );
 
@@ -346,7 +353,9 @@ export function DomainView() {
 
   return (
     <div>
-      <h2><RenderDomain data={data.domain} /></h2>
+      <h2>
+        <RenderDomain data={data.domain} />
+      </h2>
 
       <h3>Subdomains</h3>
       <ul>
