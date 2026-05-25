@@ -1,4 +1,4 @@
-import type { NormalizedAddress } from "enssdk";
+import { type AccountId, stringifyAccountId } from "enssdk";
 
 import type {
   ReferrerEditionMetricsPieSplit,
@@ -22,7 +22,7 @@ import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 import type { ReferrerLeaderboard } from "./leaderboard";
 
 /**
- * Referrer edition metrics data for a specific referrer address.
+ * Referrer edition metrics data for a specific referrer.
  *
  * Use `awardModel` to narrow the award model variant, then `type` to narrow ranked vs unranked.
  * When `awardModel` is `"unrecognized"`, the data was produced by a server running a newer
@@ -39,20 +39,21 @@ export type ReferrerEditionMetrics =
  * Returns a {@link ReferrerEditionMetricsPieSplit} or {@link ReferrerEditionMetricsRevShareCap}
  * with `type: "ranked"` if the referrer is on the leaderboard, or `type: "unranked"` otherwise.
  *
- * @param referrer - The referrer address to look up
+ * @param referrer - The referrer {@link AccountId} to look up
  * @param leaderboard - The referrer leaderboard to query
  */
 export const getReferrerEditionMetrics = (
-  referrer: NormalizedAddress,
+  referrer: AccountId,
   leaderboard: ReferrerLeaderboard,
 ): ReferrerEditionMetrics => {
+  const referrerKey = stringifyAccountId(referrer);
   switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit: {
       const status = calcReferralProgramEditionStatusPieSplit(
         leaderboard.rules,
         leaderboard.accurateAsOf,
       );
-      const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
+      const awardedReferrerMetrics = leaderboard.referrers.get(referrerKey);
       if (awardedReferrerMetrics) {
         return {
           awardModel: leaderboard.awardModel,
@@ -81,7 +82,7 @@ export const getReferrerEditionMetrics = (
         leaderboard.accurateAsOf,
         leaderboard.aggregatedMetrics,
       );
-      const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
+      const awardedReferrerMetrics = leaderboard.referrers.get(referrerKey);
       if (awardedReferrerMetrics) {
         return {
           awardModel: leaderboard.awardModel,
