@@ -106,7 +106,7 @@ export default {
       ETHRegistrar: {
         abi: ETHRegistrar,
         address: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        startBlock: 10893209,
       },
     },
   },

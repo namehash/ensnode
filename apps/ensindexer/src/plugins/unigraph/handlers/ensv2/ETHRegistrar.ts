@@ -41,7 +41,7 @@ async function getRegistrarAndRegistry(context: IndexingEngineContext, event: Lo
       await context.client.readContract({
         abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
         address: event.log.address,
-        functionName: "REGISTRY",
+        functionName: "ETH_REGISTRY",
       }),
     ),
   };
@@ -143,11 +143,11 @@ export default function () {
         newExpiry: UnixTimestampBigInt;
         referrer: EncodedReferrer;
         paymentToken: NormalizedAddress;
-        base: Wei;
+        amount: Wei;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: TODO(paymentToken)
-      const { tokenId, duration, referrer, paymentToken, base } = event.args;
+      const { tokenId, duration, referrer, paymentToken, amount } = event.args;
 
       // this event occurs _after_ ENSv2Registry:ExpiryUpdated and therefore does not need to
       // update Registration.expiry, it just needs to update the latest Renewal
@@ -179,7 +179,7 @@ export default function () {
         eventId,
 
         // TODO(paymentToken)
-        base,
+        base: amount,
       });
 
       // push event to domain history
