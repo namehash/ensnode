@@ -4,7 +4,6 @@ import { SEO } from "astro-seo";
 
 import "../styles/tailwind.css";
 import "../styles/globals.css";
-import heroImage from "../assets/hero_bg_image.png";
 
 import { Footer } from "@namehash/namehash-ui";
 
@@ -16,7 +15,6 @@ const { ...props } = Astro.props;
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width"/>
     <meta name="generator" content={Astro.generator}/>
-    <link rel="preload" as="image" href={heroImage.src} />
     <AstroFont
             config={[
                 {
