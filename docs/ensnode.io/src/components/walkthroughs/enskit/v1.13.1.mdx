@@ -219,7 +219,7 @@ export function DomainView() {
 
 Notice we're selecting the same fields (`name`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed shape for components that render a Domain.
 
-```tsx title="src/DomainView.tsx" ins={1,4-10,16,18,23,26-39,55-57,63}
+```tsx title="src/DomainView.tsx" ins={1,4-10,16,18,23,26-39,57-59,65}
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { asInterpretedName, beautifyInterpretedName } from "enssdk";
 

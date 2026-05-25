@@ -45,14 +45,8 @@ const HelloWorldQuery = graphql(`
   query HelloWorld {
     domain(by: { name: "eth" }) {
       id
-      canonical {
-        name {
-          beautified
-        }
-      }
-      owner {
-        address
-      }
+      canonical { name { beautified } }
+      owner { address }
     }
   }
 `);
@@ -90,34 +84,23 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    canonical {
-      name {
-        beautified
-      }
-    }
-    owner {
-      id
-      address
-    }
+    canonical { name { beautified } }
+    owner { id address }
   }
 `);
 
 // this is fully typechecked and supports editor autocomplete!
 const DomainByNameQuery = graphql(
   `
-    query DomainByNameQuery($name: InterpretedName!) {
-      domain(by: { name: $name }) {
-        ...DomainFragment
-        subdomains {
-          edges {
-            node {
-              ...DomainFragment
-            }
-          }
-        }
+  query DomainByNameQuery($name: InterpretedName!) {
+    domain(by: { name: $name }) {
+      ...DomainFragment
+      subdomains {
+        edges { node { ...DomainFragment } }
       }
     }
-  `,
+  }
+`,
   [DomainFragment],
 );
 
