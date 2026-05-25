@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  ACTIVE_OMNIGRAPH_VERSION,
-} from "@data/omnigraph-examples/active";
+import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
 import type { SnapshotExample } from "@data/omnigraph-examples/types";
 
 import {

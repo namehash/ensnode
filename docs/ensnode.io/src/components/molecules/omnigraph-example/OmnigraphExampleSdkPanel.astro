@@ -1,0 +1,90 @@
+---
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+
+import OmnigraphExampleActionBar from "./OmnigraphExampleActionBar.astro";
+import OmnigraphExampleCodeSection from "./OmnigraphExampleCodeSection.astro";
+import OmnigraphExampleTabbedSection, {
+  type OmnigraphExampleTab,
+  type OmnigraphExampleTabPanel,
+} from "./OmnigraphExampleTabbedSection.astro";
+
+interface Props {
+  uid: string;
+  integrationId: "enssdk" | "enskit";
+  codeBadge: string;
+  snippet: string;
+  snippetLang: "typescript" | "tsx";
+  setupTabsRoot: string;
+  setupTabs: OmnigraphExampleTab[];
+  setupPanels: OmnigraphExampleTabPanel[];
+  hasOutput: boolean;
+  docsHref: string;
+  docsLabel: string;
+  footerSuffix: string;
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+  tabButtonClass: string;
+  tabIconClass: string;
+}
+
+const {
+  uid,
+  integrationId,
+  codeBadge,
+  snippet,
+  snippetLang,
+  setupTabsRoot,
+  setupTabs,
+  setupPanels,
+  hasOutput,
+  docsHref,
+  docsLabel,
+  footerSuffix,
+  hostedInstanceDocUrl,
+  hostedInstanceNamespace,
+  tabButtonClass,
+  tabIconClass,
+} = Astro.props;
+
+const footerClass =
+  "px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5";
+const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]";
+const outputNote =
+  "Output matches the GraphQL Response snapshot; live output depends on your ENSNode instance.";
+---
+
+<div
+  id={`${uid}-int-${integrationId}`}
+  data-integration-panel={integrationId}
+  role="tabpanel"
+  aria-labelledby={`${uid}-int-tab-${integrationId}`}
+  hidden
+  class="hidden">
+  <OmnigraphExampleActionBar
+    variant="stackblitz"
+    hostedInstanceDocUrl={hostedInstanceDocUrl}
+    hostedInstanceNamespace={hostedInstanceNamespace}
+  />
+
+  <OmnigraphExampleCodeSection badge={codeBadge} code={snippet} lang={snippetLang} />
+
+  <OmnigraphExampleTabbedSection
+    tabsRootId={setupTabsRoot}
+    tablistAriaLabel="Setup and output"
+    srHeading={{
+      id: `${uid}-${integrationId}-setup-heading`,
+      label: `${integrationId} setup and output`,
+    }}
+    tabs={setupTabs}
+    panels={setupPanels}
+    tabButtonClass={tabButtonClass}
+    tabIconClass={tabIconClass}
+  />
+
+  <p class={footerClass}>
+    {hasOutput ? `${outputNote} ` : ""}
+    See the{" "}
+    <a href={docsHref} class={docsLinkClass}>{docsLabel}</a>
+    {" "}{footerSuffix}
+  </p>
+</div>

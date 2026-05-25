@@ -1,0 +1,52 @@
+---
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+
+import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
+
+import OmnigraphExamplePlaygroundHint from "./OmnigraphExamplePlaygroundHint.astro";
+
+interface Props {
+  variant: "ensadmin" | "stackblitz";
+  adminUrl?: string;
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+}
+
+const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceNamespace } = Astro.props;
+
+const stickyActionBarClass =
+  "sticky z-20 flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]/95 md:px-5";
+const stickyActionBarStyle =
+  "top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);";
+const actionButtonClass =
+  "inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)]";
+---
+
+<div class={stickyActionBarClass} style={stickyActionBarStyle}>
+  {
+    variant === "ensadmin" ? (
+      <a
+        class={`${actionButtonClass} no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]`}
+        href={adminUrl}
+        target="_blank"
+        rel="noopener noreferrer">
+        <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
+        Run in ENSAdmin
+      </a>
+    ) : (
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        class={`${actionButtonClass} opacity-50 cursor-not-allowed`}>
+        <StackBlitzLogo className="h-5 w-auto shrink-0" />
+        Run in StackBlitz
+      </button>
+    )
+  }
+  <OmnigraphExamplePlaygroundHint
+    hostedInstanceDocUrl={hostedInstanceDocUrl}
+    hostedInstanceNamespace={hostedInstanceNamespace}
+  />
+</div>

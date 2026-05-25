@@ -6,6 +6,11 @@ export type SetupPackageManager = "npm" | "pnpm";
 
 export const SETUP_PACKAGE_MANAGERS: SetupPackageManager[] = ["npm", "pnpm"];
 
+export const SETUP_TAB_LABELS: Record<SetupPackageManager, string> = {
+  npm: "Setup with NPM",
+  pnpm: "Setup with PNPM",
+};
+
 const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
 
 /** Setup steps for enssdk per package manager: scaffold, install, copy snippet, run. */

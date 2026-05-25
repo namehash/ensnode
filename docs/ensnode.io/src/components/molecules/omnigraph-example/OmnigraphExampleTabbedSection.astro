@@ -1,0 +1,81 @@
+---
+import { Code, Icon } from "@astrojs/starlight/components";
+
+export interface OmnigraphExampleTab {
+  id: string;
+  label: string;
+  icon?: string;
+}
+
+export interface OmnigraphExampleTabPanel {
+  id: string;
+  code: string;
+  lang: string;
+  maxHeight: string;
+  visible?: boolean;
+}
+
+interface Props {
+  tabsRootId: string;
+  tablistAriaLabel: string;
+  srHeading?: { id: string; label: string };
+  tabs: OmnigraphExampleTab[];
+  panels: OmnigraphExampleTabPanel[];
+  tabButtonClass: string;
+  tabIconClass?: string;
+}
+
+const { tabsRootId, tablistAriaLabel, srHeading, tabs, panels, tabButtonClass, tabIconClass } =
+  Astro.props;
+
+const tablistClass = "flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]";
+const codeWrapClass = "min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg";
+---
+
+<section class="px-4 py-5 md:px-5" {...srHeading ? { "aria-labelledby": srHeading.id } : {}}>
+  {
+    srHeading ? (
+      <h3 id={srHeading.id} class="sr-only">
+        {srHeading.label}
+      </h3>
+    ) : null
+  }
+  <div class="omnigraph-tabs flex flex-col" data-tabs-root={tabsRootId}>
+    <div class={tablistClass} role="tablist" aria-label={tablistAriaLabel}>
+      {
+        tabs.map((tab, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`${tab.id}-btn`}
+            aria-selected={i === 0 ? "true" : "false"}
+            aria-controls={tab.id}
+            data-tab-target={tab.id}
+            class={tabButtonClass}>
+            {tab.icon && tabIconClass ? (
+              <Icon name={tab.icon} class={tabIconClass} size="1.125em" />
+            ) : null}
+            <span class="tab-label">{tab.label}</span>
+          </button>
+        ))
+      }
+    </div>
+    <div class="relative min-h-[8rem]">
+      {
+        panels.map((panel) => (
+          <div
+            id={panel.id}
+            role="tabpanel"
+            aria-labelledby={`${panel.id}-btn`}
+            data-tab-panel={panel.id}
+            class:list={["example-tab-panel pt-3", { hidden: !panel.visible }]}
+            hidden={!panel.visible}>
+            <div class={codeWrapClass} style={`max-height: ${panel.maxHeight}`}>
+              <Code code={panel.code} lang={panel.lang} />
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

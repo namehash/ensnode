@@ -1,14 +1,20 @@
 ---
-import { Code, Icon } from "@astrojs/starlight/components";
+import { Icon } from "@astrojs/starlight/components";
 import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
 import { buildOmnigraphCurlExample, getHostedEnsNodeInstanceDocUrl } from "@lib/playground/utils";
 import {
   SETUP_PACKAGE_MANAGERS,
+  SETUP_TAB_LABELS,
   type SetupPackageManager,
 } from "@lib/omnigraph-examples/build-integration-snippets";
-import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
-import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
+import OmnigraphExampleActionBar from "@components/molecules/omnigraph-example/OmnigraphExampleActionBar.astro";
+import OmnigraphExampleCodeSection from "@components/molecules/omnigraph-example/OmnigraphExampleCodeSection.astro";
+import OmnigraphExampleSdkPanel from "@components/molecules/omnigraph-example/OmnigraphExampleSdkPanel.astro";
+import OmnigraphExampleTabbedSection, {
+  type OmnigraphExampleTab,
+  type OmnigraphExampleTabPanel,
+} from "@components/molecules/omnigraph-example/OmnigraphExampleTabbedSection.astro";
 
 export interface OmnigraphAPIExamplePanelsProps {
   /** Unique id prefix for aria / tab wiring (e.g. example id). */
@@ -49,8 +55,19 @@ const {
 } = Astro.props;
 
 const hostedInstanceDocUrl = getHostedEnsNodeInstanceDocUrl(hostedInstanceAnchor);
-
 const uid = panelId.replace(/[^a-zA-Z0-9_-]/g, "-");
+
+const exampleTabClass =
+  "example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]";
+const integrationTabClass = `${exampleTabClass} integration-tab`;
+const setupPmTabClass = `${exampleTabClass} setup-pm-tab`;
+const formatTabClass = exampleTabClass;
+
+const integrationTabs = [
+  { id: "graphql", label: "Omnigraph", icon: "seti:graphql" },
+  { id: "enssdk", label: "enssdk", icon: "seti:typescript" },
+  { id: "enskit", label: "enskit", icon: "seti:react" },
+] as const;
 
 const tabIds = {
   vars: `${uid}-tab-vars`,
@@ -62,197 +79,149 @@ const curlExample = !hideCurl
   ? buildOmnigraphCurlExample({ connectionBaseUrl, query, variables: variablesObject })
   : "";
 
-const graphqlTabList: { id: string; label: string }[] = [
-  { id: tabIds.vars, label: "Variables" },
-  ...(responseJson ? [{ id: tabIds.resp, label: "Response" }] : []),
-  ...(!hideCurl && curlExample ? [{ id: tabIds.curl, label: "Curl" }] : []),
+const graphqlTabs: OmnigraphExampleTab[] = [
+  { id: tabIds.vars, label: "Variables", icon: "seti:json" },
+  ...(responseJson ? [{ id: tabIds.resp, label: "Response", icon: "seti:json" }] : []),
+  ...(!hideCurl && curlExample ? [{ id: tabIds.curl, label: "Curl", icon: "window" }] : []),
 ];
 
-function buildSetupPackageManagerTabs(prefix: "enssdk" | "enskit") {
-  return SETUP_PACKAGE_MANAGERS.map((pm) => ({
+const graphqlPanels: OmnigraphExampleTabPanel[] = [
+  {
+    id: tabIds.vars,
+    code: variablesJson,
+    lang: "json",
+    maxHeight: "min(38vh,19rem)",
+    visible: true,
+  },
+  ...(responseJson
+    ? [
+        {
+          id: tabIds.resp,
+          code: responseJson,
+          lang: "json",
+          maxHeight: "min(50vh,28rem)",
+          visible: false,
+        },
+      ]
+    : []),
+  ...(!hideCurl && curlExample
+    ? [
+        {
+          id: tabIds.curl,
+          code: curlExample,
+          lang: "bash",
+          maxHeight: "min(50vh,28rem)",
+          visible: false,
+        },
+      ]
+    : []),
+];
+
+function buildSdkTabs(prefix: "enssdk" | "enskit"): OmnigraphExampleTab[] {
+  const tabs = SETUP_PACKAGE_MANAGERS.map((pm) => ({
     id: `${uid}-tab-setup-${prefix}-${pm}`,
-    label: pm,
+    label: SETUP_TAB_LABELS[pm],
     icon: pm,
   }));
+  if (responseJson) {
+    tabs.push({
+      id: `${uid}-tab-output-${prefix}`,
+      label: "Output",
+      icon: "seti:json",
+    });
+  }
+  return tabs;
 }
 
-const enssdkSetupTabs = buildSetupPackageManagerTabs("enssdk");
-const enskitSetupTabs = buildSetupPackageManagerTabs("enskit");
+function buildSdkPanels(
+  prefix: "enssdk" | "enskit",
+  snippets: Record<SetupPackageManager, string>,
+): OmnigraphExampleTabPanel[] {
+  const panels: OmnigraphExampleTabPanel[] = SETUP_PACKAGE_MANAGERS.map((pm, i) => ({
+    id: `${uid}-tab-setup-${prefix}-${pm}`,
+    code: snippets[pm],
+    lang: "bash",
+    maxHeight: "min(38vh,19rem)",
+    visible: i === 0,
+  }));
 
-const stickyActionBarClass =
-  "sticky z-20 flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]/95 md:px-5";
-const stickyActionBarStyle =
-  "top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);";
+  if (responseJson) {
+    panels.push({
+      id: `${uid}-tab-output-${prefix}`,
+      code: responseJson,
+      lang: "json",
+      maxHeight: "min(50vh,28rem)",
+      visible: false,
+    });
+  }
+
+  return panels;
+}
+
+const enssdkSdkTabs = buildSdkTabs("enssdk");
+const enskitSdkTabs = buildSdkTabs("enskit");
+const enssdkSdkPanels = buildSdkPanels("enssdk", enssdkSetupSnippets);
+const enskitSdkPanels = buildSdkPanels("enskit", enskitSetupSnippets);
+
+const footerClass =
+  "px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5";
 ---
 
 <div
   class="not-content not-prose omnigraph-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]"
-  data-omnigraph-example={uid}
->
-  <!-- Primary integration tab bar -->
+  data-omnigraph-example={uid}>
   <div
     class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08] px-4 md:px-5 pt-3"
     role="tablist"
     aria-label="Integration method"
-    data-integration-tabs={uid}
-  >
-    <button
-      type="button"
-      role="tab"
-      id={`${uid}-int-tab-graphql`}
-      aria-selected="true"
-      aria-controls={`${uid}-int-graphql`}
-      data-integration-tab="graphql"
-      class="integration-tab example-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-    >
-      <Icon name="seti:graphql" class="integration-tab-icon shrink-0" size="1.125em" />
-      Omnigraph (GraphQL)
-    </button>
-    <button
-      type="button"
-      role="tab"
-      id={`${uid}-int-tab-enssdk`}
-      aria-selected="false"
-      aria-controls={`${uid}-int-enssdk`}
-      data-integration-tab="enssdk"
-      class="integration-tab example-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-    >
-      <Icon name="seti:typescript" class="integration-tab-icon shrink-0" size="1.125em" />
-      enssdk (TypeScript)
-    </button>
-    <button
-      type="button"
-      role="tab"
-      id={`${uid}-int-tab-enskit`}
-      aria-selected="false"
-      aria-controls={`${uid}-int-enskit`}
-      data-integration-tab="enskit"
-      class="integration-tab example-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-    >
-      <Icon name="seti:react" class="integration-tab-icon shrink-0" size="1.125em" />
-      enskit (React)
-    </button>
+    data-integration-tabs={uid}>
+    {
+      integrationTabs.map((tab, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${uid}-int-tab-${tab.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          aria-controls={`${uid}-int-${tab.id}`}
+          data-integration-tab={tab.id}
+          class={integrationTabClass}>
+          <Icon name={tab.icon} class="tab-icon" size="1.125em" />
+          <span class="tab-label">{tab.label}</span>
+        </button>
+      ))
+    }
   </div>
 
-  <!-- ── Omnigraph (GraphQL) panel ── -->
   <div
     id={`${uid}-int-graphql`}
     data-integration-panel="graphql"
     role="tabpanel"
-    aria-labelledby={`${uid}-int-tab-graphql`}
-  >
-    <div class={stickyActionBarClass} style={stickyActionBarStyle}>
-      <a
-        class="inline-flex shrink-0 items-center justify-between gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-        href={adminUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
-        Run in ENSAdmin
-      </a>
-      <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
-        Open an interactive playground to execute this example on our{" "}
-        <a
-          href={hostedInstanceDocUrl}
-          class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-        >
-          {hostedInstanceNamespace}
-        </a>{" "}
-        ENSNode instance.
-      </span>
-    </div>
+    aria-labelledby={`${uid}-int-tab-graphql`}>
+    <OmnigraphExampleActionBar
+      variant="ensadmin"
+      adminUrl={adminUrl}
+      hostedInstanceDocUrl={hostedInstanceDocUrl}
+      hostedInstanceNamespace={hostedInstanceNamespace}
+    />
 
-    <section
-      class="border-b border-black/[0.05] px-4 pb-5 pt-6 dark:border-white/[0.06] md:px-5"
-      aria-labelledby={`${uid}-query-heading`}
-    >
-      <div class="mb-2.5">
-        <span
-          id={`${uid}-query-heading`}
-          class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]"
-        >
-          ENS Omnigraph GraphQL
-        </span>
-      </div>
-      <div class="min-w-0 [&_.expressive-code]:rounded-lg">
-        <Code code={query} lang="graphql" />
-      </div>
-    </section>
+    <OmnigraphExampleCodeSection
+      badge="GraphQL"
+      headingId={`${uid}-query-heading`}
+      code={query}
+      lang="graphql"
+    />
 
-    <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-secondary-heading`}>
-      <h3 id={`${uid}-secondary-heading`} class="sr-only">Payload and transport examples</h3>
-      <div class="omnigraph-tabs flex flex-col" data-tabs-root={uid}>
-        <div
-          class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
-          role="tablist"
-          aria-label="Example formats"
-        >
-          {
-            graphqlTabList.map((t, i) => (
-              <button
-                type="button"
-                role="tab"
-                id={`${t.id}-btn`}
-                aria-selected={i === 0 ? "true" : "false"}
-                aria-controls={t.id}
-                data-tab-target={t.id}
-                class="example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-              >
-                {t.label}
-              </button>
-            ))
-          }
-        </div>
-        <div class="relative min-h-[8rem]">
-          <div
-            id={tabIds.vars}
-            role="tabpanel"
-            aria-labelledby={`${tabIds.vars}-btn`}
-            data-tab-panel={tabIds.vars}
-            class="example-tab-panel pt-3"
-          >
-            <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-              <Code code={variablesJson} lang="json" />
-            </div>
-          </div>
-          {
-            responseJson ? (
-              <div
-                id={tabIds.resp}
-                role="tabpanel"
-                aria-labelledby={`${tabIds.resp}-btn`}
-                data-tab-panel={tabIds.resp}
-                class="example-tab-panel hidden pt-3"
-                hidden
-              >
-                <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                  <Code code={responseJson} lang="json" />
-                </div>
-              </div>
-            ) : null
-          }
-          {
-            !hideCurl && curlExample ? (
-              <div
-                id={tabIds.curl}
-                role="tabpanel"
-                aria-labelledby={`${tabIds.curl}-btn`}
-                data-tab-panel={tabIds.curl}
-                class="example-tab-panel hidden pt-3"
-                hidden
-              >
-                <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                  <Code code={curlExample} lang="bash" />
-                </div>
-              </div>
-            ) : null
-          }
-        </div>
-      </div>
-    </section>
+    <OmnigraphExampleTabbedSection
+      tabsRootId={uid}
+      tablistAriaLabel="Example formats"
+      srHeading={{ id: `${uid}-secondary-heading`, label: "Payload and transport examples" }}
+      tabs={graphqlTabs}
+      panels={graphqlPanels}
+      tabButtonClass={formatTabClass}
+      tabIconClass="tab-icon"
+    />
 
-    <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
+    <p class={footerClass}>
       Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab
       shows a POST to
       <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]"
@@ -261,195 +230,43 @@ const stickyActionBarStyle =
     </p>
   </div>
 
-  <!-- ── enssdk panel ── -->
-  <div
-    id={`${uid}-int-enssdk`}
-    data-integration-panel="enssdk"
-    role="tabpanel"
-    aria-labelledby={`${uid}-int-tab-enssdk`}
-    hidden
-    class="hidden"
-  >
-    <div class={stickyActionBarClass} style={stickyActionBarStyle}>
-      <button
-        type="button"
-        disabled
-        aria-disabled="true"
-        class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] opacity-50 cursor-not-allowed"
-      >
-        <StackBlitzLogo className="h-5 w-auto shrink-0" />
-        Run in StackBlitz
-      </button>
-      <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
-        Open an interactive playground to execute this example on our{" "}
-        <a
-          href={hostedInstanceDocUrl}
-          class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-        >
-          {hostedInstanceNamespace}
-        </a>{" "}
-        ENSNode instance.
-      </span>
-    </div>
+  <OmnigraphExampleSdkPanel
+    uid={uid}
+    integrationId="enssdk"
+    codeBadge="TypeScript"
+    snippet={enssdkSnippet}
+    snippetLang="typescript"
+    setupTabsRoot={`${uid}-enssdk`}
+    setupTabs={enssdkSdkTabs}
+    setupPanels={enssdkSdkPanels}
+    hasOutput={Boolean(responseJson)}
+    docsHref="/docs/integrate/integration-options/enssdk"
+    docsLabel="enssdk docs"
+    footerSuffix="for gql.tada plugin and tsconfig setup."
+    hostedInstanceDocUrl={hostedInstanceDocUrl}
+    hostedInstanceNamespace={hostedInstanceNamespace}
+    tabButtonClass={setupPmTabClass}
+    tabIconClass="tab-icon"
+  />
 
-    <section class="border-b border-black/[0.05] px-4 pb-5 pt-6 dark:border-white/[0.06] md:px-5">
-      <div class="mb-2.5">
-        <span class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]">
-          TypeScript
-        </span>
-      </div>
-      <div class="min-w-0 [&_.expressive-code]:rounded-lg">
-        <Code code={enssdkSnippet} lang="typescript" />
-      </div>
-    </section>
-
-    <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-enssdk-setup-heading`}>
-      <h3 id={`${uid}-enssdk-setup-heading`} class="sr-only">enssdk setup</h3>
-      <div class="omnigraph-tabs flex flex-col" data-tabs-root={`${uid}-enssdk-setup`}>
-        <div
-          class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
-          role="tablist"
-          aria-label="Package manager"
-        >
-          {
-            enssdkSetupTabs.map((t, i) => (
-              <button
-                type="button"
-                role="tab"
-                id={`${t.id}-btn`}
-                aria-selected={i === 0 ? "true" : "false"}
-                aria-controls={t.id}
-                data-tab-target={t.id}
-                class="example-tab setup-pm-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-              >
-                <Icon name={t.icon} class="setup-pm-tab-icon shrink-0" size="1.125em" />
-                {t.label}
-              </button>
-            ))
-          }
-        </div>
-        <div class="relative min-h-[8rem]">
-          {
-            SETUP_PACKAGE_MANAGERS.map((pm, i) => (
-              <div
-                id={`${uid}-tab-setup-enssdk-${pm}`}
-                role="tabpanel"
-                aria-labelledby={`${uid}-tab-setup-enssdk-${pm}-btn`}
-                data-tab-panel={`${uid}-tab-setup-enssdk-${pm}`}
-                class:list={["example-tab-panel pt-3", { hidden: i !== 0 }]}
-                hidden={i !== 0}
-              >
-                <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                  <Code code={enssdkSetupSnippets[pm]} lang="bash" />
-                </div>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
-      See the{" "}
-      <a href="/docs/integrate/integration-options/enssdk" class="underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]">enssdk docs</a>
-      {" "}for gql.tada plugin and tsconfig setup.
-    </p>
-  </div>
-
-  <!-- ── enskit panel ── -->
-  <div
-    id={`${uid}-int-enskit`}
-    data-integration-panel="enskit"
-    role="tabpanel"
-    aria-labelledby={`${uid}-int-tab-enskit`}
-    hidden
-    class="hidden"
-  >
-    <div class={stickyActionBarClass} style={stickyActionBarStyle}>
-      <button
-        type="button"
-        disabled
-        aria-disabled="true"
-        class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] opacity-50 cursor-not-allowed"
-      >
-        <StackBlitzLogo className="h-5 w-auto shrink-0" />
-        Run in StackBlitz
-      </button>
-      <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
-        Open an interactive playground to execute this example on our{" "}
-        <a
-          href={hostedInstanceDocUrl}
-          class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-        >
-          {hostedInstanceNamespace}
-        </a>{" "}
-        ENSNode instance.
-      </span>
-    </div>
-
-    <section class="border-b border-black/[0.05] px-4 pb-5 pt-6 dark:border-white/[0.06] md:px-5">
-      <div class="mb-2.5">
-        <span class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]">
-          TSX (React)
-        </span>
-      </div>
-      <div class="min-w-0 [&_.expressive-code]:rounded-lg">
-        <Code code={enskitSnippet} lang="tsx" />
-      </div>
-    </section>
-
-    <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-enskit-setup-heading`}>
-      <h3 id={`${uid}-enskit-setup-heading`} class="sr-only">enskit setup</h3>
-      <div class="omnigraph-tabs flex flex-col" data-tabs-root={`${uid}-enskit-setup`}>
-        <div
-          class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
-          role="tablist"
-          aria-label="Package manager"
-        >
-          {
-            enskitSetupTabs.map((t, i) => (
-              <button
-                type="button"
-                role="tab"
-                id={`${t.id}-btn`}
-                aria-selected={i === 0 ? "true" : "false"}
-                aria-controls={t.id}
-                data-tab-target={t.id}
-                class="example-tab setup-pm-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-              >
-                <Icon name={t.icon} class="setup-pm-tab-icon shrink-0" size="1.125em" />
-                {t.label}
-              </button>
-            ))
-          }
-        </div>
-        <div class="relative min-h-[8rem]">
-          {
-            SETUP_PACKAGE_MANAGERS.map((pm, i) => (
-              <div
-                id={`${uid}-tab-setup-enskit-${pm}`}
-                role="tabpanel"
-                aria-labelledby={`${uid}-tab-setup-enskit-${pm}-btn`}
-                data-tab-panel={`${uid}-tab-setup-enskit-${pm}`}
-                class:list={["example-tab-panel pt-3", { hidden: i !== 0 }]}
-                hidden={i !== 0}
-              >
-                <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                  <Code code={enskitSetupSnippets[pm]} lang="bash" />
-                </div>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
-      See the{" "}
-      <a href="/docs/integrate/integration-options/enskit" class="underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]">enskit docs</a>
-      {" "}for gql.tada plugin and provider setup.
-    </p>
-  </div>
+  <OmnigraphExampleSdkPanel
+    uid={uid}
+    integrationId="enskit"
+    codeBadge="TSX (React)"
+    snippet={enskitSnippet}
+    snippetLang="tsx"
+    setupTabsRoot={`${uid}-enskit`}
+    setupTabs={enskitSdkTabs}
+    setupPanels={enskitSdkPanels}
+    hasOutput={Boolean(responseJson)}
+    docsHref="/docs/integrate/integration-options/enskit"
+    docsLabel="enskit docs"
+    footerSuffix="for gql.tada plugin and provider setup."
+    hostedInstanceDocUrl={hostedInstanceDocUrl}
+    hostedInstanceNamespace={hostedInstanceNamespace}
+    tabButtonClass={setupPmTabClass}
+    tabIconClass="tab-icon"
+  />
 </div>
 
 <script define:vars={{ uid }}>
@@ -491,7 +308,10 @@ const stickyActionBarStyle =
 
     function activate(targetId) {
       for (const btn of buttons) {
-        btn.setAttribute("aria-selected", btn.getAttribute("data-tab-target") === targetId ? "true" : "false");
+        btn.setAttribute(
+          "aria-selected",
+          btn.getAttribute("data-tab-target") === targetId ? "true" : "false",
+        );
       }
       for (const panel of panels) {
         const on = panel.getAttribute("data-tab-panel") === targetId;
@@ -518,14 +338,30 @@ const stickyActionBarStyle =
     cursor: pointer;
   }
 
-  .example-tab {
+  .omnigraph-example :global(.example-tab) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    line-height: 1;
     color: var(--sl-color-gray-3);
     background: transparent;
     border: none;
     cursor: pointer;
   }
 
-  .example-tab:hover {
+  .omnigraph-example :global(.tab-label) {
+    line-height: 1;
+  }
+
+  .omnigraph-example :global(.tab-icon) {
+    opacity: 0.9;
+    flex-shrink: 0;
+    display: block;
+    width: 1.125em;
+    height: 1.125em;
+  }
+
+  .omnigraph-example :global(.example-tab:hover) {
     color: var(--sl-color-gray-1);
   }
 
@@ -534,12 +370,12 @@ const stickyActionBarStyle =
    * overlapping (and visually cancelling) the tablist container's border-b.
    * z-index: 1 ensures it renders above that border.
    */
-  .example-tab[aria-selected="true"] {
+  .omnigraph-example :global(.example-tab[aria-selected="true"]) {
     color: var(--sl-color-text-accent);
     z-index: 1;
   }
 
-  .example-tab[aria-selected="true"]::after {
+  .omnigraph-example :global(.example-tab[aria-selected="true"]::after) {
     content: "";
     position: absolute;
     inset-inline-start: 0;
@@ -550,19 +386,7 @@ const stickyActionBarStyle =
     border-radius: 2px 2px 0 0;
   }
 
-  .setup-pm-tab-icon {
-    opacity: 0.9;
-  }
-
-  .setup-pm-tab[aria-selected="true"] .setup-pm-tab-icon {
-    opacity: 1;
-  }
-
-  .integration-tab-icon {
-    opacity: 0.9;
-  }
-
-  .integration-tab[aria-selected="true"] .integration-tab-icon {
+  .omnigraph-example :global(.example-tab[aria-selected="true"] .tab-icon) {
     opacity: 1;
   }
 </style>
