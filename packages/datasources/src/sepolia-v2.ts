@@ -17,8 +17,8 @@ import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// The block number of the Sepolia ENSv2 deployment
-// which includes the creation of the updated `ENSRegistry` contract.
+// The block number of the Sepolia ENSv2 deployment,
+// corresponding to the earliest ENSv2 contracts in this datasource (`RootRegistry`/`ETHRegistry`).
 const SEPOLIA_ENSV2_DEPLOYMENT_BLOCK = 10893142;
 
 /**
