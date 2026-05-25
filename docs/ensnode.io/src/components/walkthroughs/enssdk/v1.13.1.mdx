@@ -21,7 +21,7 @@ npm init -y
 mkdir src
 ```
 
-## 2. Install `enssdk`
+## 2. Install enssdk
 
 We'll use [`tsx`](https://tsx.is/) to run TypeScript directly without a bundler.
 
@@ -34,7 +34,7 @@ npm install -D tsx typescript @types/node
 Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking the exact version keeps types and runtime in sync, and matched to the ENSNode version your hosted instance runs.
 :::
 
-## 3. Configure the `gql.tada` TypeScript plugin
+## 3. Configure the gql.tada TypeScript plugin
 
 `gql.tada` is what gives your `graphql(...)` query strings end-to-end type safety. It reads the Omnigraph schema from `enssdk` at typecheck time.
 

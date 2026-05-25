@@ -110,7 +110,7 @@ the Event responsible for its existence.
 | `ENSv2RegistryRegistration` |
 | `ENSv2RegistryReservation`  |
 
-## `events`
+## events
 
 | Column              | Type          | Nullable | Description                                                                                                                                                                                                                                                             |
 | ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -132,7 +132,7 @@ the Event responsible for its existence.
 
 **Indexes:** `selector`, `from`, `sender`, `timestamp`.
 
-## `domain_events`
+## domain_events
 
 Join table linking a `domains` record to its associated `events`.
 
@@ -143,7 +143,7 @@ Join table linking a `domains` record to its associated `events`.
 
 **Primary key:** `(domain_id, event_id)`.
 
-## `resolver_events`
+## resolver_events
 
 Join table linking a `resolvers` record to its associated `events`.
 
@@ -154,7 +154,7 @@ Join table linking a `resolvers` record to its associated `events`.
 
 **Primary key:** `(resolver_id, event_id)`.
 
-## `permissions_events`
+## permissions_events
 
 Join table linking a `permissions` record to its associated `events`.
 
@@ -165,7 +165,7 @@ Join table linking a `permissions` record to its associated `events`.
 
 **Primary key:** `(permissions_id, event_id)`.
 
-## `permissions_user_events`
+## permissions_user_events
 
 Join table linking a `permissions_users` record to its associated `events` — i.e. the per-`(contract, resource, user)` history of role grants, revokes, and bitmap mutations.
 
@@ -176,7 +176,7 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 **Primary key:** `(permissions_user_id, event_id)`.
 
-## `accounts`
+## accounts
 
 | Column | Type   | Nullable | Description                    |
 | ------ | ------ | -------- | ------------------------------ |
@@ -184,7 +184,7 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 **Relations:** has many `registrations` (as registrant), has many `domains`, has many `permissions_users`.
 
-## `registries`
+## registries
 
 For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`ENSv1VirtualRegistry`) whose sole parent is that domain. Children of the parent then point their `registry_id` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry, the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a single `ENSv2Registry` RootRegistry.
 
@@ -203,7 +203,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 
 **Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chain_id, address)`.
 
-## `domains`
+## domains
 
 The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domains.owner_id`.
 
@@ -233,7 +233,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 
 **Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 
-## `labels`
+## labels
 
 Internal rainbow table mapping a `label_hash` to its interpreted label string. Domains reference labels by hash; names are healed at resolution-time.
 
@@ -246,7 +246,7 @@ Internal rainbow table mapping a `label_hash` to its interpreted label string. D
 
 **Relations:** has many `domains`.
 
-## `registrations`
+## registrations
 
 A registration is keyed by `id`.
 
@@ -274,7 +274,7 @@ A registration is keyed by `id`.
 
 **Relations:** belongs to one `domains` record, has one `accounts` record (registrant), has one `accounts` record (unregistrant), has many `renewals`, has one `events` record.
 
-## `latest_registration_indexes`
+## latest_registration_indexes
 
 Tracks the highest `registration_index` seen for each domain. Used to sequence registrations.
 
@@ -285,7 +285,7 @@ Tracks the highest `registration_index` seen for each domain. Used to sequence r
 
 **Primary key:** `domain_id`.
 
-## `renewals`
+## renewals
 
 A renewal is keyed by `id` and belongs to a specific registration.
 
@@ -305,7 +305,7 @@ A renewal is keyed by `id` and belongs to a specific registration.
 
 **Relations:** belongs to one `registrations` record via `(domain_id, registration_index)`, has one `events` record via `(event_id)`.
 
-## `latest_renewal_indexes`
+## latest_renewal_indexes
 
 Tracks the highest `renewal_index` seen for each registration. Used to sequence renewals.
 
@@ -317,7 +317,7 @@ Tracks the highest `renewal_index` seen for each registration. Used to sequence 
 
 **Primary key:** `(domain_id, registration_index)`.
 
-## `permissions`
+## permissions
 
 An ENSv2 permissions contract instance.
 
@@ -331,7 +331,7 @@ An ENSv2 permissions contract instance.
 
 **Relations:** has many `permissions_resources`, has many `permissions_users`.
 
-## `permissions_resources`
+## permissions_resources
 
 A resource managed by a `permissions` contract.
 
@@ -346,7 +346,7 @@ A resource managed by a `permissions` contract.
 
 **Relations:** belongs to one `permissions` via `(chain_id, address)`.
 
-## `permissions_users`
+## permissions_users
 
 A user's role bitmap for a specific resource within a `permissions` contract.
 

@@ -19,7 +19,7 @@ cd my-ens-app
 npm install
 ```
 
-## 2. Install `enskit` and `enssdk`
+## 2. Install enskit and enssdk
 
 ```sh
 npm install enskit@1.13.1 enssdk@1.13.1
@@ -29,7 +29,7 @@ npm install enskit@1.13.1 enssdk@1.13.1
 Always pin **exact** versions (no `^` or `~`) of `enskit` and `enssdk`, and keep them on the same version. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking exact versions keeps types and runtime in sync, and matched to the ENSNode version your hosted instance runs.
 :::
 
-## 3. Configure the `gql.tada` TypeScript plugin
+## 3. Configure the gql.tada TypeScript plugin
 
 `gql.tada` is what gives your `graphql(...)` query strings end-to-end type safety. It reads the Omnigraph schema from `enssdk` at typecheck time.
 
@@ -62,7 +62,7 @@ If you're using VS Code, make sure your workspace is using the workspace TypeScr
 }
 ```
 
-## 4. Mount the `OmnigraphProvider`
+## 4. Mount the OmnigraphProvider
 
 `OmnigraphProvider` is what `useOmnigraphQuery` reads from. Construct an `EnsNodeClient`, extend it with the `omnigraph` module, and wrap your app:
 
