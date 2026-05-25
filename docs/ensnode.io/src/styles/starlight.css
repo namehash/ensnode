@@ -307,6 +307,13 @@ a[rel="prev"]:hover {
     background-color 0.2s ease-in-out;
 }
 
+#starlight__sidebar .starlight-sidebar-topics a,
+#starlight__sidebar .top-level > li > a,
+#starlight__sidebar .top-level > li > details > summary .group-label span,
+#starlight__sidebar a[aria-current="page"] {
+  font-weight: 500;
+}
+
 /* Only apply hover effects to: 
 * * non-selected items 
 * * expandable items (in all states), including nested ones
@@ -337,21 +344,35 @@ a[rel="prev"]:hover {
   }
 }
 
-a.starlight-sidebar-topics-current {
-  background-color: rgb(0, 128, 188) !important;
-  color: white !important;
+a.starlight-sidebar-topics-current,
+#starlight__sidebar a[aria-current="page"] {
+  background-color: rgba(0, 129, 189, 0.1) !important;
+  color: #0081bd !important;
   border-radius: 6px;
+  transform: none !important;
 }
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
-  transform: scale(1.1);
-  filter: brightness(1.2) contrast(1.1);
-  box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
-  border-radius: 4px;
-  transition:
-    transform 0.2s ease-in-out,
-    filter 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+  background-color: rgba(0, 129, 189, 0.15) !important;
+  border-color: transparent !important;
+  color: #0081bd !important;
+}
+
+/* Additional styles for hover states of the sidebar items */
+.starlight-sidebar-topics a:hover {
+  & .starlight-sidebar-topics-icon {
+    background-color: rgba(128, 128, 128, 0.1);
+    color: #9ca3af;
+    border-color: transparent;
+  }
+
+  color: var(--sl-color-white);
+}
+
+.starlight-sidebar-topics-icon {
+  color: #9ca3af;
+  border-color: transparent !important;
+  background-color: rgba(128, 128, 128, 0.1);
 }
 
 /* Make sure that all non-top-level sidebar items are:
