@@ -4,8 +4,6 @@ description: Why ENSNode is the best way to build ENSv2 apps.
 ---
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
-import LostENSNamesImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/LostENSNamesImage.astro";
-import ENSAdminImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/ENSAdminImage.astro";
 
 ENSNode is the full-stack ENSv2 development platform — a single, unified API over **both ENSv1 and ENSv2**, with first-class multichain support and the integration surfaces (React, TypeScript, GraphQL, Postgres) you need to ship.
 
@@ -69,17 +67,20 @@ Whatever your stack looks like, there's an ENSNode integration shaped for it:
 
 ## Why it matters beyond your app
 
-### Close critical ENS infrastructure gaps
+Indexed ENS data is critical infrastructure for ENS — and the legacy ENS Subgraph is fundamentally unsuitable for ENSv2. Closing that gap is required for many of ENS's most important apps, including the official ENS Manager App.
 
-Indexed ENS data is vital for the upcoming launch of ENSv2. The legacy ENS Subgraph is fundamentally unsuitable for ENSv2, and a replacement is critically required for many of ENS's most important apps — including the official ENS Manager App.
-
-<LostENSNamesImage styles="w-full h-auto" />
-
-### Strengthen the decentralization and "unstoppability" of ENS
-
-ENSNode removes the strict dependency on centralized offchain gateway servers whose downtime would otherwise shut down impacted multichain ENS names that are key to the future of ENSv2 — subnames of `base.eth`, `linea.eth`, tokenized DNS names like `.box`, and more.
-
-<ENSAdminImage styles="w-full h-auto rounded-2xl rotate-y-180" />
+<CardGrid>
+  <LinkCard
+    title="Key Limitations of the ENS Subgraph"
+    description="Why the Subgraph falls short today, and breaks with ENSv2."
+    href="/docs/integrate/ens-subgraph/key-limitations"
+  />
+  <LinkCard
+    title="ENS Protocol Acceleration"
+    description="How ENSNode strengthens the decentralization and unstoppability of ENS."
+    href="/docs/services/ensapi#ens-protocol-acceleration"
+  />
+</CardGrid>
 
 ## Next steps
 

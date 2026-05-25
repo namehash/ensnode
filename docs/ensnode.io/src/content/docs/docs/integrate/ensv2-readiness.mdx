@@ -12,22 +12,13 @@ import { LinkCard, Aside } from "@astrojs/starlight/components";
 
 ## Historical limitations of building on ENS
 
-Full access to ENS data formerly required two separate data fetching strategies working in parallel:
+Full access to ENS data formerly required two separate data fetching strategies working in parallel: **ENS resolution** (RPC calls with CCIP-Read, e.g. via `viem` or `wagmi`) and **indexed ENS data** (the ENS Subgraph). Neither system alone was complete — resolution is "close to the metal" and the Subgraph carries a long list of [Key Limitations](/docs/integrate/ens-subgraph/key-limitations). And **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
 
-1. **ENS resolution** — RPC calls with CCIP-read support for offchain data (e.g. via a popular package such as `viem` or `wagmi`) to perform forward or reverse ENS resolution.
-2. **Indexed ENS data** — the [ENS Subgraph](/docs/integrate/subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
-
-Neither system alone was complete.
-
-- ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpreting raw values returned by the ENS protocol.
-- The Subgraph gives you queryable indexed ENS data but has critical limitations, including:
-  - The Subgraph is single-chain.
-  - The Subgraph has no support for ENSv2's fundamental data model changes.
-  - The Subgraph cannot perform ENS resolutions.
-  - The Subgraph doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.
-  - The Subgraph exposes too many internal implementation detail complexities of ENS for app developers.
-
-In the past, apps building on ENS have had to live with these split fetching strategies, their limitations, and their downstream complexities. And we should note, **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
+<LinkCard
+  title="Key Limitations of the ENS Subgraph"
+  description="The full breakdown of what the Subgraph can't do — and why it breaks with ENSv2."
+  href="/docs/integrate/ens-subgraph/key-limitations"
+/>
 
 ## How ENSNode solves this
 

@@ -1,0 +1,128 @@
+---
+title: Key Limitations
+description: The ENS Subgraph was never designed to be a complete view of ENS. These are the limitations that break apps today — and that get worse the moment ENSv2 launches.
+sidebar:
+  order: 2
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import LostENSNamesImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/LostENSNamesImage.astro";
+
+The ENS Subgraph was never designed to be a complete view of ENS. It indexes a single chain's onchain events and exposes them largely as-is — leaving every app that builds on it to work around a long list of gaps. Many apps don't work around them correctly, and the result is real, shipping bugs in some of the most-used software in the ecosystem.
+
+This page catalogs those limitations. Each one is a place where the burden of getting ENS right is pushed onto app developers — and each one gets worse with ENSv2.
+
+:::tip[There is a path forward]
+The [ENS Omnigraph API](/docs/integrate/omnigraph) is built to close every gap on this page: one unified, typed API over ENSv1 and ENSv2, multichain by default, with [ENS Protocol Acceleration](/docs/services/ensapi#ens-protocol-acceleration) for resolution. The limitations below explain why that matters.
+:::
+
+## Two systems, neither complete
+
+Historically, full access to ENS data required two separate data-fetching strategies working in parallel:
+
+1. **ENS resolution** — RPC calls with CCIP-Read support for offchain data (e.g. via `viem` or `wagmi`) to perform forward or reverse resolution.
+2. **Indexed ENS data** — the ENS Subgraph, for discovering names owned by an address and all other ENS state outside of resolution.
+
+Neither system alone is complete. Resolution gives you resolver records but no access to the rest of ENS state, and it is painfully "close to the metal." The Subgraph gives you queryable indexed data but cannot resolve names and carries the limitations below. Apps have had to live with the split, its limitations, and its downstream complexity — and **with ENSv2, the complexity of ENS's onchain state meaningfully increases.**
+
+## No ENS resolution — and apps that fake it are broken
+
+The Subgraph does not perform ENS resolution. It has no concept of the ENS Universal Resolver, CCIP-Read, or ENSIP-10 wildcard resolution. Despite this, developers routinely reach for the Subgraph to resolve names — because it's the indexed data source already in front of them — which **violates the ENS protocol** and produces incorrect results.
+
+This isn't hypothetical. It happens in widely-used software:
+
+- **[Stamp](https://github.com/snapshot-labs/stamp) by [Snapshot Labs](https://snapshot.box/)** powers the avatars across [Snapshot](https://snapshot.box/), among the most-used DAO infrastructure in the ecosystem. It resolves addresses [directly against the Subgraph](https://github.com/snapshot-labs/stamp/blob/a6d341a65159a1e76d1dc889156c4676e54eea14/src/addressResolvers/ens.ts#L87-L94).
+- **[ethVM](https://www.ethvm.com/) by [MyEtherWallet](https://www.myetherwallet.com/)** resolves names [via a generated Subgraph query](https://github.com/EthVM/EthVM/blob/2ad42adc544074ed8cd6c2cba6a7fa0ff4ffc48b/v2/src/core/composables/ResolveName/ensResolveName.generated.ts#L21-L30).
+- **[Ethereum Comments Protocol](https://github.com/ecp-eth/comments-monorepo)** resolves names [against an indexer query](https://github.com/ecp-eth/comments-monorepo/blob/c301d76fa56b6b807f135c98273ac9eb5ddebe95/apps/indexer/src/services/resolvers/ens-by-query-resolver.ts) rather than the resolution protocol.
+
+Each of these "footguns" produces results that diverge from what the ENS protocol actually says a name resolves to. The Omnigraph API removes the footgun by performing protocol-correct resolution for you — including the CCIP-Read offchain lookups — so the correct result is the default.
+
+## It forces you to stitch together multiple APIs
+
+Because the Subgraph can't resolve names, any app that needs both indexed data _and_ resolution has to run two integrations side by side: the Subgraph for indexed state, and a resolution library for records. You reconcile their differences, their failure modes, and their data models yourself. Developers shouldn't have to care about these implementation details of the ENS protocol — getting "all the ENS data I need," whether ENSv1, ENSv2, indexed, or resolved, should come from a single unified API.
+
+## ENSv1 only — blind to ENSv2
+
+The Subgraph's data model has no concept of ENSv2. The moment ENSv2 launches (Summer 2026), apps still reading the Subgraph are looking at a stale, partial view of ENS — missing the new Namegraph data model entirely. There is no upgrade path: the schema was never designed for it.
+
+## Single-chain only — misses most names
+
+The Subgraph indexes a single chain, so it never sees Basenames (`.base.eth`), Lineanames (`.linea.eth`), or 3DNS names (`.box`). A large and growing majority of ENS names already live off of mainnet and are simply invisible to it.
+
+<LostENSNamesImage styles="w-full h-auto" />
+
+## No multichain primary names (ENSIP-19)
+
+Beyond being single-chain, the Subgraph has no concept of [ENSIP-19](https://docs.ens.domains/ensip/19) multichain primary names. Even an app willing to query several per-chain Subgraphs cannot reconstruct a name's primary-name configuration across chains from Subgraph data.
+
+## No concept of the effective resolver (ENSIP-10)
+
+The Subgraph records the resolver _assigned_ to a domain but has no understanding of [ENSIP-10](https://docs.ens.domains/ensip/10) wildcard resolution, and therefore no concept of the _effective_ resolver — the resolver that actually answers for a name via a parent's wildcard resolver. Apps that read the assigned resolver from the Subgraph and assume it's the effective one get the wrong answer for any name that relies on wildcard resolution.
+
+## Unnormalized names (ENSIP-15 not applied)
+
+The Subgraph does not apply [ENSIP-15](https://docs.ens.domains/ensip/15) name normalization. It returns label and name values as indexed, including unnormalized ones, with no signal about whether a value is normalized. Every consuming app has to implement normalization correctly and consistently — and the ones that don't display or match names incorrectly. ENSNode can [replace unnormalized labels](/docs/integrate/ens-subgraph/backwards-compatibility#never-normalize-labels-returned-by-ensnode) for safer handling.
+
+## Unstable domain identification
+
+Labels in the Subgraph are not stable identifiers. A label that is "unknown" today can become "known" later (as label-healing coverage grows), and the set of normalizable names can change over time. Apps that key on label or name strings will see identifiers shift underneath them. The only stable identifier is the `node` (the namehash of the name) — but the Subgraph schema surfaces it as the `id` field, and getting this right requires careful, documented handling. See [Use the node as the stable identifier](/docs/integrate/ens-subgraph/backwards-compatibility#use-the-node-as-the-stable-identifier).
+
+## Effective ownership is hard to determine
+
+The Subgraph schema spreads ownership across multiple fields — `owner`, `registrant`, `wrappedOwner` — reflecting raw protocol state (the Registry, the `.eth` Registrar, and the Name Wrapper). Determining the _effective_ owner of a domain requires understanding the interplay of all of them. This is exactly the kind of protocol-implementation detail app developers are forced to learn and re-implement, with plenty of room to get it wrong.
+
+## Missing all offchain ENS names
+
+The Subgraph indexes onchain events only, so it has no knowledge of offchain ENS names. A meaningful and growing slice of ENS lives offchain and is entirely absent from Subgraph data.
+
+## Raw "bare-metal" values push the decoding burden onto you
+
+The Subgraph exposes raw values straight from the ENS protocol, with none of the interpretation that apps actually need:
+
+- **Address records** may be for non-EVM chains and need chain-specific decoding before they're usable.
+- **Contenthash** values are encoded and need decoding to become a usable URL.
+- **Avatar records** are frequently NFT references or `ipfs://` / `ar://` URIs — not something a browser `<img>` can render without resolution.
+- **Text records** are represented by users in many inconsistent ways. Consider the many variations in how someone might set a Twitter/X handle — both the record key and the value vary widely.
+
+Every bit of this interpretation, decoding, and normalization is left to the app developer. The result is more bugs in ENS integrations across the ecosystem, which damages the network effects and growth of ENS.
+
+## It can't cleanly power NFT-reference → avatar use cases
+
+A common and important flow is taking an NFT reference as input and mapping it: **NFT Ref → Domain → Name → Avatar text record → Avatar image.** This powers services like the ENS Metadata Service, which provides NFT metadata for ENS names using standardized protocols adopted by platforms such as OpenSea, Rarible, Grails, and ENS Vision. The Subgraph's raw, resolution-free data model makes this flow far harder than it should be.
+
+## Unhealed names degrade developer and user experience
+
+The Subgraph (and any data-level-compatible indexer) contains a large volume of unhealed names — names whose labels are only known as labelhashes (e.g. `[abcd…].eth`). These complicate both the developer experience and the UX of every app built on top, which must decide how to display and handle them.
+
+ENSNode pairs with [ENSRainbow](https://ensrainbow.io/) to heal a large and growing share of these labels. {/* TODO: cite current ENSRainbow name-healing coverage metrics from ensrainbow.io; reach out to Krzysztof for updated figures (current graphic is over a year old and understates coverage). */}
+
+## Thick-client lock-in
+
+Achieving common ENS query operations correctly against the Subgraph requires meaningful additional logic. In practice that logic lives in "thick client" libraries — most notably `ensjs`, which embeds special-case handling for working with the Subgraph (e.g. decoding names, reconstructing histories, assembling the queries for names owned by an address). A thin client that simply wraps the GraphQL API can't reproduce these behaviors. And because such thick clients are written for a single language (`ensjs` is TypeScript only), developers building on ENS in any other language don't get them at all.
+
+## No type-safe API client
+
+The Subgraph's auto-generated GraphQL API ships without a first-class, type-safe client. Developers are left hand-writing queries and types, with no compile-time guarantees that a query matches the schema or that responses are shaped as expected.
+
+## Operational gaps
+
+Beyond the data-model limitations, the Subgraph's auto-generated GraphQL API leaves common operational needs underserved:
+
+- **Pagination** is awkward and easy to implement incorrectly at scale.
+- **Caching** has no first-class story for ENS-shaped data.
+- **Indexing status** is hard to reason about — there's no clear, app-friendly signal for how far behind realtime the data is (e.g. worst-case distance from the chain head).
+- **Joins** in the auto-generated API perform certain multi-entity operations in ways that don't match what apps actually need, forcing client-side stitching.
+
+## How ENSNode closes these gaps
+
+ENSNode was built to address exactly the limitations above. Beyond multichain indexing and protocol-correct resolution, ENSIndexer activates capabilities the raw Subgraph behavior lacks — **healing reverse addresses**, **indexing additional resolver records**, and **replacing unnormalized labels** — and surfaces them through the unified, typed [ENS Omnigraph API](/docs/integrate/omnigraph).
+
+### Why it matters beyond your app
+
+Indexed ENS data is vital for the upcoming launch of ENSv2. The legacy ENS Subgraph is fundamentally unsuitable for ENSv2, and a replacement is critically required for many of ENS's most important apps — including the official ENS Manager App. Closing these gaps isn't a nice-to-have for individual integrations; it's critical ENS infrastructure.
+
+<LinkCard
+  title="ENS Omnigraph API"
+  description="ENSv2-ready unified GraphQL API over both ENSv1 and ENSv2 — start here for new integrations."
+  href="/docs/integrate/omnigraph"
+/>
