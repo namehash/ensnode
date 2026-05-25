@@ -2,7 +2,7 @@ import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 import { Fragment } from "react";
 
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
-import ensNode from "../../assets/Illustration.svg";
+import ensNode from "../../assets/ENSNodeBannerLight.svg";
 import { ENSNodeSchema } from "../atoms/ENSNodeSchema.tsx";
 import { ENSProfile } from "../atoms/ENSProfile.tsx";
 import { ENSProfileMobile } from "../atoms/ENSProfileMobile.tsx";
