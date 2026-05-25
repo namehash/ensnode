@@ -7,6 +7,10 @@ sidebar:
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
+:::caution[`unigraph` plugin required]
+Using the Unigraph SQL requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
+:::
+
 Fetch a Domain by its canonical name. Because `canonical_name` is materialized across both ENSv1 and ENSv2, the same lookup works regardless of protocol version. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <Tabs syncKey="unigraph-client">
