@@ -31,9 +31,12 @@ npm install -D tsx typescript @types/node
 ```
 
 <Aside type="caution" title="Pin exact versions">
-Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking the exact version keeps types and runtime in sync, and matched to the ENSNode version your hosted instance runs.
+  Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is
+  bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a
+  minor or patch bump can change the schema and silently drift your generated types away from your
+  queries. Locking the exact version keeps types and runtime in sync, and matched to the ENSNode
+  version your hosted instance runs.
 </Aside>
-
 
 ## 3. Configure the `gql.tada` TypeScript plugin
 
@@ -104,8 +107,12 @@ const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
 
 Add your first query — look up the `eth` Domain and print its owner and protocol version.
 
-<Aside type="tip" title="InterpretedName" >
-An **InterpretedName** is a Name whose labels are each either normalized or represented as an [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a known-safe string as one; for user input, validate first. See [Interpreted Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
+<Aside type="tip" title="InterpretedName">
+  An **InterpretedName** is a Name whose labels are each either normalized or represented as an
+  [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the
+  canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a
+  known-safe string as one; for user input, validate first. See [Interpreted
+  Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
 </Aside>
 
 ```ts title="src/index.ts"

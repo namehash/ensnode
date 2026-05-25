@@ -36,6 +36,17 @@
   --color-gray-800: #2a3c43;
   --color-gray-900: #1a2c33;
   --color-gray-950: var(--color-primary-dark);
+
+  /* Sidebar active/hover colors */
+  --sidebar-active-bg: rgba(0, 129, 189, 0.1);
+  --sidebar-active-color: #0081bd;
+  --sidebar-icon-bg: rgba(128, 128, 128, 0.1);
+  --sidebar-icon-color: #9ca3af;
+
+  /* Aside colors */
+  --aside-tip-color: #f43f5e;
+  --aside-caution-color: #f97316;
+  --aside-note-color: #3b82f6;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -346,22 +357,22 @@ a[rel="prev"]:hover {
 
 a.starlight-sidebar-topics-current,
 #starlight__sidebar a[aria-current="page"] {
-  background-color: rgba(0, 129, 189, 0.1) !important;
-  color: #0081bd !important;
+  background-color: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-color) !important;
   border-radius: 6px;
   transform: none !important;
 }
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
   background-color: rgba(0, 129, 189, 0.15) !important;
-  color: #0081bd !important;
+  color: var(--sidebar-active-color) !important;
 }
 
 /* Additional styles for hover states of the sidebar items */
 .starlight-sidebar-topics a:hover {
   & .starlight-sidebar-topics-icon {
-    background-color: rgba(128, 128, 128, 0.1);
-    color: #9ca3af;
+    background-color: var(--sidebar-icon-bg);
+    color: var(--sidebar-icon-color);
   }
 
   color: var(--sl-color-white);
@@ -387,7 +398,7 @@ ul.top-level details details > summary .group-label span {
 }
 
 /* Align "tablist" component to the left 
- * and remove the the default full-witdh underline
+ * and remove the default full-width underline
  */
 starlight-tabs ul[role="tablist"] {
   padding-left: 0;
@@ -434,46 +445,46 @@ starlight-tabs ul[role="tablist"] {
 }
 
 .starlight-aside--tip {
-  border: 1px solid #f43f5e33;
-  background-color: #f43f5e1a;
+  border: 1px solid color-mix(in srgb, var(--aside-tip-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-tip-color) 10%, transparent);
 
   & .starlight-aside__icon {
-    color: #f43f5e;
+    color: var(--aside-tip-color);
   }
 
   & a {
-    color: #f43f5e;
+    color: var(--aside-tip-color);
   }
 }
 
 .starlight-aside--caution {
-  border: 1px solid #f9731633;
-  background-color: #f973161a;
+  border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-caution-color) 10%, transparent);
 
   & .starlight-aside__icon {
-    color: #f97316;
+    color: var(--aside-caution-color);
   }
 
   & a {
-    color: #f97316;
+    color: var(--aside-caution-color);
   }
 
   & pre {
     background-color: rgba(103, 61, 73, 0.05);
-    border: 1px solid #f9731633;
+    border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
   }
 }
 
 .starlight-aside--note {
-  border: 1px solid #3b82f633;
-  background-color: #3b82f61a;
+  border: 1px solid color-mix(in srgb, var(--aside-note-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-note-color) 10%, transparent);
 
   & .starlight-aside__icon {
-    color: #3b82f6;
+    color: var(--aside-note-color);
   }
 
   & a {
-    color: #3b82f6;
+    color: var(--aside-note-color);
   }
 }
 
@@ -494,7 +505,7 @@ starlight-tabs ul[role="tablist"] {
   padding: 6px;
   border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.05);
-  color: #9ca3af;
+  color: var(--sidebar-icon-color);
   border: none !important;
   box-sizing: border-box;
 }
