@@ -379,6 +379,10 @@ ul.top-level details details > summary .group-label span {
 starlight-tabs ul[role="tablist"] {
   padding-left: 0;
   border-bottom: none;
+
+  & a[role="tab"] {
+    padding-bottom: 8px;
+  }
 }
 
 /* Add custom styling to aside tip/caution/note components */
