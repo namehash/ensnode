@@ -14,7 +14,7 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    canonical { name { beautified } }
+    name
     owner { id address }
   }
 `);
@@ -25,7 +25,7 @@ const DomainQuery = graphql(
   query DomainBy($by: DomainIdInput!, $first: Int!, $after: String) {
     domain(by: $by) {
       ...DomainFragment
-      parent { id canonical { name { beautified } } }
+      parent { id name }
       subdomains(first: $first, after: $after) {
         edges {
           node {
@@ -54,7 +54,7 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
     <li>
       {/* link by DomainId so the exact Domain (and its ENSv1/ENSv2 variant) is preserved */}
       <Link to={`/domain/id/${domain.id}`}>
-        {domain.canonical?.name.beautified ?? <em>non-canonical domain</em>}
+        {domain.name ? beautifyInterpretedName(domain.name) : <em>non-canonical domain</em>}
       </Link>{" "}
       ({domain.__typename})
       <span>
@@ -90,7 +90,7 @@ function RenderDomain({ by }: { by: DomainBy }) {
 
   return (
     <div>
-      <h2>{domain.canonical?.name.beautified ?? domain.id}</h2>
+      <h2>{domain.name ? beautifyInterpretedName(domain.name) : domain.id}</h2>
       <p>
         Owner:{" "}
         {domain.owner ? (
@@ -108,8 +108,9 @@ function RenderDomain({ by }: { by: DomainBy }) {
         // parent has no Canonical Name
         <Link to={`/domain/id/${data.domain.parent.id}`}>
           ←{" "}
-          {data.domain.parent.canonical?.name.beautified ??
-            `non-canonical parent domain with id '${data.domain.parent.id}'`}
+          {data.domain.parent.name
+            ? beautifyInterpretedName(data.domain.parent.name)
+            : `non-canonical parent domain with id '${data.domain.parent.id}'`}
         </Link>
       )}
 

@@ -10,7 +10,7 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
-    "enssdk": "workspace:*"
+    "enssdk": "1.13.1"
   },
   "devDependencies": {
     "@types/node": "catalog:",
