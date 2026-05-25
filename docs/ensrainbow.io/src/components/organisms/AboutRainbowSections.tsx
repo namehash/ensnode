@@ -95,7 +95,7 @@ const rainbowSections: AboutRainbowProps[] = [
         >
           ENSNode
         </a>
-        , the new multichain indexer for ENSv2.
+        , the full-stack development platform for ENSv2.
       </>
     ),
     descriptionExternalElements: (
