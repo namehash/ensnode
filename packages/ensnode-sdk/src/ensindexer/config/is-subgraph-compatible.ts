@@ -19,13 +19,18 @@ export function isSubgraphCompatible(
   const isSubgraphLabelSet =
     config.clientLabelSet.labelSetId === "subgraph" && config.clientLabelSet.labelSetVersion === 0;
 
+  const isEmptyLabelSet = config.clientLabelSet.labelSetId === "discovery-a";
+
   const isEnsTestEnvLabelSet =
     config.clientLabelSet.labelSetId === "ens-test-env" &&
     config.clientLabelSet.labelSetVersion === 0;
 
-  // config should be considered subgraph-compatible if in ens-test-env namespace with ens-test-env labelset
   const labelSetIsSubgraphCompatible =
-    isSubgraphLabelSet || (config.namespace === ENSNamespaceIds.EnsTestEnv && isEnsTestEnvLabelSet);
+    isSubgraphLabelSet ||
+    // config should be considered subgraph-compatible if with `discovery-a` labelset
+    isEmptyLabelSet ||
+    // config should be considered subgraph-compatible if in ens-test-env namespace with ens-test-env labelset
+    (config.namespace === ENSNamespaceIds.EnsTestEnv && isEnsTestEnvLabelSet);
 
   return onlySubgraphPluginActivated && labelSetIsSubgraphCompatible;
 }
