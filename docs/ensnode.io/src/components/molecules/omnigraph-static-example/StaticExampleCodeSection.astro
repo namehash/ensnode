@@ -4,18 +4,15 @@ import { Code } from "@astrojs/starlight/components";
 interface Props {
   badge: string;
   headingId?: string;
-  bordered?: boolean;
   code: string;
   lang: string;
 }
 
-const { badge, headingId, bordered = true, code, lang } = Astro.props;
+const { badge, headingId, code, lang } = Astro.props;
 
 const badgeClass =
   "inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]";
-const sectionClass = bordered
-  ? "border-b border-black/[0.05] px-4 pb-5 pt-6 dark:border-white/[0.06] md:px-5"
-  : "px-4 pb-5 pt-6 md:px-5";
+const sectionClass = "border-b border-black/[0.05] px-4 pb-5 pt-3 dark:border-white/[0.06] md:px-5";
 ---
 
 <section class={sectionClass} {...headingId ? { "aria-labelledby": headingId } : {}}>

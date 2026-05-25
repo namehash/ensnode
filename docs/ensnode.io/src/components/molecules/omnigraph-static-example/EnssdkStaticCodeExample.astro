@@ -9,6 +9,7 @@ import { buildSdkSetupTabs } from "./build-sdk-setup-tabs";
 import { exampleTabClass, staticExampleFooterClass } from "./example-tab-styles";
 
 interface Props {
+  exampleId: string;
   uid: string;
   snippet: string;
   setupSnippets: Record<SetupPackageManager, string>;
@@ -17,8 +18,15 @@ interface Props {
   hostedInstanceNamespace: ENSNamespaceId;
 }
 
-const { uid, snippet, setupSnippets, responseJson, hostedInstanceDocUrl, hostedInstanceNamespace } =
-  Astro.props;
+const {
+  exampleId,
+  uid,
+  snippet,
+  setupSnippets,
+  responseJson,
+  hostedInstanceDocUrl,
+  hostedInstanceNamespace,
+} = Astro.props;
 
 const { tabs, panels } = buildSdkSetupTabs({
   uid,
@@ -36,6 +44,7 @@ const outputNote =
   variant="stackblitz"
   hostedInstanceDocUrl={hostedInstanceDocUrl}
   hostedInstanceNamespace={hostedInstanceNamespace}
+  staticExampleId={exampleId}
 />
 
 <StaticExampleCodeSection badge="TypeScript" code={snippet} lang="typescript" />

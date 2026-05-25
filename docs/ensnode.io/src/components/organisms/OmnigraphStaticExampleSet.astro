@@ -6,7 +6,7 @@ import StaticExampleCard from "@components/molecules/omnigraph-static-example/St
 import EnssdkStaticCodeExample from "@components/molecules/omnigraph-static-example/EnssdkStaticCodeExample.astro";
 import EnskitStaticCodeExample from "@components/molecules/omnigraph-static-example/EnskitStaticCodeExample.astro";
 import GraphqlStaticQueryExample from "@components/molecules/omnigraph-static-example/GraphqlStaticQueryExample.astro";
-import { integrationTabClass } from "@components/molecules/omnigraph-static-example/example-tab-styles";
+import { exampleTabClass } from "@components/molecules/omnigraph-static-example/example-tab-styles";
 import { resolveOmnigraphStaticExample } from "@lib/omnigraph-examples/resolve-static-example";
 
 interface Props {
@@ -44,7 +44,7 @@ const integrationTabs = [
           aria-selected={i === 0 ? "true" : "false"}
           aria-controls={`${data.uid}-int-${tab.panel}`}
           data-integration-tab={tab.panel}
-          class={integrationTabClass}>
+          class={exampleTabClass}>
           <Icon name={tab.icon} class="tab-icon" size="1.125em" />
           <span class="tab-label">{tab.label}</span>
         </button>
@@ -79,6 +79,7 @@ const integrationTabs = [
     class="hidden"
     hidden>
     <EnssdkStaticCodeExample
+      exampleId={data.exampleId}
       uid={data.uid}
       snippet={data.enssdkSnippet}
       setupSnippets={data.enssdkSetupSnippets}
@@ -96,6 +97,7 @@ const integrationTabs = [
     class="hidden"
     hidden>
     <EnskitStaticCodeExample
+      exampleId={data.exampleId}
       uid={data.uid}
       snippet={data.enskitSnippet}
       setupSnippets={data.enskitSetupSnippets}

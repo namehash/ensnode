@@ -11,14 +11,16 @@ interface Props {
   adminUrl?: string;
   hostedInstanceDocUrl: string;
   hostedInstanceNamespace: ENSNamespaceId;
+  staticExampleId?: string;
 }
 
-const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceNamespace } = Astro.props;
+const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceNamespace, staticExampleId } =
+  Astro.props;
 
 const actionBarClass =
-  "flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)] px-4 py-3 dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)] md:px-5";
+  "flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)] px-4 py-4 dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)] md:px-5";
 const actionButtonClass =
-  "inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)]";
+  "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]";
 ---
 
 <div class={actionBarClass}>
@@ -32,6 +34,14 @@ const actionButtonClass =
         <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
         Run in ENSAdmin
       </a>
+    ) : staticExampleId ? (
+      <button
+        type="button"
+        class={actionButtonClass}
+        data-static-example-id={staticExampleId}>
+        <StackBlitzLogo className="h-5 w-auto shrink-0" />
+        Run in StackBlitz
+      </button>
     ) : (
       <button
         type="button"

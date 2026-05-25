@@ -13,6 +13,12 @@ const { uid, withIntegrationTabs = false } = Astro.props;
   <slot />
 </div>
 
+<script>
+  import { initStaticExampleStackBlitzButtons } from "@lib/playground/initStaticExampleStackBlitzButtons";
+
+  initStaticExampleStackBlitzButtons();
+</script>
+
 <script define:vars={{ uid, withIntegrationTabs }}>
   const root = document.querySelector(`[data-static-example="${uid}"]`);
   if (!root) return;
