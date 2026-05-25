@@ -354,7 +354,6 @@ a.starlight-sidebar-topics-current,
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
   background-color: rgba(0, 129, 189, 0.15) !important;
-  border-color: transparent !important;
   color: #0081bd !important;
 }
 
@@ -363,16 +362,9 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
   & .starlight-sidebar-topics-icon {
     background-color: rgba(128, 128, 128, 0.1);
     color: #9ca3af;
-    border-color: transparent;
   }
 
   color: var(--sl-color-white);
-}
-
-.starlight-sidebar-topics-icon {
-  color: #9ca3af;
-  border-color: transparent !important;
-  background-color: rgba(128, 128, 128, 0.1);
 }
 
 /* Make sure that all non-top-level sidebar items are:
@@ -483,4 +475,53 @@ starlight-tabs ul[role="tablist"] {
   & a {
     color: #3b82f6;
   }
+}
+
+/* Custom icon logic for specific sidebar items based on URL - 
+ * hack since Starlight doesn't allow overriding icons directly. */
+
+.starlight-sidebar-topics-icon svg {
+  display: none; /* Hide the default SVG icon */
+}
+
+/* Default sidebar icon (parent) */
+.starlight-sidebar-topics-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #9ca3af;
+  border: none !important;
+  box-sizing: border-box;
+}
+
+/* The custom icon injection*/
+.starlight-sidebar-topics-icon::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--sidebar-icon) center / contain no-repeat;
+  mask: var(--sidebar-icon) center / contain no-repeat;
+}
+
+.starlight-sidebar-topics a[href*="/integrate"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/integrate-with-ensv2.svg");
+}
+.starlight-sidebar-topics a[href*="/hosted-instances"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/hosted-instances.svg");
+}
+.starlight-sidebar-topics a[href*="/self-host"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/self-host-ensnode.svg");
+}
+.starlight-sidebar-topics a[href*="/services"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/ensnode-services.svg");
+}
+.starlight-sidebar-topics a[href*="/reference"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/reference.svg");
 }
