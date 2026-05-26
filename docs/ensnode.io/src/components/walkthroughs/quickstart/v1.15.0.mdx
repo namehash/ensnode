@@ -1,6 +1,6 @@
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
 import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
-import OmnigraphAPIExample from "@components/organisms/OmnigraphAPIExample.astro";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
 ## What is ENSv2?
 
@@ -172,7 +172,12 @@ export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
 
 The ENS Omnigraph API is a GraphQL API following the Relay specification, so you get built-in support for efficient infinite pagination and idiomatic access to all of the ENS protocol within a _unified_ ENSv1 + ENSv2 datamodel.
 
-<OmnigraphAPIExample id="domains-by-address" hideDescription hideBackToExamples />
+<OmnigraphStaticExampleSet
+  id="domains-by-address"
+  integrations={["omnigraph", "curl"]}
+  hideDescription
+  hideBackToExamples
+/>
 
 <LinkCard
   title="Full ENS Omnigraph GraphQL API Documentation"

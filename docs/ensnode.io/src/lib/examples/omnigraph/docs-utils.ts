@@ -3,18 +3,6 @@ export function stringifyJsonForDocs(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-export function getNiceHeightForCodeSnippet(snippet: string): number {
-  const linesCount = snippet.split("\n").length;
-  const lineHeight = 18;
-  const headerHeight = 38;
-  const footerHeight = 32;
-  const height = linesCount * lineHeight + headerHeight + footerHeight;
-
-  const terminalHeightPercentage = 0.35;
-
-  return Math.ceil(height / (1 - terminalHeightPercentage));
-}
-
 /**
  * Build a curl example that POSTs the same JSON body as enssdk's Omnigraph module
  * (`POST {baseUrl}/api/omnigraph` with `{ query, variables }`).
@@ -46,7 +34,7 @@ export function buildOmnigraphCurlExample(params: {
 }
 
 /** Docs path for the hosted ENSNode instances catalog. */
-export const HOSTED_INSTANCES_DOC_PATH = "/docs/hosted-instances" as const;
+const HOSTED_INSTANCES_DOC_PATH = "/docs/hosted-instances" as const;
 
 /** Link to a hosted instance section (Starlight heading anchor on the hosted instances page). */
 export function getHostedEnsNodeInstanceDocUrl(headingAnchor: string): string {

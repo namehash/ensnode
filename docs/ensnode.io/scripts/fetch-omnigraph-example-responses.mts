@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { ACTIVE_OMNIGRAPH_VERSION } from "../src/data/omnigraph-examples/active.ts";
 import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
-import { ENSNODE_URL } from "../src/lib/playground/constants.ts";
+import { ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
 
 function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);

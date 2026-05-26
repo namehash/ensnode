@@ -56,11 +56,15 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "enssdk": "workspace:*",
+    "enskit": "workspace:*",
     "prettier": "catalog:",
     "prettier-plugin-astro": "catalog:",
     "tsx": "^4.19.3",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

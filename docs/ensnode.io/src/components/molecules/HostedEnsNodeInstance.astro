@@ -47,14 +47,14 @@ const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
       <td set:html={plugins} />
     </tr>
     <tr>
-      <td>ENS APIs</td>
+      <td>ENSApi Services</td>
       <td>
         <dl>
-          <dt>ENS Omnigraph API</dt>
+          <dt>ENS Omnigraph API <slot name="ens-omnigraph-api-icon" /></dt>
           <dd class="pl-0"><slot name="ens-omnigraph-api" /></dd>
-          <dt>ENS Protocol Acceleration</dt>
+          <dt>ENS Protocol Acceleration <slot name="ens-protocol-acceleration-icon" /></dt>
           <dd class="pl-0"><slot name="ens-protocol-acceleration" /></dd>
-          <dt>ENS Subgraph API</dt>
+          <dt>ENS Subgraph API <slot name="ens-subgraph-api-icon" /></dt>
           <dd class="pl-0"><slot name="ens-subgraph-api" /></dd>
         </dl>
       </td>

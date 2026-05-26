@@ -1,7 +1,6 @@
-import { loadEnssdkExampleProject } from "src/lib/playground/loadEnssdkExampleProject";
-import { getNiceHeightForCodeSnippet } from "src/lib/playground/utils";
-
-import CodePlayground from "../molecules/CodePlayground";
+import CodePlayground from "@components/molecules/CodePlayground";
+import { getNiceHeightForCodeSnippet } from "@lib/examples/stackblitz/interactive/embedHeight";
+import { loadEnssdkExampleProject } from "@lib/examples/stackblitz/interactive/loadEnssdkExampleProject";
 
 type EnssdkExampleInteractivePlaygroundProps = {
   height?: number;
