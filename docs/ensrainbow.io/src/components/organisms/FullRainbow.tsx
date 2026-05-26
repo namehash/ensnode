@@ -17,7 +17,7 @@ export default function FullRainbow() {
         {
           label: <>ENS Subgraph</>,
           value: 11,
-          color: "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 80%)",
+          color: "linear-gradient(90deg, #EA2F86 0%, #CA01FD 4.5%, #0B10FE 154.5%)",
         },
         {
           label: (
