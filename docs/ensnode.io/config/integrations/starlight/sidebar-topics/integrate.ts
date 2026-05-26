@@ -26,7 +26,15 @@ export const integrateSidebarTopic = {
       items: [
         {
           label: "Overview",
-          link: "/docs/integrate/subgraph",
+          link: "/docs/integrate/ens-subgraph",
+        },
+        {
+          label: "Key Limitations",
+          link: "/docs/integrate/ens-subgraph/key-limitations",
+        },
+        {
+          label: "Backwards Compatibility",
+          link: "/docs/integrate/ens-subgraph/backwards-compatibility",
         },
         {
           label: "Examples",
@@ -34,29 +42,21 @@ export const integrateSidebarTopic = {
           items: [
             {
               label: "Overview",
-              link: "/docs/integrate/subgraph/examples",
+              link: "/docs/integrate/ens-subgraph/examples",
             },
             {
               label: "With ENSjs",
-              link: "/docs/integrate/subgraph/examples/with-ensjs",
+              link: "/docs/integrate/ens-subgraph/examples/with-ensjs",
             },
             {
               label: "With Viem",
-              link: "/docs/integrate/subgraph/examples/with-viem",
+              link: "/docs/integrate/ens-subgraph/examples/with-viem",
             },
           ],
         },
         {
           label: "Schema Reference",
-          link: "/docs/integrate/subgraph/schema-reference",
-        },
-        {
-          label: "Querying Best Practices",
-          link: "/docs/integrate/subgraph/querying-best-practices",
-        },
-        {
-          label: "Subgraph Dependents",
-          link: "/docs/integrate/subgraph/subgraph-dependents",
+          link: "/docs/integrate/ens-subgraph/schema-reference",
         },
       ],
     },
