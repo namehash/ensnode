@@ -1,10 +1,10 @@
-import { fetchRawExampleProjectFromGlob } from "./example-project/fetchRawExampleProject";
-import { loadExampleProject } from "./example-project/loadExampleProject";
-import { resolveEnssdkExamplePackageManifest } from "./example-project/resolvePinnedDependencies";
-import type { PlaygroundProject } from "./example-project/types";
+import { fetchRawExampleProjectFromGlob } from "../core/fetchRawExampleProject";
+import { loadExampleProject } from "../core/loadExampleProject";
+import { resolveEnssdkExamplePackageManifest } from "../core/resolvePinnedDependencies";
+import type { PlaygroundProject } from "../core/types";
 
 const enssdkExampleSourceModules = import.meta.glob(
-  "../../../../../examples/enssdk-example/src/**/*.{ts,tsx}",
+  "../../../../../../../examples/enssdk-example/src/**/*.{ts,tsx}",
   {
     query: "?raw",
     import: "default",

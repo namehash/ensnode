@@ -16,7 +16,7 @@ export default function FullRainbow() {
       data={[
         {
           label: <>ENS Subgraph</>,
-          value: 20,
+          value: 19,
           color: "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 80%)",
         },
         {
@@ -25,7 +25,7 @@ export default function FullRainbow() {
               ENSRainbow + ENSNode {badge("Current")}
             </div>
           ),
-          value: 90,
+          value: 93,
           color:
             "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 71%, #F09C0A 87.5%, #EA2F86 105%)",
         },
@@ -41,7 +41,7 @@ export default function FullRainbow() {
         },
       ]}
       title="Name Healing Coverage"
-      footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 8 March, 2025."
+      footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 26 May, 2026."
     />
   );
 

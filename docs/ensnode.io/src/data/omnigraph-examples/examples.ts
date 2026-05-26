@@ -1,5 +1,8 @@
-import { ENSNODE_URL } from "src/lib/playground/constants";
-import { OmnigraphExampleQuerySchema, type OmnigraphExampleQuery } from "src/lib/playground/types";
+import { ENSNODE_URL } from "@lib/examples/omnigraph/constants";
+import {
+  OmnigraphExampleQuerySchema,
+  type OmnigraphExampleQuery,
+} from "@lib/examples/omnigraph/example-query";
 
 import { ACTIVE_OMNIGRAPH_VERSION } from "./active";
 import { OMNIGRAPH_EXAMPLES_META } from "./meta";

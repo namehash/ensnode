@@ -1,0 +1,112 @@
+---
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+import type { SetupPackageManager } from "@lib/examples/omnigraph/build-integration-snippets";
+
+import StaticExampleActionBar from "./StaticExampleActionBar.astro";
+import StaticExampleCodeSection from "./StaticExampleCodeSection.astro";
+import StaticExampleOutputSection from "./StaticExampleOutputSection.astro";
+import StaticExampleTabbedSection from "./StaticExampleTabbedSection.astro";
+import StaticExampleNote from "./StaticExampleNote.astro";
+import { buildSdkSetupTabs } from "./build-sdk-setup-tabs";
+import { exampleTabClass, staticExampleSectionXClass } from "./constants";
+
+type SdkIntegration = "enssdk" | "enskit";
+
+const SDK_PANEL_CONFIG: Record<
+  SdkIntegration,
+  {
+    badge: string;
+    lang: string;
+    docsHref: string;
+    docsLabel: string;
+    docsDetail: string;
+  }
+> = {
+  enssdk: {
+    badge: "TypeScript",
+    lang: "typescript",
+    docsHref: "/docs/integrate/integration-options/enssdk",
+    docsLabel: "enssdk docs",
+    docsDetail: "gql.tada plugin and tsconfig setup.",
+  },
+  enskit: {
+    badge: "TSX (React)",
+    lang: "tsx",
+    docsHref: "/docs/integrate/integration-options/enskit",
+    docsLabel: "enskit docs",
+    docsDetail: "gql.tada plugin and provider setup.",
+  },
+};
+
+interface Props {
+  integration: SdkIntegration;
+  exampleId: string;
+  uid: string;
+  snippet: string;
+  setupSnippets: Record<SetupPackageManager, string>;
+  responseJson: string | null;
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+}
+
+const {
+  integration,
+  exampleId,
+  uid,
+  snippet,
+  setupSnippets,
+  responseJson,
+  hostedInstanceDocUrl,
+  hostedInstanceNamespace,
+} = Astro.props;
+
+const config = SDK_PANEL_CONFIG[integration];
+
+const { tabs, panels } = buildSdkSetupTabs({
+  uid,
+  prefix: integration,
+  setupSnippets,
+});
+
+const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]";
+---
+
+<StaticExampleActionBar
+  variant="stackblitz"
+  hostedInstanceDocUrl={hostedInstanceDocUrl}
+  hostedInstanceNamespace={hostedInstanceNamespace}
+  staticExampleId={exampleId}
+/>
+
+<StaticExampleCodeSection badge={config.badge} code={snippet} lang={config.lang} />
+
+{
+  responseJson ? (
+    <StaticExampleOutputSection
+      uid={`${uid}-${integration}`}
+      responseJson={responseJson}
+      heading="Output"
+    />
+  ) : null
+}
+
+<StaticExampleTabbedSection
+  tabsRootId={`${uid}-${integration}`}
+  tablistAriaLabel="Package manager setup"
+  srHeading={{
+    id: `${uid}-${integration}-setup-heading`,
+    label: `${integration} package manager setup`,
+  }}
+  tabs={tabs}
+  panels={panels}
+  tabButtonClass={exampleTabClass}
+  tabIconClass="tab-icon"
+/>
+
+<section class={`pb-4 ${staticExampleSectionXClass}`}>
+  <StaticExampleNote>
+    See the{" "}
+    <a href={config.docsHref} class={docsLinkClass}>{config.docsLabel}</a>
+    {" "}for {config.docsDetail}
+  </StaticExampleNote>
+</section>
