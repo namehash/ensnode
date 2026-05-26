@@ -1,0 +1,29 @@
+---
+import StaticExampleCodeSection from "./StaticExampleCodeSection.astro";
+import StaticExampleOutputSection from "./StaticExampleOutputSection.astro";
+
+interface Props {
+  uid: string;
+  curlExample: string;
+  responseJson: string | null;
+}
+
+const { uid, curlExample, responseJson } = Astro.props;
+---
+
+<StaticExampleCodeSection
+  badge="cURL"
+  headingId={`${uid}-curl-heading`}
+  code={curlExample}
+  lang="bash"
+/>
+
+{
+  responseJson ? (
+    <StaticExampleOutputSection
+      uid={`${uid}-curl`}
+      responseJson={responseJson}
+      heading="Response"
+    />
+  ) : null
+}
