@@ -27,10 +27,10 @@ Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` v
     import { count, eq } from 'drizzle-orm';
 
     const counts = await ensDb
-    .select({ type: ensIndexerSchema.domain.type, count: count() })
-    .from(ensIndexerSchema.domain)
-    .where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
-    .groupBy(ensIndexerSchema.domain.type);
+      .select({ type: ensIndexerSchema.domain.type, count: count() })
+      .from(ensIndexerSchema.domain)
+      .where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
+      .groupBy(ensIndexerSchema.domain.type);
 
     ```
 

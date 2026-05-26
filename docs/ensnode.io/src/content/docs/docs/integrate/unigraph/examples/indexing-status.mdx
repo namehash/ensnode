@@ -22,15 +22,15 @@ Read the indexing status snapshot for an ENSIndexer instance from the shared `en
     AND key = 'indexing_metadata_context';
     ```
   </TabItem>
-  
+
   <TabItem label="ensdb-sdk (TypeScript)">
     ```typescript
     import { IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
 
     const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
     if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
-    const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
-    // Do something with the indexing status snapshot
+      const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
+      // Do something with the indexing status snapshot
     }
 
     ```
