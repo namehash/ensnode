@@ -38,16 +38,16 @@
   --color-gray-950: var(--color-primary-dark);
 
   /* Sidebar active/hover colors */
-  --sidebar-active-bg: rgba(0, 129, 189, 0.1);
-  --sidebar-active-color: #0081bd;
+  --sidebar-active-color: #2563eb;
+  --sidebar-active-bg: color-mix(in srgb, var(--sidebar-active-color) 10%, transparent);
   --sidebar-icon-bg: rgba(128, 128, 128, 0.1);
   --sidebar-icon-color: #9ca3af;
 
   /* Aside colors */
-  --aside-danger-color: #f43f5e;
-  --aside-caution-color: #f97316;
+  --aside-danger-color: #ef4444;
+  --aside-caution-color: #ca8a04;
   --aside-note-color: #3b82f6;
-  --aside-tip-color: #007c23;
+  --aside-tip-color: #16a34a;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -226,6 +226,12 @@ a[rel="prev"]:hover {
   }
 }
 
+.sl-markdown-content > p a:not([role="tab"]):hover,
+.sl-markdown-content :is(ul, ol) > li a:not([role="tab"]):hover,
+starlight-toc a:hover {
+  color: var(--sl-color-accent-high);
+}
+
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
   color: var(--sl-color-white);
   display: inline;
@@ -365,7 +371,7 @@ a.starlight-sidebar-topics-current,
 }
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
-  background-color: rgba(0, 129, 189, 0.15) !important;
+  background-color: color-mix(in srgb, var(--sidebar-active-color) 15%, transparent) !important;
   color: var(--sidebar-active-color) !important;
 }
 
@@ -394,9 +400,31 @@ ul.top-level details details > summary .group-label span {
 }
 
 /* Customize badge styles in the sidebar */
+#starlight__sidebar .sl-badge {
+  font-family: var(--sl-font);
+  font-size: 12px;
+  font-weight: 600 !important;
+  line-height: 14px;
+}
+
 .sl-badge:is(.danger) {
   border-color: var(--aside-danger-color);
   background-color: var(--aside-danger-color);
+}
+
+.sl-badge:is(.success) {
+  border-color: var(--aside-tip-color);
+  background-color: var(--aside-tip-color);
+}
+
+/* Center sidebar badges vertically */
+#starlight__sidebar .group-label:has(.sl-badge) {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 9px;
 }
 
 /* Make sure that social icons in the sidebar do not move on hover */
@@ -470,6 +498,10 @@ starlight-tabs ul[role="tablist"] {
     color: var(--aside-tip-color);
   }
 
+  & code {
+    background-color: color-mix(in srgb, var(--aside-tip-color) 12%, transparent);
+  }
+
   & .sl-link-card:hover {
     border-color: var(--aside-tip-color);
 
@@ -493,6 +525,10 @@ starlight-tabs ul[role="tablist"] {
 
   & a {
     color: var(--aside-danger-color);
+  }
+
+  & code {
+    background-color: color-mix(in srgb, var(--aside-danger-color) 12%, transparent);
   }
 
   & .sl-link-card:hover {
@@ -520,8 +556,12 @@ starlight-tabs ul[role="tablist"] {
     color: var(--aside-caution-color);
   }
 
+  & code {
+    background-color: color-mix(in srgb, var(--aside-caution-color) 12%, transparent);
+  }
+
   & pre {
-    background-color: rgba(103, 61, 73, 0.05);
+    background-color: color-mix(in srgb, var(--aside-caution-color) 5%, transparent);
     border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
   }
 
@@ -610,4 +650,46 @@ starlight-tabs ul[role="tablist"] {
 }
 .starlight-sidebar-topics a[href*="/reference"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/reference.svg");
+}
+
+/* Rounded corners for the code snippets in the text-body. */
+
+/* Radius + overflow live on the figure so the horizontal scrollbar inside
+   <pre> gets clipped by the rounded shape instead of overlapping it. */
+.sl-markdown-content .expressive-code .frame:not(.not-content) {
+  border-radius: 12px;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 25%);
+}
+
+/* Make the background of horizontal scrollbar transparent */
+.sl-markdown-content .expressive-code pre::-webkit-scrollbar {
+  background: transparent;
+}
+
+/* Add margin to the scrollbar track to prevent it from touching the rounded corners */
+.sl-markdown-content .expressive-code pre::-webkit-scrollbar-track {
+  margin-inline: 12px;
+}
+
+/* Other elements are rounded accordingly */
+.sl-markdown-content .expressive-code figcaption:is(.header),
+.sl-markdown-content .expressive-code figcaption:is(.header) > span {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.sl-markdown-content .expressive-code pre {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.sl-markdown-content div[role="tabpanel"] > .expressive-code:not(:has(figcaption:not(:empty))) pre {
+  border-radius: 12px;
+}
+
+/* Additional border for the "filename" tab in the code snippets */
+.sl-markdown-content .expressive-code figcaption:is(.header):has(.title:not(:empty)) > span {
+  border-right: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
 }

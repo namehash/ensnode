@@ -27,7 +27,7 @@ Canonical fields (`canonical_name`, `canonical_path`, `canonical_node`, `canonic
 populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query
 them uniformly without branching by `type`.
 
-```typescript
+```typescript title="example.ts"
 import { EnsDbReader } from "@ensnode/ensdb-sdk";
 import { eq } from "drizzle-orm";
 
@@ -40,14 +40,14 @@ const [vitalik] = await ensDb
   .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
 ```
 
-```sql
+```sql title="example.sql"
 SELECT * FROM ensindexer_0.domains
 WHERE canonical_name = 'vitalik.eth';
 ```
 
 ### Example: count an address's Domains by type (ENSv1 vs ENSv2)
 
-```typescript
+```typescript title="example.ts"
 import { count, eq } from "drizzle-orm";
 
 const counts = await ensDb
@@ -57,7 +57,7 @@ const counts = await ensDb
   .groupBy(ensIndexerSchema.domain.type);
 ```
 
-```sql
+```sql title="example.sql"
 SELECT type, count(*) FROM ensindexer_0.domains
 WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
 GROUP BY type;

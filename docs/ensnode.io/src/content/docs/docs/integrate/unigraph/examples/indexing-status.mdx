@@ -15,24 +15,25 @@ Read the indexing status snapshot for an ENSIndexer instance from the shared `en
 
 <Tabs syncKey="unigraph-client">
   <TabItem label="SQL">
-```sql
--- Indexing status snapshot for the `ensindexer_0` ENSIndexer Schema
-SELECT value -> 'indexingStatus' FROM "ensnode"."metadata"
-WHERE ens_indexer_schema_name = 'ensindexer_0'
-AND key = 'indexing_metadata_context';
-```
+    ```sql
+    -- Indexing status snapshot for the `ensindexer_0` ENSIndexer Schema
+    SELECT value -> 'indexingStatus' FROM "ensnode"."metadata"
+    WHERE ens_indexer_schema_name = 'ensindexer_0'
+    AND key = 'indexing_metadata_context';
+    ```
   </TabItem>
+
   <TabItem label="ensdb-sdk (TypeScript)">
-```typescript
-import { IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
+    ```typescript
+    import { IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
 
-const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
-if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
-const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
-// Do something with the indexing status snapshot
-}
+    const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
+    if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
+      const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
+      // Do something with the indexing status snapshot
+    }
 
-```
+    ```
+
   </TabItem>
 </Tabs>
-```
