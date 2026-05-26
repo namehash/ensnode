@@ -26,27 +26,30 @@ Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` v
 <Tabs syncKey="unigraph-client">
   <TabItem label="SQL">
     <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
+
 ```sql
 SELECT type, count(*) FROM ensindexer_0.domains
 WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
 GROUP BY type;
 ```
+
     <ResultDetails value={resultJson} />
+
   </TabItem>
   <TabItem label="ensdb-sdk (TypeScript)">
     <EnsDbReaderIntro />
+
 ```typescript
-import { count, eq } from 'drizzle-orm';
+import { count, eq } from "drizzle-orm";
 
 const counts = await ensDb
-.select({ type: ensIndexerSchema.domain.type, count: count() })
-.from(ensIndexerSchema.domain)
-.where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
-.groupBy(ensIndexerSchema.domain.type);
-
+  .select({ type: ensIndexerSchema.domain.type, count: count() })
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
+  .groupBy(ensIndexerSchema.domain.type);
 ```
+
     <ResultDetails value={resultJson} />
+
   </TabItem>
 </Tabs>
-
-```
