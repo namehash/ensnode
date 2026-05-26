@@ -1,10 +1,9 @@
 ---
 interface Props {
   uid: string;
-  withIntegrationTabs?: boolean;
 }
 
-const { uid, withIntegrationTabs = false } = Astro.props;
+const { uid } = Astro.props;
 ---
 
 <div
@@ -19,36 +18,34 @@ const { uid, withIntegrationTabs = false } = Astro.props;
   initStaticExampleStackBlitzButtons();
 </script>
 
-<script define:vars={{ uid, withIntegrationTabs }}>
+<script define:vars={{ uid }}>
   const root = document.querySelector(`[data-static-example="${uid}"]`);
   if (root) {
-    if (withIntegrationTabs) {
-      const integrationTabsEl = root.querySelector(`[data-integration-tabs="${uid}"]`);
-      const integrationPanels = [...root.querySelectorAll("[data-integration-panel]")];
-      const integrationButtons = integrationTabsEl
-        ? [...integrationTabsEl.querySelectorAll("[data-integration-tab]")]
-        : [];
+    const integrationTabsEl = root.querySelector(`[data-integration-tabs="${uid}"]`);
+    const integrationPanels = [...root.querySelectorAll("[data-integration-panel]")];
+    const integrationButtons = integrationTabsEl
+      ? [...integrationTabsEl.querySelectorAll("[data-integration-tab]")]
+      : [];
 
-      function activateIntegration(name) {
-        for (const btn of integrationButtons) {
-          btn.setAttribute("aria-selected", btn.dataset.integrationTab === name ? "true" : "false");
-        }
-        for (const panel of integrationPanels) {
-          const on = panel.dataset.integrationPanel === name;
-          panel.classList.toggle("hidden", !on);
-          panel.toggleAttribute("hidden", !on);
-        }
+    function activateIntegration(name) {
+      for (const btn of integrationButtons) {
+        btn.setAttribute("aria-selected", btn.dataset.integrationTab === name ? "true" : "false");
       }
+      for (const panel of integrationPanels) {
+        const on = panel.dataset.integrationPanel === name;
+        panel.classList.toggle("hidden", !on);
+        panel.toggleAttribute("hidden", !on);
+      }
+    }
 
-      if (integrationTabsEl) {
-        integrationTabsEl.addEventListener("click", (e) => {
-          const btn =
-            e.target instanceof Element ? e.target.closest("[data-integration-tab]") : null;
-          if (btn && integrationTabsEl.contains(btn)) {
-            activateIntegration(btn.dataset.integrationTab);
-          }
-        });
-      }
+    if (integrationTabsEl) {
+      integrationTabsEl.addEventListener("click", (e) => {
+        const btn =
+          e.target instanceof Element ? e.target.closest("[data-integration-tab]") : null;
+        if (btn && integrationTabsEl.contains(btn)) {
+          activateIntegration(btn.dataset.integrationTab);
+        }
+      });
     }
 
     for (const tabsRoot of root.querySelectorAll("[data-tabs-root]")) {

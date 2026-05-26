@@ -12,6 +12,6 @@ export function openStackBlitzProject(project: PlaygroundProject): void {
     view: stackBlitzViewForPlayground(project.view),
     startScript: stackBlitzStartScriptForRuntime(project.runtime),
     // open project should use default theme since it's NOT embedded in the our docs with light theme
-    theme: "default"
+    theme: "default",
   });
 }
