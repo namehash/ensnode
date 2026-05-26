@@ -39,7 +39,7 @@ npm install enskit@1.15.0 enssdk@1.15.0
 
 Add the plugin to `tsconfig.json`:
 
-```json title="tsconfig.json" {6-13}
+```json title="tsconfig.json" ins={6-12}
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -80,7 +80,7 @@ import { DomainView } from "./DomainView";
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL!;
+const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 // create and extend an EnsNodeClient with Omnigraph support
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
@@ -117,14 +117,8 @@ const DomainByNameQuery = graphql(`
   query DomainByName($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical {
-        name {
-          beautified
-        }
-      }
-      owner {
-        address
-      }
+      canonical { name { beautified } }
+      owner { address }
     }
   }
 `);
@@ -167,31 +161,16 @@ A few things to notice:
 
 Expand the query to also fetch the Domain's subdomains. `subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm), so the shape is `{ edges: [{ node }] }`.
 
-```tsx title="src/DomainView.tsx" ins={7-13,40-54}
+```tsx title="src/DomainView.tsx" ins={7-11,40-48}
 const DomainByNameQuery = graphql(`
   query DomainByName($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical {
-        name {
-          beautified
-        }
-      }
-      owner {
-        address
-      }
+      canonical { name { beautified } }
+      owner { address }
       subdomains {
         edges {
-          node {
-            canonical {
-              name {
-                beautified
-              }
-            }
-            owner {
-              address
-            }
-          }
+          node { canonical { name { beautified } } owner { address } }
         }
       }
     }
@@ -240,39 +219,29 @@ export function DomainView() {
 
 Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed shape for components that render a Domain.
 
-```tsx title="src/DomainView.tsx" ins={1,2,5,9-15,21,23,28,31-48,66,72}
+```tsx title="src/DomainView.tsx" ins={1,4-10,16,18,23,26-39,57-59,65}
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { asInterpretedName } from "enssdk";
 
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
-    canonical {
-      name {
-        beautified
-      }
-    }
-    owner {
-      address
-    }
+    canonical { name { beautified } }
+    owner { address }
   }
 `);
 
 const DomainByNameQuery = graphql(
   `
-    query DomainByName($name: InterpretedName!) {
-      domain(by: { name: $name }) {
-        ...DomainFragment
-        subdomains {
-          edges {
-            node {
-              ...DomainFragment
-            }
-          }
-        }
+  query DomainByName($name: InterpretedName!) {
+    domain(by: { name: $name }) {
+      ...DomainFragment
+      subdomains {
+        edges { node { ...DomainFragment } }
       }
     }
-  `,
+  }
+`,
   [DomainFragment],
 );
 
@@ -330,29 +299,22 @@ export function DomainView() {
 
 `subdomains` is a Relay Connection — page through it with the `first` and `after` arguments. Add `pageInfo { hasNextPage endCursor }` to the query, track the cursor in component state, and wire up a "Next page" button.
 
-```tsx title="src/DomainView.tsx" ins={1,6,9,11,19,23,27,51-59}
+```tsx title="src/DomainView.tsx" ins={1,6,9,11,19,23,27,53-61}
 import { useState } from "react";
 // ...other imports
 
 const DomainByNameQuery = graphql(
   `
-    query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
-      domain(by: { name: $name }) {
-        ...DomainFragment
-        subdomains(first: $first, after: $after) {
-          edges {
-            node {
-              ...DomainFragment
-            }
-          }
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
-        }
+  query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
+    domain(by: { name: $name }) {
+      ...DomainFragment
+      subdomains(first: $first, after: $after) {
+        edges { node { ...DomainFragment } }
+        pageInfo { hasNextPage endCursor }
       }
     }
-  `,
+  }
+`,
   [DomainFragment],
 );
 
@@ -407,7 +369,7 @@ export function DomainView() {
 ## 9. Run it
 
 ```sh
-VITE_ENSNODE_URL=https://api.v2-sepolia.blue.ensnode.io npm run dev
+VITE_ENSNODE_URL=https://api.v2-sepolia.ensnode.io npm run dev
 ```
 
 Open the printed URL and you should see the `eth` Domain, its owner, and the first page of its subdomains. Clicking **Next page** advances the cursor.

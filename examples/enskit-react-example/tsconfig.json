@@ -9,13 +9,10 @@
     "skipLibCheck": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "plugins": [
-      // here we enable the gql.tada typescript plugin for
+      // here we enable the gql.tada typescript plugin
       {
         "name": "gql.tada/ts-plugin",
-        // NOTE: this example is in the ENSNode monorepo, so we imports it from parent directory.
-        // In a ordinary app you'd import it from the package like so:
-        // "schema": "node_modules/enssdk/src/omnigraph/generated/schema.graphql",
-        "schema": "../../packages/enssdk/src/omnigraph/generated/schema.graphql",
+        "schema": "node_modules/enssdk/src/omnigraph/generated/schema.graphql",
         "tadaOutputLocation": "./src/generated/graphql-env.d.ts"
       }
     ]

@@ -10,6 +10,13 @@
         "bracketSameLine": true,
         "astroSkipFrontmatter": true
       }
+    },
+    {
+      "comment": "Walkthroughs mirror the example apps verbatim; don't reflow their embedded GraphQL.",
+      "files": ["docs/ensnode.io/src/components/walkthroughs/**/*.mdx", "examples/**/*.{ts,tsx}"],
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
     }
   ]
 }

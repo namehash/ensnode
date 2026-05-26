@@ -46,9 +46,7 @@ const HelloWorldQuery = graphql(`
     domain(by: { name: "eth" }) {
       id
       name
-      owner {
-        address
-      }
+      owner { address }
     }
   }
 `);
@@ -87,29 +85,22 @@ const DomainFragment = graphql(`
     __typename
     id
     name
-    owner {
-      id
-      address
-    }
+    owner { id address }
   }
 `);
 
 // this is fully typechecked and supports editor autocomplete!
 const DomainByNameQuery = graphql(
   `
-    query DomainByNameQuery($name: InterpretedName!) {
-      domain(by: { name: $name }) {
-        ...DomainFragment
-        subdomains {
-          edges {
-            node {
-              ...DomainFragment
-            }
-          }
-        }
+  query DomainByNameQuery($name: InterpretedName!) {
+    domain(by: { name: $name }) {
+      ...DomainFragment
+      subdomains {
+        edges { node { ...DomainFragment } }
       }
     }
-  `,
+  }
+`,
   [DomainFragment],
 );
 
