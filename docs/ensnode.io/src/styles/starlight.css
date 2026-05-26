@@ -38,16 +38,16 @@
   --color-gray-950: var(--color-primary-dark);
 
   /* Sidebar active/hover colors */
-  --sidebar-active-bg: rgba(0, 129, 189, 0.1);
-  --sidebar-active-color: #0081bd;
+  --sidebar-active-color: #2563eb;
+  --sidebar-active-bg: color-mix(in srgb, var(--sidebar-active-color) 10%, transparent);
   --sidebar-icon-bg: rgba(128, 128, 128, 0.1);
   --sidebar-icon-color: #9ca3af;
 
   /* Aside colors */
-  --aside-danger-color: #f43f5e;
-  --aside-caution-color: #f97316;
+  --aside-danger-color: #ef4444;
+  --aside-caution-color: #ca8a04;
   --aside-note-color: #3b82f6;
-  --aside-tip-color: #007c23;
+  --aside-tip-color: #16a34a;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -226,6 +226,12 @@ a[rel="prev"]:hover {
   }
 }
 
+.sl-markdown-content > p a:not([role="tab"]):hover,
+.sl-markdown-content :is(ul, ol) > li a:not([role="tab"]):hover,
+starlight-toc a:hover {
+  color: var(--sl-color-accent-high);
+}
+
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
   color: var(--sl-color-white);
   display: inline;
@@ -365,7 +371,7 @@ a.starlight-sidebar-topics-current,
 }
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
-  background-color: rgba(0, 129, 189, 0.15) !important;
+  background-color: color-mix(in srgb, var(--sidebar-active-color) 15%, transparent) !important;
   color: var(--sidebar-active-color) !important;
 }
 
@@ -394,11 +400,32 @@ ul.top-level details details > summary .group-label span {
 }
 
 /* Customize badge styles in the sidebar */
+#starlight__sidebar .sl-badge {
+  font-family: var(--sl-font);
+  font-size: 12px;
+  font-weight: 600 !important;
+  line-height: 14px;
+}
+
 .sl-badge:is(.danger) {
   border-color: var(--aside-danger-color);
   background-color: var(--aside-danger-color);
 }
 
+.sl-badge:is(.success) {
+  border-color: var(--aside-tip-color);
+  background-color: var(--aside-tip-color);
+}
+
+/* Center sidebar badges vertically */
+#starlight__sidebar .group-label:has(.sl-badge) {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 9px;
+}
 /* Make sure that social icons in the sidebar do not move on hover */
 .sidebar-content .social-icons a {
   transform: none !important;
