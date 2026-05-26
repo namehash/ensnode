@@ -8,6 +8,5 @@ export interface StaticExampleTabPanel {
   id: string;
   code: string;
   lang: string;
-  maxHeight: string;
   visible?: boolean;
 }

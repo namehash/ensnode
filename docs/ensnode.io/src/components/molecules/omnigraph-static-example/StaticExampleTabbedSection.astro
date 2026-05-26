@@ -1,7 +1,9 @@
 ---
+/** Tabs for mutually exclusive choices (e.g. npm vs pnpm), not request/response pairs. */
 import { Code, Icon } from "@astrojs/starlight/components";
 
 import type { StaticExampleTab, StaticExampleTabPanel } from "./tab-types";
+import { staticExampleCodeWrapClass, staticExampleSectionXClass } from "./example-tab-styles";
 
 interface Props {
   tabsRootId: string;
@@ -17,10 +19,11 @@ const { tabsRootId, tablistAriaLabel, srHeading, tabs, panels, tabButtonClass, t
   Astro.props;
 
 const tablistClass = "flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]";
-const codeWrapClass = "min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg";
 ---
 
-<section class="px-4 py-5 md:px-5" {...srHeading ? { "aria-labelledby": srHeading.id } : {}}>
+<section
+  class={`py-5 ${staticExampleSectionXClass}`}
+  {...srHeading ? { "aria-labelledby": srHeading.id } : {}}>
   {
     srHeading ? (
       <h3 id={srHeading.id} class="sr-only">
@@ -48,7 +51,7 @@ const codeWrapClass = "min-w-0 overflow-auto overscroll-y-contain [&_.expressive
         ))
       }
     </div>
-    <div class="relative min-h-[8rem]">
+    <div class="relative">
       {
         panels.map((panel) => (
           <div
@@ -58,7 +61,7 @@ const codeWrapClass = "min-w-0 overflow-auto overscroll-y-contain [&_.expressive
             data-tab-panel={panel.id}
             class:list={["example-tab-panel pt-3", { hidden: !panel.visible }]}
             hidden={!panel.visible}>
-            <div class={codeWrapClass} style={`max-height: ${panel.maxHeight}`}>
+            <div class={staticExampleCodeWrapClass}>
               <Code code={panel.code} lang={panel.lang} />
             </div>
           </div>

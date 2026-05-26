@@ -16,6 +16,7 @@ import {
 } from "@lib/examples/omnigraph/build-integration-snippets";
 import {
   buildEnsAdminOmnigraphUrl,
+  buildOmnigraphCurlExample,
   getHostedEnsNodeInstanceDocUrl,
   stringifyJsonForDocs,
 } from "@lib/examples/omnigraph/docs-utils";
@@ -35,6 +36,7 @@ export interface OmnigraphStaticExampleData {
   enskitSnippet: string;
   enssdkSetupSnippets: Record<SetupPackageManager, string>;
   enskitSetupSnippets: Record<SetupPackageManager, string>;
+  curlExample: string;
 }
 
 /** Load snapshot example data and derived integration snippets for static docs panels. */
@@ -62,5 +64,10 @@ export function resolveOmnigraphStaticExample(exampleId: string): OmnigraphStati
     enskitSnippet: buildEnskitSnippet({ query: example.query, variables: example.variables }),
     enssdkSetupSnippets: buildEnssdkSetupSnippets(),
     enskitSetupSnippets: buildEnskitSetupSnippets(),
+    curlExample: buildOmnigraphCurlExample({
+      connectionBaseUrl: example.connection,
+      query: example.query,
+      variables: example.variables,
+    }),
   };
 }
