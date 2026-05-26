@@ -77,7 +77,7 @@ The `sepolia-v2` namespace is undergoing active development by the ENS Labs team
 <Fragment slot="ens-subgraph-api-icon" set:text={"🚨"} />
 <Fragment slot="ens-subgraph-api">
   <span set:html={subgraphCompatibilityApiLevel} />
-  <EnsSubgraphCorrectnessPostEnsV2Launch isEnsV2Launched={true} />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="sepolia-v2" isEnsV2Launched={true} />
 </Fragment>
 
   <Fragment slot="ens-protocol-acceleration-icon" set:text={"✅"} />
@@ -107,7 +107,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
 <Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
 <Fragment slot="ens-subgraph-api">
   <span set:html={subgraphCompatibilityApiLevel} />
-  <EnsSubgraphCorrectnessPostEnsV2Launch />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="mainnet" isEnsV2Launched={false} />
 </Fragment>
 
   <Fragment slot="ens-protocol-acceleration-icon" set:text={"✅"} />
@@ -129,7 +129,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
 <Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
 <Fragment slot="ens-subgraph-api">
   <span set:html={subgraphCompatibilityApiLevel} />
-  <EnsSubgraphCorrectnessPostEnsV2Launch />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="sepolia" isEnsV2Launched={false} />
 </Fragment>
 
   <Fragment slot="ens-protocol-acceleration-icon" set:text={"✅"} />
@@ -155,7 +155,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
 <Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
 <Fragment slot="ens-subgraph-api">
   <span set:html={subgraphCompatibilityFull} />
-  <EnsSubgraphCorrectnessPostEnsV2Launch />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="mainnet" isEnsV2Launched={false} />
 </Fragment>
 
   <Fragment slot="ens-protocol-acceleration-icon" set:text={"❌"} />
@@ -177,7 +177,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
 <Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
 <Fragment slot="ens-subgraph-api">
   <span set:html={subgraphCompatibilityFull} />
-  <EnsSubgraphCorrectnessPostEnsV2Launch />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="sepolia" isEnsV2Launched={false} />
 </Fragment>
 
   <Fragment slot="ens-protocol-acceleration-icon" set:text={"❌"} />

@@ -2,15 +2,15 @@
 import { Aside } from "@astrojs/starlight/components";
 const { namespace, isEnsV2Launched = false } = Astro.props;
 const ensSubgraphCorrectnessMessage = isEnsV2Launched
-  ? `ENSv2 has launched on the ${namespace} ENS namespace. This means the legacy ENS Subgraph no longer returns reliable data.`
-  : `ENSv2 launches soon! As soon as ENSv2 launches on the ${namespace} ENS namespace, the legacy ENS Subgraph will no longer return reliable data.`;
+  ? `ENSv2 has launched on the <code>${namespace}</code> ENS namespace. This means the legacy ENS Subgraph no longer returns reliable data.`
+  : `ENSv2 launches soon! As soon as ENSv2 launches on the <code>${namespace}</code> ENS namespace, the legacy ENS Subgraph will no longer return reliable data.`;
 const title = isEnsV2Launched
   ? "ENSv2 launch completed. Subgraph API now unreliable."
   : "ENSv2 launches soon. Subgraph API soon unreliable.";
 ---
 
 <Aside type="danger" title={title}>
-  {ensSubgraphCorrectnessMessage} Transition your apps now to the new <a
+  <span set:html={ensSubgraphCorrectnessMessage} /> Transition your apps now to the new <a
     href="/docs/integrate/omnigraph">ENS Omnigraph API</a
   > to be ENSv2 ready.
 </Aside>
