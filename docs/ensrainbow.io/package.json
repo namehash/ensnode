@@ -12,9 +12,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "biome check --write .",
-    "lint:ci": "biome ci",
-    "lint:prettier": "prettier --write \"**/*.astro\"",
-    "lint:prettier:ci": "prettier --check \"**/*.astro\""
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@astrojs/react": "catalog:",
@@ -32,8 +30,6 @@
   },
   "devDependencies": {
     "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "prettier": "catalog:",
-    "prettier-plugin-astro": "catalog:"
+    "@types/react-dom": "catalog:"
   }
 }
