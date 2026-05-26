@@ -7,23 +7,33 @@ sidebar:
   order: 2
 ---
 
+import { Icon } from "@astrojs/starlight/components";
 import EnskitExampleInteractivePlayground from "@components/organisms/EnskitExampleInteractivePlayground";
 import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
 
 This playground loads the same source as [`enskit-react-example`](https://github.com/namehash/ensnode/tree/main/examples/enskit-react-example): a Vite + React app with routing, domain and account browsers, registry cache, and search — powered by [`enskit`](/docs/integrate/integration-options/enskit) and the [ENS Omnigraph API](/docs/integrate/omnigraph).
 
-<HostedInstanceSdkVersionWarning for="enskit" />
-
-:::note[First load may take a moment]
-The editor runs entirely in your browser. Downloading of **enskit**, **enssdk** and their heavy dependencies may take 30-60 seconds.
-:::
-
-After the project is ready, edit the app and run **`npm start`** in the terminal to restart the Vite dev server. Use the **preview** pane to interact with the running UI.
+<HostedInstanceSdkVersionWarning />
 
 :::caution[StackBlitz embed outage]
 StackBlitz is having problems with embedded WebContainer projects as of **May 19**. If the editor does not load, use the **Fork on StackBlitz** button in the bottom left to open and run the example on stackblitz.com.
 :::
 
+:::note[First load may take a few minutes]
+The embedded StackBlitz editor runs entirely in your browser. Downloading and installing all npm packages may take a few minutes. Watch the install progress in the terminal of the StackBlitz editor.
+:::
+
 <EnskitExampleInteractivePlayground client:load />
 
-[Back to enskit overview](/docs/integrate/integration-options/enskit)
+<a
+  class="group w-fit flex flex-row justify-start items-center gap-2 mt-4"
+  href="/docs/integrate/integration-options/enskit"
+>
+  <Icon
+    name="left-arrow"
+    class="h-5 w-5 text-[var(--sl-color-accent)] group-hover:text-[var(--sl-color-white)] transition-colors duration-200"
+  />
+  <p class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-all duration-200">
+    Back to enskit overview
+  </p>
+</a>

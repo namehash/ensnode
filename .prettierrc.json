@@ -1,0 +1,22 @@
+{
+  "printWidth": 100,
+  "proseWrap": "preserve",
+  "plugins": ["prettier-plugin-astro"],
+  "overrides": [
+    {
+      "files": "*.astro",
+      "options": {
+        "parser": "astro",
+        "bracketSameLine": true,
+        "astroSkipFrontmatter": true
+      }
+    },
+    {
+      "comment": "Walkthroughs mirror the example apps verbatim; don't reflow their embedded GraphQL.",
+      "files": ["docs/ensnode.io/src/components/walkthroughs/**/*.mdx", "examples/**/*.{ts,tsx}"],
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ENSApi APIs",
-    "version": "1.14.0",
+    "version": "1.15.1",
     "description": "REST APIs for the ENSNode stack as served by the ENSApi service"
   },
   "servers": [

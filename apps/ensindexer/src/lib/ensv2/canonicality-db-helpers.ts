@@ -523,7 +523,11 @@ async function cascadeCanonicality(
   // https://github.com/namehash/ensnode/issues/1962
   if (!nextCanonical) return;
 
-  const rows = changed.rows as { id: DomainId; canonical_label_hash_path: LabelHashPath }[];
+  // NOTE: Ponder types `db.sql` as a NodePg/Pglite Drizzle (whose `.execute()` resolves to a
+  // `{ rows }` result), but at runtime it's a pg-proxy Drizzle whose `.execute()` resolves to the
+  // rows array directly. The declared type lies (Ponder `@ts-expect-error`s the mismatch), so reading
+  // `changed.rows` is `undefined` at runtime — `changed` itself is the array.
+  const rows = changed as unknown as { id: DomainId; canonical_label_hash_path: LabelHashPath }[];
   for (let i = 0; i < rows.length; i += CANONICAL_NODE_UPDATE_BATCH_SIZE) {
     const batch = rows.slice(i, i + CANONICAL_NODE_UPDATE_BATCH_SIZE);
     const ids = batch.map((r) => r.id);
@@ -532,7 +536,7 @@ async function cascadeCanonicality(
     await context.ensDb.sql.execute(sql`
       UPDATE ${ensIndexerSchema.domain} AS d
         SET canonical_node = upd.canonical_node
-        FROM unnest(${ids}::text[], ${nodes}::text[]) AS upd(id, canonical_node)
+        FROM unnest(${sql.param(ids)}::text[], ${sql.param(nodes)}::text[]) AS upd(id, canonical_node)
         WHERE d.id = upd.id;
     `);
   }

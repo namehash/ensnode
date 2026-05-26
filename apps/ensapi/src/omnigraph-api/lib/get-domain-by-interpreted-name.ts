@@ -23,7 +23,6 @@ import {
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import di from "@/di";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
@@ -175,6 +174,8 @@ async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelH
 
   // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(path)}::text[]`;
+
+  const { ensDb, ensIndexerSchema } = di.context;
 
   const result = await withSpanAsync(tracer, "forward-walk", { registryId, path }, () =>
     ensDb.execute(sql`

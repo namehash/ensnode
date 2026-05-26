@@ -9,7 +9,7 @@ import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
-import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/constants.ts";
+import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
 
 // Freeze the CURRENT workspace SDK omnigraph bundle (examples + schema) into a version
 // snapshot. Run this on the release commit of <version>, where the SDK's example set is

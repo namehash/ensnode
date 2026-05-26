@@ -9,15 +9,13 @@ import EnsDbUseCases from "@components/molecules/EnsDbUseCases.astro";
 
 For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of both **ENSv1 and ENSv2** directly via `SQL`.
 
-**ENSDb** is a bi-directional integration standard for any EnsDbWriter and EnsDbReader implementations to coordinate around the live unified onchain state of ENSv1 **and ENSv2** in a carefully-crafted standardized data model within a PostgreSQL database. Because ENSDb builds on Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
+**ENSDb** is a bi-directional integration standard for any EnsDbWriter and EnsDbReader implementations to coordinate around the live unified onchain state of ENSv1 **and ENSv2** in a carefully-crafted standardized data model within a PostgreSQL database. Because ENSDb builds on Postgres, you can use _any_ language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
 
 :::tip[Coming soon: ensdb-cli & ENSDb snapshots]
 We're building [**`ensdb-cli` & ENSDb snapshots**](/docs/integrate/integration-options/ensdb-cli) so you can pull down a fresh ENSDb in minutes instead of paying for a full historical RPC backfill among many other benefits.
 :::
 
-
 <EnsDbSelfHostingNote />
-
 
 ### Inspirations for what you can build with ENSDb
 

@@ -1,0 +1,138 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+
+import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
+import StaticExampleCard from "@components/molecules/omnigraph-static-example/StaticExampleCard.astro";
+import CurlStaticCodeExample from "@components/molecules/omnigraph-static-example/CurlStaticCodeExample.astro";
+import SdkStaticCodeExample from "@components/molecules/omnigraph-static-example/SdkStaticCodeExample.astro";
+import GraphqlStaticQueryExample from "@components/molecules/omnigraph-static-example/GraphqlStaticQueryExample.astro";
+import { exampleTabClass } from "@components/molecules/omnigraph-static-example/constants";
+import { resolveOmnigraphStaticExample } from "@lib/examples/omnigraph/resolve-static-example";
+
+type StaticExampleIntegration = "omnigraph" | "enssdk" | "enskit" | "curl";
+
+const INTEGRATION_TABS = {
+  omnigraph: { label: "omnigraph", icon: "seti:graphql" },
+  enssdk: { label: "enssdk", icon: "seti:typescript" },
+  enskit: { label: "enskit", icon: "seti:react" },
+  curl: { label: "curl", icon: "window" },
+} as const;
+
+const DEFAULT_INTEGRATIONS: StaticExampleIntegration[] = ["omnigraph", "enssdk", "enskit", "curl"];
+
+interface Props {
+  id: string;
+  integrations?: StaticExampleIntegration[];
+  hideDescription?: boolean;
+  hideBackToExamples?: boolean;
+}
+
+const {
+  id,
+  integrations = DEFAULT_INTEGRATIONS,
+  hideDescription = false,
+  hideBackToExamples = false,
+} = Astro.props;
+const { description } = getOmnigraphExampleById(id);
+const data = resolveOmnigraphStaticExample(id);
+---
+
+{!hideDescription && description}
+
+<StaticExampleCard uid={data.uid}>
+  <div
+    class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08] px-4 md:px-5 pt-3"
+    role="tablist"
+    aria-label="Integration method"
+    data-integration-tabs={data.uid}>
+    {
+      integrations.map((panel, i) => {
+        const tab = INTEGRATION_TABS[panel];
+        return (
+          <button
+            type="button"
+            role="tab"
+            id={`${data.uid}-int-tab-${panel}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            aria-controls={`${data.uid}-int-${panel}`}
+            data-integration-tab={panel}
+            class={exampleTabClass}>
+            <Icon name={tab.icon} class="tab-icon" size="1.125em" />
+            <span class="tab-label">{tab.label}</span>
+          </button>
+        );
+      })
+    }
+  </div>
+
+  {
+    integrations.map((panel, i) => (
+      <div
+        id={`${data.uid}-int-${panel}`}
+        data-integration-panel={panel}
+        role="tabpanel"
+        aria-labelledby={`${data.uid}-int-tab-${panel}`}
+        class:list={[{ hidden: i !== 0 }]}
+        hidden={i !== 0}>
+        {panel === "omnigraph" ? (
+          <GraphqlStaticQueryExample
+            uid={data.uid}
+            query={data.query}
+            variablesJson={data.variablesJson}
+            responseJson={data.responseJson}
+            adminUrl={data.adminUrl}
+            hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+            hostedInstanceNamespace={data.hostedInstanceNamespace}
+          />
+        ) : null}
+        {panel === "enssdk" ? (
+          <SdkStaticCodeExample
+            integration="enssdk"
+            exampleId={data.exampleId}
+            uid={data.uid}
+            snippet={data.enssdkSnippet}
+            setupSnippets={data.enssdkSetupSnippets}
+            responseJson={data.responseJson}
+            hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+            hostedInstanceNamespace={data.hostedInstanceNamespace}
+          />
+        ) : null}
+        {panel === "enskit" ? (
+          <SdkStaticCodeExample
+            integration="enskit"
+            exampleId={data.exampleId}
+            uid={data.uid}
+            snippet={data.enskitSnippet}
+            setupSnippets={data.enskitSetupSnippets}
+            responseJson={data.responseJson}
+            hostedInstanceDocUrl={data.hostedInstanceDocUrl}
+            hostedInstanceNamespace={data.hostedInstanceNamespace}
+          />
+        ) : null}
+        {panel === "curl" ? (
+          <CurlStaticCodeExample
+            uid={data.uid}
+            curlExample={data.curlExample}
+            responseJson={data.responseJson}
+          />
+        ) : null}
+      </div>
+    ))
+  }
+</StaticExampleCard>
+
+{
+  !hideBackToExamples && (
+    <a
+      class="group w-fit flex flex-row justify-start items-center gap-2"
+      href="/docs/integrate/omnigraph/examples">
+      <Icon
+        name="left-arrow"
+        class="h-5 w-5 text-[var(--sl-color-accent)] group-hover:text-[var(--sl-color-white)] transition-colors duration-200"
+      />
+      <p class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-all duration-200">
+        Back to Examples{" "}
+      </p>
+    </a>
+  )
+}

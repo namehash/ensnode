@@ -2,7 +2,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address, ChainId, InterpretedName } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
@@ -23,10 +23,12 @@ import { PrimaryNameByChainRef } from "@/omnigraph-api/schema/resolution";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
-  load: (ids: Address[]) =>
-    ensDb.query.account.findMany({
+  load: (ids: Address[]) => {
+    const { ensDb } = di.context;
+    return ensDb.query.account.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
-    }),
+    });
+  },
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -147,6 +149,7 @@ AccountRef.implement({
       },
       resolve: (parent, args) => {
         const contract = args.where?.contract;
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           // this user's permissions
           eq(ensIndexerSchema.permissionsUser.user, parent.id),
@@ -183,6 +186,7 @@ AccountRef.implement({
       description: "The Permissions on Registries granted to this Account.",
       type: RegistryPermissionsUserRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.registry.chainId),
@@ -220,6 +224,7 @@ AccountRef.implement({
       description: "The Permissions on Resolvers granted to this Account.",
       type: ResolverPermissionsUserRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.resolver.chainId),

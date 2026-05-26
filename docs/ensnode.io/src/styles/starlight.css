@@ -36,6 +36,18 @@
   --color-gray-800: #2a3c43;
   --color-gray-900: #1a2c33;
   --color-gray-950: var(--color-primary-dark);
+
+  /* Sidebar active/hover colors */
+  --sidebar-active-bg: rgba(0, 129, 189, 0.1);
+  --sidebar-active-color: #0081bd;
+  --sidebar-icon-bg: rgba(128, 128, 128, 0.1);
+  --sidebar-icon-color: #9ca3af;
+
+  /* Aside colors */
+  --aside-danger-color: #f43f5e;
+  --aside-caution-color: #f97316;
+  --aside-note-color: #3b82f6;
+  --aside-tip-color: #007c23;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -82,7 +94,7 @@
 /* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
 @media (min-width: 50rem) {
   .page[data-sidebar-docked] {
-    --sl-sidebar-docked-peek: 1rem;
+    --sl-sidebar-docked-peek: 4rem;
     /* Match Starlight splash / no-sidebar content width (default with sidebar is 45rem). */
     --sl-content-width: 67.5rem;
   }
@@ -94,7 +106,6 @@
   .page[data-sidebar-docked] nav.sidebar {
     position: fixed;
     inset-block: var(--sl-nav-height) 0;
-    inset-inline-start: 0;
     z-index: var(--sl-z-index-menu);
     width: var(--sl-sidebar-docked-peek);
     overflow: hidden;
@@ -116,24 +127,24 @@
     border-inline-end: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar::after {
-    content: "›";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 0;
-    width: var(--sl-sidebar-docked-peek);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sl-color-gray-3);
-    font-size: 1.125rem;
-    line-height: 1;
-    pointer-events: none;
+  /* Docked + collapsed: show only the top-level topic icons */
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    .sidebar-content
+    > :not(.starlight-sidebar-topics) {
+    display: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar:hover::after,
-  .page[data-sidebar-docked] nav.sidebar:focus-within::after {
-    opacity: 0;
+  .page[data-sidebar-docked]
+    nav.sidebar:not(:hover):not(:focus-within)
+    .starlight-sidebar-topics-icon
+    + div {
+    display: none;
+  }
+
+  /* Docked + collapsed: Highlight only the icon of the current topic */
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    a.starlight-sidebar-topics-current {
+    background-color: transparent !important;
   }
 }
 
@@ -193,15 +204,15 @@ a[rel="prev"]:hover {
 .sl-markdown-content h4,
 .sl-markdown-content h5,
 .sl-markdown-content h6 {
-  color: var(--sl-color-accent-high);
+  color: var(--sl-color-white);
 }
 
 .sl-markdown-content a:hover:not(:where(.not-content *)) > span {
   color: var(--sl-color-accent);
 }
 
-.sl-markdown-content > p a:not(:has(code)),
-.sl-markdown-content :is(ul, ol) > li a:not(:has(code)),
+.sl-markdown-content > p a:not(:has(code), [role="tab"]),
+.sl-markdown-content :is(ul, ol) > li a:not(:has(code), [role="tab"]),
 .starlight-aside__content a {
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -308,40 +319,295 @@ a[rel="prev"]:hover {
     background-color 0.2s ease-in-out;
 }
 
-/* Only apply hover effects to non-selected items */
-#starlight__sidebar a:not([aria-current="page"]):hover {
+#starlight__sidebar .starlight-sidebar-topics a,
+#starlight__sidebar .top-level > li > a,
+#starlight__sidebar .top-level > li > details > summary .group-label span,
+#starlight__sidebar a[aria-current="page"] {
+  font-weight: 500;
+}
+
+/* Only apply hover effects to: 
+* * non-selected items 
+* * expandable items (in all states), including nested ones
+*/
+#starlight__sidebar a:not([aria-current="page"]):hover,
+#starlight__sidebar details details > summary:hover,
+#starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
   transform: translateX(2px);
   border-radius: 6px;
 }
 
-a.starlight-sidebar-topics-current {
-  background-color: rgb(0, 128, 188) !important;
-  color: white !important;
+/** Additional styling required for the
+ * expandable items in the sidebar
+ */
+#starlight__sidebar details details > summary:hover {
+  & span {
+    color: var(--sl-color-white);
+  }
+}
+
+#starlight__sidebar details details > summary,
+#starlight__sidebar details > summary {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    color: var(--sl-color-white);
+  }
+}
+
+a.starlight-sidebar-topics-current,
+#starlight__sidebar a[aria-current="page"] {
+  background-color: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-color) !important;
   border-radius: 6px;
+  transform: none !important;
 }
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
-  transform: scale(1.1);
-  filter: brightness(1.2) contrast(1.1);
-  box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
-  border-radius: 4px;
-  transition:
-    transform 0.2s ease-in-out,
-    filter 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+  background-color: rgba(0, 129, 189, 0.15) !important;
+  color: var(--sidebar-active-color) !important;
 }
 
-/* Make sure that all non-top-level sidebar items are not enlarged and non-bold */
+/* Additional styles for hover states of the sidebar items */
+.starlight-sidebar-topics a:hover {
+  & .starlight-sidebar-topics-icon {
+    background-color: var(--sidebar-icon-bg);
+    color: var(--sidebar-icon-color);
+  }
+
+  color: var(--sl-color-white);
+}
+
+/* Make sure that all non-top-level sidebar items are:
+ * * not enlarged
+ * * not bolded 
+ * * the same color as the rest of the sidebar text
+ */
 ul.top-level details details > summary .group-label span {
   @media (min-width: 50rem) {
     font-size: var(--sl-text-sm);
   }
 
   font-weight: normal;
+  color: var(--sl-color-gray-2);
+}
+
+/* Customize badge styles in the sidebar */
+.sl-badge:is(.danger) {
+  border-color: var(--aside-danger-color);
+  background-color: var(--aside-danger-color);
 }
 
 /* Make sure that social icons in the sidebar do not move on hover */
 .sidebar-content .social-icons a {
   transform: none !important;
+}
+
+/* Align "tablist" component to the left 
+ * and remove the default full-width underline
+ */
+starlight-tabs ul[role="tablist"] {
+  padding-left: 0;
+  border-bottom: none;
+
+  & a[role="tab"] {
+    padding-bottom: 8px;
+  }
+}
+
+/* Add custom styling to aside tip/caution/note components */
+.starlight-aside {
+  padding: 20px 16px;
+
+  border-radius: 12px;
+}
+
+.starlight-aside__title {
+  color: var(--sl-color-white);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 125% */
+}
+
+.starlight-aside__content {
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 171.429% */
+
+  margin-top: 10px;
+
+  & pre {
+    margin-top: 10px;
+  }
+
+  & .sl-link-card {
+    background-color: var(--sl-color-black);
+
+    & a {
+      text-decoration: none;
+    }
+  }
+}
+
+.starlight-aside__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.starlight-aside--tip {
+  border: 1px solid color-mix(in srgb, var(--aside-tip-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-tip-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-tip-color);
+  }
+
+  & a {
+    color: var(--aside-tip-color);
+  }
+
+  & .sl-link-card:hover {
+    border-color: var(--aside-tip-color);
+
+    & .title {
+      color: var(--aside-tip-color);
+    }
+
+    & .icon {
+      color: var(--aside-tip-color);
+    }
+  }
+}
+
+.starlight-aside--danger {
+  border: 1px solid color-mix(in srgb, var(--aside-danger-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-danger-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-danger-color);
+  }
+
+  & a {
+    color: var(--aside-danger-color);
+  }
+
+  & .sl-link-card:hover {
+    border-color: var(--aside-danger-color);
+
+    & .title {
+      color: var(--aside-danger-color);
+    }
+
+    & .icon {
+      color: var(--aside-danger-color);
+    }
+  }
+}
+
+.starlight-aside--caution {
+  border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-caution-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-caution-color);
+  }
+
+  & a {
+    color: var(--aside-caution-color);
+  }
+
+  & pre {
+    background-color: rgba(103, 61, 73, 0.05);
+    border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
+  }
+
+  & .sl-link-card {
+    border-color: var(--aside-caution-color);
+
+    & .title {
+      color: var(--aside-caution-color);
+    }
+
+    & .icon {
+      color: var(--aside-caution-color);
+    }
+  }
+}
+
+.starlight-aside--note {
+  border: 1px solid color-mix(in srgb, var(--aside-note-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-note-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-note-color);
+  }
+
+  & a {
+    color: var(--aside-note-color);
+  }
+
+  & .sl-link-card {
+    border-color: var(--aside-note-color);
+
+    & .title {
+      color: var(--aside-note-color);
+    }
+
+    & .icon {
+      color: var(--aside-note-color);
+    }
+  }
+}
+
+/* Custom icon logic for specific sidebar items based on URL - 
+ * hack since Starlight doesn't allow overriding icons directly. */
+
+.starlight-sidebar-topics-icon svg {
+  display: none; /* Hide the default SVG icon */
+}
+
+/* Default sidebar icon (parent) */
+.starlight-sidebar-topics-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--sidebar-icon-color);
+  border: none !important;
+  box-sizing: border-box;
+}
+
+/* The custom icon injection*/
+.starlight-sidebar-topics-icon::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--sidebar-icon) center / contain no-repeat;
+  mask: var(--sidebar-icon) center / contain no-repeat;
+}
+
+.starlight-sidebar-topics a[href*="/integrate"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/integrate-with-ensv2.svg");
+}
+.starlight-sidebar-topics a[href*="/hosted-instances"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/hosted-instances.svg");
+}
+.starlight-sidebar-topics a[href*="/self-host"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/self-host-ensnode.svg");
+}
+.starlight-sidebar-topics a[href*="/services"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/ensnode-services.svg");
+}
+.starlight-sidebar-topics a[href*="/reference"] .starlight-sidebar-topics-icon {
+  --sidebar-icon: url("../assets/custom-sidebar-icons/reference.svg");
 }

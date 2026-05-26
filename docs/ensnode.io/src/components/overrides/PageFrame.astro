@@ -5,10 +5,7 @@ const { hasSidebar, entry } = Astro.locals.starlightRoute;
 const sidebarDocked = entry.data.sidebarDocked === true;
 ---
 
-<div
-  class="page sl-flex"
-  data-sidebar-docked={sidebarDocked ? "" : undefined}
->
+<div class="page sl-flex" data-sidebar-docked={sidebarDocked ? "" : undefined}>
   <header class="header"><slot name="header" /></header>
   {
     hasSidebar && (

@@ -5,7 +5,6 @@ import {
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
@@ -30,6 +29,12 @@ export const indexingStatusCache = lazyProxy<IndexingStatusCache>(
   () =>
     new SWRCache<CrossChainIndexingStatusSnapshot>({
       fn: async function loadIndexingStatusSnapshot() {
+        // Async import `di` here to avoid circular dependency between this cache module and the DI container module.
+        // NOTE: It will not be required soon, as we plan to create a factory function for this cache
+        // that accepts the necessary dependencies as parameters, instead of importing from the DI container.
+        const di = await import("@/di").then((mod) => mod.default);
+        const { ensDbClient } = di.context;
+
         try {
           const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 

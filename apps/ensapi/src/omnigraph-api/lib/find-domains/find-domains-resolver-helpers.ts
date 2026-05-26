@@ -1,6 +1,6 @@
 import { asc, desc, type SQL, sql } from "drizzle-orm";
 
-import { ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import type { DomainCursor } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
@@ -51,6 +51,7 @@ export function truncateNameForCursor(name: string | null): string | null {
  * config wired up).
  */
 function getOrderColumn(orderBy: typeof DomainsOrderBy.$inferType): SQL {
+  const { ensIndexerSchema } = di.context;
   switch (orderBy) {
     case "NAME":
       return sql`left(${ensIndexerSchema.domain.canonicalName}, ${sql.raw(String(CANONICAL_NAME_SORT_PREFIX))})`;
@@ -100,6 +101,7 @@ export function cursorFilter(
   // "after" with ASC and "before" with DESC both step forward in cursor order (greater-than).
   const useGreaterThan = (direction === "after") !== (queryOrderDir === "DESC");
   const op = sql.raw(useGreaterThan ? ">" : "<");
+  const { ensIndexerSchema } = di.context;
   const idCmp = sql`${ensIndexerSchema.domain.id} ${op} ${cursor.id}`;
 
   // NULL cursor values need explicit handling because Postgres tuple comparison with NULL yields
@@ -154,6 +156,7 @@ export function orderFindDomains(
     ? sql`${orderColumn} DESC NULLS LAST`
     : sql`${orderColumn} ASC NULLS LAST`;
 
+  const { ensIndexerSchema } = di.context;
   // Always include id as tiebreaker for stable ordering
   const tiebreaker = effectiveDesc
     ? desc(ensIndexerSchema.domain.id)

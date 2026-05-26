@@ -1,0 +1,68 @@
+---
+title: ENS Unigraph SQL
+description: Query the unified onchain state of ENSv1 and ENSv2 directly over SQL.
+sidebar:
+  label: Overview
+---
+
+import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
+
+The **ENS Unigraph** combines every ENSv1 "Nametree" (the mainnet ENS Registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, and more) and the ENSv2 "Namegraph" into a **single unified data model** — indexed into [ENSDb](/docs/services/ensdb), a standard PostgreSQL database.
+
+**ENS Unigraph SQL** is direct, read-only SQL access to that data. The [ENS Omnigraph API](/docs/integrate/omnigraph) is built _on top of_ the Unigraph; Unigraph SQL is the layer beneath it, for use cases that go past what the Omnigraph exposes — custom analytics, data pipelines, dashboards, or building your own service. Because it's just Postgres, you can query it from **any language with a Postgres driver** — TypeScript, Python, Rust, Go, and more.
+
+<Aside type="caution" title="Requires a self-hosted ENSNode">
+  SQL access connects directly to your ENSDb (PostgreSQL) instance, so you need to run your own
+  ENSNode — NameHash's hosted instances don't expose direct database access. See the [self-hosting
+  overview](/docs/self-host) to get an instance running. If you'd rather use a hosted API, reach for
+  the [ENS Omnigraph API](/docs/integrate/omnigraph) instead.
+</Aside>
+
+## One model across ENSv1 and ENSv2
+
+The Unigraph models both protocol versions with the **same polymorphic entities**, so the shape of your query rarely changes between an ENSv1 and an ENSv2 name:
+
+- **Domain** — any name, on either protocol version. A `type` discriminator (`ENSv1Domain` / `ENSv2Domain`) tells you which, but the columns you read are shared.
+- **Registry** — the contracts that hold subnames. ENSv1 and ENSv2 both follow the same `Registry → Domain → (sub)Registry → Domain → …` namegraph shape.
+- **Account** — an address; owners, registrants, and permission holders all point here.
+- **Registration** & **Renewal** — the lifecycle of a name, polymorphic across registration types (`.eth` `BaseRegistrar`, `NameWrapper`, 3DNS, and ENSv2 Registry registrations).
+- **Resolver** records — indexed resolver state (addresses, text records, content hashes).
+- **Label** — the `labelHash` → label mapping that heals hashed labels into human-readable names.
+- **Permissions** — the ENSv2 roles model for who can do what in a specific contract.
+
+## The Canonical Nametree
+
+The **Canonical Nametree** is the set of all Domains that have an inferrable **Canonical Name** — materialized from the namegraph. For every Domain in it, the canonical fields are populated — `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth` — across both ENSv1 and ENSv2. That means you can look a name up by `canonical_name = 'vitalik.eth'`, order by `canonical_depth`, or walk a name's path **without branching on protocol version** and without traversing the namegraph yourself.
+
+Multichain coverage is part of the same model: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are materialized into the same Unigraph as mainnet `.eth`, so a single query spans every indexable name.
+
+<Aside type="caution" title="Not a substitute for ENS Resolution">
+  The Unigraph mirrors onchain state; ENS's resolution-time behavior is applied _on top_ of it by
+  [ENSApi](/docs/services/ensapi). A direct SQL read of resolver records is therefore **not**
+  ENSIP-10 / CCIP-Read compliant and **cannot** be used as a source of truth for name resolution.
+  For correct resolution, use the [ENS Omnigraph API](/docs/integrate/omnigraph) (which adds ENS
+  Protocol Acceleration on top of the Unigraph). Use Unigraph SQL for analytics, discovery, and
+  custom indexing.
+</Aside>
+
+## Get started
+
+<CardGrid>
+  <LinkCard
+    title="Examples"
+    description="Domain by name, account domains, and indexing status — in raw SQL and with the ensdb-sdk."
+    href="/docs/integrate/unigraph/examples"
+  />
+
+<LinkCard
+  title="Schema Reference"
+  description="Every table, column, and index in the Unigraph data model."
+  href="/docs/integrate/unigraph/schema-reference"
+/>
+
+  <LinkCard
+    title="ENSDb (service)"
+    description="How the Unigraph is indexed, stored, and self-hosted."
+    href="/docs/services/ensdb"
+  />
+</CardGrid>
