@@ -497,6 +497,10 @@ starlight-tabs ul[role="tablist"] {
     color: var(--aside-tip-color);
   }
 
+  & code {
+    background-color: color-mix(in srgb, var(--aside-tip-color) 12%, transparent);
+  }
+
   & .sl-link-card:hover {
     border-color: var(--aside-tip-color);
 
@@ -522,6 +526,10 @@ starlight-tabs ul[role="tablist"] {
     color: var(--aside-danger-color);
   }
 
+  & code {
+    background-color: color-mix(in srgb, var(--aside-danger-color) 12%, transparent);
+  }
+
   & .sl-link-card:hover {
     border-color: var(--aside-danger-color);
 
@@ -545,6 +553,10 @@ starlight-tabs ul[role="tablist"] {
 
   & a {
     color: var(--aside-caution-color);
+  }
+
+  & code {
+    background-color: rgba(103, 61, 73, 0.05);
   }
 
   & pre {
