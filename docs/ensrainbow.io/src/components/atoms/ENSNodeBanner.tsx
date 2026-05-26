@@ -1,6 +1,6 @@
 import type { SVGImageProps } from "../../types/IconTypes.ts";
 
-export const ENSNodeSchema = (props: SVGImageProps) => (
+export const ENSNodeBanner = (props: SVGImageProps) => (
   <svg
     className={props.styles ? props.styles : ""}
     width="149"

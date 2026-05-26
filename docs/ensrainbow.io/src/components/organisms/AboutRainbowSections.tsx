@@ -3,7 +3,7 @@ import { Fragment } from "react";
 
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 import ensNode from "../../assets/ENSNodeBannerLight.svg";
-import { ENSNodeSchema } from "../atoms/ENSNodeSchema.tsx";
+import { ENSNodeBanner } from "../atoms/ENSNodeBanner.tsx";
 import { ENSProfile } from "../atoms/ENSProfile.tsx";
 import { ENSProfileMobile } from "../atoms/ENSProfileMobile.tsx";
 import { LearnMoreButton } from "../atoms/LearnMoreButton.tsx";
@@ -95,7 +95,7 @@ const rainbowSections: AboutRainbowProps[] = [
         >
           ENSNode
         </a>
-        , the full-stack development platform for ENSv2.
+        , the full&#8288;&#8211;&#8288;stack development platform for ENSv2.
       </>
     ),
     descriptionExternalElements: (
@@ -104,17 +104,10 @@ const rainbowSections: AboutRainbowProps[] = [
     sectionBackgroundName: "",
     isTextOnTheLeft: true,
     mobileImageOnTop: true,
-    alignImageEnd: true,
-    normalImage: {
-      source: ensNode.src,
-      tagWidth: 149,
-      tagHeight: 28,
-      alt: "ENSNode sidecar service ENSRainbow",
-    },
     svgImage: (
-      <>
-        <ENSNodeSchema styles="relative z-10 w-full h-auto" />
-      </>
+      <div className="w-full flex flex-row justify-center items-center xl:justify-end pt-7 pb-5 sm:max-xl:pt-16 sm:max-xl:pb-8">
+        <ENSNodeBanner styles="relative z-10 w-2/3 sm:w-1/2 xl:w-3/4 h-auto" />
+      </div>
     ),
   },
 ];

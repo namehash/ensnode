@@ -12,12 +12,11 @@ export type AboutRainbowProps = {
   normalImage?: ImageCharacteristics;
   designatedMobileImage?: React.ReactNode;
   mobileImageOnTop: boolean;
-  alignImageEnd?: boolean;
 };
 export default function AboutRainbow(props: AboutRainbowProps) {
   return (
     <section className="box-border h-fit w-full flex flex-col items-center justify-center py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
-      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 xl:gap-16 max-w-[1216px]">
+      <div className="w-full flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 max-w-[1216px]">
         {!props.isTextOnTheLeft && (
           <div
             className={cc([
@@ -60,31 +59,22 @@ export default function AboutRainbow(props: AboutRainbowProps) {
           {props.descriptionExternalElements && props.descriptionExternalElements}
         </div>
 
-        {props.isTextOnTheLeft && (
-          <div
-            className={cc([
-              "relative hidden sm:flex flex-row items-center w-full h-2/3 xl:h-full rounded-none bg-origin-border shrink-0",
-              props.alignImageEnd ? "justify-end xl:w-3/5" : "justify-center xl:w-3/5",
-            ])}
-          >
-            {props.normalImage ? (
-              <img
-                className={cc([
-                  props.alignImageEnd
-                    ? "relative z-10 w-full h-auto"
-                    : "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                  props.normalImage.styles,
-                ])}
-                src={props.normalImage.source}
-                alt="section image"
-                width={props.normalImage.tagWidth}
-                height={props.normalImage.tagHeight}
-              />
-            ) : (
-              props.svgImage
-            )}
-          </div>
-        )}
+        <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border shrink-0">
+          {props.normalImage ? (
+            <img
+              className={cc([
+                "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
+                props.normalImage.styles,
+              ])}
+              src={props.normalImage.source}
+              alt="section image"
+              width={props.normalImage.tagWidth}
+              height={props.normalImage.tagHeight}
+            />
+          ) : (
+            props.svgImage
+          )}
+        </div>
 
         {!props.mobileImageOnTop && (
           <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain shrink-0">
