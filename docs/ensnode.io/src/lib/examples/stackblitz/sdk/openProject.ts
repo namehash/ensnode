@@ -10,7 +10,8 @@ export function openStackBlitzProject(project: PlaygroundProject): void {
     openFile: project.openFile ?? project.entryFileName,
     newWindow: true,
     view: stackBlitzViewForPlayground(project.view),
-    theme: "light",
     startScript: stackBlitzStartScriptForRuntime(project.runtime),
+    // open project should use default theme since it's NOT embedded in the our docs with light theme
+    theme: "default"
   });
 }
