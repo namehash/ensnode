@@ -32,7 +32,7 @@ export default function FullRainbow() {
         {
           label: (
             <div className="flex flex-row flex-nowrap justify-start items-center gap-2">
-              ENSRainbow + ENSNode + ENSRainbowBeam {badge("Target")}
+              ENSRainbowBeam + ENSNode {badge("Target")}
             </div>
           ),
           value: 99,
