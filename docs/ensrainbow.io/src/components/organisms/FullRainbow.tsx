@@ -27,7 +27,7 @@ export default function FullRainbow() {
           ),
           value: 94,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 71%, #F09C0A 87.5%, #EA2F86 105%)",
+            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.3%, #1EFDFF 36.1%, #93E223 52.4%, #FAE000 70.2%, #F09C0A 86.6%, #EA2F86 103.9%)",
         },
         {
           label: (
@@ -37,7 +37,7 @@ export default function FullRainbow() {
           ),
           value: 99,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 69%, #F09C0A 84.5%, #EA2F86 100%)",
+            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 17.8%, #1EFDFF 35%, #93E223 50.9%, #FAE000 66.2%, #F09C0A 81.1%, #EA2F86 100%)",
         },
       ]}
       title="Name Healing Coverage"
