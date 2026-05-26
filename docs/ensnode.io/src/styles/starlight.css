@@ -650,3 +650,41 @@ starlight-tabs ul[role="tablist"] {
 .starlight-sidebar-topics a[href*="/reference"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/reference.svg");
 }
+
+/* Rounded corners for the code snippets in the text-body. */
+
+/* Radius + overflow live on the figure so the horizontal scrollbar inside
+   <pre> gets clipped by the rounded shape instead of overlapping it. */
+.sl-markdown-content .expressive-code .frame {
+  border-radius: 12px;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 25%);
+}
+
+/* Make the background of horizontal scrollbar transparent */
+.sl-markdown-content .expressive-code pre::-webkit-scrollbar {
+  background: transparent;
+}
+
+/* Add margin to the scrollbar track to prevent it from touching the rounded corners */
+.sl-markdown-content .expressive-code pre::-webkit-scrollbar-track {
+  margin-inline: 12px; /* matches the corner radius */
+}
+
+/* Other elements are rounded accordingly */
+.sl-markdown-content .expressive-code figcaption:is(.header),
+.sl-markdown-content .expressive-code figcaption:is(.header) > span {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.sl-markdown-content .expressive-code pre {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Additional border for the "filename" tab in the code snippets */
+.sl-markdown-content .expressive-code figcaption:is(.header) > span {
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+}

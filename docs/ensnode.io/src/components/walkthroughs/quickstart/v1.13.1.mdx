@@ -32,7 +32,7 @@ With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to
 
 <HostedInstanceSdkVersionWarning />
 
-```ts
+```ts title="example.ts"
 // create and extend an EnsNodeClient with Omnigraph API support
 const client = createEnsNodeClient({ url: process.env.ENSNODE_URL! }).extend(omnigraph);
 
@@ -74,7 +74,7 @@ With `enskit`, leverage ENSNode and the Omnigraph to power your React components
 
 <HostedInstanceSdkVersionWarning />
 
-```tsx
+```tsx title="example.tsx"
 // this is fully typechecked and supports editor autocomplete!
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
