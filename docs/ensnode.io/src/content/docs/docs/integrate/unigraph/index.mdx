@@ -36,7 +36,7 @@ The **Canonical Nametree** is the set of all Domains that have an inferrable **C
 
 Multichain coverage is part of the same model: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are materialized into the same Unigraph as mainnet `.eth`, so a single query spans every indexable name.
 
-<Aside type="caution" title="Not a substitute for ENS Resolution">
+<Aside type="danger" title="Not a substitute for ENS Resolution">
   The Unigraph mirrors onchain state; ENS's resolution-time behavior is applied _on top_ of it by
   [ENSApi](/docs/services/ensapi). A direct SQL read of resolver records is therefore **not**
   ENSIP-10 / CCIP-Read compliant and **cannot** be used as a source of truth for name resolution.

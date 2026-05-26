@@ -15,21 +15,22 @@ Fetch a Domain by its canonical name. Because `canonical_name` is materialized a
 
 <Tabs syncKey="unigraph-client">
   <TabItem label="SQL">
-```sql
-SELECT * FROM ensindexer_0.domains
-WHERE canonical_name = 'vitalik.eth';
-```
+    ```sql
+    SELECT * FROM ensindexer_0.domains
+    WHERE canonical_name = 'vitalik.eth';
+    ```
   </TabItem>
+
   <TabItem label="ensdb-sdk (TypeScript)">
-```typescript
-import { eq } from 'drizzle-orm';
+    ```typescript
+    import { eq } from 'drizzle-orm';
 
-const [vitalik] = await ensDb
-.select()
-.from(ensIndexerSchema.domain)
-.where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+    const [vitalik] = await ensDb
+      .select()
+      .from(ensIndexerSchema.domain)
+      .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
 
-```
+    ```
+
   </TabItem>
 </Tabs>
-```
