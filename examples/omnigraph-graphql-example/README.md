@@ -8,13 +8,13 @@ Companion to the [ENS Omnigraph GraphQL API integration guide](https://ensnode.i
 
 ## Usage (with NameHash Hosted Instance)
 
-> **Schema version:** This example tracks the latest Omnigraph schema (ENSNode 1.15.0). It connects to the `blue` hosted deployment by default, which runs `1.15.0`; the production hosted instances still serve an older schema (`1.13.x`) that wouldn't satisfy these queries. If you query a hosted instance from your own app, match its ENSNode version with the same `enskit`/`enssdk` version.
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.13.x`). If you query a different ENSNode version, you may need to adjust the query format.
 
 ```sh
 # from the ENSNode monorepo root
 pnpm install
 
-ENSNODE_URL=https://api.v2-sepolia.blue.ensnode.io pnpm -F omnigraph-graphql-example start
+pnpm -F omnigraph-graphql-example start
 ```
 
 ## Usage (with Local ENSNode)
