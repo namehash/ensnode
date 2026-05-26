@@ -10,7 +10,36 @@ import StaticExampleNote from "./StaticExampleNote.astro";
 import { buildSdkSetupTabs } from "./build-sdk-setup-tabs";
 import { exampleTabClass, staticExampleSectionXClass } from "./example-tab-styles";
 
+type SdkIntegration = "enssdk" | "enskit";
+
+const SDK_PANEL_CONFIG: Record<
+  SdkIntegration,
+  {
+    badge: string;
+    lang: string;
+    docsHref: string;
+    docsLabel: string;
+    docsDetail: string;
+  }
+> = {
+  enssdk: {
+    badge: "TypeScript",
+    lang: "typescript",
+    docsHref: "/docs/integrate/integration-options/enssdk",
+    docsLabel: "enssdk docs",
+    docsDetail: "gql.tada plugin and tsconfig setup.",
+  },
+  enskit: {
+    badge: "TSX (React)",
+    lang: "tsx",
+    docsHref: "/docs/integrate/integration-options/enskit",
+    docsLabel: "enskit docs",
+    docsDetail: "gql.tada plugin and provider setup.",
+  },
+};
+
 interface Props {
+  integration: SdkIntegration;
   exampleId: string;
   uid: string;
   snippet: string;
@@ -21,6 +50,7 @@ interface Props {
 }
 
 const {
+  integration,
   exampleId,
   uid,
   snippet,
@@ -30,9 +60,11 @@ const {
   hostedInstanceNamespace,
 } = Astro.props;
 
+const config = SDK_PANEL_CONFIG[integration];
+
 const { tabs, panels } = buildSdkSetupTabs({
   uid,
-  prefix: "enskit",
+  prefix: integration,
   setupSnippets,
 });
 
@@ -46,12 +78,12 @@ const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-t
   staticExampleId={exampleId}
 />
 
-<StaticExampleCodeSection badge="TSX (React)" code={snippet} lang="tsx" />
+<StaticExampleCodeSection badge={config.badge} code={snippet} lang={config.lang} />
 
 {
   responseJson ? (
     <StaticExampleOutputSection
-      uid={`${uid}-enskit`}
+      uid={`${uid}-${integration}`}
       responseJson={responseJson}
       heading="Output"
     />
@@ -59,9 +91,12 @@ const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-t
 }
 
 <StaticExampleTabbedSection
-  tabsRootId={`${uid}-enskit`}
+  tabsRootId={`${uid}-${integration}`}
   tablistAriaLabel="Package manager setup"
-  srHeading={{ id: `${uid}-enskit-setup-heading`, label: "enskit package manager setup" }}
+  srHeading={{
+    id: `${uid}-${integration}-setup-heading`,
+    label: `${integration} package manager setup`,
+  }}
   tabs={tabs}
   panels={panels}
   tabButtonClass={exampleTabClass}
@@ -71,7 +106,7 @@ const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-t
 <section class={`pb-4 ${staticExampleSectionXClass}`}>
   <StaticExampleNote>
     See the{" "}
-    <a href="/docs/integrate/integration-options/enskit" class={docsLinkClass}>enskit docs</a>
-    {" "}for gql.tada plugin and provider setup.
+    <a href={config.docsHref} class={docsLinkClass}>{config.docsLabel}</a>
+    {" "}for {config.docsDetail}
   </StaticExampleNote>
 </section>

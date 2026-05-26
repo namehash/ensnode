@@ -16,7 +16,6 @@ export default defineConfig({
       "@scripts": resolve(docsRoot, "src/scripts"),
       "@styles": resolve(docsRoot, "src/styles"),
       "@workspace": resolve(docsRoot, "../.."),
-      src: resolve(docsRoot, "src"),
     },
   },
   test: {

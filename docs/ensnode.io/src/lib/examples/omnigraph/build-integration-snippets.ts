@@ -74,7 +74,7 @@ ${runEnv} pnpm run dev`,
 }
 
 /** Strip GraphQL `#` line comments so operation parsing ignores comment text like `your query here`. */
-export function stripGraphQLLineComments(query: string): string {
+function stripGraphQLLineComments(query: string): string {
   return query.replace(/^\s*#.*$/gm, "");
 }
 
@@ -90,7 +90,7 @@ export function extractGraphQLOperationName(query: string): string {
  */
 export function parseGraphQLVariableTypes(query: string): Record<string, string> {
   const sigMatch = stripGraphQLLineComments(query).match(
-    /(?:query|mutation|subscription)\s+\w+\s*\(([^)]+)\)/,
+    /(?:query|mutation|subscription)(?:\s+\w+)?\s*\(([^)]+)\)/,
   );
   if (!sigMatch) return {};
   const types: Record<string, string> = {};
@@ -132,8 +132,11 @@ function indentGraphqlQuery(query: string): string {
     .join("\n");
 }
 
-function indentVariablesBlock(varsLiteral: string, indent: string): string {
-  return varsLiteral.replace(/\n/g, `\n${indent}`);
+function indentBlock(block: string, indent: string): string {
+  return block
+    .split("\n")
+    .map((line) => (line ? `${indent}${line}` : line))
+    .join("\n");
 }
 
 /** Build a runnable enssdk TypeScript snippet for the given query and variables. */
@@ -148,7 +151,7 @@ export function buildEnssdkSnippet(params: {
   const hasVars = Object.keys(variables).length > 0;
   const varsLiteral = formatVariablesForTypeScript(variables, types);
   const indentedQuery = indentGraphqlQuery(query);
-  const variablesBlock = hasVars ? indentVariablesBlock(varsLiteral, "  ") : "{}";
+  const variablesBlock = hasVars ? indentBlock(varsLiteral, "  ") : "{}";
   const interpretedNameImport = needsInterpretedName
     ? 'import { asInterpretedName } from "enssdk";\n'
     : "";
@@ -185,7 +188,7 @@ export function buildEnskitSnippet(params: {
   const hasVars = Object.keys(variables).length > 0;
   const varsLiteral = formatVariablesForTypeScript(variables, types);
   const indentedQuery = indentGraphqlQuery(query);
-  const variablesBlock = hasVars ? indentVariablesBlock(varsLiteral, "    ") : "{}";
+  const variablesBlock = hasVars ? indentBlock(varsLiteral, "    ") : "{}";
   const interpretedNameImport = needsInterpretedName
     ? 'import { asInterpretedName } from "enssdk";\n'
     : "";

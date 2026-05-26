@@ -26,9 +26,7 @@ export interface OmnigraphStaticExampleData {
   uid: string;
   query: string;
   variablesJson: string;
-  variablesObject: Record<string, unknown>;
   responseJson: string | null;
-  connectionBaseUrl: string;
   hostedInstanceDocUrl: string;
   hostedInstanceNamespace: ENSNamespaceId;
   adminUrl: string;
@@ -49,9 +47,7 @@ export function resolveOmnigraphStaticExample(exampleId: string): OmnigraphStati
     uid,
     query: example.query,
     variablesJson: stringifyJsonForDocs(example.variables),
-    variablesObject: example.variables,
     responseJson: example.response ? stringifyJsonForDocs(example.response) : null,
-    connectionBaseUrl: example.connection,
     hostedInstanceDocUrl: getHostedEnsNodeInstanceDocUrl(DOCS_HOSTED_INSTANCE_ANCHOR),
     hostedInstanceNamespace: DOCS_OMNIGRAPH_NAMESPACE,
     adminUrl: buildEnsAdminOmnigraphUrl({

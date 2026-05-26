@@ -62,10 +62,7 @@ function formatDiagnostic(diagnostic: ts.Diagnostic): string {
 }
 
 /** Return TypeScript errors for a generated integration snippet (empty if it typechecks). */
-export function getIntegrationSnippetTypeErrors(
-  snippet: string,
-  kind: IntegrationSnippetKind,
-): string[] {
+function getIntegrationSnippetTypeErrors(snippet: string, kind: IntegrationSnippetKind): string[] {
   mkdirSync(snippetTypecheckCacheRoot, { recursive: true });
   const dir = mkdtempSync(join(snippetTypecheckCacheRoot, `${kind}-`));
   const fileName = kind === "enskit" ? "snippet.tsx" : "snippet.ts";

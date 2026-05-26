@@ -4,8 +4,7 @@ import { Icon } from "@astrojs/starlight/components";
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
 import StaticExampleCard from "@components/molecules/omnigraph-static-example/StaticExampleCard.astro";
 import CurlStaticCodeExample from "@components/molecules/omnigraph-static-example/CurlStaticCodeExample.astro";
-import EnssdkStaticCodeExample from "@components/molecules/omnigraph-static-example/EnssdkStaticCodeExample.astro";
-import EnskitStaticCodeExample from "@components/molecules/omnigraph-static-example/EnskitStaticCodeExample.astro";
+import SdkStaticCodeExample from "@components/molecules/omnigraph-static-example/SdkStaticCodeExample.astro";
 import GraphqlStaticQueryExample from "@components/molecules/omnigraph-static-example/GraphqlStaticQueryExample.astro";
 import { exampleTabClass } from "@components/molecules/omnigraph-static-example/example-tab-styles";
 import { resolveOmnigraphStaticExample } from "@lib/examples/omnigraph/resolve-static-example";
@@ -87,7 +86,8 @@ const data = resolveOmnigraphStaticExample(id);
           />
         ) : null}
         {panel === "enssdk" ? (
-          <EnssdkStaticCodeExample
+          <SdkStaticCodeExample
+            integration="enssdk"
             exampleId={data.exampleId}
             uid={data.uid}
             snippet={data.enssdkSnippet}
@@ -98,7 +98,8 @@ const data = resolveOmnigraphStaticExample(id);
           />
         ) : null}
         {panel === "enskit" ? (
-          <EnskitStaticCodeExample
+          <SdkStaticCodeExample
+            integration="enskit"
             exampleId={data.exampleId}
             uid={data.uid}
             snippet={data.enskitSnippet}

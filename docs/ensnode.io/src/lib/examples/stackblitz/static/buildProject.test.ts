@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildStackBlitzPackageJson, buildStackBlitzProjectPayload } from "../sdk/buildPayload";
+import {
+  buildStackBlitzPackageJson,
+  buildStackBlitzProjectPayload,
+  sanitizeNpmPackageName,
+} from "../sdk/buildPayload";
 import { buildStaticExampleStackBlitzProject } from "./buildProject";
 
 describe("buildStaticExampleStackBlitzProject", () => {
@@ -45,5 +49,28 @@ describe("buildStackBlitzProjectPayload", () => {
     expect(payload.template).toBe("node");
     expect(packageJson.scripts.start).toBe("tsx src/index.ts");
     expect(packageJson.dependencies.enssdk).toBeTruthy();
+  });
+
+  it("generated package.json wins over project.files override", () => {
+    const project = buildStaticExampleStackBlitzProject("enssdk", {
+      title: "Example",
+      snippet: "export {}",
+    });
+    project.files["package.json"] = '{"name":"override"}';
+    const payload = buildStackBlitzProjectPayload(project);
+    const packageJson = JSON.parse(payload.files["package.json"]);
+
+    expect(packageJson.scripts.start).toBe("tsx src/index.ts");
+    expect(packageJson.dependencies.enssdk).toBeTruthy();
+  });
+});
+
+describe("sanitizeNpmPackageName", () => {
+  it("strips invalid characters and collapses hyphens", () => {
+    expect(sanitizeNpmPackageName("Hello World!!!")).toBe("hello-world");
+  });
+
+  it("falls back when sanitization yields an empty name", () => {
+    expect(sanitizeNpmPackageName("!!!")).toBe("stackblitz-project");
   });
 });

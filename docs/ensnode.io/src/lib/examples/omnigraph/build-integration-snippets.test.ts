@@ -99,6 +99,15 @@ describe("parseGraphQLVariableTypes", () => {
   it("returns empty object when there are no variables", () => {
     expect(parseGraphQLVariableTypes(namegraphQuery)).toMatchObject({});
   });
+
+  it("parses variables on unnamed operations", () => {
+    const unnamedQuery = `query ($name: InterpretedName!) {
+  domain(by: { name: $name }) { name }
+}`;
+    expect(parseGraphQLVariableTypes(unnamedQuery)).toMatchObject({
+      name: "InterpretedName!",
+    });
+  });
 });
 
 describe("formatVariablesForTypeScript", () => {

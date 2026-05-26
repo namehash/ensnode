@@ -15,10 +15,25 @@ export function buildStackBlitzStartScript(
   return `tsx ${entryFileName}`;
 }
 
+/** Normalize a human title into a valid npm package name for StackBlitz project.json. */
+export function sanitizeNpmPackageName(title: string): string {
+  let name = title
+    .toLowerCase()
+    .replace(/[^a-z0-9.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "");
+
+  if (!name || /^[.-]/.test(name)) {
+    name = name ? `project-${name.replace(/^[-.]+/, "")}` : "stackblitz-project";
+  }
+
+  return name || "stackblitz-project";
+}
+
 export function buildStackBlitzPackageJson(project: PlaygroundProject): string {
   return JSON.stringify(
     {
-      name: project.title.toLowerCase().replace(/\s+/g, "-"),
+      name: sanitizeNpmPackageName(project.title),
       version: "0.0.0",
       private: true,
       type: "module",
@@ -54,8 +69,8 @@ export function buildStackBlitzProjectPayload(project: PlaygroundProject): Proje
     description: project.description,
     template: STACKBLITZ_WEBCONTAINERS_TEMPLATE,
     files: {
-      "package.json": buildStackBlitzPackageJson(project),
       ...project.files,
+      "package.json": buildStackBlitzPackageJson(project),
       "tsconfig.json": project.files["tsconfig.json"] ?? project.tsconfig ?? defaultNodeTsconfig,
     },
   };

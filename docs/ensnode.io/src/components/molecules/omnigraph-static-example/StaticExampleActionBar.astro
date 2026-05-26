@@ -27,30 +27,22 @@ const actionButtonClass =
   {
     variant === "ensadmin" ? (
       <a
-        class={`${actionButtonClass} no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]`}
+        class={`${actionButtonClass} no-underline`}
         href={adminUrl}
         target="_blank"
         rel="noopener noreferrer">
         <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
         Run in ENSAdmin
       </a>
-    ) : staticExampleId ? (
-      <button type="button" class={actionButtonClass} data-static-example-id={staticExampleId}>
-        <StackBlitzLogo className="h-5 w-auto shrink-0" />
-        Run in StackBlitz
-      </button>
     ) : (
-      <button
-        type="button"
-        disabled
-        aria-disabled="true"
-        class={`${actionButtonClass} opacity-50 cursor-not-allowed`}>
+      <button type="button" class={actionButtonClass} data-static-example-id={staticExampleId}>
         <StackBlitzLogo className="h-5 w-auto shrink-0" />
         Run in StackBlitz
       </button>
     )
   }
   <StaticExamplePlaygroundHint
+    variant={variant}
     hostedInstanceDocUrl={hostedInstanceDocUrl}
     hostedInstanceNamespace={hostedInstanceNamespace}
   />
