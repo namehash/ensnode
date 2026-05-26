@@ -1,4 +1,5 @@
 export const integrateSidebarTopic = {
+  id: "integrate-with-ensv2",
   label: "Integrate with ENSv2",
   link: "/docs/integrate",
   icon: "rocket",
@@ -185,31 +186,11 @@ export const integrateSidebarTopic = {
         },
         {
           label: "enssdk (TypeScript)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enssdk",
-            },
-            {
-              label: "Interactive example ⚡",
-              link: "/docs/integrate/integration-options/enssdk/example",
-            },
-          ],
+          link: "/docs/integrate/integration-options/enssdk",
         },
         {
           label: "enskit (React)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enskit",
-            },
-            {
-              label: "Interactive example ⚡",
-              link: "/docs/integrate/integration-options/enskit/example",
-            },
-          ],
+          link: "/docs/integrate/integration-options/enskit",
         },
         {
           label: "ENS Omnigraph (GraphQL)",

@@ -183,13 +183,13 @@ The ENS Omnigraph API is a GraphQL API following the Relay specification, so you
 
 ### 4. Further Integration Options
 
-Beyond `enssdk`, `enskit`, and the Omnigraph GraphQL API, ENSNode exposes a deeper set of integration surfaces for advanced use cases:
+Beyond [`enssdk`](/docs/integrate/integration-options/enssdk), [`enskit`](/docs/integrate/integration-options/enskit), and the [Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api), ENSNode exposes a deeper set of integration surfaces for advanced use cases:
 
-- **ENSDb** — query the indexed ENS dataset directly over Postgres for custom analytics or your own service layer.
-- **enscli** — (coming soon) script ENSNode operations from the command line.
-- **ensskills** — (coming soon) AI agent tooling for working with ENS data.
-- **ensdb-cli** — (coming soon) share and load point-in-time ENSDb snapshots.
-- **ENSEngine** (coming soon) — subscribe to ENS-aware webhooks driven by changes in ENSDb.
+- **[ENSDb (SQL)](/docs/integrate/integration-options/ensdb)** — query the indexed ENSv1 and ENSv2 datasets directly via SQL for custom analytics or your own service layer, from any language with a Postgres driver.
+- **[enscli (CLI)](/docs/integrate/integration-options/enscli)** — resolve names, look up records, and run ad-hoc Omnigraph queries from the terminal — built for humans and AI agents alike.
+- **[ensskills (AI agents)](/docs/integrate/integration-options/ensskills)** — a curated set of skills that gives AI coding agents a well-defined contract for working with ENS.
+- **[ensdb-cli (ENSDb Snapshots)](/docs/integrate/integration-options/ensdb-cli)** — bootstrap a fresh ENSDb in minutes from portable, versioned snapshots instead of waiting days on a full historical backfill.
+- **[ENSEngine (webhooks)](/docs/integrate/integration-options/ensengine)** — subscribe to ENS-aware webhooks driven by changes in ENSDb, so your apps can stop polling and start reacting.
 
 <LinkCard
   title="See all Integration Options"
