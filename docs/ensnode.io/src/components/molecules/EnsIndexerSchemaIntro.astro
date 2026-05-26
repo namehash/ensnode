@@ -1,0 +1,22 @@
+---
+import { Aside } from "@astrojs/starlight/components";
+
+const { ensIndexerSchemaName = "ensindexer_0" } = Astro.props;
+---
+
+<Aside type="note" title="What is ENSIndexer Schema?">
+  <p>
+    The <a href="/docs/services/ensdb/concepts/glossary#ensindexer-schema">ENSIndexer Schema</a> is a
+    database schema within an <a href="/docs/services/ensdb/concepts/glossary#ensdb-instance"
+      >ENSDb instance</a
+    >, used to store indexed ENS data from a given <a
+      href="/docs/services/ensdb/concepts/glossary#ensindexer-instance">ENSIndexer instance</a
+    >. We use <code>{ensIndexerSchemaName}</code> as the <a
+      href="/docs/services/ensdb/concepts/glossary#ensindexer-schema-name">ENSIndexer Schema Name</a
+    > in examples on this page, but your <a
+      href="/docs/services/ensdb/concepts/glossary#ensindexer-instance">ENSIndexer instance</a
+    > may be configured to use a different schema name. Make sure to replace <code
+      >{ensIndexerSchemaName}</code
+    > with the actual schema name used by your ENSIndexer instance when querying the ENSDb instance directly.
+  </p>
+</Aside>

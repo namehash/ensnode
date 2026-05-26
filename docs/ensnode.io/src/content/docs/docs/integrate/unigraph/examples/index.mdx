@@ -38,6 +38,10 @@ FROM ensnode.metadata;
 npm install @ensnode/ensdb-sdk
 ```
 
+:::note[ENSDb Reader]
+The `EnsDbReader` object enables you to build custom queries against the Unigraph data model in ENSDb. Use the `ensDb` field to build queries with the Drizzle ORM, and the `ensIndexerSchema` field to reference database objects (i.e. the Unigraph tables) within the [ENSIndexer Schema](/docs/services/ensdb/concepts/glossary#ensindexer-schema) in a type-safe way.
+:::
+
 ```typescript
 import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
@@ -48,10 +52,6 @@ const { ensDb, ensIndexerSchema } = ensDbReader;
 
   </TabItem>
 </Tabs>
-
-:::note[Canonical fields]
-Canonical fields (`canonical_name`, `canonical_path`, `canonical_node`, `canonical_depth`) are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`.
-:::
 
 ## Examples
 
