@@ -683,6 +683,10 @@ starlight-tabs ul[role="tablist"] {
   border-bottom-right-radius: 12px;
 }
 
+.sl-markdown-content div[role="tabpanel"] > .expressive-code pre {
+  border-radius: 12px;
+}
+
 /* Additional border for the "filename" tab in the code snippets */
 .sl-markdown-content .expressive-code figcaption:is(.header) > span {
   border: 1px solid var(--color-border);
