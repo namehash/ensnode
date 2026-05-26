@@ -128,9 +128,10 @@ Every bit of this interpretation, decoding, and normalization is left to the app
 
 :::tip[Coming Soon 🚧]
 The [Omnigraph API](/docs/integrate/omnigraph) will support two major record resolution use-cases:
+
 1. Protocol-accurate 'raw' requests, without post processing, and
 2. Consumer-friendly semantic interpretation of records for, e.g. profile display.
-:::
+   :::
 
 ## It can't cleanly power NFT-reference → avatar use cases
 
@@ -174,7 +175,7 @@ Beyond the data-model limitations, the Subgraph's auto-generated GraphQL API lea
 - **Joins** in the auto-generated API perform certain multi-entity operations in ways that don't match what apps actually need, forcing client-side stitching.
 
 :::tip
-The [Omnigraph API](/docs/integrate/omnigraph) supports [Relay Connections](https://relay.dev/graphql/connections.htm) for paginated resources; your app gets lightning-quick infinite scroll with minimal work! If using [`enskit` (React)](/docs/integrate/integration-options/enskit), the `useOmnigraphQuery` hook comes with Omnigraph-specific local cache directives for instant resolution of cacheable values. The Omnigraph's idomatic GraphQL API also aims to match consumer query patterns as closely as possible to negate complex and bespoke client-side logic; if your use-case isn't yet supported, [open an issue on GitHub](https://github.com/namehash/ensnode/issues/new).
+The [Omnigraph API](/docs/integrate/omnigraph) supports [Relay Connections](https://relay.dev/graphql/connections.htm) for paginated resources; your app gets lightning-quick infinite scroll with minimal work! If using [`enskit` (React)](/docs/integrate/integration-options/enskit), the `useOmnigraphQuery` hook comes with Omnigraph-specific local cache directives for instant resolution of cacheable values. The Omnigraph's idiomatic GraphQL API also aims to match consumer query patterns as closely as possible to negate complex and bespoke client-side logic; if your use-case isn't yet supported, [open an issue on GitHub](https://github.com/namehash/ensnode/issues/new).
 :::
 
 :::tip[ENSNode's Indexing Status API]

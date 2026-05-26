@@ -16,7 +16,7 @@ To use ENSNode with `@ensdomains/ensjs`, follow the [ENSjs documentation for cus
 import { http, createClient } from "viem";
 import { mainnet } from "viem/chains";
 import { addEnsContracts } from "@ensdomains/ensjs";
-import { getSubgraphRecords } from "@ensdomains/ensjs/subgraph";
+import { getNamesForAddress } from "@ensdomains/ensjs/subgraph";
 
 const mainnetWithEns = addEnsContracts(mainnet);
 
@@ -37,7 +37,9 @@ const client = createClient({
   transport: http(),
 });
 
-const names = await getNamesForAddress(client, { name: "validator.eth" });
+const names = await getNamesForAddress(client, {
+  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // vitalik.eth
+});
 ```
 
 ## Well-Known Subgraph Queries
