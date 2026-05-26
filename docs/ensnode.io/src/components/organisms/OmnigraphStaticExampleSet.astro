@@ -12,10 +12,10 @@ import { resolveOmnigraphStaticExample } from "@lib/examples/omnigraph/resolve-s
 type StaticExampleIntegration = "omnigraph" | "enssdk" | "enskit" | "curl";
 
 const INTEGRATION_TABS = {
-  omnigraph: { label: "Omnigraph", icon: "seti:graphql" },
-  enssdk: { label: "Enssdk", icon: "seti:typescript" },
-  enskit: { label: "Enskit", icon: "seti:react" },
-  curl: { label: "Curl", icon: "window" },
+  omnigraph: { label: "omnigraph", icon: "seti:graphql" },
+  enssdk: { label: "enssdk", icon: "seti:typescript" },
+  enskit: { label: "enskit", icon: "seti:react" },
+  curl: { label: "curl", icon: "window" },
 } as const;
 
 const DEFAULT_INTEGRATIONS: StaticExampleIntegration[] = ["omnigraph", "enssdk", "enskit", "curl"];

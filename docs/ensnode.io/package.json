@@ -59,6 +59,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "enssdk": "workspace:*",
     "enskit": "workspace:*",
     "prettier": "catalog:",
     "prettier-plugin-astro": "catalog:",

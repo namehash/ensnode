@@ -803,6 +803,9 @@ importers:
       enskit:
         specifier: workspace:*
         version: link:../../packages/enskit
+      enssdk:
+        specifier: workspace:*
+        version: link:../../packages/enssdk
       prettier:
         specifier: 'catalog:'
         version: 3.6.2

@@ -19,4 +19,4 @@ export const staticExampleMutedTextClass =
 
 /** Shown under illustrative JSON output snapshots in static Omnigraph examples. */
 export const staticExampleOutputSnapshotNote =
-  "Output matches the GraphQL Response snapshot; live output depends on your ENSNode instance.";
+  "Output matches a GraphQL Response snapshot; live output depends on your ENSNode instance.";
