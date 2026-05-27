@@ -13,17 +13,17 @@ import { Aside, LinkCard } from "@astrojs/starlight/components";
 - How to store that processed data in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance).
 - How to store metadata about the [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance).
 
-
-## Building Your Own ENSDb Writer
-
+:::note[Build your own ENSDb Writer]
 You can build your own ENSDb Writer in any language, using any indexing framework, as long as you follow the [ENSDb Standard](/docs/services/ensdb/concepts/glossary#ensdb-standard). The ENSDb Standard defines rules and constraints for how an ENSDb Writer should write data into an ENSDb instance in a way that maintains the integrity of the data and supports interoperability with any ENSDb Reader.
 
 Your ENSDb Writer must include:
 - The _implementation_ of 1 or more standard compliant [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins).
 - The _implementation_ of an [EnsDbMetadataWriter](/docs/services/ensdb/concepts/glossary#ensdb-metadata-writer) that stores [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) overall, including which [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) it has activated, what the status of indexing is across each indexed chain, etc.
+:::
 
+## Standards compliant ENSDb Writer
 
-## Reference Implementations
+[ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) built by the NameHash team. It is a multi-chain ENS indexer built on top of [Ponder](https://ponder.sh/), a modular blockchain indexing framework. ENSIndexer processes events from each relevant chain and transforms the data, storing it in your ENSDb instance.
 
 <LinkCard
   title="Learn more about ENSIndexer"

@@ -180,7 +180,7 @@ A running [ENSApi](#ensapi) process that serves GraphQL and REST APIs from an [E
 
 ### ENSIndexer
 
-A reference implementation of an [ENSDb Writer](#ensdb-writer) that indexes onchain ENS data and writes to an [ENSDb instance](#ensdb-instance). It is built on top of [Ponder](https://ponder.sh/), a modular blockchain indexing framework.
+A reference implementation of an [ENSDb Writer](#ensdb-writer) that indexes onchain ENS data and writes to an [ENSDb instance](#ensdb-instance). It is built on top of [Ponder](https://ponder.sh/), a modular blockchain indexing framework. ENSIndexer implements the [ENSDb Metadata Writer](#ensdb-metadata-writer) spec by writing metadata about itself into the [ENSNode Metadata Table](#ensnode-metadata-table) in the ENSDb instance.
 
 ### ENSIndexer Instance
 

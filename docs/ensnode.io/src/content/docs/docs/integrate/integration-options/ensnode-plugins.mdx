@@ -18,3 +18,17 @@ import { Aside, LinkCard } from "@astrojs/starlight/components";
   description="A reference implementation of an ENSNode Plugin, built by the NameHash team."
   href="/docs/services/ensnodeplugin"
 />
+
+## Community Plugins
+
+### Under development
+
+New plugins currently under development by the [EthId team](https://ethid.org/) for:
+- [EFP (Ethereum Follow Protocol)](https://efp.app/)
+- [Grails](https://grails.app/)
+
+:::tip[Unified data access]
+
+When new [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) are created, it can be possible for the [ENS Omnigraph API](/docs/integrate/integration-options/omnigraph-graphql-api) (or other APIs built by any ENSDb Reader) to unify the ability to query across ENSNode plugins in a single query. For example, to query both ENS State from the `unigraph` and EFP State about followers from the `efp` plugin in a single GraphQL query to the [ENS Omnigraph API](/docs/integrate/integration-options/omnigraph-graphql-api).
+
+:::
