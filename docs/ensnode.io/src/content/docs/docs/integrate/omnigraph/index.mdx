@@ -87,7 +87,7 @@ Registries, Resolvers, and ENSv2 Domains all expose their Permissions directly (
 
 The polymorphism, Namegraph traversal, Canonical Name, Events, and version-specific fragments — all in one query:
 
-```graphql
+```graphql title="example.graphql"
 query EthAndSubdomains {
   domains(where: { name: { eq: "eth" } }) {
     edges {

@@ -3,9 +3,9 @@
   --font-primary: "Inter", sans-serif;
 
   /* Brand Colors */
-  --color-primary: #0080bc;
-  --color-primary-light: #cee1e8;
-  --color-primary-dark: #093c52;
+  --color-primary: #2563eb;
+  --color-primary-light: #9eb5e8;
+  --color-primary-dark: #1e40af;
 
   /* Neutral Colors */
   --color-background: #fff;
@@ -16,9 +16,9 @@
   --color-text-secondary: #c4c7c8;
 
   /* Status Colors */
-  --color-blue: #0080bc;
-  --color-blue-light: #cee1e8;
-  --color-blue-dark: #093c52;
+  --color-blue: #2563eb;
+  --color-blue-light: #9eb5e8;
+  --color-blue-dark: #1e40af;
   --color-orange: #673d49;
   --color-orange-light: #f8f6d6;
   --color-purple: #f53293;

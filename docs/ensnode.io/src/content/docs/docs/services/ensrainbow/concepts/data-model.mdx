@@ -21,7 +21,7 @@ ENSRainbow stores its rainbow table in a **LevelDB** database. The schema is int
 
 A [rainbow record](/docs/services/ensrainbow/concepts/glossary#rainbow-record) with versioning information:
 
-```ts
+```ts title="rainbow-record.ts"
 interface VersionedRainbowRecord {
   label: string; // original label
   labelSetVersion: number; // version it belongs to

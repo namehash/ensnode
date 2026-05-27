@@ -48,7 +48,7 @@ export const contracts = {
   ENSV1Resolver: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
   ENSV2Resolver: "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
   OwnedResolver: "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
-  PermissionedResolver: "0x5ea90acf6555276660760fe629d72932c91f4b8e",
+  PermissionedResolver: "0x8550d35164e7f86bb6adf4cedb3f012913c9d563",
   LegacyPublicResolver: "0xa4899d35897033b927acfcf422bc745916139776",
   PublicResolver: "0xf953b3a269d80e3eb0f2947630da976b896a8c5b",
   PermissionedResolverImpl: "0x809d550fca64d94bd9f66e60752a544199cfac3d",
@@ -66,7 +66,8 @@ export const contracts = {
   VerifiableFactory: "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
   NameWrapper: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
   UnlockedMigrationController: "0xdbc43ba45381e02825b14322cddd15ec4b3164e6",
-  WrapperRegistry: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+  ApprovedUpgradeGate: "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
+  WrapperRegistryImpl: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
   LockedMigrationController: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
   UserRegistryImpl: "0x7969c5ed335650692bc04293b07f5bf2e7a673c0",
   StaticMetadataService: "0xb0d4afd8879ed9f52b28595d31b441d079b2ca07",
@@ -115,10 +116,10 @@ function createAccount(addressIndex: number, resolver: NormalizedAddress) {
  * @see https://github.com/ensdomains/ens-test-env
  */
 export const accounts = {
-  deployer: createAccount(0, asNormalizedAddress("0x1f2ce8886692b90f5754a7d428a2336800a5911b")),
-  owner: createAccount(1, asNormalizedAddress("0x5ea90acf6555276660760fe629d72932c91f4b8e")),
-  user: createAccount(2, asNormalizedAddress("0xb63ae54076c1c281ec9395b290add470e69140c6")),
-  user2: createAccount(3, asNormalizedAddress("0x5380066832977eb36353fd2b01fb92e751636b84")),
+  deployer: createAccount(0, asNormalizedAddress("0x9c97ec2d79944fa55aa2eb6385bc8711cacf18d2")),
+  owner: createAccount(1, asNormalizedAddress("0x8550d35164e7f86bb6adf4cedb3f012913c9d563")),
+  user: createAccount(2, asNormalizedAddress("0x98a84b915ffe27241033ac8f29c6b7849a0fb6e4")),
+  user2: createAccount(3, asNormalizedAddress("0xd04f8f3726a417cfadeea604fc94cf66112b9af6")),
 } as const;
 
 /**
