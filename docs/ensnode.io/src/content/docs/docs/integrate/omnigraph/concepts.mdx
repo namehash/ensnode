@@ -292,7 +292,7 @@ query ByInterpretedName {
 ```
 
 :::danger[Not all InterpretedNames are Resolvable]
-ENS Forward Resolution does _not_ support Encoded LabelHashes in names, so while an InterpretedName can be used to traverse the Namegraph (i.e. with `domain(by: { name: "" }))`, if the Canonical Name is not a [ResolvableName](/docs/reference/terminology#resolvable-name), then the records for that name _cannot_ be determined.
+ENS Forward Resolution does _not_ support Encoded LabelHashes in names, so while an InterpretedName can be used to traverse the Namegraph (i.e. with `domain(by: { name: "" })`), if the Canonical Name is not a [ResolvableName](/docs/reference/terminology#resolvable-name), then the records for that name _cannot_ be determined.
 :::
 
 ### BeautifiedNames and BeautifiedLabels
