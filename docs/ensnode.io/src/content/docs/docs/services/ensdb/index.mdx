@@ -8,6 +8,7 @@ sidebar:
 
 import { LinkCard, Aside } from "@astrojs/starlight/components";
 import EnsDbUseCases from "@components/molecules/EnsDbUseCases.astro";
+import EnsDbSelfHostingNote from "@components/molecules/EnsDbSelfHostingNote.astro";
 
 ## Vision
 
@@ -26,7 +27,6 @@ The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) is i
   _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby,
   Java, C# — the choice is yours.
 </Aside>
-
 ## What You Get
 
 ### Complete ENS State
@@ -52,9 +52,11 @@ By building on a PostgreSQL database, ENSDb inherits world-class capabilities:
 
 ## What You Can Build
 
-ENSDb unlocks a new universe of ENS applications:
-
-<EnsDbUseCases />
+<LinkCard
+  title="Get inspired"
+  description="Discover the wide range of applications you can build with ENSDb, from analytics dashboards to custom APIs and more."
+  href="/docs/integrate/integration-options/ensdb#inspirations-for-what-you-can-build-with-ensdb"
+/>
 
 ## Quick Start
 

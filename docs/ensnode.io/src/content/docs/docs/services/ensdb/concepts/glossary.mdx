@@ -46,7 +46,7 @@ Objects contained within a [database schema](#database-schema), including:
 An open standard for bi-directional ENS integration. The ENSDb Standard defines:
 
 - Schema designs for storing ENS data in a [PostgreSQL database](#postgresql-database)
-- Rules and constraints for [ENSDb Writers](#ensdb-writer) and [ENSDb Readers](#ensdb-reader)
+- Rules and constraints for [ENSDb Writers](#ensdb-writer), [ENSDb Metadata Writers](#ensdb-metadata-writer), and [ENSDb Readers](#ensdb-reader)
 - A modular architecture enabling interoperability
 
 Any [PostgreSQL database](#postgresql-database) following the ENSDb Standard is an [ENSDb instance](#ensdb-instance).
@@ -55,9 +55,17 @@ Any [PostgreSQL database](#postgresql-database) following the ENSDb Standard is 
 
 Any application that writes ENS data into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Writer. Other implementations of ENSDb Writers can be built in any language, and can use different indexing frameworks (i.e. [Ponder](https://ponder.sh/), [rindexer](https://rindexer.xyz/)), as long as they follow the ENSDb Standard.
 
+### ENSDb Metadata Writer
+
+Any application that writes metadata about an [EnsDbWriter](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) records into the [ENSNode Metadata Table](docs/services/ensdb/concepts/glossary#ensnode-metadata-table) for each ENSIndexer instance that have ever connected to the ENSDb instance.
+
+Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
+
 ### ENSDb Reader
 
-Any application that reads ENS data from an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSApi](#ensapi) is a reference implementation of an ENSDb Reader. Other implementations of ENSDb Readers can be built in any language, and can serve different types of APIs (GraphQL, REST, gRPC, etc.), as long as they follow the ENSDb Standard.
+Any application that reads ENS data from an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSApi](#ensapi) is a reference implementation of an ENSDb Reader.
+
+Other implementations of ENSDb Readers can be built in any language, and can serve different types of APIs (GraphQL, REST, gRPC, etc.), as long as they follow the ENSDb Standard.
 
 ## ENSDb Concepts
 
@@ -149,15 +157,15 @@ The `key` column identifies the type of metadata:
 
 | Key                         | Description                                                                                                |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `indexing_metadata_context` | [Indexing metadata context](#indexing-metadata-context) of the [ENSIndexer instance](#ensindexer-instance) |
+| `indexing_metadata_context` | [Indexing metadata context](#indexing-metadata-context) for the [ENSDb Writer instance](#ensdb-writer) |
 
 #### Indexing Metadata Context
 
-A JSON object that provides indexing metadata context. The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The object may include fields such as:
+A data model that describes indexing metadata context. The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The data model may include fields such as:
 
 - `version`: The version of the Indexing Metadata Context structure
-- `indexingStatus`: the current Indexing Status of the [ENSIndexer instance](#ensindexer-instance).
-- `stackInfo`: a group of public config objects that describe the ENSIndexer instance and its dependencies.
+- `indexingStatus`: the current Indexing Status of the [ENSDb Writer instance](#ensdb-writer) (i.e. the [Indexing Status](#indexing-status) of the [ENSIndexer instance](#ensindexer-instance)).
+- `stackInfo`: describes the [ENSDb Writer](#ensdb-writer) instance and its config, dependencies, etc.
 
 ### ENSApi
 

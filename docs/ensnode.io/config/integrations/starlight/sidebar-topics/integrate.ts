@@ -201,6 +201,18 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
+          label: "ENSDb Writers (Indexers)",
+          link: "/docs/integrate/integration-options/ensdb-writers",
+        },
+        {
+          label: "ENSDb Readers (Custom APIs)",
+          link: "/docs/integrate/integration-options/ensdb-readers",
+        },
+        {
+          label: "ENSNode Plugins (data models)",
+          link: "/docs/integrate/integration-options/ensnode-plugins",
+        },
+        {
           label: "enscli (CLI)",
           link: "/docs/integrate/integration-options/enscli",
         },
