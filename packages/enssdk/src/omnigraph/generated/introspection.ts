@@ -1986,6 +1986,10 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "DEFAULT",
+            "isDeprecated": false
+          },
+          {
             "name": "ETHEREUM",
             "isDeprecated": false
           },

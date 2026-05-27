@@ -370,6 +370,30 @@ describe("Account.primaryName and Account.primaryNames", () => {
     }
   `;
 
+  const AccountPrimaryNameByDefaultChain = gql`
+    query AccountPrimaryNameByDefaultChain($address: Address!) {
+      account(by: { address: $address }) {
+        primaryName(by: { chain: DEFAULT }) {
+          coinType
+          chain
+          name { interpreted beautified }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByDefaultChain = gql`
+    query AccountPrimaryNamesByDefaultChain($address: Address!) {
+      account(by: { address: $address }) {
+        primaryNames(by: { chains: [DEFAULT] }) {
+          coinType
+          chain
+          name { interpreted beautified }
+        }
+      }
+    }
+  `;
+
   const AccountPrimaryNamesByCoinTypes = gql`
     query AccountPrimaryNamesByCoinTypes($address: Address!, $coinTypes: [CoinType!]!) {
       account(by: { address: $address }) {
@@ -446,6 +470,40 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toEqual({
       account: {
         primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
+      },
+    });
+  });
+
+  it("accepts DEFAULT and maps it to the ENSIP-19 default EVM coin type", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByDefaultChain, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        primaryName: {
+          coinType: 2_147_483_648,
+          chain: "DEFAULT",
+          name: null,
+        },
+      },
+    });
+  });
+
+  it("resolves primary names for DEFAULT", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByDefaultChain, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        primaryNames: [
+          {
+            coinType: 2_147_483_648,
+            chain: "DEFAULT",
+            name: null,
+          },
+        ],
       },
     });
   });

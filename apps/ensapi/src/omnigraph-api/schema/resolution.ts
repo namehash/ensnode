@@ -24,7 +24,7 @@ import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
 //////////////////
 export const ENSIP19Chain = builder.enumType("ENSIP19Chain", {
   description:
-    "ENSIP-19 supported chains that can have a primary name. Non-EVM coin types are intentionally absent.",
+    "ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the ENSIP-19 default EVM chain. Non-EVM coin types are intentionally absent.",
   values: ENSIP19_CHAIN_VALUES,
 });
 
