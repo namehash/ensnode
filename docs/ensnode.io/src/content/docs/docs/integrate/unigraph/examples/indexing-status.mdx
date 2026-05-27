@@ -149,7 +149,7 @@ import { IndexingMetadataContextStatusCodes } from "@ensnode/ensdb-sdk";
 const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
 if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
   const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
-  console.log(JSON.stringify(indexingStatusSnapshot, null, 2));
+  console.log(indexingStatusSnapshot);
 }
 ```
 
