@@ -250,8 +250,11 @@ const introspection = {
               {
                 "name": "by",
                 "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "PrimaryNamesByInput"
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PrimaryNamesByInput"
+                  }
                 }
               },
               {
@@ -1664,15 +1667,6 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "String"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "name",
-            "type": {
-              "kind": "OBJECT",
-              "name": "ProfileName"
             },
             "args": [],
             "isDeprecated": false
@@ -4871,8 +4865,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "InterpretedName"
+              "kind": "OBJECT",
+              "name": "CanonicalName"
             },
             "args": [],
             "isDeprecated": false
@@ -4999,31 +4993,6 @@ const introspection = {
         "fields": [
           {
             "name": "url",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String"
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ProfileName",
-        "fields": [
-          {
-            "name": "beautified",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "normalized",
             "type": {
               "kind": "SCALAR",
               "name": "String"
@@ -6238,6 +6207,34 @@ const introspection = {
       },
       {
         "kind": "OBJECT",
+        "name": "ResolvedRawTextRecord",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "value",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "ResolvedRecords",
         "fields": [
           {
@@ -6376,7 +6373,7 @@ const introspection = {
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "ResolvedTextRecord"
+                    "name": "ResolvedRawTextRecord"
                   }
                 }
               }
@@ -6406,34 +6403,6 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "BigInt"
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ResolvedTextRecord",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "value",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String"
             },
             "args": [],
             "isDeprecated": false

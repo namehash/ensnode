@@ -40,8 +40,7 @@ const { uid } = Astro.props;
 
     if (integrationTabsEl) {
       integrationTabsEl.addEventListener("click", (e) => {
-        const btn =
-          e.target instanceof Element ? e.target.closest("[data-integration-tab]") : null;
+        const btn = e.target instanceof Element ? e.target.closest("[data-integration-tab]") : null;
         if (btn && integrationTabsEl.contains(btn)) {
           activateIntegration(btn.dataset.integrationTab);
         }
