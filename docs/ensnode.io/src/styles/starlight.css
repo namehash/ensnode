@@ -207,8 +207,12 @@ a[rel="prev"]:hover {
   color: var(--sl-color-white);
 }
 
+/* Override Starlight's default markdown link hover (which switches to
+   --sl-color-white): keep links their base color on hover so only the
+   underline-offset animates. */
+.sl-markdown-content a:hover:not(:where(.not-content *)),
 .sl-markdown-content a:hover:not(:where(.not-content *)) > span {
-  color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
 }
 
 .sl-markdown-content > p a:not(:has(code), [role="tab"]),
@@ -217,17 +221,13 @@ a[rel="prev"]:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 
-  transition:
-    color 0.2s ease-in-out,
-    text-underline-offset 0.2s ease-in-out;
+  transition: text-underline-offset 0.2s ease-in-out;
 
   &:hover {
     text-underline-offset: 2px;
   }
 }
 
-.sl-markdown-content > p a:not([role="tab"]):hover,
-.sl-markdown-content :is(ul, ol) > li a:not([role="tab"]):hover,
 starlight-toc a:hover {
   color: var(--sl-color-accent-high);
 }
