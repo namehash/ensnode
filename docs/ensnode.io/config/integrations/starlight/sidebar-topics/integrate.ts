@@ -73,6 +73,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph",
         },
         {
+          label: "Core Concepts",
+          link: "/docs/integrate/omnigraph/concepts",
+        },
+        {
           label: "Examples",
           collapsed: true,
           items: [
