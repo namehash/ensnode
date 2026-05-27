@@ -177,6 +177,11 @@
   box-shadow: var(--sl-shadow-sm);
 }
 
+/* Match Card borders to the rounded radius used by the Aside/Tip component (12px) */
+.card {
+  border-radius: 12px;
+}
+
 .sl-link-card:hover,
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
