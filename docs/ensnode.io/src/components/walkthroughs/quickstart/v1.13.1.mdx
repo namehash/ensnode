@@ -95,7 +95,7 @@ export function DomainCard({ name }: { name: InterpretedName }) {
 
   return (
     <div>
-      <p>Name: {domain.name ?? "Unnamed Domain"}</p>
+      <p>Name: {domain.name ? beautifyInterpretedName(domain.name) : "Unnamed Domain"}</p>
       <p>Owner: {domain.owner?.address ?? "Unowned"}</p>
     </div>
   );
