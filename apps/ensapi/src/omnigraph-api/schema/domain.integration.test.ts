@@ -606,7 +606,6 @@ describe("Domain.profile", () => {
   type DomainProfileResult = {
     domain: {
       profile: {
-        name: { beautified: string | null; normalized: string | null } | null;
         description: string | null;
         avatar: { url: string | null } | null;
         addresses: { ethereum: string | null } | null;
@@ -619,7 +618,6 @@ describe("Domain.profile", () => {
     query DomainProfile($name: InterpretedName!) {
       domain(by: { name: $name }) {
         profile {
-          name { beautified normalized }
           description
           avatar { url }
           addresses { ethereum }
@@ -635,7 +633,6 @@ describe("Domain.profile", () => {
     ).resolves.toEqual({
       domain: {
         profile: {
-          name: { beautified: null, normalized: null },
           description: null,
           avatar: { url: null },
           addresses: { ethereum: null },

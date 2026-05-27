@@ -13,10 +13,7 @@ import {
   normalizePrimaryNameByInput,
   normalizePrimaryNamesByInput,
 } from "@/omnigraph-api/lib/resolution/primary-name-input";
-import {
-  resolveDefaultPrimaryNameRecords,
-  resolvePrimaryNameRecords,
-} from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
+import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -105,16 +102,14 @@ AccountRef.implement({
     // Account.primaryNames
     ////////////////////////
     primaryNames: t.field({
-      description:
-        "ENSIP-19 primary names for this Account. Omit `by` to resolve all ENSIP-19 supported chains in the current namespace.",
+      description: "ENSIP-19 primary names for this Account on the requested coin types or chains.",
       type: [PrimaryNameRecordRef],
       nullable: false,
       args: {
         by: t.arg({
           type: PrimaryNamesByInput,
-          required: false,
-          description:
-            "Select coin types or chains to resolve. Omit to resolve all ENSIP-19 supported chains.",
+          required: true,
+          description: "Select coin types or chains to resolve primary names for.",
         }),
         disableAcceleration: t.arg.boolean({
           required: false,
@@ -123,17 +118,11 @@ AccountRef.implement({
         }),
       },
       resolve: async (account, { by, disableAcceleration }, context) => {
-        const options = {
+        const coinTypes = normalizePrimaryNamesByInput(by);
+        return resolvePrimaryNameRecords(account.id, coinTypes, {
           disableAcceleration: disableAcceleration ?? false,
           canAccelerate: context.canAccelerate,
-        };
-
-        if (!by) {
-          return resolveDefaultPrimaryNameRecords(account.id, options);
-        }
-
-        const coinTypes = normalizePrimaryNamesByInput(by);
-        return resolvePrimaryNameRecords(account.id, coinTypes, options);
+        });
       },
     }),
 

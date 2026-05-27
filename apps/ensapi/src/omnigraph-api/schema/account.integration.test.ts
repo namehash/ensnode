@@ -314,15 +314,24 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 });
 
 describe("Account.primaryName and Account.primaryNames", () => {
+  type CanonicalNameResult = {
+    interpreted: string;
+    beautified: string;
+  } | null;
+
   type PrimaryNameRecordResult = {
     coinType: number;
     chain: string | null;
-    name: string | null;
+    name: CanonicalNameResult;
     records?: { addresses: Array<{ coinType: number; address: string | null }> } | null;
     profile?: {
-      name: { normalized: string | null } | null;
       addresses: { ethereum: string | null } | null;
     };
+  };
+
+  const TEST_ETH_NAME: CanonicalNameResult = {
+    interpreted: "test.eth",
+    beautified: "test.eth",
   };
 
   type AccountPrimaryNameResult = {
@@ -343,7 +352,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
         primaryName(by: { coinType: $coinType }) {
           coinType
           chain
-          name
+          name { interpreted beautified }
         }
       }
     }
@@ -355,7 +364,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
         primaryName(by: { chain: ETHEREUM }) {
           coinType
           chain
-          name
+          name { interpreted beautified }
         }
       }
     }
@@ -367,7 +376,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
         primaryNames(by: { coinTypes: $coinTypes }) {
           coinType
           chain
-          name
+          name { interpreted beautified }
         }
       }
     }
@@ -379,19 +388,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
         primaryNames(by: { chains: [ETHEREUM, BASE] }) {
           coinType
           chain
-          name
-        }
-      }
-    }
-  `;
-
-  const AccountPrimaryNamesAllChains = gql`
-    query AccountPrimaryNamesAllChains($address: Address!) {
-      account(by: { address: $address }) {
-        primaryNames {
-          coinType
-          chain
-          name
+          name { interpreted beautified }
         }
       }
     }
@@ -403,12 +400,11 @@ describe("Account.primaryName and Account.primaryNames", () => {
         primaryName(by: { coinType: 0 }) {
           coinType
           chain
-          name
+          name { interpreted beautified }
           records {
             addresses(coinTypes: [60]) { address }
           }
           profile {
-            name { normalized }
             addresses { ethereum }
           }
         }
@@ -420,7 +416,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     query AccountPrimaryNameChainedRecords($address: Address!) {
       account(by: { address: $address }) {
         primaryName(by: { coinType: 60 }) {
-          name
+          name { interpreted beautified }
           records {
             addresses(coinTypes: [60]) { coinType address }
           }
@@ -437,7 +433,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+        primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
       },
     });
   });
@@ -449,7 +445,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+        primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
       },
     });
   });
@@ -476,7 +472,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toMatchObject({
       account: {
         primaryNames: [
-          { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+          { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
           { coinType: 2147492101, chain: "BASE", name: null },
         ],
       },
@@ -491,23 +487,9 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toMatchObject({
       account: {
         primaryNames: [
-          { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+          { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
           { coinType: 2147492101, chain: "BASE", name: null },
         ],
-      },
-    });
-  });
-
-  it("resolves all ENSIP-19 supported chains when by is omitted", async () => {
-    await expect(
-      request<AccountPrimaryNamesResult>(AccountPrimaryNamesAllChains, {
-        address: accounts.owner.address,
-      }),
-    ).resolves.toMatchObject({
-      account: {
-        primaryNames: expect.arrayContaining([
-          { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
-        ]),
       },
     });
   });
@@ -525,7 +507,6 @@ describe("Account.primaryName and Account.primaryNames", () => {
           name: null,
           records: null,
           profile: {
-            name: { normalized: null },
             addresses: { ethereum: null },
           },
         },
@@ -541,7 +522,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toMatchObject({
       account: {
         primaryName: {
-          name: "test.eth",
+          name: TEST_ETH_NAME,
           records: {
             addresses: [{ coinType: 60, address: accounts.owner.address }],
           },

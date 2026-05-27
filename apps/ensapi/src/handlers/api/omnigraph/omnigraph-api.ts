@@ -11,7 +11,7 @@ import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware"
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
-const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60;
+const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 600; // 10 minutes
 
 const app = createApp({
   middlewares: [

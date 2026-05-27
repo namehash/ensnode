@@ -43,6 +43,3 @@ export const coinTypeToEnsip19Chain = (coinType: CoinType): ENSIP19ChainValue | 
 /** Maps an `ENSIP19Chain` enum value to the EVM chain id used for reverse resolution. */
 export const ensip19ChainToChainId = (chain: ENSIP19ChainValue): ChainId =>
   coinTypeToEvmChainId(ensip19ChainToCoinType(chain));
-
-/** Coin types corresponding to all values in the `ENSIP19Chain` enum. */
-export const ALL_ENSIP19_COIN_TYPES: CoinType[] = ENSIP19_CHAIN_VALUES.map(ensip19ChainToCoinType);

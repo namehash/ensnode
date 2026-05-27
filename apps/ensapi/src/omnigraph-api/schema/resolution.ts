@@ -17,6 +17,7 @@ import {
   ENSIP19_CHAIN_VALUES,
   type ENSIP19ChainValue,
 } from "@/omnigraph-api/lib/resolution/chain-coin-type";
+import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
 
 //////////////////
 // ENSIP19Chain
@@ -141,24 +142,6 @@ ProfileAddressesRef.implement({
   }),
 });
 
-export const ProfileNameRef = builder.objectRef<DomainProfileModel>("ProfileName");
-
-ProfileNameRef.implement({
-  description: "PREVIEW: Interpreted name metadata on a Domain profile. Not yet resolved.",
-  fields: (t) => ({
-    beautified: t.string({
-      description: "The beautified display form of the name, or null when unset.",
-      nullable: true,
-      resolve: () => null,
-    }),
-    normalized: t.string({
-      description: "The normalized form of the name, or null when unset.",
-      nullable: true,
-      resolve: () => null,
-    }),
-  }),
-});
-
 export const ProfileAvatarRef = builder.objectRef<DomainProfileModel>("ProfileAvatar");
 
 ProfileAvatarRef.implement({
@@ -204,11 +187,6 @@ DomainProfileRef.implement({
   description:
     "PREVIEW: An interpreted ENS profile for a name. Types are defined for query ergonomics; resolution is not yet wired.",
   fields: (t) => ({
-    name: t.field({
-      type: ProfileNameRef,
-      nullable: true,
-      resolve: () => ({}),
-    }),
     avatar: t.field({
       type: ProfileAvatarRef,
       nullable: true,
@@ -242,22 +220,24 @@ DomainProfileRef.implement({
   }),
 });
 
-///////////////////////
-// ResolvedTextRecord
-///////////////////////
-export const ResolvedTextRecordRef = builder.objectRef<{ key: string; value: string | null }>(
-  "ResolvedTextRecord",
+//////////////////////////
+// ResolvedRawTextRecord
+//////////////////////////
+export const ResolvedRawTextRecordRef = builder.objectRef<{ key: string; value: string | null }>(
+  "ResolvedRawTextRecord",
 );
 
-ResolvedTextRecordRef.implement({
-  description: "A resolved text record for an ENS name.",
+ResolvedRawTextRecordRef.implement({
+  description:
+    "A resolved 'raw' text record for an ENS name. Value is any possible string and may require additional validation or preprocessing before use.",
   fields: (t) => ({
     key: t.exposeString("key", {
       description: "The text record key.",
       nullable: false,
     }),
     value: t.exposeString("value", {
-      description: "The text record value, or null if not set.",
+      description:
+        "The 'raw' text record value, or null if not set. Value is any possible string and may require additional validation or preprocessing before use.",
       nullable: true,
     }),
   }),
@@ -368,7 +348,7 @@ ResolvedRecordsRef.implement({
   fields: (t) => ({
     reverseName: t.string({
       description:
-        "The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set.",
+        "The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.",
       nullable: true,
       resolve: (r) => r.name ?? null,
     }),
@@ -433,7 +413,7 @@ ResolvedRecordsRef.implement({
     }),
     texts: t.field({
       description: "Resolved text records for the requested keys.",
-      type: [ResolvedTextRecordRef],
+      type: [ResolvedRawTextRecordRef],
       nullable: false,
       args: {
         keys: t.arg.stringList({
@@ -501,9 +481,9 @@ PrimaryNameRecordRef.implement({
     name: t.field({
       description:
         "The validated primary name for this Account on this coin type, or null if none is set.",
-      type: "InterpretedName",
+      type: CanonicalNameRef,
       nullable: true,
-      resolve: (r) => r.name,
+      resolve: (r) => (r.name ? { canonicalName: r.name } : null),
     }),
     records: t.field({
       description:

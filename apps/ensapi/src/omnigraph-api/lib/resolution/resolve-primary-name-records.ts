@@ -77,23 +77,3 @@ export async function resolvePrimaryNameRecords(
     return record;
   });
 }
-
-/** Resolves primary names for all ENSIP-19 supported coin types in the current namespace. */
-export async function resolveDefaultPrimaryNameRecords(
-  address: Address,
-  options: PrimaryNameResolutionOptions,
-): Promise<PrimaryNameRecordModel[]> {
-  const coinTypes = getENSIP19SupportedCoinTypes();
-  const { result } = await runWithTrace(() =>
-    resolvePrimaryNamesByCoinTypes(address, coinTypes, toResolutionOptions(options)),
-  );
-
-  return coinTypes.map((coinType) =>
-    toPrimaryNameRecord(
-      address,
-      coinType,
-      (result[coinType] ?? null) as InterpretedName | null,
-      options,
-    ),
-  );
-}

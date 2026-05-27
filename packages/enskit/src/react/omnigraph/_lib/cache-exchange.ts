@@ -45,7 +45,6 @@ export const omnigraphCacheExchange = cacheExchange({
     DomainResolver: EMBEDDED_DATA,
     PrimaryNameRecord: EMBEDDED_DATA,
     DomainProfile: EMBEDDED_DATA,
-    ProfileName: EMBEDDED_DATA,
     ProfileAvatar: EMBEDDED_DATA,
     ProfileBanner: EMBEDDED_DATA,
     ProfileWebsite: EMBEDDED_DATA,
@@ -57,7 +56,7 @@ export const omnigraphCacheExchange = cacheExchange({
     ResolvedInterfaceRecord: EMBEDDED_DATA,
     ResolvedPubkeyRecord: EMBEDDED_DATA,
     ResolvedRecords: EMBEDDED_DATA,
-    ResolvedTextRecord: EMBEDDED_DATA,
+    ResolvedRawTextRecord: EMBEDDED_DATA,
   },
   resolvers: mergeResolverMaps(
     // produce relayPagination() local resolvers for each t.connection in the schema

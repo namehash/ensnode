@@ -341,7 +341,7 @@ query AccountPrimaryNames($address: Address!) {
     primaryNames(by: { chains: [ETHEREUM, BASE] }) {
       coinType
       chain
-      name
+      name { interpreted beautified }
       records {
         addresses(coinTypes: [60]) {
           coinType
@@ -367,7 +367,6 @@ query AccountPrimaryNames($address: Address!) {
 query DomainProfile($name: InterpretedName!) {
   domain(by: { name: $name }) {
     profile {
-      name { beautified normalized }
       description
       avatar { url }
       banner { url }

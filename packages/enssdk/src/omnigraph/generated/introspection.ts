@@ -201,6 +201,37 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "primaryName",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PrimaryNameRecord"
+              }
+            },
+            "args": [
+              {
+                "name": "by",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PrimaryNameByInput"
+                  }
+                }
+              },
+              {
+                "name": "disableAcceleration",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "false"
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
             "name": "primaryNames",
             "type": {
               "kind": "NON_NULL",
@@ -210,23 +241,17 @@ const introspection = {
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "PrimaryNameByChain"
+                    "name": "PrimaryNameRecord"
                   }
                 }
               }
             },
             "args": [
               {
-                "name": "chainIds",
+                "name": "by",
                 "type": {
-                  "kind": "LIST",
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ChainId"
-                    }
-                  }
+                  "kind": "INPUT_OBJECT",
+                  "name": "PrimaryNamesByInput"
                 }
               },
               {
@@ -1225,6 +1250,15 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "profile",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainProfile"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "records",
             "type": {
               "kind": "OBJECT",
@@ -1596,6 +1630,76 @@ const introspection = {
       },
       {
         "kind": "OBJECT",
+        "name": "DomainProfile",
+        "fields": [
+          {
+            "name": "addresses",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileAddresses"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "avatar",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileAvatar"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "banner",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileBanner"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "description",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileName"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "socials",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocials"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "website",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileWebsite"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "DomainRegistrationsConnection",
         "fields": [
           {
@@ -1877,6 +1981,36 @@ const introspection = {
       },
       {
         "kind": "ENUM",
+        "name": "ENSIP19Chain",
+        "enumValues": [
+          {
+            "name": "ARBITRUM",
+            "isDeprecated": false
+          },
+          {
+            "name": "BASE",
+            "isDeprecated": false
+          },
+          {
+            "name": "ETHEREUM",
+            "isDeprecated": false
+          },
+          {
+            "name": "LINEA",
+            "isDeprecated": false
+          },
+          {
+            "name": "OPTIMISM",
+            "isDeprecated": false
+          },
+          {
+            "name": "SCROLL",
+            "isDeprecated": false
+          }
+        ]
+      },
+      {
+        "kind": "ENUM",
         "name": "ENSProtocolVersion",
         "enumValues": [
           {
@@ -1997,6 +2131,15 @@ const introspection = {
             "type": {
               "kind": "INTERFACE",
               "name": "Domain"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "profile",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainProfile"
             },
             "args": [],
             "isDeprecated": false
@@ -2617,6 +2760,15 @@ const introspection = {
                 }
               }
             ],
+            "isDeprecated": false
+          },
+          {
+            "name": "profile",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainProfile"
+            },
+            "args": [],
             "isDeprecated": false
           },
           {
@@ -4671,16 +4823,46 @@ const introspection = {
         "name": "PermissionsUserId"
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "PrimaryNameByInput",
+        "inputFields": [
+          {
+            "name": "chain",
+            "type": {
+              "kind": "ENUM",
+              "name": "ENSIP19Chain"
+            }
+          },
+          {
+            "name": "coinType",
+            "type": {
+              "kind": "SCALAR",
+              "name": "CoinType"
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
         "kind": "OBJECT",
-        "name": "PrimaryNameByChain",
+        "name": "PrimaryNameRecord",
         "fields": [
           {
-            "name": "chainId",
+            "name": "chain",
+            "type": {
+              "kind": "ENUM",
+              "name": "ENSIP19Chain"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "coinType",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "ChainId"
+                "name": "CoinType"
               }
             },
             "args": [],
@@ -4691,6 +4873,235 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "InterpretedName"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "profile",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainProfile"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "records",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ResolvedRecords"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "PrimaryNamesByInput",
+        "inputFields": [
+          {
+            "name": "chains",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "ENSIP19Chain"
+                }
+              }
+            }
+          },
+          {
+            "name": "coinTypes",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "CoinType"
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileAddresses",
+        "fields": [
+          {
+            "name": "base",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Address"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "bitcoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "ethereum",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Address"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "solana",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileAvatar",
+        "fields": [
+          {
+            "name": "url",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileBanner",
+        "fields": [
+          {
+            "name": "url",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileName",
+        "fields": [
+          {
+            "name": "beautified",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "normalized",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileSocialAccount",
+        "fields": [
+          {
+            "name": "handle",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "url",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileSocials",
+        "fields": [
+          {
+            "name": "github",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "telegram",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "twitter",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileWebsite",
+        "fields": [
+          {
+            "name": "url",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
             },
             "args": [],
             "isDeprecated": false

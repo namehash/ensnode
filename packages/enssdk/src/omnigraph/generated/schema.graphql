@@ -30,13 +30,11 @@ type Account {
   ): PrimaryNameRecord!
 
   """
-  ENSIP-19 primary names for this Account. Omit `by` to resolve all ENSIP-19 supported chains in the current namespace.
+  ENSIP-19 primary names for this Account on the requested coin types or chains.
   """
   primaryNames(
-    """
-    Select coin types or chains to resolve. Omit to resolve all ENSIP-19 supported chains.
-    """
-    by: PrimaryNamesByInput
+    """Select coin types or chains to resolve primary names for."""
+    by: PrimaryNamesByInput!
 
     """When true, disables protocol acceleration feature."""
     disableAcceleration: Boolean = false
@@ -395,7 +393,6 @@ type DomainProfile {
 
   """The profile description, or null when unset."""
   description: String
-  name: ProfileName
   socials: ProfileSocials
   website: ProfileWebsite
 }
@@ -1190,7 +1187,7 @@ type PrimaryNameRecord {
   """
   The validated primary name for this Account on this coin type, or null if none is set.
   """
-  name: InterpretedName
+  name: CanonicalName
 
   """
   PREVIEW: An interpreted ENS profile for the validated primary name. Not yet resolved.
@@ -1245,17 +1242,6 @@ PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.
 type ProfileBanner {
   """The resolved banner URL, or null when unset."""
   url: String
-}
-
-"""
-PREVIEW: Interpreted name metadata on a Domain profile. Not yet resolved.
-"""
-type ProfileName {
-  """The beautified display form of the name, or null when unset."""
-  beautified: String
-
-  """The normalized form of the name, or null when unset."""
-  normalized: String
 }
 
 """
@@ -1516,6 +1502,19 @@ type ResolvedPubkeyRecord {
   y: Hex!
 }
 
+"""
+A resolved 'raw' text record for an ENS name. Value is any possible string and may require additional validation or preprocessing before use.
+"""
+type ResolvedRawTextRecord {
+  """The text record key."""
+  key: String!
+
+  """
+  The 'raw' text record value, or null if not set. Value is any possible string and may require additional validation or preprocessing before use.
+  """
+  value: String
+}
+
 """Records resolved for a specific ENS name via the ENS protocol."""
 type ResolvedRecords {
   """
@@ -1550,7 +1549,7 @@ type ResolvedRecords {
   pubkey: ResolvedPubkeyRecord
 
   """
-  The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set.
+  The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.
   """
   reverseName: String
 
@@ -1558,19 +1557,10 @@ type ResolvedRecords {
   texts(
     """Text record keys to resolve (e.g. `avatar`, `description`)."""
     keys: [String!]!
-  ): [ResolvedTextRecord!]!
+  ): [ResolvedRawTextRecord!]!
 
   """The IVersionableResolver version, or null if not set or unavailable."""
   version: BigInt
-}
-
-"""A resolved text record for an ENS name."""
-type ResolvedTextRecord {
-  """The text record key."""
-  key: String!
-
-  """The text record value, or null if not set."""
-  value: String
 }
 
 """A Resolver represents a Resolver contract on-chain."""

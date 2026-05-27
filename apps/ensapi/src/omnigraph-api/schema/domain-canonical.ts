@@ -15,7 +15,15 @@ DomainCanonicalRef.implement({
       description: "The Canonical Name for this Domain.",
       type: CanonicalNameRef,
       nullable: false,
-      resolve: (domain) => domain,
+      resolve: (domain) => {
+        if (!domain.canonicalName) {
+          throw new Error(
+            `Invariant(DomainCanonical.name): canonical Domain '${domain.id}' is missing canonicalName.`,
+          );
+        }
+
+        return { canonicalName: domain.canonicalName };
+      },
     }),
     depth: t.field({
       description:
