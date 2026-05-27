@@ -238,6 +238,7 @@ starlight-toc a:hover {
   text-decoration: none;
 
   &:hover {
+    color: var(--sl-color-white);
     text-decoration: underline;
   }
 }
