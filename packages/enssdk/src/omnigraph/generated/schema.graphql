@@ -20,17 +20,27 @@ type Account {
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
 
   """
-  ENSIP-19 primary names for this Account. Omit chainIds to resolve all ENSIP-19 supported chains.
+  The ENSIP-19 primary name for this Account on a specific coin type or chain.
   """
-  primaryNames(
-    """
-    Chain ids to resolve primary names for. Omit to resolve all ENSIP-19 supported chains.
-    """
-    chainIds: [ChainId!]
+  primaryName(
+    by: PrimaryNameByInput!
 
     """When true, disables protocol acceleration feature."""
     disableAcceleration: Boolean = false
-  ): [PrimaryNameByChain!]!
+  ): PrimaryNameRecord!
+
+  """
+  ENSIP-19 primary names for this Account. Omit `by` to resolve all ENSIP-19 supported chains in the current namespace.
+  """
+  primaryNames(
+    """
+    Select coin types or chains to resolve. Omit to resolve all ENSIP-19 supported chains.
+    """
+    by: PrimaryNamesByInput
+
+    """When true, disables protocol acceleration feature."""
+    disableAcceleration: Boolean = false
+  ): [PrimaryNameRecord!]!
 
   """The Permissions on Registries granted to this Account."""
   registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
@@ -280,6 +290,11 @@ interface Domain {
   parent: Domain
 
   """
+  PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.
+  """
+  profile: DomainProfile
+
+  """
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
   records(
@@ -370,6 +385,21 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
+"""
+PREVIEW: An interpreted ENS profile for a name. Types are defined for query ergonomics; resolution is not yet wired.
+"""
+type DomainProfile {
+  addresses: ProfileAddresses
+  avatar: ProfileAvatar
+  banner: ProfileBanner
+
+  """The profile description, or null when unset."""
+  description: String
+  name: ProfileName
+  socials: ProfileSocials
+  website: ProfileWebsite
+}
+
 type DomainRegistrationsConnection {
   edges: [DomainRegistrationsConnectionEdge!]!
   pageInfo: PageInfo!
@@ -447,6 +477,18 @@ input DomainsWhereInput {
   version: ENSProtocolVersion
 }
 
+"""
+ENSIP-19 supported chains that can have a primary name. Non-EVM coin types are intentionally absent.
+"""
+enum ENSIP19Chain {
+  ARBITRUM
+  BASE
+  ETHEREUM
+  LINEA
+  OPTIMISM
+  SCROLL
+}
+
 """An ENS protocol version."""
 enum ENSProtocolVersion {
   ENSv1
@@ -481,6 +523,11 @@ type ENSv1Domain implements Domain {
   The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
   """
   parent: Domain
+
+  """
+  PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.
+  """
+  profile: DomainProfile
 
   """
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
@@ -601,6 +648,11 @@ type ENSv2Domain implements Domain {
   Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.
   """
   permissions(after: String, before: String, first: Int, last: Int, where: DomainPermissionsWhereInput): ENSv2DomainPermissionsConnection
+
+  """
+  PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.
+  """
+  profile: DomainProfile
 
   """
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
@@ -1114,15 +1166,124 @@ type PermissionsUserEventsConnectionEdge {
 """PermissionsUserId represents an enssdk#PermissionsUserId."""
 scalar PermissionsUserId
 
-"""An ENSIP-19 primary name for an Account on a specific chain."""
-type PrimaryNameByChain {
-  """The chain on which the primary name was resolved."""
-  chainId: ChainId!
+"""
+Select a primary name lookup target. Exactly one of `coinType` or `chain` must be provided.
+"""
+input PrimaryNameByInput @oneOf {
+  """An ENSIP-19 supported chain to resolve the primary name for."""
+  chain: ENSIP19Chain
+
+  """The ENSIP-9 coin type to resolve the primary name for."""
+  coinType: CoinType
+}
+
+"""An ENSIP-19 primary name for an Account on a specific coin type."""
+type PrimaryNameRecord {
+  """
+  The ENSIP-19 chain corresponding to `coinType`, or null when `coinType` is not represented in `ENSIP19Chain`.
+  """
+  chain: ENSIP19Chain
+
+  """The canonical ENSIP-9 coin type for this primary name lookup."""
+  coinType: CoinType!
 
   """
-  The validated primary name for this Account on this chain, or null if none is set.
+  The validated primary name for this Account on this coin type, or null if none is set.
   """
   name: InterpretedName
+
+  """
+  PREVIEW: An interpreted ENS profile for the validated primary name. Not yet resolved.
+  """
+  profile: DomainProfile!
+
+  """
+  Forward-resolve ENS records for the validated primary name. Null when `name` is null.
+  """
+  records: ResolvedRecords
+}
+
+"""
+Select primary name lookup targets. Exactly one of `coinTypes` or `chains` must be provided.
+"""
+input PrimaryNamesByInput @oneOf {
+  """ENSIP-19 supported chains to resolve primary names for."""
+  chains: [ENSIP19Chain!]
+
+  """Coin types to resolve primary names for."""
+  coinTypes: [CoinType!]
+}
+
+"""
+PREVIEW: Interpreted address records on a Domain profile. Not yet resolved.
+"""
+type ProfileAddresses {
+  """The interpreted Base address, or null when unset."""
+  base: Address
+
+  """The interpreted Bitcoin address, or null when unset."""
+  bitcoin: String
+
+  """The interpreted Ethereum address, or null when unset."""
+  ethereum: Address
+
+  """The interpreted Solana address, or null when unset."""
+  solana: String
+}
+
+"""
+PREVIEW: Interpreted avatar metadata on a Domain profile. Not yet resolved.
+"""
+type ProfileAvatar {
+  """The resolved avatar URL, or null when unset."""
+  url: String
+}
+
+"""
+PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.
+"""
+type ProfileBanner {
+  """The resolved banner URL, or null when unset."""
+  url: String
+}
+
+"""
+PREVIEW: Interpreted name metadata on a Domain profile. Not yet resolved.
+"""
+type ProfileName {
+  """The beautified display form of the name, or null when unset."""
+  beautified: String
+
+  """The normalized form of the name, or null when unset."""
+  normalized: String
+}
+
+"""
+PREVIEW: An interpreted social account on a Domain profile. Not yet resolved.
+"""
+type ProfileSocialAccount {
+  """The social handle, or null when unset."""
+  handle: String
+
+  """The social profile URL, or null when unset."""
+  url: String
+}
+
+"""
+PREVIEW: Interpreted social accounts on a Domain profile. Not yet resolved.
+"""
+type ProfileSocials {
+  github: ProfileSocialAccount
+  telegram: ProfileSocialAccount
+  twitter: ProfileSocialAccount
+}
+
+"""
+PREVIEW: Interpreted website metadata on a Domain profile. Not yet resolved.
+"""
+type ProfileWebsite {
+  """The resolved website URL, or null when unset."""
+  url: String
 }
 
 type Query {

@@ -601,3 +601,47 @@ describe("Domain.records", () => {
     });
   });
 });
+
+describe("Domain.profile", () => {
+  type DomainProfileResult = {
+    domain: {
+      profile: {
+        name: { beautified: string | null; normalized: string | null } | null;
+        description: string | null;
+        avatar: { url: string | null } | null;
+        addresses: { ethereum: string | null } | null;
+        socials: { github: { handle: string | null; url: string | null } | null } | null;
+      } | null;
+    };
+  };
+
+  const DomainProfile = gql`
+    query DomainProfile($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        profile {
+          name { beautified normalized }
+          description
+          avatar { url }
+          addresses { ethereum }
+          socials { github { handle url } }
+        }
+      }
+    }
+  `;
+
+  it("returns the preview null shape for a canonical domain", async () => {
+    await expect(
+      request<DomainProfileResult>(DomainProfile, { name: "test.eth" }),
+    ).resolves.toEqual({
+      domain: {
+        profile: {
+          name: { beautified: null, normalized: null },
+          description: null,
+          avatar: { url: null },
+          addresses: { ethereum: null },
+          socials: { github: { handle: null, url: null } },
+        },
+      },
+    });
+  });
+});

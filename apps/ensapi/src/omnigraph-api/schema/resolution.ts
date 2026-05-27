@@ -1,5 +1,5 @@
 import type {
-  ChainId,
+  Address,
   CoinType,
   Hex,
   InterfaceId,
@@ -9,31 +9,235 @@ import type {
 
 import type { ResolverRecordsResponseBase } from "@ensnode/ensnode-sdk";
 
+import { resolveForward } from "@/lib/resolution/forward-resolution";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
+import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/resolution/build-records-selection";
+import {
+  ENSIP19_CHAIN_VALUES,
+  type ENSIP19ChainValue,
+} from "@/omnigraph-api/lib/resolution/chain-coin-type";
 
-//////////////////////
-// PrimaryNameByChain
-//////////////////////
-export const PrimaryNameByChainRef = builder.objectRef<{
-  chainId: ChainId;
-  name: InterpretedName | null;
-}>("PrimaryNameByChain");
+//////////////////
+// ENSIP19Chain
+//////////////////
+export const ENSIP19Chain = builder.enumType("ENSIP19Chain", {
+  description:
+    "ENSIP-19 supported chains that can have a primary name. Non-EVM coin types are intentionally absent.",
+  values: ENSIP19_CHAIN_VALUES,
+});
 
-PrimaryNameByChainRef.implement({
-  description: "An ENSIP-19 primary name for an Account on a specific chain.",
+///////////////////////
+// PrimaryName inputs
+///////////////////////
+export const PrimaryNameByInput = builder.inputType("PrimaryNameByInput", {
+  description:
+    "Select a primary name lookup target. Exactly one of `coinType` or `chain` must be provided.",
+  isOneOf: true,
   fields: (t) => ({
-    chainId: t.field({
-      description: "The chain on which the primary name was resolved.",
-      type: "ChainId",
-      nullable: false,
-      resolve: (r) => r.chainId,
+    coinType: t.field({
+      type: "CoinType",
+      description: "The ENSIP-9 coin type to resolve the primary name for.",
     }),
-    name: t.field({
-      description:
-        "The validated primary name for this Account on this chain, or null if none is set.",
-      type: "InterpretedName",
+    chain: t.field({
+      type: ENSIP19Chain,
+      description: "An ENSIP-19 supported chain to resolve the primary name for.",
+    }),
+  }),
+});
+
+export const PrimaryNamesByInput = builder.inputType("PrimaryNamesByInput", {
+  description:
+    "Select primary name lookup targets. Exactly one of `coinTypes` or `chains` must be provided.",
+  isOneOf: true,
+  fields: (t) => ({
+    coinTypes: t.field({
+      type: ["CoinType"],
+      description: "Coin types to resolve primary names for.",
+      validate: { minLength: 1 },
+    }),
+    chains: t.field({
+      type: [ENSIP19Chain],
+      description: "ENSIP-19 supported chains to resolve primary names for.",
+      validate: { minLength: 1 },
+    }),
+  }),
+});
+
+//////////////////////
+// DomainProfile (preview — types only, no resolution wired yet)
+//////////////////////
+export type DomainProfileModel = Record<string, never>;
+
+export const ProfileSocialAccountRef =
+  builder.objectRef<DomainProfileModel>("ProfileSocialAccount");
+
+ProfileSocialAccountRef.implement({
+  description: "PREVIEW: An interpreted social account on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    handle: t.string({
+      description: "The social handle, or null when unset.",
       nullable: true,
-      resolve: (r) => r.name,
+      resolve: () => null,
+    }),
+    url: t.string({
+      description: "The social profile URL, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+  }),
+});
+
+export const ProfileSocialsRef = builder.objectRef<DomainProfileModel>("ProfileSocials");
+
+ProfileSocialsRef.implement({
+  description: "PREVIEW: Interpreted social accounts on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    github: t.field({
+      type: ProfileSocialAccountRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    telegram: t.field({
+      type: ProfileSocialAccountRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    twitter: t.field({
+      type: ProfileSocialAccountRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+  }),
+});
+
+export const ProfileAddressesRef = builder.objectRef<DomainProfileModel>("ProfileAddresses");
+
+ProfileAddressesRef.implement({
+  description: "PREVIEW: Interpreted address records on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    ethereum: t.field({
+      description: "The interpreted Ethereum address, or null when unset.",
+      type: "Address",
+      nullable: true,
+      resolve: () => null,
+    }),
+    base: t.field({
+      description: "The interpreted Base address, or null when unset.",
+      type: "Address",
+      nullable: true,
+      resolve: () => null,
+    }),
+    bitcoin: t.string({
+      description: "The interpreted Bitcoin address, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+    solana: t.string({
+      description: "The interpreted Solana address, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+  }),
+});
+
+export const ProfileNameRef = builder.objectRef<DomainProfileModel>("ProfileName");
+
+ProfileNameRef.implement({
+  description: "PREVIEW: Interpreted name metadata on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    beautified: t.string({
+      description: "The beautified display form of the name, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+    normalized: t.string({
+      description: "The normalized form of the name, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+  }),
+});
+
+export const ProfileAvatarRef = builder.objectRef<DomainProfileModel>("ProfileAvatar");
+
+ProfileAvatarRef.implement({
+  description: "PREVIEW: Interpreted avatar metadata on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    url: t.string({
+      description: "The resolved avatar URL, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+  }),
+});
+
+export const ProfileBannerRef = builder.objectRef<DomainProfileModel>("ProfileBanner");
+
+ProfileBannerRef.implement({
+  description: "PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    url: t.string({
+      description: "The resolved banner URL, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+  }),
+});
+
+export const ProfileWebsiteRef = builder.objectRef<DomainProfileModel>("ProfileWebsite");
+
+ProfileWebsiteRef.implement({
+  description: "PREVIEW: Interpreted website metadata on a Domain profile. Not yet resolved.",
+  fields: (t) => ({
+    url: t.string({
+      description: "The resolved website URL, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+  }),
+});
+
+export const DomainProfileRef = builder.objectRef<DomainProfileModel>("DomainProfile");
+
+DomainProfileRef.implement({
+  description:
+    "PREVIEW: An interpreted ENS profile for a name. Types are defined for query ergonomics; resolution is not yet wired.",
+  fields: (t) => ({
+    name: t.field({
+      type: ProfileNameRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    avatar: t.field({
+      type: ProfileAvatarRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    banner: t.field({
+      type: ProfileBannerRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    website: t.field({
+      type: ProfileWebsiteRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    description: t.string({
+      description: "The profile description, or null when unset.",
+      nullable: true,
+      resolve: () => null,
+    }),
+    addresses: t.field({
+      type: ProfileAddressesRef,
+      nullable: true,
+      resolve: () => ({}),
+    }),
+    socials: t.field({
+      type: ProfileSocialsRef,
+      nullable: true,
+      resolve: () => ({}),
     }),
   }),
 });
@@ -260,6 +464,74 @@ ResolvedRecordsRef.implement({
               address: r.addresses?.[coinType] ?? null,
             }))
           : [],
+    }),
+  }),
+});
+
+//////////////////////
+// PrimaryNameRecord
+//////////////////////
+export type PrimaryNameRecordModel = {
+  address: Address;
+  coinType: CoinType;
+  chain: ENSIP19ChainValue | null;
+  name: InterpretedName | null;
+  disableAcceleration: boolean;
+  canAccelerate: boolean;
+};
+
+export const PrimaryNameRecordRef = builder.objectRef<PrimaryNameRecordModel>("PrimaryNameRecord");
+
+PrimaryNameRecordRef.implement({
+  description: "An ENSIP-19 primary name for an Account on a specific coin type.",
+  fields: (t) => ({
+    coinType: t.field({
+      description: "The canonical ENSIP-9 coin type for this primary name lookup.",
+      type: "CoinType",
+      nullable: false,
+      resolve: (r) => r.coinType,
+    }),
+    chain: t.field({
+      description:
+        "The ENSIP-19 chain corresponding to `coinType`, or null when `coinType` is not represented in `ENSIP19Chain`.",
+      type: ENSIP19Chain,
+      nullable: true,
+      resolve: (r) => r.chain,
+    }),
+    name: t.field({
+      description:
+        "The validated primary name for this Account on this coin type, or null if none is set.",
+      type: "InterpretedName",
+      nullable: true,
+      resolve: (r) => r.name,
+    }),
+    records: t.field({
+      description:
+        "Forward-resolve ENS records for the validated primary name. Null when `name` is null.",
+      type: ResolvedRecordsRef,
+      nullable: true,
+      tracing: true,
+      resolve: async (parent, _args, context, info) => {
+        const name = parent.name;
+        if (!name) return null;
+
+        const recordsSelection = buildRecordsSelectionFromResolveInfo(info);
+        const { result } = await runWithTrace(() =>
+          resolveForward(name, recordsSelection, {
+            accelerate: !parent.disableAcceleration,
+            canAccelerate: context.canAccelerate,
+          }),
+        );
+
+        return result as ResolverRecordsResponseBase;
+      },
+    }),
+    profile: t.field({
+      description:
+        "PREVIEW: An interpreted ENS profile for the validated primary name. Not yet resolved.",
+      type: DomainProfileRef,
+      nullable: false,
+      resolve: () => ({}),
     }),
   }),
 });

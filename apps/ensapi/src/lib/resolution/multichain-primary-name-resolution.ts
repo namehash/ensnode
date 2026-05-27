@@ -1,20 +1,22 @@
 import { trace } from "@opentelemetry/api";
+import { type Address, type CoinType, evmChainIdToCoinType } from "enssdk";
 import { mainnet } from "viem/chains";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type MultichainPrimaryNameResolutionArgs,
   type MultichainPrimaryNameResolutionResult,
+  type ReverseResolutionResult,
   uniq,
 } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { resolveReverse } from "@/lib/resolution/reverse-resolution";
+import { resolveReverse, resolveReverseByCoinType } from "@/lib/resolution/reverse-resolution";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
-const getENSIP19SupportedChainIds = () => {
+export const getENSIP19SupportedChainIds = () => {
   return uniq([
     // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
     // regardless of the current namespace
@@ -33,6 +35,43 @@ const getENSIP19SupportedChainIds = () => {
       .map((ds) => ds.chain.id),
   ]);
 };
+
+/** Coin types corresponding to {@link getENSIP19SupportedChainIds} in the current namespace. */
+export const getENSIP19SupportedCoinTypes = (): CoinType[] =>
+  uniq(getENSIP19SupportedChainIds().map(evmChainIdToCoinType));
+
+export type MultichainPrimaryNameByCoinTypeResolutionResult = Partial<
+  Record<CoinType, ReverseResolutionResult>
+>;
+
+type PrimaryNameResolutionOptions = Parameters<typeof resolveReverseByCoinType>[2];
+
+/**
+ * Batch-resolves an address' primary name for each requested coin type.
+ *
+ * @see https://docs.ens.domains/ensip/19
+ */
+export async function resolvePrimaryNamesByCoinTypes(
+  address: Address,
+  coinTypes: CoinType[],
+  options: PrimaryNameResolutionOptions,
+): Promise<MultichainPrimaryNameByCoinTypeResolutionResult> {
+  const names = await withActiveSpanAsync(
+    tracer,
+    "resolvePrimaryNamesByCoinTypes",
+    { address },
+    () =>
+      Promise.all(
+        coinTypes.map((coinType) => resolveReverseByCoinType(address, coinType, options)),
+      ),
+  );
+
+  return coinTypes.reduce((memo, coinType, i) => {
+    // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
+    memo[coinType] = names[i]!;
+    return memo;
+  }, {} as MultichainPrimaryNameByCoinTypeResolutionResult);
+}
 
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`.

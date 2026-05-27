@@ -46,7 +46,7 @@ import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
-import { ResolvedRecordsRef } from "@/omnigraph-api/schema/resolution";
+import { DomainProfileRef, ResolvedRecordsRef } from "@/omnigraph-api/schema/resolution";
 
 const tracer = trace.getTracer("schema/Domain");
 
@@ -206,6 +206,17 @@ DomainInterfaceRef.implement({
 
         return result as ResolverRecordsResponseBase;
       },
+    }),
+
+    ///////////////////
+    // Domain.profile
+    ///////////////////
+    profile: t.field({
+      description:
+        "PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.",
+      type: DomainProfileRef,
+      nullable: true,
+      resolve: (domain) => (domain.canonicalName ? {} : null),
     }),
 
     ///////////////////////

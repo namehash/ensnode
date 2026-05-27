@@ -1,16 +1,22 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import type { Address, ChainId, InterpretedName } from "enssdk";
+import type { Address } from "enssdk";
 
 import di from "@/di";
-import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
-import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import {
+  normalizePrimaryNameByInput,
+  normalizePrimaryNamesByInput,
+} from "@/omnigraph-api/lib/resolution/primary-name-input";
+import {
+  resolveDefaultPrimaryNameRecords,
+  resolvePrimaryNameRecords,
+} from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -19,7 +25,11 @@ import { EventRef } from "@/omnigraph-api/schema/event";
 import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
-import { PrimaryNameByChainRef } from "@/omnigraph-api/schema/resolution";
+import {
+  PrimaryNameByInput,
+  PrimaryNameRecordRef,
+  PrimaryNamesByInput,
+} from "@/omnigraph-api/schema/resolution";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -62,21 +72,17 @@ AccountRef.implement({
       resolve: (parent) => parent.id,
     }),
 
-    ////////////////////////
-    // Account.primaryNames
-    ////////////////////////
-    primaryNames: t.field({
-      description:
-        "ENSIP-19 primary names for this Account. Omit chainIds to resolve all ENSIP-19 supported chains.",
-      type: [PrimaryNameByChainRef],
+    ///////////////////////
+    // Account.primaryName
+    ///////////////////////
+    primaryName: t.field({
+      description: "The ENSIP-19 primary name for this Account on a specific coin type or chain.",
+      type: PrimaryNameRecordRef,
       nullable: false,
       args: {
-        chainIds: t.arg({
-          type: ["ChainId"],
-          required: false,
-          description:
-            "Chain ids to resolve primary names for. Omit to resolve all ENSIP-19 supported chains.",
-          validate: { minLength: 1 },
+        by: t.arg({
+          type: PrimaryNameByInput,
+          required: true,
         }),
         disableAcceleration: t.arg.boolean({
           required: false,
@@ -84,21 +90,50 @@ AccountRef.implement({
           description: "When true, disables protocol acceleration feature.",
         }),
       },
-      resolve: async (account, { chainIds, disableAcceleration }, context) => {
-        const { result } = await runWithTrace(() =>
-          resolvePrimaryNames(account.id, chainIds ?? undefined, {
-            accelerate: !disableAcceleration,
-            canAccelerate: context.canAccelerate,
-          }),
-        );
+      resolve: async (account, { by, disableAcceleration }, context) => {
+        const coinType = normalizePrimaryNameByInput(by);
+        const [record] = await resolvePrimaryNameRecords(account.id, [coinType], {
+          disableAcceleration: disableAcceleration ?? false,
+          canAccelerate: context.canAccelerate,
+        });
+        // biome-ignore lint/style/noNonNullAssertion: exactly one coin type requested
+        return record!;
+      },
+    }),
 
-        // Object.entries returns key/value pairs as [string, string | null],
-        // but the values are already ChainId / InterpretedName | null,
-        // so the cast is safe.
-        return Object.entries(result).map(([chainId, name]) => ({
-          chainId: Number(chainId) as ChainId,
-          name: name as InterpretedName | null,
-        }));
+    ////////////////////////
+    // Account.primaryNames
+    ////////////////////////
+    primaryNames: t.field({
+      description:
+        "ENSIP-19 primary names for this Account. Omit `by` to resolve all ENSIP-19 supported chains in the current namespace.",
+      type: [PrimaryNameRecordRef],
+      nullable: false,
+      args: {
+        by: t.arg({
+          type: PrimaryNamesByInput,
+          required: false,
+          description:
+            "Select coin types or chains to resolve. Omit to resolve all ENSIP-19 supported chains.",
+        }),
+        disableAcceleration: t.arg.boolean({
+          required: false,
+          defaultValue: false,
+          description: "When true, disables protocol acceleration feature.",
+        }),
+      },
+      resolve: async (account, { by, disableAcceleration }, context) => {
+        const options = {
+          disableAcceleration: disableAcceleration ?? false,
+          canAccelerate: context.canAccelerate,
+        };
+
+        if (!by) {
+          return resolveDefaultPrimaryNameRecords(account.id, options);
+        }
+
+        const coinTypes = normalizePrimaryNamesByInput(by);
+        return resolvePrimaryNameRecords(account.id, coinTypes, options);
       },
     }),
 

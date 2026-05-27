@@ -313,18 +313,72 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
   });
 });
 
-describe("Account.primaryNames", () => {
-  type AccountPrimaryNamesResult = {
-    account: {
-      primaryNames: Array<{ chainId: number; name: string | null }>;
+describe("Account.primaryName and Account.primaryNames", () => {
+  type PrimaryNameRecordResult = {
+    coinType: number;
+    chain: string | null;
+    name: string | null;
+    records?: { addresses: Array<{ coinType: number; address: string | null }> } | null;
+    profile?: {
+      name: { normalized: string | null } | null;
+      addresses: { ethereum: string | null } | null;
     };
   };
 
-  const AccountPrimaryNames = gql`
-    query AccountPrimaryNames($address: Address!, $chainIds: [ChainId!]) {
+  type AccountPrimaryNameResult = {
+    account: {
+      primaryName: PrimaryNameRecordResult;
+    };
+  };
+
+  type AccountPrimaryNamesResult = {
+    account: {
+      primaryNames: PrimaryNameRecordResult[];
+    };
+  };
+
+  const AccountPrimaryNameByCoinType = gql`
+    query AccountPrimaryNameByCoinType($address: Address!, $coinType: CoinType!) {
       account(by: { address: $address }) {
-        primaryNames(chainIds: $chainIds) {
-          chainId
+        primaryName(by: { coinType: $coinType }) {
+          coinType
+          chain
+          name
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameByChain = gql`
+    query AccountPrimaryNameByChain($address: Address!) {
+      account(by: { address: $address }) {
+        primaryName(by: { chain: ETHEREUM }) {
+          coinType
+          chain
+          name
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByCoinTypes = gql`
+    query AccountPrimaryNamesByCoinTypes($address: Address!, $coinTypes: [CoinType!]!) {
+      account(by: { address: $address }) {
+        primaryNames(by: { coinTypes: $coinTypes }) {
+          coinType
+          chain
+          name
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByChains = gql`
+    query AccountPrimaryNamesByChains($address: Address!) {
+      account(by: { address: $address }) {
+        primaryNames(by: { chains: [ETHEREUM, BASE] }) {
+          coinType
+          chain
           name
         }
       }
@@ -335,56 +389,188 @@ describe("Account.primaryNames", () => {
     query AccountPrimaryNamesAllChains($address: Address!) {
       account(by: { address: $address }) {
         primaryNames {
-          chainId
+          coinType
+          chain
           name
         }
       }
     }
   `;
 
-  it("resolves primary name for owner on chain 1", async () => {
+  const AccountPrimaryNameNonEnsip19 = gql`
+    query AccountPrimaryNameNonEnsip19($address: Address!) {
+      account(by: { address: $address }) {
+        primaryName(by: { coinType: 0 }) {
+          coinType
+          chain
+          name
+          records {
+            addresses(coinTypes: [60]) { address }
+          }
+          profile {
+            name { normalized }
+            addresses { ethereum }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedRecords = gql`
+    query AccountPrimaryNameChainedRecords($address: Address!) {
+      account(by: { address: $address }) {
+        primaryName(by: { coinType: 60 }) {
+          name
+          records {
+            addresses(coinTypes: [60]) { coinType address }
+          }
+        }
+      }
+    }
+  `;
+
+  it("resolves primary name by coinType for owner on Ethereum", async () => {
     await expect(
-      request<AccountPrimaryNamesResult>(AccountPrimaryNames, {
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
         address: accounts.owner.address,
-        chainIds: [1],
+        coinType: 60,
       }),
-    ).resolves.toEqual({ account: { primaryNames: [{ chainId: 1, name: "test.eth" }] } });
+    ).resolves.toEqual({
+      account: {
+        primaryName: { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+      },
+    });
+  });
+
+  it("resolves the same primary name by chain as by coinType", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByChain, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        primaryName: { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+      },
+    });
   });
 
   it("returns null for user without a primary name", async () => {
     await expect(
-      request<AccountPrimaryNamesResult>(AccountPrimaryNames, {
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
         address: accounts.user.address,
-        chainIds: [1],
+        coinType: 60,
       }),
-    ).resolves.toEqual({ account: { primaryNames: [{ chainId: 1, name: null }] } });
+    ).resolves.toEqual({
+      account: {
+        primaryName: { coinType: 60, chain: "ETHEREUM", name: null },
+      },
+    });
   });
 
-  it("resolves all ENSIP-19 supported chains when chainIds is omitted from the query", async () => {
+  it("resolves primary names for requested coin types", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByCoinTypes, {
+        address: accounts.owner.address,
+        coinTypes: [60, 2147492101],
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        primaryNames: [
+          { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+          { coinType: 2147492101, chain: "BASE", name: null },
+        ],
+      },
+    });
+  });
+
+  it("resolves primary names for requested chains", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByChains, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        primaryNames: [
+          { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+          { coinType: 2147492101, chain: "BASE", name: null },
+        ],
+      },
+    });
+  });
+
+  it("resolves all ENSIP-19 supported chains when by is omitted", async () => {
     await expect(
       request<AccountPrimaryNamesResult>(AccountPrimaryNamesAllChains, {
         address: accounts.owner.address,
       }),
     ).resolves.toMatchObject({
-      account: { primaryNames: expect.arrayContaining([{ chainId: 1, name: "test.eth" }]) },
+      account: {
+        primaryNames: expect.arrayContaining([
+          { coinType: 60, chain: "ETHEREUM", name: "test.eth" },
+        ]),
+      },
     });
   });
 
-  it("rejects empty chainIds at GraphQL validation", async () => {
+  it("returns null name and chain for non-ENSIP-19 coin types", async () => {
     await expect(
-      request(AccountPrimaryNames, {
+      request<AccountPrimaryNameResult>(AccountPrimaryNameNonEnsip19, {
         address: accounts.owner.address,
-        chainIds: [],
+      }),
+    ).resolves.toEqual({
+      account: {
+        primaryName: {
+          coinType: 0,
+          chain: null,
+          name: null,
+          records: null,
+          profile: {
+            name: { normalized: null },
+            addresses: { ethereum: null },
+          },
+        },
+      },
+    });
+  });
+
+  it("chains forward resolution through primaryName.records", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedRecords, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        primaryName: {
+          name: "test.eth",
+          records: {
+            addresses: [{ coinType: 60, address: accounts.owner.address }],
+          },
+        },
+      },
+    });
+  });
+
+  it("rejects empty coinTypes at GraphQL validation", async () => {
+    await expect(
+      request(AccountPrimaryNamesByCoinTypes, {
+        address: accounts.owner.address,
+        coinTypes: [],
       }),
     ).rejects.toThrow();
   });
 
-  it("rejects chain id 0 at GraphQL validation", async () => {
+  it("rejects empty chains at GraphQL validation", async () => {
     await expect(
-      request(AccountPrimaryNames, {
-        address: accounts.owner.address,
-        chainIds: [0, 1],
-      }),
+      request(
+        gql`
+          query AccountPrimaryNamesEmptyChains($address: Address!) {
+            account(by: { address: $address }) {
+              primaryNames(by: { chains: [] }) { coinType }
+            }
+          }
+        `,
+        { address: accounts.owner.address },
+      ),
     ).rejects.toThrow();
   });
 });

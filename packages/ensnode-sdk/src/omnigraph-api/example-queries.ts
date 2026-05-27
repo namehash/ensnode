@@ -221,7 +221,7 @@ query DomainRecords(
         name: DEVNET_NAME_WITH_OWNED_RESOLVER,
       },
       [ENSNamespaceIds.SepoliaV2]: {
-        name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER,
+        name: SEPOLIA_V2_NAME,
       },
     },
   },
@@ -338,16 +338,53 @@ query AccountDomains(
 query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
-    primaryNames {
-      chainId
+    primaryNames(by: { chains: [ETHEREUM, BASE] }) {
+      coinType
+      chain
       name
+      records {
+        addresses(coinTypes: [60]) {
+          coinType
+          address
+        }
+      }
     }
   }
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
+    },
+  },
+
+  //////////////////
+  // Domain Profile
+  //////////////////
+  {
+    id: "domain-profile",
+    query: `
+query DomainProfile($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    profile {
+      name { beautified normalized }
+      description
+      avatar { url }
+      banner { url }
+      website { url }
+      addresses { ethereum base bitcoin solana }
+      socials {
+        github { handle url }
+        telegram { handle url }
+        twitter { handle url }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "vitalik.eth" },
+      [ENSNamespaceIds.EnsTestEnv]: { name: "test.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "test.eth" },
     },
   },
 

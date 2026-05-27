@@ -1,10 +1,16 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { coinTypeReverseLabel, evmChainIdToCoinType, reverseName } from "enssdk";
+import {
+  type Address,
+  type ChainId,
+  type CoinType,
+  coinTypeReverseLabel,
+  evmChainIdToCoinType,
+  reverseName,
+} from "enssdk";
 import { isAddress, isAddressEqual } from "viem";
 
 import {
   type ResolverRecordsSelection,
-  type ReverseResolutionArgs,
   ReverseResolutionProtocolStep,
   type ReverseResolutionResult,
   TraceableENSProtocol,
@@ -24,23 +30,24 @@ export const REVERSE_RESOLUTION_SELECTION = {
 
 const tracer = trace.getTracer("reverse-resolution");
 
+type ReverseResolutionOptions = Parameters<typeof resolveForward>[2];
+
 /**
- * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
+ * Implements ENS Reverse Resolution for a specific coin type, including ENSIP-19 L2 Primary Names.
  *
  * @see https://docs.ens.domains/ensip/19/#algorithm
  *
- * The DEFAULT_EVM_CHAIN_ID (0) is a valid chainId in this context.
  *
  * @param address the adddress whose Primary Name to resolve
- * @param chainId the chainId within which to resolve the address' Primary Name
+ * @param coinType the coinType  within which to resolve the address' Primary Name
  * @param options Optional settings
  * @param options.accelerate Whether to accelerate resolution (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
-export async function resolveReverse(
-  address: ReverseResolutionArgs["address"],
-  chainId: ReverseResolutionArgs["chainId"],
-  options: Parameters<typeof resolveForward>[2],
+export async function resolveReverseByCoinType(
+  address: Address,
+  coinType: CoinType,
+  options: ReverseResolutionOptions,
 ): Promise<ReverseResolutionResult> {
   const { accelerate = true } = options;
 
@@ -48,13 +55,13 @@ export async function resolveReverse(
   return withProtocolStep(
     TraceableENSProtocol.ReverseResolution,
     ReverseResolutionProtocolStep.Operation,
-    { address, chainId, accelerate },
+    { address, coinType, accelerate },
     (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
-        `resolveReverse(${address}, chainId: ${chainId})`,
-        { address, chainId, accelerate },
+        `resolveReverseByCoinType(${address}, coinType: ${coinType})`,
+        { address, coinType, accelerate },
         async (span) => {
           /////////////////////////////////////////////////////////
           // Reverse Resolution
@@ -62,7 +69,6 @@ export async function resolveReverse(
           /////////////////////////////////////////////////////////
 
           // Steps 1-3 — Resolve coinType-specific name record
-          const coinType = evmChainIdToCoinType(chainId);
           const _reverseName = reverseName(address, coinType);
           const { name } = await withProtocolStep(
             TraceableENSProtocol.ReverseResolution,
@@ -172,4 +178,25 @@ export async function resolveReverse(
         },
       ),
   );
+}
+
+/**
+ * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
+ *
+ * @see https://docs.ens.domains/ensip/19/#algorithm
+ *
+ * The DEFAULT_EVM_CHAIN_ID (0) is a valid chainId in this context.
+ *
+ * @param address the adddress whose Primary Name to resolve
+ * @param chainId the chainId within which to resolve the address' Primary Name
+ * @param options Optional settings
+ * @param options.accelerate Whether to accelerate resolution (default: true)
+ * @param options.canAccelerate Whether acceleration is currently possible (default: false)
+ */
+export async function resolveReverse(
+  address: Address,
+  chainId: ChainId,
+  options: ReverseResolutionOptions,
+): Promise<ReverseResolutionResult> {
+  return resolveReverseByCoinType(address, evmChainIdToCoinType(chainId), options);
 }
