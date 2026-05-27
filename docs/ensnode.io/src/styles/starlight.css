@@ -177,7 +177,7 @@
   box-shadow: var(--sl-shadow-sm);
 }
 
-.card {
+.sl-link-card.card {
   border-radius: 12px;
 }
 
