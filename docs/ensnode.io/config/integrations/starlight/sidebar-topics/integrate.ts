@@ -73,6 +73,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph",
         },
         {
+          label: "Protocol Acceleration",
+          link: "/docs/integrate/omnigraph/protocol-acceleration",
+        },
+        {
           label: "Examples",
           collapsed: true,
           items: [
