@@ -118,7 +118,9 @@ query ByProtocolVersion {
   domain(by: { name: "vitalik.eth" }) { id }
 
   # always returns the protocol-specific version of vitalik.eth
-  domains(where: { name: { eq: "vitalik.eth" } }, version: ENSv1) { id }
+  domains(where: { name: { eq: "vitalik.eth" }, version: ENSv1 }) {
+    edges { node { id } }
+  }
 }
 ```
 
@@ -295,7 +297,7 @@ ENS Forward Resolution does _not_ support Encoded LabelHashes in names, so while
 
 ### BeautifiedNames and BeautifiedLabels
 
-For some labels and names, there is exists an [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form, where certain normalized characters are 'beautified' into their _un-normalized_ but prettier forms.
+For some labels and names, there exists an [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form, where certain normalized characters are 'beautified' into their _un-normalized_ but prettier forms.
 
 For example, the InterpretedName `♾.eth` (normalized) would be beautified to `♾️.eth` (un-normalized). All name and label fields in the Omnigraph provide a `beautified` variant which can be used for display.
 
