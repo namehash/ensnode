@@ -146,7 +146,7 @@ query Canonicality {
       }
       node   # namehash(name)
       depth  # i.e. 2 for "vitalik.eth"
-      path   # [Domain("eth"), Domain("vitalik.eth")]
+      path { id } # [Domain("eth"), Domain("vitalik.eth")]
     }
   }
 }
