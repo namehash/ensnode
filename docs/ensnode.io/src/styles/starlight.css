@@ -340,7 +340,6 @@ starlight-toc a:hover {
 #starlight__sidebar details details > summary:hover,
 #starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
-  transform: translateX(2px);
   border-radius: 6px;
 }
 
