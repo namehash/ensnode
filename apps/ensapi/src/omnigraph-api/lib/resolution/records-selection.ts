@@ -74,14 +74,16 @@ function buildRecordsSelectionFromRecordsFieldNodes(
   recordsFieldNodes: readonly FieldNode[],
   recordsReturnType: GraphQLObjectType,
   info: GraphQLResolveInfo,
-): ResolverRecordsSelection {
+): ResolverRecordsSelection | null {
   // 1. Collect all selections from all 'records' field nodes (merging fragments and aliases)
   const graphqlSelections = recordsFieldNodes.flatMap(
     (node) => node.selectionSet?.selections ?? [],
   );
 
   if (graphqlSelections.length === 0) {
-    throw new GraphQLError(EMPTY_RECORDS_SELECTION_MESSAGE);
+    // If the 'records' field is selected but has no sub-fields (e.g. only '__typename'),
+    // we return null to indicate that no resolution is required.
+    return null;
   }
 
   // Create a virtual selection set to process all collected selections together
@@ -118,7 +120,9 @@ function buildRecordsSelectionFromRecordsFieldNodes(
   }
 
   if (isSelectionEmpty(recordsSelection)) {
-    throw new GraphQLError(EMPTY_RECORDS_SELECTION_MESSAGE);
+    // If the selection is empty after filtering out unknown fields or '__typename',
+    // we return null to indicate that no resolution is required.
+    return null;
   }
 
   return recordsSelection;
@@ -139,7 +143,12 @@ export function buildRecordsSelectionFromResolveInfo(
     throw new GraphQLError("Return type must be an object type.");
   }
 
-  return buildRecordsSelectionFromRecordsFieldNodes(info.fieldNodes, returnType, info);
+  const selection = buildRecordsSelectionFromRecordsFieldNodes(info.fieldNodes, returnType, info);
+  if (!selection) {
+    throw new GraphQLError(EMPTY_RECORDS_SELECTION_MESSAGE);
+  }
+
+  return selection;
 }
 
 /**

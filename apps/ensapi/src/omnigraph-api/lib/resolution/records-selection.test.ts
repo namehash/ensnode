@@ -246,11 +246,9 @@ describe("buildRecordsSelectionFromResolveContainerInfo", () => {
     });
   });
 
-  it("throws when records is selected with an empty subselection", () => {
+  it("returns null when records is selected with an empty subselection", () => {
     const info = resolveInfoForDomainResolveSubselection("records { __typename }");
 
-    expect(() => buildRecordsSelectionFromResolveContainerInfo(info)).toThrow(
-      EMPTY_RECORDS_SELECTION_MESSAGE,
-    );
+    expect(buildRecordsSelectionFromResolveContainerInfo(info)).toBeNull();
   });
 });
