@@ -80,12 +80,12 @@ export const ENS_ECOSYSTEM_MEMBERS = new Map<
     EnsEcosystemMemberTypes.app,
     [
       {
-        name: "Official ENS Explorer for ENSv2",
+        name: "Official ENSv2 Explorer",
         websiteURL: new URL("https://explorer.ens.dev/"),
         icon: ENSv2ExplorerLogo,
       },
       {
-        name: "Official ENS App for ENSv2",
+        name: "Official ENSv2 App",
         websiteURL: new URL("https://app.ens.dev/"),
         icon: ENSv2AppLogo,
       },
