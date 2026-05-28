@@ -177,6 +177,10 @@
   box-shadow: var(--sl-shadow-sm);
 }
 
+.card-grid .card {
+  border-radius: 12px;
+}
+
 .sl-link-card:hover,
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
@@ -359,7 +363,6 @@ starlight-toc a:hover {
 #starlight__sidebar details details > summary:hover,
 #starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
-  transform: translateX(2px);
   border-radius: 6px;
 }
 
