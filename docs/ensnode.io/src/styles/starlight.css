@@ -45,7 +45,8 @@
 
   /* Aside colors */
   --aside-danger-color: #ef4444;
-  --aside-caution-color: #ca8a04;
+  --aside-caution-color: #a16207;
+  --aside-caution-bg-color: #fde047;
   --aside-note-color: #3b82f6;
   --aside-tip-color: #16a34a;
 }
@@ -560,7 +561,7 @@ starlight-tabs ul[role="tablist"] {
 
 .starlight-aside--caution {
   border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-caution-color) 10%, transparent);
+  background-color: color-mix(in srgb, var(--aside-caution-bg-color) 30%, transparent);
 
   & .starlight-aside__icon {
     color: var(--aside-caution-color);
@@ -571,11 +572,11 @@ starlight-tabs ul[role="tablist"] {
   }
 
   & code {
-    background-color: color-mix(in srgb, var(--aside-caution-color) 12%, transparent);
+    background-color: color-mix(in srgb, var(--aside-caution-bg-color) 35%, transparent);
   }
 
   & pre {
-    background-color: color-mix(in srgb, var(--aside-caution-color) 5%, transparent);
+    background-color: color-mix(in srgb, var(--aside-caution-bg-color) 18%, transparent);
     border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
   }
 
