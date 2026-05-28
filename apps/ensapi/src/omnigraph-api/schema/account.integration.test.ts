@@ -323,10 +323,9 @@ describe("Account.primaryName and Account.primaryNames", () => {
     coinType: number;
     chain: string | null;
     name: CanonicalNameResult;
-    records?: { addresses: Array<{ coinType: number; address: string | null }> } | null;
-    profile?: {
-      addresses: { ethereum: string | null } | null;
-    };
+    resolve?: {
+      records?: { addresses: Array<{ coinType: number; address: string | null }> } | null;
+    } | null;
   };
 
   const TEST_ETH_NAME: CanonicalNameResult = {
@@ -336,23 +335,29 @@ describe("Account.primaryName and Account.primaryNames", () => {
 
   type AccountPrimaryNameResult = {
     account: {
-      primaryName: PrimaryNameRecordResult;
+      resolve: {
+        primaryName: PrimaryNameRecordResult;
+      };
     };
   };
 
   type AccountPrimaryNamesResult = {
     account: {
-      primaryNames: PrimaryNameRecordResult[];
+      resolve: {
+        primaryNames: PrimaryNameRecordResult[];
+      };
     };
   };
 
   const AccountPrimaryNameByCoinType = gql`
     query AccountPrimaryNameByCoinType($address: Address!, $coinType: CoinType!) {
       account(by: { address: $address }) {
-        primaryName(by: { coinType: $coinType }) {
-          coinType
-          chain
-          name { interpreted beautified }
+        resolve {
+          primaryName(by: { coinType: $coinType }) {
+            coinType
+            chain
+            name { interpreted beautified }
+          }
         }
       }
     }
@@ -361,10 +366,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNameByChain = gql`
     query AccountPrimaryNameByChain($address: Address!) {
       account(by: { address: $address }) {
-        primaryName(by: { chain: ETHEREUM }) {
-          coinType
-          chain
-          name { interpreted beautified }
+        resolve {
+          primaryName(by: { chain: ETH }) {
+            coinType
+            chain
+            name { interpreted beautified }
+          }
         }
       }
     }
@@ -373,10 +380,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNameByDefaultChain = gql`
     query AccountPrimaryNameByDefaultChain($address: Address!) {
       account(by: { address: $address }) {
-        primaryName(by: { chain: DEFAULT }) {
-          coinType
-          chain
-          name { interpreted beautified }
+        resolve {
+          primaryName(by: { chain: DEFAULT }) {
+            coinType
+            chain
+            name { interpreted beautified }
+          }
         }
       }
     }
@@ -385,10 +394,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNamesByDefaultChain = gql`
     query AccountPrimaryNamesByDefaultChain($address: Address!) {
       account(by: { address: $address }) {
-        primaryNames(by: { chains: [DEFAULT] }) {
-          coinType
-          chain
-          name { interpreted beautified }
+        resolve {
+          primaryNames(where: { chains: [DEFAULT] }) {
+            coinType
+            chain
+            name { interpreted beautified }
+          }
         }
       }
     }
@@ -397,10 +408,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNamesByCoinTypes = gql`
     query AccountPrimaryNamesByCoinTypes($address: Address!, $coinTypes: [CoinType!]!) {
       account(by: { address: $address }) {
-        primaryNames(by: { coinTypes: $coinTypes }) {
-          coinType
-          chain
-          name { interpreted beautified }
+        resolve {
+          primaryNames(where: { coinTypes: $coinTypes }) {
+            coinType
+            chain
+            name { interpreted beautified }
+          }
         }
       }
     }
@@ -409,10 +422,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNamesByChains = gql`
     query AccountPrimaryNamesByChains($address: Address!) {
       account(by: { address: $address }) {
-        primaryNames(by: { chains: [ETHEREUM, BASE] }) {
-          coinType
-          chain
-          name { interpreted beautified }
+        resolve {
+          primaryNames(where: { chains: [ETH, BASE] }) {
+            coinType
+            chain
+            name { interpreted beautified }
+          }
         }
       }
     }
@@ -421,15 +436,16 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNameNonEnsip19 = gql`
     query AccountPrimaryNameNonEnsip19($address: Address!) {
       account(by: { address: $address }) {
-        primaryName(by: { coinType: 0 }) {
-          coinType
-          chain
-          name { interpreted beautified }
-          records {
-            addresses(coinTypes: [60]) { address }
-          }
-          profile {
-            addresses { ethereum }
+        resolve {
+          primaryName(by: { coinType: 0 }) {
+            coinType
+            chain
+            name { interpreted beautified }
+            resolve {
+              records {
+                addresses(coinTypes: [60]) { address }
+              }
+            }
           }
         }
       }
@@ -439,10 +455,14 @@ describe("Account.primaryName and Account.primaryNames", () => {
   const AccountPrimaryNameChainedRecords = gql`
     query AccountPrimaryNameChainedRecords($address: Address!) {
       account(by: { address: $address }) {
-        primaryName(by: { coinType: 60 }) {
-          name { interpreted beautified }
-          records {
-            addresses(coinTypes: [60]) { coinType address }
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              records {
+                addresses(coinTypes: [60]) { coinType address }
+              }
+            }
           }
         }
       }
@@ -457,7 +477,9 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
+        resolve: {
+          primaryName: { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+        },
       },
     });
   });
@@ -469,7 +491,9 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
+        resolve: {
+          primaryName: { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+        },
       },
     });
   });
@@ -481,10 +505,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: {
-          coinType: 2_147_483_648,
-          chain: "DEFAULT",
-          name: null,
+        resolve: {
+          primaryName: {
+            coinType: 2_147_483_648,
+            chain: "DEFAULT",
+            name: null,
+          },
         },
       },
     });
@@ -497,13 +523,15 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryNames: [
-          {
-            coinType: 2_147_483_648,
-            chain: "DEFAULT",
-            name: null,
-          },
-        ],
+        resolve: {
+          primaryNames: [
+            {
+              coinType: 2_147_483_648,
+              chain: "DEFAULT",
+              name: null,
+            },
+          ],
+        },
       },
     });
   });
@@ -516,7 +544,9 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: { coinType: 60, chain: "ETHEREUM", name: null },
+        resolve: {
+          primaryName: { coinType: 60, chain: "ETH", name: null },
+        },
       },
     });
   });
@@ -529,10 +559,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toMatchObject({
       account: {
-        primaryNames: [
-          { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
-          { coinType: 2147492101, chain: "BASE", name: null },
-        ],
+        resolve: {
+          primaryNames: [
+            { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+            { coinType: 2147492101, chain: "BASE", name: null },
+          ],
+        },
       },
     });
   });
@@ -544,10 +576,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toMatchObject({
       account: {
-        primaryNames: [
-          { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
-          { coinType: 2147492101, chain: "BASE", name: null },
-        ],
+        resolve: {
+          primaryNames: [
+            { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+            { coinType: 2147492101, chain: "BASE", name: null },
+          ],
+        },
       },
     });
   });
@@ -559,13 +593,14 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toEqual({
       account: {
-        primaryName: {
-          coinType: 0,
-          chain: null,
-          name: null,
-          records: null,
-          profile: {
-            addresses: { ethereum: null },
+        resolve: {
+          primaryName: {
+            coinType: 0,
+            chain: null,
+            name: null,
+            resolve: {
+              records: null,
+            },
           },
         },
       },
@@ -579,10 +614,14 @@ describe("Account.primaryName and Account.primaryNames", () => {
       }),
     ).resolves.toMatchObject({
       account: {
-        primaryName: {
-          name: TEST_ETH_NAME,
-          records: {
-            addresses: [{ coinType: 60, address: accounts.owner.address }],
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              records: {
+                addresses: [{ coinType: 60, address: accounts.owner.address }],
+              },
+            },
           },
         },
       },
@@ -604,7 +643,9 @@ describe("Account.primaryName and Account.primaryNames", () => {
         gql`
           query AccountPrimaryNamesEmptyChains($address: Address!) {
             account(by: { address: $address }) {
-              primaryNames(by: { chains: [] }) { coinType }
+              resolve {
+                primaryNames(where: { chains: [] }) { coinType }
+              }
             }
           }
         `,

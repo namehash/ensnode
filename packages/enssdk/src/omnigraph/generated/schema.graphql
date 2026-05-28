@@ -1,3 +1,12 @@
+"""Execution status metadata for a resolver strategy."""
+type AccelerationStatus {
+  """Whether this strategy was attempted at runtime."""
+  attempted: Boolean!
+
+  """Whether this strategy was requested by the caller."""
+  requested: Boolean!
+}
+
 """Represents an individual Account, keyed by its Address."""
 type Account {
   """An EVM Address that uniquely identifies this Account on-chain."""
@@ -19,29 +28,19 @@ type Account {
   """
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
 
-  """
-  The ENSIP-19 primary name for this Account on a specific coin type or chain.
-  """
-  primaryName(
-    by: PrimaryNameByInput!
-
-    """When true, disables protocol acceleration feature."""
-    disableAcceleration: Boolean = false
-  ): PrimaryNameRecord!
-
-  """
-  ENSIP-19 primary names for this Account on the requested coin types or chains.
-  """
-  primaryNames(
-    """Select coin types or chains to resolve primary names for."""
-    by: PrimaryNamesByInput!
-
-    """When true, disables protocol acceleration feature."""
-    disableAcceleration: Boolean = false
-  ): [PrimaryNameRecord!]!
-
   """The Permissions on Registries granted to this Account."""
   registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
+
+  """
+  Resolve primary names for this Account with protocol acceleration controls.
+  """
+  resolve(
+    """
+    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): AccountResolve!
 
   """The Permissions on Resolvers granted to this Account."""
   resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
@@ -140,6 +139,17 @@ input AccountPermissionsWhereInput {
   contract: AccountIdInput
 }
 
+"""
+Filter primary name lookups. Exactly one of `coinTypes` or `chains` must be provided.
+"""
+input AccountPrimaryNamesWhereInput @oneOf {
+  """ENSIP-19 supported chains to resolve primary names for."""
+  chains: [ENSIP19Chain!]
+
+  """Coin types to resolve primary names for."""
+  coinTypes: [CoinType!]
+}
+
 type AccountRegistryPermissionsConnection {
   edges: [AccountRegistryPermissionsConnectionEdge!]!
   pageInfo: PageInfo!
@@ -149,6 +159,35 @@ type AccountRegistryPermissionsConnection {
 type AccountRegistryPermissionsConnectionEdge {
   cursor: String!
   node: RegistryPermissionsUser!
+}
+
+"""
+Nested account resolution container exposing primary-name resolution with shared acceleration settings.
+"""
+type AccountResolve {
+  """Protocol acceleration strategy status for this Account resolution."""
+  acceleration: AccelerationStatus!
+
+  """
+  The ENSIP-19 primary name for this Account on a specific coin type or chain.
+  """
+  primaryName(
+    """Select a coin type or chain to resolve a primary name for."""
+    by: PrimaryNameByInput!
+  ): PrimaryNameRecord!
+
+  """
+  ENSIP-19 primary names for this Account on the requested coin types or chains.
+  """
+  primaryNames(
+    """Select coin types or chains to resolve primary names for."""
+    where: AccountPrimaryNamesWhereInput!
+  ): [PrimaryNameRecord!]!
+
+  """
+  Protocol trace tree emitted by primary-name resolution, represented as JSON for schema stability.
+  """
+  trace: JSON
 }
 
 type AccountResolverPermissionsConnection {
@@ -287,19 +326,6 @@ interface Domain {
   """
   parent: Domain
 
-  """
-  PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.
-  """
-  profile: DomainProfile
-
-  """
-  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
-  """
-  records(
-    """When true, disables protocol acceleration feature."""
-    disableAcceleration: Boolean = false
-  ): ResolvedRecords
-
   """The latest Registration for this Domain, if exists."""
   registration: Registration
 
@@ -308,6 +334,17 @@ interface Domain {
 
   """The Registry under which this Domain exists."""
   registry: Registry!
+
+  """
+  Resolve protocol-level data for this Domain with trace and acceleration metadata.
+  """
+  resolve(
+    """
+    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): DomainResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -408,6 +445,24 @@ type DomainRegistrationsConnectionEdge {
   node: Registration!
 }
 
+"""
+Nested domain resolution container exposing trace/acceleration metadata and resolved data.
+"""
+type DomainResolve {
+  """Protocol acceleration strategy status for this Domain resolution."""
+  acceleration: AccelerationStatus!
+
+  """
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
+  """
+  records: ResolvedRecords
+
+  """
+  Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability.
+  """
+  trace: JSON
+}
+
 """Metadata describing this Domain's relationship to its Resolver(s)."""
 type DomainResolver {
   """
@@ -475,16 +530,17 @@ input DomainsWhereInput {
 }
 
 """
-ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the ENSIP-19 default EVM chain. Non-EVM coin types are intentionally absent.
+ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the ENSIP-19 default EVM chain.
+@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
 """
 enum ENSIP19Chain {
-  ARBITRUM
+  ARB1
   BASE
   DEFAULT
-  ETHEREUM
+  ETH
   LINEA
-  OPTIMISM
-  SCROLL
+  OP
+  SCR
 }
 
 """An ENS protocol version."""
@@ -522,19 +578,6 @@ type ENSv1Domain implements Domain {
   """
   parent: Domain
 
-  """
-  PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.
-  """
-  profile: DomainProfile
-
-  """
-  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
-  """
-  records(
-    """When true, disables protocol acceleration feature."""
-    disableAcceleration: Boolean = false
-  ): ResolvedRecords
-
   """The latest Registration for this Domain, if exists."""
   registration: Registration
 
@@ -543,6 +586,17 @@ type ENSv1Domain implements Domain {
 
   """The Registry under which this Domain exists."""
   registry: Registry!
+
+  """
+  Resolve protocol-level data for this Domain with trace and acceleration metadata.
+  """
+  resolve(
+    """
+    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): DomainResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -647,19 +701,6 @@ type ENSv2Domain implements Domain {
   """
   permissions(after: String, before: String, first: Int, last: Int, where: DomainPermissionsWhereInput): ENSv2DomainPermissionsConnection
 
-  """
-  PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.
-  """
-  profile: DomainProfile
-
-  """
-  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
-  """
-  records(
-    """When true, disables protocol acceleration feature."""
-    disableAcceleration: Boolean = false
-  ): ResolvedRecords
-
   """The latest Registration for this Domain, if exists."""
   registration: Registration
 
@@ -668,6 +709,17 @@ type ENSv2Domain implements Domain {
 
   """The Registry under which this Domain exists."""
   registry: Registry!
+
+  """
+  Resolve protocol-level data for this Domain with trace and acceleration metadata.
+  """
+  resolve(
+    """
+    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): DomainResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -952,6 +1004,9 @@ scalar InterpretedLabel
 """InterpretedName represents an enssdk#InterpretedName."""
 scalar InterpretedName
 
+"""JSON represents arbitrary JSON-serializable data."""
+scalar JSON
+
 """
 Represents a Label within ENS, providing its hash and interpreted representation.
 """
@@ -1191,25 +1246,29 @@ type PrimaryNameRecord {
   name: CanonicalName
 
   """
-  PREVIEW: An interpreted ENS profile for the validated primary name. Not yet resolved.
+  Resolve protocol-level records (and optionally profile preview) for this primary name.
   """
-  profile: DomainProfile!
+  resolve: PrimaryNameResolve!
+}
+
+"""
+Nested resolution container for a PrimaryNameRecord, including acceleration settings and resolved data.
+"""
+type PrimaryNameResolve {
+  """
+  Protocol acceleration strategy status for this primary name resolution.
+  """
+  acceleration: AccelerationStatus!
 
   """
   Forward-resolve ENS records for the validated primary name. Null when `name` is null.
   """
   records: ResolvedRecords
-}
 
-"""
-Select primary name lookup targets. Exactly one of `coinTypes` or `chains` must be provided.
-"""
-input PrimaryNamesByInput @oneOf {
-  """ENSIP-19 supported chains to resolve primary names for."""
-  chains: [ENSIP19Chain!]
-
-  """Coin types to resolve primary names for."""
-  coinTypes: [CoinType!]
+  """
+  Protocol trace tree emitted by resolution, represented as JSON for schema stability.
+  """
+  trace: JSON
 }
 
 """
@@ -1540,6 +1599,11 @@ type ResolvedRecords {
   """The IDNSZoneResolver zonehash raw bytes, or null if not set."""
   dnszonehash: Hex
 
+  """
+  Stable cache key for these records: the InterpretedName used to resolve them.
+  """
+  id: UID!
+
   """Resolved ERC-165 interface implementer records for the requested ids."""
   interfaces(
     """ERC-165 interface ids to resolve (4-byte hex selectors)."""
@@ -1710,6 +1774,9 @@ type ThreeDNSRegistration implements Registration {
   """
   unregistrant: Account
 }
+
+"""UID is a stable cache key for records/profile entities."""
+scalar UID
 
 """
 Additional metadata for BaseRegistrar Registrations wrapped by the NameWrapper (i.e. in the case of a wrapped .eth name)

@@ -7,6 +7,7 @@ import { byIdLookupResolvers } from "./by-id-lookup-resolvers";
 import { localBigIntResolvers } from "./local-bigint-resolvers";
 import { localConnectionResolvers } from "./local-connection-resolvers";
 import { mergeResolverMaps } from "./merge-resolver-maps";
+import { recordsProfileCacheResolvers } from "./records-profile-cache-resolvers";
 
 /**
  * Entities without keys are 'Embedded Data', and we tell graphcache about them to avoid warnings
@@ -37,13 +38,24 @@ export const omnigraphCacheExchange = cacheExchange({
       return typeof key === "string" ? key : null;
     },
 
+    // ResolvedRecords are keyable by just `id`
+    ResolvedRecords: (data) => {
+      const key = data.id;
+      return typeof key === "string" ? key : null;
+    },
+
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
     CanonicalName: EMBEDDED_DATA,
     DomainCanonical: EMBEDDED_DATA,
     DomainResolver: EMBEDDED_DATA,
+    DomainResolve: EMBEDDED_DATA,
+    AccountResolve: EMBEDDED_DATA,
+    PrimaryNameResolve: EMBEDDED_DATA,
+    ResolutionStatus: EMBEDDED_DATA,
     PrimaryNameRecord: EMBEDDED_DATA,
+    // dont forget to add cache strategy when DomainProfile is wired
     DomainProfile: EMBEDDED_DATA,
     ProfileAvatar: EMBEDDED_DATA,
     ProfileBanner: EMBEDDED_DATA,
@@ -55,7 +67,6 @@ export const omnigraphCacheExchange = cacheExchange({
     ResolvedAddressRecord: EMBEDDED_DATA,
     ResolvedInterfaceRecord: EMBEDDED_DATA,
     ResolvedPubkeyRecord: EMBEDDED_DATA,
-    ResolvedRecords: EMBEDDED_DATA,
     ResolvedRawTextRecord: EMBEDDED_DATA,
   },
   resolvers: mergeResolverMaps(
@@ -67,5 +78,6 @@ export const omnigraphCacheExchange = cacheExchange({
 
     // produce local cache resolvers for the Query.entity(by: { }) lookups
     byIdLookupResolvers,
+    recordsProfileCacheResolvers,
   ),
 });

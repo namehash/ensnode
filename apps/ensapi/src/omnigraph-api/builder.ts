@@ -15,6 +15,7 @@ import type {
   InterfaceId,
   InterpretedLabel,
   InterpretedName,
+  JsonValue,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -25,6 +26,7 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
+  UID,
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
@@ -62,6 +64,7 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
 export type BuilderScalars = {
   ID: { Input: string; Output: string };
   BigInt: { Input: bigint; Output: bigint };
+  JSON: { Input: JsonValue; Output: JsonValue };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
@@ -69,6 +72,7 @@ export type BuilderScalars = {
   InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };
   InterpretedName: { Input: InterpretedName; Output: InterpretedName };
+  UID: { Input: UID; Output: UID };
   InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
   BeautifiedName: { Input: BeautifiedName; Output: BeautifiedName };
   BeautifiedLabel: { Input: BeautifiedLabel; Output: BeautifiedLabel };

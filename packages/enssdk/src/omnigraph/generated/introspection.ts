@@ -32,6 +32,37 @@ const introspection = {
     "types": [
       {
         "kind": "OBJECT",
+        "name": "AccelerationStatus",
+        "fields": [
+          {
+            "name": "attempted",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "requested",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "Account",
         "fields": [
           {
@@ -201,74 +232,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "primaryName",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PrimaryNameRecord"
-              }
-            },
-            "args": [
-              {
-                "name": "by",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "PrimaryNameByInput"
-                  }
-                }
-              },
-              {
-                "name": "disableAcceleration",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean"
-                },
-                "defaultValue": "false"
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
-            "name": "primaryNames",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "PrimaryNameRecord"
-                  }
-                }
-              }
-            },
-            "args": [
-              {
-                "name": "by",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "PrimaryNamesByInput"
-                  }
-                }
-              },
-              {
-                "name": "disableAcceleration",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean"
-                },
-                "defaultValue": "false"
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "registryPermissions",
             "type": {
               "kind": "OBJECT",
@@ -302,6 +265,27 @@ const introspection = {
                   "kind": "SCALAR",
                   "name": "Int"
                 }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AccountResolve"
+              }
+            },
+            "args": [
+              {
+                "name": "accelerate",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "true"
               }
             ],
             "isDeprecated": false
@@ -737,6 +721,39 @@ const introspection = {
         "isOneOf": false
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "AccountPrimaryNamesWhereInput",
+        "inputFields": [
+          {
+            "name": "chains",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "ENSIP19Chain"
+                }
+              }
+            }
+          },
+          {
+            "name": "coinTypes",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "CoinType"
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
         "kind": "OBJECT",
         "name": "AccountRegistryPermissionsConnection",
         "fields": [
@@ -809,6 +826,86 @@ const introspection = {
                 "kind": "OBJECT",
                 "name": "RegistryPermissionsUser"
               }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AccountResolve",
+        "fields": [
+          {
+            "name": "acceleration",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AccelerationStatus"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "primaryName",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PrimaryNameRecord"
+              }
+            },
+            "args": [
+              {
+                "name": "by",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PrimaryNameByInput"
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "primaryNames",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PrimaryNameRecord"
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "where",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "AccountPrimaryNamesWhereInput"
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "trace",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON"
             },
             "args": [],
             "isDeprecated": false
@@ -1253,33 +1350,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "profile",
-            "type": {
-              "kind": "OBJECT",
-              "name": "DomainProfile"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "records",
-            "type": {
-              "kind": "OBJECT",
-              "name": "ResolvedRecords"
-            },
-            "args": [
-              {
-                "name": "disableAcceleration",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean"
-                },
-                "defaultValue": "false"
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "registration",
             "type": {
               "kind": "INTERFACE",
@@ -1336,6 +1406,27 @@ const introspection = {
               }
             },
             "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolve"
+              }
+            },
+            "args": [
+              {
+                "name": "accelerate",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "true"
+              }
+            ],
             "isDeprecated": false
           },
           {
@@ -1774,6 +1865,43 @@ const introspection = {
       },
       {
         "kind": "OBJECT",
+        "name": "DomainResolve",
+        "fields": [
+          {
+            "name": "acceleration",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AccelerationStatus"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "records",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ResolvedRecords"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "trace",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "DomainResolver",
         "fields": [
           {
@@ -1978,7 +2106,7 @@ const introspection = {
         "name": "ENSIP19Chain",
         "enumValues": [
           {
-            "name": "ARBITRUM",
+            "name": "ARB1",
             "isDeprecated": false
           },
           {
@@ -1990,7 +2118,7 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "ETHEREUM",
+            "name": "ETH",
             "isDeprecated": false
           },
           {
@@ -1998,11 +2126,11 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "OPTIMISM",
+            "name": "OP",
             "isDeprecated": false
           },
           {
-            "name": "SCROLL",
+            "name": "SCR",
             "isDeprecated": false
           }
         ]
@@ -2134,33 +2262,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "profile",
-            "type": {
-              "kind": "OBJECT",
-              "name": "DomainProfile"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "records",
-            "type": {
-              "kind": "OBJECT",
-              "name": "ResolvedRecords"
-            },
-            "args": [
-              {
-                "name": "disableAcceleration",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean"
-                },
-                "defaultValue": "false"
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "registration",
             "type": {
               "kind": "INTERFACE",
@@ -2217,6 +2318,27 @@ const introspection = {
               }
             },
             "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolve"
+              }
+            },
+            "args": [
+              {
+                "name": "accelerate",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "true"
+              }
+            ],
             "isDeprecated": false
           },
           {
@@ -2761,33 +2883,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "profile",
-            "type": {
-              "kind": "OBJECT",
-              "name": "DomainProfile"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "records",
-            "type": {
-              "kind": "OBJECT",
-              "name": "ResolvedRecords"
-            },
-            "args": [
-              {
-                "name": "disableAcceleration",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean"
-                },
-                "defaultValue": "false"
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "registration",
             "type": {
               "kind": "INTERFACE",
@@ -2844,6 +2939,27 @@ const introspection = {
               }
             },
             "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolve"
+              }
+            },
+            "args": [
+              {
+                "name": "accelerate",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "true"
+              }
+            ],
             "isDeprecated": false
           },
           {
@@ -3834,6 +3950,10 @@ const introspection = {
       {
         "kind": "SCALAR",
         "name": "InterpretedName"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "JSON"
       },
       {
         "kind": "OBJECT",
@@ -4876,12 +4996,31 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "profile",
+            "name": "resolve",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DomainProfile"
+                "name": "PrimaryNameResolve"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PrimaryNameResolve",
+        "fields": [
+          {
+            "name": "acceleration",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AccelerationStatus"
               }
             },
             "args": [],
@@ -4895,42 +5034,18 @@ const introspection = {
             },
             "args": [],
             "isDeprecated": false
+          },
+          {
+            "name": "trace",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON"
+            },
+            "args": [],
+            "isDeprecated": false
           }
         ],
         "interfaces": []
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "PrimaryNamesByInput",
-        "inputFields": [
-          {
-            "name": "chains",
-            "type": {
-              "kind": "LIST",
-              "ofType": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "ENSIP19Chain"
-                }
-              }
-            }
-          },
-          {
-            "name": "coinTypes",
-            "type": {
-              "kind": "LIST",
-              "ofType": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "CoinType"
-                }
-              }
-            }
-          }
-        ],
-        "isOneOf": true
       },
       {
         "kind": "OBJECT",
@@ -6315,6 +6430,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "UID"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "interfaces",
             "type": {
               "kind": "NON_NULL",
@@ -7073,6 +7200,10 @@ const introspection = {
             "name": "Registration"
           }
         ]
+      },
+      {
+        "kind": "SCALAR",
+        "name": "UID"
       },
       {
         "kind": "OBJECT",

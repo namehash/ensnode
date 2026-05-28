@@ -4,27 +4,58 @@ import type {
   Hex,
   InterfaceId,
   InterpretedName,
+  JsonValue,
   NormalizedAddress,
 } from "enssdk";
 
-import type { ResolverRecordsResponseBase } from "@ensnode/ensnode-sdk";
+import type { TracingTrace } from "@ensnode/ensnode-sdk";
 
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
-import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/resolution/build-records-selection";
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import {
   ENSIP19_CHAIN_VALUES,
   type ENSIP19ChainValue,
 } from "@/omnigraph-api/lib/resolution/chain-coin-type";
+import {
+  type ResolvedRecordsModel,
+  toResolvedRecordsModel,
+} from "@/omnigraph-api/lib/resolution/records-profile-model";
+import {
+  buildRecordsSelectionFromResolveContainerInfo,
+  buildRecordsSelectionFromResolveInfo,
+} from "@/omnigraph-api/lib/resolution/records-selection";
 import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
+
+export type AccelerationStatusModel = {
+  requested: boolean;
+  attempted: boolean;
+};
+
+export const AccelerationStatusRef =
+  builder.objectRef<AccelerationStatusModel>("AccelerationStatus");
+
+AccelerationStatusRef.implement({
+  description: "Execution status metadata for a resolver strategy.",
+  fields: (t) => ({
+    requested: t.exposeBoolean("requested", {
+      description: "Whether this strategy was requested by the caller.",
+      nullable: false,
+    }),
+    attempted: t.exposeBoolean("attempted", {
+      description: "Whether this strategy was attempted at runtime.",
+      nullable: false,
+    }),
+  }),
+});
 
 //////////////////
 // ENSIP19Chain
 //////////////////
 export const ENSIP19Chain = builder.enumType("ENSIP19Chain", {
   description:
-    "ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the ENSIP-19 default EVM chain. Non-EVM coin types are intentionally absent.",
+    "ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the ENSIP-19 default EVM chain.\n@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.",
   values: ENSIP19_CHAIN_VALUES,
 });
 
@@ -47,9 +78,9 @@ export const PrimaryNameByInput = builder.inputType("PrimaryNameByInput", {
   }),
 });
 
-export const PrimaryNamesByInput = builder.inputType("PrimaryNamesByInput", {
+export const AccountPrimaryNamesWhereInput = builder.inputType("AccountPrimaryNamesWhereInput", {
   description:
-    "Select primary name lookup targets. Exactly one of `coinTypes` or `chains` must be provided.",
+    "Filter primary name lookups. Exactly one of `coinTypes` or `chains` must be provided.",
   isOneOf: true,
   fields: (t) => ({
     coinTypes: t.field({
@@ -68,10 +99,10 @@ export const PrimaryNamesByInput = builder.inputType("PrimaryNamesByInput", {
 //////////////////////
 // DomainProfile (preview — types only, no resolution wired yet)
 //////////////////////
-export type DomainProfileModel = Record<string, never>;
+type ProfileSectionModel = Record<string, never>;
 
 export const ProfileSocialAccountRef =
-  builder.objectRef<DomainProfileModel>("ProfileSocialAccount");
+  builder.objectRef<ProfileSectionModel>("ProfileSocialAccount");
 
 ProfileSocialAccountRef.implement({
   description: "PREVIEW: An interpreted social account on a Domain profile. Not yet resolved.",
@@ -89,7 +120,7 @@ ProfileSocialAccountRef.implement({
   }),
 });
 
-export const ProfileSocialsRef = builder.objectRef<DomainProfileModel>("ProfileSocials");
+export const ProfileSocialsRef = builder.objectRef<ProfileSectionModel>("ProfileSocials");
 
 ProfileSocialsRef.implement({
   description: "PREVIEW: Interpreted social accounts on a Domain profile. Not yet resolved.",
@@ -112,7 +143,7 @@ ProfileSocialsRef.implement({
   }),
 });
 
-export const ProfileAddressesRef = builder.objectRef<DomainProfileModel>("ProfileAddresses");
+export const ProfileAddressesRef = builder.objectRef<ProfileSectionModel>("ProfileAddresses");
 
 ProfileAddressesRef.implement({
   description: "PREVIEW: Interpreted address records on a Domain profile. Not yet resolved.",
@@ -142,7 +173,7 @@ ProfileAddressesRef.implement({
   }),
 });
 
-export const ProfileAvatarRef = builder.objectRef<DomainProfileModel>("ProfileAvatar");
+export const ProfileAvatarRef = builder.objectRef<ProfileSectionModel>("ProfileAvatar");
 
 ProfileAvatarRef.implement({
   description: "PREVIEW: Interpreted avatar metadata on a Domain profile. Not yet resolved.",
@@ -155,7 +186,7 @@ ProfileAvatarRef.implement({
   }),
 });
 
-export const ProfileBannerRef = builder.objectRef<DomainProfileModel>("ProfileBanner");
+export const ProfileBannerRef = builder.objectRef<ProfileSectionModel>("ProfileBanner");
 
 ProfileBannerRef.implement({
   description: "PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.",
@@ -168,7 +199,7 @@ ProfileBannerRef.implement({
   }),
 });
 
-export const ProfileWebsiteRef = builder.objectRef<DomainProfileModel>("ProfileWebsite");
+export const ProfileWebsiteRef = builder.objectRef<ProfileSectionModel>("ProfileWebsite");
 
 ProfileWebsiteRef.implement({
   description: "PREVIEW: Interpreted website metadata on a Domain profile. Not yet resolved.",
@@ -181,7 +212,7 @@ ProfileWebsiteRef.implement({
   }),
 });
 
-export const DomainProfileRef = builder.objectRef<DomainProfileModel>("DomainProfile");
+export const DomainProfileRef = builder.objectRef<ProfileSectionModel>("DomainProfile");
 
 DomainProfileRef.implement({
   description:
@@ -340,12 +371,19 @@ ResolvedInterfaceRecordRef.implement({
 ////////////////////
 // ResolvedRecords
 ////////////////////
-export const ResolvedRecordsRef =
-  builder.objectRef<Partial<ResolverRecordsResponseBase>>("ResolvedRecords");
+export type { ResolvedRecordsModel };
+
+export const ResolvedRecordsRef = builder.objectRef<ResolvedRecordsModel>("ResolvedRecords");
 
 ResolvedRecordsRef.implement({
   description: "Records resolved for a specific ENS name via the ENS protocol.",
   fields: (t) => ({
+    id: t.field({
+      description: "Stable cache key for these records: the InterpretedName used to resolve them.",
+      type: "UID",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
     reverseName: t.string({
       description:
         "The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.",
@@ -456,11 +494,26 @@ export type PrimaryNameRecordModel = {
   coinType: CoinType;
   chain: ENSIP19ChainValue | null;
   name: InterpretedName | null;
-  disableAcceleration: boolean;
-  canAccelerate: boolean;
 };
 
-export const PrimaryNameRecordRef = builder.objectRef<PrimaryNameRecordModel>("PrimaryNameRecord");
+/** GraphQL parent for `PrimaryNameRecord`, including `AccountResolve` acceleration settings. */
+export type PrimaryNameRecordParent = PrimaryNameRecordModel & {
+  accelerate: boolean;
+};
+
+type PrimaryNameRecordsResult = {
+  trace: TracingTrace;
+  records: ResolvedRecordsModel;
+};
+
+type PrimaryNameResolveModel = {
+  parent: PrimaryNameRecordParent;
+  recordsResolution: Promise<PrimaryNameRecordsResult> | null;
+};
+
+export const PrimaryNameRecordRef = builder.objectRef<PrimaryNameRecordParent>("PrimaryNameRecord");
+export const PrimaryNameResolveRef =
+  builder.objectRef<PrimaryNameResolveModel>("PrimaryNameResolve");
 
 PrimaryNameRecordRef.implement({
   description: "An ENSIP-19 primary name for an Account on a specific coin type.",
@@ -485,33 +538,75 @@ PrimaryNameRecordRef.implement({
       nullable: true,
       resolve: (r) => (r.name ? { canonicalName: r.name } : null),
     }),
+    resolve: t.field({
+      description:
+        "Resolve protocol-level records (and optionally profile preview) for this primary name.",
+      type: PrimaryNameResolveRef,
+      nullable: false,
+      resolve: (parent, _args, context, info) => {
+        const { name, accelerate } = parent;
+        const { canAccelerate } = context;
+
+        const recordsSelection = name ? buildRecordsSelectionFromResolveContainerInfo(info) : null;
+
+        const recordsResolution =
+          name && recordsSelection
+            ? runWithTrace(() =>
+                resolveForward(name, recordsSelection, { accelerate, canAccelerate }),
+              ).then(({ trace, result }) => ({
+                trace,
+                records: toResolvedRecordsModel(name, result),
+              }))
+            : null;
+
+        return { parent, recordsResolution };
+      },
+    }),
+  }),
+});
+
+PrimaryNameResolveRef.implement({
+  description:
+    "Nested resolution container for a PrimaryNameRecord, including acceleration settings and resolved data.",
+  fields: (t) => ({
+    trace: t.field({
+      description:
+        "Protocol trace tree emitted by resolution, represented as JSON for schema stability.",
+      type: "JSON",
+      nullable: true,
+      resolve: async ({ recordsResolution }) => {
+        if (!recordsResolution) return null;
+        return (await recordsResolution).trace as unknown as JsonValue;
+      },
+    }),
+    acceleration: t.field({
+      description: "Protocol acceleration strategy status for this primary name resolution.",
+      type: AccelerationStatusRef,
+      nullable: false,
+      resolve: ({ parent }, _args, context) => ({
+        requested: parent.accelerate,
+        attempted: parent.accelerate && context.canAccelerate,
+      }),
+    }),
     records: t.field({
       description:
         "Forward-resolve ENS records for the validated primary name. Null when `name` is null.",
       type: ResolvedRecordsRef,
       nullable: true,
       tracing: true,
-      resolve: async (parent, _args, context, info) => {
-        const name = parent.name;
-        if (!name) return null;
-
-        const recordsSelection = buildRecordsSelectionFromResolveInfo(info);
-        const { result } = await runWithTrace(() =>
-          resolveForward(name, recordsSelection, {
-            accelerate: !parent.disableAcceleration,
-            canAccelerate: context.canAccelerate,
-          }),
-        );
-
-        return result as ResolverRecordsResponseBase;
+      resolve: async ({ recordsResolution }) => {
+        if (!recordsResolution) return null;
+        return (await recordsResolution).records;
       },
     }),
-    profile: t.field({
-      description:
-        "PREVIEW: An interpreted ENS profile for the validated primary name. Not yet resolved.",
-      type: DomainProfileRef,
-      nullable: false,
-      resolve: () => ({}),
+    ...(INCLUDE_DEV_METHODS && {
+      profile: t.field({
+        description:
+          "PREVIEW: An interpreted ENS profile for the validated primary name. Not yet resolved.",
+        type: DomainProfileRef,
+        nullable: true,
+        resolve: ({ parent }) => (parent.name ? {} : null),
+      }),
     }),
   }),
 });

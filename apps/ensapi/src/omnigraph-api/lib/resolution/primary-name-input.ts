@@ -11,7 +11,7 @@ export type PrimaryNameByInput = {
   chain?: ENSIP19ChainValue | null;
 };
 
-export type PrimaryNamesByInput = {
+export type AccountPrimaryNamesWhereInput = {
   coinTypes?: CoinType[] | null;
   chains?: ENSIP19ChainValue[] | null;
 };
@@ -23,11 +23,13 @@ export const normalizePrimaryNameByInput = (by: PrimaryNameByInput): CoinType =>
   throw new Error("PrimaryNameByInput must specify exactly one of coinType or chain.");
 };
 
-/** Normalizes a plural `PrimaryNamesByInput` to an ordered coin-type list. */
-export const normalizePrimaryNamesByInput = (by: PrimaryNamesByInput): CoinType[] => {
-  if (by.coinTypes != null) return by.coinTypes;
-  if (by.chains != null) return by.chains.map(ensip19ChainToCoinType);
-  throw new Error("PrimaryNamesByInput must specify exactly one of coinTypes or chains.");
+/** Normalizes `AccountPrimaryNamesWhereInput` to an ordered coin-type list. */
+export const normalizeAccountPrimaryNamesWhereInput = (
+  where: AccountPrimaryNamesWhereInput,
+): CoinType[] => {
+  if (where.coinTypes != null) return where.coinTypes;
+  if (where.chains != null) return where.chains.map(ensip19ChainToCoinType);
+  throw new Error("AccountPrimaryNamesWhereInput must specify exactly one of coinTypes or chains.");
 };
 
 /** Projects a coin type to its ENSIP19Chain enum value, if applicable. */

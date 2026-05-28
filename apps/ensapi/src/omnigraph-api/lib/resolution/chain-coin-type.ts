@@ -1,51 +1,40 @@
-import {
-  type ChainId,
-  type CoinType,
-  coinTypeToEvmChainId,
-  DEFAULT_EVM_CHAIN_ID,
-  DEFAULT_EVM_COIN_TYPE,
-  ETH_COIN_TYPE,
-  evmChainIdToCoinType,
-} from "enssdk";
-import { arbitrum, base, linea, optimism, scroll } from "viem/chains";
+import type { CoinName } from "@ensdomains/address-encoder";
+import { coinNameToTypeMap } from "@ensdomains/address-encoder";
+import type { CoinType } from "enssdk";
 
-/** GraphQL `ENSIP19Chain` enum values — chains that can have an ENSIP-19 primary name. */
-export const ENSIP19_CHAIN_VALUES = [
-  "DEFAULT",
-  "ETHEREUM",
-  "BASE",
-  "OPTIMISM",
-  "ARBITRUM",
-  "LINEA",
-  "SCROLL",
-] as const;
+/**
+ * address-encoder coin names for ENSIP-19 primary-name chains.
+ */
+const ENSIP19_COIN_NAMES = [
+  "default",
+  "eth",
+  "base",
+  "op",
+  "arb1",
+  "linea",
+  "scr",
+] as const satisfies readonly CoinName[];
 
-export type ENSIP19ChainValue = (typeof ENSIP19_CHAIN_VALUES)[number];
+export type ENSIP19ChainValue = Uppercase<(typeof ENSIP19_COIN_NAMES)[number]>;
 
-const ENSIP19_CHAIN_TO_COIN_TYPE: Record<ENSIP19ChainValue, CoinType> = {
-  DEFAULT: DEFAULT_EVM_COIN_TYPE,
-  ETHEREUM: ETH_COIN_TYPE,
-  BASE: evmChainIdToCoinType(base.id),
-  OPTIMISM: evmChainIdToCoinType(optimism.id),
-  ARBITRUM: evmChainIdToCoinType(arbitrum.id),
-  LINEA: evmChainIdToCoinType(linea.id),
-  SCROLL: evmChainIdToCoinType(scroll.id),
-};
+export const ENSIP19_CHAIN_VALUES = ENSIP19_COIN_NAMES.map((coinName) =>
+  coinName.toUpperCase(),
+) as unknown as readonly [ENSIP19ChainValue, ...ENSIP19ChainValue[]];
+
+const ensip19ChainToCoinName = Object.fromEntries(
+  ENSIP19_CHAIN_VALUES.map((chain) => [
+    chain,
+    chain.toLowerCase() as (typeof ENSIP19_COIN_NAMES)[number],
+  ]),
+) as Record<ENSIP19ChainValue, (typeof ENSIP19_COIN_NAMES)[number]>;
 
 /** Maps an `ENSIP19Chain` enum value to its canonical ENSIP-9 coin type. */
 export const ensip19ChainToCoinType = (chain: ENSIP19ChainValue): CoinType =>
-  ENSIP19_CHAIN_TO_COIN_TYPE[chain];
+  coinNameToTypeMap[ensip19ChainToCoinName[chain]] as CoinType;
 
 /** Maps a coin type to an `ENSIP19Chain` enum value, or null when not ENSIP-19 supported. */
 export const coinTypeToEnsip19Chain = (coinType: CoinType): ENSIP19ChainValue | null => {
-  for (const chain of ENSIP19_CHAIN_VALUES) {
-    if (ENSIP19_CHAIN_TO_COIN_TYPE[chain] === coinType) return chain;
-  }
-  return null;
-};
-
-/** Maps an `ENSIP19Chain` enum value to the EVM chain id used for reverse resolution. */
-export const ensip19ChainToChainId = (chain: ENSIP19ChainValue): ChainId => {
-  if (chain === "DEFAULT") return DEFAULT_EVM_CHAIN_ID;
-  return coinTypeToEvmChainId(ensip19ChainToCoinType(chain));
+  const coinName = ENSIP19_COIN_NAMES.find((name) => coinNameToTypeMap[name] === coinType);
+  if (!coinName) return null;
+  return coinName.toUpperCase() as ENSIP19ChainValue;
 };

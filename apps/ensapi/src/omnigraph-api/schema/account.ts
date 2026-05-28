@@ -1,6 +1,8 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import type { Address } from "enssdk";
+import type { Address, JsonValue } from "enssdk";
+
+import type { TracingTrace } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
@@ -9,13 +11,13 @@ import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domain
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import {
-  normalizePrimaryNameByInput,
-  normalizePrimaryNamesByInput,
-} from "@/omnigraph-api/lib/resolution/primary-name-input";
+import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
 import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import {
+  ID_PAGINATED_CONNECTION_ARGS,
+  RESOLVE_ACCELERATE_ARG,
+} from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import { AccountDomainsWhereInput, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef } from "@/omnigraph-api/schema/event";
@@ -23,9 +25,11 @@ import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
 import {
+  AccelerationStatusRef,
+  AccountPrimaryNamesWhereInput,
   PrimaryNameByInput,
+  type PrimaryNameRecordModel,
   PrimaryNameRecordRef,
-  PrimaryNamesByInput,
 } from "@/omnigraph-api/schema/resolution";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
 
@@ -42,6 +46,17 @@ export const AccountRef = builder.loadableObjectRef("Account", {
 });
 
 export type Account = Exclude<typeof AccountRef.$inferType, Address>;
+type AccountPrimaryNamesResult = {
+  trace: TracingTrace | null;
+  records: PrimaryNameRecordModel[];
+};
+type AccountResolveModel = {
+  account: Account;
+  accelerate: boolean;
+  canAccelerate: boolean;
+  primaryNamesResolution: Promise<AccountPrimaryNamesResult> | null;
+};
+const AccountResolveRef = builder.objectRef<AccountResolveModel>("AccountResolve");
 
 ///////////
 // Account
@@ -69,60 +84,27 @@ AccountRef.implement({
       resolve: (parent) => parent.id,
     }),
 
-    ///////////////////////
-    // Account.primaryName
-    ///////////////////////
-    primaryName: t.field({
-      description: "The ENSIP-19 primary name for this Account on a specific coin type or chain.",
-      type: PrimaryNameRecordRef,
+    //////////////////
+    // Account.resolve
+    //////////////////
+    resolve: t.field({
+      description: "Resolve primary names for this Account with protocol acceleration controls.",
+      type: AccountResolveRef,
       nullable: false,
       args: {
-        by: t.arg({
-          type: PrimaryNameByInput,
-          required: true,
-        }),
-        disableAcceleration: t.arg.boolean({
-          required: false,
-          defaultValue: false,
-          description: "When true, disables protocol acceleration feature.",
-        }),
+        accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
       },
-      resolve: async (account, { by, disableAcceleration }, context) => {
-        const coinType = normalizePrimaryNameByInput(by);
-        const [record] = await resolvePrimaryNameRecords(account.id, [coinType], {
-          disableAcceleration: disableAcceleration ?? false,
-          canAccelerate: context.canAccelerate,
-        });
-        // biome-ignore lint/style/noNonNullAssertion: exactly one coin type requested
-        return record!;
-      },
-    }),
+      resolve: (account, { accelerate: accelerateArg }, context, info) => {
+        const accelerate = accelerateArg ?? true;
+        const { canAccelerate } = context;
+        const coinTypes = buildAccountPrimaryNamesSelection(info);
 
-    ////////////////////////
-    // Account.primaryNames
-    ////////////////////////
-    primaryNames: t.field({
-      description: "ENSIP-19 primary names for this Account on the requested coin types or chains.",
-      type: [PrimaryNameRecordRef],
-      nullable: false,
-      args: {
-        by: t.arg({
-          type: PrimaryNamesByInput,
-          required: true,
-          description: "Select coin types or chains to resolve primary names for.",
-        }),
-        disableAcceleration: t.arg.boolean({
-          required: false,
-          defaultValue: false,
-          description: "When true, disables protocol acceleration feature.",
-        }),
-      },
-      resolve: async (account, { by, disableAcceleration }, context) => {
-        const coinTypes = normalizePrimaryNamesByInput(by);
-        return resolvePrimaryNameRecords(account.id, coinTypes, {
-          disableAcceleration: disableAcceleration ?? false,
-          canAccelerate: context.canAccelerate,
-        });
+        const primaryNamesResolution =
+          coinTypes !== null
+            ? resolvePrimaryNameRecords(account.id, coinTypes, { accelerate, canAccelerate })
+            : null;
+
+        return { account, accelerate, canAccelerate, primaryNamesResolution };
       },
     }),
 
@@ -276,6 +258,75 @@ AccountRef.implement({
                   .limit(limit),
             ),
         });
+      },
+    }),
+  }),
+});
+
+AccountResolveRef.implement({
+  description:
+    "Nested account resolution container exposing primary-name resolution with shared acceleration settings.",
+  fields: (t) => ({
+    trace: t.field({
+      description:
+        "Protocol trace tree emitted by primary-name resolution, represented as JSON for schema stability.",
+      type: "JSON",
+      nullable: true,
+      resolve: async ({ primaryNamesResolution }) => {
+        if (!primaryNamesResolution) return null;
+        const { trace } = await primaryNamesResolution;
+        return trace as unknown as JsonValue | null;
+      },
+    }),
+    acceleration: t.field({
+      description: "Protocol acceleration strategy status for this Account resolution.",
+      type: AccelerationStatusRef,
+      nullable: false,
+      resolve: ({ accelerate, canAccelerate }) => ({
+        requested: accelerate,
+        attempted: accelerate && canAccelerate,
+      }),
+    }),
+    primaryName: t.field({
+      description: "The ENSIP-19 primary name for this Account on a specific coin type or chain.",
+      type: PrimaryNameRecordRef,
+      nullable: false,
+      args: {
+        by: t.arg({
+          type: PrimaryNameByInput,
+          required: true,
+          description: "Select a coin type or chain to resolve a primary name for.",
+        }),
+      },
+      resolve: async ({ primaryNamesResolution, accelerate }) => {
+        if (!primaryNamesResolution) {
+          throw new Error("primaryName requires a primary-name resolution to be started.");
+        }
+        const { records } = await primaryNamesResolution;
+        const [record] = records;
+        if (!record) {
+          throw new Error("Missing primary name record for requested coin type.");
+        }
+        return { ...record, accelerate };
+      },
+    }),
+    primaryNames: t.field({
+      description: "ENSIP-19 primary names for this Account on the requested coin types or chains.",
+      type: [PrimaryNameRecordRef],
+      nullable: false,
+      args: {
+        where: t.arg({
+          type: AccountPrimaryNamesWhereInput,
+          required: true,
+          description: "Select coin types or chains to resolve primary names for.",
+        }),
+      },
+      resolve: async ({ primaryNamesResolution, accelerate }) => {
+        if (!primaryNamesResolution) {
+          throw new Error("primaryNames requires a primary-name resolution to be started.");
+        }
+        const { records } = await primaryNamesResolution;
+        return records.map((record) => ({ ...record, accelerate }));
       },
     }),
   }),

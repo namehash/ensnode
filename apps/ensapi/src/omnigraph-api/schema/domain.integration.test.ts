@@ -19,6 +19,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
@@ -490,35 +491,41 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 describe("Domain.records", () => {
   type DomainRecordsResult = {
     domain: {
-      records: {
-        addresses: Array<{ coinType: CoinType; address: string | null }>;
-        texts: Array<{ key: string; value: string | null }>;
-      } | null;
+      resolve: {
+        records: {
+          addresses: Array<{ coinType: CoinType; address: string | null }>;
+          texts: Array<{ key: string; value: string | null }>;
+        } | null;
+      };
     };
   };
 
   type DomainAllRecordsResult = {
     domain: {
-      records: {
-        reverseName: string | null;
-        contenthash: string | null;
-        pubkey: { x: string; y: string } | null;
-        dnszonehash: string | null;
-        version: string | null;
-        abi: { contentType: string; data: string } | null;
-        interfaces: Array<{ interfaceId: string; implementer: string | null }>;
-        addresses: Array<{ coinType: CoinType; address: string | null }>;
-        texts: Array<{ key: string; value: string | null }>;
-      } | null;
+      resolve: {
+        records: {
+          reverseName: string | null;
+          contenthash: string | null;
+          pubkey: { x: string; y: string } | null;
+          dnszonehash: string | null;
+          version: string | null;
+          abi: { contentType: string; data: string } | null;
+          interfaces: Array<{ interfaceId: string; implementer: string | null }>;
+          addresses: Array<{ coinType: CoinType; address: string | null }>;
+          texts: Array<{ key: string; value: string | null }>;
+        } | null;
+      };
     };
   };
 
   const DomainRecords = gql`
     query DomainRecords($name: InterpretedName!, $addresses: [CoinType!]!, $texts: [String!]!) {
       domain(by: { name: $name }) {
-        records {
-          addresses(coinTypes: $addresses) { coinType address }
-          texts(keys: $texts) { key value }
+        resolve {
+          records {
+            addresses(coinTypes: $addresses) { coinType address }
+            texts(keys: $texts) { key value }
+          }
         }
       }
     }
@@ -533,16 +540,18 @@ describe("Domain.records", () => {
       $interfaceIds: [InterfaceId!]!
     ) {
       domain(by: { name: $name }) {
-        records {
-          reverseName
-          contenthash
-          pubkey { x y }
-          dnszonehash
-          version
-          abi(contentTypeMask: $contentTypeMask) { contentType data }
-          interfaces(ids: $interfaceIds) { interfaceId implementer }
-          addresses(coinTypes: $addresses) { coinType address }
-          texts(keys: $texts) { key value }
+        resolve {
+          records {
+            reverseName
+            contenthash
+            pubkey { x y }
+            dnszonehash
+            version
+            abi(contentTypeMask: $contentTypeMask) { contentType data }
+            interfaces(ids: $interfaceIds) { interfaceId implementer }
+            addresses(coinTypes: $addresses) { coinType address }
+            texts(keys: $texts) { key value }
+          }
         }
       }
     }
@@ -557,9 +566,11 @@ describe("Domain.records", () => {
       }),
     ).resolves.toMatchObject({
       domain: {
-        records: {
-          texts: [{ key: "description", value: "example.eth" }],
-          addresses: [{ coinType: 60, address: accounts.owner.address }],
+        resolve: {
+          records: {
+            texts: [{ key: "description", value: "example.eth" }],
+            addresses: [{ coinType: 60, address: accounts.owner.address }],
+          },
         },
       },
     });
@@ -576,52 +587,58 @@ describe("Domain.records", () => {
       }),
     ).resolves.toMatchObject({
       domain: {
-        records: {
-          contenthash: fixtures.contenthash,
-          pubkey: { x: fixtures.publicKeyX, y: fixtures.publicKeyY },
-          dnszonehash: null,
-          version: expect.any(String),
-          abi: { contentType: "1", data: fixtures.abiBytes },
-          interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
-          addresses: [
-            { coinType: 60, address: accounts.owner.address },
-            { coinType: 0, address: fixtures.bitcoinAddress },
-            { coinType: 2, address: fixtures.litecoinAddress },
-          ],
-          texts: [
-            { key: "avatar", value: "https://example.com/avatar.png" },
-            { key: "description", value: "test.eth" },
-            { key: "url", value: "https://ens.domains" },
-            { key: "email", value: "test@ens.domains" },
-            { key: "com.twitter", value: "ensdomains" },
-            { key: "com.github", value: "ensdomains" },
-          ],
+        resolve: {
+          records: {
+            contenthash: fixtures.contenthash,
+            pubkey: { x: fixtures.publicKeyX, y: fixtures.publicKeyY },
+            dnszonehash: null,
+            version: expect.any(String),
+            abi: { contentType: "1", data: fixtures.abiBytes },
+            interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
+            addresses: [
+              { coinType: 60, address: accounts.owner.address },
+              { coinType: 0, address: fixtures.bitcoinAddress },
+              { coinType: 2, address: fixtures.litecoinAddress },
+            ],
+            texts: [
+              { key: "avatar", value: "https://example.com/avatar.png" },
+              { key: "description", value: "test.eth" },
+              { key: "url", value: "https://ens.domains" },
+              { key: "email", value: "test@ens.domains" },
+              { key: "com.twitter", value: "ensdomains" },
+              { key: "com.github", value: "ensdomains" },
+            ],
+          },
         },
       },
     });
   });
 });
 
-describe("Domain.profile", () => {
+(INCLUDE_DEV_METHODS ? describe : describe.skip)("Domain.profile", () => {
   type DomainProfileResult = {
     domain: {
-      profile: {
-        description: string | null;
-        avatar: { url: string | null } | null;
-        addresses: { ethereum: string | null } | null;
-        socials: { github: { handle: string | null; url: string | null } | null } | null;
-      } | null;
+      resolve: {
+        profile: {
+          description: string | null;
+          avatar: { url: string | null } | null;
+          addresses: { ethereum: string | null } | null;
+          socials: { github: { handle: string | null; url: string | null } | null } | null;
+        } | null;
+      };
     };
   };
 
   const DomainProfile = gql`
     query DomainProfile($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        profile {
-          description
-          avatar { url }
-          addresses { ethereum }
-          socials { github { handle url } }
+        resolve {
+          profile {
+            description
+            avatar { url }
+            addresses { ethereum }
+            socials { github { handle url } }
+          }
         }
       }
     }
@@ -632,11 +649,13 @@ describe("Domain.profile", () => {
       request<DomainProfileResult>(DomainProfile, { name: "test.eth" }),
     ).resolves.toEqual({
       domain: {
-        profile: {
-          description: null,
-          avatar: { url: null },
-          addresses: { ethereum: null },
-          socials: { github: { handle: null, url: null } },
+        resolve: {
+          profile: {
+            description: null,
+            avatar: { url: null },
+            addresses: { ethereum: null },
+            socials: { github: { handle: null, url: null } },
+          },
         },
       },
     });

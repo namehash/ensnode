@@ -1,13 +1,9 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import type { DomainId } from "enssdk";
+import type { DomainId, JsonValue } from "enssdk";
 
-import type {
-  RequiredAndNotNull,
-  RequiredAndNull,
-  ResolverRecordsResponseBase,
-} from "@ensnode/ensnode-sdk";
+import type { RequiredAndNotNull, RequiredAndNull, TracingTrace } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -25,13 +21,16 @@ import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domain
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/resolution/build-records-selection";
+import { toResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
+import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
+  RESOLVE_ACCELERATE_ARG,
 } from "@/omnigraph-api/schema/constants";
 import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
 import {
@@ -46,7 +45,14 @@ import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
-import { DomainProfileRef, ResolvedRecordsRef } from "@/omnigraph-api/schema/resolution";
+import {
+  AccelerationStatusRef,
+  AccountPrimaryNamesWhereInput,
+  DomainProfileRef,
+  PrimaryNameByInput,
+  PrimaryNameRecordRef,
+  ResolvedRecordsRef,
+} from "@/omnigraph-api/schema/resolution";
 
 const tracer = trace.getTracer("schema/Domain");
 
@@ -70,6 +76,16 @@ export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
 
 export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
 export type DomainInterface = Omit<Domain, "tokenId" | "node" | "rootRegistryOwnerId">;
+type DomainRecordsResult = {
+  trace: TracingTrace;
+  records: ReturnType<typeof toResolvedRecordsModel>;
+};
+type DomainResolveModel = {
+  domain: DomainInterface;
+  accelerate: boolean;
+  canAccelerate: boolean;
+  recordsResolution: Promise<DomainRecordsResult> | null;
+};
 export type ENSv1Domain = RequiredAndNotNull<Domain, "node"> &
   RequiredAndNull<Domain, "tokenId"> & { type: "ENSv1Domain" };
 export type ENSv2Domain = RequiredAndNotNull<Domain, "tokenId"> &
@@ -83,6 +99,7 @@ export const isENSv2Domain = (domain: DomainInterface): domain is ENSv2Domain =>
 
 export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
 export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
+const DomainResolveRef = builder.objectRef<DomainResolveModel>("DomainResolve");
 
 //////////////////////////////////
 // DomainInterface Implementation
@@ -175,48 +192,36 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.id,
     }),
 
-    ///////////////////
-    // Domain.records
-    ///////////////////
-    records: t.field({
+    //////////////////
+    // Domain.resolve
+    //////////////////
+    resolve: t.field({
       description:
-        "Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.",
-      type: ResolvedRecordsRef,
-      nullable: true,
-      tracing: true,
+        "Resolve protocol-level data for this Domain with trace and acceleration metadata.",
+      type: DomainResolveRef,
+      nullable: false,
       args: {
-        disableAcceleration: t.arg.boolean({
-          required: false,
-          defaultValue: false,
-          description: "When true, disables protocol acceleration feature.",
-        }),
+        accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
       },
-      resolve: async (domain, { disableAcceleration }, context, info) => {
+      resolve: (domain, { accelerate: accelerateArg }, context, info) => {
+        const accelerate = accelerateArg ?? true;
+        const { canAccelerate } = context;
         const name = domain.canonicalName;
-        if (!name) return null;
 
-        const recordsSelection = buildRecordsSelectionFromResolveInfo(info);
+        const recordsSelection = name ? buildRecordsSelectionFromResolveContainerInfo(info) : null;
 
-        const { result } = await runWithTrace(() =>
-          resolveForward(name, recordsSelection, {
-            accelerate: !disableAcceleration,
-            canAccelerate: context.canAccelerate,
-          }),
-        );
+        const recordsResolution =
+          name && recordsSelection
+            ? runWithTrace(() =>
+                resolveForward(name, recordsSelection, { accelerate, canAccelerate }),
+              ).then(({ trace, result }) => ({
+                trace,
+                records: toResolvedRecordsModel(name, result),
+              }))
+            : null;
 
-        return result as ResolverRecordsResponseBase;
+        return { domain, accelerate, canAccelerate, recordsResolution };
       },
-    }),
-
-    ///////////////////
-    // Domain.profile
-    ///////////////////
-    profile: t.field({
-      description:
-        "PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.",
-      type: DomainProfileRef,
-      nullable: true,
-      resolve: (domain) => (domain.canonicalName ? {} : null),
     }),
 
     ///////////////////////
@@ -307,6 +312,52 @@ DomainInterfaceRef.implement({
           },
         });
       },
+    }),
+  }),
+});
+
+DomainResolveRef.implement({
+  description:
+    "Nested domain resolution container exposing trace/acceleration metadata and resolved data.",
+  fields: (t) => ({
+    trace: t.field({
+      description:
+        "Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability.",
+      type: "JSON",
+      nullable: true,
+      resolve: async ({ recordsResolution }) => {
+        if (!recordsResolution) return null;
+        return (await recordsResolution).trace as unknown as JsonValue;
+      },
+    }),
+    acceleration: t.field({
+      description: "Protocol acceleration strategy status for this Domain resolution.",
+      type: AccelerationStatusRef,
+      nullable: false,
+      resolve: ({ accelerate, canAccelerate }) => ({
+        requested: accelerate,
+        attempted: accelerate && canAccelerate,
+      }),
+    }),
+    records: t.field({
+      description:
+        "Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.",
+      type: ResolvedRecordsRef,
+      nullable: true,
+      tracing: true,
+      resolve: async ({ domain, recordsResolution }) => {
+        if (!domain.canonicalName || !recordsResolution) return null;
+        return (await recordsResolution).records;
+      },
+    }),
+    ...(INCLUDE_DEV_METHODS && {
+      profile: t.field({
+        description:
+          "PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical.",
+        type: DomainProfileRef,
+        nullable: true,
+        resolve: ({ domain }) => (domain.canonicalName ? {} : null),
+      }),
     }),
   }),
 });

@@ -11,6 +11,7 @@ import {
   isInterfaceId,
   isInterpretedLabel,
   isInterpretedName,
+  type JsonValue,
   type Name,
   type Node,
   type NormalizedAddress,
@@ -22,6 +23,7 @@ import {
   type RenewalId,
   type ResolverId,
   type ResolverRecordsId,
+  type UID,
 } from "enssdk";
 import { isHex, size } from "viem";
 import { z } from "zod/v4";
@@ -38,6 +40,12 @@ builder.scalarType("BigInt", {
   description: "BigInt represents non-fractional signed whole numeric values.",
   serialize: (value: bigint) => value.toString(),
   parseValue: (value) => z.coerce.bigint().parse(value),
+});
+
+builder.scalarType("JSON", {
+  description: "JSON represents arbitrary JSON-serializable data.",
+  serialize: (value: JsonValue) => value,
+  parseValue: (value) => z.unknown().parse(value) as JsonValue,
 });
 
 builder.scalarType("Address", {
@@ -113,6 +121,16 @@ builder.scalarType("Node", {
         });
       })
       .transform((val) => val as Node)
+      .parse(value),
+});
+
+builder.scalarType("UID", {
+  description: "UID is a stable cache key for records/profile entities.",
+  serialize: (value: UID) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as UID)
       .parse(value),
 });
 

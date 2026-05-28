@@ -209,9 +209,11 @@ query DomainRecords(
 ) {
   domain(by: { name: $name }) {
     canonical { name { interpreted } }
-    records {
-      addresses(coinTypes: [60]) { coinType address }
-      texts(keys: ["description"]) { key value }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) { coinType address }
+        texts(keys: ["description"]) { key value }
+      }
     }
   }
 }`,
@@ -338,14 +340,18 @@ query AccountDomains(
 query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
-    primaryNames(by: { chains: [ETHEREUM, BASE] }) {
-      coinType
-      chain
-      name { interpreted beautified }
-      records {
-        addresses(coinTypes: [60]) {
-          coinType
-          address
+    resolve {
+      primaryNames(where: { chains: [ETH, BASE] }) {
+        coinType
+        chain
+        name { interpreted beautified }
+        resolve {
+          records {
+            addresses(coinTypes: [60]) {
+              coinType
+              address
+            }
+          }
         }
       }
     }
@@ -357,36 +363,6 @@ query AccountPrimaryNames($address: Address!) {
       [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
     },
   },
-
-  //////////////////
-  // Domain Profile
-  //////////////////
-  {
-    id: "domain-profile",
-    query: `
-query DomainProfile($name: InterpretedName!) {
-  domain(by: { name: $name }) {
-    profile {
-      description
-      avatar { url }
-      banner { url }
-      website { url }
-      addresses { ethereum base bitcoin solana }
-      socials {
-        github { handle url }
-        telegram { handle url }
-        twitter { handle url }
-      }
-    }
-  }
-}`,
-    variables: {
-      default: { name: "vitalik.eth" },
-      [ENSNamespaceIds.EnsTestEnv]: { name: "test.eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: "test.eth" },
-    },
-  },
-
   ////////////////////
   // Account Events
   ////////////////////

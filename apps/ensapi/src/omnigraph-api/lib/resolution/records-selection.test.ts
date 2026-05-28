@@ -13,9 +13,10 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  buildRecordsSelectionFromResolveContainerInfo,
   buildRecordsSelectionFromResolveInfo,
   EMPTY_RECORDS_SELECTION_MESSAGE,
-} from "@/omnigraph-api/lib/resolution/build-records-selection";
+} from "@/omnigraph-api/lib/resolution/records-selection";
 import {
   RECORDS_SELECTION_PARAMETRIC_FIELDS,
   RECORDS_SELECTION_SIMPLE_FIELDS,
@@ -60,6 +61,34 @@ function buildMockResolvedRecordsType() {
 }
 
 const ResolvedRecordsType = buildMockResolvedRecordsType();
+
+const DomainResolveType = new GraphQLObjectType({
+  name: "DomainResolve",
+  fields: {
+    trace: { type: GraphQLString },
+    records: { type: ResolvedRecordsType },
+  },
+});
+
+function parseResolveFieldNode(subselection: string) {
+  const document = parse(`{ resolve { ${subselection} } }`);
+  const operation = document.definitions[0];
+  if (operation.kind !== "OperationDefinition") throw new Error("expected operation");
+
+  const resolveField = operation.selectionSet.selections[0];
+  if (resolveField.kind !== "Field") throw new Error("expected field");
+
+  return resolveField;
+}
+
+function resolveInfoForDomainResolveSubselection(subselection: string): GraphQLResolveInfo {
+  return {
+    fieldNodes: [parseResolveFieldNode(subselection)],
+    fragments: {},
+    returnType: DomainResolveType,
+    variableValues: {},
+  } as unknown as GraphQLResolveInfo;
+}
 
 function parseRecordsFieldNode(subselection: string) {
   const document = parse(`{ records { ${subselection} } }`);
@@ -170,6 +199,37 @@ describe("buildRecordsSelectionFromResolveInfo", () => {
     const info = resolveInfoForRecordsSubselection("unknownField");
 
     expect(() => buildRecordsSelectionFromResolveInfo(info)).toThrow(
+      EMPTY_RECORDS_SELECTION_MESSAGE,
+    );
+  });
+});
+
+describe("buildRecordsSelectionFromResolveContainerInfo", () => {
+  it("returns null when records is not selected", () => {
+    const info = resolveInfoForDomainResolveSubselection("trace acceleration { requested }");
+
+    expect(buildRecordsSelectionFromResolveContainerInfo(info)).toBeNull();
+  });
+
+  it("builds selection from resolve { records { ... } } regardless of sibling field order", () => {
+    const info = resolveInfoForDomainResolveSubselection(`
+      trace
+      records {
+        texts(keys: ["description"])
+        addresses(coinTypes: [60])
+      }
+    `);
+
+    expect(buildRecordsSelectionFromResolveContainerInfo(info)).toEqual({
+      texts: ["description"],
+      addresses: [60],
+    });
+  });
+
+  it("throws when records is selected with an empty subselection", () => {
+    const info = resolveInfoForDomainResolveSubselection("records { __typename }");
+
+    expect(() => buildRecordsSelectionFromResolveContainerInfo(info)).toThrow(
       EMPTY_RECORDS_SELECTION_MESSAGE,
     );
   });

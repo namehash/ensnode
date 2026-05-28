@@ -1,5 +1,7 @@
 import type { Address, CoinType, InterpretedName } from "enssdk";
 
+import type { TracingTrace } from "@ensnode/ensnode-sdk";
+
 import {
   getENSIP19SupportedCoinTypes,
   type MultichainPrimaryNameByCoinTypeResolutionResult,
@@ -10,27 +12,24 @@ import { coinTypeToEnsip19Chain } from "@/omnigraph-api/lib/resolution/chain-coi
 import type { PrimaryNameRecordModel } from "@/omnigraph-api/schema/resolution";
 
 type PrimaryNameResolutionOptions = {
-  disableAcceleration: boolean;
+  accelerate: boolean;
   canAccelerate: boolean;
 };
 
-const toResolutionOptions = (options: PrimaryNameResolutionOptions) => ({
-  accelerate: !options.disableAcceleration,
-  canAccelerate: options.canAccelerate,
-});
+export type PrimaryNameRecordsResolution = {
+  trace: TracingTrace | null;
+  records: PrimaryNameRecordModel[];
+};
 
 const toPrimaryNameRecord = (
   address: Address,
   coinType: CoinType,
   name: InterpretedName | null,
-  options: PrimaryNameResolutionOptions,
 ): PrimaryNameRecordModel => ({
   address,
   coinType,
   chain: coinTypeToEnsip19Chain(coinType),
   name,
-  disableAcceleration: options.disableAcceleration,
-  canAccelerate: options.canAccelerate,
 });
 
 /** Resolves primary names for the provided coin types, preserving input order. */
@@ -38,42 +37,21 @@ export async function resolvePrimaryNameRecords(
   address: Address,
   coinTypes: CoinType[],
   options: PrimaryNameResolutionOptions,
-): Promise<PrimaryNameRecordModel[]> {
+): Promise<PrimaryNameRecordsResolution> {
   const supportedCoinTypes = new Set(getENSIP19SupportedCoinTypes());
   const resolvableCoinTypes = coinTypes.filter((coinType) => supportedCoinTypes.has(coinType));
-  const nonResolvableCoinTypes = coinTypes.filter((coinType) => !supportedCoinTypes.has(coinType));
 
-  let resolvedByCoinType: MultichainPrimaryNameByCoinTypeResolutionResult = {};
-  if (resolvableCoinTypes.length > 0) {
-    const { result } = await runWithTrace(() =>
-      resolvePrimaryNamesByCoinTypes(address, resolvableCoinTypes, toResolutionOptions(options)),
-    );
-    resolvedByCoinType = result;
-  }
+  const { trace, result: resolvedByCoinType } =
+    resolvableCoinTypes.length > 0
+      ? await runWithTrace(() =>
+          resolvePrimaryNamesByCoinTypes(address, resolvableCoinTypes, options),
+        )
+      : { trace: null, result: {} as MultichainPrimaryNameByCoinTypeResolutionResult };
 
-  const recordsByCoinType = new Map<CoinType, PrimaryNameRecordModel>();
-
-  for (const coinType of resolvableCoinTypes) {
-    recordsByCoinType.set(
-      coinType,
-      toPrimaryNameRecord(
-        address,
-        coinType,
-        (resolvedByCoinType[coinType] ?? null) as InterpretedName | null,
-        options,
-      ),
-    );
-  }
-
-  for (const coinType of nonResolvableCoinTypes) {
-    recordsByCoinType.set(coinType, toPrimaryNameRecord(address, coinType, null, options));
-  }
-
-  return coinTypes.map((coinType) => {
-    const record = recordsByCoinType.get(coinType);
-    if (!record) {
-      throw new Error(`Missing primary name record for coinType ${coinType}.`);
-    }
-    return record;
+  const records = coinTypes.map((coinType) => {
+    const name = (resolvedByCoinType[coinType] ?? null) as InterpretedName | null;
+    return toPrimaryNameRecord(address, coinType, name);
   });
+
+  return { trace, records };
 }
