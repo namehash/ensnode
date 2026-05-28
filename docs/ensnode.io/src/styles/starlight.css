@@ -260,11 +260,6 @@ starlight-toc a:hover {
   }
 }
 
-.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a:hover,
-.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a:hover > span {
-  color: var(--sl-color-white);
-}
-
 .sl-markdown-content :global(.anchor-link) {
   display: inline;
 }
