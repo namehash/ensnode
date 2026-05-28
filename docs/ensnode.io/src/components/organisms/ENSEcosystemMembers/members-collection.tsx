@@ -15,15 +15,6 @@ import { JustaNameLogo } from "@components/atoms/logos/ens-ecosystem-members/Jus
 import { NamespaceLogo } from "@components/atoms/logos/ens-ecosystem-members/NamespaceLogo";
 import type { JSX } from "react";
 
-export const EnsEcosystemMemberTypes = {
-  Organization: "organization",
-  App: "app",
-  OfficialENSApp: "official-ens-app",
-} as const;
-
-export type EnsEcosystemMemberType =
-  (typeof EnsEcosystemMemberTypes)[keyof typeof EnsEcosystemMemberTypes];
-
 export interface ENSEcosystemMemberDisplayData {
   name: string;
   websiteURL: URL;
@@ -31,102 +22,83 @@ export interface ENSEcosystemMemberDisplayData {
   customStyles?: string;
 }
 
-export const ENS_ECOSYSTEM_MEMBERS = new Map<
-  EnsEcosystemMemberType,
-  ENSEcosystemMemberDisplayData[]
->([
-  [
-    EnsEcosystemMemberTypes.Organization,
-    [
-      {
-        name: "ENS Labs",
-        websiteURL: new URL("https://www.enslabs.org/"),
-        icon: ENSLabsLogo,
-      },
-      {
-        name: "Ethereum Identity Foundation",
-        websiteURL: new URL("https://ethid.org/"),
-        icon: EthIdLogo,
-      },
-      {
-        name: "Blockful",
-        websiteURL: new URL("https://www.blockful.io/"),
-        icon: BlockfulLogo,
-      },
-      {
-        name: "Namespace",
-        websiteURL: new URL("https://www.namespace.ninja/"),
-        icon: NamespaceLogo,
-      },
-      {
-        name: "JustaName",
-        websiteURL: new URL("https://www.justaname.id/"),
-        icon: JustaNameLogo,
-        customStyles:
-          "text-white opacity-50 group-hover:opacity-100 transition-opacity duration-200",
-      },
-      {
-        name: "Enscribe",
-        websiteURL: new URL("https://www.enscribe.xyz/"),
-        icon: EnscribeLogo,
-      },
-      {
-        name: "Ethereum Comments Protocol",
-        websiteURL: new URL("https://www.ethcomments.xyz/"),
-        icon: EthereumCommentsProtocolLogo,
-      },
-    ],
-  ],
-  [
-    EnsEcosystemMemberTypes.OfficialENSApp,
-    [
-      {
-        name: "Official ENSv2 Explorer",
-        websiteURL: new URL("https://explorer.ens.dev/"),
-        icon: ENSv2ExplorerLogo,
-      },
-      {
-        name: "Official ENSv2 App",
-        websiteURL: new URL("https://app.ens.dev/"),
-        icon: ENSv2AppLogo,
-      },
-    ],
-  ],
-  [
-    EnsEcosystemMemberTypes.App,
-    [
-      {
-        name: "Grails",
-        websiteURL: new URL("https://grails.app/"),
-        icon: GrailsLogo,
-      },
-      {
-        name: "ENS Vision",
-        websiteURL: new URL("https://ensvision.com/"),
-        icon: ENSVisionLogo,
-      },
-      {
-        name: "Anticapture",
-        websiteURL: new URL("https://app.anticapture.com/"),
-        icon: AnticaptureLogo,
-      },
-      {
-        name: "ENSvolution",
-        websiteURL: new URL("https://www.ensvolution.xyz/"),
-        icon: ENSvolutionLogo,
-        customStyles: "py-0.5 sm:py-1",
-      },
-      {
-        name: "ens-test-env",
-        websiteURL: new URL("https://github.com/ensdomains/ens-test-env"),
-        icon: ENSTestEnvLogo,
-      },
-      {
-        name: "Atlas (ENS CLI)",
-        websiteURL: new URL("https://github.com/stevedylandev/atlas"),
-        icon: AtlasLogo,
-        customStyles: "py-1 sm:py-2",
-      },
-    ],
-  ],
-]);
+export const ENS_ECOSYSTEM_MEMBERS: ENSEcosystemMemberDisplayData[] = [
+  {
+    name: "ENS Labs",
+    websiteURL: new URL("https://www.enslabs.org/"),
+    icon: ENSLabsLogo,
+  },
+  {
+    name: "Ethereum Identity Foundation",
+    websiteURL: new URL("https://ethid.org/"),
+    icon: EthIdLogo,
+  },
+  {
+    name: "Blockful",
+    websiteURL: new URL("https://www.blockful.io/"),
+    icon: BlockfulLogo,
+  },
+  {
+    name: "Namespace",
+    websiteURL: new URL("https://www.namespace.ninja/"),
+    icon: NamespaceLogo,
+  },
+  {
+    name: "JustaName",
+    websiteURL: new URL("https://www.justaname.id/"),
+    icon: JustaNameLogo,
+    customStyles: "text-white opacity-50 group-hover:opacity-100 transition-opacity duration-200",
+  },
+  {
+    name: "Enscribe",
+    websiteURL: new URL("https://www.enscribe.xyz/"),
+    icon: EnscribeLogo,
+  },
+  {
+    name: "Ethereum Comments Protocol",
+    websiteURL: new URL("https://www.ethcomments.xyz/"),
+    icon: EthereumCommentsProtocolLogo,
+  },
+  {
+    name: "Official ENSv2 Explorer",
+    websiteURL: new URL("https://explorer.ens.dev/"),
+    icon: ENSv2ExplorerLogo,
+  },
+  {
+    name: "Official ENSv2 App",
+    websiteURL: new URL("https://app.ens.dev/"),
+    icon: ENSv2AppLogo,
+  },
+  {
+    name: "Grails",
+    websiteURL: new URL("https://grails.app/"),
+    icon: GrailsLogo,
+  },
+  {
+    name: "ENS Vision",
+    websiteURL: new URL("https://ensvision.com/"),
+    icon: ENSVisionLogo,
+  },
+  {
+    name: "Anticapture",
+    websiteURL: new URL("https://app.anticapture.com/"),
+    icon: AnticaptureLogo,
+  },
+  {
+    name: "ENSvolution",
+    websiteURL: new URL("https://www.ensvolution.xyz/"),
+    icon: ENSvolutionLogo,
+    customStyles: "py-0.5 sm:py-1",
+  },
+  {
+    name: "ens-test-env",
+    websiteURL: new URL("https://github.com/ensdomains/ens-test-env"),
+    icon: ENSTestEnvLogo,
+  },
+  {
+    name: "Atlas (ENS CLI)",
+    websiteURL: new URL("https://github.com/stevedylandev/atlas"),
+    icon: AtlasLogo,
+    customStyles: "py-1 sm:py-2",
+  },
+];
