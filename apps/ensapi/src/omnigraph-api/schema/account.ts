@@ -12,6 +12,10 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
+import {
+  normalizeAccountPrimaryNamesWhereInput,
+  normalizePrimaryNameByInput,
+} from "@/omnigraph-api/lib/resolution/primary-name-input";
 import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import {
@@ -298,14 +302,15 @@ AccountResolveRef.implement({
           description: "Select a coin type or chain to resolve a primary name for.",
         }),
       },
-      resolve: async ({ primaryNamesResolution, accelerate }) => {
+      resolve: async ({ primaryNamesResolution, accelerate }, { by }) => {
         if (!primaryNamesResolution) {
           throw new Error("primaryName requires a primary-name resolution to be started.");
         }
+        const coinType = normalizePrimaryNameByInput(by);
         const { records } = await primaryNamesResolution;
-        const [record] = records;
+        const record = records.find((r) => r.coinType === coinType);
         if (!record) {
-          throw new Error("Missing primary name record for requested coin type.");
+          throw new Error(`Missing primary name record for requested coin type: ${coinType}`);
         }
         return { ...record, accelerate };
       },
@@ -321,12 +326,21 @@ AccountResolveRef.implement({
           description: "Select coin types or chains to resolve primary names for.",
         }),
       },
-      resolve: async ({ primaryNamesResolution, accelerate }) => {
+      resolve: async ({ primaryNamesResolution, accelerate }, { where }) => {
         if (!primaryNamesResolution) {
           throw new Error("primaryNames requires a primary-name resolution to be started.");
         }
+        const coinTypes = normalizeAccountPrimaryNamesWhereInput(where);
         const { records } = await primaryNamesResolution;
-        return records.map((record) => ({ ...record, accelerate }));
+
+        // return records in the order of requested coinTypes
+        return coinTypes.map((coinType) => {
+          const record = records.find((r) => r.coinType === coinType);
+          if (!record) {
+            throw new Error(`Missing primary name record for requested coin type: ${coinType}`);
+          }
+          return { ...record, accelerate };
+        });
       },
     }),
   }),

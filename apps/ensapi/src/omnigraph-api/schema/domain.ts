@@ -47,10 +47,7 @@ import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import {
   AccelerationStatusRef,
-  AccountPrimaryNamesWhereInput,
   DomainProfileRef,
-  PrimaryNameByInput,
-  PrimaryNameRecordRef,
   ResolvedRecordsRef,
 } from "@/omnigraph-api/schema/resolution";
 

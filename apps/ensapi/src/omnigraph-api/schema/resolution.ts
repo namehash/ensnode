@@ -22,10 +22,7 @@ import {
   type ResolvedRecordsModel,
   toResolvedRecordsModel,
 } from "@/omnigraph-api/lib/resolution/records-profile-model";
-import {
-  buildRecordsSelectionFromResolveContainerInfo,
-  buildRecordsSelectionFromResolveInfo,
-} from "@/omnigraph-api/lib/resolution/records-selection";
+import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
 import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
 
 export type AccelerationStatusModel = {

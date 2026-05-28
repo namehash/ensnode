@@ -995,7 +995,7 @@ input EventsWhereInput {
 """Hex represents viem#Hex."""
 scalar Hex
 
-"""InterfaceId represents a ERC-165 interface id (4-byte hex selector)."""
+"""InterfaceId represents an ERC-165 interface id (4-byte hex selector)."""
 scalar InterfaceId
 
 """InterpretedLabel represents an enssdk#InterpretedLabel."""

@@ -86,7 +86,7 @@ builder.scalarType("CoinType", {
 });
 
 builder.scalarType("InterfaceId", {
-  description: "InterfaceId represents a ERC-165 interface id (4-byte hex selector).",
+  description: "InterfaceId represents an ERC-165 interface id (4-byte hex selector).",
   serialize: (value: InterfaceId) => value,
   parseValue: (value) =>
     z.coerce

@@ -99,11 +99,11 @@ describe("buildAccountPrimaryNamesSelection", () => {
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([60]);
   });
 
-  it("prefers primaryNames over primaryName when both are selected", () => {
+  it("merges coin types from primaryName and primaryNames when both are selected", () => {
     const info = resolveInfoForAccountResolveSubselection(`
         primaryName(by: { coinType: 0 }) { name }
         primaryNames(where: { coinTypes: [60] }) { name }
       `);
-    expect(buildAccountPrimaryNamesSelection(info)).toEqual([60]);
+    expect(buildAccountPrimaryNamesSelection(info)).toEqual([60, 0]);
   });
 });

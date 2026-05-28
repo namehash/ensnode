@@ -64,11 +64,18 @@ export function collectNamedSubFieldNodes(
   return fields;
 }
 
+/**
+ * Translates a GraphQL selection set on a 'records' field into a flat {@link ResolverRecordsSelection}.
+ *
+ * This function handles merging selections from multiple field nodes (e.g. from fragments or aliases)
+ * and correctly maps both simple (boolean) and parametric (keyed-args) record types.
+ */
 function buildRecordsSelectionFromRecordsFieldNodes(
   recordsFieldNodes: readonly FieldNode[],
   recordsReturnType: GraphQLObjectType,
   info: GraphQLResolveInfo,
 ): ResolverRecordsSelection {
+  // 1. Collect all selections from all 'records' field nodes (merging fragments and aliases)
   const graphqlSelections = recordsFieldNodes.flatMap(
     (node) => node.selectionSet?.selections ?? [],
   );
@@ -77,6 +84,7 @@ function buildRecordsSelectionFromRecordsFieldNodes(
     throw new GraphQLError(EMPTY_RECORDS_SELECTION_MESSAGE);
   }
 
+  // Create a virtual selection set to process all collected selections together
   const mergedGraphqlSelectionSet: SelectionSetNode = {
     kind: Kind.SELECTION_SET,
     selections: graphqlSelections,
@@ -84,22 +92,28 @@ function buildRecordsSelectionFromRecordsFieldNodes(
 
   const recordsSelection: ResolverRecordsSelection = {};
 
+  // 2. Iterate over each selected field to build the ResolverRecordsSelection object
   for (const childField of collectFieldNodes(mergedGraphqlSelectionSet, info)) {
     const graphqlField = childField.name.value;
 
+    // A. Handle 'simple' fields (e.g. contenthash, pubkey) which map to boolean flags
     const simple = getSimpleRecordsSelectionField(graphqlField);
     if (simple) {
       recordsSelection[simple.recordsSelectionKey] = true;
       continue;
     }
 
+    // B. Handle 'parametric' fields (e.g. texts, addresses) which require arguments
     const parametric = getParametricRecordsSelectionField(graphqlField);
     if (!parametric) continue;
 
     const fieldDef = recordsReturnType.getFields()[graphqlField];
     if (!fieldDef) continue;
 
+    // Extract arguments for this specific field node (handles variables and aliases)
     const args = getArgumentValues(fieldDef, childField, info.variableValues);
+
+    // Apply the arguments to the recordsSelection object (merging with any existing values)
     parametric.applyToRecordsSelection(recordsSelection, args);
   }
 

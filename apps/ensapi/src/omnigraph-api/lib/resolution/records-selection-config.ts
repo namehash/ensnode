@@ -48,7 +48,10 @@ export const RECORDS_SELECTION_PARAMETRIC_FIELDS = [
     argName: "keys",
     recordsSelectionKey: "texts",
     applyToRecordsSelection: (recordsSelection, args) => {
-      recordsSelection.texts = args.keys as string[];
+      const keys = args.keys as string[] | undefined;
+      if (keys && keys.length > 0) {
+        recordsSelection.texts = [...new Set([...(recordsSelection.texts ?? []), ...keys])];
+      }
     },
   },
   {
@@ -56,7 +59,12 @@ export const RECORDS_SELECTION_PARAMETRIC_FIELDS = [
     argName: "coinTypes",
     recordsSelectionKey: "addresses",
     applyToRecordsSelection: (recordsSelection, args) => {
-      recordsSelection.addresses = args.coinTypes as CoinType[];
+      const coinTypes = args.coinTypes as CoinType[] | undefined;
+      if (coinTypes && coinTypes.length > 0) {
+        recordsSelection.addresses = [
+          ...new Set([...(recordsSelection.addresses ?? []), ...coinTypes]),
+        ];
+      }
     },
   },
   {
@@ -64,7 +72,10 @@ export const RECORDS_SELECTION_PARAMETRIC_FIELDS = [
     argName: "contentTypeMask",
     recordsSelectionKey: "abi",
     applyToRecordsSelection: (recordsSelection, args) => {
-      recordsSelection.abi = args.contentTypeMask as ContentType;
+      const contentTypeMask = args.contentTypeMask as ContentType | undefined;
+      if (contentTypeMask !== undefined) {
+        recordsSelection.abi = (recordsSelection.abi ?? 0n) | contentTypeMask;
+      }
     },
   },
   {
@@ -72,7 +83,12 @@ export const RECORDS_SELECTION_PARAMETRIC_FIELDS = [
     argName: "ids",
     recordsSelectionKey: "interfaces",
     applyToRecordsSelection: (recordsSelection, args) => {
-      recordsSelection.interfaces = args.ids as InterfaceId[];
+      const ids = args.ids as InterfaceId[] | undefined;
+      if (ids && ids.length > 0) {
+        recordsSelection.interfaces = [
+          ...new Set([...(recordsSelection.interfaces ?? []), ...ids]),
+        ];
+      }
     },
   },
 ] as const satisfies readonly RecordsSelectionParametricField[];

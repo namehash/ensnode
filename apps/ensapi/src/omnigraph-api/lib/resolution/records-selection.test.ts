@@ -188,6 +188,20 @@ describe("buildRecordsSelectionFromResolveInfo", () => {
     });
   });
 
+  it("merges parametric fields with different arguments (aliases)", () => {
+    const info = resolveInfoForRecordsSubselection(`
+      avatar: texts(keys: ["avatar"])
+      description: texts(keys: ["description"])
+      eth: addresses(coinTypes: [60])
+      btc: addresses(coinTypes: [0])
+    `);
+
+    expect(buildRecordsSelectionFromResolveInfo(info)).toEqual({
+      texts: ["avatar", "description"],
+      addresses: [60, 0],
+    });
+  });
+
   it("throws when selection is empty", () => {
     const info = resolveInfoForRecordsSubselection("__typename");
     expect(() => buildRecordsSelectionFromResolveInfo(info)).toThrow(
