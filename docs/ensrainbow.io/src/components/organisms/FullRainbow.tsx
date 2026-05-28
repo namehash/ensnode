@@ -17,7 +17,7 @@ export default function FullRainbow() {
         {
           label: <>ENS Subgraph</>,
           value: 11,
-          color: "linear-gradient(90deg, #EA2F86 0%, #CA01FD 4.5%, #0B10FE 154.5%)",
+          color: "linear-gradient(270deg, #DBE10B 0%, #FAE000 17.5%, #F09C0A 54.5%, #EA2F86 100%)",
         },
         {
           label: (
@@ -27,7 +27,7 @@ export default function FullRainbow() {
           ),
           value: 94,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.3%, #1EFDFF 36.1%, #93E223 52.4%, #FAE000 70.2%, #F09C0A 86.6%, #EA2F86 103.9%)",
+            "linear-gradient(270deg, #CA01FD -30.44%, #0B10FE -7.38%, #1EFDFF 16.33%, #93E223 38.07%, #FAE000 59.16%, #F09C0A 79.58%, #EA2F86 100%)",
         },
         {
           label: (
@@ -37,11 +37,11 @@ export default function FullRainbow() {
           ),
           value: 99,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 17.8%, #1EFDFF 35%, #93E223 50.9%, #FAE000 66.2%, #F09C0A 81.1%, #EA2F86 100%)",
+            "linear-gradient(270deg, #CA01FD -0.46%, #0B10FE 17.29%, #1EFDFF 35.56%, #93E223 52.3%, #FAE000 68.54%, #F09C0A 84.27%, #EA2F86 100%)",
         },
       ]}
       title="Name Healing Coverage"
-      footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 26 May, 2026. Results exclude unnormalized names that are formatted as encoded labelhashes in the ENS Subgraph but are actually known."
+      footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 26 May, 2026.&#10;Results exclude unnormalized names that are formatted as encoded labelhashes in the ENS Subgraph but are actually known."
     />
   );
 

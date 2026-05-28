@@ -25,11 +25,11 @@ export default function BarChart({ data, title, subtitle, footnote }: BarChartPr
         <div className="w-full flex flex-col gap-4 md:gap-6">
           {data.map((item: BarChartData, index: number) => {
             const percent = (item.value / maxValue) * 100;
-            const percentLabel = `${index === data.length - 1 ? "+" : ""}${percent}%`;
+            const percentLabel = `${percent}%`;
 
             return (
               <Fragment key={`barChartFragment#${index}`}>
-                <div key={`barChartFull#${index}`} className="flex flex-col gap-2">
+                <div key={`barChartFull#${index}`} className="flex flex-col gap-3">
                   <span className="text-sm md:text-base leading-7 font-semibold">{item.label}</span>
                   <div key={`barChartBar#${index}`} className="flex items-center gap-3">
                     <div
@@ -46,7 +46,7 @@ export default function BarChart({ data, title, subtitle, footnote }: BarChartPr
                         }}
                       />
                     </div>
-                    <span className="shrink-0 w-10 text-right text-xs leading-4 font-semibold tabular-nums">
+                    <span className="shrink-0 w-[25px] text-right text-xs leading-4 font-semibold">
                       {percentLabel}
                     </span>
                   </div>
@@ -57,7 +57,11 @@ export default function BarChart({ data, title, subtitle, footnote }: BarChartPr
           })}
         </div>
       </div>
-      {footnote && <p className="text-sm leading-5 font-normal text-gray-500 px-4">{footnote}</p>}
+      {footnote && (
+        <p className="text-sm leading-5 font-normal text-gray-500 px-4 whitespace-pre-wrap">
+          {footnote}
+        </p>
+      )}
     </div>
   );
 }
