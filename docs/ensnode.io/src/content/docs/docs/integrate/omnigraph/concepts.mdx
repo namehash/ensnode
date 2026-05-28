@@ -5,9 +5,19 @@ sidebar:
   label: Core Concepts
 ---
 
-import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard, Aside } from "@astrojs/starlight/components";
 
 The [ENS Omnigraph API](/docs/integrate/omnigraph) abstracts away most of ENS's protocol complexity, but a handful of concepts explain _how_ it presents ENSv1 and ENSv2 through a single unified schema. You don't need these to send your first query, only to understand how the Omnigraph represents the state of the ENS protocol.
+
+<Aside type="caution" title="ENSv1 and ENSv2 will coexist">
+  Unlike traditional software, **ENSv2 does not replace ENSv1**. When ENSv2 launches, ENSv1 doesn't
+  stop existing — both protocols coexist onchain, at the same time, even though ENSv2 has a
+  substantially different onchain data model from ENSv1.
+
+  That's exactly why developers building on ENS need ENSNode and the ENS Omnigraph API: it's the
+  world's first and only service delivering the **unified ENSv1 + ENSv2 data access** that building on
+  ENS requires. The concepts below explain how the Omnigraph presents that unified state.
+</Aside>
 
 ## What is a Namegraph?
 
