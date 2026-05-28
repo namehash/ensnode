@@ -181,7 +181,11 @@
   border-radius: 12px;
 }
 
-.sl-link-card:hover,
+.sl-link-card:hover {
+  background: #f5f8ff;
+  border-color: #82abfc;
+}
+
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
   background: var(--sl-color-black);
