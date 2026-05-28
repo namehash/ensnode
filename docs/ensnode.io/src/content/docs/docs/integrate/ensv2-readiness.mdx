@@ -12,22 +12,13 @@ import { LinkCard, Aside } from "@astrojs/starlight/components";
 
 ## Historical limitations of building on ENS
 
-Full access to ENS data formerly required two separate data fetching strategies working in parallel:
+Full access to ENS data formerly required two separate data-fetching strategies working in parallel: **ENS resolution** (RPC calls with CCIP-Read, e.g. via `viem` or `wagmi`) and **indexed ENS data** (the ENS Subgraph). Neither system alone was complete — resolution is "close to the metal" and the Subgraph carries a long list of [Key Limitations](/docs/integrate/ens-subgraph/key-limitations). And **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
 
-1. **ENS resolution** — RPC calls with CCIP-read support for offchain data (e.g. via a popular package such as `viem` or `wagmi`) to perform forward or reverse ENS resolution.
-2. **Indexed ENS data** — the [ENS Subgraph](/docs/integrate/subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
-
-Neither system alone was complete.
-
-- ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpreting raw values returned by the ENS protocol.
-- The Subgraph gives you queryable indexed ENS data but has critical limitations, including:
-  - The Subgraph is single-chain.
-  - The Subgraph has no support for ENSv2's fundamental data model changes.
-  - The Subgraph cannot perform ENS resolutions.
-  - The Subgraph doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.
-  - The Subgraph exposes too many internal implementation detail complexities of ENS for app developers.
-
-In the past, apps building on ENS have had to live with these split fetching strategies, their limitations, and their downstream complexities. And we should note, **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
+<LinkCard
+  title="Key Limitations of the ENS Subgraph"
+  description="The full breakdown of what the Subgraph can't do — and why it breaks with ENSv2."
+  href="/docs/integrate/ens-subgraph/key-limitations"
+/>
 
 ## How ENSNode solves this
 
@@ -35,13 +26,13 @@ In the past, apps building on ENS have had to live with these split fetching str
 
 **The Omnigraph API** — The [ENS Omnigraph API](/docs/integrate/omnigraph) is delivered by [ENSApi](/docs/services/ensapi) and builds upon and refines the Unigraph data model held in [ENSDb](/docs/services/ensdb). The Omnigraph API provides a highly tailored, fully typed GraphQL API that understands ENS protocol implementation details—including ENSIP-10, ENSIP-15, ENSIP-19, and much more—so that you can focus on building your app (and not all the internal implementation complexities of the ENS protocol).
 
-**Accelerated ENS Resolution** — The ENS Omnigraph API, through ENSApi, internally implements the ENS Universal Resolver on top of the indexed ENS Unigraph data model in ENSDb. We refer to this idea as "ENS Protocol Acceleration". For cases where ENS Resolution requires offchain data, ENSApi internally performs the CCIP-read operations on your behalf to ensure every resolution request accurately follows all ENS protocol standards. No need for any RPC calls in your app, and your ENS resolutions for indexed names could speed up by an order of magnitude or more!
+**Accelerated ENS Resolution** — The ENS Omnigraph API, through ENSApi, internally implements the ENS Universal Resolver on top of the indexed ENS Unigraph data model in ENSDb. We refer to this idea as "[ENS Protocol Acceleration](/docs/services/ensapi#ens-protocol-acceleration)". For cases where ENS Resolution requires offchain data, ENSApi internally performs the CCIP-read operations on your behalf to ensure every resolution request accurately follows all ENS protocol standards. No need for any RPC calls in your app, and your ENS resolutions for indexed names could speed up by an order of magnitude or more!
 
 ## What You Need to Do
 
 **Resolving Records** — If you're exclusively interested in resolving ENS names, you need to ensure that your `resolve` RPC calls go to the new `UniversalResolverV2` contract or risk stale and incorrect results being returned. Depending on your situation, this update may be handled simply by updating `viem` or `wagmi`, but for many apps building on indexed ENS data or with more advanced requirements, additional upgrade actions may be required.
 
-For many, the simple solution for ENSv2 readiness will be to adopt the ENS Omnigraph API from ENSNode for all their ENS data needs (both ENSv1 and ENSv2). ENSNode also provides **ENS Protocol Acceleration**, dramatically reducing resolution latency for most names people use.
+For many, the simple solution for ENSv2 readiness will be to adopt the ENS Omnigraph API from ENSNode for all their ENS data needs (both ENSv1 and ENSv2). ENSNode also provides **[ENS Protocol Acceleration](/docs/services/ensapi#ens-protocol-acceleration)**, dramatically reducing resolution latency for most names people use.
 
 **Querying ENS Data** — If you're querying ENS names via a legacy API such as the ENS Subgraph you need to update to an ENSv2-ready service like ENSNode; as soon as ENSv2 launches, data served by the Subgraph (and any ENSv1-only indexers) will be instantly unreliable for the true state of ENS.
 

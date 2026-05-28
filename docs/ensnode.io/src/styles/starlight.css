@@ -177,6 +177,10 @@
   box-shadow: var(--sl-shadow-sm);
 }
 
+.card-grid .card {
+  border-radius: 12px;
+}
+
 .sl-link-card:hover,
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
@@ -332,15 +336,14 @@ starlight-toc a:hover {
   font-weight: 500;
 }
 
-/* Only apply hover effects to: 
-* * non-selected items 
+/* Only apply hover effects to:
+* * non-selected items
 * * expandable items (in all states), including nested ones
 */
 #starlight__sidebar a:not([aria-current="page"]):hover,
 #starlight__sidebar details details > summary:hover,
 #starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
-  transform: translateX(2px);
   border-radius: 6px;
 }
 
@@ -387,7 +390,7 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
 
 /* Make sure that all non-top-level sidebar items are:
  * * not enlarged
- * * not bolded 
+ * * not bolded
  * * the same color as the rest of the sidebar text
  */
 ul.top-level details details > summary .group-label span {
@@ -432,7 +435,7 @@ ul.top-level details details > summary .group-label span {
   transform: none !important;
 }
 
-/* Align "tablist" component to the left 
+/* Align "tablist" component to the left
  * and remove the default full-width underline
  */
 starlight-tabs ul[role="tablist"] {
@@ -603,7 +606,7 @@ starlight-tabs ul[role="tablist"] {
   }
 }
 
-/* Custom icon logic for specific sidebar items based on URL - 
+/* Custom icon logic for specific sidebar items based on URL -
  * hack since Starlight doesn't allow overriding icons directly. */
 
 .starlight-sidebar-topics-icon svg {
