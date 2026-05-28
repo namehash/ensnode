@@ -182,8 +182,8 @@
 }
 
 .sl-link-card:hover {
-  background: #f5f8ff;
-  border-color: #82abfc;
+  background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
 }
 
 a[rel="next"]:hover,
