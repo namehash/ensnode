@@ -55,6 +55,7 @@ export const omnigraphCacheExchange = cacheExchange({
     PrimaryNameResolve: EMBEDDED_DATA,
     ResolutionStatus: EMBEDDED_DATA,
     PrimaryNameRecord: EMBEDDED_DATA,
+    AccelerationStatus: EMBEDDED_DATA,
     // dont forget to add cache strategy when DomainProfile is wired
     DomainProfile: EMBEDDED_DATA,
     ProfileAvatar: EMBEDDED_DATA,
