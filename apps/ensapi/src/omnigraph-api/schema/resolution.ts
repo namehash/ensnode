@@ -1,11 +1,12 @@
-import type {
-  Address,
-  CoinType,
-  Hex,
-  InterfaceId,
-  InterpretedName,
-  JsonValue,
-  NormalizedAddress,
+import {
+  type Address,
+  type CoinType,
+  type Hex,
+  type InterfaceId,
+  type InterpretedName,
+  isNormalizedName,
+  type JsonValue,
+  type NormalizedAddress,
 } from "enssdk";
 
 import type { TracingTrace } from "@ensnode/ensnode-sdk";
@@ -424,7 +425,23 @@ ResolvedRecordsRef.implement({
             "Content-type bitmask; the resolver returns the first stored ABI whose bit is set (lowest bit first).",
         }),
       },
-      resolve: (r) => r.abi ?? null,
+      resolve: (r, { contentTypeMask }) => {
+        /*
+        ENSIP-4 ABIs are stored with a single-bit contentType (1=JSON, 2=zlib-JSON, etc).
+        The selection-building layer merges all requested contentTypeMasks from all 'abi'
+        field aliases into a single aggregate mask for the underlying resolution call.
+        At this resolver layer, we must verify that the specific ABI returned by the
+        protocol (which is the first one found matching the aggregate mask) actually
+        matches the specific bitmask requested by *this* GraphQL field alias.
+
+        @see https://docs.ens.domains/ensip/4/
+        */
+        if (!r.abi) return null;
+        // check if the found contentType matches the requested contentTypeMask
+        const foundContentType = r.abi.contentType & contentTypeMask;
+        if (foundContentType === 0n) return null;
+        return r.abi;
+      },
     }),
     interfaces: t.field({
       description: "Resolved ERC-165 interface implementer records for the requested ids.",
@@ -544,7 +561,10 @@ PrimaryNameRecordRef.implement({
         const { name, accelerate } = parent;
         const { canAccelerate } = context;
 
-        const recordsSelection = name ? buildRecordsSelectionFromResolveContainerInfo(info) : null;
+        const recordsSelection =
+          name && isNormalizedName(name)
+            ? buildRecordsSelectionFromResolveContainerInfo(info)
+            : null;
 
         const recordsResolution =
           name && recordsSelection

@@ -613,6 +613,65 @@ describe("Domain.records", () => {
       },
     });
   });
+
+  it("returns null for an unnormalized canonical name (e.g. with labelhash)", async () => {
+    // A name with a labelhash is an InterpretedName but not a normalized name.
+    // Even if it exists in the DB, resolve should return null.
+    const unnormalizedName =
+      "[0000000000000000000000000000000000000000000000000000000000000000].eth";
+    await expect(
+      request<DomainRecordsResult>(DomainRecords, {
+        name: unnormalizedName,
+        addresses: [60],
+        texts: ["description"],
+      }),
+    ).resolves.toMatchObject({
+      domain: null,
+    });
+  });
+
+  it("returns null for an ABI alias that does not match the returned content type", async () => {
+    // test.eth has ABI with contentType 1 (JSON)
+    // If we ask for contentType 2 (zlib-JSON), it should return null
+    const DomainRecordsAbi = gql`
+      query DomainRecordsAbi($name: InterpretedName!, $mask1: BigInt!, $mask2: BigInt!) {
+        domain(by: { name: $name }) {
+          resolve {
+            records {
+              abi1: abi(contentTypeMask: $mask1) { contentType data }
+              abi2: abi(contentTypeMask: $mask2) { contentType data }
+            }
+          }
+        }
+      }
+    `;
+
+    await expect(
+      request<{
+        domain: {
+          resolve: {
+            records: {
+              abi1: { contentType: string; data: string } | null;
+              abi2: { contentType: string; data: string } | null;
+            };
+          };
+        };
+      }>(DomainRecordsAbi, {
+        name: "test.eth",
+        mask1: "1", // JSON
+        mask2: "2", // zlib-JSON
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            abi1: { contentType: "1", data: fixtures.abiBytes },
+            abi2: null,
+          },
+        },
+      },
+    });
+  });
 });
 
 (INCLUDE_DEV_METHODS ? describe : describe.skip)("Domain.profile", () => {

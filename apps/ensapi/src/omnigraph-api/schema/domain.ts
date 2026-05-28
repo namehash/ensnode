@@ -1,7 +1,7 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import type { DomainId, JsonValue } from "enssdk";
+import { type DomainId, isNormalizedName, type JsonValue } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull, TracingTrace } from "@ensnode/ensnode-sdk";
 
@@ -205,7 +205,10 @@ DomainInterfaceRef.implement({
         const { canAccelerate } = context;
         const name = domain.canonicalName;
 
-        const recordsSelection = name ? buildRecordsSelectionFromResolveContainerInfo(info) : null;
+        const recordsSelection =
+          name && isNormalizedName(name)
+            ? buildRecordsSelectionFromResolveContainerInfo(info)
+            : null;
 
         const recordsResolution =
           name && recordsSelection

@@ -194,11 +194,17 @@ describe("buildRecordsSelectionFromResolveInfo", () => {
       description: texts(keys: ["description"])
       eth: addresses(coinTypes: [60])
       btc: addresses(coinTypes: [0])
+      abi1: abi(contentTypeMask: "1")
+      abi2: abi(contentTypeMask: "2")
+      i1: interfaces(ids: ["0x01020304"])
+      i2: interfaces(ids: ["0x05060708"])
     `);
 
     expect(buildRecordsSelectionFromResolveInfo(info)).toEqual({
       texts: ["avatar", "description"],
       addresses: [60, 0],
+      abi: 3n,
+      interfaces: ["0x01020304", "0x05060708"],
     });
   });
 
