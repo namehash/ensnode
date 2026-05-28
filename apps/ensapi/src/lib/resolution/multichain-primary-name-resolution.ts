@@ -1,5 +1,5 @@
 import { trace } from "@opentelemetry/api";
-import { type Address, type CoinType, evmChainIdToCoinType } from "enssdk";
+import type { Address, CoinType } from "enssdk";
 import { mainnet } from "viem/chains";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
@@ -35,10 +35,6 @@ export const getENSIP19SupportedChainIds = () => {
       .map((ds) => ds.chain.id),
   ]);
 };
-
-/** Coin types corresponding to {@link getENSIP19SupportedChainIds} in the current namespace. */
-export const getENSIP19SupportedCoinTypes = (): CoinType[] =>
-  uniq(getENSIP19SupportedChainIds().map(evmChainIdToCoinType));
 
 export type MultichainPrimaryNameByCoinTypeResolutionResult = Partial<
   Record<CoinType, ReverseResolutionResult>

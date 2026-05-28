@@ -1,7 +1,6 @@
 import type { CoinType } from "enssdk";
 
 import {
-  coinTypeToEnsip19Chain,
   type ENSIP19ChainValue,
   ensip19ChainToCoinType,
 } from "@/omnigraph-api/lib/resolution/chain-coin-type";
@@ -31,7 +30,3 @@ export const normalizeAccountPrimaryNamesWhereInput = (
   if (where.chains != null) return where.chains.map(ensip19ChainToCoinType);
   throw new Error("AccountPrimaryNamesWhereInput must specify exactly one of coinTypes or chains.");
 };
-
-/** Projects a coin type to its ENSIP19Chain enum value, if applicable. */
-export const projectCoinTypeToEnsip19Chain = (coinType: CoinType): ENSIP19ChainValue | null =>
-  coinTypeToEnsip19Chain(coinType);

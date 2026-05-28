@@ -3,12 +3,14 @@ import type { Address, CoinType, InterpretedName } from "enssdk";
 import type { TracingTrace } from "@ensnode/ensnode-sdk";
 
 import {
-  getENSIP19SupportedCoinTypes,
   type MultichainPrimaryNameByCoinTypeResolutionResult,
   resolvePrimaryNamesByCoinTypes,
 } from "@/lib/resolution/multichain-primary-name-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
-import { coinTypeToEnsip19Chain } from "@/omnigraph-api/lib/resolution/chain-coin-type";
+import {
+  coinTypeToEnsip19Chain,
+  ENSIP19_COIN_TYPES,
+} from "@/omnigraph-api/lib/resolution/chain-coin-type";
 import type { PrimaryNameRecordModel } from "@/omnigraph-api/schema/resolution";
 
 type PrimaryNameResolutionOptions = {
@@ -38,7 +40,7 @@ export async function resolvePrimaryNameRecords(
   coinTypes: CoinType[],
   options: PrimaryNameResolutionOptions,
 ): Promise<PrimaryNameRecordsResolution> {
-  const supportedCoinTypes = new Set(getENSIP19SupportedCoinTypes());
+  const supportedCoinTypes = new Set(ENSIP19_COIN_TYPES);
   const resolvableCoinTypes = coinTypes.filter((coinType) => supportedCoinTypes.has(coinType));
 
   const { trace, result: resolvedByCoinType } =

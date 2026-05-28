@@ -5,7 +5,7 @@ import type { CoinType } from "enssdk";
 /**
  * address-encoder coin names for ENSIP-19 primary-name chains.
  */
-const ENSIP19_COIN_NAMES = [
+export const ENSIP19_COIN_NAMES = [
   "default",
   "eth",
   "base",
@@ -14,6 +14,11 @@ const ENSIP19_COIN_NAMES = [
   "linea",
   "scr",
 ] as const satisfies readonly CoinName[];
+
+/** Canonical ENSIP-9 coin types for ENSIP-19 primary-name chains. */
+export const ENSIP19_COIN_TYPES = ENSIP19_COIN_NAMES.map(
+  (name) => coinNameToTypeMap[name] as CoinType,
+);
 
 export type ENSIP19ChainValue = Uppercase<(typeof ENSIP19_COIN_NAMES)[number]>;
 
