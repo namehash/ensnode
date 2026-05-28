@@ -233,7 +233,9 @@ a[rel="prev"]:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 
-  transition: text-underline-offset 0.2s ease-in-out;
+  transition:
+    color 0.2s ease-in-out,
+    text-underline-offset 0.2s ease-in-out;
 
   &:hover {
     text-underline-offset: 2px;
