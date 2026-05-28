@@ -16,8 +16,9 @@ import { NamespaceLogo } from "@components/atoms/logos/ens-ecosystem-members/Nam
 import type { JSX } from "react";
 
 export const EnsEcosystemMemberTypes = {
-  organization: "organization",
-  app: "app",
+  Organization: "organization",
+  App: "app",
+  OfficialENSApp: "official-ens-app",
 } as const;
 
 export type EnsEcosystemMemberType =
@@ -35,7 +36,7 @@ export const ENS_ECOSYSTEM_MEMBERS = new Map<
   ENSEcosystemMemberDisplayData[]
 >([
   [
-    EnsEcosystemMemberTypes.organization,
+    EnsEcosystemMemberTypes.Organization,
     [
       {
         name: "ENS Labs",
@@ -77,7 +78,7 @@ export const ENS_ECOSYSTEM_MEMBERS = new Map<
     ],
   ],
   [
-    EnsEcosystemMemberTypes.app,
+    EnsEcosystemMemberTypes.OfficialENSApp,
     [
       {
         name: "Official ENSv2 Explorer",
@@ -89,6 +90,11 @@ export const ENS_ECOSYSTEM_MEMBERS = new Map<
         websiteURL: new URL("https://app.ens.dev/"),
         icon: ENSv2AppLogo,
       },
+    ],
+  ],
+  [
+    EnsEcosystemMemberTypes.App,
+    [
       {
         name: "Grails",
         websiteURL: new URL("https://grails.app/"),
