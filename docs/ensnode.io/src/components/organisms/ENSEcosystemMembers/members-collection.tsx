@@ -11,7 +11,7 @@ import { ENSVolutionLogo } from "@components/atoms/logos/ens-ecosystem-members/E
 import { EthereumCommentsProtocolLogo } from "@components/atoms/logos/ens-ecosystem-members/EthereumCommentsProtocolLogo";
 import { EthIdLogo } from "@components/atoms/logos/ens-ecosystem-members/EthIdLogo";
 import { GrailsLogo } from "@components/atoms/logos/ens-ecosystem-members/GrailsLogo";
-import { JustaNameLogo } from "@components/atoms/logos/ens-ecosystem-members/JustANameLogo";
+import { JustaNameLogo } from "@components/atoms/logos/ens-ecosystem-members/JustaNameLogo";
 import { NamespaceLogo } from "@components/atoms/logos/ens-ecosystem-members/NamespaceLogo";
 import type { JSX } from "react";
 
