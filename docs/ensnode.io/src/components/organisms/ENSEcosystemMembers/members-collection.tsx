@@ -5,9 +5,9 @@ import { EnscribeLogo } from "@components/atoms/logos/ens-ecosystem-members/Ensc
 import { ENSLabsLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSLabsLogo";
 import { ENSTestEnvLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSTestEnvLogo";
 import { ENSv2AppLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSv2AppLogo";
-import { ENSv2ExpolorerLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSv2ExpolorerLogo";
+import { ENSv2ExplorerLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSv2ExplorerLogo";
 import { ENSVisionLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSVisionLogo";
-import { ENSVolutionLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSVolutionLogo";
+import { ENSvolutionLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSvolutionLogo";
 import { EthereumCommentsProtocolLogo } from "@components/atoms/logos/ens-ecosystem-members/EthereumCommentsProtocolLogo";
 import { EthIdLogo } from "@components/atoms/logos/ens-ecosystem-members/EthIdLogo";
 import { GrailsLogo } from "@components/atoms/logos/ens-ecosystem-members/GrailsLogo";
@@ -18,7 +18,7 @@ import type { JSX } from "react";
 export const EnsEcosystemMemberTypes = {
   organization: "organization",
   app: "app",
-};
+} as const;
 
 export type EnsEcosystemMemberType =
   (typeof EnsEcosystemMemberTypes)[keyof typeof EnsEcosystemMemberTypes];
@@ -82,7 +82,7 @@ export const ENS_ECOSYSTEM_MEMBERS = new Map<
       {
         name: "Official ENS Explorer for ENSv2",
         websiteURL: new URL("https://explorer.ens.dev/"),
-        icon: ENSv2ExpolorerLogo,
+        icon: ENSv2ExplorerLogo,
       },
       {
         name: "Official ENS App for ENSv2",
@@ -107,7 +107,7 @@ export const ENS_ECOSYSTEM_MEMBERS = new Map<
       {
         name: "ENSvolution",
         websiteURL: new URL("https://www.ensvolution.xyz/"),
-        icon: ENSVolutionLogo,
+        icon: ENSvolutionLogo,
         customStyles: "py-0.5 sm:py-1",
       },
       {

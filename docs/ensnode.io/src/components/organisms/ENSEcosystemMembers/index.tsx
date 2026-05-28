@@ -8,15 +8,19 @@ export const ENSEcosystemMembers = () => {
       <p className="text-sm sm:text-base leading-6 font-normal text-white text-balance">
         Join the ENS ecosystem that builds on ENSNode
       </p>
-      {Array.from(ENS_ECOSYSTEM_MEMBERS.values()).map((membersByType) => (
-        <div className="max-w-[1216px] w-full h-fit flex flex-row flex-wrap justify-center items-center gap-6 gap-y-5 sm:gap-8 sm:gap-y-10">
+      {Array.from(ENS_ECOSYSTEM_MEMBERS.entries()).map(([type, membersByType]) => (
+        <div
+          key={`ens-ecosystem-members-${type}`}
+          className="max-w-[1216px] w-full h-fit flex flex-row flex-wrap justify-center items-center gap-6 gap-y-5 sm:gap-8 sm:gap-y-10"
+        >
           {membersByType.map((member: ENSEcosystemMemberDisplayData) => (
             <Tooltip
               key={`tooltip-${member.name}`}
               sideOffset={-5}
               trigger={
                 <a
-                  key={`ens-ecosystem-memeber=${member.name}`}
+                  key={`ens-ecosystem-member=${member.name}`}
+                  aria-label={member.name}
                   href={member.websiteURL.href}
                   target="_blank"
                   rel="noreferrer noopener"

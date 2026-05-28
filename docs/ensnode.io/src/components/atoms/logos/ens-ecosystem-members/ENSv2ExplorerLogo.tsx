@@ -1,4 +1,4 @@
-export const ENSv2ExpolorerLogo = (props: React.SVGProps<SVGSVGElement>) => (
+export const ENSv2ExplorerLogo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="151"
     height="46"

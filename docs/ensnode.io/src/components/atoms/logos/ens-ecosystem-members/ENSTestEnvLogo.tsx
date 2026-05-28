@@ -8,7 +8,7 @@ export const ENSTestEnvLogo = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <g>
-      <g clip-path="url(#clip0_2897_1566)">
+      <g clipPath="url(#clip0_2897_1566)">
         <path
           d="M12.1538 8.79711L4.30474 21.8283C4.24318 21.9306 4.10017 21.9419 4.02381 21.8505C3.3328 21.0226 0.758455 17.5007 3.94395 14.2907C6.85072 11.3615 10.5531 9.2731 11.9253 8.5513C12.081 8.4694 12.245 8.64584 12.1538 8.79711Z"
           fill="currentColor"
