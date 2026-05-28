@@ -8,7 +8,6 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 import FasterLookupImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/FasterLookupImage.astro";
-import ENSAdminImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/ENSAdminImage.astro";
 
 ENSApi is a web service built on top of [ENSDb](/docs/services/ensdb), and provides access to indexed ENS data through multiple HTTP APIs.
 
@@ -52,8 +51,8 @@ resolution configurations that span across multiple chains.
 
 <FasterLookupImage styles="w-full h-auto" />
 
-### Strengthen the decentralization and "unstoppability" of ENS
-
-By resolving against indexed ENS data, ENSNode removes the strict dependency on centralized offchain gateway servers whose downtime would otherwise shut down impacted multichain ENS names that are key to the future of ENSv2 — subnames of `base.eth`, `linea.eth`, tokenized DNS names like `.box`, and more.
-
-<ENSAdminImage styles="w-full h-auto rounded-2xl rotate-y-180" />
+<LinkCard
+  title="ENS Protocol Acceleration"
+  description="How ENSApi accelerates ENS resolution by implementing the Universal Resolver over indexed data."
+  href="/docs/integrate/omnigraph/protocol-acceleration"
+/>

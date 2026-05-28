@@ -26,13 +26,13 @@ Full access to ENS data formerly required two separate data-fetching strategies 
 
 **The Omnigraph API** — The [ENS Omnigraph API](/docs/integrate/omnigraph), delivered by [ENSApi](/docs/services/ensapi), is a fully typed GraphQL API on top of that Unigraph data model. It handles the ENS protocol's many implementation details for you, so you can focus on building your app instead of wiring up the protocol's internals.
 
-**Accelerated ENS Resolution** — The ENS Omnigraph API, through ENSApi, internally implements the ENS Universal Resolver on top of the indexed ENS Unigraph data model in ENSDb. We refer to this idea as "[ENS Protocol Acceleration](/docs/services/ensapi#ens-protocol-acceleration)". For cases where ENS Resolution requires offchain data, ENSApi internally performs the CCIP-read operations on your behalf to ensure every resolution request accurately follows all ENS protocol standards. No need for any RPC calls in your app, and your ENS resolutions for indexed names could speed up by an order of magnitude or more!
+**Accelerated ENS Resolution** — The ENS Omnigraph API, through ENSApi, internally implements the ENS Universal Resolver on top of the indexed ENS Unigraph data model in ENSDb. We refer to this idea as "[ENS Protocol Acceleration](/docs/integrate/omnigraph/protocol-acceleration)". For cases where ENS Resolution requires offchain data, ENSApi internally performs the CCIP-read operations on your behalf to ensure every resolution request accurately follows all ENS protocol standards. No need for any RPC calls in your app, and your ENS resolutions for indexed names could speed up by an order of magnitude or more!
 
 ## What You Need to Do
 
 **Resolving Records** — If you're exclusively interested in resolving ENS names, you need to ensure that your `resolve` RPC calls go to the new `UniversalResolverV2` contract or risk stale and incorrect results being returned. Depending on your situation, this update may be handled simply by updating `viem` or `wagmi`, but for many apps building on indexed ENS data or with more advanced requirements, additional upgrade actions may be required.
 
-For many, the simple solution for ENSv2 readiness will be to adopt the ENS Omnigraph API from ENSNode for all their ENS data needs (both ENSv1 and ENSv2). ENSNode also provides **[ENS Protocol Acceleration](/docs/services/ensapi#ens-protocol-acceleration)**, dramatically reducing resolution latency for most names.
+For many, the simple solution for ENSv2 readiness will be to adopt the ENS Omnigraph API from ENSNode for all their ENS data needs (both ENSv1 and ENSv2). ENSNode also provides **[ENS Protocol Acceleration](/docs/integrate/omnigraph/protocol-acceleration)**, dramatically reducing resolution latency for most names.
 
 **Querying ENS Data** — If you're querying ENS names via a legacy API such as the ENS Subgraph you need to update to an ENSv2-ready service like ENSNode; as soon as ENSv2 launches, data served by the Subgraph (and any ENSv1-only indexers) will be instantly unreliable for the true state of ENS.
 
