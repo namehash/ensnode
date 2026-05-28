@@ -175,13 +175,20 @@
 .sl-link-card {
   border-color: var(--sl-color-gray-4);
   box-shadow: var(--sl-shadow-sm);
+  transition:
+    background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
 }
 
 .card-grid .card {
   border-radius: 12px;
 }
 
-.sl-link-card:hover,
+.sl-link-card:hover {
+  background-color: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+}
+
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
   background: var(--sl-color-black);
@@ -477,6 +484,10 @@ starlight-tabs ul[role="tablist"] {
 
   & .sl-link-card {
     background-color: var(--sl-color-black);
+
+    &:hover {
+      background-color: var(--sl-color-black);
+    }
 
     & a {
       text-decoration: none;
