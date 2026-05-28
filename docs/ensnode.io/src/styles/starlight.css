@@ -485,6 +485,10 @@ starlight-tabs ul[role="tablist"] {
   & .sl-link-card {
     background-color: var(--sl-color-black);
 
+    &:hover {
+      background-color: var(--sl-color-black);
+    }
+
     & a {
       text-decoration: none;
     }
