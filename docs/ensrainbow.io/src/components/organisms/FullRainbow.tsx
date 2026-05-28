@@ -17,7 +17,7 @@ export default function FullRainbow() {
         {
           label: <>ENS Subgraph</>,
           value: 11,
-          color: "linear-gradient(270deg, #DBE10B 0%, #FAE000 17.5%, #F09C0A 54.5%, #EA2F86 100%)",
+          color: "linear-gradient(270deg, #F09C0A -69%, #EA2F86 100%)",
         },
         {
           label: (
@@ -27,7 +27,7 @@ export default function FullRainbow() {
           ),
           value: 94,
           color:
-            "linear-gradient(270deg, #CA01FD -30.44%, #0B10FE -7.38%, #1EFDFF 16.33%, #93E223 38.07%, #FAE000 59.16%, #F09C0A 79.58%, #EA2F86 100%)",
+            "linear-gradient(270deg, #CA01FD -6.5%, #0B10FE 14.5%, #1EFDFF 31.5%, #93E223 48%, #FAE000 63%, #F09C0A 78%, #EA2F86 100%)",
         },
         {
           label: (
@@ -37,7 +37,7 @@ export default function FullRainbow() {
           ),
           value: 99,
           color:
-            "linear-gradient(270deg, #CA01FD -0.46%, #0B10FE 17.29%, #1EFDFF 35.56%, #93E223 52.3%, #FAE000 68.54%, #F09C0A 84.27%, #EA2F86 100%)",
+            "linear-gradient(270deg, #CA01FD 0%, #0B10FE 17%, #1EFDFF 35%, #93E223 52%, #FAE000 68%, #F09C0A 84%, #EA2F86 100%)",
         },
       ]}
       title="Name Healing Coverage"
