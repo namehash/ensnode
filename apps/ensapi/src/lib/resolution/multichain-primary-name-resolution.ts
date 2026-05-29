@@ -12,7 +12,7 @@ import {
 
 import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { resolveReverse, resolveReverseByCoinType } from "@/lib/resolution/reverse-resolution";
+import { resolveReverse, resolveReverseByChainId } from "@/lib/resolution/reverse-resolution";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
@@ -40,7 +40,7 @@ export type MultichainPrimaryNameByCoinTypeResolutionResult = Partial<
   Record<CoinType, ReverseResolutionResult>
 >;
 
-type PrimaryNameResolutionOptions = Parameters<typeof resolveReverseByCoinType>[2];
+type PrimaryNameResolutionOptions = Parameters<typeof resolveReverse>[2];
 
 /**
  * Batch-resolves an address' primary name for each requested coin type.
@@ -56,10 +56,7 @@ export async function resolvePrimaryNamesByCoinTypes(
     tracer,
     "resolvePrimaryNamesByCoinTypes",
     { address },
-    () =>
-      Promise.all(
-        coinTypes.map((coinType) => resolveReverseByCoinType(address, coinType, options)),
-      ),
+    () => Promise.all(coinTypes.map((coinType) => resolveReverse(address, coinType, options))),
   );
 
   return coinTypes.reduce((memo, coinType, i) => {
@@ -81,17 +78,19 @@ export async function resolvePrimaryNamesByCoinTypes(
  * @param options.accelerate Whether acceleration is requested (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
-export async function resolvePrimaryNames(
+export async function resolvePrimaryNamesByChainIds(
   address: MultichainPrimaryNameResolutionArgs["address"],
   chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = getENSIP19SupportedChainIds(),
-  options: Parameters<typeof resolveReverse>[2],
+  options: Parameters<typeof resolveReverseByChainId>[2],
 ): Promise<MultichainPrimaryNameResolutionResult> {
-  // parallel reverseResolve
-  const names = await withActiveSpanAsync(tracer, "resolvePrimaryNames", { address }, () =>
-    Promise.all(chainIds.map((chainId) => resolveReverse(address, chainId, options))),
+  const names = await withActiveSpanAsync(
+    tracer,
+    "resolvePrimaryNamesByChainIds",
+    { address },
+    () =>
+      Promise.all(chainIds.map((chainId) => resolveReverseByChainId(address, chainId, options))),
   );
 
-  // key results by chainId
   return chainIds.reduce((memo, chainId, i) => {
     // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
     memo[chainId] = names[i]!;

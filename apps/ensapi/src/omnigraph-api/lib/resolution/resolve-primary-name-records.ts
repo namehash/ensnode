@@ -2,10 +2,7 @@ import type { Address, CoinType, InterpretedName } from "enssdk";
 
 import type { TracingTrace } from "@ensnode/ensnode-sdk";
 
-import {
-  type MultichainPrimaryNameByCoinTypeResolutionResult,
-  resolvePrimaryNamesByCoinTypes,
-} from "@/lib/resolution/multichain-primary-name-resolution";
+import { resolvePrimaryNamesByCoinTypes } from "@/lib/resolution/multichain-primary-name-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import {
   coinTypeToEnsip19Chain,
@@ -43,12 +40,16 @@ export async function resolvePrimaryNameRecords(
   const supportedCoinTypes = new Set(ENSIP19_COIN_TYPES);
   const resolvableCoinTypes = coinTypes.filter((coinType) => supportedCoinTypes.has(coinType));
 
-  const { trace, result: resolvedByCoinType } =
-    resolvableCoinTypes.length > 0
-      ? await runWithTrace(() =>
-          resolvePrimaryNamesByCoinTypes(address, resolvableCoinTypes, options),
-        )
-      : { trace: null, result: {} as MultichainPrimaryNameByCoinTypeResolutionResult };
+  if (resolvableCoinTypes.length === 0) {
+    return {
+      trace: null,
+      records: coinTypes.map((coinType) => toPrimaryNameRecord(address, coinType, null)),
+    };
+  }
+
+  const { trace, result: resolvedByCoinType } = await runWithTrace(() =>
+    resolvePrimaryNamesByCoinTypes(address, resolvableCoinTypes, options),
+  );
 
   const records = coinTypes.map((coinType) => {
     const name = (resolvedByCoinType[coinType] ?? null) as InterpretedName | null;

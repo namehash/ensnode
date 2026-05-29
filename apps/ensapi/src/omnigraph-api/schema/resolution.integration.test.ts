@@ -1,3 +1,4 @@
+import { ETH_COIN_TYPE } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { accounts } from "@ensnode/datasources/devnet";
@@ -105,7 +106,7 @@ describe("Resolution Trace and Acceleration", () => {
     });
 
     expect(primaryName.resolve.records.addresses).toContainEqual({
-      coinType: 60,
+      coinType: ETH_COIN_TYPE,
       address: accounts.owner.address,
     });
   });
@@ -163,7 +164,7 @@ describe("Resolution Trace and Acceleration", () => {
       attempted: false,
     });
 
-    // PrimaryNameResolve should inherit accelerate: false from Account.resolve
+    // PrimaryNameRecord.resolve should inherit accelerate: false from Account.resolve
     expect(result.account.resolve.primaryName.resolve.acceleration).toEqual({
       requested: false,
       attempted: false,

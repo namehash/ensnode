@@ -23,7 +23,6 @@ import {
   type RenewalId,
   type ResolverId,
   type ResolverRecordsId,
-  type UID,
 } from "enssdk";
 import { isHex, size } from "viem";
 import { z } from "zod/v4";
@@ -121,16 +120,6 @@ builder.scalarType("Node", {
         });
       })
       .transform((val) => val as Node)
-      .parse(value),
-});
-
-builder.scalarType("UID", {
-  description: "UID is a stable cache key for records/profile entities.",
-  serialize: (value: UID) => value,
-  parseValue: (value) =>
-    z.coerce
-      .string()
-      .transform((val) => val as UID)
       .parse(value),
 });
 

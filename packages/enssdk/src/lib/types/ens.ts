@@ -159,11 +159,6 @@ export type LiteralName = Name & { __brand: "LiteralName" };
 export type InterpretedName = Name & { __brand: "InterpretedName" };
 
 /**
- * Stable cache identity for normalized GraphQL entities (e.g. records/profile).
- */
-export type UID = String;
-
-/**
  * A Beautified Name is a Name produced for presentation in a UI from an {@link InterpretedName}.
  *
  * Each label is either:

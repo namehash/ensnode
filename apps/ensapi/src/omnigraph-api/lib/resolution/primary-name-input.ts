@@ -1,32 +1,29 @@
 import type { CoinType } from "enssdk";
 
-import {
-  type ENSIP19ChainValue,
-  ensip19ChainToCoinType,
-} from "@/omnigraph-api/lib/resolution/chain-coin-type";
+import { ensip19ChainToCoinType } from "@/omnigraph-api/lib/resolution/chain-coin-type";
+import type {
+  PrimaryNameByInputValue,
+  PrimaryNamesWhereInputValue,
+} from "@/omnigraph-api/schema/resolution";
 
-export type PrimaryNameByInput = {
-  coinType?: CoinType | null;
-  chain?: ENSIP19ChainValue | null;
-};
-
-export type AccountPrimaryNamesWhereInput = {
-  coinTypes?: CoinType[] | null;
-  chains?: ENSIP19ChainValue[] | null;
-};
-
-/** Normalizes a singular `PrimaryNameByInput` to a coin type. */
-export const normalizePrimaryNameByInput = (by: PrimaryNameByInput): CoinType => {
+/**
+ * Normalizes a singular `PrimaryNameByInput` to a coin type.
+ */
+export const normalizePrimaryNameByInput = (by: PrimaryNameByInputValue): CoinType => {
   if (by.coinType != null) return by.coinType;
   if (by.chain != null) return ensip19ChainToCoinType(by.chain);
+  // this should never happen as the schema with `@oneOf` prevents it
   throw new Error("PrimaryNameByInput must specify exactly one of coinType or chain.");
 };
 
-/** Normalizes `AccountPrimaryNamesWhereInput` to an ordered coin-type list. */
+/**
+ * Normalizes `PrimaryNamesWhereInput` to an ordered coin-type list.
+ */
 export const normalizeAccountPrimaryNamesWhereInput = (
-  where: AccountPrimaryNamesWhereInput,
+  where: PrimaryNamesWhereInputValue,
 ): CoinType[] => {
   if (where.coinTypes != null) return where.coinTypes;
   if (where.chains != null) return where.chains.map(ensip19ChainToCoinType);
-  throw new Error("AccountPrimaryNamesWhereInput must specify exactly one of coinTypes or chains.");
+  // this should never happen as the schema with `@oneOf` prevents it
+  throw new Error("PrimaryNamesWhereInput must specify exactly one of coinTypes or chains.");
 };

@@ -26,7 +26,6 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
-  UID,
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
@@ -72,7 +71,6 @@ export type BuilderScalars = {
   InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };
   InterpretedName: { Input: InterpretedName; Output: InterpretedName };
-  UID: { Input: UID; Output: UID };
   InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
   BeautifiedName: { Input: BeautifiedName; Output: BeautifiedName };
   BeautifiedLabel: { Input: BeautifiedLabel; Output: BeautifiedLabel };

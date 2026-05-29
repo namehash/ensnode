@@ -1,3 +1,4 @@
+import { coinNameToTypeMap } from "@ensdomains/address-encoder";
 import {
   GraphQLInputObjectType,
   GraphQLInt,
@@ -5,12 +6,19 @@ import {
   GraphQLObjectType,
   type GraphQLResolveInfo,
   GraphQLString,
-  parse,
 } from "graphql";
 import { describe, expect, it } from "vitest";
 
+import { parseFieldNode } from "@/omnigraph-api/lib/resolution/test-helpers";
+
 import { buildAccountPrimaryNamesSelection } from "./account-primary-names-selection";
 
+// These mock types mirror the real Pothos-generated schema types. They cannot be imported
+// from `@/omnigraph-api/schema` directly because doing so loads the full Pothos schema into
+// the test process, which creates a second in-memory instance of `graphql`. graphql-js's
+// `instanceOf` checks then fail when comparing types across those two instances (the "Duplicate
+// graphql modules" error). Keeping the mocks here avoids that issue; ensure names stay in sync
+// with the real schema when those types change.
 const PrimaryNameByInputType = new GraphQLInputObjectType({
   name: "PrimaryNameByInput",
   fields: {
@@ -19,8 +27,8 @@ const PrimaryNameByInputType = new GraphQLInputObjectType({
   },
 });
 
-const AccountPrimaryNamesWhereInputType = new GraphQLInputObjectType({
-  name: "AccountPrimaryNamesWhereInput",
+const PrimaryNamesWhereInputType = new GraphQLInputObjectType({
+  name: "PrimaryNamesWhereInput",
   fields: {
     coinTypes: { type: new GraphQLList(GraphQLInt) },
     chains: { type: new GraphQLList(GraphQLString) },
@@ -46,26 +54,15 @@ const AccountResolveType = new GraphQLObjectType({
     primaryNames: {
       type: new GraphQLList(PrimaryNameRecordType),
       args: {
-        where: { type: AccountPrimaryNamesWhereInputType },
+        where: { type: PrimaryNamesWhereInputType },
       },
     },
   },
 });
 
-function parseResolveFieldNode(subselection: string) {
-  const document = parse(`{ resolve { ${subselection} } }`);
-  const operation = document.definitions[0];
-  if (operation.kind !== "OperationDefinition") throw new Error("expected operation");
-
-  const resolveField = operation.selectionSet.selections[0];
-  if (resolveField.kind !== "Field") throw new Error("expected field");
-
-  return resolveField;
-}
-
 function resolveInfoForAccountResolveSubselection(subselection: string): GraphQLResolveInfo {
   return {
-    fieldNodes: [parseResolveFieldNode(subselection)],
+    fieldNodes: [parseFieldNode("resolve", subselection)],
     fragments: {},
     returnType: AccountResolveType,
     variableValues: {},
@@ -96,7 +93,7 @@ describe("buildAccountPrimaryNamesSelection", () => {
     const info = resolveInfoForAccountResolveSubselection(
       'primaryName(by: { chain: "ETHEREUM" }) { name }',
     );
-    expect(buildAccountPrimaryNamesSelection(info)).toEqual([60]);
+    expect(buildAccountPrimaryNamesSelection(info)).toEqual([coinNameToTypeMap.eth]);
   });
 
   it("merges coin types from primaryName and primaryNames when both are selected", () => {
@@ -105,5 +102,26 @@ describe("buildAccountPrimaryNamesSelection", () => {
         primaryNames(where: { coinTypes: [60] }) { name }
       `);
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([60, 0]);
+  });
+
+  it("merges coin types from multiple aliased primaryName and primaryNames fields", () => {
+    const info = resolveInfoForAccountResolveSubselection(`
+        one: primaryName(by: { coinType: ${coinNameToTypeMap.btc} }) { name }
+        two: primaryName(by: { coinType: ${coinNameToTypeMap.ltc} }) { name }
+        three: primaryNames(where: { coinTypes: [${coinNameToTypeMap.doge}, ${coinNameToTypeMap.sol}] }) { name }
+        four: primaryNames(where: { chains: ["DEFAULT", "ETHEREUM", "ARBITRUM"] }) { name }
+        five: primaryName(by: { chain: "BASE" }) { name }
+      `);
+
+    expect(buildAccountPrimaryNamesSelection(info)).toEqual([
+      coinNameToTypeMap.doge,
+      coinNameToTypeMap.sol,
+      coinNameToTypeMap.default,
+      coinNameToTypeMap.eth,
+      coinNameToTypeMap.arb1,
+      coinNameToTypeMap.btc,
+      coinNameToTypeMap.ltc,
+      coinNameToTypeMap.base,
+    ]);
   });
 });

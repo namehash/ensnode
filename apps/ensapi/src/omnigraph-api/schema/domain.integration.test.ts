@@ -3,6 +3,7 @@ import {
   asInterpretedLabel,
   type CoinType,
   type DomainId,
+  ETH_COIN_TYPE,
   ETH_NODE,
   type InterpretedLabel,
   type InterpretedName,
@@ -557,11 +558,14 @@ describe("Domain.records", () => {
     }
   `;
 
+  const BITCOIN_COIN_TYPE = 0;
+  const LITECOIN_COIN_TYPE = 2;
+
   it("resolves address and text records for example.eth", async () => {
     await expect(
       request<DomainRecordsResult>(DomainRecords, {
         name: "example.eth",
-        addresses: [60],
+        addresses: [ETH_COIN_TYPE],
         texts: ["description"],
       }),
     ).resolves.toMatchObject({
@@ -569,7 +573,7 @@ describe("Domain.records", () => {
         resolve: {
           records: {
             texts: [{ key: "description", value: "example.eth" }],
-            addresses: [{ coinType: 60, address: accounts.owner.address }],
+            addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
           },
         },
       },
@@ -580,7 +584,7 @@ describe("Domain.records", () => {
     await expect(
       request<DomainAllRecordsResult>(DomainRecordsAll, {
         name: "test.eth",
-        addresses: [60, 0, 2],
+        addresses: [ETH_COIN_TYPE, 0, 2],
         texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
         contentTypeMask: "1",
         interfaceIds: [fixtures.fourBytesInterface],
@@ -596,9 +600,9 @@ describe("Domain.records", () => {
             abi: { contentType: "1", data: fixtures.abiBytes },
             interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
             addresses: [
-              { coinType: 60, address: accounts.owner.address },
-              { coinType: 0, address: fixtures.bitcoinAddress },
-              { coinType: 2, address: fixtures.litecoinAddress },
+              { coinType: ETH_COIN_TYPE, address: accounts.owner.address },
+              { coinType: BITCOIN_COIN_TYPE, address: fixtures.bitcoinAddress },
+              { coinType: LITECOIN_COIN_TYPE, address: fixtures.litecoinAddress },
             ],
             texts: [
               { key: "avatar", value: "https://example.com/avatar.png" },

@@ -8,7 +8,6 @@ import {
   GraphQLScalarType,
   GraphQLString,
   Kind,
-  parse,
 } from "graphql";
 import { describe, expect, it } from "vitest";
 
@@ -21,7 +20,14 @@ import {
   RECORDS_SELECTION_PARAMETRIC_FIELDS,
   RECORDS_SELECTION_SIMPLE_FIELDS,
 } from "@/omnigraph-api/lib/resolution/records-selection-config";
+import { parseFieldNode } from "@/omnigraph-api/lib/resolution/test-helpers";
 
+// These mock types mirror the real Pothos-generated schema types. They cannot be imported
+// from `@/omnigraph-api/schema` directly because doing so loads the full Pothos schema into
+// the test process, which creates a second in-memory instance of `graphql`. graphql-js's
+// `instanceOf` checks then fail when comparing types across those two instances (the "Duplicate
+// graphql modules" error). Keeping the mocks here avoids that issue; ensure names stay in sync
+// with the real schema when those types change.
 const stringListArg = new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString)));
 const intListArg = new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLInt)));
 
@@ -63,46 +69,24 @@ function buildMockResolvedRecordsType() {
 const ResolvedRecordsType = buildMockResolvedRecordsType();
 
 const DomainResolveType = new GraphQLObjectType({
-  name: "DomainResolve",
+  name: "Resolve",
   fields: {
     trace: { type: GraphQLString },
     records: { type: ResolvedRecordsType },
   },
 });
 
-function parseResolveFieldNode(subselection: string) {
-  const document = parse(`{ resolve { ${subselection} } }`);
-  const operation = document.definitions[0];
-  if (operation.kind !== "OperationDefinition") throw new Error("expected operation");
-
-  const resolveField = operation.selectionSet.selections[0];
-  if (resolveField.kind !== "Field") throw new Error("expected field");
-
-  return resolveField;
-}
-
 function resolveInfoForDomainResolveSubselection(subselection: string): GraphQLResolveInfo {
   return {
-    fieldNodes: [parseResolveFieldNode(subselection)],
+    fieldNodes: [parseFieldNode("resolve", subselection)],
     fragments: {},
     returnType: DomainResolveType,
     variableValues: {},
   } as unknown as GraphQLResolveInfo;
 }
 
-function parseRecordsFieldNode(subselection: string) {
-  const document = parse(`{ records { ${subselection} } }`);
-  const operation = document.definitions[0];
-  if (operation.kind !== "OperationDefinition") throw new Error("expected operation");
-
-  const recordsField = operation.selectionSet.selections[0];
-  if (recordsField.kind !== "Field") throw new Error("expected field");
-
-  return recordsField;
-}
-
 function mockResolveInfo(
-  fieldNodes: ReturnType<typeof parseRecordsFieldNode>[],
+  fieldNodes: ReturnType<typeof parseFieldNode>[],
   variableValues: Record<string, unknown> = {},
 ): GraphQLResolveInfo {
   return {
@@ -114,12 +98,12 @@ function mockResolveInfo(
 }
 
 function resolveInfoForRecordsSubselection(subselection: string): GraphQLResolveInfo {
-  return mockResolveInfo([parseRecordsFieldNode(subselection)]);
+  return mockResolveInfo([parseFieldNode("records", subselection)]);
 }
 
 /** Simulates GraphQL passing multiple AST field nodes for the same `records` resolver. */
 function resolveInfoForMultipleRecordsFieldNodes(...subselections: string[]): GraphQLResolveInfo {
-  return mockResolveInfo(subselections.map(parseRecordsFieldNode));
+  return mockResolveInfo(subselections.map((s) => parseFieldNode("records", s)));
 }
 
 describe("buildRecordsSelectionFromResolveInfo", () => {

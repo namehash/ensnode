@@ -8,12 +8,14 @@ import {
 } from "graphql";
 
 import {
-  type AccountPrimaryNamesWhereInput,
   normalizeAccountPrimaryNamesWhereInput,
   normalizePrimaryNameByInput,
-  type PrimaryNameByInput,
 } from "@/omnigraph-api/lib/resolution/primary-name-input";
 import { collectNamedSubFieldNodes } from "@/omnigraph-api/lib/resolution/records-selection";
+import type {
+  PrimaryNameByInputValue,
+  PrimaryNamesWhereInputValue,
+} from "@/omnigraph-api/schema/resolution";
 
 /**
  * Derives primary-name coin types from `Account.resolve { primaryName | primaryNames }`, or null
@@ -44,7 +46,7 @@ export function buildAccountPrimaryNamesSelection(info: GraphQLResolveInfo): Coi
         // Extract arguments from this specific field node (handles variables and aliases)
         const args = getArgumentValues(primaryNamesFieldDef, node, info.variableValues);
         const normalized = normalizeAccountPrimaryNamesWhereInput(
-          args.where as AccountPrimaryNamesWhereInput,
+          args.where as PrimaryNamesWhereInputValue,
         );
         // Add all requested coin types from this 'primaryNames' call to our set
         for (const coinType of normalized) coinTypes.add(coinType);
@@ -59,7 +61,7 @@ export function buildAccountPrimaryNamesSelection(info: GraphQLResolveInfo): Coi
         // Extract arguments from this specific field node
         const args = getArgumentValues(primaryNameFieldDef, node, info.variableValues);
         // Add the single requested coin type from this 'primaryName' call to our set
-        coinTypes.add(normalizePrimaryNameByInput(args.by as PrimaryNameByInput));
+        coinTypes.add(normalizePrimaryNameByInput(args.by as PrimaryNameByInputValue));
       }
     }
   }

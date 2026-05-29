@@ -21,7 +21,6 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
-  UID,
 } from "../lib/types";
 import type { introspection } from "./generated/introspection";
 
@@ -48,7 +47,6 @@ export type OmnigraphScalars = {
   CoinType: CoinType;
   InterfaceId: InterfaceId;
   InterpretedName: InterpretedName;
-  UID: UID;
   InterpretedLabel: InterpretedLabel;
   BeautifiedName: BeautifiedName;
   BeautifiedLabel: BeautifiedLabel;

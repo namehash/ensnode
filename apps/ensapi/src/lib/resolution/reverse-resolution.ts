@@ -37,14 +37,13 @@ type ReverseResolutionOptions = Parameters<typeof resolveForward>[2];
  *
  * @see https://docs.ens.domains/ensip/19/#algorithm
  *
- *
  * @param address the adddress whose Primary Name to resolve
- * @param coinType the coinType  within which to resolve the address' Primary Name
+ * @param coinType the coinType within which to resolve the address' Primary Name
  * @param options Optional settings
  * @param options.accelerate Whether to accelerate resolution (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
-export async function resolveReverseByCoinType(
+export async function resolveReverse(
   address: Address,
   coinType: CoinType,
   options: ReverseResolutionOptions,
@@ -180,23 +179,11 @@ export async function resolveReverseByCoinType(
   );
 }
 
-/**
- * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
- *
- * @see https://docs.ens.domains/ensip/19/#algorithm
- *
- * The DEFAULT_EVM_CHAIN_ID (0) is a valid chainId in this context.
- *
- * @param address the adddress whose Primary Name to resolve
- * @param chainId the chainId within which to resolve the address' Primary Name
- * @param options Optional settings
- * @param options.accelerate Whether to accelerate resolution (default: true)
- * @param options.canAccelerate Whether acceleration is currently possible (default: false)
- */
-export async function resolveReverse(
+/** Thin chainId wrapper around {@link resolveReverse} for callers at the REST API boundary. */
+export async function resolveReverseByChainId(
   address: Address,
   chainId: ChainId,
   options: ReverseResolutionOptions,
 ): Promise<ReverseResolutionResult> {
-  return resolveReverseByCoinType(address, evmChainIdToCoinType(chainId), options);
+  return resolveReverse(address, evmChainIdToCoinType(chainId), options);
 }

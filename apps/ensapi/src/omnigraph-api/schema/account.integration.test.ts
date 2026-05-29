@@ -1,4 +1,10 @@
-import type { InterpretedName } from "enssdk";
+import {
+  DEFAULT_EVM_COIN_TYPE,
+  ETH_COIN_TYPE,
+  evmChainIdToCoinType,
+  type InterpretedName,
+} from "enssdk";
+import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { accounts } from "@ensnode/datasources/devnet";
@@ -314,6 +320,8 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 });
 
 describe("Account.primaryName and Account.primaryNames", () => {
+  const BASE_COIN_TYPE = evmChainIdToCoinType(base.id);
+
   type CanonicalNameResult = {
     interpreted: string;
     beautified: string;
@@ -473,12 +481,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
     await expect(
       request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
         address: accounts.owner.address,
-        coinType: 60,
+        coinType: ETH_COIN_TYPE,
       }),
     ).resolves.toEqual({
       account: {
         resolve: {
-          primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
+          primaryName: { coinType: ETH_COIN_TYPE, chain: "ETHEREUM", name: TEST_ETH_NAME },
         },
       },
     });
@@ -492,7 +500,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toEqual({
       account: {
         resolve: {
-          primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
+          primaryName: { coinType: ETH_COIN_TYPE, chain: "ETHEREUM", name: TEST_ETH_NAME },
         },
       },
     });
@@ -507,7 +515,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
       account: {
         resolve: {
           primaryName: {
-            coinType: 2_147_483_648,
+            coinType: DEFAULT_EVM_COIN_TYPE,
             chain: "DEFAULT",
             name: null,
           },
@@ -526,7 +534,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
         resolve: {
           primaryNames: [
             {
-              coinType: 2_147_483_648,
+              coinType: DEFAULT_EVM_COIN_TYPE,
               chain: "DEFAULT",
               name: null,
             },
@@ -540,12 +548,12 @@ describe("Account.primaryName and Account.primaryNames", () => {
     await expect(
       request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
         address: accounts.user.address,
-        coinType: 60,
+        coinType: ETH_COIN_TYPE,
       }),
     ).resolves.toEqual({
       account: {
         resolve: {
-          primaryName: { coinType: 60, chain: "ETHEREUM", name: null },
+          primaryName: { coinType: ETH_COIN_TYPE, chain: "ETHEREUM", name: null },
         },
       },
     });
@@ -555,14 +563,14 @@ describe("Account.primaryName and Account.primaryNames", () => {
     await expect(
       request<AccountPrimaryNamesResult>(AccountPrimaryNamesByCoinTypes, {
         address: accounts.owner.address,
-        coinTypes: [60, 2147492101],
+        coinTypes: [ETH_COIN_TYPE, BASE_COIN_TYPE],
       }),
     ).resolves.toMatchObject({
       account: {
         resolve: {
           primaryNames: [
-            { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
-            { coinType: 2147492101, chain: "BASE", name: null },
+            { coinType: ETH_COIN_TYPE, chain: "ETHEREUM", name: TEST_ETH_NAME },
+            { coinType: BASE_COIN_TYPE, chain: "BASE", name: null },
           ],
         },
       },
@@ -578,8 +586,8 @@ describe("Account.primaryName and Account.primaryNames", () => {
       account: {
         resolve: {
           primaryNames: [
-            { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
-            { coinType: 2147492101, chain: "BASE", name: null },
+            { coinType: ETH_COIN_TYPE, chain: "ETHEREUM", name: TEST_ETH_NAME },
+            { coinType: BASE_COIN_TYPE, chain: "BASE", name: null },
           ],
         },
       },
@@ -619,7 +627,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
             name: TEST_ETH_NAME,
             resolve: {
               records: {
-                addresses: [{ coinType: 60, address: accounts.owner.address }],
+                addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
               },
             },
           },
