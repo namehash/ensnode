@@ -1,5 +1,4 @@
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
-import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
 import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
 ## What is ENSv2?
@@ -29,8 +28,6 @@ Here's a summary of some popular integration strategies:
 ### 1. enssdk + Omnigraph
 
 With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
-
-<HostedInstanceSdkVersionWarning />
 
 ```ts title="example.ts"
 // create and extend an EnsNodeClient with Omnigraph API support
@@ -72,76 +69,34 @@ const result = await client.omnigraph.query({ query: HelloWorldQuery });
 
 With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
 
-<HostedInstanceSdkVersionWarning />
-
 ```tsx title="example.tsx"
-// this is fully typechecked and supports editor autocomplete!
-const DomainFragment = graphql(`
-  fragment DomainFragment on Domain {
-    __typename
-    id
-    name
-    owner { id address }
-  }
-`);
-
-// this is fully typechecked and supports editor autocomplete!
-const DomainByNameQuery = graphql(
-  `
+// this query is fully typechecked and supports editor autocomplete!
+const DomainByNameQuery = graphql(`
   query DomainByNameQuery($name: InterpretedName!) {
     domain(by: { name: $name }) {
-      ...DomainFragment
-      subdomains {
-        edges { node { ...DomainFragment } }
+      name
+      owner {
+        address
       }
     }
   }
-`,
-  [DomainFragment],
-);
+`);
 
-function RenderDomainFragment({ data }: { data: FragmentOf<typeof DomainFragment> }) {
-  // type-safe access to fragment data!
-  const domain = readFragment(DomainFragment, data);
-
-  return (
-    <>
-      <span>Name: {domain.name ? beautifyInterpretedName(domain.name) : "Unnamed Domain"}</span>
-      <span>Protocol Version: {domain.__typename === "ENSv1Domain" ? "ENSv1" : "ENSv2"}</span>
-      <span>Owner: {domain.owner ? domain.owner.address : "Unowned"}</span>
-    </>
-  );
-}
-
-export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
+export function DomainCard({ name }: { name: InterpretedName }) {
   // `result` is fully typed!
   const [result] = useOmnigraphQuery({ query: DomainByNameQuery, variables: { name } });
   const { data, fetching, error } = result;
 
-  // some loading/error handling
-  if (!data && fetching) return <p>Loading...</p>;
+  if (fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!data?.domain) return <p>No domain was found with name '{name}'.</p>;
+  if (!data?.domain) return <p>No domain found for '{name}'.</p>;
 
-  // now we have type-safe access to Domain!
-  const domain = readFragment(DomainFragment, data.domain);
-  const { subdomains } = data.domain;
+  const { domain } = data;
 
   return (
     <div>
-      <RenderDomainFragment data={data.domain} />
-
-      <h2>Subdomains:</h2>
-      <ul>
-        {subdomains?.edges.map((edge) => {
-          const { id } = readFragment(DomainFragment, edge.node);
-          return (
-            <li key={id}>
-              <RenderDomainFragment data={edge.node} />
-            </li>
-          );
-        })}
-      </ul>
+      <p>Name: {domain.name ? beautifyInterpretedName(domain.name) : "Unnamed Domain"}</p>
+      <p>Owner: {domain.owner?.address ?? "Unowned"}</p>
     </div>
   );
 }
