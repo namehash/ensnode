@@ -43,6 +43,16 @@ describe("parseRecord", () => {
     });
   });
 
+  it("lower-cases the canonical record and recordData", () => {
+    const data = `0x0101${"AB".repeat(20)}` as `0x${string}`;
+    expect(parseRecord(data)).toEqual({
+      version: 1,
+      recordType: 1,
+      record: `0x0101${"ab".repeat(20)}` as `0x${string}`,
+      recordData: `0x${"ab".repeat(20)}` as `0x${string}`,
+    });
+  });
+
   it("returns null when an address record is shorter than 20 bytes", () => {
     const data = `0x0101${"aa".repeat(10)}` as `0x${string}`;
     expect(parseRecord(data)).toBeNull();
@@ -84,6 +94,16 @@ describe("parseTagOp", () => {
     const tagBytes = "610062";
     const data = `0x${recordPrefixHex}${tagBytes}` as `0x${string}`;
     expect(parseTagOp(data)?.tag).toBe("ab");
+  });
+
+  it("lower-cases the record prefix and rejects non-address prefixes", () => {
+    const tagBytes = Buffer.from("top8", "utf8").toString("hex");
+    // uppercase hex in the record prefix is lower-cased to match the stored record key
+    const upper = `0x0101${"AB".repeat(20)}${tagBytes}` as `0x${string}`;
+    expect(parseTagOp(upper)?.record).toBe(`0x0101${"ab".repeat(20)}`);
+    // a non-version-1 / non-type-1 record prefix is rejected (no such record is ever indexed)
+    const reserved = `0x0102${"ab".repeat(20)}${tagBytes}` as `0x${string}`;
+    expect(parseTagOp(reserved)).toBeNull();
   });
 
   it("returns null for inputs shorter than the record prefix", () => {

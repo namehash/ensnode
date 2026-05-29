@@ -44,18 +44,19 @@ export function parseListStorageLocation(
   lsl: Hex | string | null | undefined,
 ): ParsedListStorageLocation | null {
   if (!lsl || typeof lsl !== "string" || !isHex(lsl)) return null;
-  if (lsl.length < LOCATION_TYPE_END + 2) return null; // "0x" + version + locationType
 
   const bytes = lsl.slice(2);
+  // A locationType-1 location is a fixed 86-byte payload; reject any other length up front, which
+  // also guarantees every field slice below is fully present.
+  if (bytes.length !== SLOT_END) return null;
+
   const version = parseInt(bytes.slice(0, VERSION_END), 16);
   const locationType = parseInt(bytes.slice(VERSION_END, LOCATION_TYPE_END), 16);
 
-  // The version byte defines the payload schema, and a locationType-1 location is a fixed 86-byte
-  // shape; reject other versions, location types, or lengths rather than remap the list from a
-  // partially- or over-decoded payload.
+  // The version byte defines the payload schema; reject other versions or location types rather
+  // than remap the list from a payload this indexer can't represent.
   if (version !== EFP_LSL_VERSION) return null;
   if (locationType !== LOCATION_TYPE_ONCHAIN) return null;
-  if (bytes.length !== SLOT_END) return null;
 
   return {
     version,

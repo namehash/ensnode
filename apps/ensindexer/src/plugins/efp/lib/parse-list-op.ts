@@ -106,29 +106,35 @@ export function parseRecord(data: Hex | string | null | undefined): ParsedRecord
   return {
     version,
     recordType,
-    record: `0x${bytes.slice(0, RECORD_PREFIX_HEX_LENGTH)}` as Hex,
-    recordData: `0x${body}` as Hex,
+    // Lowercase so the canonical key matches across ADD / REMOVE / tag ops and the API's
+    // `recordData` filters, mirroring the List Storage Location decoder.
+    record: `0x${bytes.slice(0, RECORD_PREFIX_HEX_LENGTH).toLowerCase()}` as Hex,
+    recordData: `0x${body.toLowerCase()}` as Hex,
   };
 }
 
 /**
  * Decode an ADD_TAG / REMOVE_TAG payload, where the data layout is
- * `record (22 bytes) | tag (UTF-8 bytes)`. Returns `null` when the record prefix is missing.
+ * `record (22 bytes) | tag (UTF-8 bytes)`. Returns `null` when the record prefix is missing or is
+ * not a valid address record.
  */
 export function parseTagOp(data: Hex | string | null | undefined): ParsedTagOp | null {
   if (!data || typeof data !== "string" || !isHex(data)) return null;
   if (data.length < RECORD_PREFIX_WITH_0X_LENGTH) return null;
 
-  const record = data.slice(0, RECORD_PREFIX_WITH_0X_LENGTH) as Hex;
-  const tagHex = data.slice(RECORD_PREFIX_WITH_0X_LENGTH);
+  // Validate and canonicalize the 22-byte record prefix exactly as `parseRecord` does (version /
+  // type checked, lowercased), so the tag keys into the same row the record was stored under.
+  const parsed = parseRecord(data.slice(0, RECORD_PREFIX_WITH_0X_LENGTH) as Hex);
+  if (!parsed) return null;
 
+  const tagHex = data.slice(RECORD_PREFIX_WITH_0X_LENGTH);
   // hex must contain whole bytes
   if (tagHex.length % 2 !== 0) return null;
 
   // Match api-v2: decode as UTF-8 and strip embedded NULs.
   const tag = hexToUtf8(tagHex).replace(/\0/g, "");
 
-  return { record, tag };
+  return { record: parsed.record, tag };
 }
 
 /**
