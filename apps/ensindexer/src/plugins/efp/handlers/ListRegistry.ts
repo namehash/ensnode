@@ -3,6 +3,7 @@ import { type Hex, isAddressEqual, zeroAddress } from "viem";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
+import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { EFP_LIST_METADATA_KEYS } from "../constants";
@@ -42,6 +43,9 @@ export default function () {
           });
         }
         await context.ensDb.delete(ensIndexerSchema.efpLists, { tokenId });
+        // The list's `efp_list_records` rows are intentionally left in place: they mirror the
+        // on-chain `ListRecords` contract (a burn does not clear them), and their
+        // `EfpListRecord.list` back-ref resolves to null once the reverse mapping above is gone.
         return;
       }
 
@@ -64,36 +68,63 @@ export default function () {
   addOnchainEventListener(
     namespaceContract(pluginName, "ListRegistry:UpdateListStorageLocation"),
     async ({ context, event }) => {
-      const parsed = parseListStorageLocation(event.args.listStorageLocation);
-      if (!parsed) return;
-
       const ts = event.block.timestamp;
       const tokenId = event.args.tokenId.toString();
+
+      // The mint Transfer always precedes this event (both fire on the ListRegistry on Base, in
+      // order), so the list row exists. Guard anyway so an unexpected ordering skips rather than
+      // updating a non-existent row.
+      const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { tokenId });
+      if (!existing) return;
+
+      const oldLocationId =
+        existing.listStorageLocationChainId != null &&
+        existing.listStorageLocationContractAddress != null &&
+        existing.listStorageLocationSlot != null
+          ? storageLocationId(
+              existing.listStorageLocationChainId,
+              existing.listStorageLocationContractAddress,
+              existing.listStorageLocationSlot,
+            )
+          : null;
+
+      const parsed = parseListStorageLocation(event.args.listStorageLocation);
+
+      // An undecodable payload (future version, non-onchain location type, or malformed) replaces
+      // the on-chain location with something this indexer can't represent. Drop the stale decoded
+      // location, its reverse mapping, and its location-scoped roles rather than keep resolving the
+      // old slot; keep the raw payload for debugging.
+      if (!parsed) {
+        logger.warn({
+          msg: `EFP UpdateListStorageLocation(tokenId=${tokenId}) has an undecodable payload; clearing the list's location`,
+        });
+        if (oldLocationId !== null) {
+          await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, {
+            id: oldLocationId,
+          });
+        }
+        await context.ensDb.update(ensIndexerSchema.efpLists, { tokenId }).set({
+          listStorageLocation: event.args.listStorageLocation,
+          listStorageLocationChainId: null,
+          listStorageLocationContractAddress: null,
+          listStorageLocationSlot: null,
+          user: null,
+          manager: null,
+          updatedAt: ts,
+        });
+        return;
+      }
+
       const chainId = Number(parsed.chainId);
       const { contractAddress, slot } = parsed;
       const newLocationId = storageLocationId(chainId, contractAddress, slot);
 
       // If this list previously pointed at a different storage location, drop the stale reverse
-      // mapping. (Relies on the mint Transfer preceding this event — both fire on the ListRegistry
-      // on Base, so the list row already exists.)
-      const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { tokenId });
+      // mapping.
       let moved = false;
-      if (
-        existing?.listStorageLocationChainId != null &&
-        existing.listStorageLocationContractAddress != null &&
-        existing.listStorageLocationSlot != null
-      ) {
-        const oldLocationId = storageLocationId(
-          existing.listStorageLocationChainId,
-          existing.listStorageLocationContractAddress,
-          existing.listStorageLocationSlot,
-        );
-        if (oldLocationId !== newLocationId) {
-          moved = true;
-          await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, {
-            id: oldLocationId,
-          });
-        }
+      if (oldLocationId !== null && oldLocationId !== newLocationId) {
+        moved = true;
+        await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, { id: oldLocationId });
       }
 
       await context.ensDb.update(ensIndexerSchema.efpLists, { tokenId }).set({
