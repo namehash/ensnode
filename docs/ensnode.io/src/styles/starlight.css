@@ -337,12 +337,6 @@ starlight-toc a:hover {
   }
 }
 
-.open-in-ensadmin {
-  @media screen and (max-width: 400px) {
-    font-size: 14px;
-  }
-}
-
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
   transition:

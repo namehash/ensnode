@@ -1,0 +1,23 @@
+---
+import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import cc from "classcat";
+
+interface ENSAdminCTAButtonProps {
+  ensAdminHref?: string;
+  text: string;
+}
+
+const { ensAdminHref, text } = Astro.props as ENSAdminCTAButtonProps;
+
+const styles =
+  "w-fit inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-medium text-[var(--sl-color-black)] transition-colors hover:bg-[var(--sl-color-accent-high)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]";
+---
+
+<a
+  class={cc([styles, "no-underline"])}
+  href={ensAdminHref}
+  target="_blank"
+  rel="noopener noreferrer">
+  <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
+  {text}
+</a>

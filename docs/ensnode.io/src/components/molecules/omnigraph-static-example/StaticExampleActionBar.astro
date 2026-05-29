@@ -1,7 +1,7 @@
 ---
 import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
-import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import ENSAdminCTAButton from "@components/atoms/ENSAdminCTAButton.astro";
 import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
 
 import StaticExamplePlaygroundHint from "./StaticExamplePlaygroundHint.astro";
@@ -26,14 +26,7 @@ const actionButtonClass =
 <div class={actionBarClass}>
   {
     variant === "ensadmin" ? (
-      <a
-        class={`${actionButtonClass} no-underline`}
-        href={adminUrl}
-        target="_blank"
-        rel="noopener noreferrer">
-        <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
-        Run in ENSAdmin
-      </a>
+      <ENSAdminCTAButton ensAdminHref={adminUrl} text="Run in ENSAdmin" />
     ) : (
       <button type="button" class={actionButtonClass} data-static-example-id={staticExampleId}>
         <StackBlitzLogo className="h-5 w-auto shrink-0" />
