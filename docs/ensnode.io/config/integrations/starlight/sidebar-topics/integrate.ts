@@ -29,7 +29,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/ens-subgraph",
         },
         {
-          label: "Key Limitations",
+          label: "Key Limitations 🚨",
           link: "/docs/integrate/ens-subgraph/key-limitations",
         },
         {
