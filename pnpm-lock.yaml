@@ -156,6 +156,9 @@ patchedDependencies:
   '@opentelemetry/otlp-exporter-base':
     hash: 1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171
     path: patches/@opentelemetry__otlp-exporter-base.patch
+  ponder@0.16.6:
+    hash: 844821c68ccbb1397fd39f4165cc99a0007dca84899a462a204aa1d751b9a672
+    path: patches/ponder@0.16.6.patch
   starlight-llms-txt@0.10.0:
     hash: b0be40873b81b978ff243b51b244d99ddad85f5b0ff444cc9890cb6a1566277a
     path: patches/starlight-llms-txt@0.10.0.patch
@@ -558,7 +561,7 @@ importers:
         version: 7.1.1
       ponder:
         specifier: 'catalog:'
-        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
+        version: 0.16.6(patch_hash=844821c68ccbb1397fd39f4165cc99a0007dca84899a462a204aa1d751b9a672)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
       viem:
         specifier: 'catalog:'
         version: 2.50.3(typescript@5.9.3)(zod@4.3.6)
@@ -1017,7 +1020,7 @@ importers:
         version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.17)(pg@8.16.3)
       ponder:
         specifier: 'catalog:'
-        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
+        version: 0.16.6(patch_hash=844821c68ccbb1397fd39f4165cc99a0007dca84899a462a204aa1d751b9a672)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.22.3)(typescript@5.9.3)(yaml@2.8.3)
@@ -19059,7 +19062,7 @@ snapshots:
       graphql: 16.11.0
       hono: 4.12.18
 
-  ponder@0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6):
+  ponder@0.16.6(patch_hash=844821c68ccbb1397fd39f4165cc99a0007dca84899a462a204aa1d751b9a672)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6):
     dependencies:
       '@babel/code-frame': 7.29.0
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)

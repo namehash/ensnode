@@ -1,0 +1,20 @@
+diff --git a/dist/esm/utils/pg.js b/dist/esm/utils/pg.js
+index 0000000..0000000 100644
+--- a/dist/esm/utils/pg.js
++++ b/dist/esm/utils/pg.js
+@@ -62,9 +62,14 @@ export function createPool(config, logger) {
+             }
+         }
+     }
++    const statementTimeout = Number(process.env.PONDER_STATEMENT_TIMEOUT ?? `${2 * 60 * 1000}`);
++    logger.debug({
++        msg: "Postgres pool config",
++        statement_timeout: statementTimeout,
++    });
+     const pool = new pg.Pool({
+         // https://stackoverflow.com/questions/59155572/how-to-set-query-timeout-in-relation-to-statement-timeout
+-        statement_timeout: 2 * 60 * 1000,
++        statement_timeout: statementTimeout,
+         // @ts-expect-error: The custom Client is an undocumented option.
+         Client: Client,
+         ...config,
