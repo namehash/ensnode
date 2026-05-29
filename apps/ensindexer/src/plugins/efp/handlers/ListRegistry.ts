@@ -1,4 +1,4 @@
-import type { Hex } from "viem";
+import { type Hex, isAddressEqual, zeroAddress } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -22,8 +22,30 @@ export default function () {
     async ({ context, event }) => {
       const ts = event.block.timestamp;
       const tokenId = event.args.tokenId.toString();
-      const owner = event.args.to.toLowerCase() as Hex;
 
+      // ERC-721 mints are Transfer(from=0) and burns are Transfer(to=0). On a burn the list NFT no
+      // longer exists, so drop the list row (and its storage-location reverse mapping) rather than
+      // record a zero-address owner that would surface through `EfpList.owner` and `lists(where:)`.
+      if (isAddressEqual(event.args.to, zeroAddress)) {
+        const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { tokenId });
+        if (
+          existing?.listStorageLocationChainId != null &&
+          existing.listStorageLocationContractAddress != null &&
+          existing.listStorageLocationSlot != null
+        ) {
+          await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, {
+            id: storageLocationId(
+              existing.listStorageLocationChainId,
+              existing.listStorageLocationContractAddress,
+              existing.listStorageLocationSlot,
+            ),
+          });
+        }
+        await context.ensDb.delete(ensIndexerSchema.efpLists, { tokenId });
+        return;
+      }
+
+      const owner = event.args.to.toLowerCase() as Hex;
       await context.ensDb
         .insert(ensIndexerSchema.efpLists)
         .values({
