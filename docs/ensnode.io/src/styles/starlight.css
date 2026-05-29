@@ -45,9 +45,11 @@
 
   /* Aside colors */
   --aside-danger-color: #ef4444;
-  --aside-caution-color: #ca8a04;
+  --aside-caution-color: #eab308;
   --aside-note-color: #3b82f6;
   --aside-tip-color: #16a34a;
+
+  --color-yellow-700: #a16207;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -335,12 +337,6 @@ starlight-toc a:hover {
   }
 }
 
-.open-in-ensadmin {
-  @media screen and (max-width: 400px) {
-    font-size: 14px;
-  }
-}
-
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
   transition:
@@ -471,6 +467,29 @@ starlight-tabs ul[role="tablist"] {
   padding: 20px 16px;
 
   border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--aside-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-text-color, var(--aside-color));
+  }
+
+  & a {
+    color: var(--aside-text-color, var(--aside-color));
+
+    &:hover {
+      color: var(--aside-text-color, var(--aside-color));
+    }
+  }
+
+  & code {
+    background-color: color-mix(
+      in srgb,
+      var(--aside-color) var(--aside-code-strength, 12%),
+      transparent
+    );
+    border-radius: 4px;
+  }
 }
 
 .starlight-aside__title {
@@ -513,118 +532,83 @@ starlight-tabs ul[role="tablist"] {
 }
 
 .starlight-aside--tip {
-  border: 1px solid color-mix(in srgb, var(--aside-tip-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-tip-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-tip-color);
-  }
-
-  & a {
-    color: var(--aside-tip-color);
-  }
-
-  & code {
-    background-color: color-mix(in srgb, var(--aside-tip-color) 12%, transparent);
-  }
+  --aside-color: var(--aside-tip-color);
 
   & .sl-link-card:hover {
-    border-color: var(--aside-tip-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-tip-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-tip-color);
+      color: var(--aside-color);
     }
   }
 }
 
 .starlight-aside--danger {
-  border: 1px solid color-mix(in srgb, var(--aside-danger-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-danger-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-danger-color);
-  }
-
-  & a {
-    color: var(--aside-danger-color);
-  }
-
-  & code {
-    background-color: color-mix(in srgb, var(--aside-danger-color) 12%, transparent);
-  }
+  --aside-color: var(--aside-danger-color);
 
   & .sl-link-card:hover {
-    border-color: var(--aside-danger-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-danger-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-danger-color);
+      color: var(--aside-color);
     }
   }
 }
 
 .starlight-aside--caution {
-  border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-caution-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-caution-color);
-  }
-
-  & a {
-    color: var(--aside-caution-color);
-  }
+  --aside-color: var(--aside-caution-color);
+  --aside-text-color: var(--color-yellow-700);
+  --aside-code-strength: 15%;
 
   & code {
-    background-color: color-mix(in srgb, var(--aside-caution-color) 12%, transparent);
+    color: var(--aside-text-color);
   }
 
   & pre {
-    background-color: color-mix(in srgb, var(--aside-caution-color) 5%, transparent);
-    border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
+    background-color: color-mix(in srgb, var(--aside-color) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aside-color) 15%, transparent);
+    border-radius: 12px;
+    color: var(--aside-text-color);
+
+    & code {
+      color: var(--aside-text-color);
+      background-color: transparent;
+    }
   }
 
   & .sl-link-card {
-    border-color: var(--aside-caution-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-caution-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-caution-color);
+      color: var(--aside-color);
     }
   }
 }
 
 .starlight-aside--note {
-  border: 1px solid color-mix(in srgb, var(--aside-note-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-note-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-note-color);
-  }
-
-  & a {
-    color: var(--aside-note-color);
-  }
+  --aside-color: var(--aside-note-color);
 
   & .sl-link-card {
-    border-color: var(--aside-note-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-note-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-note-color);
+      color: var(--aside-color);
     }
   }
 }

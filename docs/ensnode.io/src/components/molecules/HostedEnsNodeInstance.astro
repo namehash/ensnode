@@ -1,5 +1,5 @@
 ---
-import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import ENSAdminCTAButton from "@components/atoms/ENSAdminCTAButton.astro";
 import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
 
 const { instanceURL, connectWithENSAdminURL, namespace, ensVersions, plugins } = Astro.props;
@@ -17,17 +17,9 @@ const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
           class="sl-markdown-content underline underline-offset-4 hover:underline-offset-2 transition-[text-underline-offset] duration-200"
           href={instanceURL}>{instanceURL}</a
         >
-        <a
-          class="not-content w-fit open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
-                hover:bg-[var(--sl-color-accent-high)] pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg"
-          target="_blank"
-          rel="noopener noreferrer"
-          href={connectWithENSAdminURL}>
-          <ENSAdminLogoDark className="h-6.5 w-auto shrink-0" />
-          <p class="text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-normal">
-            Connect with ENSAdmin
-          </p>
-        </a>
+        <div class="not-content">
+          <ENSAdminCTAButton ensAdminHref={connectWithENSAdminURL} text="Connect with ENSAdmin" />
+        </div>
       </td>
     </tr>
     <tr>
