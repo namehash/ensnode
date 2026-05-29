@@ -10,7 +10,7 @@ interface Props {
 const { variant, hostedInstanceDocUrl, hostedInstanceNamespace } = Astro.props;
 
 const hostedInstanceLinkClass =
-  "text-sm font-semibold text-[var(--sl-color-accent)] underline underline-offset-4 hover:underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-underline duration-200";
+  "text-sm font-semibold text-[var(--sl-color-accent)] underline underline-offset-4 hover:underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)] transition-[text-underline-offset] duration-200";
 ---
 
 <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
