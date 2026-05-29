@@ -724,6 +724,247 @@ type ENSv2RegistryReservation implements Registration {
 }
 
 """
+An EFP `(address, key) -> value` account-metadata entry (e.g. "primary-list").
+"""
+type EfpAccountMetadata {
+  """The account this metadata belongs to."""
+  address: Address!
+
+  """Chain id of the AccountMetadata contract."""
+  chainId: ChainId!
+
+  """Address of the AccountMetadata contract."""
+  contractAddress: Address!
+  createdAt: BigInt!
+  id: String!
+
+  """The metadata key (UTF-8 string)."""
+  key: String!
+  updatedAt: BigInt!
+
+  """The metadata value (raw bytes)."""
+  value: Hex!
+}
+
+"""Filter EFP account metadata."""
+input EfpAccountMetadatasWhereInput {
+  """The account address."""
+  address: Address!
+}
+
+"""An EFP list NFT (a ListRegistry token) and the records it holds."""
+type EfpList {
+  createdAt: BigInt!
+
+  """Decoded list storage location: target chain id."""
+  listStorageLocationChainId: ChainId
+
+  """Decoded list storage location: target contract address."""
+  listStorageLocationContractAddress: Address
+
+  """Decoded list storage location: target slot (bytes32)."""
+  listStorageLocationSlot: Hex
+
+  """The address allowed to administer this list."""
+  manager: Address
+
+  """Chain id of the ListRegistry NFT (always Base / 8453)."""
+  nftChainId: ChainId!
+
+  """The ListRegistry contract address."""
+  nftContractAddress: Address!
+
+  """The current ERC-721 owner of the list NFT."""
+  owner: Address!
+
+  """The records currently in this list (the addresses it follows)."""
+  records(after: String, before: String, first: Int, last: Int): EfpListRecordsConnection
+
+  """The ERC-721 token id of the list NFT (decimal string)."""
+  tokenId: String!
+  updatedAt: BigInt!
+
+  """The address allowed to post records to this list."""
+  user: Address
+}
+
+"""
+A correlation between an ENS name (via its `eth.efp.list` text record) and an EFP list.
+"""
+type EfpListPointer {
+  """Chain id of the resolver that emitted the text record."""
+  chainId: ChainId!
+  createdAt: BigInt!
+
+  """The matched ENS text-record key (e.g. `eth.efp.list`)."""
+  ensKey: String!
+  id: String!
+
+  """Decoded list chain id (defaults to 8453 / Base)."""
+  listChainId: ChainId!
+
+  """
+  Decoded list contract address (defaults to the EFP ListRegistry on Base).
+  """
+  listContract: Address!
+
+  """Decoded list token id (decimal string)."""
+  listTokenId: String!
+
+  """The ENS namehash whose `eth.efp.list` text record points at a list."""
+  node: Node!
+
+  """The raw text-record value, kept verbatim."""
+  rawValue: String!
+
+  """The resolver contract address."""
+  resolver: Address!
+  updatedAt: BigInt!
+}
+
+"""
+Filter EFP ENS list pointers (the `eth.efp.list` text-record correlation).
+"""
+input EfpListPointersWhereInput {
+  """Find the ENS names that point at this list token id."""
+  listTokenId: String
+
+  """The ENS namehash that claims a list."""
+  node: Node
+}
+
+"""
+A single record within an EFP list (an address it follows), with its tags.
+"""
+type EfpListRecord {
+  """Chain id of the ListRecords contract holding this record."""
+  chainId: ChainId!
+
+  """Address of the ListRecords contract holding this record."""
+  contractAddress: Address!
+  createdAt: BigInt!
+  id: String!
+
+  """The full record payload (version | type | data)."""
+  record: Hex!
+
+  """The followed/target address. Valid for address records (recordType 1)."""
+  recordData: Address!
+
+  """The EFP record type (1 = address)."""
+  recordType: Int!
+
+  """The list's storage slot (bytes32) within the ListRecords contract."""
+  slot: Hex!
+
+  """UTF-8 tags attached to this record (e.g. "close-friend", "block")."""
+  tags: [String!]!
+}
+
+type EfpListRecordsConnection {
+  edges: [EfpListRecordsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpListRecordsConnectionEdge {
+  cursor: String!
+  node: EfpListRecord!
+}
+
+"""Filter EFP list records."""
+input EfpListRecordsWhereInput {
+  """
+  The target address of an address record (recordType 1). Filtering by this answers 'which lists follow this address?'.
+  """
+  recordData: Address
+
+  """The EFP record type (1 = address)."""
+  recordType: Int
+}
+
+"""Filter EFP lists by their owner, user, or manager address."""
+input EfpListsWhereInput {
+  """The address allowed to administer the list."""
+  manager: Address
+
+  """The ERC-721 owner of the list NFT."""
+  owner: Address
+
+  """The address allowed to post records."""
+  user: Address
+}
+
+"""Queries for Ethereum Follow Protocol (EFP) data."""
+type EfpQuery {
+  """Get an EFP account-metadata value by address and key."""
+  accountMetadata(address: Address!, key: String!): EfpAccountMetadata
+
+  """Find all EFP account-metadata entries for an address."""
+  accountMetadatas(after: String, before: String, first: Int, last: Int, where: EfpAccountMetadatasWhereInput!): EfpQueryAccountMetadatasConnection
+
+  """Get an EFP list by its NFT token id."""
+  list(tokenId: String!): EfpList
+
+  """
+  Find ENS -> EFP list correlations (the `eth.efp.list` text record), by ENS node or list token id.
+  """
+  listPointers(after: String, before: String, first: Int, last: Int, where: EfpListPointersWhereInput): EfpQueryListPointersConnection
+
+  """
+  Find EFP list records. Filter by `recordData` to answer 'which lists follow this address?'.
+  """
+  listRecords(after: String, before: String, first: Int, last: Int, where: EfpListRecordsWhereInput): EfpQueryListRecordsConnection
+
+  """Find EFP lists, optionally filtered by owner / user / manager."""
+  lists(after: String, before: String, first: Int, last: Int, where: EfpListsWhereInput): EfpQueryListsConnection
+}
+
+type EfpQueryAccountMetadatasConnection {
+  edges: [EfpQueryAccountMetadatasConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryAccountMetadatasConnectionEdge {
+  cursor: String!
+  node: EfpAccountMetadata!
+}
+
+type EfpQueryListPointersConnection {
+  edges: [EfpQueryListPointersConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListPointersConnectionEdge {
+  cursor: String!
+  node: EfpListPointer!
+}
+
+type EfpQueryListRecordsConnection {
+  edges: [EfpQueryListRecordsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListRecordsConnectionEdge {
+  cursor: String!
+  node: EfpListRecord!
+}
+
+type EfpQueryListsConnection {
+  edges: [EfpQueryListsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListsConnectionEdge {
+  cursor: String!
+  node: EfpList!
+}
+
+"""
 An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.
 """
 type Event {
@@ -1083,6 +1324,9 @@ type Query {
 
   """Find Canonical Domains by Name."""
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
+
+  """Ethereum Follow Protocol (EFP) queries."""
+  efp: EfpQuery!
 
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions
