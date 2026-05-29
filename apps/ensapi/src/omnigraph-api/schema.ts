@@ -1,5 +1,6 @@
 import { builder } from "@/omnigraph-api/builder";
 
+import "./schema/account-efp";
 import "./schema/account-id";
 import "./schema/connection";
 import "./schema/domain";

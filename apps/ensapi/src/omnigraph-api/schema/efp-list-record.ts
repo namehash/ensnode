@@ -4,6 +4,7 @@ import type { ChainId, NormalizedAddress } from "enssdk";
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { AccountRef } from "@/omnigraph-api/schema/account";
 import { efpStorageLocationId } from "@/omnigraph-api/schema/efp-ids";
 import { EfpListRef } from "@/omnigraph-api/schema/efp-list";
 
@@ -129,6 +130,17 @@ EfpListRecordRef.implement({
           .limit(1);
         return mapping?.tokenId ?? null;
       },
+    }),
+
+    ///////////////////////////
+    // EfpListRecord.account
+    ///////////////////////////
+    account: t.field({
+      description:
+        "The account this record points to (its `recordData`). Null if that address is not an indexed account.",
+      type: AccountRef,
+      nullable: true,
+      resolve: (record) => record.recordData as NormalizedAddress,
     }),
   }),
 });

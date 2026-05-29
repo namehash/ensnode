@@ -9,6 +9,7 @@ import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domain
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountEfpRef } from "@/omnigraph-api/schema/account-efp";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -92,6 +93,17 @@ AccountRef.implement({
           ...args,
           where: { ...args.where, sender: { eq: parent.id } },
         }),
+    }),
+
+    ///////////////
+    // Account.efp
+    ///////////////
+    efp: t.field({
+      description:
+        "This Account's Ethereum Follow Protocol (EFP) presence: its lists and validated primary list.",
+      type: AccountEfpRef,
+      nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     ///////////////////////
