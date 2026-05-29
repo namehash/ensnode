@@ -26,7 +26,7 @@ const actionButtonClass =
 <div class={actionBarClass}>
   {
     variant === "ensadmin" ? (
-      <ENSAdminCTAButton ensAdminHref={adminUrl} text="Run in ENSAdmin" />
+      adminUrl && <ENSAdminCTAButton ensAdminHref={adminUrl} text="Run in ENSAdmin" />
     ) : (
       <button type="button" class={actionButtonClass} data-static-example-id={staticExampleId}>
         <StackBlitzLogo className="h-5 w-auto shrink-0" />
