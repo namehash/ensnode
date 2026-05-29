@@ -175,9 +175,20 @@
 .sl-link-card {
   border-color: var(--sl-color-gray-4);
   box-shadow: var(--sl-shadow-sm);
+  transition:
+    background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
 }
 
-.sl-link-card:hover,
+.card-grid .card {
+  border-radius: 12px;
+}
+
+.sl-link-card:hover {
+  background-color: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+}
+
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
   background: var(--sl-color-black);
@@ -207,8 +218,12 @@ a[rel="prev"]:hover {
   color: var(--sl-color-white);
 }
 
+/* Override Starlight's default markdown link hover (which switches to
+   --sl-color-white): keep links their base color on hover so only the
+   underline-offset animates. */
+.sl-markdown-content a:hover:not(:where(.not-content *)),
 .sl-markdown-content a:hover:not(:where(.not-content *)) > span {
-  color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
 }
 
 .sl-markdown-content > p a:not(:has(code), [role="tab"]),
@@ -217,19 +232,27 @@ a[rel="prev"]:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 
-  transition:
-    color 0.2s ease-in-out,
-    text-underline-offset 0.2s ease-in-out;
+  transition: text-underline-offset 0.2s ease-in-out;
 
   &:hover {
     text-underline-offset: 2px;
   }
 }
 
-.sl-markdown-content > p a:not([role="tab"]):hover,
-.sl-markdown-content :is(ul, ol) > li a:not([role="tab"]):hover,
+.sl-markdown-content > p a:has(code):not([role="tab"]),
+.sl-markdown-content :is(ul, ol) > li a:has(code):not([role="tab"]) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  transition: text-underline-offset 0.2s ease-in-out;
+
+  &:hover {
+    text-underline-offset: 2px;
+  }
+}
+
 starlight-toc a:hover {
-  color: var(--sl-color-accent-high);
+  color: var(--sl-color-text-accent);
 }
 
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
@@ -332,15 +355,14 @@ starlight-toc a:hover {
   font-weight: 500;
 }
 
-/* Only apply hover effects to: 
-* * non-selected items 
+/* Only apply hover effects to:
+* * non-selected items
 * * expandable items (in all states), including nested ones
 */
 #starlight__sidebar a:not([aria-current="page"]):hover,
 #starlight__sidebar details details > summary:hover,
 #starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
-  transform: translateX(2px);
   border-radius: 6px;
 }
 
@@ -387,7 +409,7 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
 
 /* Make sure that all non-top-level sidebar items are:
  * * not enlarged
- * * not bolded 
+ * * not bolded
  * * the same color as the rest of the sidebar text
  */
 ul.top-level details details > summary .group-label span {
@@ -432,7 +454,7 @@ ul.top-level details details > summary .group-label span {
   transform: none !important;
 }
 
-/* Align "tablist" component to the left 
+/* Align "tablist" component to the left
  * and remove the default full-width underline
  */
 starlight-tabs ul[role="tablist"] {
@@ -474,6 +496,10 @@ starlight-tabs ul[role="tablist"] {
 
   & .sl-link-card {
     background-color: var(--sl-color-black);
+
+    &:hover {
+      background-color: var(--sl-color-black);
+    }
 
     & a {
       text-decoration: none;
@@ -603,7 +629,7 @@ starlight-tabs ul[role="tablist"] {
   }
 }
 
-/* Custom icon logic for specific sidebar items based on URL - 
+/* Custom icon logic for specific sidebar items based on URL -
  * hack since Starlight doesn't allow overriding icons directly. */
 
 .starlight-sidebar-topics-icon svg {

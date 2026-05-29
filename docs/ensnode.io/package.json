@@ -13,8 +13,6 @@
     "astro": "astro",
     "lint": "biome check --write",
     "lint:ci": "biome ci",
-    "lint:prettier": "prettier --write \"**/*.astro\"",
-    "lint:prettier:ci": "prettier --check \"**/*.astro\"",
     "omnigraph-examples:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-example-responses.mts",
     "omnigraph:snapshot": "tsx --tsconfig tsconfig.json scripts/snapshot-omnigraph-version.mts",
     "test": "vitest",
@@ -61,8 +59,6 @@
     "@types/react-dom": "catalog:",
     "enssdk": "workspace:*",
     "enskit": "workspace:*",
-    "prettier": "catalog:",
-    "prettier-plugin-astro": "catalog:",
     "tsx": "^4.19.3",
     "typescript": "catalog:",
     "vitest": "catalog:"
