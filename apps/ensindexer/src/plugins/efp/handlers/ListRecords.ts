@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { EFP_LIST_METADATA_KEYS, EFP_OPCODE } from "../constants";
-import { listRecordId, pendingListMetadataId, storageLocationId } from "../lib/ids";
+import { listMetadataId, listRecordId, storageLocationId } from "../lib/ids";
 import { metadataValueToAddress } from "../lib/list-metadata";
 import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "../lib/parse-list-op";
 
@@ -118,32 +118,33 @@ export default function () {
       const chainId = context.chain.id;
       const contractAddress = event.log.address.toLowerCase() as Hex;
       const slot = slotToBytes32(event.args.slot);
-      // `metadataValueToAddress` returns null for a non-20-byte value, which is written through
-      // below to clear the role: a malformed `user`/`manager` value is no longer a valid address,
-      // so reflecting "no role" is faithful to on-chain state (intentional clear-on-malformed).
-      const address = metadataValueToAddress(event.args.value);
 
+      // Record the location's latest metadata durably (keyed by location + key) so it can be
+      // (re-)applied to whichever list points at this slot, now or after a future re-point, and so
+      // it survives whichever of UpdateListMetadata / UpdateListStorageLocation arrives first.
+      const id = listMetadataId(chainId, contractAddress, slot, key);
+      await context.ensDb
+        .insert(ensIndexerSchema.efpListMetadata)
+        .values({ id, chainId, contractAddress, slot, key, value: event.args.value, createdAt: ts })
+        .onConflictDoUpdate({ value: event.args.value });
+
+      // If a list currently points at this storage location, apply the role to it now.
+      // `metadataValueToAddress` returns null for a non-20-byte value, intentionally clearing the
+      // role: a malformed `user`/`manager` value is no longer a valid address, so reflecting "no
+      // role" is faithful to on-chain state.
       const mapping = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
         id: storageLocationId(chainId, contractAddress, slot),
       });
+      if (!mapping) return;
 
-      if (mapping) {
-        await context.ensDb
-          .update(ensIndexerSchema.efpLists, { tokenId: mapping.tokenId })
-          .set(
-            key === EFP_LIST_METADATA_KEYS.USER
-              ? { user: address, updatedAt: ts }
-              : { manager: address, updatedAt: ts },
-          );
-        return;
-      }
-
-      // No list points at this storage location yet; stage it for the storage-location handler.
-      const id = pendingListMetadataId(chainId, contractAddress, slot, key);
+      const address = metadataValueToAddress(event.args.value);
       await context.ensDb
-        .insert(ensIndexerSchema.efpPendingListMetadata)
-        .values({ id, chainId, contractAddress, slot, key, value: event.args.value, createdAt: ts })
-        .onConflictDoUpdate({ value: event.args.value, createdAt: ts });
+        .update(ensIndexerSchema.efpLists, { tokenId: mapping.tokenId })
+        .set(
+          key === EFP_LIST_METADATA_KEYS.USER
+            ? { user: address, updatedAt: ts }
+            : { manager: address, updatedAt: ts },
+        );
     },
   );
 }

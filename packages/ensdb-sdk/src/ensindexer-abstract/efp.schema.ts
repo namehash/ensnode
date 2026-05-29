@@ -138,16 +138,17 @@ export const efpAccountMetadata = onchainTable(
 );
 
 /**
- * Staging area for `UpdateListMetadata` (`user`/`manager`) events that arrive before the matching
- * list row's storage location is known. `UpdateListMetadata` is emitted on the `ListRecords`
- * contract, while the storage-location mapping is created by `UpdateListStorageLocation` on the
- * `ListRegistry` contract (a different contract, sometimes on a different chain). The
- * storage-location handler drains matching rows when it runs. Rows staged for a slot that no list
- * NFT ever points at are never drained; this is a bounded, low-volume artifact (at most one row
- * per abandoned slot and key), not a growth concern in practice.
+ * EFP List Metadata (`user` / `manager`), keyed by the storage location it is set at
+ * (`chainId-contractAddress-slot-key`), not by list NFT. `UpdateListMetadata` is emitted on the
+ * `ListRecords` contract while the storage-location mapping is created by `UpdateListStorageLocation`
+ * on the `ListRegistry` contract (a different contract, sometimes on a different chain), so the two
+ * can arrive in either order. The value here is durable: it survives a list re-pointing its storage
+ * location, and the storage-location handler reads it to (re-)populate `efp_lists.user` / `manager`
+ * for whichever list points at the location. One row per `(location, key)`, bounded by the number
+ * of distinct locations seen.
  */
-export const efpPendingListMetadata = onchainTable(
-  "efp_pending_list_metadata",
+export const efpListMetadata = onchainTable(
+  "efp_list_metadata",
   (t) => ({
     /** Composite key "chainId-contractAddress-slot-key". */
     id: t.text().primaryKey(),

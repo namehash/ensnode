@@ -25,8 +25,8 @@ export function accountMetadataId(address: Hex, key: string): string {
   return `${address.toLowerCase()}-${key}`;
 }
 
-/** `efp_pending_list_metadata` key: a staged metadata `(storage location, key)`. */
-export function pendingListMetadataId(
+/** `efp_list_metadata` key: per-location metadata `(storage location, key)`. */
+export function listMetadataId(
   chainId: number,
   contractAddress: Hex,
   slot: Hex,

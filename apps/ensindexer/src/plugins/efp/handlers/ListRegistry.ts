@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { EFP_LIST_METADATA_KEYS } from "../constants";
-import { pendingListMetadataId, storageLocationId } from "../lib/ids";
+import { listMetadataId, storageLocationId } from "../lib/ids";
 import { metadataValueToAddress } from "../lib/list-metadata";
 import { parseListStorageLocation } from "../lib/parse-list-storage-location";
 
@@ -144,13 +144,17 @@ export default function () {
         .values({ id: newLocationId, chainId, contractAddress, slot, tokenId, updatedAt: ts })
         .onConflictDoUpdate({ tokenId, updatedAt: ts });
 
-      // Drain any user/manager metadata staged before this storage location was known.
+      // (Re-)apply this storage location's durable user/manager metadata to the list. Keyed by
+      // location, so it restores roles whenever a list points at (or re-points to) a slot whose
+      // metadata was already recorded; it is not deleted, as it stays valid for the slot. Combined
+      // with the role clear on a move above, this rederives the list's roles from its location.
       for (const key of [EFP_LIST_METADATA_KEYS.USER, EFP_LIST_METADATA_KEYS.MANAGER] as const) {
-        const id = pendingListMetadataId(chainId, contractAddress, slot, key);
-        const pending = await context.ensDb.find(ensIndexerSchema.efpPendingListMetadata, { id });
-        if (!pending) continue;
+        const meta = await context.ensDb.find(ensIndexerSchema.efpListMetadata, {
+          id: listMetadataId(chainId, contractAddress, slot, key),
+        });
+        if (!meta) continue;
 
-        const address = metadataValueToAddress(pending.value);
+        const address = metadataValueToAddress(meta.value);
         await context.ensDb
           .update(ensIndexerSchema.efpLists, { tokenId })
           .set(
@@ -158,7 +162,6 @@ export default function () {
               ? { user: address, updatedAt: ts }
               : { manager: address, updatedAt: ts },
           );
-        await context.ensDb.delete(ensIndexerSchema.efpPendingListMetadata, { id });
       }
     },
   );

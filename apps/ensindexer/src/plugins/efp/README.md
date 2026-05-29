@@ -23,8 +23,9 @@ Contract coordinates live in the `EFPBase` / `EFPOptimism` / `EFPEthereum` datas
 - `efp_list_records` — the records in each list, each carrying its set of UTF-8 `tags` as an
   embedded array (so removing a record drops its tags in the same primary-key delete).
 - `efp_account_metadata` — `(address, key) → value` (today only `primary-list`).
-- `efp_pending_list_metadata` — staging for `user`/`manager` updates that arrive before the list's
-  storage location is known (the `ListRecords` and `ListRegistry` contracts emit independently).
+- `efp_list_metadata` — durable `user`/`manager` metadata keyed by storage location, (re-)applied to
+  whichever list points at the slot (the `ListRecords` and `ListRegistry` contracts emit
+  independently, and a list can re-point to a previously-used slot).
 
 ## Notes
 
