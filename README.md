@@ -37,7 +37,7 @@ query HelloWorld {
     __typename
     canonical {
       name {
-        interpreted
+        beautified
       }
     }
     owner {
@@ -50,7 +50,7 @@ query HelloWorld {
           __typename
           canonical {
             name {
-              interpreted
+              beautified
             }
           }
           owner {
