@@ -8,12 +8,17 @@ import { efpAccountMetadataId } from "@/omnigraph-api/schema/efp-ids";
 /** The EFP AccountMetadata key whose value is an account's primary-list token id. */
 export const EFP_PRIMARY_LIST_KEY = "primary-list";
 
+/** A valid `primary-list` value is `abi.encodePacked(uint256 tokenId)`: "0x" + 32 bytes. */
+const PRIMARY_LIST_VALUE_HEX_LENGTH = 2 + 32 * 2;
+
 /**
- * Decode a `primary-list` account-metadata value (an abi-encoded `uint256` token id) into a decimal
- * token-id string, or `null` if it isn't a well-formed value.
+ * Decode a `primary-list` account-metadata value (`abi.encodePacked(uint256 tokenId)`) into a
+ * decimal token-id string, or `null` if it isn't well-formed. EFP defines the value as exactly a
+ * 32-byte uint256, so reject any other length rather than let `BigInt` coerce a malformed value
+ * (e.g. `0x01`) into a real token id.
  */
-function decodePrimaryListTokenId(value: Hex): string | null {
-  if (!value || value === "0x") return null;
+export function decodePrimaryListTokenId(value: Hex): string | null {
+  if (value.length !== PRIMARY_LIST_VALUE_HEX_LENGTH) return null;
   try {
     return BigInt(value).toString();
   } catch {
