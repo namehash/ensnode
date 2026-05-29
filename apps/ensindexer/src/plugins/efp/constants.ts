@@ -1,11 +1,14 @@
 /**
- * The only EFP protocol version defined today. The leading `version` byte of a `ListOp`, a
- * `ListRecord`, and a List Storage Location must all equal this — other versions use a schema this
- * indexer doesn't understand, so they are skipped rather than decoded as v1.
+ * EFP versions its payload schemas independently with a leading `version` byte. Each is `1` today,
+ * and a decoder rejects any other value rather than decode a future or unknown schema as v1. They
+ * are separate constants because a bump to one schema (say `ListOp`) does not imply a bump to the
+ * others (`ListRecord`, List Storage Location).
  *
  * @see https://docs.efp.app/design/list-ops/
  */
-export const EFP_VERSION = 1;
+export const EFP_LIST_OP_VERSION = 1;
+export const EFP_RECORD_VERSION = 1;
+export const EFP_LSL_VERSION = 1;
 
 /**
  * EFP `ListOp` opcodes (op version 0x01), encoded as `version | opcode | data`.

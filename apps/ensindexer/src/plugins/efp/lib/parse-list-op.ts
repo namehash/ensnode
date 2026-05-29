@@ -8,15 +8,15 @@
  *
  * EFP defines only `recordType === 1` (a 20-byte address); reserved types are skipped. Managers
  * sometimes append junk after the 20-byte address, so type-1 records are truncated to the canonical
- * `recordVersion (1) | recordType (1) | address (20)` 22-byte prefix (api-v2 parity) and keyed by it
- * — so tag/remove ops, which carry that same prefix, always resolve to the same record.
+ * `recordVersion (1) | recordType (1) | address (20)` 22-byte prefix (api-v2 parity) and keyed by it,
+ * so tag/remove ops, which carry that same prefix, always resolve to the same record.
  *
  * @see https://docs.efp.app/design/list-ops/
  */
 
 import { type Hex, isHex } from "viem";
 
-import { EFP_VERSION } from "../constants";
+import { EFP_LIST_OP_VERSION, EFP_RECORD_VERSION } from "../constants";
 
 export interface ParsedListOp {
   /** Top-level list-op version. Always 1 today. */
@@ -67,7 +67,7 @@ export function parseListOp(op: Hex | string | null | undefined): ParsedListOp |
   const version = parseInt(bytes.slice(0, 2), 16);
   // The version byte defines the op schema; EFP defines only version 1. Reject other versions so a
   // future/unknown schema is never dispatched through the v1 opcode handlers.
-  if (version !== EFP_VERSION) return null;
+  if (version !== EFP_LIST_OP_VERSION) return null;
 
   return {
     version,
@@ -92,7 +92,7 @@ export function parseRecord(data: Hex | string | null | undefined): ParsedRecord
   const recordType = parseInt(bytes.slice(2, 4), 16);
 
   // The version byte is part of the record's decoding contract; EFP defines only version 1.
-  if (version !== EFP_VERSION) return null;
+  if (version !== EFP_RECORD_VERSION) return null;
   // EFP defines only record type 1 (a 20-byte address); types 0 and 2-255 are reserved.
   if (recordType !== 1) return null;
 
