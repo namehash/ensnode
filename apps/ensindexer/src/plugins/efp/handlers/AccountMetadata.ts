@@ -9,6 +9,9 @@ import { accountMetadataId } from "../lib/ids";
 
 const pluginName = PluginName.EFP;
 
+/**
+ * Registers the EFP `AccountMetadata` event handler (UpdateAccountMetadata).
+ */
 export default function () {
   // UpdateAccountMetadata — writes a single (key, value) pair for an account (today: `primary-list`).
   addOnchainEventListener(

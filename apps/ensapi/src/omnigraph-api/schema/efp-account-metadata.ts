@@ -33,8 +33,14 @@ export const efpAccountMetadataId = (address: NormalizedAddress, key: string): s
 EfpAccountMetadataRef.implement({
   description: 'An EFP `(address, key) -> value` account-metadata entry (e.g. "primary-list").',
   fields: (t) => ({
+    //////////////////////////
+    // EfpAccountMetadata.id
+    //////////////////////////
     id: t.field({ type: "String", nullable: false, resolve: (metadata) => metadata.id }),
 
+    ///////////////////////////////
+    // EfpAccountMetadata.chainId
+    ///////////////////////////////
     chainId: t.field({
       description: "Chain id of the AccountMetadata contract.",
       type: "ChainId",
@@ -42,6 +48,9 @@ EfpAccountMetadataRef.implement({
       resolve: (metadata) => metadata.chainId as ChainId,
     }),
 
+    ///////////////////////////////////////
+    // EfpAccountMetadata.contractAddress
+    ///////////////////////////////////////
     contractAddress: t.field({
       description: "Address of the AccountMetadata contract.",
       type: "Address",
@@ -49,6 +58,9 @@ EfpAccountMetadataRef.implement({
       resolve: (metadata) => metadata.contractAddress as NormalizedAddress,
     }),
 
+    ///////////////////////////////
+    // EfpAccountMetadata.address
+    ///////////////////////////////
     address: t.field({
       description: "The account this metadata belongs to.",
       type: "Address",
@@ -56,6 +68,9 @@ EfpAccountMetadataRef.implement({
       resolve: (metadata) => metadata.address as NormalizedAddress,
     }),
 
+    ///////////////////////////
+    // EfpAccountMetadata.key
+    ///////////////////////////
     key: t.field({
       description: "The metadata key (UTF-8 string).",
       type: "String",
@@ -63,6 +78,9 @@ EfpAccountMetadataRef.implement({
       resolve: (metadata) => metadata.key,
     }),
 
+    /////////////////////////////
+    // EfpAccountMetadata.value
+    /////////////////////////////
     value: t.field({
       description: "The metadata value (raw bytes).",
       type: "Hex",
@@ -70,7 +88,14 @@ EfpAccountMetadataRef.implement({
       resolve: (metadata) => metadata.value,
     }),
 
+    /////////////////////////////////
+    // EfpAccountMetadata.createdAt
+    /////////////////////////////////
     createdAt: t.field({ type: "BigInt", nullable: false, resolve: (m) => m.createdAt }),
+
+    /////////////////////////////////
+    // EfpAccountMetadata.updatedAt
+    /////////////////////////////////
     updatedAt: t.field({ type: "BigInt", nullable: false, resolve: (m) => m.updatedAt }),
   }),
 });

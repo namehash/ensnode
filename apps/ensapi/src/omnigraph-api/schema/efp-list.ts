@@ -49,6 +49,9 @@ export const TOKEN_ID_PAGINATED_CONNECTION_ARGS = {
 EfpListRef.implement({
   description: "An EFP list NFT (a ListRegistry token) and the records it holds.",
   fields: (t) => ({
+    //////////////////
+    // EfpList.tokenId
+    //////////////////
     tokenId: t.field({
       description: "The ERC-721 token id of the list NFT (decimal string).",
       type: "String",
@@ -56,6 +59,9 @@ EfpListRef.implement({
       resolve: (list) => list.tokenId,
     }),
 
+    ////////////////
+    // EfpList.owner
+    ////////////////
     owner: t.field({
       description: "The current ERC-721 owner of the list NFT.",
       type: "Address",
@@ -63,6 +69,9 @@ EfpListRef.implement({
       resolve: (list) => list.owner as NormalizedAddress,
     }),
 
+    ///////////////
+    // EfpList.user
+    ///////////////
     user: t.field({
       description: "The address allowed to post records to this list.",
       type: "Address",
@@ -70,6 +79,9 @@ EfpListRef.implement({
       resolve: (list) => (list.user ?? null) as NormalizedAddress | null,
     }),
 
+    //////////////////
+    // EfpList.manager
+    //////////////////
     manager: t.field({
       description: "The address allowed to administer this list.",
       type: "Address",
@@ -77,6 +89,9 @@ EfpListRef.implement({
       resolve: (list) => (list.manager ?? null) as NormalizedAddress | null,
     }),
 
+    /////////////////////
+    // EfpList.nftChainId
+    /////////////////////
     nftChainId: t.field({
       description: "Chain id of the ListRegistry NFT (always Base / 8453).",
       type: "ChainId",
@@ -84,6 +99,9 @@ EfpListRef.implement({
       resolve: (list) => list.nftChainId as ChainId,
     }),
 
+    /////////////////////////////
+    // EfpList.nftContractAddress
+    /////////////////////////////
     nftContractAddress: t.field({
       description: "The ListRegistry contract address.",
       type: "Address",
@@ -91,6 +109,9 @@ EfpListRef.implement({
       resolve: (list) => list.nftContractAddress as NormalizedAddress,
     }),
 
+    //////////////////////////////////////
+    // EfpList.listStorageLocationChainId
+    //////////////////////////////////////
     listStorageLocationChainId: t.field({
       description: "Decoded list storage location: target chain id.",
       type: "ChainId",
@@ -98,6 +119,9 @@ EfpListRef.implement({
       resolve: (list) => (list.listStorageLocationChainId ?? null) as ChainId | null,
     }),
 
+    //////////////////////////////////////////////
+    // EfpList.listStorageLocationContractAddress
+    //////////////////////////////////////////////
     listStorageLocationContractAddress: t.field({
       description: "Decoded list storage location: target contract address.",
       type: "Address",
@@ -106,6 +130,9 @@ EfpListRef.implement({
         (list.listStorageLocationContractAddress ?? null) as NormalizedAddress | null,
     }),
 
+    ///////////////////////////////////
+    // EfpList.listStorageLocationSlot
+    ///////////////////////////////////
     listStorageLocationSlot: t.field({
       description: "Decoded list storage location: target slot (bytes32).",
       type: "Hex",
@@ -113,12 +140,19 @@ EfpListRef.implement({
       resolve: (list) => list.listStorageLocationSlot,
     }),
 
+    ////////////////////
+    // EfpList.createdAt
+    ////////////////////
     createdAt: t.field({ type: "BigInt", nullable: false, resolve: (list) => list.createdAt }),
+
+    ////////////////////
+    // EfpList.updatedAt
+    ////////////////////
     updatedAt: t.field({ type: "BigInt", nullable: false, resolve: (list) => list.updatedAt }),
 
-    ///////////////////
+    //////////////////
     // EfpList.records
-    ///////////////////
+    //////////////////
     records: t.connection({
       description: "The records currently in this list (the addresses it follows).",
       type: EfpListRecordRef,

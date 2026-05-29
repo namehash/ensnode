@@ -20,14 +20,20 @@ export const EfpListRecordRef = builder.loadableObjectRef("EfpListRecord", {
 
 export type EfpListRecord = Exclude<typeof EfpListRecordRef.$inferType, string>;
 
-///////////////////
+/////////////////
 // EfpListRecord
-///////////////////
+/////////////////
 EfpListRecordRef.implement({
   description: "A single record within an EFP list (an address it follows), with its tags.",
   fields: (t) => ({
+    /////////////////////
+    // EfpListRecord.id
+    /////////////////////
     id: t.field({ type: "String", nullable: false, resolve: (record) => record.id }),
 
+    //////////////////////////
+    // EfpListRecord.chainId
+    //////////////////////////
     chainId: t.field({
       description: "Chain id of the ListRecords contract holding this record.",
       type: "ChainId",
@@ -35,6 +41,9 @@ EfpListRecordRef.implement({
       resolve: (record) => record.chainId as ChainId,
     }),
 
+    //////////////////////////////////
+    // EfpListRecord.contractAddress
+    //////////////////////////////////
     contractAddress: t.field({
       description: "Address of the ListRecords contract holding this record.",
       type: "Address",
@@ -42,6 +51,9 @@ EfpListRecordRef.implement({
       resolve: (record) => record.contractAddress as NormalizedAddress,
     }),
 
+    ////////////////////////
+    // EfpListRecord.slot
+    ////////////////////////
     slot: t.field({
       description: "The list's storage slot (bytes32) within the ListRecords contract.",
       type: "Hex",
@@ -49,6 +61,9 @@ EfpListRecordRef.implement({
       resolve: (record) => record.slot,
     }),
 
+    //////////////////////////
+    // EfpListRecord.record
+    //////////////////////////
     record: t.field({
       description: "The full record payload (version | type | data).",
       type: "Hex",
@@ -56,6 +71,9 @@ EfpListRecordRef.implement({
       resolve: (record) => record.record,
     }),
 
+    //////////////////////////////
+    // EfpListRecord.recordType
+    //////////////////////////////
     recordType: t.field({
       description: "The EFP record type (1 = address).",
       type: "Int",
@@ -63,6 +81,9 @@ EfpListRecordRef.implement({
       resolve: (record) => record.recordType,
     }),
 
+    //////////////////////////////
+    // EfpListRecord.recordData
+    //////////////////////////////
     recordData: t.field({
       description: "The followed/target address. Valid for address records (recordType 1).",
       type: "Address",
@@ -70,6 +91,9 @@ EfpListRecordRef.implement({
       resolve: (record) => record.recordData as NormalizedAddress,
     }),
 
+    ////////////////////////
+    // EfpListRecord.tags
+    ////////////////////////
     tags: t.field({
       description: 'UTF-8 tags attached to this record (e.g. "close-friend", "block").',
       type: ["String"],
@@ -91,6 +115,9 @@ EfpListRecordRef.implement({
       },
     }),
 
+    /////////////////////////////
+    // EfpListRecord.createdAt
+    /////////////////////////////
     createdAt: t.field({ type: "BigInt", nullable: false, resolve: (record) => record.createdAt }),
   }),
 });

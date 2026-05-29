@@ -11,6 +11,9 @@ import { parseEfpListTextRecord } from "../lib/parse-efp-list-text-record";
 
 const pluginName = PluginName.EFP;
 
+/**
+ * Registers the EFP `Resolver` event handler for the `eth.efp.list` text record (TextChanged).
+ */
 export default function () {
   // TextChanged — index the `eth.efp.list` text record into efp_ens_list_pointers.
   //

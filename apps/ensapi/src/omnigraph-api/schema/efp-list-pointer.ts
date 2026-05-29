@@ -27,8 +27,14 @@ EfpListPointerRef.implement({
   description:
     "A correlation between an ENS name (via its `eth.efp.list` text record) and an EFP list.",
   fields: (t) => ({
+    ////////////////////////
+    // EfpListPointer.id
+    ////////////////////////
     id: t.field({ type: "String", nullable: false, resolve: (pointer) => pointer.id }),
 
+    /////////////////////////////
+    // EfpListPointer.chainId
+    /////////////////////////////
     chainId: t.field({
       description: "Chain id of the resolver that emitted the text record.",
       type: "ChainId",
@@ -36,6 +42,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.chainId as ChainId,
     }),
 
+    //////////////////////////////
+    // EfpListPointer.resolver
+    //////////////////////////////
     resolver: t.field({
       description: "The resolver contract address.",
       type: "Address",
@@ -43,6 +52,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.resolver as NormalizedAddress,
     }),
 
+    //////////////////////////
+    // EfpListPointer.node
+    //////////////////////////
     node: t.field({
       description: "The ENS namehash whose `eth.efp.list` text record points at a list.",
       type: "Node",
@@ -50,6 +62,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.node as Node,
     }),
 
+    ////////////////////////////
+    // EfpListPointer.ensKey
+    ////////////////////////////
     ensKey: t.field({
       description: "The matched ENS text-record key (e.g. `eth.efp.list`).",
       type: "String",
@@ -57,6 +72,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.ensKey,
     }),
 
+    //////////////////////////////
+    // EfpListPointer.rawValue
+    //////////////////////////////
     rawValue: t.field({
       description: "The raw text-record value, kept verbatim.",
       type: "String",
@@ -64,6 +82,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.rawValue,
     }),
 
+    /////////////////////////////////
+    // EfpListPointer.listTokenId
+    /////////////////////////////////
     listTokenId: t.field({
       description: "Decoded list token id (decimal string).",
       type: "String",
@@ -71,6 +92,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.listTokenId,
     }),
 
+    /////////////////////////////////
+    // EfpListPointer.listContract
+    /////////////////////////////////
     listContract: t.field({
       description: "Decoded list contract address (defaults to the EFP ListRegistry on Base).",
       type: "Address",
@@ -78,6 +102,9 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.listContract as NormalizedAddress,
     }),
 
+    ////////////////////////////////
+    // EfpListPointer.listChainId
+    ////////////////////////////////
     listChainId: t.field({
       description: "Decoded list chain id (defaults to 8453 / Base).",
       type: "ChainId",
@@ -85,7 +112,14 @@ EfpListPointerRef.implement({
       resolve: (pointer) => pointer.listChainId as ChainId,
     }),
 
+    ////////////////////////////////
+    // EfpListPointer.createdAt
+    ////////////////////////////////
     createdAt: t.field({ type: "BigInt", nullable: false, resolve: (p) => p.createdAt }),
+
+    ////////////////////////////////
+    // EfpListPointer.updatedAt
+    ////////////////////////////////
     updatedAt: t.field({ type: "BigInt", nullable: false, resolve: (p) => p.updatedAt }),
   }),
 });

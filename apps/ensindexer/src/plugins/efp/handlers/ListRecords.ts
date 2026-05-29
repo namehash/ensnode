@@ -18,6 +18,9 @@ import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "../lib/pars
 
 const pluginName = PluginName.EFP;
 
+/**
+ * Registers the EFP `ListRecords` event handlers (ListOp, UpdateListMetadata).
+ */
 export default function () {
   // ListOp — opcode-dispatched add/remove of records and tags.
   addOnchainEventListener(

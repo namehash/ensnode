@@ -12,6 +12,9 @@ import { parseListStorageLocation } from "../lib/parse-list-storage-location";
 
 const pluginName = PluginName.EFP;
 
+/**
+ * Registers the EFP `ListRegistry` event handlers (Transfer, UpdateListStorageLocation).
+ */
 export default function () {
   // Transfer — mints/transfers a list NFT. Upsert the list row keyed by tokenId.
   addOnchainEventListener(

@@ -1,5 +1,9 @@
 import { builder } from "@/omnigraph-api/builder";
 
+//////////////////////
+// Inputs
+//////////////////////
+
 /**
  * Filters for the `efp.lists` connection.
  */
