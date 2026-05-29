@@ -104,7 +104,7 @@ The [Omnigraph API](/docs/integrate/omnigraph) supports both a Domain's _assigne
 ## Unnormalized names (ENSIP-15 not applied)
 
 :::danger[Normalization is left to you]
-The Subgraph does not apply [ENSIP-15](https://docs.ens.domains/ensip/15) name normalization. It returns label and name values as indexed, including unnormalized ones, with no signal about whether a value is normalized. Every consuming app has to implement normalization correctly and consistently — and the ones that don't display or match names incorrectly. ENSNode can [replace unnormalized labels](/docs/integrate/ens-subgraph/backwards-compatibility#never-normalize-labels-returned-by-ensnode) for safer handling.
+The Subgraph does not apply [ENSIP-15](https://docs.ens.domains/ensip/15) name normalization. It returns unnormalized labels and names, putting the burden on every consuming app to implement normalization correctly and consistently — and the ones that don't display or match names incorrectly. ENSNode [replaces unnormalized labels](/docs/integrate/ens-subgraph/backwards-compatibility#never-normalize-labels-returned-by-ensnode) for you, so you automatically enjoy safer handling.
 :::
 
 :::tip[Interpreted Names by default]
@@ -210,7 +210,8 @@ Beyond the data-model limitations, the Subgraph's auto-generated GraphQL API lea
 - **Caching** has no first-class story for ENS-shaped data.
 - **Indexing status** is hard to reason about — there's no clear, app-friendly signal for how far behind realtime the data is (e.g. worst-case distance from the chain head).
 - **Joins** in the auto-generated API perform certain multi-entity operations in ways that don't match what apps actually need, forcing client-side stitching.
-  :::
+
+:::
 
 :::tip[Relay pagination and caching]
 The [Omnigraph API](/docs/integrate/omnigraph) supports [Relay Connections](https://relay.dev/graphql/connections.htm) for paginated resources; your app gets lightning-quick infinite scroll with minimal work! If using [`enskit` (React)](/docs/integrate/integration-options/enskit), the `useOmnigraphQuery` hook comes with Omnigraph-specific local cache directives for instant resolution of cacheable values. The Omnigraph's idiomatic GraphQL API also aims to match consumer query patterns as closely as possible to negate complex and bespoke client-side logic; if your use-case isn't yet supported, [open an issue on GitHub](https://github.com/namehash/ensnode/issues/new).
