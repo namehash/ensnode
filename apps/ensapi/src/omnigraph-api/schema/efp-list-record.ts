@@ -88,7 +88,8 @@ EfpListRecordRef.implement({
     // EfpListRecord.recordData
     //////////////////////////////
     recordData: t.field({
-      description: "The followed/target address. Valid for address records (recordType 1).",
+      description:
+        "The followed/target address (the record's 20-byte payload). EFP indexes only address records (recordType 1).",
       type: "Address",
       nullable: false,
       resolve: (record) => record.recordData as NormalizedAddress,

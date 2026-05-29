@@ -840,7 +840,9 @@ type EfpListRecord {
   """The full record payload (version | type | data)."""
   record: Hex!
 
-  """The followed/target address. Valid for address records (recordType 1)."""
+  """
+  The followed/target address (the record's 20-byte payload). EFP indexes only address records (recordType 1).
+  """
   recordData: Address!
 
   """The EFP record type (1 = address)."""
