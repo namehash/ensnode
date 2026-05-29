@@ -3,6 +3,7 @@ import type { Hex } from "viem";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
+import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { EFP_LIST_METADATA_KEYS, EFP_OPCODE } from "../constants";
@@ -65,9 +66,15 @@ export default function () {
           if (!tagOp) return;
           const id = listRecordId(chainId, contractAddress, slot, tagOp.record);
           const record = await context.ensDb.find(ensIndexerSchema.efpListRecords, { id });
-          // Tags attach to a record that is in the list; ops can arrive in any order, so ignore a
-          // tag for an absent record. A record's tags are a set — skip duplicates.
-          if (!record || record.tags.includes(tagOp.tag)) return;
+          // Ops for a (chain, contract, slot) are indexed in on-chain order, so a tag with no record
+          // means the record is not in the list: removed earlier, or (anomalously) never added.
+          // Either way there is no row to tag; warn rather than drop it silently.
+          if (!record) {
+            logger.warn({ msg: `EFP ADD_TAG references absent record ${id} (tag "${tagOp.tag}")` });
+            return;
+          }
+          // A record's tags are a set, so skip a tag it already carries.
+          if (record.tags.includes(tagOp.tag)) return;
           await context.ensDb
             .update(ensIndexerSchema.efpListRecords, { id })
             .set({ tags: [...record.tags, tagOp.tag] });
@@ -79,7 +86,13 @@ export default function () {
           if (!tagOp) return;
           const id = listRecordId(chainId, contractAddress, slot, tagOp.record);
           const record = await context.ensDb.find(ensIndexerSchema.efpListRecords, { id });
-          if (!record || !record.tags.includes(tagOp.tag)) return;
+          if (!record) {
+            logger.warn({
+              msg: `EFP REMOVE_TAG references absent record ${id} (tag "${tagOp.tag}")`,
+            });
+            return;
+          }
+          if (!record.tags.includes(tagOp.tag)) return;
           await context.ensDb
             .update(ensIndexerSchema.efpListRecords, { id })
             .set({ tags: record.tags.filter((existing) => existing !== tagOp.tag) });
