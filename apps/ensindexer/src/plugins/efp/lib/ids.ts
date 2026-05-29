@@ -45,13 +45,3 @@ export function pendingListMetadataId(
 ): string {
   return `${chainId}-${contractAddress.toLowerCase()}-${slot.toLowerCase()}-${key}`;
 }
-
-/** `efp_ens_list_pointers` key: a `(resolver, node, ensKey)` on a chain. */
-export function ensListPointerId(
-  chainId: number,
-  resolver: Hex,
-  node: Hex,
-  ensKey: string,
-): string {
-  return `${chainId}-${resolver.toLowerCase()}-${node.toLowerCase()}-${ensKey}`;
-}

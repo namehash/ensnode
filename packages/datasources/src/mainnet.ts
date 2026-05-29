@@ -548,12 +548,7 @@ export default {
   },
 
   /**
-   * EFP `ListRecords` Datasource on Ethereum mainnet, plus the `Resolver` subscription used to
-   * index the `eth.efp.list` ENS text record into `efp_ens_list_pointers`.
-   *
-   * The `Resolver` has no pinned address: any contract that emits the standard `TextChanged` event
-   * is in scope (the EFP plugin narrows to the `eth.efp.list` key), mirroring how Protocol
-   * Acceleration indexes Resolvers.
+   * EFP `ListRecords` Datasource on Ethereum mainnet.
    */
   [DatasourceNames.EFPEthereum]: {
     chain: mainnet,
@@ -561,11 +556,6 @@ export default {
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
-        startBlock: 20820000,
-      },
-      Resolver: {
-        abi: ResolverABI,
-        // EFP launch on mainnet; `eth.efp.list` text records are not expected before this.
         startBlock: 20820000,
       },
     },

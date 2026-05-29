@@ -6,12 +6,11 @@ the `PLUGINS` environment variable (mainnet ENS namespace only).
 
 ## Contracts indexed
 
-| Contract          | Chain(s)                         | Events                                     |
-| ----------------- | -------------------------------- | ------------------------------------------ |
-| `ListRegistry`    | Base                             | `Transfer`, `UpdateListStorageLocation`    |
-| `AccountMetadata` | Base                             | `UpdateAccountMetadata`                    |
-| `ListRecords`     | Base, Optimism, Ethereum mainnet | `ListOp`, `UpdateListMetadata`             |
-| `Resolver`        | Ethereum mainnet (address-less)  | `TextChanged` (filtered to `eth.efp.list`) |
+| Contract          | Chain(s)                         | Events                                  |
+| ----------------- | -------------------------------- | --------------------------------------- |
+| `ListRegistry`    | Base                             | `Transfer`, `UpdateListStorageLocation` |
+| `AccountMetadata` | Base                             | `UpdateAccountMetadata`                 |
+| `ListRecords`     | Base, Optimism, Ethereum mainnet | `ListOp`, `UpdateListMetadata`          |
 
 Contract coordinates live in the `EFPBase` / `EFPOptimism` / `EFPEthereum` datasources
 (`packages/datasources/src/mainnet.ts`).
@@ -25,13 +24,14 @@ Contract coordinates live in the `EFPBase` / `EFPOptimism` / `EFPEthereum` datas
 - `efp_account_metadata` — `(address, key) → value` (today only `primary-list`).
 - `efp_pending_list_metadata` — staging for `user`/`manager` updates that arrive before the list's
   storage location is known (the `ListRecords` and `ListRegistry` contracts emit independently).
-- `efp_ens_list_pointers` — `eth.efp.list` text record → EFP list NFT, joinable to ENS names by `node`.
 
 ## Notes
 
 - EFP defines a single List Storage Location type (onchain EVM contract); see
   [the spec](https://docs.efp.app/design/list-storage-location/). Other location types decode to
   `null` and are skipped.
-- The `eth.efp.list` Resolver subscription indexes `TextChanged` across every mainnet resolver
-  (address-less, like Protocol Acceleration) and filters to the well-known key in the handler.
-- Byte decoders for list ops, storage locations, and the text record live in `lib/` with unit tests.
+- The canonical association of an Ethereum account with an EFP list is its **primary list**: the
+  `primary-list` account-metadata value, valid only when the named list's `user` role matches the
+  account (see [Account Metadata](https://docs.efp.app/design/account-metadata/)). ENSApi's Omnigraph
+  `efp.primaryList(address)` resolves and validates it.
+- Byte decoders for list ops and storage locations live in `lib/` with unit tests.

@@ -1,9 +1,8 @@
 /**
  * The EFP plugin indexes the Ethereum Follow Protocol:
  * - list NFTs (`ListRegistry` on Base),
- * - list records & tags (`ListRecords` on Base, Optimism, and Ethereum mainnet),
- * - account metadata (`AccountMetadata` on Base), and
- * - the `eth.efp.list` ENS text record (any Resolver on Ethereum mainnet).
+ * - list records & tags (`ListRecords` on Base, Optimism, and Ethereum mainnet), and
+ * - account metadata (`AccountMetadata` on Base).
  *
  * EFP does not consume ENS protocol data; it indexes its own contracts, sourced from the EFP
  * datasources, which exist only on the `mainnet` ENS namespace — so the plugin can only be
@@ -88,19 +87,6 @@ export default createPlugin({
             ),
           },
           abi: efpBase.contracts.ListRecords.abi,
-        },
-        // Address-less Resolver subscription on Ethereum mainnet for the `eth.efp.list` text record.
-        // Matches any contract emitting the standard TextChanged event (Ponder factory-mode); the
-        // handler filters to the well-known key.
-        [namespaceContract(pluginName, "Resolver")]: {
-          chain: {
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              efpEthereum.chain.id,
-              efpEthereum.contracts.Resolver,
-            ),
-          },
-          abi: efpEthereum.contracts.Resolver.abi,
         },
       },
     });

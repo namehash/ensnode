@@ -179,39 +179,3 @@ export const efpPendingListMetadata = onchainTable(
     idx_slot: index().on(t.chainId, t.contractAddress, t.slot),
   }),
 );
-
-/**
- * Cross-correlation between an ENS namehash and a specific EFP list NFT, populated from
- * `Resolver.TextChanged` events whose key is `eth.efp.list`. The same node can have pointers via
- * multiple resolvers, so they are not collapsed at write time. An empty / unparseable text record
- * deletes the row, matching the ENS convention that an empty text record is unset.
- */
-export const efpEnsListPointers = onchainTable(
-  "efp_ens_list_pointers",
-  (t) => ({
-    /** Composite key "chainId-resolver-node-ensKey". */
-    id: t.text().primaryKey(),
-    /** Chain id of the resolver contract that emitted the TextChanged event. */
-    chainId: t.int8({ mode: "number" }).notNull(),
-    /** Resolver contract address. */
-    resolver: t.hex().notNull(),
-    /** ENS namehash of the name whose text record this is. */
-    node: t.hex().notNull(),
-    /** The ENS text-record key matched on (e.g. "eth.efp.list"). */
-    ensKey: t.text().notNull(),
-    /** Raw text-record value, kept verbatim for re-parsing. */
-    rawValue: t.text().notNull(),
-    /** Decoded list token id (decimal string). */
-    listTokenId: t.text().notNull(),
-    /** Decoded list contract address (defaults to the EFP ListRegistry on Base). */
-    listContract: t.hex().notNull(),
-    /** Decoded list chain id (defaults to 8453 / Base for plain decimal values). */
-    listChainId: t.int8({ mode: "number" }).notNull(),
-    createdAt: t.bigint().notNull(),
-    updatedAt: t.bigint().notNull(),
-  }),
-  (t) => ({
-    idx_node: index().on(t.node),
-    idx_listTokenId: index().on(t.listTokenId),
-  }),
-);
