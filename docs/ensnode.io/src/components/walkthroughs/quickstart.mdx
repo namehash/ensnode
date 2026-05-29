@@ -47,6 +47,10 @@ const HelloWorldQuery = graphql(`
 const result = await client.omnigraph.query({ query: HelloWorldQuery });
 ```
 
+<Aside type="note" title="BeautifiedName">
+  `beautified` is the display-ready form of the Canonical Name — its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`) — so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
+</Aside>
+
 <LinkCard
   title="Full enssdk Integration Documentation"
   href="/docs/integrate/integration-options/enssdk"

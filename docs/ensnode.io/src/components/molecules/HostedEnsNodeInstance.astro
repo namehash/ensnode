@@ -1,9 +1,9 @@
 ---
 import ENSAdminCTAButton from "@components/atoms/ENSAdminCTAButton.astro";
-import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 
 const { instanceURL, connectWithENSAdminURL, namespace, ensVersions, plugins } = Astro.props;
-const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
+const hostedEnsNodeVersion = snapshot.version;
 ---
 
 <table style={{ marginTop: "0" }}>
