@@ -48,6 +48,8 @@
   --aside-caution-color: #eab308;
   --aside-note-color: #3b82f6;
   --aside-tip-color: #16a34a;
+
+  --color-yellow-700: #a16207;
 }
 
 /* Starlight-specific variable overrides using global tokens */
