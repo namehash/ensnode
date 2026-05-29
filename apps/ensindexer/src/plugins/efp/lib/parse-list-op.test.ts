@@ -26,12 +26,13 @@ describe("parseListOp", () => {
 });
 
 describe("parseRecord", () => {
-  it("decodes an address record (recordType=1) and truncates to 20 bytes", () => {
+  it("decodes an address record (recordType=1), truncating trailing junk to the canonical 22 bytes", () => {
     // recordVersion=01, recordType=01, address=20 bytes of 0xaa, then junk
     const data = `0x0101${"aa".repeat(20)}deadbeef` as `0x${string}`;
     expect(parseRecord(data)).toEqual({
       version: 1,
       recordType: 1,
+      record: `0x0101${"aa".repeat(20)}` as `0x${string}`,
       recordData: `0x${"aa".repeat(20)}` as `0x${string}`,
     });
   });
@@ -41,13 +42,9 @@ describe("parseRecord", () => {
     expect(parseRecord(data)).toBeNull();
   });
 
-  it("keeps the full body for non-address record types", () => {
+  it("returns null for reserved (non-address) record types", () => {
     const data = ("0x0102" + "01020304") as `0x${string}`;
-    expect(parseRecord(data)).toEqual({
-      version: 1,
-      recordType: 2,
-      recordData: "0x01020304",
-    });
+    expect(parseRecord(data)).toBeNull();
   });
 
   it("returns null for unparseable input", () => {

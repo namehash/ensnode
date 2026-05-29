@@ -6,12 +6,10 @@
  *   ListOp.op   := version (1) | opcode (1) | data (variable)
  *   record      := recordVersion (1) | recordType (1) | recordData (variable)
  *
- * `recordData` is the address-only payload for the only record type EFP uses in production
- * (`recordType === 1`). The api-v2 reference indexer truncates that payload to exactly 20 bytes
- * because users sometimes append junk after the address; we preserve that behaviour.
- *
- * Tag operations use `record (22 bytes) | tag (UTF-8 bytes)` inside `data`. The 22-byte record
- * prefix is the `recordVersion (1) | recordType (1) | address (20)` triple.
+ * EFP defines only `recordType === 1` (a 20-byte address); reserved types are skipped. Managers
+ * sometimes append junk after the 20-byte address, so type-1 records are truncated to the canonical
+ * `recordVersion (1) | recordType (1) | address (20)` 22-byte prefix (api-v2 parity) and keyed by it
+ * — so tag/remove ops, which carry that same prefix, always resolve to the same record.
  *
  * @see https://docs.efp.app/design/list-ops/
  */
@@ -32,6 +30,12 @@ export interface ParsedRecord {
   version: number;
   /** Record type (1 = 20-byte address). */
   recordType: number;
+  /**
+   * Canonical record bytes `recordVersion | recordType | address` (0x-prefixed, exactly 22 bytes),
+   * with any trailing junk after the 20-byte address truncated. Records are keyed by this so tag
+   * and remove ops, which carry the same 22-byte prefix, resolve to the same row.
+   */
+  record: Hex;
   /** Record payload (0x-prefixed). For `recordType === 1` this is exactly 20 bytes. */
   recordData: Hex;
 }
@@ -66,8 +70,11 @@ export function parseListOp(op: Hex | string | null | undefined): ParsedListOp |
 }
 
 /**
- * Decode a record payload as it appears inside an ADD_RECORD list op. For `recordType === 1` the
- * returned `recordData` is exactly 20 bytes, matching api-v2's truncation rule.
+ * Decode a record payload as it appears inside an ADD_RECORD / REMOVE_RECORD list op. Returns
+ * `null` for anything other than an address record (`recordType === 1`) carrying a full 20-byte
+ * address: reserved record types and shorter payloads are unrecoverable and skipped, since EFP
+ * defines only the address record and the API has no representation for the others. Trailing junk
+ * after the 20-byte address is truncated, and `record` is the resulting canonical 22-byte prefix.
  */
 export function parseRecord(data: Hex | string | null | undefined): ParsedRecord | null {
   if (!data || typeof data !== "string" || !isHex(data)) return null;
@@ -77,21 +84,20 @@ export function parseRecord(data: Hex | string | null | undefined): ParsedRecord
   const version = parseInt(bytes.slice(0, 2), 16);
   const recordType = parseInt(bytes.slice(2, 4), 16);
 
-  let body: string;
-  if (recordType === 1) {
-    // Truncate to 20 bytes (40 hex chars) and reject short inputs.
-    body = bytes.slice(
-      RECORD_HEADER_HEX_LENGTH,
-      RECORD_HEADER_HEX_LENGTH + ADDRESS_RECORD_HEX_BODY_LENGTH,
-    );
-    if (body.length < ADDRESS_RECORD_HEX_BODY_LENGTH) return null;
-  } else {
-    body = bytes.slice(RECORD_HEADER_HEX_LENGTH);
-  }
+  // EFP defines only record type 1 (a 20-byte address); types 0 and 2-255 are reserved.
+  if (recordType !== 1) return null;
+
+  // Truncate any trailing junk to the 20-byte address; reject inputs missing the full address.
+  const body = bytes.slice(
+    RECORD_HEADER_HEX_LENGTH,
+    RECORD_HEADER_HEX_LENGTH + ADDRESS_RECORD_HEX_BODY_LENGTH,
+  );
+  if (body.length < ADDRESS_RECORD_HEX_BODY_LENGTH) return null;
 
   return {
     version,
     recordType,
+    record: `0x${bytes.slice(0, RECORD_PREFIX_HEX_LENGTH)}` as Hex,
     recordData: `0x${body}` as Hex,
   };
 }
