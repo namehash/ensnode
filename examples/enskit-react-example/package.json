@@ -12,8 +12,8 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
-    "enskit": "1.13.1",
-    "enssdk": "1.13.1",
+    "enskit": "1.15.1",
+    "enssdk": "1.15.1",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "^7.6.1"
