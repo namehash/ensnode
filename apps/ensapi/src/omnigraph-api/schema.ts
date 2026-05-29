@@ -9,7 +9,6 @@ import "./schema/efp";
 import "./schema/efp-account-metadata";
 import "./schema/efp-inputs";
 import "./schema/efp-list";
-import "./schema/efp-list-pointer";
 import "./schema/efp-list-record";
 import "./schema/event";
 import "./schema/label";

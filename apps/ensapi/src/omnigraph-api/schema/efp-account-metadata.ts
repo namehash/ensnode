@@ -20,13 +20,6 @@ export const EfpAccountMetadataRef = builder.loadableObjectRef("EfpAccountMetada
 
 export type EfpAccountMetadata = Exclude<typeof EfpAccountMetadataRef.$inferType, string>;
 
-/**
- * The synthetic primary key used by `efp_account_metadata`. Mirrors the EFP plugin's
- * `accountMetadataId` (`${address}-${key}`, with a lowercased address).
- */
-export const efpAccountMetadataId = (address: NormalizedAddress, key: string): string =>
-  `${address}-${key}`;
-
 //////////////////////
 // EfpAccountMetadata
 //////////////////////

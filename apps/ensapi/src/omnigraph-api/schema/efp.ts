@@ -7,19 +7,31 @@ import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import {
-  EfpAccountMetadataRef,
-  efpAccountMetadataId,
-} from "@/omnigraph-api/schema/efp-account-metadata";
+import { EfpAccountMetadataRef } from "@/omnigraph-api/schema/efp-account-metadata";
+import { efpAccountMetadataId } from "@/omnigraph-api/schema/efp-ids";
 import {
   EfpAccountMetadatasWhereInput,
-  EfpListPointersWhereInput,
   EfpListRecordsWhereInput,
   EfpListsWhereInput,
 } from "@/omnigraph-api/schema/efp-inputs";
 import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
-import { EfpListPointerRef } from "@/omnigraph-api/schema/efp-list-pointer";
 import { EfpListRecordRef } from "@/omnigraph-api/schema/efp-list-record";
+
+/** The EFP AccountMetadata key whose value is an account's primary-list token id. */
+const EFP_PRIMARY_LIST_KEY = "primary-list";
+
+/**
+ * Decode a `primary-list` account-metadata value (an abi-encoded `uint256` token id) into a
+ * decimal token-id string, or `null` if it isn't a well-formed value.
+ */
+function decodePrimaryListTokenId(value: Hex): string | null {
+  if (!value || value === "0x") return null;
+  try {
+    return BigInt(value).toString();
+  } catch {
+    return null;
+  }
+}
 
 /**
  * `EfpQuery` namespaces all Ethereum Follow Protocol (EFP) queries under a single root `efp` field,
@@ -156,39 +168,41 @@ EfpQueryRef.implement({
     }),
 
     ///////////////////////
-    // efp.listPointers
+    // efp.primaryList
     ///////////////////////
-    listPointers: t.connection({
+    primaryList: t.field({
       description:
-        "Find ENS -> EFP list correlations (the `eth.efp.list` text record), by ENS node or list token id.",
-      type: EfpListPointerRef,
-      args: { where: t.arg({ type: EfpListPointersWhereInput }) },
-      resolve: (_parent, args) => {
+        "The account's validated primary EFP list: the list named by the account's `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.",
+      type: EfpListRef,
+      nullable: true,
+      args: { address: t.arg({ type: "Address", required: true }) },
+      resolve: async (_parent, args) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        const where = args.where;
-        const scope = and(
-          where?.node ? eq(ensIndexerSchema.efpEnsListPointers.node, where.node as Hex) : undefined,
-          where?.listTokenId
-            ? eq(ensIndexerSchema.efpEnsListPointers.listTokenId, where.listTokenId)
-            : undefined,
-        );
 
-        return lazyConnection({
-          totalCount: () => ensDb.$count(ensIndexerSchema.efpEnsListPointers, scope),
-          connection: () =>
-            resolveCursorConnection(
-              { ...ID_PAGINATED_CONNECTION_ARGS, args },
-              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                ensDb
-                  .select()
-                  .from(ensIndexerSchema.efpEnsListPointers)
-                  .where(
-                    and(scope, paginateBy(ensIndexerSchema.efpEnsListPointers.id, before, after)),
-                  )
-                  .orderBy(orderPaginationBy(ensIndexerSchema.efpEnsListPointers.id, inverted))
-                  .limit(limit),
+        const [metadata] = await ensDb
+          .select({ value: ensIndexerSchema.efpAccountMetadata.value })
+          .from(ensIndexerSchema.efpAccountMetadata)
+          .where(
+            eq(
+              ensIndexerSchema.efpAccountMetadata.id,
+              efpAccountMetadataId(args.address, EFP_PRIMARY_LIST_KEY),
             ),
-        });
+          )
+          .limit(1);
+        if (!metadata) return null;
+
+        const tokenId = decodePrimaryListTokenId(metadata.value);
+        if (tokenId === null) return null;
+
+        // EFP "Primary List" is only valid when the named list's `user` role matches the account.
+        const [list] = await ensDb
+          .select({ user: ensIndexerSchema.efpLists.user })
+          .from(ensIndexerSchema.efpLists)
+          .where(eq(ensIndexerSchema.efpLists.tokenId, tokenId))
+          .limit(1);
+        if (!list || list.user?.toLowerCase() !== args.address) return null;
+
+        return tokenId;
       },
     }),
   }),

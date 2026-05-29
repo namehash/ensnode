@@ -43,17 +43,3 @@ export const EfpAccountMetadatasWhereInput = builder.inputType("EfpAccountMetada
     address: t.field({ type: "Address", required: true, description: "The account address." }),
   }),
 });
-
-/**
- * Filters for the `efp.listPointers` connection.
- */
-export const EfpListPointersWhereInput = builder.inputType("EfpListPointersWhereInput", {
-  description: "Filter EFP ENS list pointers (the `eth.efp.list` text-record correlation).",
-  fields: (t) => ({
-    node: t.field({ type: "Node", description: "The ENS namehash that claims a list." }),
-    listTokenId: t.field({
-      type: "String",
-      description: "Find the ENS names that point at this list token id.",
-    }),
-  }),
-});

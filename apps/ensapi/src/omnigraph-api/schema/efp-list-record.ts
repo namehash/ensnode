@@ -4,6 +4,8 @@ import type { ChainId, NormalizedAddress } from "enssdk";
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { efpStorageLocationId } from "@/omnigraph-api/schema/efp-ids";
+import { EfpListRef } from "@/omnigraph-api/schema/efp-list";
 
 export const EfpListRecordRef = builder.loadableObjectRef("EfpListRecord", {
   load: (ids: string[]) => {
@@ -119,5 +121,28 @@ EfpListRecordRef.implement({
     // EfpListRecord.createdAt
     /////////////////////////////
     createdAt: t.field({ type: "BigInt", nullable: false, resolve: (record) => record.createdAt }),
+
+    ///////////////////////
+    // EfpListRecord.list
+    ///////////////////////
+    list: t.field({
+      description: "The EFP list this record belongs to.",
+      type: EfpListRef,
+      nullable: true,
+      resolve: async (record) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        const [mapping] = await ensDb
+          .select({ tokenId: ensIndexerSchema.efpListStorageLocations.tokenId })
+          .from(ensIndexerSchema.efpListStorageLocations)
+          .where(
+            eq(
+              ensIndexerSchema.efpListStorageLocations.id,
+              efpStorageLocationId(record.chainId, record.contractAddress, record.slot),
+            ),
+          )
+          .limit(1);
+        return mapping?.tokenId ?? null;
+      },
+    }),
   }),
 });
