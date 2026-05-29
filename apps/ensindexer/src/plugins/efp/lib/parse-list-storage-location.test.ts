@@ -58,4 +58,19 @@ describe("parseListStorageLocation", () => {
     const overlong = `0x0101${chainIdHex}${"ab".repeat(20)}${"cd".repeat(32)}ff` as `0x${string}`;
     expect(parseListStorageLocation(overlong)).toBeNull();
   });
+
+  it("returns null for a chain id outside the JS-safe integer range", () => {
+    const addressHex = "ab".repeat(20);
+    const slotHex = "cd".repeat(32);
+    // chainId = 2^60, far above 2^53 - 1
+    const bigChainIdHex = (2n ** 60n).toString(16).padStart(64, "0");
+    expect(
+      parseListStorageLocation(`0x0101${bigChainIdHex}${addressHex}${slotHex}` as `0x${string}`),
+    ).toBeNull();
+    // chainId = 0 is not a valid chain
+    const zeroChainIdHex = "0".repeat(64);
+    expect(
+      parseListStorageLocation(`0x0101${zeroChainIdHex}${addressHex}${slotHex}` as `0x${string}`),
+    ).toBeNull();
+  });
 });
