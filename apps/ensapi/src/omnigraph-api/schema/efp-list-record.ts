@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { ChainId, NormalizedAddress } from "enssdk";
 
 import di from "@/di";
@@ -100,21 +100,7 @@ EfpListRecordRef.implement({
       description: 'UTF-8 tags attached to this record (e.g. "close-friend", "block").',
       type: ["String"],
       nullable: false,
-      resolve: async (record) => {
-        const { ensDb, ensIndexerSchema } = di.context;
-        const rows = await ensDb
-          .select({ tag: ensIndexerSchema.efpListRecordTags.tag })
-          .from(ensIndexerSchema.efpListRecordTags)
-          .where(
-            and(
-              eq(ensIndexerSchema.efpListRecordTags.chainId, record.chainId),
-              eq(ensIndexerSchema.efpListRecordTags.contractAddress, record.contractAddress),
-              eq(ensIndexerSchema.efpListRecordTags.slot, record.slot),
-              eq(ensIndexerSchema.efpListRecordTags.record, record.record),
-            ),
-          );
-        return rows.map((row) => row.tag);
-      },
+      resolve: (record) => record.tags,
     }),
 
     /////////////////////////////

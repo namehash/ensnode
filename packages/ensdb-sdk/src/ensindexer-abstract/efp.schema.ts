@@ -2,10 +2,12 @@
  * EFP (Ethereum Follow Protocol) abstract schema.
  *
  * Tables are prefixed `efp_` and indexed by the EFP plugin
- * (`apps/ensindexer/src/plugins/efp`). The first five tables mirror the
- * ethereumfollowprotocol/api-v2 reference indexer's data model; `efp_list_storage_locations`
- * is added so list-metadata events can resolve the owning list NFT by primary key
- * (rather than scanning `efp_lists` by storage location).
+ * (`apps/ensindexer/src/plugins/efp`). The model mirrors the ethereumfollowprotocol/api-v2
+ * reference indexer with two adaptations for ENSNode's primary-key-only access pattern:
+ * `efp_list_storage_locations` is a reverse index so list-metadata events resolve the owning list
+ * NFT by primary key (rather than scanning `efp_lists` by storage location), and a record's tags
+ * are embedded as an array on `efp_list_records` (rather than a separate join table) so removing a
+ * record is a single primary-key delete instead of a non-PK cascade.
  *
  * Timestamps are Unix-seconds `bigint`s (the block timestamp), matching ENSNode convention.
  */
@@ -80,9 +82,10 @@ export const efpListStorageLocations = onchainTable(
 );
 
 /**
- * One row per record currently in a list. The `record` column is the full record payload
- * (`version | type | data`), so two records that decode to the same address but with different
- * headers remain distinct.
+ * One row per record currently in a list. The `record` column is the canonical
+ * `version | type | address` 22-byte prefix (any trailing junk after the address truncated), which
+ * is also what tag and remove ops reference. A record's `tags` are embedded here as a set of UTF-8
+ * strings, so removing a record drops its tags in the same primary-key delete.
  */
 export const efpListRecords = onchainTable(
   "efp_list_records",
@@ -92,7 +95,7 @@ export const efpListRecords = onchainTable(
     chainId: t.int8({ mode: "number" }).notNull(),
     contractAddress: t.hex().notNull(),
     slot: t.hex().notNull(),
-    /** Full record payload (`version | type | data`). */
+    /** Canonical record prefix `version | type | address` (22 bytes). */
     record: t.hex().notNull(),
     /** Decoded record header — version byte. */
     recordVersion: t.integer().notNull(),
@@ -100,35 +103,13 @@ export const efpListRecords = onchainTable(
     recordType: t.integer().notNull(),
     /** Decoded record data. For address records (type 1), exactly 20 bytes. */
     recordData: t.hex().notNull(),
+    /** UTF-8 tags attached to this record (a set; NUL bytes stripped). */
+    tags: t.text().array().notNull(),
     createdAt: t.bigint().notNull(),
   }),
   (t) => ({
     idx_slot: index().on(t.chainId, t.contractAddress, t.slot),
     idx_recordData: index().on(t.recordData),
-  }),
-);
-
-/**
- * Many-to-many between records and UTF-8 tags.
- */
-export const efpListRecordTags = onchainTable(
-  "efp_list_record_tags",
-  (t) => ({
-    /** Composite key "chainId-contractAddress-slot-record-tag". */
-    id: t.text().primaryKey(),
-    chainId: t.int8({ mode: "number" }).notNull(),
-    contractAddress: t.hex().notNull(),
-    slot: t.hex().notNull(),
-    /** Record prefix `version | type | address` (22 bytes). */
-    record: t.hex().notNull(),
-    /** UTF-8 tag (NUL bytes stripped). */
-    tag: t.text().notNull(),
-    createdAt: t.bigint().notNull(),
-  }),
-  (t) => ({
-    idx_slot: index().on(t.chainId, t.contractAddress, t.slot),
-    idx_record: index().on(t.record),
-    idx_tag: index().on(t.tag),
   }),
 );
 

@@ -20,7 +20,8 @@ Contract coordinates live in the `EFPBase` / `EFPOptimism` / `EFPEthereum` datas
 - `efp_lists` — one row per list NFT (owner / user / manager + decoded storage location).
 - `efp_list_storage_locations` — reverse index from a storage location `(chainId, contract, slot)`
   to its list NFT, so `UpdateListMetadata` resolves the owning list by primary key.
-- `efp_list_records` / `efp_list_record_tags` — the records in each list and their tags.
+- `efp_list_records` — the records in each list, each carrying its set of UTF-8 `tags` as an
+  embedded array (so removing a record drops its tags in the same primary-key delete).
 - `efp_account_metadata` — `(address, key) → value` (today only `primary-list`).
 - `efp_pending_list_metadata` — staging for `user`/`manager` updates that arrive before the list's
   storage location is known (the `ListRecords` and `ListRegistry` contracts emit independently).

@@ -1,4 +1,3 @@
-import { and, eq } from "drizzle-orm";
 import type { Hex } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -7,12 +6,7 @@ import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engine
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { EFP_LIST_METADATA_KEYS, EFP_OPCODE } from "../constants";
-import {
-  listRecordId,
-  listRecordTagId,
-  pendingListMetadataId,
-  storageLocationId,
-} from "../lib/ids";
+import { listRecordId, pendingListMetadataId, storageLocationId } from "../lib/ids";
 import { metadataValueToAddress } from "../lib/list-metadata";
 import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "../lib/parse-list-op";
 
@@ -41,14 +35,15 @@ export default function () {
           await context.ensDb
             .insert(ensIndexerSchema.efpListRecords)
             .values({
-              id: listRecordId(chainId, contractAddress, slot, parsed.data),
+              id: listRecordId(chainId, contractAddress, slot, record.record),
               chainId,
               contractAddress,
               slot,
-              record: parsed.data,
+              record: record.record,
               recordVersion: record.version,
               recordType: record.recordType,
               recordData: record.recordData,
+              tags: [],
               createdAt: ts,
             })
             .onConflictDoNothing();
@@ -56,50 +51,38 @@ export default function () {
         }
 
         case EFP_OPCODE.REMOVE_RECORD: {
+          const record = parseRecord(parsed.data);
+          if (!record) return;
+          // The record's embedded `tags` are removed with the row, so this is a single PK delete.
           await context.ensDb.delete(ensIndexerSchema.efpListRecords, {
-            id: listRecordId(chainId, contractAddress, slot, parsed.data),
+            id: listRecordId(chainId, contractAddress, slot, record.record),
           });
-          // Cascade-delete this record's tags. A record has many (record, tag) rows, so this is not
-          // expressible via the PK-only Store API — use the raw drizzle escape hatch. This flushes
-          // ponder's cache to Postgres, accepted because record removals are infrequent relative to
-          // additions (cf. protocol-acceleration Resolver VersionChanged).
-          await context.ensDb.sql
-            .delete(ensIndexerSchema.efpListRecordTags)
-            .where(
-              and(
-                eq(ensIndexerSchema.efpListRecordTags.chainId, chainId),
-                eq(ensIndexerSchema.efpListRecordTags.contractAddress, contractAddress),
-                eq(ensIndexerSchema.efpListRecordTags.slot, slot),
-                eq(ensIndexerSchema.efpListRecordTags.record, parsed.data.toLowerCase() as Hex),
-              ),
-            );
           return;
         }
 
         case EFP_OPCODE.ADD_TAG: {
           const tagOp = parseTagOp(parsed.data);
           if (!tagOp) return;
+          const id = listRecordId(chainId, contractAddress, slot, tagOp.record);
+          const record = await context.ensDb.find(ensIndexerSchema.efpListRecords, { id });
+          // Tags attach to a record that is in the list; ops can arrive in any order, so ignore a
+          // tag for an absent record. A record's tags are a set — skip duplicates.
+          if (!record || record.tags.includes(tagOp.tag)) return;
           await context.ensDb
-            .insert(ensIndexerSchema.efpListRecordTags)
-            .values({
-              id: listRecordTagId(chainId, contractAddress, slot, tagOp.record, tagOp.tag),
-              chainId,
-              contractAddress,
-              slot,
-              record: tagOp.record,
-              tag: tagOp.tag,
-              createdAt: ts,
-            })
-            .onConflictDoNothing();
+            .update(ensIndexerSchema.efpListRecords, { id })
+            .set({ tags: [...record.tags, tagOp.tag] });
           return;
         }
 
         case EFP_OPCODE.REMOVE_TAG: {
           const tagOp = parseTagOp(parsed.data);
           if (!tagOp) return;
-          await context.ensDb.delete(ensIndexerSchema.efpListRecordTags, {
-            id: listRecordTagId(chainId, contractAddress, slot, tagOp.record, tagOp.tag),
-          });
+          const id = listRecordId(chainId, contractAddress, slot, tagOp.record);
+          const record = await context.ensDb.find(ensIndexerSchema.efpListRecords, { id });
+          if (!record || !record.tags.includes(tagOp.tag)) return;
+          await context.ensDb
+            .update(ensIndexerSchema.efpListRecords, { id })
+            .set({ tags: record.tags.filter((existing) => existing !== tagOp.tag) });
           return;
         }
 
