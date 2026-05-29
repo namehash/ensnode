@@ -7,6 +7,13 @@ import { RpcConfig, type RpcConfigs } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
+ * Per-chain override of Ponder's maximum `eth_getLogs` block range, keyed by chain id.
+ *
+ * @invariant Each value is a positive integer.
+ */
+export type EthGetLogsBlockRanges = Map<ChainId, number>;
+
+/**
  * The complete runtime configuration for an ENSIndexer instance.
  */
 export interface EnsIndexerConfig {
@@ -103,6 +110,24 @@ export interface EnsIndexerConfig {
    *   of {@link rpcConfigs} is a superset of {@link indexedChainIds}.
    */
   rpcConfigs: RpcConfigs;
+
+  /**
+   * Optional per-chain override of Ponder's maximum `eth_getLogs` block range, keyed by chain id
+   * (configured via the `ETH_GET_LOGS_BLOCK_RANGE_<chainId>` environment variable).
+   *
+   * Ponder auto-determines a safe `eth_getLogs` block range per chain; this lets operators set a
+   * manual cap for RPC providers that reject Ponder's default range.
+   * @see https://ponder.sh/docs/config/chains#eth_getlogs-block-range
+   *
+   * Like {@link rpcConfigs}, this is a performance/connection tuning knob only: it does NOT affect
+   * indexed data and is intentionally excluded from the indexing-behavior Build ID. Changing it does
+   * not trigger a re-index.
+   *
+   * Invariants:
+   * - Keys are a subset of the chains in the configured {@link namespace}. Chains without an entry
+   *   use Ponder's auto-determined range.
+   */
+  ethGetLogsBlockRanges: EthGetLogsBlockRanges;
 
   /**
    * Indexed Chain IDs

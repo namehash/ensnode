@@ -17,6 +17,10 @@ import type { ENSIndexerEnvironment } from "@/config/environment";
 import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
 
 import { derive_indexedChainIds } from "./derived-params";
+import {
+  buildEthGetLogsBlockRangesFromEnv,
+  EthGetLogsBlockRangesSchema,
+} from "./eth-get-logs-block-ranges";
 import type { EnsIndexerConfig } from "./types";
 import {
   invariant_globalBlockrange,
@@ -89,6 +93,7 @@ const IsSubgraphCompatibleSchema =
 const ENSIndexerConfigSchema = z
   .object({
     rpcConfigs: RpcConfigsSchema,
+    ethGetLogsBlockRanges: EthGetLogsBlockRangesSchema,
 
     namespace: ENSNamespaceSchema,
     plugins: PluginsSchema,
@@ -163,14 +168,16 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
     // apply the partial defaults to the provided env
     const env = applyDefaults(_env, environmentDefaults);
 
-    // and use that to generate rpcConfigs
+    // and use that to build the per-chain rpcConfigs and eth_getLogs block ranges
     const namespace = ENSNamespaceSchema.parse(env.NAMESPACE);
     const rpcConfigs = buildRpcConfigsFromEnv(env, namespace);
+    const ethGetLogsBlockRanges = buildEthGetLogsBlockRangesFromEnv(env, namespace);
 
     // parse/validate with ENSIndexerConfigSchema
     return ENSIndexerConfigSchema.parse({
       namespace: env.NAMESPACE,
       rpcConfigs,
+      ethGetLogsBlockRanges,
 
       plugins: env.PLUGINS,
       isSubgraphCompatible: env.SUBGRAPH_COMPAT,

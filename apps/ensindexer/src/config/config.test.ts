@@ -299,6 +299,24 @@ describe("config (with base env)", () => {
     });
   });
 
+  describe(".ethGetLogsBlockRanges", () => {
+    it("defaults to an empty Map when no ETH_GET_LOGS_BLOCK_RANGE_* var is set", async () => {
+      const config = await getConfig();
+      expect(config.ethGetLogsBlockRanges).toStrictEqual(new Map());
+    });
+
+    it("includes a chain's configured eth_getLogs block range", async () => {
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE_1", "1000");
+      const config = await getConfig();
+      expect(config.ethGetLogsBlockRanges).toStrictEqual(new Map([[1, 1000]]));
+    });
+
+    it("throws if a configured eth_getLogs block range is not a positive integer", async () => {
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE_1", "abc");
+      await expect(getConfig()).rejects.toThrow(/positive integer/i);
+    });
+  });
+
   describe(".chains", () => {
     it("returns the chains if it is a valid object (one HTTP protocol URL)", async () => {
       vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
