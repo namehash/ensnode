@@ -3522,166 +3522,6 @@ const introspection = {
       },
       {
         "kind": "OBJECT",
-        "name": "EfpListPointer",
-        "fields": [
-          {
-            "name": "chainId",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ChainId"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "createdAt",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "BigInt"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "ensKey",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "listChainId",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ChainId"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "listContract",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Address"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "listTokenId",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Node"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "rawValue",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "resolver",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Address"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "updatedAt",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "BigInt"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "EfpListPointersWhereInput",
-        "inputFields": [
-          {
-            "name": "listTokenId",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String"
-            }
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Node"
-            }
-          }
-        ],
-        "isOneOf": false
-      },
-      {
-        "kind": "OBJECT",
         "name": "EfpListRecord",
         "fields": [
           {
@@ -3728,6 +3568,15 @@ const introspection = {
                 "kind": "SCALAR",
                 "name": "String"
               }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "list",
+            "type": {
+              "kind": "OBJECT",
+              "name": "EfpList"
             },
             "args": [],
             "isDeprecated": false
@@ -4033,51 +3882,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "listPointers",
-            "type": {
-              "kind": "OBJECT",
-              "name": "EfpQueryListPointersConnection"
-            },
-            "args": [
-              {
-                "name": "after",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "before",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "first",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "last",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "where",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "EfpListPointersWhereInput"
-                }
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "listRecords",
             "type": {
               "kind": "OBJECT",
@@ -4166,6 +3970,26 @@ const introspection = {
               }
             ],
             "isDeprecated": false
+          },
+          {
+            "name": "primaryList",
+            "type": {
+              "kind": "OBJECT",
+              "name": "EfpList"
+            },
+            "args": [
+              {
+                "name": "address",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Address"
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
           }
         ],
         "interfaces": []
@@ -4242,86 +4066,6 @@ const introspection = {
               "ofType": {
                 "kind": "OBJECT",
                 "name": "EfpAccountMetadata"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "EfpQueryListPointersConnection",
-        "fields": [
-          {
-            "name": "edges",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "EfpQueryListPointersConnectionEdge"
-                  }
-                }
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "pageInfo",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "totalCount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "EfpQueryListPointersConnectionEdge",
-        "fields": [
-          {
-            "name": "cursor",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "EfpListPointer"
               }
             },
             "args": [],

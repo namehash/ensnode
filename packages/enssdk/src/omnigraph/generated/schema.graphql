@@ -789,51 +789,6 @@ type EfpList {
 }
 
 """
-A correlation between an ENS name (via its `eth.efp.list` text record) and an EFP list.
-"""
-type EfpListPointer {
-  """Chain id of the resolver that emitted the text record."""
-  chainId: ChainId!
-  createdAt: BigInt!
-
-  """The matched ENS text-record key (e.g. `eth.efp.list`)."""
-  ensKey: String!
-  id: String!
-
-  """Decoded list chain id (defaults to 8453 / Base)."""
-  listChainId: ChainId!
-
-  """
-  Decoded list contract address (defaults to the EFP ListRegistry on Base).
-  """
-  listContract: Address!
-
-  """Decoded list token id (decimal string)."""
-  listTokenId: String!
-
-  """The ENS namehash whose `eth.efp.list` text record points at a list."""
-  node: Node!
-
-  """The raw text-record value, kept verbatim."""
-  rawValue: String!
-
-  """The resolver contract address."""
-  resolver: Address!
-  updatedAt: BigInt!
-}
-
-"""
-Filter EFP ENS list pointers (the `eth.efp.list` text-record correlation).
-"""
-input EfpListPointersWhereInput {
-  """Find the ENS names that point at this list token id."""
-  listTokenId: String
-
-  """The ENS namehash that claims a list."""
-  node: Node
-}
-
-"""
 A single record within an EFP list (an address it follows), with its tags.
 """
 type EfpListRecord {
@@ -844,6 +799,9 @@ type EfpListRecord {
   contractAddress: Address!
   createdAt: BigInt!
   id: String!
+
+  """The EFP list this record belongs to."""
+  list: EfpList
 
   """The full record payload (version | type | data)."""
   record: Hex!
@@ -907,17 +865,17 @@ type EfpQuery {
   list(tokenId: String!): EfpList
 
   """
-  Find ENS -> EFP list correlations (the `eth.efp.list` text record), by ENS node or list token id.
-  """
-  listPointers(after: String, before: String, first: Int, last: Int, where: EfpListPointersWhereInput): EfpQueryListPointersConnection
-
-  """
   Find EFP list records. Filter by `recordData` to answer 'which lists follow this address?'.
   """
   listRecords(after: String, before: String, first: Int, last: Int, where: EfpListRecordsWhereInput): EfpQueryListRecordsConnection
 
   """Find EFP lists, optionally filtered by owner / user / manager."""
   lists(after: String, before: String, first: Int, last: Int, where: EfpListsWhereInput): EfpQueryListsConnection
+
+  """
+  The account's validated primary EFP list: the list named by the account's `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.
+  """
+  primaryList(address: Address!): EfpList
 }
 
 type EfpQueryAccountMetadatasConnection {
@@ -929,17 +887,6 @@ type EfpQueryAccountMetadatasConnection {
 type EfpQueryAccountMetadatasConnectionEdge {
   cursor: String!
   node: EfpAccountMetadata!
-}
-
-type EfpQueryListPointersConnection {
-  edges: [EfpQueryListPointersConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type EfpQueryListPointersConnectionEdge {
-  cursor: String!
-  node: EfpListPointer!
 }
 
 type EfpQueryListRecordsConnection {
