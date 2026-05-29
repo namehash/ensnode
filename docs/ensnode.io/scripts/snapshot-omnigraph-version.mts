@@ -25,6 +25,7 @@ if (!version) {
   console.error("Usage: pnpm omnigraph:snapshot <version>");
   process.exit(1);
 }
+// Sanity-check the CLI argument; <version> is only written to snapshot.json, not used as a path.
 if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
   console.error(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
   process.exit(1);
