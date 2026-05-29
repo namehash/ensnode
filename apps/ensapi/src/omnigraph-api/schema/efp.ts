@@ -16,22 +16,7 @@ import {
 } from "@/omnigraph-api/schema/efp-inputs";
 import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
 import { EfpListRecordRef } from "@/omnigraph-api/schema/efp-list-record";
-
-/** The EFP AccountMetadata key whose value is an account's primary-list token id. */
-const EFP_PRIMARY_LIST_KEY = "primary-list";
-
-/**
- * Decode a `primary-list` account-metadata value (an abi-encoded `uint256` token id) into a
- * decimal token-id string, or `null` if it isn't a well-formed value.
- */
-function decodePrimaryListTokenId(value: Hex): string | null {
-  if (!value || value === "0x") return null;
-  try {
-    return BigInt(value).toString();
-  } catch {
-    return null;
-  }
-}
+import { resolveValidatedPrimaryListTokenId } from "@/omnigraph-api/schema/efp-primary-list";
 
 /**
  * `EfpQuery` namespaces all Ethereum Follow Protocol (EFP) queries under a single root `efp` field,
@@ -176,36 +161,7 @@ EfpQueryRef.implement({
       type: EfpListRef,
       nullable: true,
       args: { address: t.arg({ type: "Address", required: true }) },
-      resolve: async (_parent, args) => {
-        const { ensDb, ensIndexerSchema } = di.context;
-
-        const [metadata] = await ensDb
-          .select({ value: ensIndexerSchema.efpAccountMetadata.value })
-          .from(ensIndexerSchema.efpAccountMetadata)
-          .where(
-            eq(
-              ensIndexerSchema.efpAccountMetadata.id,
-              efpAccountMetadataId(args.address, EFP_PRIMARY_LIST_KEY),
-            ),
-          )
-          .limit(1);
-        if (!metadata) return null;
-
-        const tokenId = decodePrimaryListTokenId(metadata.value);
-        if (tokenId === null) return null;
-
-        // EFP "Primary List" is only valid when the named list's `user` role matches the account.
-        const [list] = await ensDb
-          .select({ user: ensIndexerSchema.efpLists.user })
-          .from(ensIndexerSchema.efpLists)
-          .where(eq(ensIndexerSchema.efpLists.tokenId, tokenId))
-          .limit(1);
-        // Compare case-insensitively: although the Address scalar already normalizes `args.address`,
-        // lower-casing both sides keeps validation independent of input casing.
-        if (!list?.user || list.user.toLowerCase() !== args.address.toLowerCase()) return null;
-
-        return tokenId;
-      },
+      resolve: (_parent, args) => resolveValidatedPrimaryListTokenId(args.address),
     }),
   }),
 });
