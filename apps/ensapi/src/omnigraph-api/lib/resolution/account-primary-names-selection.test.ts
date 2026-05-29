@@ -92,9 +92,9 @@ describe("buildAccountPrimaryNamesSelection", () => {
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([60, 0]);
   });
 
-  it("extracts coin type from primaryName(by: { chain: ETH })", () => {
+  it("extracts coin type from primaryName(by: { chain: ETHEREUM })", () => {
     const info = resolveInfoForAccountResolveSubselection(
-      'primaryName(by: { chain: "ETH" }) { name }',
+      'primaryName(by: { chain: "ETHEREUM" }) { name }',
     );
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([60]);
   });

@@ -534,13 +534,13 @@ ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the EN
 @see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
 """
 enum ENSIP19Chain {
-  ARB1
+  ARBITRUM
   BASE
   DEFAULT
-  ETH
+  ETHEREUM
   LINEA
-  OP
-  SCR
+  OPTIMISM
+  SCROLL
 }
 
 """An ENS protocol version."""

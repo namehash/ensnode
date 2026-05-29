@@ -367,7 +367,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     query AccountPrimaryNameByChain($address: Address!) {
       account(by: { address: $address }) {
         resolve {
-          primaryName(by: { chain: ETH }) {
+          primaryName(by: { chain: ETHEREUM }) {
             coinType
             chain
             name { interpreted beautified }
@@ -423,7 +423,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     query AccountPrimaryNamesByChains($address: Address!) {
       account(by: { address: $address }) {
         resolve {
-          primaryNames(where: { chains: [ETH, BASE] }) {
+          primaryNames(where: { chains: [ETHEREUM, BASE] }) {
             coinType
             chain
             name { interpreted beautified }
@@ -478,7 +478,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toEqual({
       account: {
         resolve: {
-          primaryName: { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+          primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
         },
       },
     });
@@ -492,7 +492,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toEqual({
       account: {
         resolve: {
-          primaryName: { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+          primaryName: { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
         },
       },
     });
@@ -545,7 +545,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
     ).resolves.toEqual({
       account: {
         resolve: {
-          primaryName: { coinType: 60, chain: "ETH", name: null },
+          primaryName: { coinType: 60, chain: "ETHEREUM", name: null },
         },
       },
     });
@@ -561,7 +561,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
       account: {
         resolve: {
           primaryNames: [
-            { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+            { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
             { coinType: 2147492101, chain: "BASE", name: null },
           ],
         },
@@ -578,7 +578,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
       account: {
         resolve: {
           primaryNames: [
-            { coinType: 60, chain: "ETH", name: TEST_ETH_NAME },
+            { coinType: 60, chain: "ETHEREUM", name: TEST_ETH_NAME },
             { coinType: 2147492101, chain: "BASE", name: null },
           ],
         },

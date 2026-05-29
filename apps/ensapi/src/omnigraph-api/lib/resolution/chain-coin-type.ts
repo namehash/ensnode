@@ -3,35 +3,34 @@ import { coinNameToTypeMap } from "@ensdomains/address-encoder";
 import type { CoinType } from "enssdk";
 
 /**
- * address-encoder coin names for ENSIP-19 primary-name chains.
+ * address-encoder coin names for ENSIP-19 primary-name chains, paired with their canonical
+ * GraphQL `ENSIP19Chain` enum values.
  */
 export const ENSIP19_COIN_NAMES = [
-  "default",
-  "eth",
-  "base",
-  "op",
-  "arb1",
-  "linea",
-  "scr",
-] as const satisfies readonly CoinName[];
+  ["default", "DEFAULT"],
+  ["eth", "ETHEREUM"],
+  ["base", "BASE"],
+  ["op", "OPTIMISM"],
+  ["arb1", "ARBITRUM"],
+  ["linea", "LINEA"],
+  ["scr", "SCROLL"],
+] as const satisfies readonly (readonly [CoinName, string])[];
+
+export type ENSIP19CoinName = (typeof ENSIP19_COIN_NAMES)[number][0];
+export type ENSIP19ChainValue = (typeof ENSIP19_COIN_NAMES)[number][1];
+
+export const ENSIP19_CHAIN_VALUES = ENSIP19_COIN_NAMES.map(
+  ([, chain]) => chain,
+) as unknown as readonly [ENSIP19ChainValue, ...ENSIP19ChainValue[]];
 
 /** Canonical ENSIP-9 coin types for ENSIP-19 primary-name chains. */
 export const ENSIP19_COIN_TYPES = ENSIP19_COIN_NAMES.map(
-  (name) => coinNameToTypeMap[name] as CoinType,
+  ([coinName]) => coinNameToTypeMap[coinName] as CoinType,
 );
 
-export type ENSIP19ChainValue = Uppercase<(typeof ENSIP19_COIN_NAMES)[number]>;
-
-export const ENSIP19_CHAIN_VALUES = ENSIP19_COIN_NAMES.map((coinName) =>
-  coinName.toUpperCase(),
-) as unknown as readonly [ENSIP19ChainValue, ...ENSIP19ChainValue[]];
-
 const ensip19ChainToCoinName = Object.fromEntries(
-  ENSIP19_CHAIN_VALUES.map((chain) => [
-    chain,
-    chain.toLowerCase() as (typeof ENSIP19_COIN_NAMES)[number],
-  ]),
-) as Record<ENSIP19ChainValue, (typeof ENSIP19_COIN_NAMES)[number]>;
+  ENSIP19_COIN_NAMES.map(([coinName, chain]) => [chain, coinName]),
+) as Record<ENSIP19ChainValue, ENSIP19CoinName>;
 
 /** Maps an `ENSIP19Chain` enum value to its canonical ENSIP-9 coin type. */
 export const ensip19ChainToCoinType = (chain: ENSIP19ChainValue): CoinType =>
@@ -39,7 +38,7 @@ export const ensip19ChainToCoinType = (chain: ENSIP19ChainValue): CoinType =>
 
 /** Maps a coin type to an `ENSIP19Chain` enum value, or null when not ENSIP-19 supported. */
 export const coinTypeToEnsip19Chain = (coinType: CoinType): ENSIP19ChainValue | null => {
-  const coinName = ENSIP19_COIN_NAMES.find((name) => coinNameToTypeMap[name] === coinType);
-  if (!coinName) return null;
-  return coinName.toUpperCase() as ENSIP19ChainValue;
+  const entry = ENSIP19_COIN_NAMES.find(([coinName]) => coinNameToTypeMap[coinName] === coinType);
+  if (!entry) return null;
+  return entry[1];
 };
