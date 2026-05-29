@@ -1,7 +1,7 @@
 ---
 import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
-import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import ENSAdminCTAButton from "@components/atoms/ENSAdminCTAButton.astro";
 import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
 
 import StaticExamplePlaygroundHint from "./StaticExamplePlaygroundHint.astro";
@@ -20,20 +20,13 @@ const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceNamespace, static
 const actionBarClass =
   "flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)] px-4 py-4 dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)] md:px-5";
 const actionButtonClass =
-  "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]";
+  "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-medium text-[var(--sl-color-black)] transition-colors hover:bg-[var(--sl-color-accent-high)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]";
 ---
 
 <div class={actionBarClass}>
   {
     variant === "ensadmin" ? (
-      <a
-        class={`${actionButtonClass} no-underline`}
-        href={adminUrl}
-        target="_blank"
-        rel="noopener noreferrer">
-        <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
-        Run in ENSAdmin
-      </a>
+      adminUrl && <ENSAdminCTAButton ensAdminHref={adminUrl} text="Run in ENSAdmin" />
     ) : (
       <button type="button" class={actionButtonClass} data-static-example-id={staticExampleId}>
         <StackBlitzLogo className="h-5 w-auto shrink-0" />
