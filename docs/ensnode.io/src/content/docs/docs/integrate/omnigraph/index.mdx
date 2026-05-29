@@ -25,13 +25,13 @@ The Omnigraph is delivered by [ENSApi](/docs/services/ensapi) on top of the inde
 
 When ENSv2 launches in **Summer 2026**, the two protocol versions coexist — and the Omnigraph keeps your app working against both, at the same time, with no code changes. Both ENSv1 and ENSv2 Domains are indexed concurrently and exposed through a unified schema.
 
-Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a typed result whether that name lives in ENSv1 or ENSv2 — your code doesn't have to know or care which.
+Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a typed result whether that name lives in ENSv1 or ENSv2 — your code doesn't have to know which at query time.
 
 ## What you get
 
 - **Multichain in one query** — mainnet `.eth`, Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) all in a single unified schema.
 - **Typed, no footguns** — names and labels are normalized for you, so rendering them in a UI is trivial.
-- **The full ENS picture** — resolve records, search Domains, list what an address owns, read a complete history of onchain Events, and inspect Permissions.
+- **The full ENS picture** — resolve records, search Domains, list what an address owns, read a complete history of onchain Events, inspect Permissions, and more.
 - **Built-in pagination** — Relay-spec connections mean infinite scroll and stable pagination work out of the box.
 
 ## Your first query

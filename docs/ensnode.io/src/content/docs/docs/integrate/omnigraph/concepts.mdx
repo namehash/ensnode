@@ -7,7 +7,7 @@ sidebar:
 
 import { CardGrid, LinkCard, Aside } from "@astrojs/starlight/components";
 
-The [ENS Omnigraph API](/docs/integrate/omnigraph) abstracts away most of ENS's protocol complexity, but a handful of concepts explain _how_ it presents ENSv1 and ENSv2 through a single unified schema. You don't need these to send your first query, only to understand how the Omnigraph represents the state of the ENS protocol.
+The [ENS Omnigraph API](/docs/integrate/omnigraph) abstracts away most of the complexity of the ENS protocol. There are still some core concepts that are useful to learn. These concepts will help you understand _how_ the Omnigraph presents ENSv1 and ENSv2 through a single unified schema. You don't need to master these concepts to build your first Omnigraph query, but as you level-up to building more advanced ENS features in your app, these concepts will help you to understand how the Omnigraph represents the state of the ENS protocol.
 
 <Aside type="caution" title="ENSv1 and ENSv2 will coexist">
   Unlike traditional software, **ENSv2 does not replace ENSv1**. When ENSv2 launches, ENSv1 doesn't
@@ -285,7 +285,7 @@ query InterpretedNames {
 
 ### InterpretedName with Encoded LabelHash Example
 
-As noted above, an InterpretedName may contain Labels that are [Encoded LabelHashes](/docs/reference/terminology#encoded-labelhash), meaning that the human-readable Label isn't known or isn't normalizable. The Omnigraph still supports referencing Domains by these InterpretedNames, like so:
+As noted above, an InterpretedName may contain Labels that are [Encoded LabelHashes](/docs/reference/terminology#encoded-labelhash), meaning that the human-readable Label isn't known or isn't normalized. The Omnigraph still supports referencing Domains by these InterpretedNames, like so:
 
 ```graphql title="example.gql"
 query ByInterpretedName {
@@ -307,9 +307,9 @@ ENS Forward Resolution does _not_ support Encoded LabelHashes in names, so while
 
 ### BeautifiedNames and BeautifiedLabels
 
-For some labels and names, there exists an [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form, where certain normalized characters are 'beautified' into their _un-normalized_ but prettier forms.
+For some labels and names, there exists an [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form, where certain normalized characters are 'beautified' into their _un-normalized_ but _normalizable_ prettier forms.
 
-For example, the InterpretedName `♾.eth` (normalized) would be beautified to `♾️.eth` (un-normalized). All name and label fields in the Omnigraph provide a `beautified` variant which can be used for display.
+For example, the InterpretedName `♾.eth` (normalized) would be beautified to `♾️.eth` (un-normalized, but is normalizable back to `♾.eth`). All name and label fields in the Omnigraph provide a `beautified` variant which can be used for display.
 
 ```graphql title="example.gql"
 query Beautified {
