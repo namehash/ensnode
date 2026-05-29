@@ -23,6 +23,12 @@ describe("parseListOp", () => {
     expect(parseListOp("0x01")).toBeNull(); // only version, no opcode
     expect(parseListOp("hello")).toBeNull();
   });
+
+  it("returns null for unsupported op versions (only version 1 is defined)", () => {
+    // version=0x02, opcode=0x01 (ADD_RECORD) — must not be dispatched through v1 handlers
+    const op = `0x0201${"0101"}${A20.slice(2)}` as `0x${string}`;
+    expect(parseListOp(op)).toBeNull();
+  });
 });
 
 describe("parseRecord", () => {
@@ -44,6 +50,12 @@ describe("parseRecord", () => {
 
   it("returns null for reserved (non-address) record types", () => {
     const data = ("0x0102" + "01020304") as `0x${string}`;
+    expect(parseRecord(data)).toBeNull();
+  });
+
+  it("returns null for unsupported record versions (only version 1 is defined)", () => {
+    // recordVersion=0x02, recordType=0x01, 20-byte address
+    const data = `0x0201${"aa".repeat(20)}` as `0x${string}`;
     expect(parseRecord(data)).toBeNull();
   });
 

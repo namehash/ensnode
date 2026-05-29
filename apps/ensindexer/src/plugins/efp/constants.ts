@@ -1,4 +1,13 @@
 /**
+ * The only EFP protocol version defined today. The leading `version` byte of a `ListOp`, a
+ * `ListRecord`, and a List Storage Location must all equal this — other versions use a schema this
+ * indexer doesn't understand, so they are skipped rather than decoded as v1.
+ *
+ * @see https://docs.efp.app/design/list-ops/
+ */
+export const EFP_VERSION = 1;
+
+/**
  * EFP `ListOp` opcodes (op version 0x01), encoded as `version | opcode | data`.
  *
  * @see https://docs.efp.app/design/list-ops/

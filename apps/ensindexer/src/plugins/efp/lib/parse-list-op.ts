@@ -16,6 +16,8 @@
 
 import { type Hex, isHex } from "viem";
 
+import { EFP_VERSION } from "../constants";
+
 export interface ParsedListOp {
   /** Top-level list-op version. Always 1 today. */
   version: number;
@@ -62,8 +64,13 @@ export function parseListOp(op: Hex | string | null | undefined): ParsedListOp |
   if (op.length < 6) return null;
 
   const bytes = op.slice(2);
+  const version = parseInt(bytes.slice(0, 2), 16);
+  // The version byte defines the op schema; EFP defines only version 1. Reject other versions so a
+  // future/unknown schema is never dispatched through the v1 opcode handlers.
+  if (version !== EFP_VERSION) return null;
+
   return {
-    version: parseInt(bytes.slice(0, 2), 16),
+    version,
     opcode: parseInt(bytes.slice(2, 4), 16),
     data: `0x${bytes.slice(4)}` as Hex,
   };
@@ -84,6 +91,8 @@ export function parseRecord(data: Hex | string | null | undefined): ParsedRecord
   const version = parseInt(bytes.slice(0, 2), 16);
   const recordType = parseInt(bytes.slice(2, 4), 16);
 
+  // The version byte is part of the record's decoding contract; EFP defines only version 1.
+  if (version !== EFP_VERSION) return null;
   // EFP defines only record type 1 (a 20-byte address); types 0 and 2-255 are reserved.
   if (recordType !== 1) return null;
 

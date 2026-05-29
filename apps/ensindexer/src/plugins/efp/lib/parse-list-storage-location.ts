@@ -9,12 +9,15 @@
  *   contractAddress  (20 bytes)
  *   slot             (32 bytes)
  *
- * Total: 86 bytes. Any other `locationType` is reserved/unknown and decodes to `null`.
+ * Total: 86 bytes. Decodes to `null` unless the payload is exactly this 86-byte, version-1,
+ * `locationType == 1` shape; other versions, location types, or lengths are reserved/unknown.
  *
  * @see https://docs.efp.app/design/list-storage-location/
  */
 
 import { type Hex, isHex } from "viem";
+
+import { EFP_VERSION } from "../constants";
 
 export interface ParsedListStorageLocation {
   version: number;
@@ -42,8 +45,12 @@ export function parseListStorageLocation(
   const version = parseInt(bytes.slice(0, HEADER_END / 2), 16);
   const locationType = parseInt(bytes.slice(HEADER_END / 2, HEADER_END), 16);
 
+  // The version byte defines the payload schema, and a locationType-1 location is a fixed 86-byte
+  // shape; reject other versions, location types, or lengths rather than remap the list from a
+  // partially- or over-decoded payload.
+  if (version !== EFP_VERSION) return null;
   if (locationType !== LOCATION_TYPE_ONCHAIN) return null;
-  if (bytes.length < SLOT_END) return null;
+  if (bytes.length !== SLOT_END) return null;
 
   return {
     version,

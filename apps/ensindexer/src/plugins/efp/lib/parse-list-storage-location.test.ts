@@ -44,4 +44,18 @@ describe("parseListStorageLocation", () => {
     // locationType = 0xff — reserved/unknown.
     expect(parseListStorageLocation(`0x01ff${tail}` as `0x${string}`)).toBeNull();
   });
+
+  it("returns null for unsupported versions (only version 1 is defined)", () => {
+    const chainIdHex = (1).toString(16).padStart(64, "0");
+    // version = 0x02 — a future schema must not remap the list via the v1 decoder.
+    const payload = `0x0201${chainIdHex}${"ab".repeat(20)}${"cd".repeat(32)}` as `0x${string}`;
+    expect(parseListStorageLocation(payload)).toBeNull();
+  });
+
+  it("returns null for overlong payloads (must be exactly 86 bytes)", () => {
+    const chainIdHex = (1).toString(16).padStart(64, "0");
+    // 86 well-formed bytes + 1 trailing byte = 87 bytes.
+    const overlong = `0x0101${chainIdHex}${"ab".repeat(20)}${"cd".repeat(32)}ff` as `0x${string}`;
+    expect(parseListStorageLocation(overlong)).toBeNull();
+  });
 });
