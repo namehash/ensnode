@@ -118,6 +118,9 @@ export default function () {
       const chainId = context.chain.id;
       const contractAddress = event.log.address.toLowerCase() as Hex;
       const slot = slotToBytes32(event.args.slot);
+      // `metadataValueToAddress` returns null for a non-20-byte value, which is written through
+      // below to clear the role: a malformed `user`/`manager` value is no longer a valid address,
+      // so reflecting "no role" is faithful to on-chain state (intentional clear-on-malformed).
       const address = metadataValueToAddress(event.args.value);
 
       const mapping = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
@@ -135,7 +138,7 @@ export default function () {
         return;
       }
 
-      // No list points at this storage location yet — stage it for the storage-location handler.
+      // No list points at this storage location yet; stage it for the storage-location handler.
       const id = pendingListMetadataId(chainId, contractAddress, slot, key);
       await context.ensDb
         .insert(ensIndexerSchema.efpPendingListMetadata)
