@@ -8,12 +8,8 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-:::danger[The ENS Subgraph is legacy — do not build new ENS apps on it!]
-The ENS Subgraph predates ENSv2 and **cannot** carry your app into it. Three reasons it falls short:
-
-- **ENSv1 only — instantly out of date.** The Subgraph data model has no concept of ENSv2. The moment ENSv2 launches (Summer 2026), apps still reading the Subgraph are looking at a stale, partial view of ENS.
-- **Single-chain only — misses most names.** The Subgraph indexes a single chain, so it never sees Basenames (`.base.eth`), Lineanames (`.linea.eth`), or 3DNS names (`.box`).
-- **No resolution — and slow when you bolt it on.** The Subgraph doesn't resolve names; you're left making your own RPC calls, which are slow, hard to batch, and easy to get wrong.
+:::danger[🚨 The ENS Subgraph is not ENSv2 compatible]
+The ENS Subgraph **fundamentally fails as a source of ENS data as soon as ENSv2 launches.**
 
 <LinkCard
   title="Key Limitations 🚨"
