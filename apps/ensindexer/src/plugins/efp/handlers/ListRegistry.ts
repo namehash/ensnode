@@ -77,6 +77,7 @@ export default function () {
       // mapping. (Relies on the mint Transfer preceding this event — both fire on the ListRegistry
       // on Base, so the list row already exists.)
       const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { tokenId });
+      let moved = false;
       if (
         existing?.listStorageLocationChainId != null &&
         existing.listStorageLocationContractAddress != null &&
@@ -88,6 +89,7 @@ export default function () {
           existing.listStorageLocationSlot,
         );
         if (oldLocationId !== newLocationId) {
+          moved = true;
           await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, {
             id: oldLocationId,
           });
@@ -99,6 +101,10 @@ export default function () {
         listStorageLocationChainId: chainId,
         listStorageLocationContractAddress: contractAddress,
         listStorageLocationSlot: slot,
+        // `user`/`manager` are scoped to the storage location. On a move, clear them so the list is
+        // not attributed to the old location's roles; pending metadata for the new location
+        // repopulates them in the drain below.
+        ...(moved ? { user: null, manager: null } : {}),
         updatedAt: ts,
       });
 
