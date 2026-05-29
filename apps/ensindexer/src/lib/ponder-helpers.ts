@@ -101,7 +101,7 @@ export function chainsConnectionConfig(
 
   if (!rpcConfig) {
     throw new Error(
-      `chainsConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
+      `chainsConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available. rpcConfig specifies the following chain ids: [${[...config.rpcConfigs.keys()].join(", ")}].`,
     );
   }
 
