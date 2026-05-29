@@ -4,14 +4,14 @@ import cc from "classcat";
 
 export const ENSEcosystemMembers = () => {
   return (
-    <section className="w-full h-fit box-border flex flex-col flex-nowrap justify-center items-center gap-5 sm:gap-10 px-5 py-7 sm:px-8 sm:py-[60px] bg-[#011A25] border-t border-white/10">
+    <section className="w-full h-fit box-border flex flex-col flex-nowrap justify-center items-center gap-5 sm:gap-10 px-5 py-7 sm:px-8 sm:pt-10 sm:pb-5 bg-[#011A25]">
       <p className="text-sm sm:text-base leading-6 font-normal text-white text-balance">
         Join the ENS ecosystem that builds on ENSNode
       </p>
       {Array.from(ENS_ECOSYSTEM_MEMBERS.entries()).map(([type, membersByType]) => (
         <div
           key={`ens-ecosystem-members-${type}`}
-          className="max-w-[1216px] w-full h-fit flex flex-row flex-wrap justify-center items-center gap-6 gap-y-5 sm:gap-8 sm:gap-y-10"
+          className="max-w-[1216px] w-full h-fit flex flex-row flex-wrap justify-center items-center gap-6 gap-y-5 sm:gap-8 sm:gap-y-10 relative z-20"
         >
           {membersByType.map((member: ENSEcosystemMemberDisplayData) => (
             <Tooltip
