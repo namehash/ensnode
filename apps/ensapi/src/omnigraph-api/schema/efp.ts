@@ -200,7 +200,9 @@ EfpQueryRef.implement({
           .from(ensIndexerSchema.efpLists)
           .where(eq(ensIndexerSchema.efpLists.tokenId, tokenId))
           .limit(1);
-        if (!list || list.user?.toLowerCase() !== args.address) return null;
+        // Compare case-insensitively: although the Address scalar already normalizes `args.address`,
+        // lower-casing both sides keeps validation independent of input casing.
+        if (!list?.user || list.user.toLowerCase() !== args.address.toLowerCase()) return null;
 
         return tokenId;
       },
