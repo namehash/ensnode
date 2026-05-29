@@ -1,0 +1,207 @@
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, eq } from "drizzle-orm";
+import type { Hex } from "viem";
+
+import di from "@/di";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import {
+  EfpAccountMetadataRef,
+  efpAccountMetadataId,
+} from "@/omnigraph-api/schema/efp-account-metadata";
+import {
+  EfpAccountMetadatasWhereInput,
+  EfpListPointersWhereInput,
+  EfpListRecordsWhereInput,
+  EfpListsWhereInput,
+} from "@/omnigraph-api/schema/efp-inputs";
+import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
+import { EfpListPointerRef } from "@/omnigraph-api/schema/efp-list-pointer";
+import { EfpListRecordRef } from "@/omnigraph-api/schema/efp-list-record";
+
+/**
+ * `EfpQuery` namespaces all Ethereum Follow Protocol (EFP) queries under a single root `efp` field,
+ * keeping the EFP surface self-contained and the Query root uncluttered.
+ */
+const EfpQueryRef = builder.objectRef<Record<string, never>>("EfpQuery");
+
+EfpQueryRef.implement({
+  description: "Queries for Ethereum Follow Protocol (EFP) data.",
+  fields: (t) => ({
+    ///////////////
+    // efp.list
+    ///////////////
+    list: t.field({
+      description: "Get an EFP list by its NFT token id.",
+      type: EfpListRef,
+      nullable: true,
+      args: { tokenId: t.arg({ type: "String", required: true }) },
+      resolve: (_parent, args) => args.tokenId,
+    }),
+
+    ///////////////
+    // efp.lists
+    ///////////////
+    lists: t.connection({
+      description: "Find EFP lists, optionally filtered by owner / user / manager.",
+      type: EfpListRef,
+      args: { where: t.arg({ type: EfpListsWhereInput }) },
+      resolve: (_parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        const where = args.where;
+        const scope = and(
+          where?.owner ? eq(ensIndexerSchema.efpLists.owner, where.owner as Hex) : undefined,
+          where?.user ? eq(ensIndexerSchema.efpLists.user, where.user as Hex) : undefined,
+          where?.manager ? eq(ensIndexerSchema.efpLists.manager, where.manager as Hex) : undefined,
+        );
+
+        return lazyConnection({
+          totalCount: () => ensDb.$count(ensIndexerSchema.efpLists, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...TOKEN_ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                ensDb
+                  .select()
+                  .from(ensIndexerSchema.efpLists)
+                  .where(and(scope, paginateBy(ensIndexerSchema.efpLists.tokenId, before, after)))
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpLists.tokenId, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
+
+    /////////////////////
+    // efp.listRecords
+    /////////////////////
+    listRecords: t.connection({
+      description:
+        "Find EFP list records. Filter by `recordData` to answer 'which lists follow this address?'.",
+      type: EfpListRecordRef,
+      args: { where: t.arg({ type: EfpListRecordsWhereInput }) },
+      resolve: (_parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        const where = args.where;
+        const scope = and(
+          where?.recordData
+            ? eq(ensIndexerSchema.efpListRecords.recordData, where.recordData as Hex)
+            : undefined,
+          where?.recordType != null
+            ? eq(ensIndexerSchema.efpListRecords.recordType, where.recordType)
+            : undefined,
+        );
+
+        return lazyConnection({
+          totalCount: () => ensDb.$count(ensIndexerSchema.efpListRecords, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                ensDb
+                  .select()
+                  .from(ensIndexerSchema.efpListRecords)
+                  .where(and(scope, paginateBy(ensIndexerSchema.efpListRecords.id, before, after)))
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpListRecords.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
+
+    /////////////////////////
+    // efp.accountMetadata
+    /////////////////////////
+    accountMetadata: t.field({
+      description: "Get an EFP account-metadata value by address and key.",
+      type: EfpAccountMetadataRef,
+      nullable: true,
+      args: {
+        address: t.arg({ type: "Address", required: true }),
+        key: t.arg({ type: "String", required: true }),
+      },
+      resolve: (_parent, args) => efpAccountMetadataId(args.address, args.key),
+    }),
+
+    //////////////////////////
+    // efp.accountMetadatas
+    //////////////////////////
+    accountMetadatas: t.connection({
+      description: "Find all EFP account-metadata entries for an address.",
+      type: EfpAccountMetadataRef,
+      args: { where: t.arg({ type: EfpAccountMetadatasWhereInput, required: true }) },
+      resolve: (_parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        const scope = eq(ensIndexerSchema.efpAccountMetadata.address, args.where.address as Hex);
+
+        return lazyConnection({
+          totalCount: () => ensDb.$count(ensIndexerSchema.efpAccountMetadata, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                ensDb
+                  .select()
+                  .from(ensIndexerSchema.efpAccountMetadata)
+                  .where(
+                    and(scope, paginateBy(ensIndexerSchema.efpAccountMetadata.id, before, after)),
+                  )
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpAccountMetadata.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
+
+    ///////////////////////
+    // efp.listPointers
+    ///////////////////////
+    listPointers: t.connection({
+      description:
+        "Find ENS -> EFP list correlations (the `eth.efp.list` text record), by ENS node or list token id.",
+      type: EfpListPointerRef,
+      args: { where: t.arg({ type: EfpListPointersWhereInput }) },
+      resolve: (_parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        const where = args.where;
+        const scope = and(
+          where?.node ? eq(ensIndexerSchema.efpEnsListPointers.node, where.node as Hex) : undefined,
+          where?.listTokenId
+            ? eq(ensIndexerSchema.efpEnsListPointers.listTokenId, where.listTokenId)
+            : undefined,
+        );
+
+        return lazyConnection({
+          totalCount: () => ensDb.$count(ensIndexerSchema.efpEnsListPointers, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                ensDb
+                  .select()
+                  .from(ensIndexerSchema.efpEnsListPointers)
+                  .where(
+                    and(scope, paginateBy(ensIndexerSchema.efpEnsListPointers.id, before, after)),
+                  )
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpEnsListPointers.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
+  }),
+});
+
+///////////////////////////////////////
+// Query.efp — the single EFP namespace
+///////////////////////////////////////
+builder.queryField("efp", (t) =>
+  t.field({
+    description: "Ethereum Follow Protocol (EFP) queries.",
+    type: EfpQueryRef,
+    nullable: false,
+    resolve: () => ({}),
+  }),
+);
