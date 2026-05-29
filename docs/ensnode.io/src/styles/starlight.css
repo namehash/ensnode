@@ -482,6 +482,10 @@ starlight-tabs ul[role="tablist"] {
 
   & a {
     color: var(--aside-text-color, var(--aside-color));
+
+    &:hover {
+      color: var(--aside-text-color, var(--aside-color));
+    }
   }
 
   & code {
