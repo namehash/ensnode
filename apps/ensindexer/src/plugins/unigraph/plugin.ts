@@ -57,11 +57,7 @@ export default createPlugin({
     const DATASOURCES_WITH_ENSV2_CONTRACTS = getDatasourcesWithENSv2Contracts(config.namespace);
 
     return createConfig({
-      chains: chainsConnectionConfigForDatasources(
-        config.namespace,
-        config.rpcConfigs,
-        ALL_DATASOURCE_NAMES,
-      ),
+      chains: chainsConnectionConfigForDatasources(config, ALL_DATASOURCE_NAMES),
 
       contracts: {
         ////////////////////////////

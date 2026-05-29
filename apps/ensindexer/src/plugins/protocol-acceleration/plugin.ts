@@ -75,11 +75,7 @@ export default createPlugin({
     } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
 
     return createConfig({
-      chains: chainsConnectionConfigForDatasources(
-        config.namespace,
-        config.rpcConfigs,
-        ALL_DATASOURCE_NAMES,
-      ),
+      chains: chainsConnectionConfigForDatasources(config, ALL_DATASOURCE_NAMES),
       contracts: {
         //////////////////////
         // Resolver Contracts

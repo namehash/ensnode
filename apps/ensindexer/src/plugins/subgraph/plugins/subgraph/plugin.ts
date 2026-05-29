@@ -31,11 +31,7 @@ export default createPlugin({
     } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     return ponder.createConfig({
-      chains: chainsConnectionConfigForDatasources(
-        config.namespace,
-        config.rpcConfigs,
-        REQUIRED_DATASOURCE_NAMES,
-      ),
+      chains: chainsConnectionConfigForDatasources(config, REQUIRED_DATASOURCE_NAMES),
       contracts: {
         [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
           chain: chainConfigForContract(
