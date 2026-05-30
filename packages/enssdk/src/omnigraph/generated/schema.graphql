@@ -1,9 +1,9 @@
 """Execution status metadata for a resolver strategy."""
 type AccelerationStatus {
-  """Whether this strategy was attempted at runtime."""
+  """Whether protocol acceleration was attempted at runtime."""
   attempted: Boolean!
 
-  """Whether this strategy was requested by the caller."""
+  """Whether protocol acceleration was requested by the caller."""
   requested: Boolean!
 }
 
@@ -174,7 +174,7 @@ type AccountResolve {
   """
   Protocol trace tree emitted by primary-name resolution, represented as JSON for schema stability.
   """
-  trace: JSON
+  trace: JSON!
 }
 
 type AccountResolverPermissionsConnection {
@@ -355,7 +355,7 @@ type DomainCanonical {
   depth: Int!
 
   """The Canonical Name for this Domain."""
-  name: CanonicalName
+  name: CanonicalName!
 
   """
   The namehash of this Domain's Canonical Name. Note that this is NOT a stable reference to this Domain; use `Domain.id`.
@@ -503,7 +503,7 @@ ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the EN
 @see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
 """
 enum ENSIP19Chain {
-  ARBITRUM
+  ARBITRUM_ONE
   BASE
   DEFAULT
   ETHEREUM

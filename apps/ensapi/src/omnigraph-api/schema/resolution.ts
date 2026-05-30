@@ -16,11 +16,11 @@ AccelerationStatusRef.implement({
   description: "Execution status metadata for a resolver strategy.",
   fields: (t) => ({
     requested: t.exposeBoolean("requested", {
-      description: "Whether this strategy was requested by the caller.",
+      description: "Whether protocol acceleration was requested by the caller.",
       nullable: false,
     }),
     attempted: t.exposeBoolean("attempted", {
-      description: "Whether this strategy was attempted at runtime.",
+      description: "Whether protocol acceleration was attempted at runtime.",
       nullable: false,
     }),
   }),
@@ -75,13 +75,3 @@ export const PrimaryNamesWhereInput = builder.inputType("PrimaryNamesWhereInput"
 });
 
 export type PrimaryNamesWhereInputValue = typeof PrimaryNamesWhereInput.$inferInput;
-
-export {
-  type PrimaryNameRecordModel,
-  type PrimaryNameRecordParent,
-  PrimaryNameRecordRef,
-} from "@/omnigraph-api/schema/primary-name-record";
-// Re-exports so that consumers of this module don't need to know about the file split.
-export { DomainProfileRef } from "@/omnigraph-api/schema/profile";
-export type { ResolvedRecordsModel } from "@/omnigraph-api/schema/records";
-export { ResolvedRecordsRef } from "@/omnigraph-api/schema/records";

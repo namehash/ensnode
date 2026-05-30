@@ -8,7 +8,7 @@ import {
   coinTypeToEnsip19Chain,
   ENSIP19_COIN_TYPES,
 } from "@/omnigraph-api/lib/resolution/chain-coin-type";
-import type { PrimaryNameRecordModel } from "@/omnigraph-api/schema/resolution";
+import type { PrimaryNameRecordModel } from "@/omnigraph-api/schema/primary-name-record";
 
 type PrimaryNameResolutionOptions = {
   accelerate: boolean;
@@ -16,7 +16,7 @@ type PrimaryNameResolutionOptions = {
 };
 
 export type PrimaryNameRecordsResolution = {
-  trace: TracingTrace | null;
+  trace: TracingTrace;
   records: PrimaryNameRecordModel[];
 };
 
@@ -42,7 +42,7 @@ export async function resolvePrimaryNameRecords(
 
   if (resolvableCoinTypes.length === 0) {
     return {
-      trace: null,
+      trace: [],
       records: coinTypes.map((coinType) => toPrimaryNameRecord(address, coinType, null)),
     };
   }

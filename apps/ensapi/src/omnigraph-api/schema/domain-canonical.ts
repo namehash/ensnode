@@ -14,8 +14,8 @@ DomainCanonicalRef.implement({
     name: t.field({
       description: "The Canonical Name for this Domain.",
       type: CanonicalNameRef,
-      nullable: true,
-      resolve: (domain) => domain.canonicalName ?? null,
+      nullable: false,
+      resolve: (domain) => domain.canonicalName!,
     }),
     depth: t.field({
       description:

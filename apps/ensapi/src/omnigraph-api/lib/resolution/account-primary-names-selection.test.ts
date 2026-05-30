@@ -109,7 +109,7 @@ describe("buildAccountPrimaryNamesSelection", () => {
         one: primaryName(by: { coinType: ${coinNameToTypeMap.btc} }) { name }
         two: primaryName(by: { coinType: ${coinNameToTypeMap.ltc} }) { name }
         three: primaryNames(where: { coinTypes: [${coinNameToTypeMap.doge}, ${coinNameToTypeMap.sol}] }) { name }
-        four: primaryNames(where: { chains: ["DEFAULT", "ETHEREUM", "ARBITRUM"] }) { name }
+        four: primaryNames(where: { chains: ["DEFAULT", "ETHEREUM", "ARBITRUM_ONE"] }) { name }
         five: primaryName(by: { chain: "BASE" }) { name }
       `);
 

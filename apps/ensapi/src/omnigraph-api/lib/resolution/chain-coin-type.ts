@@ -11,7 +11,7 @@ export const ENSIP19_COIN_NAMES = [
   ["eth", "ETHEREUM"],
   ["base", "BASE"],
   ["op", "OPTIMISM"],
-  ["arb1", "ARBITRUM"],
+  ["arb1", "ARBITRUM_ONE"],
   ["linea", "LINEA"],
   ["scr", "SCROLL"],
 ] as const satisfies readonly (readonly [CoinName, string])[];

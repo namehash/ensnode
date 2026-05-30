@@ -8,10 +8,12 @@ import {
   normalizePrimaryNameByInput,
 } from "@/omnigraph-api/lib/resolution/primary-name-input";
 import {
-  AccelerationStatusRef,
-  PrimaryNameByInput,
   type PrimaryNameRecordModel,
   PrimaryNameRecordRef,
+} from "@/omnigraph-api/schema/primary-name-record";
+import {
+  AccelerationStatusRef,
+  PrimaryNameByInput,
   PrimaryNamesWhereInput,
 } from "@/omnigraph-api/schema/resolution";
 
@@ -20,7 +22,7 @@ export type AccountResolveModel = {
   coinTypes: CoinType[];
   accelerate: boolean;
   canAccelerate: boolean;
-  trace: TracingTrace | null;
+  trace: TracingTrace;
   records: PrimaryNameRecordModel[];
 };
 
@@ -34,8 +36,8 @@ AccountResolveRef.implement({
       description:
         "Protocol trace tree emitted by primary-name resolution, represented as JSON for schema stability.",
       type: "JSON",
-      nullable: true,
-      resolve: (parent) => parent.trace as unknown as JsonValue | null,
+      nullable: false,
+      resolve: (parent) => parent.trace as unknown as JsonValue,
     }),
     acceleration: t.field({
       description: "Protocol acceleration strategy status for this Account resolution.",

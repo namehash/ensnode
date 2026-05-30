@@ -1501,8 +1501,11 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "OBJECT",
-              "name": "CanonicalName"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CanonicalName"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -2033,7 +2036,7 @@ const introspection = {
         "name": "ENSIP19Chain",
         "enumValues": [
           {
-            "name": "ARBITRUM",
+            "name": "ARBITRUM_ONE",
             "isDeprecated": false
           },
           {

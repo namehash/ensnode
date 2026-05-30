@@ -5,11 +5,9 @@ import type { TracingTrace } from "@ensnode/ensnode-sdk";
 import { builder } from "@/omnigraph-api/builder";
 import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
-import {
-  AccelerationStatusRef,
-  DomainProfileRef,
-  ResolvedRecordsRef,
-} from "@/omnigraph-api/schema/resolution";
+import { DomainProfileRef } from "@/omnigraph-api/schema/profile";
+import { ResolvedRecordsRef } from "@/omnigraph-api/schema/records";
+import { AccelerationStatusRef } from "@/omnigraph-api/schema/resolution";
 
 export type ResolveModel = {
   accelerate: boolean;
