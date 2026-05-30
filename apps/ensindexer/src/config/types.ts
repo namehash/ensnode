@@ -7,7 +7,8 @@ import { RpcConfig, type RpcConfigs } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
- * Per-chain override of Ponder's maximum `eth_getLogs` block range, keyed by chain id.
+ * Effective per-chain cap on Ponder's maximum `eth_getLogs` block range (after resolving the global
+ * default and per-chain overrides), keyed by chain id.
  *
  * @invariant Each value is a positive integer.
  */
@@ -112,11 +113,17 @@ export interface EnsIndexerConfig {
   rpcConfigs: RpcConfigs;
 
   /**
-   * Optional per-chain override of Ponder's maximum `eth_getLogs` block range, keyed by chain id
-   * (configured via the `ETH_GET_LOGS_BLOCK_RANGE_<chainId>` environment variable).
+   * Effective per-chain cap on Ponder's maximum `eth_getLogs` block range, keyed by chain id, after
+   * resolving environment configuration.
    *
-   * Ponder auto-determines a safe `eth_getLogs` block range per chain; this lets operators set a
-   * manual cap for RPC providers that reject Ponder's default range.
+   * Configured via environment variables:
+   * - `ETH_GET_LOGS_BLOCK_RANGE` sets a default applied to every chain.
+   * - `ETH_GET_LOGS_BLOCK_RANGE_<chainId>` overrides that default for a specific chain.
+   * - `ETH_GET_LOGS_BLOCK_RANGE_<chainId>=0` disables the cap for that chain (ignoring the default),
+   *   so Ponder auto-determines its range. `ETH_GET_LOGS_BLOCK_RANGE=0` is equivalent to unset.
+   *
+   * Ponder auto-determines a safe `eth_getLogs` block range per chain; these overrides let operators
+   * set a manual cap for RPC providers that reject Ponder's default range.
    * @see https://ponder.sh/docs/config/chains#eth_getlogs-block-range
    *
    * Like {@link rpcConfigs}, this is a performance/connection tuning knob only: it does NOT affect
@@ -124,8 +131,9 @@ export interface EnsIndexerConfig {
    * not trigger a re-index.
    *
    * Invariants:
-   * - Keys are a subset of the chains in the configured {@link namespace}. Chains without an entry
-   *   use Ponder's auto-determined range.
+   * - Keys are a subset of the chains in the configured {@link namespace}. A chain is absent when it
+   *   has no effective cap (unset, or disabled with `0`), in which case Ponder auto-determines its
+   *   range.
    */
   ethGetLogsBlockRanges: EthGetLogsBlockRanges;
 

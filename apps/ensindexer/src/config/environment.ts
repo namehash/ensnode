@@ -1,13 +1,16 @@
 import type { EnsDbEnvironment, RpcEnvironment } from "@ensnode/ensnode-sdk/internal";
 
 /**
- * Environment variables for per-chain `eth_getLogs` block range overrides.
+ * Environment variables for `eth_getLogs` block range overrides.
  *
- * Each `ETH_GET_LOGS_BLOCK_RANGE_${chainId}`, if specified, overrides Ponder's auto-determined
- * maximum `eth_getLogs` block range for that chain.
+ * `ETH_GET_LOGS_BLOCK_RANGE` sets a default applied to every chain, and each
+ * `ETH_GET_LOGS_BLOCK_RANGE_${chainId}` overrides that default for a specific chain (a value of `0`
+ * disables the override for that chain, so Ponder auto-determines its range). These cap Ponder's
+ * auto-determined maximum `eth_getLogs` block range.
  * @see https://ponder.sh/docs/config/chains#eth_getlogs-block-range
  */
 export interface EthGetLogsBlockRangeEnvironment {
+  ETH_GET_LOGS_BLOCK_RANGE?: string;
   [x: `ETH_GET_LOGS_BLOCK_RANGE_${number}`]: string | undefined;
 }
 

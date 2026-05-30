@@ -300,7 +300,7 @@ describe("config (with base env)", () => {
   });
 
   describe(".ethGetLogsBlockRanges", () => {
-    it("defaults to an empty Map when no ETH_GET_LOGS_BLOCK_RANGE_* var is set", async () => {
+    it("defaults to an empty Map when no ETH_GET_LOGS_BLOCK_RANGE var is set", async () => {
       const config = await getConfig();
       expect(config.ethGetLogsBlockRanges).toStrictEqual(new Map());
     });
@@ -311,9 +311,29 @@ describe("config (with base env)", () => {
       expect(config.ethGetLogsBlockRanges).toStrictEqual(new Map([[1, 1000]]));
     });
 
-    it("throws if a configured eth_getLogs block range is not a positive integer", async () => {
+    it("applies the global ETH_GET_LOGS_BLOCK_RANGE default to indexed chains", async () => {
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE", "1000");
+      const config = await getConfig();
+      expect(Object.fromEntries(config.ethGetLogsBlockRanges)).toMatchObject({ "1": 1000 });
+    });
+
+    it("lets a chain-specific override take precedence over the global default", async () => {
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE", "1000");
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE_1", "500");
+      const config = await getConfig();
+      expect(Object.fromEntries(config.ethGetLogsBlockRanges)).toMatchObject({ "1": 500 });
+    });
+
+    it("omits a chain disabled with 0 even when a global default is set", async () => {
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE", "1000");
+      vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE_1", "0");
+      const config = await getConfig();
+      expect(Object.fromEntries(config.ethGetLogsBlockRanges)).not.toHaveProperty("1");
+    });
+
+    it("throws if a configured eth_getLogs block range is not a non-negative integer", async () => {
       vi.stubEnv("ETH_GET_LOGS_BLOCK_RANGE_1", "abc");
-      await expect(getConfig()).rejects.toThrow(/positive integer/i);
+      await expect(getConfig()).rejects.toThrow(/non-negative integer/i);
     });
   });
 
