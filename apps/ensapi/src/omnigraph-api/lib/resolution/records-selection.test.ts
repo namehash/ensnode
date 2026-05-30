@@ -20,7 +20,10 @@ import {
   RECORDS_SELECTION_PARAMETRIC_FIELDS,
   RECORDS_SELECTION_SIMPLE_FIELDS,
 } from "@/omnigraph-api/lib/resolution/records-selection-config";
-import { parseFieldNode } from "@/omnigraph-api/lib/resolution/test-helpers";
+import {
+  mockResolveContainerInfo,
+  parseFieldNode,
+} from "@/omnigraph-api/lib/resolution/test-helpers";
 
 // These mock types mirror the real Pothos-generated schema types. They cannot be imported
 // from `@/omnigraph-api/schema` directly because doing so loads the full Pothos schema into
@@ -68,8 +71,9 @@ function buildMockResolvedRecordsType() {
 
 const ResolvedRecordsType = buildMockResolvedRecordsType();
 
+// Name must stay in sync with the real Pothos schema — see forward-resolve.ts
 const DomainResolveType = new GraphQLObjectType({
-  name: "Resolve",
+  name: "ForwardResolve",
   fields: {
     trace: { type: GraphQLString },
     records: { type: ResolvedRecordsType },
@@ -77,12 +81,7 @@ const DomainResolveType = new GraphQLObjectType({
 });
 
 function resolveInfoForDomainResolveSubselection(subselection: string): GraphQLResolveInfo {
-  return {
-    fieldNodes: [parseFieldNode("resolve", subselection)],
-    fragments: {},
-    returnType: DomainResolveType,
-    variableValues: {},
-  } as unknown as GraphQLResolveInfo;
+  return mockResolveContainerInfo("resolve", subselection, DomainResolveType);
 }
 
 function mockResolveInfo(

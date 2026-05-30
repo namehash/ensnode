@@ -38,7 +38,7 @@ type Account {
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
-  ): AccountResolve!
+  ): ReverseResolve!
 
   """The Permissions on Resolvers granted to this Account."""
   resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
@@ -148,35 +148,6 @@ type AccountRegistryPermissionsConnectionEdge {
   node: RegistryPermissionsUser!
 }
 
-"""Nested account resolution container exposing primary name resolution."""
-type AccountResolve {
-  """
-  Whether protocol acceleration was requested and attempted for this reverse resolution.
-  """
-  acceleration: AccelerationStatus!
-
-  """
-  The ENSIP-19 primary name for this Account on a specific coin type or chain.
-  """
-  primaryName(
-    """Select a coin type or chain to resolve a primary name for."""
-    by: PrimaryNameByInput!
-  ): PrimaryNameRecord!
-
-  """
-  ENSIP-19 primary names for this Account on the requested coin types or chains.
-  """
-  primaryNames(
-    """Select coin types or chains to resolve primary names for."""
-    where: PrimaryNamesWhereInput!
-  ): [PrimaryNameRecord!]!
-
-  """
-  Protocol trace tree emitted by reverse resolution, represented as JSON for schema stability. This data model should be expected to experience breaking changes.
-  """
-  trace: JSON!
-}
-
 type AccountResolverPermissionsConnection {
   edges: [AccountResolverPermissionsConnectionEdge!]!
   pageInfo: PageInfo!
@@ -282,6 +253,20 @@ type CanonicalName {
 """ChainId represents an enssdk#ChainId."""
 scalar ChainId
 
+"""
+Primary-name chains supported by the Omnigraph API. Use `DEFAULT` for the default EVM chain.
+@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
+"""
+enum ChainName {
+  ARBITRUM_ONE
+  BASE
+  DEFAULT
+  ETHEREUM
+  LINEA
+  OPTIMISM
+  SCROLL
+}
+
 """CoinType represents an enssdk#CoinType."""
 scalar CoinType
 
@@ -329,7 +314,7 @@ interface Domain {
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
-  ): Resolve!
+  ): ForwardResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -496,20 +481,6 @@ input DomainsWhereInput {
   version: ENSProtocolVersion
 }
 
-"""
-ENSIP-19 supported chains that can have a primary name. Use `DEFAULT` for the ENSIP-19 default EVM chain.
-@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
-"""
-enum ENSIP19Chain {
-  ARBITRUM_ONE
-  BASE
-  DEFAULT
-  ETHEREUM
-  LINEA
-  OPTIMISM
-  SCROLL
-}
-
 """An ENS protocol version."""
 enum ENSProtocolVersion {
   ENSv1
@@ -561,7 +532,7 @@ type ENSv1Domain implements Domain {
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
-  ): Resolve!
+  ): ForwardResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -682,7 +653,7 @@ type ENSv2Domain implements Domain {
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
-  ): Resolve!
+  ): ForwardResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -955,6 +926,26 @@ input EventsWhereInput {
   timestamp: EventsTimestampFilter
 }
 
+"""
+Nested domain resolution container exposing resolved data for the domain.
+"""
+type ForwardResolve {
+  """
+  Whether protocol acceleration was requested and attempted for this resolution.
+  """
+  acceleration: AccelerationStatus!
+
+  """
+  Resolved ENS records via the ENS protocol. Null when the name is not resolvable (non-canonical, unnormalized, or no records field was selected).
+  """
+  records: ResolvedRecords
+
+  """
+  Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability. This data model should be expected to experience breaking changes.
+  """
+  trace: JSON
+}
+
 """Hex represents viem#Hex."""
 scalar Hex
 
@@ -1186,8 +1177,8 @@ scalar PermissionsUserId
 Select a primary name lookup target. Exactly one of `coinType` or `chain` must be provided.
 """
 input PrimaryNameByInput @oneOf {
-  """An ENSIP-19 supported chain to resolve the primary name for."""
-  chain: ENSIP19Chain
+  """A `ChainName` to resolve the primary name for."""
+  chain: ChainName
 
   """The ENSIP-9 coin type to resolve the primary name for."""
   coinType: CoinType
@@ -1196,9 +1187,9 @@ input PrimaryNameByInput @oneOf {
 """An ENSIP-19 primary name for an Account on a specific coin type."""
 type PrimaryNameRecord {
   """
-  The ENSIP-19 chain corresponding to `coinType`, or null when `coinType` is not represented in `ENSIP19Chain`.
+  The chain corresponding to `coinType`, or null when `coinType` is not represented in `ChainName`.
   """
-  chain: ENSIP19Chain
+  chain: ChainName
 
   """The canonical ENSIP-9 coin type for this primary name lookup."""
   coinType: CoinType!
@@ -1209,15 +1200,15 @@ type PrimaryNameRecord {
   name: CanonicalName
 
   """Forward resolve data for this primary name."""
-  resolve: Resolve!
+  resolve: ForwardResolve!
 }
 
 """
 Filter primary name lookups. Exactly one of `coinTypes` or `chains` must be provided.
 """
 input PrimaryNamesWhereInput @oneOf {
-  """ENSIP-19 supported chains to resolve primary names for."""
-  chains: [ENSIP19Chain!]
+  """`ChainName` values to resolve primary names for."""
+  chains: [ChainName!]
 
   """Coin types to resolve primary names for."""
   coinTypes: [CoinType!]
@@ -1487,26 +1478,6 @@ type Renewal {
 """RenewalId represents an enssdk#RenewalId."""
 scalar RenewalId
 
-"""
-Nested domain resolution container exposing resolved data for the domain.
-"""
-type Resolve {
-  """
-  Whether protocol acceleration was requested and attempted for this resolution.
-  """
-  acceleration: AccelerationStatus!
-
-  """
-  Resolved ENS records via the ENS protocol. Null when the name is not resolvable (non-canonical, unnormalized, or no records field was selected).
-  """
-  records: ResolvedRecords
-
-  """
-  Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability. This data model should be expected to experience breaking changes.
-  """
-  trace: JSON
-}
-
 """A resolved ABI record for an ENS name."""
 type ResolvedAbiRecord {
   contentType: BigInt!
@@ -1698,6 +1669,31 @@ type ResolverRecordsConnectionEdge {
 
 """ResolverRecordsId represents an enssdk#ResolverRecordsId."""
 scalar ResolverRecordsId
+
+"""Nested account resolution container exposing primary name resolution."""
+type ReverseResolve {
+  """
+  Whether protocol acceleration was requested and attempted for this reverse resolution.
+  """
+  acceleration: AccelerationStatus!
+
+  """The primary name for this Account on a specific coin type or chain."""
+  primaryName(
+    """Select a coin type or chain to resolve a primary name for."""
+    by: PrimaryNameByInput!
+  ): PrimaryNameRecord!
+
+  """Primary names for this Account on the requested coin types or chains."""
+  primaryNames(
+    """Select coin types or chains to resolve primary names for."""
+    where: PrimaryNamesWhereInput!
+  ): [PrimaryNameRecord!]!
+
+  """
+  Protocol trace tree emitted by reverse resolution, represented as JSON for schema stability. This data model should be expected to experience breaking changes.
+  """
+  trace: JSON!
+}
 
 """Filter for Domain.subdomains query."""
 input SubdomainsWhereInput {

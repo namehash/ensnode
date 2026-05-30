@@ -5,8 +5,8 @@ import type { TracingTrace } from "@ensnode/ensnode-sdk";
 import { resolvePrimaryNamesByCoinTypes } from "@/lib/resolution/multichain-primary-name-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import {
-  coinTypeToEnsip19Chain,
-  ENSIP19_COIN_TYPES,
+  CHAIN_NAME_COIN_TYPES,
+  coinTypeToChainName,
 } from "@/omnigraph-api/lib/resolution/chain-coin-type";
 import type { PrimaryNameRecordModel } from "@/omnigraph-api/schema/primary-name-record";
 
@@ -27,7 +27,7 @@ const toPrimaryNameRecord = (
 ): PrimaryNameRecordModel => ({
   address,
   coinType,
-  chain: coinTypeToEnsip19Chain(coinType),
+  chain: coinTypeToChainName(coinType),
   name,
 });
 
@@ -37,7 +37,7 @@ export async function resolvePrimaryNameRecords(
   coinTypes: CoinType[],
   options: PrimaryNameResolutionOptions,
 ): Promise<PrimaryNameRecordsResolution> {
-  const supportedCoinTypes = new Set(ENSIP19_COIN_TYPES);
+  const supportedCoinTypes = new Set(CHAIN_NAME_COIN_TYPES);
   const resolvableCoinTypes = coinTypes.filter((coinType) => supportedCoinTypes.has(coinType));
 
   if (resolvableCoinTypes.length === 0) {

@@ -17,7 +17,7 @@ import {
   PrimaryNamesWhereInput,
 } from "@/omnigraph-api/schema/resolution";
 
-export type AccountResolveModel = {
+export type ReverseResolveModel = {
   address: Address;
   coinTypes: CoinType[];
   accelerate: boolean;
@@ -26,11 +26,10 @@ export type AccountResolveModel = {
   records: PrimaryNameRecordModel[];
 };
 
-export const AccountResolveRef = builder.objectRef<AccountResolveModel>("AccountResolve");
+export const ReverseResolveRef = builder.objectRef<ReverseResolveModel>("ReverseResolve");
 
-AccountResolveRef.implement({
-  description:
-    "Nested account resolution container exposing primary name resolution.",
+ReverseResolveRef.implement({
+  description: "Nested account resolution container exposing primary name resolution.",
   fields: (t) => ({
     trace: t.field({
       description:
@@ -40,7 +39,8 @@ AccountResolveRef.implement({
       resolve: (parent) => parent.trace as unknown as JsonValue,
     }),
     acceleration: t.field({
-      description: "Whether protocol acceleration was requested and attempted for this reverse resolution.",
+      description:
+        "Whether protocol acceleration was requested and attempted for this reverse resolution.",
       type: AccelerationStatusRef,
       nullable: false,
       resolve: ({ accelerate, canAccelerate }) => ({
@@ -49,7 +49,7 @@ AccountResolveRef.implement({
       }),
     }),
     primaryName: t.field({
-      description: "The ENSIP-19 primary name for this Account on a specific coin type or chain.",
+      description: "The primary name for this Account on a specific coin type or chain.",
       type: PrimaryNameRecordRef,
       nullable: false,
       args: {
@@ -69,7 +69,7 @@ AccountResolveRef.implement({
       },
     }),
     primaryNames: t.field({
-      description: "ENSIP-19 primary names for this Account on the requested coin types or chains.",
+      description: "Primary names for this Account on the requested coin types or chains.",
       type: [PrimaryNameRecordRef],
       nullable: false,
       args: {

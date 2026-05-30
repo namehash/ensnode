@@ -2,8 +2,8 @@ import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,
   type CoinType,
-  type DefaultableChainId,
   coinTypeReverseLabel,
+  type DefaultableChainId,
   evmChainIdToCoinType,
   reverseName,
 } from "enssdk";

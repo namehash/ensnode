@@ -1,7 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address } from "enssdk";
-import { GraphQLError } from "graphql";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
@@ -14,10 +13,6 @@ import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolutio
 import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import {
-  type AccountResolveModel,
-  AccountResolveRef,
-} from "@/omnigraph-api/schema/account-resolve";
-import {
   ID_PAGINATED_CONNECTION_ARGS,
   RESOLVE_ACCELERATE_ARG,
 } from "@/omnigraph-api/schema/constants";
@@ -28,6 +23,10 @@ import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
+import {
+  type ReverseResolveModel,
+  ReverseResolveRef,
+} from "@/omnigraph-api/schema/reverse-resolve";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
   load: (ids: Address[]) => {
@@ -74,7 +73,7 @@ AccountRef.implement({
     //////////////////
     resolve: t.field({
       description: "Resolve primary names for this Account.",
-      type: AccountResolveRef,
+      type: ReverseResolveRef,
       nullable: false,
       args: {
         accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
@@ -84,15 +83,23 @@ AccountRef.implement({
         { accelerate: accelerateArg },
         context,
         info,
-      ): Promise<AccountResolveModel> => {
+      ): Promise<ReverseResolveModel> => {
         const accelerate = accelerateArg ?? true;
         const { canAccelerate } = context;
         const coinTypes = buildAccountPrimaryNamesSelection(info);
 
+        // No primaryName/primaryNames fields selected (e.g. only acceleration/trace queried).
+        // Return an empty model rather than throwing so the non-nullable resolve field does not
+        // null-propagate the entire Account.
         if (coinTypes === null) {
-          throw new GraphQLError(
-            "Account.resolve requires at least one `primaryName(by: ...)` or `primaryNames(where: ...)` field to be selected for reverse resolution.",
-          );
+          return {
+            address: account.id,
+            coinTypes: [],
+            accelerate,
+            canAccelerate,
+            trace: [],
+            records: [],
+          };
         }
 
         const { trace, records } = await resolvePrimaryNameRecords(account.id, coinTypes, {

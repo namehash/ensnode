@@ -3,21 +3,24 @@ import { type Address, type CoinType, type InterpretedName, isNormalizedName } f
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
-import type { ENSIP19ChainValue } from "@/omnigraph-api/lib/resolution/chain-coin-type";
+import type { ChainNameValue } from "@/omnigraph-api/lib/resolution/chain-coin-type";
 import { toResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
 import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
 import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
-import { ENSIP19Chain } from "@/omnigraph-api/schema/resolution";
-import { type ResolveModel, ResolveRef } from "@/omnigraph-api/schema/resolve";
+import {
+  type ForwardResolveModel,
+  ForwardResolveRef,
+} from "@/omnigraph-api/schema/forward-resolve";
+import { ChainName } from "@/omnigraph-api/schema/resolution";
 
 export type PrimaryNameRecordModel = {
   address: Address;
   coinType: CoinType;
-  chain: ENSIP19ChainValue | null;
+  chain: ChainNameValue | null;
   name: InterpretedName | null;
 };
 
-/** GraphQL parent for `PrimaryNameRecord`, including `AccountResolve` acceleration settings. */
+/** GraphQL parent for `PrimaryNameRecord`, including `ReverseResolve` acceleration settings. */
 export type PrimaryNameRecordParent = PrimaryNameRecordModel & {
   accelerate: boolean;
 };
@@ -35,8 +38,8 @@ PrimaryNameRecordRef.implement({
     }),
     chain: t.field({
       description:
-        "The ENSIP-19 chain corresponding to `coinType`, or null when `coinType` is not represented in `ENSIP19Chain`.",
-      type: ENSIP19Chain,
+        "The chain corresponding to `coinType`, or null when `coinType` is not represented in `ChainName`.",
+      type: ChainName,
       nullable: true,
       resolve: (r) => r.chain,
     }),
@@ -49,9 +52,9 @@ PrimaryNameRecordRef.implement({
     }),
     resolve: t.field({
       description: "Forward resolve data for this primary name.",
-      type: ResolveRef,
+      type: ForwardResolveRef,
       nullable: false,
-      resolve: async (parent, _args, context, info): Promise<ResolveModel> => {
+      resolve: async (parent, _args, context, info): Promise<ForwardResolveModel> => {
         const { name, accelerate } = parent;
         const { canAccelerate } = context;
 

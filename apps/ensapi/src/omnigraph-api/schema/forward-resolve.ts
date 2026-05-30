@@ -9,18 +9,17 @@ import { DomainProfileRef } from "@/omnigraph-api/schema/profile";
 import { ResolvedRecordsRef } from "@/omnigraph-api/schema/records";
 import { AccelerationStatusRef } from "@/omnigraph-api/schema/resolution";
 
-export type ResolveModel = {
+export type ForwardResolveModel = {
   accelerate: boolean;
   canAccelerate: boolean;
   trace: TracingTrace | null;
   records: ResolvedRecordsModel | null;
 };
 
-export const ResolveRef = builder.objectRef<ResolveModel>("Resolve");
+export const ForwardResolveRef = builder.objectRef<ForwardResolveModel>("ForwardResolve");
 
-ResolveRef.implement({
-  description:
-    "Nested domain resolution container exposing resolved data for the domain.",
+ForwardResolveRef.implement({
+  description: "Nested domain resolution container exposing resolved data for the domain.",
   fields: (t) => ({
     trace: t.field({
       description:

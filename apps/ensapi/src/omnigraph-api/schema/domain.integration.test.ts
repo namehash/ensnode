@@ -2,9 +2,11 @@ import {
   ADDR_REVERSE_NODE,
   asInterpretedLabel,
   type CoinType,
+  type ContentType,
   type DomainId,
   ETH_COIN_TYPE,
   ETH_NODE,
+  type Hex,
   type InterpretedLabel,
   type InterpretedName,
   labelhashInterpretedLabel,
@@ -13,6 +15,7 @@ import {
   makeENSv2DomainId,
   makeENSv2RegistryId,
   makeStorageId,
+  type NormalizedAddress,
 } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -494,7 +497,7 @@ describe("Domain.records", () => {
     domain: {
       resolve: {
         records: {
-          addresses: Array<{ coinType: CoinType; address: string | null }>;
+          addresses: Array<{ coinType: CoinType; address: Hex | null }>;
           texts: Array<{ key: string; value: string | null }>;
         } | null;
       };
@@ -510,9 +513,10 @@ describe("Domain.records", () => {
           pubkey: { x: string; y: string } | null;
           dnszonehash: string | null;
           version: string | null;
-          abi: { contentType: string; data: string } | null;
+          abi: { contentType: ContentType; data: string } | null;
           interfaces: Array<{ interfaceId: string; implementer: string | null }>;
-          addresses: Array<{ coinType: CoinType; address: string | null }>;
+          // address is string (not Hex/NormalizedAddress) because non-EVM records may use non-Ethereum formats; matches GraphQL String field
+          addresses: Array<{ coinType: CoinType; address: Hex | null }>;
           texts: Array<{ key: string; value: string | null }>;
         } | null;
       };
@@ -586,6 +590,7 @@ describe("Domain.records", () => {
         name: "test.eth",
         addresses: [ETH_COIN_TYPE, 0, 2],
         texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
+        // BigInt GraphQL vars must be strings here — JSON.stringify (used by the test client) cannot serialize bigint
         contentTypeMask: "1",
         interfaceIds: [fixtures.fourBytesInterface],
       }),
@@ -655,8 +660,8 @@ describe("Domain.records", () => {
         domain: {
           resolve: {
             records: {
-              abi1: { contentType: string; data: string } | null;
-              abi2: { contentType: string; data: string } | null;
+              abi1: { contentType: ContentType; data: string } | null;
+              abi2: { contentType: ContentType; data: string } | null;
             };
           };
         };
@@ -685,7 +690,8 @@ describe("Domain.records", () => {
         profile: {
           description: string | null;
           avatar: { url: string | null } | null;
-          addresses: { ethereum: string | null } | null;
+          // ethereum address is a checksummed EVM address, so NormalizedAddress is the narrowed type
+          addresses: { ethereum: NormalizedAddress | null } | null;
           socials: { github: { handle: string | null; url: string | null } | null } | null;
         } | null;
       };

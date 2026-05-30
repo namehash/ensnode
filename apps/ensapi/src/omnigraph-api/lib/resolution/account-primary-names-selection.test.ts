@@ -9,7 +9,7 @@ import {
 } from "graphql";
 import { describe, expect, it } from "vitest";
 
-import { parseFieldNode } from "@/omnigraph-api/lib/resolution/test-helpers";
+import { mockResolveContainerInfo } from "@/omnigraph-api/lib/resolution/test-helpers";
 
 import { buildAccountPrimaryNamesSelection } from "./account-primary-names-selection";
 
@@ -42,8 +42,9 @@ const PrimaryNameRecordType = new GraphQLObjectType({
   },
 });
 
+// Name must stay in sync with the real Pothos schema — see reverse-resolve.ts
 const AccountResolveType = new GraphQLObjectType({
-  name: "AccountResolve",
+  name: "ReverseResolve",
   fields: {
     primaryName: {
       type: PrimaryNameRecordType,
@@ -61,12 +62,7 @@ const AccountResolveType = new GraphQLObjectType({
 });
 
 function resolveInfoForAccountResolveSubselection(subselection: string): GraphQLResolveInfo {
-  return {
-    fieldNodes: [parseFieldNode("resolve", subselection)],
-    fragments: {},
-    returnType: AccountResolveType,
-    variableValues: {},
-  } as unknown as GraphQLResolveInfo;
+  return mockResolveContainerInfo("resolve", subselection, AccountResolveType);
 }
 
 describe("buildAccountPrimaryNamesSelection", () => {

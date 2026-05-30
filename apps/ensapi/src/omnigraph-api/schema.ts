@@ -1,7 +1,7 @@
 import { builder } from "@/omnigraph-api/builder";
 
 import "./schema/account-id";
-import "./schema/account-resolve";
+import "./schema/reverse-resolve";
 import "./schema/connection";
 import "./schema/domain";
 import "./schema/domain-canonical";

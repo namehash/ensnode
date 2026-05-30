@@ -1,4 +1,10 @@
-import { type FieldNode, type OperationDefinitionNode, parse } from "graphql";
+import {
+  type FieldNode,
+  type GraphQLObjectType,
+  type GraphQLResolveInfo,
+  type OperationDefinitionNode,
+  parse,
+} from "graphql";
 
 /**
  * Parses a GraphQL document of the form `{ <fieldName> { <subselection> } }` and returns
@@ -14,4 +20,24 @@ export function parseFieldNode(fieldName: string, subselection: string): FieldNo
   if (!field || field.kind !== "Field") throw new Error("expected field");
 
   return field;
+}
+
+/**
+ * Builds a minimal mock {@link GraphQLResolveInfo} for a container field resolver (e.g.
+ * `resolve { <subselection> }` or `records { <subselection> }`). Used in unit tests for
+ * selection-building helpers that inspect `info.fieldNodes` and `info.returnType`.
+ *
+ * Keep mock type names in sync with the real schema — e.g. `ForwardResolve`, `ReverseResolve`.
+ */
+export function mockResolveContainerInfo(
+  containerField: string,
+  subselection: string,
+  returnType: GraphQLObjectType,
+): GraphQLResolveInfo {
+  return {
+    fieldNodes: [parseFieldNode(containerField, subselection)],
+    fragments: {},
+    returnType,
+    variableValues: {},
+  } as unknown as GraphQLResolveInfo;
 }

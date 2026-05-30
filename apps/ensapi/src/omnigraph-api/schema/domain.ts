@@ -40,11 +40,14 @@ import {
 import { DomainResolverRef } from "@/omnigraph-api/schema/domain-resolver";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
+import {
+  type ForwardResolveModel,
+  ForwardResolveRef,
+} from "@/omnigraph-api/schema/forward-resolve";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
-import { type ResolveModel, ResolveRef } from "@/omnigraph-api/schema/resolve";
 
 const tracer = trace.getTracer("schema/Domain");
 
@@ -178,7 +181,7 @@ DomainInterfaceRef.implement({
     //////////////////
     resolve: t.field({
       description: "Resolve protocol-level data for this Domain.",
-      type: ResolveRef,
+      type: ForwardResolveRef,
       nullable: false,
       args: {
         accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
@@ -188,7 +191,7 @@ DomainInterfaceRef.implement({
         { accelerate: accelerateArg },
         context,
         info,
-      ): Promise<ResolveModel> => {
+      ): Promise<ForwardResolveModel> => {
         const accelerate = accelerateArg ?? true;
         const { canAccelerate } = context;
         const name = domain.canonicalName;

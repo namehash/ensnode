@@ -661,4 +661,27 @@ describe("Account.primaryName and Account.primaryNames", () => {
       ),
     ).rejects.toThrow();
   });
+
+  it("does not null-propagate Account when only acceleration is queried (no primaryName selected)", async () => {
+    await expect(
+      request<{ account: { id: string; resolve: { acceleration: { requested: boolean } } } }>(
+        gql`
+          query AccountResolveAccelerationOnly($address: Address!) {
+            account(by: { address: $address }) {
+              id
+              resolve {
+                acceleration { requested }
+              }
+            }
+          }
+        `,
+        { address: accounts.owner.address },
+      ),
+    ).resolves.toMatchObject({
+      account: {
+        id: accounts.owner.address,
+        resolve: { acceleration: { requested: true } },
+      },
+    });
+  });
 });
