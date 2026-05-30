@@ -91,7 +91,7 @@ export const servicesSidebarTopic = {
           items: [
             { label: "Overview", link: "/docs/services/ensindexer/contributing" },
             {
-              label: "ENSNode Plugins",
+              label: "Creating an ENSNode Plugin",
               link: "/docs/services/ensindexer/contributing/creating-a-plugin",
             },
           ],
