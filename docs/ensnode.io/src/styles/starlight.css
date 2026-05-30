@@ -38,16 +38,18 @@
   --color-gray-950: var(--color-primary-dark);
 
   /* Sidebar active/hover colors */
-  --sidebar-active-bg: rgba(0, 129, 189, 0.1);
-  --sidebar-active-color: #0081bd;
+  --sidebar-active-color: #2563eb;
+  --sidebar-active-bg: color-mix(in srgb, var(--sidebar-active-color) 10%, transparent);
   --sidebar-icon-bg: rgba(128, 128, 128, 0.1);
   --sidebar-icon-color: #9ca3af;
 
   /* Aside colors */
-  --aside-danger-color: #f43f5e;
-  --aside-caution-color: #f97316;
+  --aside-danger-color: #ef4444;
+  --aside-caution-color: #eab308;
   --aside-note-color: #3b82f6;
-  --aside-tip-color: #007c23;
+  --aside-tip-color: #16a34a;
+
+  --color-yellow-700: #a16207;
 }
 
 /* Starlight-specific variable overrides using global tokens */
@@ -175,9 +177,20 @@
 .sl-link-card {
   border-color: var(--sl-color-gray-4);
   box-shadow: var(--sl-shadow-sm);
+  transition:
+    background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
 }
 
-.sl-link-card:hover,
+.card-grid .card {
+  border-radius: 12px;
+}
+
+.sl-link-card:hover {
+  background-color: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+}
+
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
   background: var(--sl-color-black);
@@ -207,8 +220,12 @@ a[rel="prev"]:hover {
   color: var(--sl-color-white);
 }
 
+/* Override Starlight's default markdown link hover (which switches to
+   --sl-color-white): keep links their base color on hover so only the
+   underline-offset animates. */
+.sl-markdown-content a:hover:not(:where(.not-content *)),
 .sl-markdown-content a:hover:not(:where(.not-content *)) > span {
-  color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
 }
 
 .sl-markdown-content > p a:not(:has(code), [role="tab"]),
@@ -217,13 +234,27 @@ a[rel="prev"]:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 
-  transition:
-    color 0.2s ease-in-out,
-    text-underline-offset 0.2s ease-in-out;
+  transition: text-underline-offset 0.2s ease-in-out;
 
   &:hover {
     text-underline-offset: 2px;
   }
+}
+
+.sl-markdown-content > p a:has(code):not([role="tab"]),
+.sl-markdown-content :is(ul, ol) > li a:has(code):not([role="tab"]) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  transition: text-underline-offset 0.2s ease-in-out;
+
+  &:hover {
+    text-underline-offset: 2px;
+  }
+}
+
+starlight-toc a:hover {
+  color: var(--sl-color-text-accent);
 }
 
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
@@ -306,12 +337,6 @@ a[rel="prev"]:hover {
   }
 }
 
-.open-in-ensadmin {
-  @media screen and (max-width: 400px) {
-    font-size: 14px;
-  }
-}
-
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
   transition:
@@ -326,15 +351,14 @@ a[rel="prev"]:hover {
   font-weight: 500;
 }
 
-/* Only apply hover effects to: 
-* * non-selected items 
+/* Only apply hover effects to:
+* * non-selected items
 * * expandable items (in all states), including nested ones
 */
 #starlight__sidebar a:not([aria-current="page"]):hover,
 #starlight__sidebar details details > summary:hover,
 #starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
-  transform: translateX(2px);
   border-radius: 6px;
 }
 
@@ -365,7 +389,7 @@ a.starlight-sidebar-topics-current,
 }
 
 a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
-  background-color: rgba(0, 129, 189, 0.15) !important;
+  background-color: color-mix(in srgb, var(--sidebar-active-color) 15%, transparent) !important;
   color: var(--sidebar-active-color) !important;
 }
 
@@ -381,7 +405,7 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
 
 /* Make sure that all non-top-level sidebar items are:
  * * not enlarged
- * * not bolded 
+ * * not bolded
  * * the same color as the rest of the sidebar text
  */
 ul.top-level details details > summary .group-label span {
@@ -394,9 +418,31 @@ ul.top-level details details > summary .group-label span {
 }
 
 /* Customize badge styles in the sidebar */
+#starlight__sidebar .sl-badge {
+  font-family: var(--sl-font);
+  font-size: 12px;
+  font-weight: 600 !important;
+  line-height: 14px;
+}
+
 .sl-badge:is(.danger) {
   border-color: var(--aside-danger-color);
   background-color: var(--aside-danger-color);
+}
+
+.sl-badge:is(.success) {
+  border-color: var(--aside-tip-color);
+  background-color: var(--aside-tip-color);
+}
+
+/* Center sidebar badges vertically */
+#starlight__sidebar .group-label:has(.sl-badge) {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 9px;
 }
 
 /* Make sure that social icons in the sidebar do not move on hover */
@@ -404,7 +450,7 @@ ul.top-level details details > summary .group-label span {
   transform: none !important;
 }
 
-/* Align "tablist" component to the left 
+/* Align "tablist" component to the left
  * and remove the default full-width underline
  */
 starlight-tabs ul[role="tablist"] {
@@ -421,6 +467,29 @@ starlight-tabs ul[role="tablist"] {
   padding: 20px 16px;
 
   border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--aside-color) 20%, transparent);
+  background-color: color-mix(in srgb, var(--aside-color) 10%, transparent);
+
+  & .starlight-aside__icon {
+    color: var(--aside-text-color, var(--aside-color));
+  }
+
+  & a {
+    color: var(--aside-text-color, var(--aside-color));
+
+    &:hover {
+      color: var(--aside-text-color, var(--aside-color));
+    }
+  }
+
+  & code {
+    background-color: color-mix(
+      in srgb,
+      var(--aside-color) var(--aside-code-strength, 12%),
+      transparent
+    );
+    border-radius: 4px;
+  }
 }
 
 .starlight-aside__title {
@@ -447,6 +516,10 @@ starlight-tabs ul[role="tablist"] {
   & .sl-link-card {
     background-color: var(--sl-color-black);
 
+    &:hover {
+      background-color: var(--sl-color-black);
+    }
+
     & a {
       text-decoration: none;
     }
@@ -459,111 +532,88 @@ starlight-tabs ul[role="tablist"] {
 }
 
 .starlight-aside--tip {
-  border: 1px solid color-mix(in srgb, var(--aside-tip-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-tip-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-tip-color);
-  }
-
-  & a {
-    color: var(--aside-tip-color);
-  }
+  --aside-color: var(--aside-tip-color);
 
   & .sl-link-card:hover {
-    border-color: var(--aside-tip-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-tip-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-tip-color);
+      color: var(--aside-color);
     }
   }
 }
 
 .starlight-aside--danger {
-  border: 1px solid color-mix(in srgb, var(--aside-danger-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-danger-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-danger-color);
-  }
-
-  & a {
-    color: var(--aside-danger-color);
-  }
+  --aside-color: var(--aside-danger-color);
 
   & .sl-link-card:hover {
-    border-color: var(--aside-danger-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-danger-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-danger-color);
+      color: var(--aside-color);
     }
   }
 }
 
 .starlight-aside--caution {
-  border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-caution-color) 10%, transparent);
+  --aside-color: var(--aside-caution-color);
+  --aside-text-color: var(--color-yellow-700);
+  --aside-code-strength: 15%;
 
-  & .starlight-aside__icon {
-    color: var(--aside-caution-color);
-  }
-
-  & a {
-    color: var(--aside-caution-color);
+  & code {
+    color: var(--aside-text-color);
   }
 
   & pre {
-    background-color: rgba(103, 61, 73, 0.05);
-    border: 1px solid color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
+    background-color: color-mix(in srgb, var(--aside-color) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aside-color) 15%, transparent);
+    border-radius: 12px;
+    color: var(--aside-text-color);
+
+    & code {
+      color: var(--aside-text-color);
+      background-color: transparent;
+    }
   }
 
   & .sl-link-card {
-    border-color: var(--aside-caution-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-caution-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-caution-color);
+      color: var(--aside-color);
     }
   }
 }
 
 .starlight-aside--note {
-  border: 1px solid color-mix(in srgb, var(--aside-note-color) 20%, transparent);
-  background-color: color-mix(in srgb, var(--aside-note-color) 10%, transparent);
-
-  & .starlight-aside__icon {
-    color: var(--aside-note-color);
-  }
-
-  & a {
-    color: var(--aside-note-color);
-  }
+  --aside-color: var(--aside-note-color);
 
   & .sl-link-card {
-    border-color: var(--aside-note-color);
+    border-color: var(--aside-color);
 
     & .title {
-      color: var(--aside-note-color);
+      color: var(--aside-color);
     }
 
     & .icon {
-      color: var(--aside-note-color);
+      color: var(--aside-color);
     }
   }
 }
 
-/* Custom icon logic for specific sidebar items based on URL - 
+/* Custom icon logic for specific sidebar items based on URL -
  * hack since Starlight doesn't allow overriding icons directly. */
 
 .starlight-sidebar-topics-icon svg {
@@ -610,4 +660,46 @@ starlight-tabs ul[role="tablist"] {
 }
 .starlight-sidebar-topics a[href*="/reference"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/reference.svg");
+}
+
+/* Rounded corners for the code snippets in the text-body. */
+
+/* Radius + overflow live on the figure so the horizontal scrollbar inside
+   <pre> gets clipped by the rounded shape instead of overlapping it. */
+.sl-markdown-content .expressive-code .frame:not(.not-content) {
+  border-radius: 12px;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 25%);
+}
+
+/* Make the background of horizontal scrollbar transparent */
+.sl-markdown-content .expressive-code pre::-webkit-scrollbar {
+  background: transparent;
+}
+
+/* Add margin to the scrollbar track to prevent it from touching the rounded corners */
+.sl-markdown-content .expressive-code pre::-webkit-scrollbar-track {
+  margin-inline: 12px;
+}
+
+/* Other elements are rounded accordingly */
+.sl-markdown-content .expressive-code figcaption:is(.header),
+.sl-markdown-content .expressive-code figcaption:is(.header) > span {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.sl-markdown-content .expressive-code pre {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.sl-markdown-content div[role="tabpanel"] > .expressive-code:not(:has(figcaption:not(:empty))) pre {
+  border-radius: 12px;
+}
+
+/* Additional border for the "filename" tab in the code snippets */
+.sl-markdown-content .expressive-code figcaption:is(.header):has(.title:not(:empty)) > span {
+  border-right: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
 }

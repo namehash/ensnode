@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,34 +11,29 @@ import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
 import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
 
-// Freeze the CURRENT workspace SDK omnigraph bundle (examples + schema) into a version
-// snapshot. Run this on the release commit of <version>, where the SDK's example set is
-// — by construction — valid against that release's schema. Responses are filled separately
+// Freeze the CURRENT workspace SDK omnigraph bundle (examples + schema) into the single
+// vendored snapshot the docs render. Run this on the release commit of <version>, where the
+// SDK's example set is — by construction — valid against that release's schema. <version> is
+// recorded in snapshot.json for provenance. Responses are filled separately
 // (`pnpm omnigraph-examples:refresh-responses`) once the version is live in production.
+// Overwrites the existing snapshot; new-version work happens on a separate branch.
 //
-// Usage: pnpm omnigraph:snapshot <version>   e.g. pnpm omnigraph:snapshot v1.14.0
+// Usage: pnpm omnigraph:snapshot <version>   e.g. pnpm omnigraph:snapshot v1.16.0
 
 const version = process.argv[2];
 if (!version) {
   console.error("Usage: pnpm omnigraph:snapshot <version>");
   process.exit(1);
 }
-// Used as a directory name; reject anything that could escape the versions/ dir.
+// Sanity-check the CLI argument; <version> is only written to snapshot.json, not used as a path.
 if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
   console.error(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
   process.exit(1);
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
-const versionDir = join(here, `../src/data/omnigraph-examples/versions/${version}`);
+const dataDir = join(here, "../src/data/omnigraph-examples");
 const sdkSchemaPath = join(here, "../../../packages/enssdk/src/omnigraph/generated/schema.graphql");
-
-if (existsSync(versionDir)) {
-  console.error(
-    `Snapshot already exists: ${versionDir}. Snapshots are immutable; delete it first to re-cut.`,
-  );
-  process.exit(1);
-}
 
 const sdl = readFileSync(sdkSchemaPath, "utf8");
 const schema = buildSchema(sdl);
@@ -72,20 +67,15 @@ try {
   // not in a git checkout; leave "unknown"
 }
 
-mkdirSync(versionDir, { recursive: true });
-writeFileSync(join(versionDir, "schema.graphql"), sdl, "utf8");
-writeFileSync(join(versionDir, "examples.json"), `${JSON.stringify(examples, null, 2)}\n`, "utf8");
+writeFileSync(join(dataDir, "schema.graphql"), sdl, "utf8");
+writeFileSync(join(dataDir, "examples.json"), `${JSON.stringify(examples, null, 2)}\n`, "utf8");
 writeFileSync(
-  join(versionDir, "snapshot.json"),
+  join(dataDir, "snapshot.json"),
   `${JSON.stringify({ version, commit, sdkVersion, schemaTag: version, endpoint: ENSNODE_URL, snapshottedAt: new Date().toISOString().slice(0, 10) }, null, 2)}\n`,
   "utf8",
 );
 
 console.log(`Snapshotted ${examples.length} examples + schema for ${version} (commit ${commit}).`);
-console.log("Next:");
 console.log(
-  `  1. OMNIGRAPH_VERSION=${version} pnpm omnigraph-examples:refresh-responses  # once ${version} is live`,
-);
-console.log(
-  `  2. set ACTIVE_OMNIGRAPH_VERSION = "${version}" in src/data/omnigraph-examples/active.ts`,
+  `Next: pnpm omnigraph-examples:refresh-responses  # once ${version} is live in production`,
 );

@@ -8,7 +8,7 @@ This app is hosted at [https://enskit-react-example.ensnode.io/](https://enskit-
 
 ## Usage (with NameHash Hosted Instance)
 
-> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.13.x`). If you query a different ENSNode version, you must match its ENSNode version with the same `enskit`/`enssdk` version.
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.x`). If you query a different ENSNode version, you must match its ENSNode version with the same `enskit`/`enssdk` version.
 
 ```sh
 # from the ENSNode monorepo root

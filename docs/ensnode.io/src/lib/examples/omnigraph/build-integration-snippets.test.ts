@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
+import exampleSnapshots from "@data/omnigraph-examples/examples.json";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 import type { SnapshotExample } from "@data/omnigraph-examples/types";
 
 import {
@@ -15,14 +16,7 @@ import {
 } from "./build-integration-snippets";
 import { expectIntegrationSnippetTypechecks } from "./typecheck-integration-snippet";
 
-const snapshotExamples = import.meta.glob<SnapshotExample[]>(
-  "../../../data/omnigraph-examples/versions/*/examples.json",
-  { eager: true, import: "default" },
-);
-const activeSnapshotExamples =
-  snapshotExamples[
-    `../../../data/omnigraph-examples/versions/${ACTIVE_OMNIGRAPH_VERSION}/examples.json`
-  ] ?? [];
+const activeSnapshotExamples = exampleSnapshots as SnapshotExample[];
 
 // Minimal real-ish query fixtures
 const domainByNameQuery = `query DomainByName($name: InterpretedName!) {
@@ -202,7 +196,7 @@ describe("buildEnskitSnippet", () => {
 });
 
 describe("buildEnssdkSetupSnippets", () => {
-  const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+  const npmSdkVersion = snapshot.sdkVersion;
 
   it.each(SETUP_PACKAGE_MANAGERS)("includes versioned enssdk install for %s", (pm) => {
     const snippet = buildEnssdkSetupSnippets()[pm];
@@ -229,7 +223,7 @@ describe("buildEnssdkSetupSnippets", () => {
 });
 
 describe("buildEnskitSetupSnippets", () => {
-  const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+  const npmSdkVersion = snapshot.sdkVersion;
 
   it.each(SETUP_PACKAGE_MANAGERS)("includes versioned enskit and enssdk for %s", (pm) => {
     const snippet = buildEnskitSetupSnippets()[pm];
