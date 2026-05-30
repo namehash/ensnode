@@ -6,7 +6,7 @@ import type { NormalizedAddress, RegistryId } from "enssdk";
 import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
-import type { context as createContext } from "@/omnigraph-api/context";
+import type { Context } from "@/omnigraph-api/context";
 import { DomainCursors } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import {
   cursorFilter,
@@ -102,7 +102,7 @@ function getDefaultOrder(where: DomainsWhere | undefined | null): DomainsOrderVa
  * @param args - Compound `where` filter, optional ordering, and relay connection args
  */
 export function resolveFindDomains(
-  context: ReturnType<typeof createContext>,
+  context: Context,
   {
     where,
     order,

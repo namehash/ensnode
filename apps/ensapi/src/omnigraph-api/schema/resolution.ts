@@ -1,0 +1,77 @@
+import { builder } from "@/omnigraph-api/builder";
+import { CHAIN_NAME_VALUES } from "@/omnigraph-api/lib/resolution/chain-coin-type";
+
+//////////////////////
+// AccelerationStatus
+//////////////////////
+export type AccelerationStatusModel = {
+  requested: boolean;
+  attempted: boolean;
+};
+
+export const AccelerationStatusRef =
+  builder.objectRef<AccelerationStatusModel>("AccelerationStatus");
+
+AccelerationStatusRef.implement({
+  description: "Execution status metadata for a resolver strategy.",
+  fields: (t) => ({
+    requested: t.exposeBoolean("requested", {
+      description: "Whether protocol acceleration was requested by the caller.",
+      nullable: false,
+    }),
+    attempted: t.exposeBoolean("attempted", {
+      description: "Whether protocol acceleration was attempted at runtime.",
+      nullable: false,
+    }),
+  }),
+});
+
+//////////////////
+// ChainName
+//////////////////
+export const ChainName = builder.enumType("ChainName", {
+  description:
+    "Primary-name chains supported by the Omnigraph API. Use `DEFAULT` for the default EVM chain.\n@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.",
+  values: CHAIN_NAME_VALUES,
+});
+
+///////////////////////
+// PrimaryName inputs
+///////////////////////
+export const PrimaryNameByInput = builder.inputType("PrimaryNameByInput", {
+  description:
+    "Select a primary name lookup target. Exactly one of `coinType` or `chain` must be provided.",
+  isOneOf: true,
+  fields: (t) => ({
+    coinType: t.field({
+      type: "CoinType",
+      description: "The ENSIP-9 coin type to resolve the primary name for.",
+    }),
+    chain: t.field({
+      type: ChainName,
+      description: "A `ChainName` to resolve the primary name for.",
+    }),
+  }),
+});
+
+export type PrimaryNameByInputValue = typeof PrimaryNameByInput.$inferInput;
+
+export const PrimaryNamesWhereInput = builder.inputType("PrimaryNamesWhereInput", {
+  description:
+    "Filter primary name lookups. Exactly one of `coinTypes` or `chains` must be provided.",
+  isOneOf: true,
+  fields: (t) => ({
+    coinTypes: t.field({
+      type: ["CoinType"],
+      description: "Coin types to resolve primary names for.",
+      validate: { minLength: 1 },
+    }),
+    chains: t.field({
+      type: [ChainName],
+      description: "`ChainName` values to resolve primary names for.",
+      validate: { minLength: 1 },
+    }),
+  }),
+});
+
+export type PrimaryNamesWhereInputValue = typeof PrimaryNamesWhereInput.$inferInput;

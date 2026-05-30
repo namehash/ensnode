@@ -1,12 +1,14 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import type { DomainId } from "enssdk";
+import { type DomainId, isNormalizedName } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { resolveForward } from "@/lib/resolution/forward-resolution";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
 import {
   EMPTY_CONNECTION,
@@ -20,11 +22,14 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { toResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
+import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
+  RESOLVE_ACCELERATE_ARG,
 } from "@/omnigraph-api/schema/constants";
 import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
 import {
@@ -35,6 +40,10 @@ import {
 import { DomainResolverRef } from "@/omnigraph-api/schema/domain-resolver";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
+import {
+  type ForwardResolveModel,
+  ForwardResolveRef,
+} from "@/omnigraph-api/schema/forward-resolve";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
@@ -165,6 +174,48 @@ DomainInterfaceRef.implement({
       type: DomainResolverRef,
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    //////////////////
+    // Domain.resolve
+    //////////////////
+    resolve: t.field({
+      description: "Resolve protocol-level data for this Domain.",
+      type: ForwardResolveRef,
+      nullable: false,
+      args: {
+        accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
+      },
+      resolve: async (
+        domain,
+        { accelerate: accelerateArg },
+        context,
+        info,
+      ): Promise<ForwardResolveModel> => {
+        const accelerate = accelerateArg ?? true;
+        const { canAccelerate } = context;
+        const name = domain.canonicalName;
+
+        if (!name || !isNormalizedName(name)) {
+          return { accelerate, canAccelerate, trace: null, records: null };
+        }
+
+        const recordsSelection = buildRecordsSelectionFromResolveContainerInfo(info);
+        if (!recordsSelection) {
+          return { accelerate, canAccelerate, trace: null, records: null };
+        }
+
+        const { trace, result } = await runWithTrace(() =>
+          resolveForward(name, recordsSelection, { accelerate, canAccelerate }),
+        );
+
+        return {
+          accelerate,
+          canAccelerate,
+          trace,
+          records: toResolvedRecordsModel(name, result),
+        };
+      },
     }),
 
     ///////////////////////
