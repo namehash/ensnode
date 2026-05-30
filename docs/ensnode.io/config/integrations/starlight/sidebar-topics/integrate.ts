@@ -221,7 +221,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
-          label: "ENSEngine (webhooks)",
+          label: "ENSEngine (Webhooks)",
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],

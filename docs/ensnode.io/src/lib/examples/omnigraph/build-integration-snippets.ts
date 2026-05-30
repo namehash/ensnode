@@ -1,4 +1,4 @@
-import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 import { ENSNODE_URL } from "@lib/examples/omnigraph/constants";
 
 /** Package managers shown in Setup tabs (npm default). */
@@ -11,7 +11,7 @@ export const SETUP_TAB_LABELS: Record<SetupPackageManager, string> = {
   pnpm: "pnpm",
 };
 
-const npmSdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+const npmSdkVersion = snapshot.sdkVersion;
 
 /** Setup steps for enssdk per package manager: scaffold, install, copy snippet, run. */
 export function buildEnssdkSetupSnippets(): Record<SetupPackageManager, string> {
