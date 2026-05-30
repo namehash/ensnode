@@ -61,15 +61,11 @@ Any application that implements one or more standard-compliant [ENSNode Plugins]
 
 ### ENSDb Metadata Writer
 
-Any application that writes metadata about an [EnsDbWriter](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) records into the [ENSNode Metadata Table](docs/services/ensdb/concepts/glossary#ensnode-metadata-table) for each ENSIndexer instance that have ever connected to the ENSDb instance.
-
-Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
+Any application that writes metadata about an [EnsDbWriter](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) records into the [ENSNode Metadata Table](/docs/services/ensdb/concepts/glossary#ensnode-metadata-table) for each ENSIndexer instance that have ever connected to the ENSDb instance. Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
 
 ### ENSDb Reader
 
-Any application that reads ENS data from an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). It knows how to read state from ENSDb, including overall metadata from the sole [ENSDb Writer](#ensdb-writer) and (where relevant) data associated with the [ENSNode Plugins](#ensnode-plugin) relevant to the specific ENSDb Reader implementation. For example, [ENSApi](#ensapi) is a reference implementation of an ENSDb Reader.
-
-Other implementations of ENSDb Readers can be built in any language, and can serve different types of APIs (GraphQL, REST, gRPC, etc.), as long as they follow the ENSDb Standard.
+Any application that reads ENS data from an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). It knows how to read state from ENSDb, including overall metadata from the sole [ENSDb Writer](#ensdb-writer) and (where relevant) data associated with the [ENSNode Plugins](#ensnode-plugin) relevant to the specific ENSDb Reader implementation. For example, [ENSApi](#ensapi) is a reference implementation of an ENSDb Reader. Other implementations of ENSDb Readers can be built in any language, and can serve different types of APIs (GraphQL, REST, gRPC, etc.), as long as they follow the ENSDb Standard.
 
 ## ENSDb Concepts
 

@@ -8,7 +8,7 @@ import { Aside, LinkCard } from "@astrojs/starlight/components";
 [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) defines how an indexing process for ENS looks like, including:
 
 - How to source onchain data about ENS (events, blocks, etc.)
-- How to process onchain data into (including transforming raw onchain data into a desired internal data model).
+- How to process onchain data into an indexed data model (including transforming raw onchain data into a desired internal data model).
 - How to store that processed data in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance).
 - How to store metadata about the [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance).
 
@@ -19,7 +19,8 @@ Your ENSDb Writer must include:
 
 - The _implementation_ of 1 or more standard compliant [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins).
 - The _implementation_ of an [EnsDbMetadataWriter](/docs/services/ensdb/concepts/glossary#ensdb-metadata-writer) that stores [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) overall, including which [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) it has activated, what the status of indexing is across each indexed chain, etc.
-  :::
+
+:::
 
 ## Standards compliant ENSDb Writers
 
