@@ -119,7 +119,7 @@ export const unigraphSqlResultJson = {
 };
 
 :::caution[`unigraph` plugin required]
-Using the Unigraph SQL requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
+Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
 
 Read the indexing status snapshot for an ENSIndexer instance from the shared `ensnode.metadata` table. See [Connect](/docs/integrate/unigraph/examples) for setup.
@@ -149,7 +149,7 @@ import { IndexingMetadataContextStatusCodes } from "@ensnode/ensdb-sdk";
 const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
 if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
   const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
-  console.log(JSON.stringify(indexingStatusSnapshot, null, 2));
+  console.log(indexingStatusSnapshot);
 }
 ```
 

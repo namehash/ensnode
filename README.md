@@ -27,44 +27,6 @@ The easiest way to get started is through the new **ENS Omnigraph API** — the 
 - 🚀 **Quickstart:** [ensnode.io/docs/integrate](https://ensnode.io/docs/integrate)
 - 💬 **Telegram:** [t.me/ensnode](https://t.me/ensnode)
 
-## Example: query the subnames of '.eth' via the ENS Omnigraph API
-
-Note that substantial ENS data is not directly queryable through traditional smart contract RPC calls. Examples include: the subnames of a name, or the names owned by an address. ENSNode is the world's first and only solution that makes the full set of ENS data spanning both ENSv1 and ENSv2 accessible through a single unified API.
-
-```graphql
-query HelloWorld {
-  domain(by: { name: "eth" }) {
-    __typename
-    canonical {
-      name {
-        interpreted
-      }
-    }
-    owner {
-      address
-    }
-    subdomains(first: 20) {
-      totalCount
-      edges {
-        node {
-          __typename
-          canonical {
-            name {
-              interpreted
-            }
-          }
-          owner {
-            address
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-To get started with ENSNode and the ENS Omnigraph API, follow the [Quickstart](https://ensnode.io/docs/integrate).
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).

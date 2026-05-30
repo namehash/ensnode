@@ -37,24 +37,39 @@ export default defineConfig({
     "/ensnode": "/docs/integrate",
     "/examples": "/docs/integrate/omnigraph/examples",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
-    "/docs/integrate/subgraph/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
-    "/docs/integrate/subgraph/subgraph-api": "/docs/integrate/subgraph/schema-reference",
-    "/docs/integrate/subgraph/with-ensjs": "/docs/integrate/subgraph/examples/with-ensjs",
-    "/docs/integrate/subgraph/with-viem": "/docs/integrate/subgraph/examples/with-viem",
-    "/docs/integrate/subgraph/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
-    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
-    "/docs/reference/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
-    "/docs/reference/querying-best-practices": "/docs/integrate/subgraph/querying-best-practices",
-    "/docs/reference/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
-    "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
-    "/docs/reference/subgraph-legacy/subgraph-api": "/docs/integrate/subgraph/schema-reference",
+    // ENS Subgraph docs moved from /docs/integrate/subgraph to /docs/integrate/ens-subgraph
+    "/docs/integrate/subgraph": "/docs/integrate/ens-subgraph",
+    "/docs/integrate/subgraph/examples": "/docs/integrate/ens-subgraph/examples",
+    "/docs/integrate/subgraph/examples/with-ensjs":
+      "/docs/integrate/ens-subgraph/examples/with-ensjs",
+    "/docs/integrate/subgraph/examples/with-viem":
+      "/docs/integrate/ens-subgraph/examples/with-viem",
+    "/docs/integrate/subgraph/schema-reference": "/docs/integrate/ens-subgraph/schema-reference",
+    "/docs/integrate/subgraph/querying-best-practices":
+      "/docs/integrate/ens-subgraph/backwards-compatibility",
+    "/docs/integrate/subgraph/subgraph-dependents": "/docs/integrate/ens-subgraph",
+    "/docs/integrate/subgraph/what-is-the-ens-subgraph": "/docs/integrate/ens-subgraph",
+    "/docs/integrate/subgraph/subgraph-api": "/docs/integrate/ens-subgraph/schema-reference",
+    "/docs/integrate/subgraph/with-ensjs": "/docs/integrate/ens-subgraph/examples/with-ensjs",
+    "/docs/integrate/subgraph/with-viem": "/docs/integrate/ens-subgraph/examples/with-viem",
+    "/docs/integrate/subgraph/subgraph-compatibility-tooling":
+      "/docs/integrate/ens-subgraph/backwards-compatibility",
+    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/integrate/ens-subgraph",
+    "/docs/reference/what-is-the-ens-subgraph": "/docs/integrate/ens-subgraph",
+    "/docs/reference/querying-best-practices":
+      "/docs/integrate/ens-subgraph/backwards-compatibility",
+    "/docs/reference/subgraph-compatibility-tooling":
+      "/docs/integrate/ens-subgraph/backwards-compatibility",
+    "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph": "/docs/integrate/ens-subgraph",
+    "/docs/reference/subgraph-legacy/subgraph-api": "/docs/integrate/ens-subgraph/schema-reference",
     "/docs/reference/subgraph-legacy/querying-best-practices":
-      "/docs/integrate/subgraph/querying-best-practices",
-    "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
-    "/docs/reference/subgraph-legacy/with-ensjs": "/docs/integrate/subgraph/examples/with-ensjs",
-    "/docs/reference/subgraph-legacy/with-viem": "/docs/integrate/subgraph/examples/with-viem",
-    "/docs/reference/subgraph-legacy/subgraph-dependents":
-      "/docs/integrate/subgraph/subgraph-dependents",
+      "/docs/integrate/ens-subgraph/backwards-compatibility",
+    "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling":
+      "/docs/integrate/ens-subgraph/backwards-compatibility",
+    "/docs/reference/subgraph-legacy/with-ensjs":
+      "/docs/integrate/ens-subgraph/examples/with-ensjs",
+    "/docs/reference/subgraph-legacy/with-viem": "/docs/integrate/ens-subgraph/examples/with-viem",
+    "/docs/reference/subgraph-legacy/subgraph-dependents": "/docs/integrate/ens-subgraph",
     "/ensadmin": "/docs/services/ensadmin",
     "/ensapi": "/docs/services/ensapi",
     "/ensdb": "/docs/services/ensdb",

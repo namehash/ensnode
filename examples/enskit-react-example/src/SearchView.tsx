@@ -1,13 +1,12 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { beautifyInterpretedName } from "enssdk";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
-  query DomainsByName($name: String!, $first: Int!, $after: String) {
+  query DomainsByName($name: DomainsNameFilter!, $first: Int!, $after: String) {
     domains(where: { name: $name }, first: $first, after: $after) {
       edges {
-        node { __typename id name }
+        node { __typename id canonical { name { beautified } } }
       }
       pageInfo {
         hasNextPage
@@ -56,7 +55,11 @@ export function SearchView() {
 
   const [result] = useOmnigraphQuery({
     query: DomainsByNameQuery,
-    variables: { name: query, first: PAGE_SIZE, after },
+    variables: {
+      name: { starts_with: query },
+      first: PAGE_SIZE,
+      after,
+    },
     pause: query.length === 0,
   });
 
@@ -67,16 +70,17 @@ export function SearchView() {
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains</code>. Only <b>Canonical</b> Domains (those
-        with an inferrable Canonical Name) are searched. Input is debounced by {DEBOUNCE_MS}ms and
-        synced to the URL as <code>?query=</code>.
+        Showcases live prefix search (typeahead) via <code>Query.domains</code> with a{" "}
+        <code>starts_with</code> name filter. Only <b>Canonical</b> Domains (those with an
+        inferrable Canonical Name) are searched. Input is debounced by {DEBOUNCE_MS}ms and synced to
+        the URL as <code>?query=</code>.
       </p>
 
       <input
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="vitalik.eth"
+        placeholder="vitalik"
       />
 
       {query.length === 0 ? (
@@ -92,8 +96,7 @@ export function SearchView() {
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
                   <Link to={`/domain/id/${edge.node.id}`}>
-                    {/** biome-ignore lint/style/noNonNullAssertion: searching by name limits to Domains with names */}
-                    {beautifyInterpretedName(edge.node.name!)}
+                    {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
                   </Link>
                 </li>
               );

@@ -132,6 +132,15 @@ An **Interpreted Label** is a **Label** that is either:
 
 Apps building on ENSNode should take special note to align their implementation of **ENS Normalize** with the **ENS Normalize** used by the ENSNode they use. The **ENS Normalize** version used by each ENSNode can be referenced in the ENSIndexer Config API.
 
+### Beautified Label
+
+A **Beautified Label** is a **Label** produced from an **Interpreted Label** for presentation in a UI. It is either:
+
+- an **Encoded LabelHash**, preserved verbatim from the source **Interpreted Label**, or
+- a label produced by passing a normalized label through [ENSIP-15](https://docs.ens.domains/ensip/15) beautification, which is guaranteed to be normalizable back to the original normalized label but is itself NOT necessarily normalized (e.g. `"♾"` → `"♾️"`).
+
+Because the beautified form is not guaranteed to be normalized, a **Beautified Label** is NOT an **Interpreted Label** and MUST NOT be used as a lookup key, or anywhere else that expects an **Interpreted Label**.
+
 ### Literal Name
 
 A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels**.
@@ -139,6 +148,23 @@ A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels*
 ### Interpreted Name
 
 An **Interpreted Name** is a Name exclusively composed of 0 or more **Interpreted Labels**.
+
+### Beautified Name
+
+A **Beautified Name** is a Name produced from an **Interpreted Name** for presentation in a UI, where each label is either:
+
+- an **Encoded LabelHash**, preserved verbatim from the source **Interpreted Name**, or
+- a label produced by passing a normalized label through [ENSIP-15](https://docs.ens.domains/ensip/15) beautification, which is guaranteed to be normalizable back to the original normalized label but is itself NOT necessarily normalized (e.g. `"♾"` → `"♾️"`).
+
+Because the beautified form is not guaranteed to be normalized, a **Beautified Name** is NOT an **Interpreted Name** and MUST NOT be used as a navigation target, lookup key, or anywhere else that expects an **Interpreted Name**.
+
+### Resolvable Name
+
+A **Resolvable Name** is a Name that can be used as input to ENS Forward Resolution. It contains only literal label segments (normalized or unnormalized), and each label is at most 255 bytes due to the [DNS Encoding](https://docs.ens.domains/resolution/names/#dns-encoding) standard.
+
+:::danger[Interpreted Name !== Resolvable Name]
+Because Forward Resolution does not support **Encoded LabelHashes**, an **Interpreted Name** containing an **Encoded LabelHash** is NOT a **Resolvable Name**: it can be used to traverse the Namegraph, but the records for that name cannot be resolved.
+:::
 
 ## Subgraph Indexability & Label/Name Interpretation
 
