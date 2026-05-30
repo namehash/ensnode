@@ -45,7 +45,34 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
   href="/docs/integrate/integration-options/ensdb"
 />
 
-## 5. enscli
+## 5. ENSDb Writers
+
+Build your own indexer for ENSDb by implementing the [ENSNode Plugin](/docs/integrate/integration-options/ensnode-plugins) specification. ENSDb Writers index onchain ENS data and write it into an ENSDb instance.
+
+<LinkCard
+  title="ENSDb Writers Documentation"
+  href="/docs/integrate/integration-options/ensdb-writers"
+/>
+
+## 6. ENSDb Readers
+
+Build custom APIs on top of ENSDb. ENSDb Readers query indexed ENS data from an ENSDb instance and serve it through any API surface (GraphQL, REST, gRPC, etc.).
+
+<LinkCard
+  title="ENSDb Readers Documentation"
+  href="/docs/integrate/integration-options/ensdb-readers"
+/>
+
+## 7. ENSNode Plugins
+
+ENSNode Plugins are abstract specifications that define indexed data models for ENS. They are the key architectural piece that enables decoupling between ENSDb Writers and ENSDb Readers.
+
+<LinkCard
+  title="ENSNode Plugins Documentation"
+  href="/docs/integrate/integration-options/ensnode-plugins"
+/>
+
+## 8. enscli
 
 `enscli` is a CLI that wraps `enssdk` to bring the ENS Omnigraph to the terminal. Designed for developers exploring or validating integrations, operators wiring ENS lookups into shell pipelines, and AI coding agents driving `ensskills`.
 
@@ -54,7 +81,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
   href="/docs/integrate/integration-options/enscli"
 />
 
-## 6. ensskills
+## 9. ensskills
 
 `ensskills` is a collection of curated skill bundles that give AI coding agents a well-defined contract for working with ENS — powering conversational ENS lookups and streamlining integration code written with `enskit`, `enssdk`, or the raw Omnigraph API.
 
@@ -63,7 +90,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
   href="/docs/integrate/integration-options/ensskills"
 />
 
-## 7. ensdb-cli & ENSDb snapshots
+## 10. ensdb-cli & ENSDb snapshots
 
 `ensdb-cli` is the operator-facing tool for ENSDb snapshots — portable, versioned packages of an ENSDb instance. Pull one down, restore it into Postgres, and start querying ENS in minutes instead of waiting days to complete a full historical indexing backfill from scratch.
 
@@ -72,7 +99,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
   href="/docs/integrate/integration-options/ensdb-cli"
 />
 
-## 8. ENSEngine
+## 11. ENSEngine
 
 ENSEngine watches your ENSDb for changes in real time and delivers ENS-aware events — including webhooks — to any sink you configure. Stop polling and start reacting to ENS state changes.
 

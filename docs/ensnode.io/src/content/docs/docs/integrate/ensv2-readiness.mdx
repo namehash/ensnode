@@ -22,7 +22,7 @@ Full access to ENS data formerly required two separate data-fetching strategies 
 
 ## How ENSNode solves this
 
-**The Unigraph Data Model** — [ENSIndexer](/docs/services/ensindexer)'s `unigraph` plugin builds a single, **unified** indexed data model in [ENSDb](/docs/services/ensdb) that combines all of ENSv1 — mainnet `.eth`, Basenames on Base, Lineanames on Linea, 3DNS on Optimism — together with ENSv2. One data model, every chain, both protocol versions.
+**The Unigraph Data Model** — The `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins), implemented in [ENSIndexer](/docs/services/ensindexer), builds a single, **unified** indexed data model in [ENSDb](/docs/services/ensdb) that combines all of ENSv1 — mainnet `.eth`, Basenames on Base, Lineanames on Linea, 3DNS on Optimism — together with ENSv2. One data model, every chain, both protocol versions.
 
 **The Omnigraph API** — The [ENS Omnigraph API](/docs/integrate/omnigraph), delivered by [ENSApi](/docs/services/ensapi), is a fully typed GraphQL API on top of that Unigraph data model. It handles the ENS protocol's many implementation details for you, so you can focus on building your app instead of wiring up the protocol's internals.
 

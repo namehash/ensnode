@@ -5,30 +5,69 @@ description: How to customize data models for ENSNode, using the ENSNode Plugin 
 
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 
-## Specification
+## What is an ENSNode Plugin?
 
-## Reference Implementations
+An **ENSNode Plugin** is an abstract specification that defines how a specific aspect of the ENS namespace is indexed into [ENSDb](/docs/services/ensdb). It is **not** an implementation — it is a standard that any [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) can implement.
 
-<Aside type="note" title="Built by the NameHash team">
-  All reference implementations of ENSNode Plugins are built by the NameHash team. We welcome contributions and collaborations to expand the ecosystem of plugins.
-</Aside>
+Each ENSNode Plugin defines:
 
-<LinkCard
-  title="ENSNodePlugin"
-  description="A reference implementation of an ENSNode Plugin, built by the NameHash team."
-  href="/docs/services/ensnodeplugin"
-/>
+- **Name** — e.g. `unigraph`, `protocol-acceleration`, `subgraph`.
+- **Datasources** — which onchain contracts should be indexed, as a function of the ENS namespace.
+- **Dependency relationships** — other plugins that must (or must not) be activated concurrently.
+- **Indexed data model** — the tables, columns, and indexes that the plugin produces in ENSDb.
+- **Standards and invariants** — rules for how onchain events are translated into the indexed data model during indexing.
+- **Versioning** — a version number that can be stored in ENSNode Metadata, to track which version of the plugin implementation is being used by ENSNode Writers and Readers.
+
+## Why ENSNode Plugins Matter
+
+ENSNode Plugins are the key architectural piece that enables a decoupling between [EnsDbWriters](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [EnsDbReaders](/docs/services/ensdb/concepts/glossary#ensdb-reader), so that anyone can create their own implementations of these. For example, any team working on indexing infrastructure can implement an ENSDb Writer and have it produce a standards compliant ENSDb. On the other hand, any team working on products for ENS ecosystem can build their own standards compliant ENSDb Reader and have it query ENSDb.
+
+:::note[Interoperability between ENSDb Writers and Readers]
+When new ENSNode plugins are created, it becomes possible for the [ENS Omnigraph API](/docs/integrate/omnigraph) (or other APIs built by any EnsDbReader) to unify the ability to query across ENSNode plugins in a single query. For example, you could query both ENS state from the `unigraph` and EFP state about followers from the `efp` plugin in a single GraphQL query.
+:::
+
+## Core Plugins
+
+[ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) that implements multiple core plugins following the ENSNode Plugins specification. The code for each plugin inside ENSIndexer is a reference implementation of that plugin's abstract specification. [The core plugins implemented in ENSIndexer today](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins) are:
+
+:::note[Built by the NameHash team]
+All core ENSNode Plugins are built by the NameHash team. [We welcome contributions and collaborations to expand the ecosystem of plugins](#build-your-own).
+:::
+
+| Plugin                  | Description                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| `unigraph`              | Unified ENSv1 + ENSv2 data model with polymorphic entities |
+| `protocol-acceleration` | Accelerated lookups for ENS resolution                     |
+| `subgraph`              | Legacy ENS Subgraph-compatible data model                  |
+| `basenames`             | Basenames (`.base.eth`) subname indexing                   |
+| `lineanames`            | Lineanames (`.linea.eth`) subname indexing                 |
+| `threedns`              | 3DNS (`.box`) name indexing                                |
+| `registrars`            | Registration and renewal lifecycle tracking                |
+| `tokenscope`            | NFT tokenization and marketplace activity                  |
 
 ## Community Plugins
 
-### Under development
+### Under Development
 
-New plugins currently under development by the [EthId team](https://ethid.org/) for:
-- [EFP (Ethereum Follow Protocol)](https://efp.app/)
-- [Grails](https://grails.app/)
+The `efp` plugin is [a new plugin currently under development](https://github.com/Quantumlyy/efpnode/tree/main/packages/ensnode-plugin-efp) by the [EthId team](https://ethid.org/):
 
-:::tip[Unified data access]
+- [EFP (Ethereum Follow Protocol)](https://efp.app/) — onchain social graph protocol
+- [Grails](https://grails.app/) — by the EthId Foundation
 
-When new [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) are created, it can be possible for the [ENS Omnigraph API](/docs/integrate/integration-options/omnigraph-graphql-api) (or other APIs built by any ENSDb Reader) to unify the ability to query across ENSNode plugins in a single query. For example, to query both ENS State from the `unigraph` and EFP State about followers from the `efp` plugin in a single GraphQL query to the [ENS Omnigraph API](/docs/integrate/integration-options/omnigraph-graphql-api).
+### Build Your Own
 
-:::
+If you are interested in defining a new ENSNode plugin or implementing an existing one, reach out to the NameHash Labs team — we are happy to provide support and additional info. Join us on [Telegram](https://t.me/ensnode) for any questions.
+
+## Related
+
+<LinkCard
+  title="ENSDb Writers"
+  description="Learn how to build indexers that implement ENSNode plugins."
+  href="/docs/integrate/integration-options/ensdb-writers"
+/>
+
+<LinkCard
+  title="ENSDb Readers"
+  description="Learn how to build APIs that read from ENSNode plugins."
+  href="/docs/integrate/integration-options/ensdb-readers"
+/>
