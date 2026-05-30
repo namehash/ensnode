@@ -9,9 +9,9 @@ import EnsDbUseCases from "@components/molecules/EnsDbUseCases.astro";
 
 For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of both **ENSv1 and ENSv2** directly via `SQL`.
 
-**ENSDb** is a bi-directional integration standard for any EnsDbWriter and EnsDbReader implementations to coordinate around the live unified onchain state of ENSv1 **and ENSv2** in a carefully-crafted standardized data model within a PostgreSQL database. Because ENSDb builds on Postgres, you can use _any_ language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
+**ENSDb** is a bi-directional integration standard for any ENSDb Writer and ENSDb Reader implementations to coordinate around the live unified onchain state of ENSv1 **and ENSv2** in a carefully-crafted standardized data model within a PostgreSQL database. Because ENSDb builds on Postgres, you can use _any_ language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
 
-The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) also defines _the abstract specification_ for how [EnsDbWriters](/docs/integrate/integration-options/ensdb-writers) store their [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) in an [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance) in a manner that supports decoupling and interop with any of [EnsDbReaders](/docs/integrate/integration-options/ensdb-readers).
+The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) also defines _the abstract specification_ for how [ENSDb Writers](/docs/integrate/integration-options/ensdb-writers) store their [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) in an [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance) in a manner that supports decoupling and interop with any of [ENSDb Readers](/docs/integrate/integration-options/ensdb-readers).
 
 :::tip[Coming soon: ensdb-cli & ENSDb snapshots]
 We're building [**`ensdb-cli` & ENSDb snapshots**](/docs/integrate/integration-options/ensdb-cli) so you can pull down a fresh ENSDb in minutes instead of paying for a full historical RPC backfill among many other benefits.

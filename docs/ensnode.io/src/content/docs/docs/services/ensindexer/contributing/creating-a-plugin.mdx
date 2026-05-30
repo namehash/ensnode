@@ -8,9 +8,9 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-ENSIndexer is a reference implementation of an [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) that implements [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins). The code for each plugin inside ENSIndexer is a reference implementation of that plugin's abstract specification.
+ENSIndexer is a reference implementation of an [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) that implements [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins). The code for each plugin inside ENSIndexer is a reference implementation of that plugin's abstract specification.
 
-For the full specification of ENSNode plugins and how they enable decoupling between [EnsDbWriters](/docs/integrate/integration-options/ensdb-writers) and [EnsDbReaders](/docs/integrate/integration-options/ensdb-readers), see the [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) integration guide.
+For the full specification of ENSNode plugins and how they enable decoupling between [ENSDb Writers](/docs/integrate/integration-options/ensdb-writers) and [ENSDb Readers](/docs/integrate/integration-options/ensdb-readers), see the [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) integration guide.
 
 <LinkCard
   title="ENSNode Plugins"
@@ -26,7 +26,7 @@ ENSIndexer will only activate the ENSNode Plugins which you specify in the `PLUG
 
 ## Plugin implementation structure
 
-Each ENSNode Plugin implemented in ENSIndexer is a standalone TypeScript module that can be developed, tested, and deployed independently. The ENSIndexer Plugin can define its own indexed data models and indexing logic. It must include two main files:
+Each ENSNode Plugin implemented in ENSIndexer is a standalone TypeScript module that can be developed, tested, and deployed independently. The ENSNode Plugin can define its own indexed data models and indexing logic. It must include two main files:
 
 - `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific onchain events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the relevant indexed data model inside the ENSIndexer Schema.
 - `plugin.ts`: This file defines the plugin itself, including its name, description, and any configuration options, like datasources to be used for specifying onchain contracts that will be indexed.

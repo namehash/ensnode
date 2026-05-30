@@ -7,7 +7,7 @@ import { Aside, LinkCard } from "@astrojs/starlight/components";
 
 ## What is an ENSNode Plugin?
 
-An **ENSNode Plugin** is an abstract specification that defines how a specific aspect of the ENS namespace is indexed into [ENSDb](/docs/services/ensdb). It is **not** an implementation — it is a standard that any [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) can implement.
+An **ENSNode Plugin** is an abstract specification that defines how a specific aspect of the ENS namespace is indexed into [ENSDb](/docs/services/ensdb). It is **not** an implementation — it is a standard that any [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) can implement.
 
 Each ENSNode Plugin defines:
 
@@ -20,15 +20,15 @@ Each ENSNode Plugin defines:
 
 ## Why ENSNode Plugins Matter
 
-ENSNode Plugins are the key architectural piece that enables a decoupling between [EnsDbWriters](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [EnsDbReaders](/docs/services/ensdb/concepts/glossary#ensdb-reader), so that anyone can create their own implementations of these. For example, any team working on indexing infrastructure can implement an ENSDb Writer and have it produce a standards compliant ENSDb. On the other hand, any team working on products for ENS ecosystem can build their own standards compliant ENSDb Reader and have it query ENSDb.
+ENSNode Plugins are the key architectural piece that enables a decoupling between [ENSDb Writers](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [ENSDb Readers](/docs/services/ensdb/concepts/glossary#ensdb-reader), so that anyone can create their own implementations of these. For example, any team working on indexing infrastructure can implement an ENSDb Writer and have it produce a standards compliant ENSDb. On the other hand, any team working on products for ENS ecosystem can build their own standards compliant ENSDb Reader and have it query ENSDb.
 
 :::note[Interoperability between ENSDb Writers and Readers]
-When new ENSNode plugins are created, it becomes possible for the [ENS Omnigraph API](/docs/integrate/omnigraph) (or other APIs built by any EnsDbReader) to unify the ability to query across ENSNode plugins in a single query. For example, you could query both ENS state from the `unigraph` and EFP state about followers from the `efp` plugin in a single GraphQL query.
+When new ENSNode plugins are created, it becomes possible for the [ENS Omnigraph API](/docs/integrate/omnigraph) (or other APIs built by any ENSDb Reader) to unify the ability to query across ENSNode plugins in a single query. For example, you could query both ENS state from the `unigraph` and EFP state about followers from the `efp` plugin in a single GraphQL query.
 :::
 
 ## Core Plugins
 
-[ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [EnsDbWriter](/docs/services/ensdb/concepts/glossary#ensdb-writer) that implements multiple core plugins following the ENSNode Plugins specification. The code for each plugin inside ENSIndexer is a reference implementation of that plugin's abstract specification. [The core plugins implemented in ENSIndexer today](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins) are:
+[ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) that implements multiple core plugins following the ENSNode Plugins specification. The code for each plugin inside ENSIndexer is a reference implementation of that plugin's abstract specification. [The core plugins implemented in ENSIndexer today](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins) are:
 
 :::note[Built by the NameHash team]
 All core ENSNode Plugins are built by the NameHash team. [We welcome contributions and collaborations to expand the ecosystem of plugins](#build-your-own).
