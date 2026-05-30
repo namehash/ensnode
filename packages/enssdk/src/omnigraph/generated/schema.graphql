@@ -31,10 +31,10 @@ type Account {
   """The Permissions on Registries granted to this Account."""
   registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
 
-  """Resolve Primary Names for this Account."""
+  """Resolve primary names for this Account."""
   resolve(
     """
-    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
@@ -148,11 +148,11 @@ type AccountRegistryPermissionsConnectionEdge {
   node: RegistryPermissionsUser!
 }
 
-"""
-Nested account resolution container exposing primary-name resolution with shared acceleration settings.
-"""
+"""Nested account resolution container exposing primary name resolution."""
 type AccountResolve {
-  """Protocol acceleration strategy status for this Account resolution."""
+  """
+  Whether protocol acceleration was requested and attempted for this reverse resolution.
+  """
   acceleration: AccelerationStatus!
 
   """
@@ -172,7 +172,7 @@ type AccountResolve {
   ): [PrimaryNameRecord!]!
 
   """
-  Protocol trace tree emitted by primary-name resolution, represented as JSON for schema stability.
+  Protocol trace tree emitted by reverse resolution, represented as JSON for schema stability. This data model should be expected to experience breaking changes.
   """
   trace: JSON!
 }
@@ -322,12 +322,10 @@ interface Domain {
   """The Registry under which this Domain exists."""
   registry: Registry!
 
-  """
-  Resolve protocol-level data for this Domain with trace and acceleration metadata.
-  """
+  """Resolve protocol-level data for this Domain."""
   resolve(
     """
-    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
@@ -556,12 +554,10 @@ type ENSv1Domain implements Domain {
   """The Registry under which this Domain exists."""
   registry: Registry!
 
-  """
-  Resolve protocol-level data for this Domain with trace and acceleration metadata.
-  """
+  """Resolve protocol-level data for this Domain."""
   resolve(
     """
-    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
@@ -679,12 +675,10 @@ type ENSv2Domain implements Domain {
   """The Registry under which this Domain exists."""
   registry: Registry!
 
-  """
-  Resolve protocol-level data for this Domain with trace and acceleration metadata.
-  """
+  """Resolve protocol-level data for this Domain."""
   resolve(
     """
-    When true (default), Protocol Acceleration is used for record resolution, when supported.
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
     @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
     """
     accelerate: Boolean = true
@@ -1214,9 +1208,7 @@ type PrimaryNameRecord {
   """
   name: CanonicalName
 
-  """
-  Resolve protocol-level records (and optionally profile preview) for this primary name.
-  """
+  """Forward resolve data for this primary name."""
   resolve: Resolve!
 }
 
@@ -1496,10 +1488,12 @@ type Renewal {
 scalar RenewalId
 
 """
-Resolution container exposing trace and acceleration metadata alongside resolved ENS records.
+Nested domain resolution container exposing resolved data for the domain.
 """
 type Resolve {
-  """Protocol acceleration strategy status for this resolution."""
+  """
+  Whether protocol acceleration was requested and attempted for this resolution.
+  """
   acceleration: AccelerationStatus!
 
   """
@@ -1508,7 +1502,7 @@ type Resolve {
   records: ResolvedRecords
 
   """
-  Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability.
+  Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability. This data model should be expected to experience breaking changes.
   """
   trace: JSON
 }
@@ -1521,7 +1515,9 @@ type ResolvedAbiRecord {
 
 """A resolved address record for an ENS name."""
 type ResolvedAddressRecord {
-  """The address value, or null if not set."""
+  """
+  The raw address record value, or null if not set. May be any address format for the associated coin type and may require validation or preprocessing before use. Only EVM addresses are guaranteed to be NormalizedAddress values; see ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder).
+  """
   address: String
 
   """The coin type for this address record."""

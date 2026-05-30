@@ -871,8 +871,11 @@ const introspection = {
           {
             "name": "trace",
             "type": {
-              "kind": "SCALAR",
-              "name": "JSON"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSON"
+              }
             },
             "args": [],
             "isDeprecated": false

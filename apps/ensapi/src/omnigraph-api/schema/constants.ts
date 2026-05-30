@@ -18,5 +18,5 @@ export const RESOLVE_ACCELERATE_ARG = {
   required: false,
   defaultValue: true,
   description:
-    "When true (default), Protocol Acceleration is used for record resolution, when supported.\n@see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration",
+    "When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.\n@see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration",
 } as const;

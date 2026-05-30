@@ -177,8 +177,7 @@ DomainInterfaceRef.implement({
     // Domain.resolve
     //////////////////
     resolve: t.field({
-      description:
-        "Resolve protocol-level data for this Domain with trace and acceleration metadata.",
+      description: "Resolve protocol-level data for this Domain.",
       type: ResolveRef,
       nullable: false,
       args: {

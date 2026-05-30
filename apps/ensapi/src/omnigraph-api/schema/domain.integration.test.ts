@@ -619,7 +619,7 @@ describe("Domain.records", () => {
   });
 
   it("returns null for an unnormalized canonical name (e.g. with labelhash)", async () => {
-    // A name with a labelhash is an InterpretedName but not a normalized name.
+    // A name with a label that is an encoded labelhash is an InterpretedName but not a normalized name.
     // Even if it exists in the DB, resolve should return null.
     const unnormalizedName =
       "[0000000000000000000000000000000000000000000000000000000000000000].eth";

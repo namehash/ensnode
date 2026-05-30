@@ -30,17 +30,17 @@ export const AccountResolveRef = builder.objectRef<AccountResolveModel>("Account
 
 AccountResolveRef.implement({
   description:
-    "Nested account resolution container exposing primary-name resolution with shared acceleration settings.",
+    "Nested account resolution container exposing primary name resolution.",
   fields: (t) => ({
     trace: t.field({
       description:
-        "Protocol trace tree emitted by primary-name resolution, represented as JSON for schema stability.",
+        "Protocol trace tree emitted by reverse resolution, represented as JSON for schema stability. This data model should be expected to experience breaking changes.",
       type: "JSON",
       nullable: false,
       resolve: (parent) => parent.trace as unknown as JsonValue,
     }),
     acceleration: t.field({
-      description: "Protocol acceleration strategy status for this Account resolution.",
+      description: "Whether protocol acceleration was requested and attempted for this reverse resolution.",
       type: AccelerationStatusRef,
       nullable: false,
       resolve: ({ accelerate, canAccelerate }) => ({

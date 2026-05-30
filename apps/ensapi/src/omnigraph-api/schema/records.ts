@@ -44,7 +44,8 @@ ResolvedAddressRecordRef.implement({
       resolve: (r) => r.coinType,
     }),
     address: t.exposeString("address", {
-      description: "The address value, or null if not set.",
+      description:
+        "The raw address record value, or null if not set. May be any address format for the associated coin type and may require validation or preprocessing before use. Only EVM addresses are guaranteed to be NormalizedAddress values; see ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder).",
       nullable: true,
     }),
   }),

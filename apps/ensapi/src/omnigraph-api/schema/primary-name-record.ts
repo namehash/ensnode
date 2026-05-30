@@ -48,8 +48,7 @@ PrimaryNameRecordRef.implement({
       resolve: (r) => r.name ?? null,
     }),
     resolve: t.field({
-      description:
-        "Resolve protocol-level records (and optionally profile preview) for this primary name.",
+      description: "Forward resolve data for this primary name.",
       type: ResolveRef,
       nullable: false,
       resolve: async (parent, _args, context, info): Promise<ResolveModel> => {

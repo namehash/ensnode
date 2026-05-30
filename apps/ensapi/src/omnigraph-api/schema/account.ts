@@ -73,7 +73,7 @@ AccountRef.implement({
     // Account.resolve
     //////////////////
     resolve: t.field({
-      description: "Resolve Primary Names for this Account.",
+      description: "Resolve primary names for this Account.",
       type: AccountResolveRef,
       nullable: false,
       args: {
@@ -91,7 +91,7 @@ AccountRef.implement({
 
         if (coinTypes === null) {
           throw new GraphQLError(
-            "Account.resolve requires at least one `primaryName(by: ...)` or `primaryNames(where: ...)` field to be selected.",
+            "Account.resolve requires at least one `primaryName(by: ...)` or `primaryNames(where: ...)` field to be selected for reverse resolution.",
           );
         }
 

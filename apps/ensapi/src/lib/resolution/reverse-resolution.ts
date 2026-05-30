@@ -1,8 +1,8 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,
-  type ChainId,
   type CoinType,
+  type DefaultableChainId,
   coinTypeReverseLabel,
   evmChainIdToCoinType,
   reverseName,
@@ -40,7 +40,7 @@ type ReverseResolutionOptions = Parameters<typeof resolveForward>[2];
  * @param address the adddress whose Primary Name to resolve
  * @param coinType the coinType within which to resolve the address' Primary Name
  * @param options Optional settings
- * @param options.accelerate Whether to accelerate resolution (default: true)
+ * @param options.accelerate Whether to attempt accelerated resolution (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
 export async function resolveReverse(
@@ -179,10 +179,16 @@ export async function resolveReverse(
   );
 }
 
-/** Thin chainId wrapper around {@link resolveReverse} for callers at the REST API boundary. */
+/**
+ * Thin `chainId` wrapper around {@link resolveReverse} for callers at the REST API boundary.
+ *
+ * @param address The address whose primary name to resolve.
+ * @param chainId The EVM chain id for the reverse lookup. `0` is valid as the ENSIP-19 default chain id.
+ * @param options Optional resolution settings.
+ */
 export async function resolveReverseByChainId(
   address: Address,
-  chainId: ChainId,
+  chainId: DefaultableChainId,
   options: ReverseResolutionOptions,
 ): Promise<ReverseResolutionResult> {
   return resolveReverse(address, evmChainIdToCoinType(chainId), options);

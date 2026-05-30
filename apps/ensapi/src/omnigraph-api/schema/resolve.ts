@@ -20,17 +20,17 @@ export const ResolveRef = builder.objectRef<ResolveModel>("Resolve");
 
 ResolveRef.implement({
   description:
-    "Resolution container exposing trace and acceleration metadata alongside resolved ENS records.",
+    "Nested domain resolution container exposing resolved data for the domain.",
   fields: (t) => ({
     trace: t.field({
       description:
-        "Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability.",
+        "Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability. This data model should be expected to experience breaking changes.",
       type: "JSON",
       nullable: true,
       resolve: (parent) => parent.trace as unknown as JsonValue | null,
     }),
     acceleration: t.field({
-      description: "Protocol acceleration strategy status for this resolution.",
+      description: "Whether protocol acceleration was requested and attempted for this resolution.",
       type: AccelerationStatusRef,
       nullable: false,
       resolve: ({ accelerate, canAccelerate }) => ({
@@ -49,7 +49,7 @@ ResolveRef.implement({
     ...(INCLUDE_DEV_METHODS && {
       profile: t.field({
         description:
-          "PREVIEW: An interpreted ENS profile for this name. Types are defined for query ergonomics; resolution is not yet wired. Returns null when no records resolution is available.",
+          "PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical or normalized.",
         type: DomainProfileRef,
         nullable: true,
         resolve: (parent) => (parent.records ? {} : null),
