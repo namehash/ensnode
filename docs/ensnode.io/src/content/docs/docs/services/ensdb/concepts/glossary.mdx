@@ -61,7 +61,7 @@ Any application that implements one or more standard-compliant [ENSNode Plugins]
 
 ### ENSDb Metadata Writer
 
-Any application that writes metadata about an [EnsDbWriter](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) records into the [ENSNode Metadata Table](/docs/services/ensdb/concepts/glossary#ensnode-metadata-table) for each ENSIndexer instance that have ever connected to the ENSDb instance. Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
+Any application that writes metadata about an [ENSDb Writer](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) records into the [ENSNode Metadata Table](/docs/services/ensdb/concepts/glossary#ensnode-metadata-table) for each ENSIndexer instance that has ever connected to the ENSDb instance. Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
 
 ### ENSDb Reader
 
@@ -157,14 +157,14 @@ The `key` column identifies the type of metadata:
 
 | Key                         | Description                                                                                            |
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `indexing_metadata_context` | [Indexing metadata context](#indexing-metadata-context) for the [ENSDb Writer instance](#ensdb-writer) |
+| `indexing_metadata_context` | [Indexing metadata context](#indexing-metadata-context) for the [ENSDb Writer](#ensdb-writer) instance |
 
 #### Indexing Metadata Context
 
 A data model that describes indexing metadata context. The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The data model may include fields such as:
 
 - `version`: The version of the Indexing Metadata Context structure
-- `indexingStatus`: the current Indexing Status of the [ENSDb Writer instance](#ensdb-writer) (i.e. the [Indexing Status](#indexing-status) of the [ENSIndexer instance](#ensindexer-instance)).
+- `indexingStatus`: the current Indexing Status of the [ENSDb Writer](#ensdb-writer) instance (i.e. the [Indexing Status](#indexing-status) of the [ENSIndexer instance](#ensindexer-instance)).
 - `stackInfo`: describes the [ENSDb Writer](#ensdb-writer) instance and its config, dependencies, etc.
 
 ### ENSApi
