@@ -8,11 +8,12 @@ sidebar:
 import { LinkCard } from "@astrojs/starlight/components";
 import HostedEnsNodeInstance from "@components/molecules/HostedEnsNodeInstance.astro";
 import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
+import EnsSubgraphCorrectnessPostEnsV2Launch from "@components/molecules/EnsSubgraphCorrectnessPostEnsV2Launch.astro";
 
-export const subgraphCompatibilityApiLevel = `<em>API-level Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API. However, additional plugins have been activated which index a superset of data into the subgraph data model in ENSDb (including Basenames, Lineanames, and 3DNS). This superset of indexed data means that the data returned for some ENS Subgraph API queries may be different. **NOTE:** As soon as ENSv2 launches the ENS Subgraph will no longer return correct data. Transition your apps now to the new ENS Omnigraph API to be ENSv2 ready.`;
-export const subgraphCompatibilityFull = `<em>Full Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API at both the API-level and the data-level. We have exhaustively tested and verified that every data record returned by this ENSNode instance's ENS Subgraph API is byte-for-byte identical with The Graph's ENS Subgraph API. **NOTE:** As soon as ENSv2 launches the ENS Subgraph will no longer return correct data. Transition your apps now to the new ENS Omnigraph API to be ENSv2 ready.`;
+export const subgraphCompatibilityApiLevel = `<em>API-level Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API. However, additional plugins have been activated which index a superset of data into the subgraph data model in ENSDb. This superset of indexed data means that the data returned for some ENS Subgraph API queries may be different.`;
+export const subgraphCompatibilityFull = `<em>Full Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API at both the API-level and the data-level. We have exhaustively tested and verified that every data record returned by this ENSNode instance's ENS Subgraph API is byte-for-byte identical with The Graph's ENS Subgraph API.`;
 export const omnigraphForEnsV1 = `<em>Activated.</em> Demonstrates the ENS Omnigraph's ability to support ENSv1 only before ENSv2 launches and both ENSv1 and ENSv2 are concurrently active. Until ENSv2 launches on this namespace, only ENSv1 domains will be available. As soon as ENSv2 launches on this namespace both ENSv1 and ENSv2 domains will be available.`;
-export const omnigraphForEnsV1AndEnsV2 = `Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2. When ENSv2 launches in Summer 2026, data from two protocol versions coexist — and the ENS Omnigraph API will keep your app working against both, at the same time, with no code changes. Domains from ENSv1 and ENSv2 are indexed concurrently and exposed through a unified schema.`;
+export const omnigraphForEnsV1AndEnsV2 = `<em>Activated.</em> Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2. When ENSv2 launches in Summer 2026, data from two protocol versions coexist — and the ENS Omnigraph API will keep your app working against both, at the same time, with no code changes. Domains from ENSv1 and ENSv2 are indexed concurrently and exposed through a unified schema.`;
 export const omnigraphUnactivated = `<em>Not activated.</em> This ENSNode instance optimizes for maximum compatibility with the ENS Subgraph. Therefore it exclusively activates the <em>subgraph</em> plugin and does not activate the <em>unigraph</em> plugin that the ENS Omnigraph API requires.`;
 export const ensProtocolAccelerationAvailable = `<em>Available.</em> Accelerate most of your ENS protocol resolution requests while maintaining full compliance with all ENS protocol standards and best practices.`;
 export const ensProtocolAccelerationUnavailable = `<em>Unavailable.</em> Your ENS protocol resolution requests will be serviced in full compliance with all ENS protocol standards and best practices. However, this ENSNode instance did not activate the <em>protocol-acceleration</em> plugin and therefore ENS resolution requests will be serviced accurately but without acceleration.`;
@@ -33,10 +34,17 @@ Each ENS namespace is associated with a particular ENS Root Registry deployment,
 
 ENSNode supports all of the following ENS namespaces:
 
-- `mainnet` (currently ENSv1 only and not also ENSv2 yet)
-- `sepolia` (currently ENSv1 only and not also ENSv2 yet)
-- `sepolia-v2` (now ENSv1 + ENSv2 — An _all new_ deployment of ENS to Sepolia that is already upgraded to ENSv1 + ENSv2 and is independent of the traditional `sepolia` ENS namespace listed above which currently remains ENSv1 only)
-- `ens-test-env` (now ENSv1 + ENSv2 — A deployment of ENSv1 + ENSv2 to a local Anvil chain for development and testing. For details see https://github.com/ensdomains/ens-test-env and https://github.com/ensdomains/contracts-v2). Teams working on the core ENS protocol and infrastructure such as ENS Labs and NameHash Labs are using this ENSNode configuration to support ENSv2 development.
+- `mainnet`
+  - Currently ENSv1 only and not also ENSv2 yet.
+- `sepolia`
+  - Currently ENSv1 only and not also ENSv2 yet.
+- `sepolia-v2`
+  - Now ENSv1 + ENSv2 — An _all new_ deployment of ENS to Sepolia that is already upgraded to ENSv1 + ENSv2 and is independent of the traditional `sepolia` ENS namespace listed above which currently remains ENSv1 only.
+- `ens-test-env`
+  - Now ENSv1 + ENSv2 — A deployment of ENSv1 + ENSv2 to a local Anvil chain for development and testing.
+    :::note[About the ens-test-env]
+    For details see [ens-test-env](https://github.com/ensdomains/ens-test-env) and [contracts-v2](https://github.com/ensdomains/contracts-v2). Teams working on the core ENS protocol and core ENS infrastructure such as ENS Labs and NameHash Labs are using this ENSNode configuration to support ENSv2 development.
+    :::
 
 More details about ENS namespaces can be found inside [ENSNode's datasources package](https://github.com/namehash/ensnode/tree/main/packages/datasources).
 
@@ -52,7 +60,7 @@ These instances are associated with an ENS namespace that has upgraded to ENSv1 
 
 #### ENSNode 'v2 Sepolia'
 
-:::tip[v2 Sepolia]
+:::caution[v2 Sepolia]
 The `sepolia-v2` namespace is undergoing active development by the ENS Labs team who is continuing to release updated ENSv2 contracts. It should be considered experimental.
 :::
 
@@ -61,22 +69,28 @@ The `sepolia-v2` namespace is undergoing active development by the ENS Labs team
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.v2-sepolia.ensnode.io"
   namespace="sepolia-v2"
   ensVersions="ENSv1 + ENSv2 (concurrently activated together)"
-  plugins="subgraph, unigraph, protocol-acceleration"
+  plugins="<em>unigraph</em>, <em>protocol-acceleration</em>, <em>subgraph</em>"
   >
+  <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1AndEnsV2} />
 
-<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
+<Fragment slot="ens-subgraph-api-icon" set:text={"🚨"} />
+<Fragment slot="ens-subgraph-api">
+  <span set:html={subgraphCompatibilityApiLevel} />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="sepolia-v2" isEnsV2Launched={true} />
+</Fragment>
 
+  <Fragment slot="ens-protocol-acceleration-icon" set:text={"✅"} />
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationAvailable} />
 </HostedEnsNodeInstance>
 
 ## ENSv1 Only Instances (not also ENSv2 yet)
 
-These instances are associated with an ENS namespace that has _NOT_ upgraded to support ENSv1 and ENSv2 concurrently yet and are still operating exclusively under ENSv1. These demonstrate how _the ENS Omnigraph API_, _enssdk_, _enskit_, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches.
+These instances are associated with an ENS namespace that has _NOT_ upgraded to support ENSv1 and ENSv2 concurrently yet and are still operating exclusively under ENSv1. These demonstrate how [_the ENS Omnigraph API_](/docs/integrate/omnigraph), [_enssdk_](/docs/integrate/integration-options/enssdk), [_enskit_](/docs/integrate/integration-options/enskit), and [the full stack of ENSNode services](/docs/services) provide support to developers to become ENSv2 ready even before ENSv2 launches.
 
 ### Alpha-style Deployments
 
-These ENSNode instances do not constrain themselves to exclusively activating the `subgraph` plugin. They activate additional plugins such as the `unigraph` plugin to demonstrate the latest capabilities of ENSNode including _the new ENS Omnigraph API_.
+These ENSNode instances do not constrain themselves to exclusively activating the `subgraph` plugin. They activate additional plugins such as the `unigraph` plugin to demonstrate the latest capabilities of ENSNode including [_the new ENS Omnigraph API_](/docs/integrate/omnigraph).
 
 #### ENSNode 'Alpha'
 
@@ -87,10 +101,16 @@ These ENSNode instances do not constrain themselves to exclusively activating th
   ensVersions="ENSv1 only (not also ENSv2 yet)"
   plugins="<em>unigraph</em>, <em>protocol-acceleration</em>, <em>subgraph</em>, basenames, lineanames, threedns, registrars, tokenscope"
 >
+  <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
 
-<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
+<Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
+<Fragment slot="ens-subgraph-api">
+  <span set:html={subgraphCompatibilityApiLevel} />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="mainnet" isEnsV2Launched={false} />
+</Fragment>
 
+  <Fragment slot="ens-protocol-acceleration-icon" set:text={"✅"} />
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationAvailable} />
 </HostedEnsNodeInstance>
 
@@ -103,10 +123,16 @@ These ENSNode instances do not constrain themselves to exclusively activating th
   ensVersions="ENSv1 only (not also ENSv2 yet)"
   plugins="<em>unigraph</em>, <em>protocol-acceleration</em>, <em>subgraph</em>, basenames, lineanames, registrars"
   >
+  <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
 
-<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityApiLevel} />
+<Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
+<Fragment slot="ens-subgraph-api">
+  <span set:html={subgraphCompatibilityApiLevel} />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="sepolia" isEnsV2Launched={false} />
+</Fragment>
 
+  <Fragment slot="ens-protocol-acceleration-icon" set:text={"✅"} />
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationAvailable} />
 </HostedEnsNodeInstance>
 
@@ -123,10 +149,16 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   ensVersions="ENSv1 only (not also ENSv2 yet)"
   plugins="<em>subgraph</em>"
   >
+  <Fragment slot="ens-omnigraph-api-icon" set:text={"❌"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphUnactivated} />
 
-<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityFull} />
+<Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
+<Fragment slot="ens-subgraph-api">
+  <span set:html={subgraphCompatibilityFull} />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="mainnet" isEnsV2Launched={false} />
+</Fragment>
 
+  <Fragment slot="ens-protocol-acceleration-icon" set:text={"❌"} />
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationUnavailable} />
 </HostedEnsNodeInstance>
 
@@ -139,10 +171,16 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   ensVersions="ENSv1 only (not also ENSv2 yet)"
   plugins="<em>subgraph</em>"
   >
+  <Fragment slot="ens-omnigraph-api-icon" set:text={"❌"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphUnactivated} />
 
-<Fragment slot="ens-subgraph-api" set:html={subgraphCompatibilityFull} />
+<Fragment slot="ens-subgraph-api-icon" set:text={"✅"} />
+<Fragment slot="ens-subgraph-api">
+  <span set:html={subgraphCompatibilityFull} />
+  <EnsSubgraphCorrectnessPostEnsV2Launch namespace="sepolia" isEnsV2Launched={false} />
+</Fragment>
 
+  <Fragment slot="ens-protocol-acceleration-icon" set:text={"❌"} />
   <Fragment slot="ens-protocol-acceleration" set:html={ensProtocolAccelerationUnavailable} />
 </HostedEnsNodeInstance>
 

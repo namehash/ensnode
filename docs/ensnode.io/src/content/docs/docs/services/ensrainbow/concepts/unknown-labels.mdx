@@ -42,7 +42,7 @@ Unknown labels are a consequence of the ENS Registry not emitting the actual lab
 - The ENS Registry contract ([`ENSRegistryWithFallback`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code)) stores the **node** for each name (the node is a 32-byte hash of a name computed via `namehash`)
 - All subnames in the ENS Registry are created by calling [`setSubnodeOwner`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code#F1#L84). This emits a `NewOwner` event for the newly created subname. However, this event contains a parameter misleadingly named `label` that is **not actually the label string**—it's the **labelhash** of the new subname's label.
 
-```solidity
+```solidity title="ENSRegistryWithFallback.sol"
 event NewOwner(bytes32 indexed node, bytes32 indexed label, address owner);
 //                                                   ^^^^^ This is actually a labelhash, not a label!
 ```
@@ -85,7 +85,7 @@ The ENS Registry contract is immutable—it cannot be changed or upgraded. The d
 
 The [**labelhash**](/docs/services/ensrainbow/concepts/glossary#labelhash) function computes a 32-byte hash of a label using `keccak256`:
 
-```typescript
+```typescript title="example.ts"
 import { labelhashInterpretedLabel, asInterpretedLabel } from "enssdk";
 const labelHash = labelhashInterpretedLabel(asInterpretedLabel("vitalik"));
 // Returns: 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc

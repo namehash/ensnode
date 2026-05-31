@@ -9,14 +9,11 @@ import { DomainByIdView, DomainByNameView } from "./DomainView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
 
-const EXAMPLE_ACCOUNT_ADDRESS = "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574";
+const EXAMPLE_ACCOUNT_ADDRESS = "0x801d2e48d378f161dba7ad7ad002ad557714c191";
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-//
-// NOTE: we point at the `blue` deployment, which runs ENSNode 1.15.0 — the version this example's
-// queries target. The production v2-sepolia instance still serves an older Omnigraph schema (1.13.x).
-const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.blue.ensnode.io";
+const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 console.log(`Connecting to ENSNode at ${ENSNODE_URL}`);
 

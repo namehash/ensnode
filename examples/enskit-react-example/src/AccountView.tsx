@@ -55,14 +55,9 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
           <ul>
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
-                {edge.node.canonical ? (
-                  // link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved
-                  <Link to={`/domain/id/${edge.node.id}`}>
-                    {edge.node.canonical.name.beautified}
-                  </Link>
-                ) : (
-                  <em>non-canonical domain</em>
-                )}{" "}
+                <Link to={`/domain/id/${edge.node.id}`}>
+                  {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
+                </Link>{" "}
                 ({edge.node.__typename})
               </li>
             ))}

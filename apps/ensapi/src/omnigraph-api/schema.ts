@@ -1,6 +1,7 @@
 import { builder } from "@/omnigraph-api/builder";
 
 import "./schema/account-id";
+import "./schema/reverse-resolve";
 import "./schema/connection";
 import "./schema/domain";
 import "./schema/domain-canonical";
@@ -13,6 +14,7 @@ import "./schema/permissions";
 import "./schema/query";
 import "./schema/registry";
 import "./schema/renewal";
+import "./schema/resolution";
 import "./schema/resolver-records";
 import "./schema/scalars";
 

@@ -9,8 +9,13 @@ import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domain
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
+import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import {
+  ID_PAGINATED_CONNECTION_ARGS,
+  RESOLVE_ACCELERATE_ARG,
+} from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import { AccountDomainsWhereInput, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef } from "@/omnigraph-api/schema/event";
@@ -18,6 +23,10 @@ import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
+import {
+  type ReverseResolveModel,
+  ReverseResolveRef,
+} from "@/omnigraph-api/schema/reverse-resolve";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
   load: (ids: Address[]) => {
@@ -57,6 +66,49 @@ AccountRef.implement({
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    //////////////////
+    // Account.resolve
+    //////////////////
+    resolve: t.field({
+      description: "Resolve primary names for this Account.",
+      type: ReverseResolveRef,
+      nullable: false,
+      args: {
+        accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
+      },
+      resolve: async (
+        account,
+        { accelerate: accelerateArg },
+        context,
+        info,
+      ): Promise<ReverseResolveModel> => {
+        const accelerate = accelerateArg ?? true;
+        const { canAccelerate } = context;
+        const coinTypes = buildAccountPrimaryNamesSelection(info);
+
+        // No primaryName/primaryNames fields selected (e.g. only acceleration/trace queried).
+        // Return an empty model rather than throwing so the non-nullable resolve field does not
+        // null-propagate the entire Account.
+        if (coinTypes === null) {
+          return {
+            address: account.id,
+            coinTypes: [],
+            accelerate,
+            canAccelerate,
+            trace: [],
+            records: [],
+          };
+        }
+
+        const { trace, records } = await resolvePrimaryNameRecords(account.id, coinTypes, {
+          accelerate,
+          canAccelerate,
+        });
+
+        return { address: account.id, coinTypes, accelerate, canAccelerate, trace, records };
+      },
     }),
 
     ////////////////////
