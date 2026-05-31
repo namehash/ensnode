@@ -11,11 +11,11 @@ ENSRainbow's TypeScript APIs expose two companion interfaces that describe **whi
 
 ## Server Label Set
 
-### `EnsRainbowServerLabelSet`
+### EnsRainbowServerLabelSet
 
 Returned by `GET /version` and stored in database metadata:
 
-```ts
+```ts title="types.ts"
 interface EnsRainbowServerLabelSet {
   labelSetId: string; // active label set ID (e.g. "subgraph")
   highestLabelSetVersion: number; // highest label set version the server has ingested for the label set id
@@ -29,11 +29,11 @@ interface EnsRainbowServerLabelSet {
 
 ## Client Label Set
 
-### `EnsRainbowClientLabelSet`
+### EnsRainbowClientLabelSet
 
 Provided when constructing `new EnsRainbowApiClient({ clientLabelSet: … })` to pin client expectations:
 
-```ts
+```ts title="types.ts"
 interface EnsRainbowClientLabelSet {
   labelSetId?: string; // optional – require a particular label set
   labelSetVersion?: number; // optional – maximum label set version accepted
@@ -52,7 +52,7 @@ This handshake that occurs when **both fields** are set ensures both client and 
 
 ### Using the Client SDK
 
-```ts
+```ts title="example.ts"
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
 // Default: use latest version of any labelset

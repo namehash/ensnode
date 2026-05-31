@@ -6,28 +6,55 @@ sidebar:
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
+import ResultDetails from "@components/molecules/ResultDetails.astro";
+import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+
+export const resultJson = [
+  {
+    type: "ENSv1Domain",
+    count: 2
+  },
+  {
+    type: "ENSv2Domain",
+    count: 14
+  }
+];
+
+:::caution[`unigraph` plugin required]
+Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
+:::
 
 Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <Tabs syncKey="unigraph-client">
   <TabItem label="SQL">
+    <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
+
 ```sql
 SELECT type, count(*) FROM ensindexer_0.domains
-WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
+WHERE owner_id = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
 GROUP BY type;
 ```
+
+    <ResultDetails value={resultJson} />
+
   </TabItem>
+
   <TabItem label="ensdb-sdk (TypeScript)">
+    <EnsDbReaderIntro />
+
 ```typescript
-import { count, eq } from 'drizzle-orm';
+import { count, eq } from "drizzle-orm";
 
 const counts = await ensDb
-.select({ type: ensIndexerSchema.domain.type, count: count() })
-.from(ensIndexerSchema.domain)
-.where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
-.groupBy(ensIndexerSchema.domain.type);
-
+  .select({ type: ensIndexerSchema.domain.type, count: count() })
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.ownerId, "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"))
+  .groupBy(ensIndexerSchema.domain.type);
 ```
+
+    <ResultDetails value={resultJson} />
+
   </TabItem>
 </Tabs>
-```

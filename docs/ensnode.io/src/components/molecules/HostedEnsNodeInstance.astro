@@ -1,9 +1,9 @@
 ---
-import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
-import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
+import ENSAdminCTAButton from "@components/atoms/ENSAdminCTAButton.astro";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 
 const { instanceURL, connectWithENSAdminURL, namespace, ensVersions, plugins } = Astro.props;
-const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
+const hostedEnsNodeVersion = snapshot.version;
 ---
 
 <table style={{ marginTop: "0" }}>
@@ -14,20 +14,12 @@ const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
         style={{ marginTop: "20px" }}
         class="flex flex-col xl:flex-row justify-start xl:items-center gap-4">
         <a
-          class="sl-markdown-content underline underline-offset-4 hover:underline-offset-2 transition-all duration-200"
+          class="sl-markdown-content underline underline-offset-4 hover:underline-offset-2 transition-[text-underline-offset] duration-200"
           href={instanceURL}>{instanceURL}</a
         >
-        <a
-          class="not-content w-fit open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
-                hover:bg-[var(--sl-color-accent-high)] pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg"
-          target="_blank"
-          rel="noopener noreferrer"
-          href={connectWithENSAdminURL}>
-          <ENSAdminLogoDark className="h-6.5 w-auto shrink-0" />
-          <p class="text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-normal">
-            Connect with ENSAdmin
-          </p>
-        </a>
+        <div class="not-content">
+          <ENSAdminCTAButton ensAdminHref={connectWithENSAdminURL} text="Connect with ENSAdmin" />
+        </div>
       </td>
     </tr>
     <tr>
@@ -47,14 +39,14 @@ const hostedEnsNodeVersion = ACTIVE_OMNIGRAPH_VERSION;
       <td set:html={plugins} />
     </tr>
     <tr>
-      <td>ENS APIs</td>
+      <td>ENSApi Services</td>
       <td>
         <dl>
-          <dt>ENS Omnigraph API</dt>
+          <dt>ENS Omnigraph API <slot name="ens-omnigraph-api-icon" /></dt>
           <dd class="pl-0"><slot name="ens-omnigraph-api" /></dd>
-          <dt>ENS Protocol Acceleration</dt>
+          <dt>ENS Protocol Acceleration <slot name="ens-protocol-acceleration-icon" /></dt>
           <dd class="pl-0"><slot name="ens-protocol-acceleration" /></dd>
-          <dt>ENS Subgraph API</dt>
+          <dt>ENS Subgraph API <slot name="ens-subgraph-api-icon" /></dt>
           <dd class="pl-0"><slot name="ens-subgraph-api" /></dd>
         </dl>
       </td>

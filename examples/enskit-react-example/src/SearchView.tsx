@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
-  query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
+  query DomainsByName($name: DomainsNameFilter!, $first: Int!, $after: String) {
+    domains(where: { name: $name }, first: $first, after: $after) {
       edges {
         node { __typename id canonical { name { beautified } } }
       }
@@ -55,31 +55,32 @@ export function SearchView() {
 
   const [result] = useOmnigraphQuery({
     query: DomainsByNameQuery,
-    variables: { name: query, first: PAGE_SIZE, after },
+    variables: {
+      name: { starts_with: query },
+      first: PAGE_SIZE,
+      after,
+    },
     pause: query.length === 0,
   });
 
   const { data, fetching, error } = result;
-
-  // only Canonical Domains are rendered, so filter before computing the empty state — otherwise a
-  // page of entirely non-canonical edges would render as a blank list with no "No matches."
-  const visibleEdges = data?.domains?.edges.filter((edge) => edge.node.canonical !== null) ?? [];
 
   return (
     <div>
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
-        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
-        synced to the URL as <code>?query=</code>.
+        Showcases live prefix search (typeahead) via <code>Query.domains</code> with a{" "}
+        <code>starts_with</code> name filter. Only <b>Canonical</b> Domains (those with an
+        inferrable Canonical Name) are searched. Input is debounced by {DEBOUNCE_MS}ms and synced to
+        the URL as <code>?query=</code>.
       </p>
 
       <input
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="vitalik.eth"
+        placeholder="vitalik"
       />
 
       {query.length === 0 ? (
@@ -90,19 +91,18 @@ export function SearchView() {
         <>
           {fetching && <p>Loading...</p>}
           <ul>
-            {visibleEdges.map((edge) => {
+            {data?.domains?.edges.map((edge) => {
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  {/* link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved */}
                   <Link to={`/domain/id/${edge.node.id}`}>
-                    {edge.node.canonical?.name.beautified}
+                    {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
                   </Link>
                 </li>
               );
             })}
           </ul>
-          {data?.domains && visibleEdges.length === 0 && !fetching && <p>No matches.</p>}
+          {!fetching && data?.domains?.edges.length === 0 && <p>No matches.</p>}
           {data?.domains?.pageInfo.hasNextPage && (
             <button
               type="button"

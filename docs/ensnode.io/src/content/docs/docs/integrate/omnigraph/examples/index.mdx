@@ -1,6 +1,6 @@
 ---
 title: ENS Omnigraph Example Queries
-description: Ready-to-run ENS Omnigraph GraphQL examples with variables, sample JSON, cURL, and ENSAdmin links.
+description: Ready-to-run Omnigraph examples with `GraphQL`, `enssdk`, and `enskit` snippets, plus links to ENSAdmin and `curl` samples.
 sidebar:
   order: 1
 ---
@@ -9,7 +9,7 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
 import { graphqlApiOmnigraphExamples } from "@data/omnigraph-examples/examples";
 
-The **Omnigraph examples** are GraphQL queries with input variables, response examples, `curl` samples, and links to the ENSAdmin playground.
+The **Omnigraph examples** are GraphQL queries with input variables, response examples, `curl` samples, and links to the ENSAdmin playground. Each example also includes ready-to-run **enssdk** (TypeScript) and **enskit** (React) code snippets.
 
 <CardGrid>
   {graphqlApiOmnigraphExamples.map((recipe) => (

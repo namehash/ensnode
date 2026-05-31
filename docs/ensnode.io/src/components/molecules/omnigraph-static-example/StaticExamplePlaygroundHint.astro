@@ -1,0 +1,30 @@
+---
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+
+interface Props {
+  variant: "ensadmin" | "stackblitz";
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+}
+
+const { variant, hostedInstanceDocUrl, hostedInstanceNamespace } = Astro.props;
+
+const hostedInstanceLinkClass =
+  "text-sm font-semibold text-[var(--sl-color-accent)] underline underline-offset-4 hover:underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)] transition-[text-underline-offset] duration-200";
+---
+
+<span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
+  {
+    variant === "ensadmin" ? (
+      <>
+        Open an interactive playground to execute this example on our{" "}
+        <a href={hostedInstanceDocUrl} class={hostedInstanceLinkClass}>
+          {hostedInstanceNamespace}
+        </a>{" "}
+        ENSNode instance.
+      </>
+    ) : (
+      <>Opens an editable StackBlitz project with this snippet.</>
+    )
+  }
+</span>

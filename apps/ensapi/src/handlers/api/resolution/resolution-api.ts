@@ -9,8 +9,8 @@ import {
 
 import { createApp } from "@/lib/hono-factory";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
-import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
-import { resolveReverse } from "@/lib/resolution/reverse-resolution";
+import { resolvePrimaryNamesByChainIds } from "@/lib/resolution/multichain-primary-name-resolution";
+import { resolveReverseByChainId } from "@/lib/resolution/reverse-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
@@ -90,7 +90,7 @@ app.openapi(resolvePrimaryNameRoute, async (c) => {
   const canAccelerate = c.var.canAccelerate;
 
   const { result, trace } = await runWithTrace(() =>
-    resolveReverse(address, chainId, { accelerate, canAccelerate }),
+    resolveReverseByChainId(address, chainId, { accelerate, canAccelerate }),
   );
 
   const response = {
@@ -118,7 +118,7 @@ app.openapi(resolvePrimaryNamesRoute, async (c) => {
   const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
   const { result, trace } = await runWithTrace(() =>
-    resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
+    resolvePrimaryNamesByChainIds(address, chainIds, { accelerate, canAccelerate }),
   );
 
   const response = {

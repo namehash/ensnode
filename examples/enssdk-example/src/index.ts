@@ -4,7 +4,7 @@ import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigr
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.blue.ensnode.io";
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 // create and extend an EnsNodeClient with Omnigraph support
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
@@ -35,7 +35,7 @@ const HelloWorldQuery = graphql(
 function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
   // type-safe access to fragment data!
   const domain = readFragment(DomainFragment, data);
-  const name = domain.canonical ? domain.canonical.name.beautified : "<unnamed>";
+  const name = domain.canonical?.name.beautified ?? "<unnamed>";
   const owner = domain.owner?.address ?? "0x0 (means reserved for ENSv2)";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }

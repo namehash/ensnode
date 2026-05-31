@@ -1,6 +1,6 @@
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.blue.ensnode.io";
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 // The Omnigraph is a standard GraphQL API following the Relay spec.
 // You can use any GraphQL client — here we just use `fetch`.
