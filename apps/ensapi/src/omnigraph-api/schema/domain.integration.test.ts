@@ -23,7 +23,6 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
@@ -683,16 +682,15 @@ describe("Domain.records", () => {
   });
 });
 
-(INCLUDE_DEV_METHODS ? describe : describe.skip)("Domain.profile", () => {
+describe("Domain.profile", () => {
   type DomainProfileResult = {
     domain: {
       resolve: {
         profile: {
           description: string | null;
-          avatar: { url: string | null } | null;
-          // ethereum address is a checksummed EVM address, so NormalizedAddress is the narrowed type
+          avatar: { httpUrl: string | null } | null;
           addresses: { ethereum: NormalizedAddress | null } | null;
-          socials: { github: { handle: string | null; url: string | null } | null } | null;
+          socials: { github: { handle: string; httpUrl: string } | null } | null;
         } | null;
       };
     };
@@ -704,27 +702,52 @@ describe("Domain.records", () => {
         resolve {
           profile {
             description
-            avatar { url }
+            avatar { httpUrl }
             addresses { ethereum }
-            socials { github { handle url } }
+            socials { github { handle httpUrl } }
           }
         }
       }
     }
   `;
 
-  it("returns the preview null shape for a canonical domain", async () => {
+  it("interprets profile fields for test.eth", async () => {
     await expect(
       request<DomainProfileResult>(DomainProfile, { name: "test.eth" }),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       domain: {
         resolve: {
           profile: {
-            description: null,
-            avatar: { url: null },
-            addresses: { ethereum: null },
-            socials: { github: { handle: null, url: null } },
+            description: "test.eth",
+            avatar: { httpUrl: "https://example.com/avatar.png" },
+            addresses: { ethereum: accounts.owner.address },
+            socials: { github: { handle: "ensdomains", httpUrl: "https://github.com/ensdomains" } },
           },
+        },
+      },
+    });
+  });
+
+  it("returns null when profile is not selected for resolution", async () => {
+    const DomainResolveWithoutProfile = gql`
+      query DomainResolveWithoutProfile($name: InterpretedName!) {
+        domain(by: { name: $name }) {
+          resolve {
+            acceleration { requested attempted }
+          }
+        }
+      }
+    `;
+
+    await expect(
+      request<{ domain: { resolve: { acceleration: { requested: boolean } } } }>(
+        DomainResolveWithoutProfile,
+        { name: "test.eth" },
+      ),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          acceleration: { requested: true },
         },
       },
     });

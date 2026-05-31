@@ -1,6 +1,8 @@
+import { getCoderByCoinType } from "@ensdomains/address-encoder";
 import {
   type BeautifiedLabel,
   type BeautifiedName,
+  type BitcoinAddress,
   type ChainId,
   type CoinType,
   type DomainId,
@@ -23,6 +25,7 @@ import {
   type RenewalId,
   type ResolverId,
   type ResolverRecordsId,
+  type SolanaAddress,
 } from "enssdk";
 import { isHex, size } from "viem";
 import { z } from "zod/v4";
@@ -51,6 +54,31 @@ builder.scalarType("Address", {
   description: "Address represents an EVM Address in all lowercase.",
   serialize: (value: NormalizedAddress) => value,
   parseValue: (value) => makeNormalizedAddressSchema("Address").parse(value),
+});
+
+const makeCoinAddressSchema = (label: string, coinType: number) =>
+  z.coerce.string().check((ctx) => {
+    try {
+      getCoderByCoinType(coinType).decode(ctx.value);
+    } catch {
+      ctx.issues.push({
+        code: "custom",
+        message: `Must be a valid ${label} address`,
+        input: ctx.value,
+      });
+    }
+  });
+
+builder.scalarType("BitcoinAddress", {
+  description: "BitcoinAddress represents a Base58Check-encoded Bitcoin address (coin type 0).",
+  serialize: (value: BitcoinAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Bitcoin", 0).parse(value) as BitcoinAddress,
+});
+
+builder.scalarType("SolanaAddress", {
+  description: "SolanaAddress represents a Base58-encoded Solana address (coin type 501).",
+  serialize: (value: SolanaAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Solana", 501).parse(value) as SolanaAddress,
 });
 
 builder.scalarType("Hex", {

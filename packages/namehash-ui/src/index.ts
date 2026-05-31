@@ -1,5 +1,7 @@
 import "./styles.css";
 
+export { getEnsMetadataServiceAvatarUrl } from "enssdk";
+
 export * from "./components/chains/ChainIcon";
 export * from "./components/chains/ChainName";
 export * from "./components/datetime/AbsoluteTime";
@@ -29,4 +31,3 @@ export { useNow } from "./hooks/useNow";
 export * from "./utils/blockExplorers";
 export * from "./utils/chains";
 export * from "./utils/ensManager";
-export * from "./utils/ensMetadata";

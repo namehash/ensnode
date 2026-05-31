@@ -15,6 +15,7 @@ import {
   buildRecordsSelectionFromResolveContainerInfo,
   buildRecordsSelectionFromResolveInfo,
   EMPTY_RECORDS_SELECTION_MESSAGE,
+  mergeRecordsSelections,
 } from "@/omnigraph-api/lib/resolution/records-selection";
 import {
   RECORDS_SELECTION_PARAMETRIC_FIELDS,
@@ -233,5 +234,37 @@ describe("buildRecordsSelectionFromResolveContainerInfo", () => {
     const info = resolveInfoForDomainResolveSubselection("records { __typename }");
 
     expect(buildRecordsSelectionFromResolveContainerInfo(info)).toBeNull();
+  });
+});
+
+describe("mergeRecordsSelections", () => {
+  it("returns null when both inputs are null", () => {
+    expect(mergeRecordsSelections(null, null)).toBeNull();
+  });
+
+  it("returns the non-null input when one side is null", () => {
+    const selection = { texts: ["description"] };
+    expect(mergeRecordsSelections(selection, null)).toEqual(selection);
+    expect(mergeRecordsSelections(null, selection)).toEqual(selection);
+  });
+
+  it("unions texts and addresses and ORs abi bitmasks", () => {
+    expect(mergeRecordsSelections({ addresses: [] }, { addresses: [0] })).toEqual({
+      addresses: [0],
+    });
+    expect(
+      mergeRecordsSelections(
+        { texts: ["avatar"], addresses: [] },
+        { texts: ["description"], addresses: [60] },
+      ),
+    ).toEqual({
+      texts: ["avatar", "description"],
+      addresses: [60],
+    });
+
+    expect(mergeRecordsSelections({ abi: 1n }, { abi: 2n })).toEqual({ abi: 3n });
+    expect(mergeRecordsSelections({ addresses: [60] }, { addresses: [61] })).toEqual({
+      addresses: [60, 61],
+    });
   });
 });

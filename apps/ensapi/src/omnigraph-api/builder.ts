@@ -8,6 +8,7 @@ import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-open
 import type {
   BeautifiedLabel,
   BeautifiedName,
+  BitcoinAddress,
   ChainId,
   CoinType,
   DomainId,
@@ -26,6 +27,7 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
+  SolanaAddress,
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
@@ -65,6 +67,8 @@ export type BuilderScalars = {
   BigInt: { Input: bigint; Output: bigint };
   JSON: { Input: JsonValue; Output: JsonValue };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
+  BitcoinAddress: { Input: BitcoinAddress; Output: BitcoinAddress };
+  SolanaAddress: { Input: SolanaAddress; Output: SolanaAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };

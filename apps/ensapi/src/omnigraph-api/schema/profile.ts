@@ -1,153 +1,162 @@
 import { builder } from "@/omnigraph-api/builder";
+import {
+  ADDRESS_PARSERS,
+  interpretProfileWebsiteHttpUrl,
+  ProfileAvatarParser,
+  ProfileDescriptionParser,
+  ProfileHeaderParser,
+  ProfileWebsiteParser,
+  profileImageHttpUrlDescription,
+  SOCIAL_PARSERS,
+} from "@/omnigraph-api/lib/resolution/profile/parsers";
+import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
 
-type ProfileSectionModel = Record<string, never>;
+export type ProfileSocialAccountModel = { handle: string; httpUrl: string };
+export type ProfileImageModel = { httpUrl: string | null };
 
 export const ProfileSocialAccountRef =
-  builder.objectRef<ProfileSectionModel>("ProfileSocialAccount");
+  builder.objectRef<ProfileSocialAccountModel>("ProfileSocialAccount");
 
 ProfileSocialAccountRef.implement({
-  description: "PREVIEW: An interpreted social account on a Domain profile. Not yet resolved.",
+  description: "An interpreted social account on a Domain profile.",
   fields: (t) => ({
-    handle: t.string({
-      description: "The social handle, or null when unset.",
-      nullable: true,
-      resolve: () => null,
+    handle: t.exposeString("handle", {
+      description: "The social handle.",
+      nullable: false,
     }),
-    url: t.string({
-      description: "The social profile URL, or null when unset.",
-      nullable: true,
-      resolve: () => null,
+    httpUrl: t.exposeString("httpUrl", {
+      description: "The HTTP-compatible social profile URL.",
+      nullable: false,
     }),
   }),
 });
 
-export const ProfileSocialsRef = builder.objectRef<ProfileSectionModel>("ProfileSocials");
+export const ProfileSocialsRef = builder.objectRef<ResolvedRecordsModel>("ProfileSocials");
 
 ProfileSocialsRef.implement({
-  description: "PREVIEW: Interpreted social accounts on a Domain profile. Not yet resolved.",
+  description: "Interpreted social accounts on a Domain profile.",
   fields: (t) => ({
     github: t.field({
       type: ProfileSocialAccountRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => SOCIAL_PARSERS.github.parse(model),
     }),
     telegram: t.field({
       type: ProfileSocialAccountRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => SOCIAL_PARSERS.telegram.parse(model),
     }),
     twitter: t.field({
       type: ProfileSocialAccountRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => SOCIAL_PARSERS.twitter.parse(model),
     }),
   }),
 });
 
-export const ProfileAddressesRef = builder.objectRef<ProfileSectionModel>("ProfileAddresses");
+export const ProfileAddressesRef = builder.objectRef<ResolvedRecordsModel>("ProfileAddresses");
 
 ProfileAddressesRef.implement({
-  description: "PREVIEW: Interpreted address records on a Domain profile. Not yet resolved.",
+  description: "Interpreted address records on a Domain profile.",
   fields: (t) => ({
     ethereum: t.field({
       description: "The interpreted Ethereum address, or null when unset.",
       type: "Address",
       nullable: true,
-      resolve: () => null,
+      resolve: (model) => ADDRESS_PARSERS.ethereum.parse(model),
     }),
     base: t.field({
       description: "The interpreted Base address, or null when unset.",
       type: "Address",
       nullable: true,
-      resolve: () => null,
+      resolve: (model) => ADDRESS_PARSERS.base.parse(model),
     }),
-    bitcoin: t.string({
+    bitcoin: t.field({
       description: "The interpreted Bitcoin address, or null when unset.",
+      type: "BitcoinAddress",
       nullable: true,
-      resolve: () => null,
+      resolve: (model) => ADDRESS_PARSERS.bitcoin.parse(model),
     }),
-    solana: t.string({
+    solana: t.field({
       description: "The interpreted Solana address, or null when unset.",
+      type: "SolanaAddress",
       nullable: true,
-      resolve: () => null,
+      resolve: (model) => ADDRESS_PARSERS.solana.parse(model),
     }),
   }),
 });
 
-export const ProfileAvatarRef = builder.objectRef<ProfileSectionModel>("ProfileAvatar");
+export const ProfileAvatarRef = builder.objectRef<ProfileImageModel>("ProfileAvatar");
 
 ProfileAvatarRef.implement({
-  description: "PREVIEW: Interpreted avatar metadata on a Domain profile. Not yet resolved.",
+  description: "Interpreted avatar metadata on a Domain profile.",
   fields: (t) => ({
-    url: t.string({
-      description: "The resolved avatar URL, or null when unset.",
+    httpUrl: t.exposeString("httpUrl", {
+      description: profileImageHttpUrlDescription("avatar"),
       nullable: true,
-      resolve: () => null,
     }),
   }),
 });
 
-export const ProfileBannerRef = builder.objectRef<ProfileSectionModel>("ProfileBanner");
+export const ProfileHeaderRef = builder.objectRef<ProfileImageModel>("ProfileHeader");
 
-ProfileBannerRef.implement({
-  description: "PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.",
+ProfileHeaderRef.implement({
+  description: "Interpreted header metadata on a Domain profile.",
   fields: (t) => ({
-    url: t.string({
-      description: "The resolved banner URL, or null when unset.",
+    httpUrl: t.exposeString("httpUrl", {
+      description: profileImageHttpUrlDescription("header"),
       nullable: true,
-      resolve: () => null,
     }),
   }),
 });
 
-export const ProfileWebsiteRef = builder.objectRef<ProfileSectionModel>("ProfileWebsite");
+export const ProfileWebsiteRef = builder.objectRef<ResolvedRecordsModel>("ProfileWebsite");
 
 ProfileWebsiteRef.implement({
-  description: "PREVIEW: Interpreted website metadata on a Domain profile. Not yet resolved.",
+  description: "Interpreted website metadata on a Domain profile.",
   fields: (t) => ({
-    url: t.string({
-      description: "The resolved website URL, or null when unset.",
+    httpUrl: t.string({
+      description: "The HTTP-compatible website URL, or null when unset.",
       nullable: true,
-      resolve: () => null,
+      resolve: (model) => interpretProfileWebsiteHttpUrl(ProfileWebsiteParser.parse(model)),
     }),
   }),
 });
 
-export const DomainProfileRef = builder.objectRef<ProfileSectionModel>("DomainProfile");
+export const DomainProfileRef = builder.objectRef<ResolvedRecordsModel>("DomainProfile");
 
 DomainProfileRef.implement({
-  description:
-    "PREVIEW: An interpreted ENS profile for a name. Types are defined for query ergonomics; resolution is not yet wired.",
+  description: "An interpreted ENS profile for a name.",
   fields: (t) => ({
     avatar: t.field({
       type: ProfileAvatarRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => ProfileAvatarParser.parse(model),
     }),
-    banner: t.field({
-      type: ProfileBannerRef,
+    header: t.field({
+      type: ProfileHeaderRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => ProfileHeaderParser.parse(model),
     }),
     website: t.field({
       type: ProfileWebsiteRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => (ProfileWebsiteParser.parse(model) ? model : null),
     }),
     description: t.string({
       description: "The profile description, or null when unset.",
       nullable: true,
-      resolve: () => null,
+      resolve: (model) => ProfileDescriptionParser.parse(model),
     }),
     addresses: t.field({
       type: ProfileAddressesRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => model,
     }),
     socials: t.field({
       type: ProfileSocialsRef,
       nullable: true,
-      resolve: () => ({}),
+      resolve: (model) => model,
     }),
   }),
 });

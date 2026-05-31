@@ -1,11 +1,11 @@
 import BoringAvatar from "boring-avatars";
 import type { Name } from "enssdk";
+import { getEnsMetadataServiceAvatarUrl } from "enssdk";
 import * as React from "react";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
 import { cn } from "../../utils/cn";
-import { getEnsMetadataServiceAvatarUrl } from "../../utils/ensMetadata";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
 interface EnsAvatarProps {

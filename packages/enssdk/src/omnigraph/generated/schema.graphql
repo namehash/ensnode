@@ -237,6 +237,11 @@ scalar BeautifiedName
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
+"""
+BitcoinAddress represents a Base58Check-encoded Bitcoin address (coin type 0).
+"""
+scalar BitcoinAddress
+
 """A Canonical Name, exposed in each representation we support."""
 type CanonicalName {
   """
@@ -390,16 +395,14 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
-"""
-PREVIEW: An interpreted ENS profile for a name. Types are defined for query ergonomics; resolution is not yet wired.
-"""
+"""An interpreted ENS profile for a name."""
 type DomainProfile {
   addresses: ProfileAddresses
   avatar: ProfileAvatar
-  banner: ProfileBanner
 
   """The profile description, or null when unset."""
   description: String
+  header: ProfileHeader
   socials: ProfileSocials
   website: ProfileWebsite
 }
@@ -936,6 +939,11 @@ type ForwardResolve {
   acceleration: AccelerationStatus!
 
   """
+  An interpreted ENS profile for this Domain. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile field was selected).
+  """
+  profile: DomainProfile
+
+  """
   Resolved ENS records via the ENS protocol. Null when the name is not resolvable (non-canonical, unnormalized, or no records field was selected).
   """
   records: ResolvedRecords
@@ -1214,65 +1222,57 @@ input PrimaryNamesWhereInput @oneOf {
   coinTypes: [CoinType!]
 }
 
-"""
-PREVIEW: Interpreted address records on a Domain profile. Not yet resolved.
-"""
+"""Interpreted address records on a Domain profile."""
 type ProfileAddresses {
   """The interpreted Base address, or null when unset."""
   base: Address
 
   """The interpreted Bitcoin address, or null when unset."""
-  bitcoin: String
+  bitcoin: BitcoinAddress
 
   """The interpreted Ethereum address, or null when unset."""
   ethereum: Address
 
   """The interpreted Solana address, or null when unset."""
-  solana: String
+  solana: SolanaAddress
 }
 
-"""
-PREVIEW: Interpreted avatar metadata on a Domain profile. Not yet resolved.
-"""
+"""Interpreted avatar metadata on a Domain profile."""
 type ProfileAvatar {
-  """The resolved avatar URL, or null when unset."""
-  url: String
+  """
+  Provides a HTTP-compatible URL for fetching the avatar image that can be safely referenced as an image in web browsers. This is an abstraction over the "raw" avatar record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. Additional details here: https://docs.ens.domains/ensip/12
+  """
+  httpUrl: String
 }
 
-"""
-PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.
-"""
-type ProfileBanner {
-  """The resolved banner URL, or null when unset."""
-  url: String
+"""Interpreted header metadata on a Domain profile."""
+type ProfileHeader {
+  """
+  Provides a HTTP-compatible URL for fetching the header image that can be safely referenced as an image in web browsers. This is an abstraction over the "raw" header record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. Additional details here: https://docs.ens.domains/ensip/12
+  """
+  httpUrl: String
 }
 
-"""
-PREVIEW: An interpreted social account on a Domain profile. Not yet resolved.
-"""
+"""An interpreted social account on a Domain profile."""
 type ProfileSocialAccount {
-  """The social handle, or null when unset."""
-  handle: String
+  """The social handle."""
+  handle: String!
 
-  """The social profile URL, or null when unset."""
-  url: String
+  """The HTTP-compatible social profile URL."""
+  httpUrl: String!
 }
 
-"""
-PREVIEW: Interpreted social accounts on a Domain profile. Not yet resolved.
-"""
+"""Interpreted social accounts on a Domain profile."""
 type ProfileSocials {
   github: ProfileSocialAccount
   telegram: ProfileSocialAccount
   twitter: ProfileSocialAccount
 }
 
-"""
-PREVIEW: Interpreted website metadata on a Domain profile. Not yet resolved.
-"""
+"""Interpreted website metadata on a Domain profile."""
 type ProfileWebsite {
-  """The resolved website URL, or null when unset."""
-  url: String
+  """The HTTP-compatible website URL, or null when unset."""
+  httpUrl: String
 }
 
 type Query {
@@ -1694,6 +1694,11 @@ type ReverseResolve {
   """
   trace: JSON!
 }
+
+"""
+SolanaAddress represents a Base58-encoded Solana address (coin type 501).
+"""
+scalar SolanaAddress
 
 """Filter for Domain.subdomains query."""
 input SubdomainsWhereInput {

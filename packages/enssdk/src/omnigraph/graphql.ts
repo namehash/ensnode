@@ -3,6 +3,7 @@ import { initGraphQLTada } from "gql.tada";
 import type {
   BeautifiedLabel,
   BeautifiedName,
+  BitcoinAddress,
   ChainId,
   CoinType,
   DomainId,
@@ -21,6 +22,7 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
+  SolanaAddress,
 } from "../lib/types";
 import type { introspection } from "./generated/introspection";
 
@@ -42,6 +44,8 @@ export type OmnigraphScalars = {
   BigInt: `${bigint}`;
   JSON: JsonValue;
   Address: NormalizedAddress;
+  BitcoinAddress: BitcoinAddress;
+  SolanaAddress: SolanaAddress;
   Hex: Hex;
   ChainId: ChainId;
   CoinType: CoinType;

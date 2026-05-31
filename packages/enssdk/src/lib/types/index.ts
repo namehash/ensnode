@@ -1,3 +1,4 @@
+export * from "./addresses";
 export * from "./coin-type";
 export * from "./eac";
 export * from "./ens";
