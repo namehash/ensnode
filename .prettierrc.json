@@ -10,6 +10,13 @@
         "bracketSameLine": true,
         "astroSkipFrontmatter": true
       }
+    },
+    {
+      "comment": "Don't reflow embedded code: hand-authored GraphQL examples throughout the docs, and the example apps that walkthroughs mirror verbatim.",
+      "files": ["docs/ensnode.io/**/*.{md,mdx}", "examples/**/*.{ts,tsx}"],
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
     }
   ]
 }

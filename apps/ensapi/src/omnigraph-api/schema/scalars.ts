@@ -5,10 +5,13 @@ import {
   type CoinType,
   type DomainId,
   type Hex,
+  type InterfaceId,
   type InterpretedLabel,
   type InterpretedName,
+  isInterfaceId,
   isInterpretedLabel,
   isInterpretedName,
+  type JsonValue,
   type Name,
   type Node,
   type NormalizedAddress,
@@ -36,6 +39,12 @@ builder.scalarType("BigInt", {
   description: "BigInt represents non-fractional signed whole numeric values.",
   serialize: (value: bigint) => value.toString(),
   parseValue: (value) => z.coerce.bigint().parse(value),
+});
+
+builder.scalarType("JSON", {
+  description: "JSON represents arbitrary JSON-serializable data.",
+  serialize: (value: JsonValue) => value,
+  parseValue: (value) => z.unknown().parse(value) as JsonValue,
 });
 
 builder.scalarType("Address", {
@@ -73,6 +82,26 @@ builder.scalarType("CoinType", {
   description: "CoinType represents an enssdk#CoinType.",
   serialize: (value: CoinType) => value,
   parseValue: (value) => makeCoinTypeSchema("CoinType").parse(value),
+});
+
+builder.scalarType("InterfaceId", {
+  description: "InterfaceId represents an ERC-165 interface id (4-byte hex selector).",
+  serialize: (value: InterfaceId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val.toLowerCase())
+      .check((ctx) => {
+        if (!isInterfaceId(ctx.value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "Must be a 4-byte hex (0x + 8 hex chars)",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => val as InterfaceId)
+      .parse(value),
 });
 
 builder.scalarType("Node", {

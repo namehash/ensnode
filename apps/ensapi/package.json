@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
+    "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",

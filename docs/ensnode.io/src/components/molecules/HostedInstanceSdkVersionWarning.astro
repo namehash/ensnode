@@ -1,12 +1,12 @@
 ---
 import { Aside } from "@astrojs/starlight/components";
 
-import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 
-// The SDK version is locked to the production-deployed Omnigraph version (see
-// `@data/omnigraph-examples/active`). The SDK bundles the Omnigraph schema, so pinning the matching
-// version keeps gql.tada's generated types aligned with the deployed API. Updates on promotion.
-const VERSION = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
+// The SDK version is locked to the production-deployed Omnigraph version (see the vendored
+// `@data/omnigraph-examples/snapshot.json`). The SDK bundles the Omnigraph schema, so pinning the
+// matching version keeps gql.tada's generated types aligned with the deployed API.
+const VERSION = snapshot.sdkVersion;
 ---
 
 <Aside type="caution" title="Version compatibility with hosted instances">

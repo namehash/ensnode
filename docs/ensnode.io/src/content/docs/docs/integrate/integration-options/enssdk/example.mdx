@@ -3,8 +3,7 @@ title: Interactive enssdk example ⚡
 description: Edit and run the enssdk-example script against a live ENSNode endpoint in your browser.
 tableOfContents: false
 sidebarDocked: true
-sidebar:
-  order: 2
+topic: integrate-with-ensv2
 ---
 
 import { Icon } from "@astrojs/starlight/components";
@@ -19,11 +18,11 @@ This playground loads the same source as [`enssdk-example`](https://github.com/n
 The embedded StackBlitz editor runs entirely in your browser. Downloading and installing all npm packages may take a few minutes. Watch the install progress in the terminal of the StackBlitz editor.
 :::
 
-You can edit the script and run **`npm start`** in the terminal to run it again.
-
 :::caution[StackBlitz embed outage]
 StackBlitz is having problems with embedded WebContainer projects as of **May 19**. If the editor does not load, use the **Fork on StackBlitz** button in the bottom left to open and run the example on stackblitz.com.
 :::
+
+You can edit the script and re-execute **`npm start`** in the terminal to run it again.
 
 <EnssdkExampleInteractivePlayground client:load height="700" />
 
@@ -31,11 +30,8 @@ StackBlitz is having problems with embedded WebContainer projects as of **May 19
   class="group w-fit flex flex-row justify-start items-center gap-2 mt-4"
   href="/docs/integrate/integration-options/enssdk"
 >
-  <Icon
-    name="left-arrow"
-    class="h-5 w-5 text-[var(--sl-color-accent)] group-hover:text-[var(--sl-color-white)] transition-colors duration-200"
-  />
-  <p class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-all duration-200">
+  <Icon name="left-arrow" class="h-5 w-5 text-[var(--sl-color-accent)]" />
+  <div class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-[text-underline-offset] duration-200">
     Back to enssdk overview
-  </p>
+  </div>
 </a>
