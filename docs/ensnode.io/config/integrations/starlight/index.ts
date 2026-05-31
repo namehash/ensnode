@@ -8,7 +8,7 @@ import { starlightSidebarTopicsConfig } from "./sidebar-topics";
 export function starlight(): AstroIntegration {
   return AstroStarlight({
     expressiveCode: {
-      themes: ["night-owl"],
+      themes: ["one-light"],
     },
     components: {
       PageFrame: "./src/components/overrides/PageFrame.astro",
