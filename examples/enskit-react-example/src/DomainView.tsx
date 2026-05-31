@@ -108,8 +108,9 @@ function RenderDomain({ by }: { by: DomainBy }) {
         // parent has no Canonical Name
         <Link to={`/domain/id/${data.domain.parent.id}`}>
           ←{" "}
-          {data.domain.parent.canonical?.name.beautified ??
-            `non-canonical parent domain with id '${data.domain.parent.id}'`}
+          {data.domain.parent.canonical
+            ? data.domain.parent.canonical.name.beautified
+            : `non-canonical parent domain with id '${data.domain.parent.id}'`}
         </Link>
       )}
 

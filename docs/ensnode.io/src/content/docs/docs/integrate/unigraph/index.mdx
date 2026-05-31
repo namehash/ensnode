@@ -11,7 +11,7 @@ The **ENS Unigraph** combines every ENSv1 "Nametree" (the mainnet ENS Registry, 
 
 **ENS Unigraph SQL** is direct, read-only SQL access to that data. The [ENS Omnigraph API](/docs/integrate/omnigraph) is built _on top of_ the Unigraph; Unigraph SQL is the layer beneath it, for use cases that go past what the Omnigraph exposes — custom analytics, data pipelines, dashboards, or building your own service. Because it's just Postgres, you can query it from **any language with a Postgres driver** — TypeScript, Python, Rust, Go, and more.
 
-<Aside type="note" title="Requires a self-hosted ENSNode">
+<Aside type="caution" title="Requires a self-hosted ENSNode">
   SQL access connects directly to your ENSDb (PostgreSQL) instance, so you need to run your own
   ENSNode — NameHash's hosted instances don't expose direct database access. See the [self-hosting
   overview](/docs/self-host) to get an instance running. If you'd rather use a hosted API, reach for
@@ -36,7 +36,7 @@ The **Canonical Nametree** is the set of all Domains that have an inferrable **C
 
 Multichain coverage is part of the same model: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are materialized into the same Unigraph as mainnet `.eth`, so a single query spans every indexable name.
 
-<Aside type="caution" title="Not a substitute for ENS Resolution">
+<Aside type="danger" title="Not a substitute for ENS Resolution">
   The Unigraph mirrors onchain state; ENS's resolution-time behavior is applied _on top_ of it by
   [ENSApi](/docs/services/ensapi). A direct SQL read of resolver records is therefore **not**
   ENSIP-10 / CCIP-Read compliant and **cannot** be used as a source of truth for name resolution.

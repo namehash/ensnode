@@ -12,3 +12,6 @@ pnpm-lock.yaml
 
 # Generated changelogs — owned by changesets, do not reformat
 **/CHANGELOG.md
+
+# Vendored GraphQL schemas in docs — copied verbatim, do not reformat
+docs/ensnode.io/src/data/**/*.graphql

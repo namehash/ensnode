@@ -2,10 +2,9 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ACTIVE_OMNIGRAPH_VERSION } from "../src/data/omnigraph-examples/active.ts";
 import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
-import { ENSNODE_URL } from "../src/lib/playground/constants.ts";
+import { ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
 
 function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
@@ -15,22 +14,12 @@ function logError(message: string, id?: string) {
   console.error(`[omnigraph-examples] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
 }
 
-// Target version defaults to the active one; override to fill responses for a staged version.
-const version = process.env.OMNIGRAPH_VERSION ?? ACTIVE_OMNIGRAPH_VERSION;
-// Used as a directory name; reject anything that could escape the versions/ dir.
-if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
-  logError(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
-  process.exit(1);
-}
-const versionDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  `../src/data/omnigraph-examples/versions/${version}`,
-);
-const examplesPath = join(versionDir, "examples.json");
-const outputPath = join(versionDir, "responses.json");
+const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../src/data/omnigraph-examples");
+const examplesPath = join(dataDir, "examples.json");
+const outputPath = join(dataDir, "responses.json");
 
 if (!existsSync(examplesPath)) {
-  logError(`No examples snapshot at ${examplesPath}. Snapshot version "${version}" first.`);
+  logError(`No examples snapshot at ${examplesPath}. Run pnpm omnigraph:snapshot <version> first.`);
   process.exit(1);
 }
 
@@ -38,7 +27,7 @@ const snapshotById = new Map(
   (JSON.parse(readFileSync(examplesPath, "utf8")) as SnapshotExample[]).map((e) => [e.id, e]),
 );
 
-// Only fetch responses for the rendered set: meta entries supported by this version's snapshot.
+// Only fetch responses for the rendered set: meta entries supported by the vendored snapshot.
 const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[])
   .filter((id) => snapshotById.has(id))
   .sort();
@@ -66,8 +55,8 @@ const url = new URL("/api/omnigraph", process.env.OMNIGRAPH_ENDPOINT ?? ENSNODE_
 
 logStep(
   argIds.length > 0
-    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples (${version}) from ${url}: ${exampleIds.join(", ")}`
-    : `Fetching all ${exampleIds.length} Omnigraph examples (${version}) from ${url}`,
+    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples from ${url}: ${exampleIds.join(", ")}`
+    : `Fetching all ${exampleIds.length} Omnigraph examples from ${url}`,
 );
 
 // When refreshing a subset, load the existing responses so unaffected entries are preserved.

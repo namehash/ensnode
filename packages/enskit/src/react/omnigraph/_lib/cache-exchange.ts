@@ -37,12 +37,36 @@ export const omnigraphCacheExchange = cacheExchange({
       return typeof key === "string" ? key : null;
     },
 
+    // ResolvedRecords are keyable by just `id`
+    ResolvedRecords: (data) => {
+      const key = data.id;
+      return typeof key === "string" ? key : null;
+    },
+
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
     CanonicalName: EMBEDDED_DATA,
     DomainCanonical: EMBEDDED_DATA,
     DomainResolver: EMBEDDED_DATA,
+    ForwardResolve: EMBEDDED_DATA,
+    ReverseResolve: EMBEDDED_DATA,
+    ResolutionStatus: EMBEDDED_DATA,
+    PrimaryNameRecord: EMBEDDED_DATA,
+    AccelerationStatus: EMBEDDED_DATA,
+    // dont forget to add cache strategy when DomainProfile is wired
+    DomainProfile: EMBEDDED_DATA,
+    ProfileAvatar: EMBEDDED_DATA,
+    ProfileBanner: EMBEDDED_DATA,
+    ProfileWebsite: EMBEDDED_DATA,
+    ProfileAddresses: EMBEDDED_DATA,
+    ProfileSocials: EMBEDDED_DATA,
+    ProfileSocialAccount: EMBEDDED_DATA,
+    ResolvedAbiRecord: EMBEDDED_DATA,
+    ResolvedAddressRecord: EMBEDDED_DATA,
+    ResolvedInterfaceRecord: EMBEDDED_DATA,
+    ResolvedPubkeyRecord: EMBEDDED_DATA,
+    ResolvedRawTextRecord: EMBEDDED_DATA,
   },
   resolvers: mergeResolverMaps(
     // produce relayPagination() local resolvers for each t.connection in the schema

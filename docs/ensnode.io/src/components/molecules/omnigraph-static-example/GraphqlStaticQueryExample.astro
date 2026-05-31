@@ -1,0 +1,57 @@
+---
+/**
+ * Omnigraph panel: GraphQL request is query + variables; result is a separate output section.
+ */
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
+
+import StaticExampleActionBar from "./StaticExampleActionBar.astro";
+import StaticExampleCodeSection from "./StaticExampleCodeSection.astro";
+import StaticExampleOutputSection from "./StaticExampleOutputSection.astro";
+
+interface Props {
+  uid: string;
+  query: string;
+  variablesJson: string;
+  responseJson: string | null;
+  adminUrl: string;
+  hostedInstanceDocUrl: string;
+  hostedInstanceNamespace: ENSNamespaceId;
+}
+
+const {
+  uid,
+  query,
+  variablesJson,
+  responseJson,
+  adminUrl,
+  hostedInstanceDocUrl,
+  hostedInstanceNamespace,
+} = Astro.props;
+---
+
+<StaticExampleActionBar
+  variant="ensadmin"
+  adminUrl={adminUrl}
+  hostedInstanceDocUrl={hostedInstanceDocUrl}
+  hostedInstanceNamespace={hostedInstanceNamespace}
+/>
+
+<StaticExampleCodeSection
+  badge="GraphQL"
+  headingId={`${uid}-query-heading`}
+  code={query}
+  lang="graphql"
+/>
+
+<StaticExampleCodeSection
+  badge="Variables"
+  headingId={`${uid}-variables-heading`}
+  code={variablesJson}
+  lang="json"
+/>
+
+{
+  responseJson ? (
+    <StaticExampleOutputSection uid={uid} responseJson={responseJson} heading="Output" />
+  ) : null
+}

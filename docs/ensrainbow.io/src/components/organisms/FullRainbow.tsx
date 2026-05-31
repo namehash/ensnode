@@ -16,8 +16,8 @@ export default function FullRainbow() {
       data={[
         {
           label: <>ENS Subgraph</>,
-          value: 20,
-          color: "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 80%)",
+          value: 11,
+          color: "linear-gradient(270deg, #F09C0A -69%, #EA2F86 100%)",
         },
         {
           label: (
@@ -25,30 +25,30 @@ export default function FullRainbow() {
               ENSRainbow + ENSNode {badge("Current")}
             </div>
           ),
-          value: 90,
+          value: 94,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 71%, #F09C0A 87.5%, #EA2F86 105%)",
+            "linear-gradient(270deg, #CA01FD -6.5%, #0B10FE 14.5%, #1EFDFF 31.5%, #93E223 48%, #FAE000 63%, #F09C0A 78%, #EA2F86 100%)",
         },
         {
           label: (
             <div className="flex flex-row flex-nowrap justify-start items-center gap-2">
-              ENSRainbow + ENSNode {badge("Future target")}
+              ENSRainbowBeam + ENSNode {badge("Target")}
             </div>
           ),
-          value: 95,
+          value: 99,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 69%, #F09C0A 84.5%, #EA2F86 100%)",
+            "linear-gradient(270deg, #CA01FD 0%, #0B10FE 17%, #1EFDFF 35%, #93E223 52%, #FAE000 68%, #F09C0A 84%, #EA2F86 100%)",
         },
       ]}
       title="Name Healing Coverage"
-      footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 8 March, 2025."
+      footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 26 May, 2026.&#10;Results exclude unnormalized names that are formatted as encoded labelhashes in the ENS Subgraph but are actually known."
     />
   );
 
   return (
     <section className="box-border w-full h-fit flex flex-col flex-nowrap items-center justify-center py-[60px] px-5 bg-[#FEFEFF] md:py-20 lg:px-28 lg:py-[120px]">
       <div className="flex flex-col xl:flex-row items-center justify-center gap-8 xl:justify-between max-w-[1216px]">
-        <div className="relative flex flex-row justify-center lg:justify-start items-center w-full max-w-2xl xl:w-[60%] rounded-none bg-origin-border shrink-0 box-border">
+        <div className="relative flex flex-row justify-center lg:justify-start items-center w-full max-w-[640px] xl:w-[60%] rounded-none bg-origin-border shrink-0 box-border">
           {barChart()}
         </div>
         <div className="flex flex-col gap-4 h-fit w-full max-w-3xl items-center xl:items-start xl:w-[40%] md:px-[72px] xl:px-0">

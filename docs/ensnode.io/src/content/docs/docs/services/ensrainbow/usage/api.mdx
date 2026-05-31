@@ -30,7 +30,7 @@ ENSRainbow's container starts its HTTP server immediately so that orchestrators 
 
 While the database is not yet ready, the following routes return `503` with the body:
 
-```json
+```json title="notReadyResponse.json"
 {
   "status": "error",
   "error": "ENSRainbow is still bootstrapping its database",
@@ -61,7 +61,7 @@ Ready response: `{"status":"ok"}`
 
 Not-ready response (HTTP 503):
 
-```json
+```json title="notReadyResponse.json"
 {
   "status": "error",
   "error": "ENSRainbow is still bootstrapping its database",
@@ -85,7 +85,7 @@ curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd14426
 
 Response:
 
-```json
+```json title="response.json"
 {
   "status": "success",
   "label": "vitalik"
@@ -115,7 +115,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
 
 - `400 Bad Request`: When the labelhash parameter is missing or invalid, or when query parameters are incorrectly specified
 
-  ```json
+  ```json title="invalidLabelhashResponse.json"
   {
     "status": "error",
     "error": "Invalid labelhash - must be a valid hex string",
@@ -123,7 +123,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
-  ```json
+  ```json title="incorrectVersionResponse.json"
   {
     "status": "error",
     "error": "Requested label set version is higher than available label set version",
@@ -131,7 +131,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
-  ```json
+  ```json title="invalidLabelSetIdResponse.json"
   {
     "status": "error",
     "error": "Server label set ID \"subgraph\" does not match client's requested label set ID \"ens-test-env\".",
@@ -141,7 +141,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
 
 - `404 Not Found`: When no label is found for the given labelhash
 
-  ```json
+  ```json title="noLabelFoundResponse.json"
   {
     "status": "error",
     "error": "Label not found",
@@ -150,7 +150,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   ```
 
 - `500 Internal Server Error`: When an unexpected error occurs or database is not initialized
-  ```json
+  ```json title="unexpectedError.json"
   {
     "status": "error",
     "error": "Internal server error",
@@ -170,7 +170,7 @@ curl https://api.ensrainbow.io/v1/labels/count
 
 Success Response:
 
-```json
+```json title="success.json"
 {
   "status": "success",
   "count": 133856894,
@@ -180,7 +180,7 @@ Success Response:
 
 #### Error Responses
 
-```json
+```json title="error.json"
 {
   "status": "error",
   "error": "Label count not initialized. Check that the ingest command has been run.",
@@ -196,7 +196,7 @@ curl https://api.ensrainbow.io/v1/config
 
 Success Response:
 
-```json
+```json title="success.json"
 {
   "serverLabelSet": {
     "labelSetId": "subgraph",
