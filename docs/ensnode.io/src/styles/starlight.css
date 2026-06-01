@@ -91,6 +91,27 @@
   --pagination-arrow-color: var(--color-text-secondary);
   --sl-shadow-md: var(--shadow-md);
   --sl-shadow-sm: var(--shadow-sm);
+
+  --aside-danger-card-bg: color-mix(in srgb, var(--aside-danger-color) 20%, transparent);
+  --aside-danger-card-bg-hover: color-mix(in srgb, var(--aside-danger-color) 30%, transparent);
+  --aside-danger-card-border: color-mix(in srgb, var(--aside-danger-color) 50%, transparent);
+  --aside-danger-card-border-hover: color-mix(in srgb, var(--aside-danger-color) 70%, transparent);
+  --aside-tip-card-bg: color-mix(in srgb, var(--aside-tip-color) 20%, transparent);
+  --aside-tip-card-bg-hover: color-mix(in srgb, var(--aside-tip-color) 30%, transparent);
+  --aside-tip-card-border: color-mix(in srgb, var(--aside-tip-color) 50%, transparent);
+  --aside-tip-card-border-hover: color-mix(in srgb, var(--aside-tip-color) 70%, transparent);
+  --aside-caution-card-bg: color-mix(in srgb, var(--aside-caution-color) 20%, transparent);
+  --aside-caution-card-bg-hover: color-mix(in srgb, var(--aside-caution-color) 30%, transparent);
+  --aside-caution-card-border: color-mix(in srgb, var(--aside-caution-color) 50%, transparent);
+  --aside-caution-card-border-hover: color-mix(
+    in srgb,
+    var(--aside-caution-color) 70%,
+    transparent
+  );
+
+  --aside-danger-card-title-hover: color-mix(in srgb, var(--aside-danger-color), black 35%);
+  --aside-tip-card-title-hover: color-mix(in srgb, var(--aside-tip-color), black 35%);
+  --aside-caution-card-title-hover: color-mix(in srgb, var(--aside-caution-color), black 35%);
 }
 
 /* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
@@ -197,8 +218,20 @@ a[rel="prev"]:hover {
   border-color: var(--sl-color-accent);
 }
 
+.sl-link-card .icon {
+  transition: color 0.2s ease-in-out;
+}
+
 .sl-link-card:hover .icon {
   color: var(--sl-color-accent);
+}
+
+.sl-link-card .title {
+  transition: color 0.2s ease-in-out;
+}
+
+.sl-link-card:hover .title {
+  color: var(--sl-color-text-accent);
 }
 
 .link-title {
@@ -223,8 +256,8 @@ a[rel="prev"]:hover {
 /* Override Starlight's default markdown link hover (which switches to
    --sl-color-white): keep links their base color on hover so only the
    underline-offset animates. */
-.sl-markdown-content a:hover:not(:where(.not-content *)),
-.sl-markdown-content a:hover:not(:where(.not-content *)) > span {
+.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card *)),
+.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card *)) > span {
   color: var(--sl-color-text-accent);
 }
 
@@ -534,11 +567,17 @@ starlight-tabs ul[role="tablist"] {
 .starlight-aside--tip {
   --aside-color: var(--aside-tip-color);
 
+  & .sl-link-card {
+    background-color: var(--aside-tip-card-bg);
+    border-color: var(--aside-tip-card-border);
+  }
+
   & .sl-link-card:hover {
-    border-color: var(--aside-color);
+    background-color: var(--aside-tip-card-bg-hover);
+    border-color: var(--aside-tip-card-border-hover);
 
     & .title {
-      color: var(--aside-color);
+      color: var(--aside-tip-card-title-hover);
     }
 
     & .icon {
@@ -550,11 +589,17 @@ starlight-tabs ul[role="tablist"] {
 .starlight-aside--danger {
   --aside-color: var(--aside-danger-color);
 
+  & .sl-link-card {
+    background-color: var(--aside-danger-card-bg);
+    border-color: var(--aside-danger-card-border);
+  }
+
   & .sl-link-card:hover {
-    border-color: var(--aside-color);
+    background-color: var(--aside-danger-card-bg-hover);
+    border-color: var(--aside-danger-card-border-hover);
 
     & .title {
-      color: var(--aside-color);
+      color: var(--aside-danger-card-title-hover);
     }
 
     & .icon {
@@ -585,10 +630,16 @@ starlight-tabs ul[role="tablist"] {
   }
 
   & .sl-link-card {
-    border-color: var(--aside-color);
+    background-color: var(--aside-caution-card-bg);
+    border-color: var(--aside-caution-card-border);
+  }
+
+  & .sl-link-card:hover {
+    background-color: var(--aside-caution-card-bg-hover);
+    border-color: var(--aside-caution-card-border-hover);
 
     & .title {
-      color: var(--aside-color);
+      color: var(--aside-caution-card-title-hover);
     }
 
     & .icon {
