@@ -14,14 +14,18 @@ ResolvedRawTextRecordRef.implement({
   description:
     "A resolved 'raw' text record for an ENS name. Value is any possible string and may require additional validation or preprocessing before use.",
   fields: (t) => ({
-    key: t.exposeString("key", {
+    key: t.field({
+      type: "String",
       description: "The text record key.",
       nullable: false,
+      resolve: (r) => r.key,
     }),
-    value: t.exposeString("value", {
+    value: t.field({
+      type: "String",
       description:
         "The 'raw' text record value, or null if not set. Value is any possible string and may require additional validation or preprocessing before use.",
       nullable: true,
+      resolve: (r) => r.value,
     }),
   }),
 });
@@ -43,11 +47,12 @@ ResolvedAddressRecordRef.implement({
       nullable: false,
       resolve: (r) => r.coinType,
     }),
-    address: t.expose("address", {
+    address: t.field({
       type: "Hex",
       description:
         'The "raw" resolved address record as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. Guaranteed to be at least one byte of hex data. There is no guarantee that an EVM CoinType returns an address value of any particular byte length.',
       nullable: true,
+      resolve: (r) => r.address,
     }),
   }),
 });
