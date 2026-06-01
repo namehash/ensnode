@@ -1095,7 +1095,15 @@ const introspection = {
       },
       {
         "kind": "SCALAR",
+        "name": "BinanceAddress"
+      },
+      {
+        "kind": "SCALAR",
         "name": "BitcoinAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "BitcoinCashAddress"
       },
       {
         "kind": "SCALAR",
@@ -1173,6 +1181,10 @@ const introspection = {
       {
         "kind": "SCALAR",
         "name": "CoinType"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "DogecoinAddress"
       },
       {
         "kind": "INTERFACE",
@@ -1671,6 +1683,15 @@ const introspection = {
           },
           {
             "name": "description",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "email",
             "type": {
               "kind": "SCALAR",
               "name": "String"
@@ -3899,6 +3920,14 @@ const introspection = {
         "interfaces": []
       },
       {
+        "kind": "SCALAR",
+        "name": "LitecoinAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "MonacoinAddress"
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "NameOrNodeInput",
         "inputFields": [
@@ -4957,6 +4986,15 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "binance",
+            "type": {
+              "kind": "SCALAR",
+              "name": "BinanceAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "bitcoin",
             "type": {
               "kind": "SCALAR",
@@ -4966,10 +5004,64 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "bitcoincash",
+            "type": {
+              "kind": "SCALAR",
+              "name": "BitcoinCashAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "dogecoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DogecoinAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "ethereum",
             "type": {
               "kind": "SCALAR",
               "name": "Address"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "litecoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "LitecoinAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "monacoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "MonacoinAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "ripple",
+            "type": {
+              "kind": "SCALAR",
+              "name": "RippleAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "rootstock",
+            "type": {
+              "kind": "SCALAR",
+              "name": "RootstockAddress"
             },
             "args": [],
             "isDeprecated": false
@@ -5055,6 +5147,24 @@ const introspection = {
         "fields": [
           {
             "name": "github",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "keybase",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "linkedin",
             "type": {
               "kind": "OBJECT",
               "name": "ProfileSocialAccount"
@@ -7009,6 +7119,14 @@ const introspection = {
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "SCALAR",
+        "name": "RippleAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "RootstockAddress"
       },
       {
         "kind": "SCALAR",
