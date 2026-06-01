@@ -13,7 +13,7 @@ import type { Hex } from "viem";
  * (the indexer strips them before writing, so a lookup must strip them too to match the stored id).
  */
 export function efpAccountMetadataId(address: NormalizedAddress, key: string): string {
-  return `${address}-${key.replace(/\0/g, "")}`;
+  return `${address.toLowerCase()}-${key.replace(/\0/g, "")}`;
 }
 
 /** `efp_list_storage_locations` key: `${chainId}-${contractAddress}-${slot}` (lowercased hex). */
