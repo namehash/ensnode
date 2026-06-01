@@ -26,6 +26,7 @@ import {
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
+import { seedEfpDevnet } from "./seed/efp";
 import { seedDevnet } from "./seed/index";
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
@@ -314,6 +315,7 @@ export async function bringUp(options: { only?: Set<Service> } = {}): Promise<vo
     // Phase 2: Seed devnet with test data (before indexing starts)
     log("Seeding devnet...");
     await seedDevnet(RPC_URL);
+    await seedEfpDevnet(RPC_URL);
     log("Devnet seeded");
   }
 

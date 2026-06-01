@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts, efpSeedRoleUser, efpSeedTargets } from "@ensnode/datasources/devnet";
 
-import { flattenConnection, type GraphQLConnection, request } from "@/test/integration/graphql-utils";
+import {
+  flattenConnection,
+  type GraphQLConnection,
+  request,
+} from "@/test/integration/graphql-utils";
 import { gql } from "@/test/integration/omnigraph-api-client";
 
 /**
@@ -158,5 +162,64 @@ describe("Account.efp deep walk (demoGraph)", () => {
     const toBob = records.find((r) => eq(r.recordData, bob));
     expect(toBob?.account && eq(toBob.account.id, bob)).toBe(true);
     expect(toBob?.account?.efp.primaryList?.tokenId).toBe("1");
+  });
+});
+
+describe("EFP handler edge cases (seeded)", () => {
+  type SeededRecordsResult = {
+    efp: {
+      listRecords: GraphQLConnection<{
+        recordData: string;
+        tags: string[];
+        account: { id: string } | null;
+        list: { user: string | null } | null;
+      }>;
+    };
+  };
+
+  const EfpSeededRecords = gql`
+    query EfpSeededRecords($target: Address!) {
+      efp {
+        listRecords(where: { recordData: $target }) {
+          edges { node { recordData tags account { id } list { user } } }
+        }
+      }
+    }
+  `;
+
+  const recordsFor = async (target: string) =>
+    flattenConnection(
+      (await request<SeededRecordsResult>(EfpSeededRecords, { target })).efp.listRecords,
+    );
+
+  it("de-duplicates a repeated ADD_TAG and clears the user role on a malformed value", async () => {
+    const records = await recordsFor(efpSeedTargets.dedup);
+    expect(records).toHaveLength(1);
+    // The tag was added twice; the embedded-tags set must hold it once.
+    expect(records[0].tags).toEqual(["block"]);
+    // The synthetic target is not an indexed account, so `account` is null.
+    expect(records[0].account).toBeNull();
+    // The owning list's `user` was set to a malformed (non-20-byte) value, clearing it to null.
+    expect(records[0].list?.user).toBeNull();
+  });
+
+  it("cascades tags on REMOVE_RECORD and starts fresh on re-ADD", async () => {
+    const records = await recordsFor(efpSeedTargets.cascade);
+    // Re-added after a REMOVE that dropped the record and its tags.
+    expect(records).toHaveLength(1);
+    expect(records[0].tags).toEqual([]);
+  });
+
+  it("deletes a record via a junk-suffixed REMOVE_RECORD (canonical 22-byte keying)", async () => {
+    const records = await recordsFor(efpSeedTargets.junk);
+    expect(records).toHaveLength(0);
+  });
+
+  it("recovers a list's user role after a storage-location re-point (durable metadata)", async () => {
+    const records = await recordsFor(efpSeedTargets.durable);
+    expect(records).toHaveLength(1);
+    // The list moved away from its slot (clearing the role) and back; the role must be re-derived
+    // from the durable per-slot metadata rather than staying null.
+    expect(records[0].list?.user && eq(records[0].list.user, efpSeedRoleUser)).toBe(true);
   });
 });

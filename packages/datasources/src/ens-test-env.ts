@@ -1,11 +1,11 @@
-import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
-import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
-import { Registry } from "./abis/ensv2/Registry";
-import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for EFP Datasources
 import { AccountMetadata as efp_AccountMetadata } from "./abis/efp/AccountMetadata";
 import { ListRecords as efp_ListRecords } from "./abis/efp/ListRecords";
 import { ListRegistry as efp_ListRegistry } from "./abis/efp/ListRegistry";
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
+import { Registry } from "./abis/ensv2/Registry";
+import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
