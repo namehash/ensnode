@@ -18,7 +18,7 @@ export const integrateSidebarTopic = {
     },
     {
       label: "ENS Subgraph",
-      collapsed: true,
+      collapsed: false,
       badge: {
         text: "LEGACY",
         variant: "danger",

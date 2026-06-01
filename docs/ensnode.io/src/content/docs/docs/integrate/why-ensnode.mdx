@@ -40,45 +40,28 @@ No more wiring up a per-chain Subgraph, reconciling overlapping ENS Nametrees, o
 
 ## Full-stack integration surfaces
 
-Whatever your stack looks like, there's an ENSNode integration shaped for it:
+Whatever your stack looks like, there's an ENSNode integration shaped for it.
 
-<CardGrid>
   <LinkCard
-    title="enskit (React)"
-    description="Typed hooks, Relay-style pagination, Omnigraph cache directives"
-    href="/docs/integrate/integration-options/enskit"
+    title="ENSNode integration options"
+    description="Explore the different ways to integrate with ENSNode based on your stack, runtime, and needs."
+    href="/docs/integrate/integration-options"
   />
-  <LinkCard
-    title="enssdk (TypeScript)"
-    description="Typed client for any JS runtime — frontend or backend"
-    href="/docs/integrate/integration-options/enssdk"
-  />
-  <LinkCard
-    title="Omnigraph GraphQL"
-    description="Relay-spec GraphQL — use it from any language"
-    href="/docs/integrate/integration-options/omnigraph-graphql-api"
-  />
-  <LinkCard
-    title="ENSDb (PostgreSQL)"
-    description="Direct SQL access for analytics and custom services"
-    href="/docs/integrate/integration-options/ensdb"
-  />
-</CardGrid>
 
 ## Why it matters beyond your app
 
-Indexed ENS data is critical infrastructure for ENS — and the legacy ENS Subgraph is fundamentally unsuitable for ENSv2. Closing that gap is required for many of ENS's most important apps, including the official ENS Manager App.
+Indexed ENS data is critical infrastructure for ENS — and the legacy ENS Subgraph is fundamentally unsuitable for ENSv2. Closing that gap is required for many of ENS's most important apps.
 
 <CardGrid>
+  <LinkCard
+    title="Avoid key ENS integrations from breaking"
+    description="Much of the ENS ecosystem quietly relies on the Subgraph today, and risks going dark when ENSv2 launches."
+    href="/docs/integrate/ens-subgraph"
+  />
   <LinkCard
     title="Key Limitations of the ENS Subgraph"
     description="Why the Subgraph falls short today, and breaks with ENSv2."
     href="/docs/integrate/ens-subgraph/key-limitations"
-  />
-  <LinkCard
-    title="ENS Protocol Acceleration"
-    description="How ENSNode strengthens the decentralization and unstoppability of ENS."
-    href="/docs/integrate/omnigraph/protocol-acceleration"
   />
 </CardGrid>
 
