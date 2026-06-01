@@ -112,6 +112,15 @@ const registryAbi = [
     ],
     outputs: [],
   },
+  // Plain mint (mints to msg.sender, sets the storage location) — unlike easyMintTo it does NOT set
+  // the minter's primary-list/user metadata, so it can add filler lists without perturbing fixtures.
+  {
+    type: "function",
+    name: "mint",
+    stateMutability: "payable",
+    inputs: [{ name: "listStorageLocation", type: "bytes" }],
+    outputs: [],
+  },
 ] as const;
 
 const recordsAbi = [
@@ -267,5 +276,26 @@ export async function seedEfpDevnet(rpcUrl: string): Promise<void> {
         args: [durableTokenId, lsl(targetSlot)],
       }),
     );
+  }
+
+  // Mint extra (bare) lists so the devnet holds more than 9 (token ids reach double digits). This
+  // makes `efp.lists` / `Account.efp.lists` pagination exercise numeric-vs-lexicographic ordering:
+  // a text tokenId would otherwise sort "10" before "2" and break the cursor. Use a plain `mint`
+  // (not easyMintTo) so these fillers do not reset the actor's primary-list/user fixtures above.
+  let nextTokenId = await client.readContract({
+    address: efpContracts.EFPListRegistry as Address,
+    abi: registryAbi,
+    functionName: "totalSupply",
+  });
+  while (nextTokenId < 12n) {
+    await send(
+      await client.writeContract({
+        address: efpContracts.EFPListRegistry as Address,
+        abi: registryAbi,
+        functionName: "mint",
+        args: [lsl(nextTokenId)],
+      }),
+    );
+    nextTokenId += 1n;
   }
 }

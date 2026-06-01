@@ -5,7 +5,7 @@ import type { Hex } from "viem";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
-import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { orderByNumericText, paginateByNumericText } from "@/omnigraph-api/lib/connection-helpers";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
 import { resolveValidatedPrimaryListTokenId } from "@/omnigraph-api/schema/efp-primary-list";
@@ -51,8 +51,13 @@ AccountEfpRef.implement({
                 ensDb
                   .select()
                   .from(ensIndexerSchema.efpLists)
-                  .where(and(scope, paginateBy(ensIndexerSchema.efpLists.tokenId, before, after)))
-                  .orderBy(orderPaginationBy(ensIndexerSchema.efpLists.tokenId, inverted))
+                  .where(
+                    and(
+                      scope,
+                      paginateByNumericText(ensIndexerSchema.efpLists.tokenId, before, after),
+                    ),
+                  )
+                  .orderBy(orderByNumericText(ensIndexerSchema.efpLists.tokenId, inverted))
                   .limit(limit),
             ),
         });

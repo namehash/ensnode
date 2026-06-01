@@ -259,3 +259,43 @@ describe("EFP handler edge cases (seeded)", () => {
     expect(records[0].list?.user && eq(records[0].list.user, efpSeedRoleUser)).toBe(true);
   });
 });
+
+describe("efp.lists pagination (seeded > 9 lists)", () => {
+  type ListsResult = {
+    efp: {
+      lists: {
+        edges: { node: { tokenId: string } }[];
+        pageInfo: { endCursor: string | null; hasNextPage: boolean };
+      };
+    };
+  };
+
+  const EfpLists = gql`
+    query EfpLists($first: Int!, $after: String) {
+      efp {
+        lists(first: $first, after: $after) {
+          edges { node { tokenId } }
+          pageInfo { endCursor hasNextPage }
+        }
+      }
+    }
+  `;
+
+  it("orders lists numerically by tokenId across cursor pages (not lexicographically)", async () => {
+    // Page in small pages so both the ORDER BY and the cursor `where` are exercised. The seeder
+    // mints > 9 lists, so a double-digit tokenId exists — the case where lexicographic ("10" < "2")
+    // and numeric ordering diverge.
+    const collected: number[] = [];
+    let after: string | null = null;
+    for (let page = 0; page < 20; page++) {
+      const result: ListsResult = await request<ListsResult>(EfpLists, { first: 4, after });
+      collected.push(...result.efp.lists.edges.map((e) => Number(e.node.tokenId)));
+      if (!result.efp.lists.pageInfo.hasNextPage) break;
+      after = result.efp.lists.pageInfo.endCursor;
+    }
+
+    expect(Math.max(...collected)).toBeGreaterThanOrEqual(10);
+    // Numerically ascending, with no rows skipped or repeated across page boundaries.
+    expect(collected).toEqual([...new Set(collected)].sort((a, b) => a - b));
+  });
+});
