@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import type { ChainId, NormalizedAddress } from "enssdk";
 
 import di from "@/di";
@@ -113,23 +113,40 @@ EfpListRecordRef.implement({
     ///////////////////////
     // EfpListRecord.list
     ///////////////////////
-    list: t.field({
+    list: t.loadable({
       description: "The EFP list this record belongs to.",
       type: EfpListRef,
       nullable: true,
-      resolve: async (record) => {
+      // Resolve each record to its storage-location id, then batch the location -> list lookup in
+      // `load` so a page of records resolves all `list` back-refs in two queries rather than one per
+      // node (avoids an N+1 on `efp.listRecords { node { list } }`).
+      resolve: (record) =>
+        efpStorageLocationId(record.chainId, record.contractAddress, record.slot),
+      load: async (locationIds: string[]) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        const [mapping] = await ensDb
-          .select({ tokenId: ensIndexerSchema.efpListStorageLocations.tokenId })
+
+        const mappings = await ensDb
+          .select({
+            id: ensIndexerSchema.efpListStorageLocations.id,
+            tokenId: ensIndexerSchema.efpListStorageLocations.tokenId,
+          })
           .from(ensIndexerSchema.efpListStorageLocations)
-          .where(
-            eq(
-              ensIndexerSchema.efpListStorageLocations.id,
-              efpStorageLocationId(record.chainId, record.contractAddress, record.slot),
-            ),
-          )
-          .limit(1);
-        return mapping?.tokenId ?? null;
+          .where(inArray(ensIndexerSchema.efpListStorageLocations.id, locationIds));
+        const tokenIdByLocation = new Map(mappings.map((m) => [m.id, m.tokenId]));
+
+        const tokenIds = [...new Set(tokenIdByLocation.values())];
+        const lists = tokenIds.length
+          ? await ensDb
+              .select()
+              .from(ensIndexerSchema.efpLists)
+              .where(inArray(ensIndexerSchema.efpLists.tokenId, tokenIds))
+          : [];
+        const listByTokenId = new Map(lists.map((l) => [l.tokenId, l]));
+
+        return locationIds.map((locationId) => {
+          const tokenId = tokenIdByLocation.get(locationId);
+          return tokenId != null ? (listByTokenId.get(tokenId) ?? null) : null;
+        });
       },
     }),
 
