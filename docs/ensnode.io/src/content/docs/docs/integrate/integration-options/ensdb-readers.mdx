@@ -1,9 +1,15 @@
 ---
 title: ENSDb Readers (Custom APIs)
-description: How to build custom APIs and under services on top of ENSDb, using the ENSDb Reader standard.
+description: How to build custom APIs and other services on top of ENSDb, using the ENSDb Reader standard.
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
+
+An [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) is any service that interacts with ENSDb to read ENS data. This can be anything from a custom GraphQL or REST API, to a data analytics pipeline, to a command-line interface, to a dashboard, and more.
+
+:::tip[Build your own ENSDb Reader]
+You can build your own ENSDb Reader in any language, using any framework, as long as you follow the [ENSDb Standard](/docs/services/ensdb/concepts/glossary#ensdb-standard). The ENSDb Standard defines rules and constraints for how an ENSDb Reader should read data from an ENSDb instance in a way that maintains the integrity of the data and supports interoperability with any ENSDb Writer.
+:::
 
 ## Current ENSDb Readers
 
@@ -13,7 +19,7 @@ ENSApi is a reference implementation of an [ENSDb Reader](/docs/services/ensdb/c
 
 - The new [ENS Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api) that's built on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `unigraph` and `protocol-acceleration`.
 - A backwards-compatible [ENS Subgraph GraphQL API](/docs/integrate/ens-subgraph) that's built on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `subgraph`, `basenames`, `lineanames`, and `threedns`.
-- APIs for various queries related to the the metadata stored in ENSDb, such as the indexing status from the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the overall [ENSNode stack of services](/docs/services) active in the ENSNode instance.
+- APIs for various queries related to the metadata stored in ENSDb, such as the indexing status from the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the overall [ENSNode stack of services](/docs/services) active in the ENSNode instance.
 
 <LinkCard
   title="Learn more about ENSApi"
