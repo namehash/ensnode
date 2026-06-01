@@ -12,8 +12,10 @@ import type {
   CoinType,
   DomainId,
   Hex,
+  InterfaceId,
   InterpretedLabel,
   InterpretedName,
+  JsonValue,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -28,7 +30,7 @@ import type {
 import { getNamedType } from "graphql";
 import superjson from "superjson";
 
-import type { context } from "@/omnigraph-api/context";
+import type { Context } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
 const createSpan = createOpenTelemetryWrapper(tracer, {
@@ -61,10 +63,12 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
 export type BuilderScalars = {
   ID: { Input: string; Output: string };
   BigInt: { Input: bigint; Output: bigint };
+  JSON: { Input: JsonValue; Output: JsonValue };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };
+  InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };
   InterpretedName: { Input: InterpretedName; Output: InterpretedName };
   InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
@@ -82,7 +86,7 @@ export type BuilderScalars = {
 };
 
 export const builder = new SchemaBuilder<{
-  Context: ReturnType<typeof context>;
+  Context: Context;
   Scalars: BuilderScalars;
 
   // the following ensures via typechecker that every t.connection returns a totalCount field

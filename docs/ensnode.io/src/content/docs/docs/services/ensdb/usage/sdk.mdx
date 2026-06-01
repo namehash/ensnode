@@ -27,9 +27,9 @@ Canonical fields (`canonicalName`, `canonicalPath`, `canonicalNode`, `canonicalD
 populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query
 them uniformly without branching by `type`.
 
-```typescript
-import { EnsDbReader, IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
-import { count, eq } from 'drizzle-orm';
+```typescript title="example.ts"
+import { EnsDbReader, IndexingMetadataContextStatusCodes } from "@ensnode/ensdb-sdk";
+import { count, eq } from "drizzle-orm";
 
 // Connect to a specific ENSDb instance by providing its connection string and
 // the ENSIndexer Schema Name you want to query

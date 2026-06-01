@@ -1,40 +1,23 @@
 ---
 import { Aside } from "@astrojs/starlight/components";
 
-interface Props {
-  /**
-   * Which SDK(s) the warning is for.
-   * - "enssdk": only enssdk
-   * - "enskit": both enskit and enssdk (enskit depends on enssdk)
-   * - "both": mention both enssdk and enskit, show both install commands
-   */
-  for?: "enssdk" | "enskit" | "both";
-}
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 
-const { for: target = "enssdk" } = Astro.props;
-
-const isEnskit = target === "enskit";
-const isBoth = target === "both";
-
-const sdkList = isEnskit
-  ? "<code>enskit@1.13.1</code> and <code>enssdk@1.13.1</code>"
-  : isBoth
-    ? "<code>enssdk@1.13.1</code> (and <code>enskit@1.13.1</code> when using React)"
-    : "<code>enssdk@1.13.1</code>";
+// The SDK version is locked to the production-deployed Omnigraph version (see the vendored
+// `@data/omnigraph-examples/snapshot.json`). The SDK bundles the Omnigraph schema, so pinning the
+// matching version keeps gql.tada's generated types aligned with the deployed API.
+const VERSION = snapshot.sdkVersion;
 ---
 
 <Aside type="caution" title="Version compatibility with hosted instances">
-  Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you <strong>must</strong> use <span set:html={sdkList} />. The latest published versions (<code>1.14.0+</code>) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. Use these exact install commands:
-
-  {isBoth ? (
-    <pre>npm install enssdk@1.13.1
+  <a href="/docs/hosted-instances">Our hosted ENSNode instances</a> currently run ENSNode <code
+    >{VERSION}</code
+  >. The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the <code>gql.tada</code
+  > TypeScript plugin to type your queries, so pin an <strong>exact</strong> version (no <code
+    >^</code
+  > or <code>~</code>) of <code>enssdk@{VERSION}</code> (and <code>enskit@{VERSION}</code> when using
+  React) to keep your generated types matched to the deployed schema. Use these exact install commands:
+  <pre>{`npm install enssdk@${VERSION}
 # or, for React apps:
-npm install enskit@1.13.1 enssdk@1.13.1</pre>
-  ) : isEnskit ? (
-    <pre>npm install enskit@1.13.1 enssdk@1.13.1</pre>
-  ) : (
-    <pre>npm install enssdk@1.13.1</pre>
-  )}
-
-  This notice will be removed once the hosted instances are upgraded.
+npm install enskit@${VERSION} enssdk@${VERSION}`}</pre>
 </Aside>

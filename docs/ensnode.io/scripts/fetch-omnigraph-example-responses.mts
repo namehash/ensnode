@@ -2,11 +2,9 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
-import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/internal";
-
 import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
-import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/constants.ts";
+import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
+import { ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
 
 function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
@@ -16,12 +14,23 @@ function logError(message: string, id?: string) {
   console.error(`[omnigraph-examples] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
 }
 
-const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[]).sort();
+const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../src/data/omnigraph-examples");
+const examplesPath = join(dataDir, "examples.json");
+const outputPath = join(dataDir, "responses.json");
 
-const outputPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../src/data/omnigraph-examples/responses.json",
+if (!existsSync(examplesPath)) {
+  logError(`No examples snapshot at ${examplesPath}. Run pnpm omnigraph:snapshot <version> first.`);
+  process.exit(1);
+}
+
+const snapshotById = new Map(
+  (JSON.parse(readFileSync(examplesPath, "utf8")) as SnapshotExample[]).map((e) => [e.id, e]),
 );
+
+// Only fetch responses for the rendered set: meta entries supported by the vendored snapshot.
+const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[])
+  .filter((id) => snapshotById.has(id))
+  .sort();
 
 // Optional filter: `pnpm omnigraph-examples:refresh-responses <id>,<id>`
 const argIds =
@@ -40,8 +49,9 @@ if (argIds.length > 0) {
 
 const exampleIds = argIds.length > 0 ? argIds : allExampleIds;
 
-const base = ENSNODE_URL.replace(/\/+$/, "");
-const url = `${base}/api/omnigraph`;
+// Endpoint defaults to the production v2 Sepolia URL; override to fill responses from a
+// staged deployment (e.g. blue/green) before that version is promoted to the prod URL.
+const url = new URL("/api/omnigraph", process.env.OMNIGRAPH_ENDPOINT ?? ENSNODE_URL).toString();
 
 logStep(
   argIds.length > 0
@@ -58,9 +68,9 @@ const out: Record<string, unknown> =
 for (const id of exampleIds) {
   logStep("Getting example query", id);
 
-  const example = getGraphqlApiExampleQueryById(id);
+  const example = snapshotById.get(id)!;
   const query = example.query.trim();
-  const variables = getNamespaceSpecificValue(DOCS_OMNIGRAPH_NAMESPACE, example.variables);
+  const variables = example.variables;
 
   const response = await fetch(url, {
     method: "POST",

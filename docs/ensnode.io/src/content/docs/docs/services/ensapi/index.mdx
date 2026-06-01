@@ -6,7 +6,7 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 import FasterLookupImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/FasterLookupImage.astro";
 
 ENSApi is a web service built on top of [ENSDb](/docs/services/ensdb), and provides access to indexed ENS data through multiple HTTP APIs.
@@ -41,10 +41,7 @@ A growing set of REST APIs are also being added to ENSApi.
 
 ENSApi can be configured via environment variables.
 
-<LinkCard
-  title="ENSApi Configuration Options"
-  href="/docs/services/ensapi/usage/configuration"
-/>
+<LinkCard title="ENSApi Configuration Options" href="/docs/services/ensapi/usage/configuration" />
 
 ## ENS Protocol Acceleration
 
@@ -53,3 +50,9 @@ architecture unlocks near-instant bulk resolution of live ENS records, including
 resolution configurations that span across multiple chains.
 
 <FasterLookupImage styles="w-full h-auto" />
+
+<LinkCard
+  title="ENS Protocol Acceleration"
+  description="How ENSApi accelerates ENS resolution by implementing the Universal Resolver over indexed data."
+  href="/docs/integrate/omnigraph/protocol-acceleration"
+/>

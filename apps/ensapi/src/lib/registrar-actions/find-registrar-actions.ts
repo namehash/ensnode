@@ -21,7 +21,7 @@ import {
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 const tracer = trace.getTracer("registrar-actions");
@@ -30,6 +30,7 @@ const tracer = trace.getTracer("registrar-actions");
  * Build SQL for order clause from provided order param.
  */
 function buildOrderByClause(order: RegistrarActionsOrder): SQL {
+  const { ensIndexerSchema } = di.context;
   switch (order) {
     case RegistrarActionsOrders.LatestRegistrarActions:
       return desc(ensIndexerSchema.registrarActions.id);
@@ -40,6 +41,7 @@ function buildOrderByClause(order: RegistrarActionsOrder): SQL {
  * Build SQL for where clause from provided filter param.
  */
 function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] {
+  const { ensIndexerSchema } = di.context;
   const binaryOperators: SQL[] =
     filters?.map((filter) => {
       switch (filter.filterType) {
@@ -101,6 +103,7 @@ interface FindRegistrarActionsOptions {
 export async function _countRegistrarActions(
   filters: RegistrarActionsFilter[] | undefined,
 ): Promise<number> {
+  const { ensDb, ensIndexerSchema } = di.context;
   return withSpanAsync(
     tracer,
     "registrarActions.count",
@@ -132,6 +135,7 @@ export async function _countRegistrarActions(
  * build a list of {@link NamedRegistrarAction} objects.
  */
 export async function _findRegistrarActions(options: FindRegistrarActionsOptions) {
+  const { ensDb, ensIndexerSchema } = di.context;
   return withSpanAsync(
     tracer,
     "registrarActions.find",

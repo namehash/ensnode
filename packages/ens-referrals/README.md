@@ -151,7 +151,6 @@ More examples are available in [`packages/ens-referrals/src/client.ts`](https://
 
 Check out [`production-editions.json`](https://ensawards.org/production-editions.json) — the live config file powering our production deployment.
 
-
 ## Other Utilities
 
 The package also includes helpers for building referral links.

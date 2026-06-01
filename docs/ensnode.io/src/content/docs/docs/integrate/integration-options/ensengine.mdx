@@ -1,12 +1,13 @@
 ---
-title: ENSEngine
+title: ENSEngine (Webhooks)
 description: Coming soon - ENS-native webhooks and push-based events that fire when ENS state changes, so apps can stop polling and start reacting.
 ---
 
 import { LinkCard, Aside } from "@astrojs/starlight/components";
 
 <Aside type="caution" title="Coming soon">
-ENS-native event-driven reactive development (such as webhooks) is coming soon with [ENSEngine](/docs/services/ensengine) that builds on top of [ENSDb](/docs/services/ensdb).
+  ENS-native event-driven reactive development (such as webhooks) is coming soon with
+  [ENSEngine](/docs/services/ensengine) that builds on top of [ENSDb](/docs/services/ensdb).
 </Aside>
 
 ## The problem
@@ -20,7 +21,7 @@ Today, if you want your app to react to ENS state changes, you have two unappeal
 
 ENSEngine will be an **ENS-native event-driven reactive development service** (for webhooks and more) so your app can subscribe to ENS state changes in ENSDb the same way you'd subscribe to a Stripe or GitHub webhook - except the events speak the language of discrete meaningful ENS actions, not the language of bare-metal raw onchain event transaction logs.
 
-```http
+```http title="example-webhook.http"
 POST https://your-app.example.com/webhooks/ens
 Content-Type: application/json
 

@@ -8,13 +8,13 @@ Companion to the [ENS Omnigraph GraphQL API integration guide](https://ensnode.i
 
 ## Usage (with NameHash Hosted Instance)
 
-> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you **must** use `enssdk@1.13.1` (and `enskit@1.13.1` when using React). The latest published versions (`1.14.0+`) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. This notice will be removed once the hosted instances are upgraded.
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.x`). If you query a different ENSNode version, you may need to adjust the query format.
 
 ```sh
 # from the ENSNode monorepo root
 pnpm install
 
-ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F omnigraph-graphql-example start
+pnpm -F omnigraph-graphql-example start
 ```
 
 ## Usage (with Local ENSNode)

@@ -1,12 +1,12 @@
 import { bigintToCoinType, type ResolverRecordsId } from "enssdk";
 
-import { ensDb } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 
 export const ResolverRecordsRef = builder.loadableObjectRef("ResolverRecords", {
   load: (ids: ResolverRecordsId[]) =>
-    ensDb.query.resolverRecords.findMany({
+    di.context.ensDb.query.resolverRecords.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { textRecords: true, addressRecords: true },
     }),

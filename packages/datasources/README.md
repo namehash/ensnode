@@ -23,7 +23,7 @@ import { getDatasource } from "@ensnode/datasources";
 import { namehashInterpretedName, asInterpretedName } from "enssdk";
 
 // access the address and abi for the ens root Registry in the canonical mainnet ENS namespace
-const registryConfig = getDatasource('mainnet', 'ensroot').contracts.Registry;
+const registryConfig = getDatasource("mainnet", "ensroot").contracts.Registry;
 
 // for example, querying the Registry with viem...
 const vitaliksResolverAddress = await publicClient.readContract({
@@ -43,19 +43,20 @@ const vitaliksResolverAddress = await publicClient.readContract({
 The primary export of `@ensnode/datasources` is `getDatasource` which returns a selected `Datasource` within the selected ENS namespace.
 
 ```ts
-import { getDatasource } from '@ensnode/datasources';
+import { getDatasource } from "@ensnode/datasources";
 
 // get ensroot datasource relative to mainnet ENS namespace
-const { chain, contracts } = getDatasource('mainnet', 'ensroot');
+const { chain, contracts } = getDatasource("mainnet", "ensroot");
 
 // get ensroot datasource relative to sepolia ENS namespace
-const { chain, contracts } = getDatasource('sepolia', 'ensroot');
+const { chain, contracts } = getDatasource("sepolia", "ensroot");
 
 // get threedns-base datasource relative to mainnet ENS namespace
-const { chain, contracts } = getDatasource('mainnet', 'threedns-base');
+const { chain, contracts } = getDatasource("mainnet", "threedns-base");
 ```
 
 The available `ENSNamespaceId`s are:
+
 - `mainnet`
 - `sepolia`
 - `ens-test-env` — Represents a local testing namespace running on an Anvil chain (chain id 1337) with deterministic configurations that deliberately start at block zero for rapid testing and development. See [ens-test-env](https://github.com/ensdomains/ens-test-env) for additional context.
@@ -65,6 +66,7 @@ The available `ENSNamespaceId`s are:
 Each ENS namespace my provide **Datasource** entries for any of the possible **DatasourceName**s:
 
 The available `DatasourceName`s are:
+
 - `ensroot` — ENS Root Contracts, guaranteed to exist
 - `basenames` — Basenames, optional
 - `lineanames` — Linea Names, optional

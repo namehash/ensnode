@@ -1,12 +1,14 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import type { DomainId } from "enssdk";
+import { type DomainId, isNormalizedName } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { resolveForward } from "@/lib/resolution/forward-resolution";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
 import {
   EMPTY_CONNECTION,
@@ -20,11 +22,14 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { toResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
+import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
+  RESOLVE_ACCELERATE_ARG,
 } from "@/omnigraph-api/schema/constants";
 import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
 import {
@@ -35,6 +40,10 @@ import {
 import { DomainResolverRef } from "@/omnigraph-api/schema/domain-resolver";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
+import {
+  type ForwardResolveModel,
+  ForwardResolveRef,
+} from "@/omnigraph-api/schema/forward-resolve";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
@@ -48,12 +57,13 @@ const tracer = trace.getTracer("schema/Domain");
 
 export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
   load: (ids: DomainId[]) =>
-    withSpanAsync(tracer, "Domain.load", { count: ids.length }, () =>
-      ensDb.query.domain.findMany({
+    withSpanAsync(tracer, "Domain.load", { count: ids.length }, () => {
+      const { ensDb } = di.context;
+      return ensDb.query.domain.findMany({
         where: (t, { inArray }) => inArray(t.id, ids),
         with: { label: true },
-      }),
-    ),
+      });
+    }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -166,6 +176,48 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.id,
     }),
 
+    //////////////////
+    // Domain.resolve
+    //////////////////
+    resolve: t.field({
+      description: "Resolve protocol-level data for this Domain.",
+      type: ForwardResolveRef,
+      nullable: false,
+      args: {
+        accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
+      },
+      resolve: async (
+        domain,
+        { accelerate: accelerateArg },
+        context,
+        info,
+      ): Promise<ForwardResolveModel> => {
+        const accelerate = accelerateArg ?? true;
+        const { canAccelerate } = context;
+        const name = domain.canonicalName;
+
+        if (!name || !isNormalizedName(name)) {
+          return { accelerate, canAccelerate, trace: null, records: null };
+        }
+
+        const recordsSelection = buildRecordsSelectionFromResolveContainerInfo(info);
+        if (!recordsSelection) {
+          return { accelerate, canAccelerate, trace: null, records: null };
+        }
+
+        const { trace, result } = await runWithTrace(() =>
+          resolveForward(name, recordsSelection, { accelerate, canAccelerate }),
+        );
+
+        return {
+          accelerate,
+          canAccelerate,
+          trace,
+          records: toResolvedRecordsModel(name, result),
+        };
+      },
+    }),
+
     ///////////////////////
     // Domain.registration
     ///////////////////////
@@ -183,6 +235,7 @@ DomainInterfaceRef.implement({
       description: "All Registrations for a Domain, including the latest Registration.",
       type: RegistrationInterfaceRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.registration.domainId, parent.id);
 
         return lazyConnection({
@@ -244,13 +297,15 @@ DomainInterfaceRef.implement({
       args: {
         where: t.arg({ type: EventsWhereInput }),
       },
-      resolve: (parent, args) =>
-        resolveFindEvents(args, {
+      resolve: (parent, args) => {
+        const { ensIndexerSchema } = di.context;
+        return resolveFindEvents(args, {
           through: {
             table: ensIndexerSchema.domainEvent,
             scope: eq(ensIndexerSchema.domainEvent.domainId, parent.id),
           },
-        }),
+        });
+      },
     }),
   }),
 });
@@ -315,6 +370,7 @@ ENSv2DomainRef.implement({
         where: t.arg({ type: DomainPermissionsWhereInput }),
       },
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const userScope = (() => {
           const user = args.where?.user;
           if (!user) return undefined;

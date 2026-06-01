@@ -6,6 +6,7 @@ sidebar:
 ---
 
 ## Intro
+
 This page provides an overview of the ENSDb SQL interface and how to use it in your applications.
 
 ## Example Queries
@@ -29,7 +30,7 @@ psql postgresql://user:password@host:5432/ensdb_devnet
 
 Once connected to an ENSDb instance, discover its ENSIndexer Schemas:
 
-```sql
+```sql title="discover-schemas.sql"
 SELECT DISTINCT ens_indexer_schema_name
 FROM ensnode.metadata;
 ```
@@ -40,7 +41,7 @@ Canonical fields (`canonical_name`, `canonical_path`, `canonical_node`, `canonic
 populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query
 them uniformly without branching by `type`.
 
-```sql
+```sql title="example.sql"
 -- Fetch a Domain by its canonical name
 SELECT * FROM ensindexer_0.domains
 WHERE canonical_name = 'vitalik.eth';

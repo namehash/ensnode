@@ -7,7 +7,7 @@ import {
   type NormalizedAddress,
 } from "enssdk";
 
-import { ensDb } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 const tracer = trace.getTracer("get-primary-name");
@@ -25,8 +25,9 @@ export async function getENSIP19ReverseNameRecordFromIndex(
     tracer,
     "reverseNameRecord.findMany",
     { address, coinType: coinTypeReverseLabel(coinType) },
-    () =>
-      ensDb.query.reverseNameRecord.findMany({
+    () => {
+      const { ensDb } = di.context;
+      return ensDb.query.reverseNameRecord.findMany({
         where: (t, { and, inArray, eq }) =>
           and(
             // address = address
@@ -35,7 +36,8 @@ export async function getENSIP19ReverseNameRecordFromIndex(
             inArray(t.coinType, [_coinType, DEFAULT_EVM_COIN_TYPE_BIGINT]),
           ),
         columns: { coinType: true, value: true },
-      }),
+      });
+    },
   );
 
   const coinTypeName = records.find((pn) => pn.coinType === _coinType)?.value ?? null;

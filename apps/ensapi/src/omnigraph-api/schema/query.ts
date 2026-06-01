@@ -1,11 +1,9 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
 
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
@@ -34,8 +32,9 @@ builder.queryType({
       allDomains: t.connection({
         description: "n/a, dev method",
         type: DomainInterfaceRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.domain),
             connection: () =>
               resolveCursorConnection(
@@ -48,7 +47,8 @@ builder.queryType({
                     with: { label: true },
                   }),
               ),
-          }),
+          });
+        },
       }),
 
       /////////////////////////////
@@ -57,8 +57,9 @@ builder.queryType({
       resolvers: t.connection({
         description: "n/a, dev method",
         type: ResolverRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.resolver),
             connection: () =>
               resolveCursorConnection(
@@ -71,7 +72,8 @@ builder.queryType({
                     .orderBy(orderPaginationBy(ensIndexerSchema.resolver.id, inverted))
                     .limit(limit),
               ),
-          }),
+          });
+        },
       }),
 
       /////////////////////////////////
@@ -80,8 +82,9 @@ builder.queryType({
       registrations: t.connection({
         description: "n/a, dev method",
         type: RegistrationInterfaceRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.registration),
             connection: () =>
               resolveCursorConnection(
@@ -94,7 +97,8 @@ builder.queryType({
                     .orderBy(orderPaginationBy(ensIndexerSchema.registration.id, inverted))
                     .limit(limit),
               ),
-          }),
+          });
+        },
       }),
     }),
 
@@ -182,7 +186,7 @@ builder.queryType({
         "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: () => getRootRegistryId(config.namespace),
+      resolve: () => getRootRegistryId(di.context.namespace),
     }),
   }),
 });

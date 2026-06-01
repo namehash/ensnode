@@ -7,8 +7,10 @@ import type {
   CoinType,
   DomainId,
   Hex,
+  InterfaceId,
   InterpretedLabel,
   InterpretedName,
+  JsonValue,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -38,10 +40,12 @@ export type OmnigraphScalars = {
   // the omnigraph returns serialized bigint values from the api; further deserialization is
   // handled by enskit's graphcache local resolvers (see cache-exchange.ts)
   BigInt: `${bigint}`;
+  JSON: JsonValue;
   Address: NormalizedAddress;
   Hex: Hex;
   ChainId: ChainId;
   CoinType: CoinType;
+  InterfaceId: InterfaceId;
   InterpretedName: InterpretedName;
   InterpretedLabel: InterpretedLabel;
   BeautifiedName: BeautifiedName;

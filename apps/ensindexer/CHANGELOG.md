@@ -1,5 +1,33 @@
 # ensindexer
 
+## 1.15.1
+
+### Patch Changes
+
+- [#2184](https://github.com/namehash/ensnode/pull/2184) [`2a7b0de`](https://github.com/namehash/ensnode/commit/2a7b0de5d9102dfe75ece66b7f710c1c7b833e35) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer no longer crashes at Basenames/Lineanames L1 Resolver update block.
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/datasources@1.15.1
+  - @ensnode/ensrainbow-sdk@1.15.1
+  - @ensnode/ensdb-sdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+  - @ensnode/ponder-sdk@1.15.1
+
+## 1.15.0
+
+### Patch Changes
+
+- [#2155](https://github.com/namehash/ensnode/pull/2155) [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71) Thanks [@shrugs](https://github.com/shrugs)! - Basenames and Lineanames are now correctly canonicalized in the `unigraph` plugin.
+
+- Updated dependencies [[`bb0b244`](https://github.com/namehash/ensnode/commit/bb0b244e01b0ef7bba88c5ac5f9052fdddac4000), [`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1), [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71), [`55a6f23`](https://github.com/namehash/ensnode/commit/55a6f239cb6e1235f07160cb6faca58ca3f6d12d), [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429)]:
+  - @ensnode/ensdb-sdk@1.15.0
+  - enssdk@1.15.0
+  - @ensnode/ensrainbow-sdk@1.15.0
+  - @ensnode/ensnode-sdk@1.15.0
+  - @ensnode/datasources@1.15.0
+  - @ensnode/ponder-sdk@1.15.0
+
 ## 1.14.0
 
 ### Minor Changes

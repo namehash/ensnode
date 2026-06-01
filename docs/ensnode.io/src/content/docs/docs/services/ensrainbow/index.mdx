@@ -6,9 +6,9 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
-ENSRainbow is an open-source public good designed to make the "unknown, known" by healing millions of unknown ENS (Ethereum Name Service) names. It functions as a sidecar service for ENSNode, the multichain indexer for ENSv2.
+ENSRainbow is an open-source public good designed to make the "unknown, known" by healing millions of unknown ENS (Ethereum Name Service) names. It functions as a sidecar service for ENSNode, the full-stack development platform for ENSv2.
 
 ENSRainbow builds upon work from The Graph Protocol (original ENS rainbow tables) and ENS Labs (ENS Subgraph development and maintenance). It is part of the NameHash Labs suite of tools dedicated to supporting the growth of the ENS Protocol.
 
@@ -24,16 +24,17 @@ ENSRainbow significantly improves "name [healing](/docs/services/ensrainbow/conc
 
 Key aspects of ENSRainbow include:
 
-*   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable labels via [healing](/docs/services/ensrainbow/concepts/glossary#heal).
-*   **Sidecar to ENSNode:** It integrates with ENSNode to provide deterministic name healing across time.
-*   **Improved Healing Coverage:** Aims to minimize the probability that end-users encounter unknown labels, far exceeding previous capabilities.
-*   **Extensible and Decentralized Data Management:** Uses a label set ID and label set version system for enabling any number of different label sets (collections of rainbow records) to support incremental updates across time.
+- **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable labels via [healing](/docs/services/ensrainbow/concepts/glossary#heal).
+- **Sidecar to ENSNode:** It integrates with ENSNode to provide deterministic name healing across time.
+- **Improved Healing Coverage:** Aims to minimize the probability that end-users encounter unknown labels, far exceeding previous capabilities.
+- **Extensible and Decentralized Data Management:** Uses a label set ID and label set version system for enabling any number of different label sets (collections of rainbow records) to support incremental updates across time.
 
 ## Documentation Structure
 
 This documentation is organized into focused sections to help you find what you need quickly:
 
-### 📚 Concepts
+### Concepts
+
 Understanding the fundamentals - terminology, data models, and why ENSRainbow works the way it does.
 
 <LinkCard
@@ -42,7 +43,8 @@ Understanding the fundamentals - terminology, data models, and why ENSRainbow wo
   href="/docs/services/ensrainbow/concepts/"
 />
 
-### 🛠️ Usage
+### Usage
+
 Practical guides for integrating ENSRainbow into your applications.
 
 <LinkCard
@@ -51,7 +53,8 @@ Practical guides for integrating ENSRainbow into your applications.
   href="/docs/services/ensrainbow/usage/"
 />
 
-### 🚀 Deployment
+### Deployment
+
 Running your own ENSRainbow instance for control, privacy, or scale.
 
 <LinkCard
@@ -60,7 +63,8 @@ Running your own ENSRainbow instance for control, privacy, or scale.
   href="/docs/services/ensrainbow/deploying/"
 />
 
-### 👥 Contributing
+### Contributing
+
 Contributing to the project and running ENSRainbow locally for development.
 
 <LinkCard
@@ -74,6 +78,7 @@ Contributing to the project and running ENSRainbow locally for development.
 Ready to try ENSRainbow? Here are the fastest ways to get started:
 
 ### Try the Public API
+
 Start with a simple HTTP request to heal labelhashes immediately. The public API requires no setup and provides instant access to ENSRainbow's healing capabilities.
 
 <LinkCard
@@ -83,6 +88,7 @@ Start with a simple HTTP request to heal labelhashes immediately. The public API
 />
 
 ### Use the TypeScript SDK
+
 Get type-safe integration with built-in error handling and caching. Perfect for JavaScript/TypeScript applications.
 
 <LinkCard
@@ -92,6 +98,7 @@ Get type-safe integration with built-in error handling and caching. Perfect for 
 />
 
 ### Deploy with Docker
+
 Run your own ENSRainbow instance for control, privacy, or high-volume usage. The HTTP server starts immediately; poll `/ready` to gate traffic until the database bootstrap completes.
 
 <LinkCard

@@ -10,6 +10,7 @@ sidebar:
 Each instance of ENSIndexer maintains its own ENSIndexer Schema instance in ENSDb. The same ENSIndexer instance will always use the same ENSIndexer Schema, even after restarts. However, if you need to update an ENSIndexer config, or deploy a new version of ENSIndexer, you will have to update the `ENSINDEXER_SCHEMA_NAME` env variable to point to a new schema, as otherwise, the ENSIndexer instance will detect that the ENSIndexer Schema was already owned by an ENSIndexer instance with different config / indexing logic and will refuse to start. These measures are taken to protect the state invariants indexing event handlers expect and require.
 
 ### ENSIndexer Schema lifecycle
+
 - Let's say you're currently running ENSNode version X that's indexing into `ENSINDEXER_SCHEMA_NAME=myschema_X`
 - Now, when you upgrade to ENSNode version Y, if you try to continue using `ENSINDEXER_SCHEMA_NAME=myschema_X` then ENSIndexer will immediately terminate with an error because indexing logic or config will be different.
 - Therefore, you must update the `ENSINDEXER_SCHEMA_NAME` to `myschema_Y`, which will:
@@ -28,6 +29,7 @@ Once executed, this operation is irreversible. Double-check your database connec
 ```sql
 DROP SCHEMA myschema_X CASCADE;
 ```
+
 :::
 
 ### Dropping the RPC Cache

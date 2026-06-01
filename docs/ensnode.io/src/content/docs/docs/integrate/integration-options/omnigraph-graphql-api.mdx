@@ -1,10 +1,10 @@
 ---
-title: ENS Omnigraph GraphQL API
+title: Omnigraph API (GraphQL)
 description: Query the ENS Omnigraph API directly via HTTP from any language.
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
+import { Aside, LinkCard } from "@astrojs/starlight/components";
+import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
 The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
 
@@ -32,9 +32,13 @@ A minimum-viable hello world over `curl`:
 ```sh
 curl -sS -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"query":"{ domain(by: { name: \"eth\" }) { canonical { name { interpreted } } owner { address } } }"}' \
-  https://api.alpha.ensnode.io/api/omnigraph
+  -d '{"query":"{ domain(by: { name: \"eth\" }) { canonical { name { beautified } } owner { address } } }"}' \
+  https://api.v2-sepolia.ensnode.io/api/omnigraph
 ```
+
+<Aside type="note" title="BeautifiedName">
+  `beautified` is the display-ready form of the Canonical Name — its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`) — so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
+</Aside>
 
 The rest of this guide builds the same thing in TypeScript using `fetch`, so you have something to extend.
 
@@ -72,17 +76,17 @@ Create `src/index.ts`. The whole script is a single `fetch` against `/api/omnigr
 ```ts title="src/index.ts"
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-const ENSNODE_URL = process.env.ENSNODE_URL!;
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 const HELLO_WORLD_QUERY = /* GraphQL */ `
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name { interpreted } }
+      canonical { name { beautified } }
       owner { address }
       subdomains(first: 20) {
         totalCount
-        edges { node { __typename canonical { name { interpreted } } owner { address } } }
+        edges { node { __typename canonical { name { beautified } } owner { address } } }
       }
     }
   }
@@ -90,25 +94,27 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
 
 interface Domain {
   __typename: "ENSv1Domain" | "ENSv2Domain";
-  canonical: { name: { interpreted: string } } | null;
+  canonical: { name: { beautified: string } } | null;
   owner: { address: string } | null;
 }
 
 interface QueryResult {
   data?: {
-    domain: (Domain & {
-      subdomains: {
-        totalCount: number;
-        edges: { node: Domain }[];
-      } | null;
-    }) | null;
+    domain:
+      | (Domain & {
+          subdomains: {
+            totalCount: number;
+            edges: { node: Domain }[];
+          } | null;
+        })
+      | null;
   } | null;
   errors?: { message: string }[];
 }
 
 function formatDomain(domain: Domain): string {
-  const name = domain.canonical?.name.interpreted ?? "<unnamed>";
-  const owner = domain.owner?.address ?? "0x0";
+  const name = domain.canonical?.name.beautified ?? "<unnamed>";
+  const owner = domain.owner?.address ?? "0x0 (means reserved for ENSv2)";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
 
@@ -156,7 +162,7 @@ A few things to notice:
 ## 4. Run it
 
 ```sh
-ENSNODE_URL=https://api.alpha.ensnode.io npm start
+ENSNODE_URL=https://api.v2-sepolia.ensnode.io npm start
 ```
 
 You should see the `eth` Domain, its owner, and the first 20 of its subdomains.

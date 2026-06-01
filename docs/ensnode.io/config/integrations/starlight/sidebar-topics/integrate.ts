@@ -1,4 +1,5 @@
 export const integrateSidebarTopic = {
+  id: "integrate-with-ensv2",
   label: "Integrate with ENSv2",
   link: "/docs/integrate",
   icon: "rocket",
@@ -16,16 +17,68 @@ export const integrateSidebarTopic = {
       link: "/docs/integrate/ensv2-readiness",
     },
     {
+      label: "ENS Subgraph",
+      collapsed: true,
+      badge: {
+        text: "LEGACY",
+        variant: "danger",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/ens-subgraph",
+        },
+        {
+          label: "Key Limitations 🚨",
+          link: "/docs/integrate/ens-subgraph/key-limitations",
+        },
+        {
+          label: "Backwards Compatibility",
+          link: "/docs/integrate/ens-subgraph/backwards-compatibility",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/ens-subgraph/examples",
+            },
+            {
+              label: "With ENSjs",
+              link: "/docs/integrate/ens-subgraph/examples/with-ensjs",
+            },
+            {
+              label: "With Viem",
+              link: "/docs/integrate/ens-subgraph/examples/with-viem",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/ens-subgraph/schema-reference",
+        },
+      ],
+    },
+    {
       label: "ENS Omnigraph API",
       collapsed: false,
       badge: {
         text: "NEW",
-        variant: "tip",
+        variant: "success",
       },
       items: [
         {
           label: "Overview",
           link: "/docs/integrate/omnigraph",
+        },
+        {
+          label: "Core Concepts",
+          link: "/docs/integrate/omnigraph/concepts",
+        },
+        {
+          label: "Protocol Acceleration",
+          link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
         {
           label: "Examples",
@@ -92,6 +145,46 @@ export const integrateSidebarTopic = {
       ],
     },
     {
+      label: "ENS Unigraph SQL",
+      collapsed: false,
+      badge: {
+        text: "NEW",
+        variant: "success",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/unigraph",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/unigraph/examples",
+            },
+            {
+              label: "Domain by Name",
+              link: "/docs/integrate/unigraph/examples/domain-by-name",
+            },
+            {
+              label: "Account Domains",
+              link: "/docs/integrate/unigraph/examples/account-domains",
+            },
+            {
+              label: "Indexing Status",
+              link: "/docs/integrate/unigraph/examples/indexing-status",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/unigraph/schema-reference",
+        },
+      ],
+    },
+    {
       label: "Integration Options",
       collapsed: false,
       items: [
@@ -100,39 +193,19 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options",
         },
         {
-          label: "enskit (React)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enskit",
-            },
-            {
-              label: "Interactive example ⚡",
-              link: "/docs/integrate/integration-options/enskit/example",
-            },
-          ],
+          label: "enssdk (TypeScript)",
+          link: "/docs/integrate/integration-options/enssdk",
         },
         {
-          label: "enssdk (TypeScript)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enssdk",
-            },
-            {
-              label: "Interactive example ⚡",
-              link: "/docs/integrate/integration-options/enssdk/example",
-            },
-          ],
+          label: "enskit (React)",
+          link: "/docs/integrate/integration-options/enskit",
         },
         {
           label: "ENS Omnigraph (GraphQL)",
           link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
-          label: "ENSDb Integration Quickstart",
+          label: "ENSDb (SQL)",
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
@@ -144,11 +217,11 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensskills",
         },
         {
-          label: "ensdb-cli (Snapshots)",
+          label: "ensdb-cli (ENSDb Snapshots)",
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
-          label: "ENSEngine (webhooks)",
+          label: "ENSEngine (Webhooks)",
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],

@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   hasEnsAnalyticsConfigSupport,
   hasEnsAnalyticsIndexingStatusSupport,
@@ -7,6 +5,7 @@ import {
 
 import type { PrerequisiteResult } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { factory, producing } from "@/lib/hono-factory";
 
 /**
@@ -51,7 +50,7 @@ export const ensanalyticsApiMiddleware = producing(
       throw new Error(`Invariant(ensanalytics.middleware): indexingStatusMiddleware required`);
     }
 
-    const configSupport = hasEnsAnalyticsConfigSupport(config.ensIndexerPublicConfig);
+    const configSupport = hasEnsAnalyticsConfigSupport(di.context.stackInfo.ensIndexer);
     if (!configSupport.supported) {
       c.set("ensAnalyticsPrerequisites", configSupport);
       return await next();

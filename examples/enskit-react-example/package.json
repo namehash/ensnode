@@ -1,7 +1,7 @@
 {
   "name": "@ensnode/enskit-react-example",
   "private": true,
-  "version": "0.0.7",
+  "version": "0.0.9",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -12,8 +12,8 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
-    "enskit": "0.0.0-preview-fix-sha-89c022b-20260519094840",
-    "enssdk": "0.0.0-preview-fix-sha-89c022b-20260519094840",
+    "enskit": "1.15.1",
+    "enssdk": "1.15.1",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "^7.6.1"

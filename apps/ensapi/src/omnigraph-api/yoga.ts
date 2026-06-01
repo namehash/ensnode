@@ -7,7 +7,11 @@ import { createYoga } from "graphql-yoga";
 import { ZodError } from "zod/v4";
 
 import { makeLogger } from "@/lib/logger";
-import { context } from "@/omnigraph-api/context";
+import {
+  type Context,
+  createOmnigraphContext,
+  type OmnigraphYogaServerContext,
+} from "@/omnigraph-api/context";
 import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("omnigraph");
@@ -33,10 +37,10 @@ const yogaLogger = {
   },
 };
 
-export const yoga = createYoga({
+export const yoga = createYoga<OmnigraphYogaServerContext, Context>({
   graphqlEndpoint: "*",
   schema,
-  context,
+  context: createOmnigraphContext,
   // CORS is handled by the Hono middleware in app.ts
   cors: false,
   graphiql: {

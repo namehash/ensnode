@@ -7,34 +7,34 @@
 
 <script>
   function buildToc() {
-    const list = document.querySelector('.scalar-toc-list');
+    const list = document.querySelector(".scalar-toc-list");
     if (!list) return;
 
-    const headings = document.querySelectorAll('h2.section-header-label[id]');
+    const headings = document.querySelectorAll("h2.section-header-label[id]");
     if (headings.length === 0) return false;
 
-    list.innerHTML = '';
+    list.innerHTML = "";
     headings.forEach((h2) => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
+      const li = document.createElement("li");
+      const a = document.createElement("a");
       a.href = `#${h2.id}`;
-      const span = document.createElement('span');
-      span.textContent = h2.textContent?.trim() ?? '';
+      const span = document.createElement("span");
+      span.textContent = h2.textContent?.trim() ?? "";
       a.appendChild(span);
       li.appendChild(a);
 
       // Find h3s that belong to this h2's section
-      const section = h2.closest('.section');
+      const section = h2.closest(".section");
       if (section) {
-        const h3s = section.querySelectorAll('h3[id]');
+        const h3s = section.querySelectorAll("h3[id]");
         if (h3s.length > 0) {
-          const subList = document.createElement('ul');
+          const subList = document.createElement("ul");
           h3s.forEach((h3) => {
-            const subLi = document.createElement('li');
-            const subA = document.createElement('a');
+            const subLi = document.createElement("li");
+            const subA = document.createElement("a");
             subA.href = `#${h3.id}`;
-            const subSpan = document.createElement('span');
-            subSpan.textContent = h3.textContent?.trim() ?? '';
+            const subSpan = document.createElement("span");
+            subSpan.textContent = h3.textContent?.trim() ?? "";
             subA.appendChild(subSpan);
             subLi.appendChild(subA);
             subList.appendChild(subLi);
@@ -80,7 +80,7 @@
     color: var(--sl-color-white);
   }
 
-  nav :global(a[aria-current='true']) {
+  nav :global(a[aria-current="true"]) {
     color: var(--sl-color-text-accent);
   }
 

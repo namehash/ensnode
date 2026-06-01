@@ -4,8 +4,12 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "lint": "biome check --write .",
-    "lint:ci": "biome ci",
+    "lint": "pnpm run lint:biome && pnpm run lint:prettier",
+    "lint:ci": "pnpm run lint:biome:ci && pnpm run lint:prettier:ci",
+    "lint:prettier": "pnpm exec prettier --write \"**/*.{md,mdx,astro}\"",
+    "lint:prettier:ci": "pnpm exec prettier --check \"**/*.{md,mdx,astro}\"",
+    "lint:biome": "biome check --write .",
+    "lint:biome:ci": "biome ci",
     "test": "vitest --silent passed-only",
     "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "test:integration:ci": "pnpm -F @ensnode/integration-test-env start:ci",
@@ -36,6 +40,8 @@
     "@changesets/cli": "^2.29.8",
     "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "jsdom": "^27.0.1",
+    "prettier": "catalog:",
+    "prettier-plugin-astro": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -1,7 +1,6 @@
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances
-// biome-ignore lint/style/noNonNullAssertion: invariant
-const ENSNODE_URL = process.env.ENSNODE_URL!;
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 // The Omnigraph is a standard GraphQL API following the Relay spec.
 // You can use any GraphQL client — here we just use `fetch`.
@@ -9,15 +8,11 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-      # canonical { name { interpreted } }
-      name
+      canonical { name { beautified } }
       owner { address }
       subdomains(first: 20) {
         totalCount
-        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-        # edges { node { __typename canonical { name { interpreted } } owner { address } } }
-        edges { node { __typename name owner { address } } }
+        edges { node { __typename canonical { name { beautified } } owner { address } } }
       }
     }
   }
@@ -25,9 +20,7 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
 
 interface Domain {
   __typename: "ENSv1Domain" | "ENSv2Domain";
-  // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-  // canonical: { name: { interpreted: string } } | null;
-  name: string;
+  canonical: { name: { beautified: string } } | null;
   owner: { address: string } | null;
 }
 
@@ -46,10 +39,8 @@ interface QueryResult {
 }
 
 function formatDomain(domain: Domain): string {
-  // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-  // const name = domain.canonical?.name.interpreted ?? "<unnamed>";
-  const name = domain.name ?? "<unnamed>";
-  const owner = domain.owner?.address ?? "0x0";
+  const name = domain.canonical?.name.beautified ?? "<unnamed>";
+  const owner = domain.owner?.address ?? "0x0 (means reserved for ENSv2)";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
 

@@ -1,11 +1,7 @@
-import config, { initEnvConfig } from "@/config";
-
 import { serve } from "@hono/node-server";
 
-import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralEditionSnapshotsCaches } from "@/cache/referral-edition-snapshots.cache";
-import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
-import { redactEnsApiConfig } from "@/config/redact";
+import di from "@/di";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
@@ -13,28 +9,29 @@ import { writeGraphQLSchema } from "@/omnigraph-api/lib/write-graphql-schema";
 
 import app from "./app";
 
-await initEnvConfig(process.env);
-
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
+// initialize DI container and its resources in a non-blocking way to
+// allow HTTP server to start immediately and serve requests
+void di.init().catch((error) => {
+  logger.error(error, "Error initializing DI container");
+  process.exit(1);
+});
 
 // start hono server
 const server = serve(
   {
     fetch: app.fetch,
-    port: config.port,
+    port: di.context.ensApiConfig.port,
   },
   async (info) => {
-    logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
-
     // Write the generated graphql schema in the background. Skipped when
     // a) in production, or
     // b) dev methods are enabled (to avoid dirty schema diff)
     const shouldWriteSchema = !(process.env.NODE_ENV === "production") && !INCLUDE_DEV_METHODS;
     if (shouldWriteSchema) void writeGraphQLSchema();
 
-    // proactively read the indexing status to warm cache
-    void indexingStatusCache.read();
+    logger.info(`ENSApi listening on port ${info.port}`);
   },
 );
 
@@ -50,12 +47,13 @@ const closeServer = () =>
 // perform graceful shutdown
 const gracefulShutdown = async () => {
   try {
+    // Close the server to stop accepting new requests
+    await closeServer();
+    logger.info("Closed application server");
+
+    // Shutdown the OpenTelemetry SDK to flush any remaining spans
     await sdk.shutdown();
     logger.info("Destroyed tracing instrumentation");
-
-    // Destroy referral program edition config set cache
-    referralProgramEditionConfigSetCache.destroy();
-    logger.info("Destroyed referralProgramEditionConfigSetCache");
 
     // Destroy all edition caches (if initialized)
     const editionsCaches = getReferralEditionSnapshotsCaches();
@@ -66,11 +64,8 @@ const gracefulShutdown = async () => {
       }
     }
 
-    indexingStatusCache.destroy();
-    logger.info("Destroyed indexingStatusCache");
-
-    await closeServer();
-    logger.info("Closed application server");
+    // Destroy DI container resources
+    await di.destroy();
 
     process.exit(0);
   } catch (error) {

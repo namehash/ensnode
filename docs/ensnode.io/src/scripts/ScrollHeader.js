@@ -25,7 +25,7 @@ export default function ScrollHeader() {
           mobileNav.classList.toggle("scrolled", !entries[0].isIntersecting);
         }
       },
-      { rootMargin: "100px 0px 0px 0px" },
+      { rootMargin: "30px 0px 0px 0px" },
     );
 
     navObserver.observe(scrollWatcher);

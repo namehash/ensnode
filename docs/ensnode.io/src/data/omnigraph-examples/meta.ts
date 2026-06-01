@@ -68,4 +68,15 @@ export const OMNIGRAPH_EXAMPLES_META: Record<
     description: "Walk the root tree: root → domains → nested subdomains (depth-limited).",
     category: "Exploration",
   },
+  "account-migrated-names": {
+    name: "Account Migration Counts",
+    description: "Count an account's ENSv1 vs ENSv2 domains to gauge its migration progress.",
+    category: "Migration",
+  },
+  "eth-by-version": {
+    name: "ETH TLD By Version",
+    description:
+      "Load the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).",
+    category: "Migration",
+  },
 };

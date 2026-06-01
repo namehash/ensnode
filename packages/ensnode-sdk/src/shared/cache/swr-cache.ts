@@ -174,6 +174,31 @@ export class SWRCache<ValueType> {
   }
 
   /**
+   * Synchronously returns the most recently cached result without triggering revalidation.
+   *
+   * Unlike {@link read}, this method is synchronous and never causes any I/O — it simply
+   * returns whatever value is already in memory. Use this when you need a best-effort
+   * snapshot of the cached value and can tolerate stale data.
+   *
+   * @returns the most recently cached `ValueType`, or an `Error` if the last fetch failed.
+   * @throws if the cache has not been initialized yet (i.e. {@link read} has never been awaited
+   * and `proactivelyInitialize` was not set to `true`).
+   *
+   * @example
+   * ```ts
+   * // Ensure cache is initialized first
+   * await cache.read();
+   *
+   * // Later, peek synchronously without triggering revalidation
+   * const result = cache.peek();
+   * ```
+   */
+  public peek(): ValueType | Error {
+    if (!this.cache) throw new Error("Cache is not initialized yet");
+    return this.cache.result;
+  }
+
+  /**
    * Destroys the background revalidation interval, if exists.
    */
   public destroy(): void {

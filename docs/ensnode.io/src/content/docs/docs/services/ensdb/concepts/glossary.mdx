@@ -7,7 +7,7 @@ sidebar:
 keywords: [ensdb, glossary, terminology, definitions]
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 This page defines the **core terminology** used throughout ENSDb documentation. If you encounter an unfamiliar term elsewhere, check here for its definition.
 
@@ -26,7 +26,9 @@ A PostgreSQL database is an isolated collection of [database objects](#database-
 A container that groups related [database objects](#database-objects). There can be multiple database schemas within a single [PostgreSQL database](#postgresql-database). Each database schema has a unique name within the [PostgreSQL database](#postgresql-database).
 
 <Aside type="note" title="Database Schema vs. Schema Definition">
-Database Schema is a PostgreSQL concept referring to a namespace for database objects. Schema Definition is a concept referring to a code-based object that defines the structure of [database objects](#database-objects) within a [database schema](#database-schema). 
+  Database Schema is a PostgreSQL concept referring to a namespace for database objects. Schema
+  Definition is a concept referring to a code-based object that defines the structure of [database
+  objects](#database-objects) within a [database schema](#database-schema).
 </Aside>
 
 ### Database Objects
@@ -42,6 +44,7 @@ Objects contained within a [database schema](#database-schema), including:
 ## ENSDb Standard
 
 An open standard for bi-directional ENS integration. The ENSDb Standard defines:
+
 - Schema designs for storing ENS data in a [PostgreSQL database](#postgresql-database)
 - Rules and constraints for [ENSDb Writers](#ensdb-writer) and [ENSDb Readers](#ensdb-reader)
 - A modular architecture enabling interoperability
@@ -71,7 +74,7 @@ For ENSDb, a Drizzle ORM object that defines the structure of [database objects]
 
 ### ENSDb Instance
 
-A [PostgreSQL database](#postgresql-database) that follows the [ENSDb Standard](#ensdb-standard).  An ENSDb instance stores indexed ENS data and is composed of two types of database schemas:
+A [PostgreSQL database](#postgresql-database) that follows the [ENSDb Standard](#ensdb-standard). An ENSDb instance stores indexed ENS data and is composed of two types of database schemas:
 
 - Exactly one [ENSNode Schema](#ensnode-schema)
 - One or more [ENSIndexer Schemas](#ensindexer-schema)
@@ -83,6 +86,7 @@ A [PostgreSQL database](#postgresql-database) that follows the [ENSDb Standard](
 An [ENSDb instance](#ensdb-instance) is considered multi-tenant when it stores data from multiple [ENSIndexer instances](#ensindexer-instance) (tenants) in isolated [ENSIndexer Schemas](#ensindexer-schema).
 
 Within a single [ENSDb instance](#ensdb-instance):
+
 - Each [ENSIndexer instance](#ensindexer-instance) gets its own [ENSIndexer Schema](#ensindexer-schema) — fully isolated data following the [ENSIndexer Schema Definition](#ensindexer-schema-definition) that was current when the ENSIndexer instance started.
 - All [ENSIndexer instances](#ensindexer-instance) share the [Ponder Schema](#ponder-schema), including the RPC cache.
 - Metadata of all [ENSIndexer instances](#ensindexer-instance) is tracked in the [ENSNode Schema](#ensnode-schema)
@@ -129,11 +133,11 @@ Multiple [ENSIndexer Schema Names](#ensindexer-schema-name) exist in an [ENSDb i
 
 A table within the [ENSNode Schema](#ensnode-schema) that tracks all [ENSIndexer instances](#ensindexer-instance) that have ever connected to the [ENSDb instance](#ensdb-instance).
 
-| Column | Type | Purpose |
-|--------|------|---------|
-| `ens_indexer_schema_name` | `text` | References the [ENSIndexer Schema Name](#ensindexer-schema-name) of the ENSIndexer instance that manages this metadata record |
-| `key` | `text` | Type of metadata record |
-| `value` | `jsonb` | The context object (configuration, status, etc.) |
+| Column                    | Type    | Purpose                                                                                                                       |
+| ------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `ens_indexer_schema_name` | `text`  | References the [ENSIndexer Schema Name](#ensindexer-schema-name) of the ENSIndexer instance that manages this metadata record |
+| `key`                     | `text`  | Type of metadata record                                                                                                       |
+| `value`                   | `jsonb` | The context object (configuration, status, etc.)                                                                              |
 
 Primary key: (`ens_indexer_schema_name`, `key`)
 
@@ -143,16 +147,17 @@ The `value` column stores a JSON object which structure may evolve over time. To
 
 The `key` column identifies the type of metadata:
 
-| Key | Description |
-|-----|-------------|
+| Key                         | Description                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `indexing_metadata_context` | [Indexing metadata context](#indexing-metadata-context) of the [ENSIndexer instance](#ensindexer-instance) |
 
 #### Indexing Metadata Context
 
 A JSON object that provides indexing metadata context. The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The object may include fields such as:
-  - `version`: The version of the Indexing Metadata Context structure
-  - `indexingStatus`: the current Indexing Status of the [ENSIndexer instance](#ensindexer-instance).
-  - `stackInfo`: a group of public config objects that describe the ENSIndexer instance and its dependencies.
+
+- `version`: The version of the Indexing Metadata Context structure
+- `indexingStatus`: the current Indexing Status of the [ENSIndexer instance](#ensindexer-instance).
+- `stackInfo`: a group of public config objects that describe the ENSIndexer instance and its dependencies.
 
 ### ENSApi
 
@@ -191,7 +196,7 @@ The Indexing Status affects database behavior:
 
 The process of finding all [ENSIndexer Schemas](#ensindexer-schema) in an [ENSDb instance](#ensdb-instance) by querying the [ENSNode Metadata Table](#ensnode-metadata-table):
 
-```sql
+```sql title="example.sql"
 SELECT DISTINCT ens_indexer_schema_name
 FROM ensnode.metadata;
 ```
@@ -200,7 +205,6 @@ This returns all [ENSIndexer Schema Names](#ensindexer-schema-name) that have be
 
 ## ENSDb SDK
 
-
 A TypeScript package published as [`@ensnode/ensdb-sdk`](https://www.npmjs.com/package/@ensnode/ensdb-sdk) providing utilities for interacting with the [ENSDb instance](#ensdb-instance).
 
 The ENSDb SDK includes:
@@ -208,7 +212,6 @@ The ENSDb SDK includes:
 - [EnsDbReader Client](#ensdb-reader-client) — An ENSDb client implementation for querying ENSDb Metadata, and building custom queries against the [ENSDb instance](#ensdb-instance).
 - [EnsDbWriter Client](#ensdb-writer-client) — An ENSDb client implementation for writing ENSNode Metadata and executing ENSNode migrations.
 - [Schema Definitions](#schema-definition) — Drizzle schemas for [ENSIndexer Schema](#ensindexer-schema) and [ENSNode Schema](#ensnode-schema).
-
 
 ### ENSDb Reader Client
 
