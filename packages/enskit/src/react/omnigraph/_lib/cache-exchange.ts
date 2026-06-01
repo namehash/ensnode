@@ -45,6 +45,7 @@ export const omnigraphCacheExchange = cacheExchange({
     DomainResolver: EMBEDDED_DATA,
     ForwardResolve: EMBEDDED_DATA,
     ReverseResolve: EMBEDDED_DATA,
+    ResolvedRecords: EMBEDDED_DATA,
     ResolutionStatus: EMBEDDED_DATA,
     PrimaryNameRecord: EMBEDDED_DATA,
     AccelerationStatus: EMBEDDED_DATA,

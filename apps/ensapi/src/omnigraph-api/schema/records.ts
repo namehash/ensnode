@@ -132,12 +132,6 @@ export const ResolvedRecordsRef = builder.objectRef<ResolvedRecordsModel>("Resol
 ResolvedRecordsRef.implement({
   description: "Records resolved for a specific ENS name via the ENS protocol.",
   fields: (t) => ({
-    id: t.field({
-      description: "Stable cache key for these records: the InterpretedName used to resolve them.",
-      type: "InterpretedName",
-      nullable: false,
-      resolve: (parent) => parent.id,
-    }),
     reverseName: t.string({
       description:
         "The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.",

@@ -1542,11 +1542,6 @@ type ResolvedRecords {
   """The IDNSZoneResolver zonehash raw bytes, or null if not set."""
   dnszonehash: Hex
 
-  """
-  Stable cache key for these records: the InterpretedName used to resolve them.
-  """
-  id: InterpretedName!
-
   """Resolved ERC-165 interface implementer records for the requested ids."""
   interfaces(
     """ERC-165 interface ids to resolve (4-byte hex selectors)."""
