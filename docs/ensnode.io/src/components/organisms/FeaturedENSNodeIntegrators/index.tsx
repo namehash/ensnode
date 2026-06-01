@@ -8,9 +8,14 @@ import cc from "classcat";
 export const FeaturedENSNodeIntegrators = () => {
   // explicitly split the integrators into two rows for wide enough screens
   // to satisfy the request to put the ENSv2 Explorer app in the second row
-  const splitIntegratorsAt = FEATURED_ENSNODE_INTEGRATORS.findIndex(
+  const splitIntegratorsAtRaw = FEATURED_ENSNODE_INTEGRATORS.findIndex(
     (m) => m.name === "Official ENSv2 Explorer",
   );
+  const splitIntegratorsAt =
+    splitIntegratorsAtRaw === -1
+      ? Math.ceil(FEATURED_ENSNODE_INTEGRATORS.length / 2)
+      : splitIntegratorsAtRaw;
+
   const [topIntegratorsRow, bottomIntegratorsRow] = [
     FEATURED_ENSNODE_INTEGRATORS.slice(0, splitIntegratorsAt),
     FEATURED_ENSNODE_INTEGRATORS.slice(splitIntegratorsAt),
@@ -52,10 +57,10 @@ const DisplayENSNodeIntegrators = ({
   >
     {integrators.map((member: FeaturedENSNodeIntegratorsDisplayData) => (
       <Tooltip
+        key={`featured-ensnode-integrator=${member.name}`}
         sideOffset={-5}
         trigger={
           <a
-            key={`featured-ensnode-integrator=${member.name}`}
             aria-label={member.name}
             href={member.websiteURL.href}
             target="_blank"
