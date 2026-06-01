@@ -172,6 +172,15 @@ export const efpSeedTargets = {
 /** The `user` role set on the {@link efpSeedTargets.durable} list, re-derived after the re-point. */
 export const efpSeedRoleUser = asNormalizedAddress(`0x${"ab".repeat(20)}`);
 
+/**
+ * The Anvil account (mnemonic index 6) the EFP seeder mints its lists from. It has `primary-list`
+ * metadata (set by easyMintTo) but its lists' `user` is never itself, so it exercises the
+ * `primaryList` two-step validation's mismatch (rejection) branch.
+ */
+export const efpSeedActorAddress = asNormalizedAddress(
+  "0x976ea74026e726554db657fa54763abd0c3a0aa9",
+);
+
 export const fixtures = {
   abiBytes: `0x${"01".repeat(32)}`,
   fourBytesInterface: "0x11100111",

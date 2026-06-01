@@ -72,5 +72,15 @@ describe("parseListStorageLocation", () => {
     expect(
       parseListStorageLocation(`0x0101${zeroChainIdHex}${addressHex}${slotHex}` as `0x${string}`),
     ).toBeNull();
+    // boundary: 2^53 - 1 (Number.MAX_SAFE_INTEGER) is the largest accepted chain id
+    const maxSafeHex = BigInt(Number.MAX_SAFE_INTEGER).toString(16).padStart(64, "0");
+    expect(
+      parseListStorageLocation(`0x0101${maxSafeHex}${addressHex}${slotHex}` as `0x${string}`),
+    ).not.toBeNull();
+    // boundary: 2^53 is one past the safe range and is rejected
+    const overSafeHex = (BigInt(Number.MAX_SAFE_INTEGER) + 1n).toString(16).padStart(64, "0");
+    expect(
+      parseListStorageLocation(`0x0101${overSafeHex}${addressHex}${slotHex}` as `0x${string}`),
+    ).toBeNull();
   });
 });

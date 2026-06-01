@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { accounts, efpSeedRoleUser, efpSeedTargets } from "@ensnode/datasources/devnet";
+import {
+  accounts,
+  efpSeedActorAddress,
+  efpSeedRoleUser,
+  efpSeedTargets,
+} from "@ensnode/datasources/devnet";
 
 import {
   flattenConnection,
@@ -213,6 +218,37 @@ describe("EFP handler edge cases (seeded)", () => {
   it("deletes a record via a junk-suffixed REMOVE_RECORD (canonical 22-byte keying)", async () => {
     const records = await recordsFor(efpSeedTargets.junk);
     expect(records).toHaveLength(0);
+  });
+
+  it("rejects a primary list when metadata is present but the list's user does not match", async () => {
+    // The seed actor has `primary-list` metadata (set by easyMintTo), but the referenced list's
+    // `user` is never the actor, so the two-step validation must reject it (return null) rather than
+    // resolve the list. This exercises the mismatch branch distinctly from the unset-metadata case.
+    type MetaResult = { efp: { accountMetadata: { value: string } | null } };
+    type PrimaryListByIdResult = { efp: { primaryList: { tokenId: string } | null } };
+
+    const meta = await request<MetaResult>(
+      gql`
+        query EfpActorMetadata($address: Address!) {
+          efp { accountMetadata(address: $address, key: "primary-list") { value } }
+        }
+      `,
+      { address: efpSeedActorAddress },
+    );
+    expect(
+      meta.efp.accountMetadata,
+      "the seed actor should have primary-list metadata",
+    ).not.toBeNull();
+
+    const result = await request<PrimaryListByIdResult>(
+      gql`
+        query EfpActorPrimaryList($address: Address!) {
+          efp { primaryList(address: $address) { tokenId } }
+        }
+      `,
+      { address: efpSeedActorAddress },
+    );
+    expect(result.efp.primaryList, "validation must reject a user mismatch").toBeNull();
   });
 
   it("recovers a list's user role after a storage-location re-point (durable metadata)", async () => {
