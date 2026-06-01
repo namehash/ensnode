@@ -1,0 +1,29 @@
+# Deploys (and seeds) the EFP contracts onto the ENS devnet's anvil node, so that one chain
+# (id 31337) carries both ENS v2 and EFP contracts. Attaches to the already-running node via
+# DEVNET_RPC_URL instead of spawning its own anvil; EFP addresses are written to the shared
+# `efp-deployments` volume as /app/deployments/devnet-31337.json.
+#
+# The image is pinned to a specific master build, mirroring how the ENS devnet pins contracts-v2.
+# Re-capture the EFP addresses in packages/datasources/src/devnet/constants.ts whenever this pin
+# (or the ENS devnet image in services/devnet.yml) is bumped.
+#
+# @see https://github.com/ethereumfollowprotocol/contracts/pull/7
+services:
+  efp-devnet:
+    container_name: efp-devnet
+    image: ghcr.io/ethereumfollowprotocol/contracts/devnet:master-c76225c
+    pull_policy: always
+    environment:
+      DEVNET_HOST: "0.0.0.0"
+      DEVNET_RPC_URL: "http://devnet:8545"
+      DEVNET_SCENARIO: "demoGraph"
+      DEVNET_SAVE_DEPLOYMENTS: "true"
+    volumes:
+      - efp-deployments:/app/deployments
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "-s", "http://localhost:8000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+      start_interval: 1s
