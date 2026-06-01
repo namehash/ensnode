@@ -36,8 +36,8 @@ describe("interpretAddressRecordValue", () => {
   });
 
   it("returns lowercase hex for non-EVM address bytes", () => {
-    expect(interpretAddressRecordValue(`0x${"05".repeat(25).toUpperCase()}`)).toBe(
-      `0x${"05".repeat(25)}`,
+    expect(interpretAddressRecordValue(`0x${"05ab".repeat(20).toUpperCase()}`)).toBe(
+      `0x${"05ab".repeat(20)}`,
     );
   });
 
