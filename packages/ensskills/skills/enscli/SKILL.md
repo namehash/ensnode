@@ -5,6 +5,4 @@ description: Reference for the enscli command-line tool (ENS hashing, Omnigraph 
 
 # enscli (coming soon)
 
-A dedicated, in-depth `enscli` usage skill is planned. Until then, the **omnigraph** skill documents
-how to drive `enscli ensnode omnigraph` (and `omnigraph schema`) to read ENS data, and
-`npx enscli --help` lists every command.
+A dedicated, in-depth `enscli` usage skill is planned. Until then, the **omnigraph** skill documents how to drive `enscli ensnode omnigraph` (and `omnigraph schema`) to read ENS data, and `npx enscli --help` lists every command.

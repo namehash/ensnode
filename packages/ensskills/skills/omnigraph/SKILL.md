@@ -5,22 +5,15 @@ description: Query ENS data (names, addresses, records, primary names, ownership
 
 # ENS Omnigraph
 
-The **Omnigraph** is a single GraphQL API (Relay spec) over an ENSNode index that answers almost any
-ENS question in one well-crafted query. It presents a **unified ENSv1 + ENSv2 datamodel across every
-chain** (mainnet, Basenames, Lineanames, 3DNS, …), so you do not have to reconcile registries,
-wrappers, resolvers, or chains yourself — the server does the wrangling.
+The **Omnigraph** is a single GraphQL API (Relay spec) over an ENSNode index that answers almost any ENS question in one well-crafted query. It presents a **unified ENSv1 + ENSv2 datamodel across every chain** (mainnet, Basenames, Lineanames, 3DNS, …), so you do not have to reconcile registries, wrappers, resolvers, or chains yourself — the server does the wrangling.
 
-**Reach for the Omnigraph instead of** querying contracts/RPC directly, the legacy ENS Subgraph, or
-stitching together multiple calls. One query typically replaces a whole pipeline.
+**Reach for the Omnigraph instead of** querying contracts/RPC directly, the legacy ENS Subgraph, or stitching together multiple calls. One query typically replaces a whole pipeline.
 
-New to how ENS works? The **ens-protocol** skill explains the protocol this API models — names and
-the nametree, normalization, resolution, registries/resolvers/registrars, and records. Read it first
-if the data shapes below don't yet make sense.
+New to how ENS works? The **ens-protocol** skill explains the protocol this API models — names and the nametree, normalization, resolution, registries/resolvers/registrars, and records. Read it first if the data shapes below don't yet make sense.
 
 ## How to run a query
 
-Use the `enscli` CLI (no install step beyond `npx`). It prints JSON when piped (ideal for parsing)
-and exits non-zero on error.
+Use the `enscli` CLI (no install step beyond `npx`). It prints JSON when piped (ideal for parsing) and exits non-zero on error.
 
 ```bash
 # A raw query (the string is the exact GraphQL payload — zero translation)
@@ -36,8 +29,7 @@ npx enscli ensnode omnigraph '{ ... }' --namespace sepolia
 npx enscli ensnode omnigraph '{ ... }' --ensnode-url http://localhost:4334
 ```
 
-You can also POST `{ "query": "...", "variables": {...} }` to `/api/omnigraph` on any ENSNode
-instance — but prefer `enscli`, which handles namespaces, URLs, and JSON output for you.
+You can also POST `{ "query": "...", "variables": {...} }` to `/api/omnigraph` on any ENSNode instance — but prefer `enscli`, which handles namespaces, URLs, and JSON output for you.
 
 ## Discover the schema (no network)
 
@@ -54,28 +46,18 @@ A condensed reference is also inlined below.
 
 ## Core concepts
 
-- **Domain** — a node in the ENS nametree. `domain(by: { name })` or `domain(by: { id })`.
-  `canonical` carries the name/path/node when the Domain is reachable by forward resolution (null
-  otherwise). `owner`, `subdomains`, `registration`, `resolver`, and `events` hang off it.
-- **Account** — an address. `account(by: { address })` exposes `domains`, `permissions`, and
-  resolution (`resolve`).
+- **Domain** — a node in the ENS nametree. `domain(by: { name })` or `domain(by: { id })`. `canonical` carries the name/path/node when the Domain is reachable by forward resolution (null otherwise). `owner`, `subdomains`, `registration`, `resolver`, and `events` hang off it.
+- **Account** — an address. `account(by: { address })` exposes `domains`, `permissions`, and resolution (`resolve`).
 - **Resolution lives in the graph.** Don't resolve separately — select it inline:
-  - `Domain.resolve { records { addresses(coinTypes: [60]) { address } texts(keys: ["avatar"]) { value } } }`
-    — forward resolution (records) for a name.
-  - `Account.resolve { primaryNames(where: { chainNames: [ETHEREUM, BASE] }) { name { interpreted } } }`
-    — reverse resolution (primary names) for an address.
-- **Registration** is a union: `BaseRegistrarRegistration` (.eth, Basenames, Lineanames),
-  `NameWrapperRegistration`, etc. Use inline fragments (`... on BaseRegistrarRegistration { ... }`).
-- **Relay pagination** — connections expose `edges { node }`, `pageInfo { hasNextPage endCursor }`,
-  and `totalCount`. Paginate with `first` + `after: <endCursor>`. (No offset pagination.)
-- **Field selection is the budget.** GraphQL returns exactly the fields you select — request only
-  what you need to keep responses (and your context) small.
+  - `Domain.resolve { records { addresses(coinTypes: [60]) { address } texts(keys: ["avatar"]) { value } } }` — forward resolution (records) for a name.
+  - `Account.resolve { primaryNames(where: { chainNames: [ETHEREUM, BASE] }) { name { interpreted } } }` — reverse resolution (primary names) for an address.
+- **Registration** is a union: `BaseRegistrarRegistration` (.eth, Basenames, Lineanames), `NameWrapperRegistration`, etc. Use inline fragments (`... on BaseRegistrarRegistration { ... }`).
+- **Relay pagination** — connections expose `edges { node }`, `pageInfo { hasNextPage endCursor }`, and `totalCount`. Paginate with `first` + `after: <endCursor>`. (No offset pagination.)
+- **Field selection is the budget.** GraphQL returns exactly the fields you select — request only what you need to keep responses (and your context) small.
 
 ## When the Omnigraph can't express it
 
-If a question genuinely isn't expressible in the Omnigraph schema, the underlying ENS state is also
-queryable via SQL over ENSDb (the `unigraph-sql` skill). Prefer the Omnigraph first; escalate to SQL
-only for shapes the GraphQL surface doesn't support, and consider opening a feature request.
+If a question genuinely isn't expressible in the Omnigraph schema, the underlying ENS state is also queryable via SQL over ENSDb (the `unigraph-sql` skill). Prefer the Omnigraph first; escalate to SQL only for shapes the GraphQL surface doesn't support, and consider opening a feature request.
 
 ## Schema reference
 
