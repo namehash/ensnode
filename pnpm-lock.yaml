@@ -992,7 +992,42 @@ importers:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.32.0)(tsx@4.22.3)(yaml@2.8.3)
 
-  packages/enscli: {}
+  packages/enscli:
+    dependencies:
+      '@ensnode/datasources':
+        specifier: workspace:*
+        version: link:../datasources
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../ensnode-sdk
+      '@ensnode/ensrainbow-sdk':
+        specifier: workspace:*
+        version: link:../ensrainbow-sdk
+      citty:
+        specifier: ^0.1.6
+        version: 0.1.6
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
+    devDependencies:
+      '@ensnode/shared-configs':
+        specifier: workspace:*
+        version: link:../shared-configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.22.3)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.32.0)(tsx@4.22.3)(yaml@2.8.3)
 
   packages/ensdb-sdk:
     dependencies:
@@ -1181,7 +1216,32 @@ importers:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.32.0)(tsx@4.22.3)(yaml@2.8.3)
 
-  packages/ensskills: {}
+  packages/ensskills:
+    devDependencies:
+      '@ensnode/datasources':
+        specifier: workspace:*
+        version: link:../datasources
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../ensnode-sdk
+      '@ensnode/shared-configs':
+        specifier: workspace:*
+        version: link:../shared-configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
+      tsx:
+        specifier: ^4.7.1
+        version: 4.22.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/integration-test-env:
     dependencies:
@@ -6010,6 +6070,9 @@ packages:
   ci-info@4.4.0:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
+
+  citty@0.1.6:
+    resolution: {integrity: sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ==}
 
   cjs-module-lexer@2.2.0:
     resolution: {integrity: sha512-4bHTS2YuzUvtoLjdy+98ykbNB5jS0+07EvFNXerqZQJ89F7DI6ET7OQo/HJuW6K0aVsKA9hj9/RVb2kQVOrPDQ==}
@@ -15105,14 +15168,6 @@ snapshots:
       chai: 6.2.0
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.20.6)(yaml@2.8.3))':
-    dependencies:
-      '@vitest/spy': 4.0.5
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.20.6)(yaml@2.8.3)
-
   '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@vitest/spy': 4.0.5
@@ -16031,6 +16086,10 @@ snapshots:
 
   ci-info@4.4.0: {}
 
+  citty@0.1.6:
+    dependencies:
+      consola: 3.4.2
+
   cjs-module-lexer@2.2.0: {}
 
   class-variance-authority@0.7.1:
@@ -16828,7 +16887,6 @@ snapshots:
       '@esbuild/win32-arm64': 0.28.0
       '@esbuild/win32-ia32': 0.28.0
       '@esbuild/win32-x64': 0.28.0
-    optional: true
 
   escalade@3.2.0: {}
 
@@ -20408,7 +20466,6 @@ snapshots:
       esbuild: 0.28.0
     optionalDependencies:
       fsevents: 2.3.3
-    optional: true
 
   tw-animate-css@1.4.0: {}
 
@@ -20761,7 +20818,7 @@ snapshots:
   vitest@4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.32.0)(tsx@4.20.6)(yaml@2.8.3):
     dependencies:
       '@vitest/expect': 4.0.5
-      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.20.6)(yaml@2.8.3))
+      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.3)(yaml@2.8.3))
       '@vitest/pretty-format': 4.0.5
       '@vitest/runner': 4.0.5
       '@vitest/snapshot': 4.0.5

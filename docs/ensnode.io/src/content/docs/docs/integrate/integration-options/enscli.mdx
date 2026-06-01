@@ -1,38 +1,122 @@
 ---
 title: enscli (CLI)
-description: Coming soon — an agent- and human-friendly CLI for the ENS Omnigraph API, wrapping enssdk.
+description: An agent- and human-friendly CLI for ENS — query the Omnigraph, explore the schema, resolve hashes, heal labels, and check indexing status from the terminal.
 ---
 
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 
-<Aside type="caution" title="Coming soon">
-  **`enscli`** is a planned ENS CLI that wraps
-  [`enssdk`](/docs/integrate/integration-options/enssdk) to bring the ENS Omnigraph to the terminal.
-  The npm name is reserved; we're still shaping the design. `enscli` will ship soon.
+`enscli` is the terminal-shaped entry point to ENS. It wraps [`enssdk`](/docs/integrate/integration-options/enssdk) and the [Omnigraph](/docs/integrate/omnigraph) so you can resolve names, look up records, search domains, and run ad-hoc GraphQL queries against any ENSNode instance — without writing a script first.
+
+It is designed to feel natural whether you drive it yourself or let an AI agent drive it: predictable arguments, machine-readable output, runtime schema introspection, and loud, structured errors.
+
+## Quick start
+
+No install step beyond `npx`:
+
+```bash
+# Resolve a name's namehash
+npx enscli namehash vitalik.eth
+
+# Run a GraphQL query against the Omnigraph (default: mainnet)
+npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { address } } }'
+```
+
+## Output contract
+
+`enscli` is **read-only** and built for predictable parsing:
+
+- **JSON when piped, pretty in a TTY.** When stdout is not a terminal (the agent case), every command prints JSON; interactively you get a friendlier rendering. Force either with `--output json` or `--output pretty`.
+- **Structured errors.** Failures print `{ "error": { "message": "…" } }` to stderr and exit non-zero.
+- **Input hardening.** Names, labels, and hashes containing control characters or `?`/`#`/`%` are rejected before any network call.
+
+## Selecting an ENSNode instance
+
+Most `ensnode` commands talk to an ENSNode instance. The target URL is resolved with this precedence:
+
+**`--ensnode-url` flag → `ENSNODE_URL` env → `.env` → namespace default.**
+
+`--namespace` (alias `-n`, or the `NAMESPACE` env var) selects a NameHash-hosted instance:
+
+| Namespace      | Hosted default                         |
+| -------------- | -------------------------------------- |
+| `mainnet`      | `https://api.alpha.ensnode.io`         |
+| `sepolia`      | `https://api.alpha-sepolia.ensnode.io` |
+| `sepolia-v2`   | `https://api.v2-sepolia.ensnode.io`    |
+| `ens-test-env` | _(none — pass `--ensnode-url`)_        |
+
+```bash
+npx enscli ensnode indexing-status --namespace sepolia
+npx enscli ensnode indexing-status --ensnode-url http://localhost:4334
+```
+
+ENSRainbow commands resolve their URL similarly via `--ensrainbow-url` / `ENSRAINBOW_URL`.
+
+## Commands
+
+### `ensnode omnigraph <query>`
+
+Send a raw GraphQL query — the string is the exact payload, so the [schema](#ensnode-omnigraph-schema-typefield) doubles as your documentation.
+
+```bash
+npx enscli ensnode omnigraph 'query D($n: InterpretedName!) {
+  domain(by: { name: $n }) {
+    canonical { name { interpreted } }
+    resolve { records { addresses(coinTypes: [60]) { address } } }
+  }
+}' --variables '{"n":"vitalik.eth"}'
+```
+
+<Aside type="tip">
+  GraphQL is naturally field-masked — select only the fields you need to keep responses small. Resolution lives in the graph: select `Domain.resolve` (records) and `Account.resolve` (primary names) inline rather than as separate calls.
 </Aside>
 
-`enscli` will be the terminal-shaped entry point to the [ENS Omnigraph](/docs/integrate/omnigraph) — a single CLI for resolving names, looking up records, searching domains, and running ad-hoc queries against any ENSNode instance.
+### `ensnode omnigraph schema [Type[.field]]`
 
-Designed to feel natural whether you're driving it yourself or letting an AI agent drive. From a terminal it's one `npx` away with sensible defaults against the public Omnigraph; for agents it's predictable arguments, structured output, and machine-readable help.
+Explore the Omnigraph schema offline (it ships with the CLI — no network):
 
-## Built for
+```bash
+npx enscli ensnode omnigraph schema                  # root query fields + major types
+npx enscli ensnode omnigraph schema Domain           # a type's fields, with descriptions
+npx enscli ensnode omnigraph schema Domain.canonical # a single field
+npx enscli ensnode omnigraph schema --search primary # find types/fields by keyword
+```
 
-- Developers exploring or validating an ENS integration from a terminal, without writing a script first.
-- Operators wiring ENS lookups into shell pipelines, cron, or CI.
-- AI coding agents driving [`ensskills`](/docs/integrate/integration-options/ensskills), which reach into the protocol through `enscli`.
+### `ensnode indexing-status`
+
+```bash
+npx enscli ensnode indexing-status
+```
+
+### `ensrainbow heal <labelhash>` / `ensrainbow count`
+
+```bash
+npx enscli ensrainbow heal 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+npx enscli ensrainbow count
+```
+
+### `namehash <name>` / `labelhash <label>`
+
+```bash
+npx enscli namehash vitalik.eth
+npx enscli labelhash vitalik
+```
+
+## For AI agents
+
+`enscli` is the runtime that [`ensskills`](/docs/integrate/integration-options/ensskills) drive on your agent's behalf. The `omnigraph` skill teaches an agent to author queries and run them through `enscli`, with the schema available via `omnigraph schema`. See the [ensskills docs](/docs/integrate/integration-options/ensskills) to install them.
 
 ## Related
-
-<LinkCard
-  title="enssdk"
-  description="The TypeScript SDK that enscli wraps."
-  href="/docs/integrate/integration-options/enssdk"
-/>
 
 <LinkCard
   title="ensskills"
   description="The agent-skill bundles that drive enscli on a developer's behalf."
   href="/docs/integrate/integration-options/ensskills"
+/>
+
+<LinkCard
+  title="enssdk"
+  description="The TypeScript SDK that enscli wraps."
+  href="/docs/integrate/integration-options/enssdk"
 />
 
 <LinkCard

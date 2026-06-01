@@ -1,18 +1,53 @@
 ---
 title: ensskills (AI agents)
-description: Coming soon — skill bundles that give AI agents an opinionated contract for ENS.
+description: Versioned agent skills for ENS — install with skills-npm to give AI coding agents an opinionated, version-locked contract for the ENS Omnigraph.
 ---
 
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 
-<Aside type="caution" title="Coming soon">
-  **`ensskills`** is a planned collection of agent skills for ENS development and ENS lookups. The
-  npm name is reserved; we're still shaping the design. `ensskills` will ship soon.
+`ensskills` is a curated set of [agent skills](https://agentskills.io) that give AI coding agents — Claude Code, Cursor, Codex, and the rest — a well-defined contract for working with ENS. Left to their own devices, agents reinvent ENS from scratch every prompt, burning context rediscovering the protocol. `ensskills` hands them the right context — no more, no less — so they produce ENS code that actually works.
+
+The skills drive [`enscli`](/docs/integrate/integration-options/enscli) for live ENS lookups and steer agents toward [`enssdk`](/docs/integrate/integration-options/enssdk) / [`enskit`](/docs/integrate/integration-options/enskit) when writing integration code.
+
+## Install
+
+`ensskills` is a normal, **version-locked** npm package: it ships the skills, and [`skills-npm`](https://github.com/antfu/skills-npm) symlinks them into whichever agent directories you have (`.claude/skills`, `.cursor/skills`, …). Because the skills are pinned like any dependency, the version you install is exactly the version that lands — and it stays in lockstep with the rest of your ENSNode suite.
+
+Add both to your project and wire a `prepare` script:
+
+```jsonc
+// package.json
+{
+  "devDependencies": {
+    "ensskills": "1.15.1",
+    "skills-npm": "^1"
+  },
+  "scripts": {
+    // re-syncs the pinned skills into your agent dirs on every install
+    "prepare": "skills-npm"
+  }
+}
+```
+
+```bash
+pnpm install   # symlinks the skills for your detected agents
+```
+
+<Aside type="note">
+  Pinning `ensskills` to an exact version is intentional: ENS skills are version-locked to the ENSNode suite, so you always get skills that match the APIs you're targeting. Avoid pulling skills from a moving git branch.
 </Aside>
 
-`ensskills` will be a small, curated set of skills that give AI coding agents — Claude Code, Cursor, Codex, and the rest — a well-defined contract for working with ENS. We want to support users who want a conversational interaction with ENS through their AI assistant, handled by skills that drive [`enscli`](/docs/integrate/integration-options/enscli) behind the scenes, and to streamline the developer experience writing integration code with [`enssdk`](/docs/integrate/integration-options/enssdk), [`enskit`](/docs/integrate/integration-options/enskit), or the raw [Omnigraph API](/docs/integrate/omnigraph).
+## Skills included
 
-Left to their own devices, agents love to reinvent the wheel from scratch every prompt — burning through your token budget rediscovering what ENS even is before they get around to the actual task. `ensskills` will be blueprints: focused, versioned bundles that hand the agent the right context for ENS work — no more, no less. The result is agents that produce ENS code that actually works, without the developer having to brief them from scratch every time.
+- **`omnigraph`** — the monolithic ENS skill. Teaches the unified ENSv1 + ENSv2 datamodel, resolution via `Domain.resolve` / `Account.resolve`, Relay pagination, a condensed schema reference, vetted example queries, and how to execute and explore queries with `enscli`.
+
+The following are reserved and ship as stubs today, fleshed out in upcoming releases:
+
+- **`enscli`** — in-depth CLI usage.
+- **`enssdk`** — TypeScript integration with the typed Omnigraph client.
+- **`enskit`** — React integration (`useOmnigraphQuery`, cache directives, infinite pagination).
+- **`migrate-to-omnigraph`** — migrating from the legacy ENS Subgraph.
+- **`unigraph-sql`** — SQL over ENSDb for query shapes the Omnigraph doesn't express.
 
 ## Built for
 
