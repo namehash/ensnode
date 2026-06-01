@@ -258,13 +258,13 @@ BaseRegistrarRegistrationRef.implement({
         const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
         if (!domain) {
           throw new Error(
-            `Invariant(WrappedBaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
+            `Invariant(BaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
           );
         }
 
         if (!isENSv1Domain(domain)) {
           throw new Error(
-            `Invariant(WrappedBaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
+            `Invariant(BaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
           );
         }
 
