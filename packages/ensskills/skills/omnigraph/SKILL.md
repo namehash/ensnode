@@ -13,6 +13,10 @@ wrappers, resolvers, or chains yourself — the server does the wrangling.
 **Reach for the Omnigraph instead of** querying contracts/RPC directly, the legacy ENS Subgraph, or
 stitching together multiple calls. One query typically replaces a whole pipeline.
 
+New to how ENS works? The **ens-protocol** skill explains the protocol this API models — names and
+the nametree, normalization, resolution, registries/resolvers/registrars, and records. Read it first
+if the data shapes below don't yet make sense.
+
 ## How to run a query
 
 Use the `enscli` CLI (no install step beyond `npx`). It prints JSON when piped (ideal for parsing)

@@ -1,11 +1,4 @@
-/** JSON replacer that renders bigints as strings so results never crash serialization. */
-function replacer(_key: string, value: unknown): unknown {
-  return typeof value === "bigint" ? value.toString() : value;
-}
-
-function stringify(data: unknown): string {
-  return JSON.stringify(data, replacer, 2);
-}
+import { toJson } from "@ensnode/ensnode-sdk";
 
 /**
  * Resolves the output format: explicit `--output` wins, otherwise `json` when stdout is piped (the
@@ -32,21 +25,21 @@ export function printResult(
   if (resolveFormat(args) === "pretty" && prettyText) {
     process.stdout.write(`${prettyText(data as never)}\n`);
   } else {
-    process.stdout.write(`${stringify(data)}\n`);
+    process.stdout.write(`${toJson(data, { pretty: true })}\n`);
   }
 }
 
 /** Streams rows as NDJSON (one JSON object per line) for paginated/list output. */
 export function printNdjson(rows: unknown[]): void {
   for (const row of rows) {
-    process.stdout.write(`${JSON.stringify(row, replacer)}\n`);
+    process.stdout.write(`${toJson(row)}\n`);
   }
 }
 
 /** Writes a structured error to stderr and exits non-zero. */
 export function fail(error: unknown): never {
   const message = error instanceof Error ? error.message : String(error);
-  process.stderr.write(`${stringify({ error: { message } })}\n`);
+  process.stderr.write(`${toJson({ error: { message } }, { pretty: true })}\n`);
   process.exit(1);
 }
 

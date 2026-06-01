@@ -15,14 +15,9 @@ import {
 
 import { printResult } from "../../lib/output";
 
-let cachedSchema: GraphQLSchema | null = null;
-
 /** Builds the Omnigraph schema from the SDL bundled with enssdk (no network, always matches the SDK). */
 function loadSchema(): GraphQLSchema {
-  if (!cachedSchema) {
-    cachedSchema = buildSchema(schemaSDL);
-  }
-  return cachedSchema;
+  return buildSchema(schemaSDL);
 }
 
 interface ArgInfo {
