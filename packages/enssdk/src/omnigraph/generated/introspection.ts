@@ -6309,18 +6309,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "InterpretedName"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "interfaces",
             "type": {
               "kind": "NON_NULL",

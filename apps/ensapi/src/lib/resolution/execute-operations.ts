@@ -144,7 +144,7 @@ export function interpretOperationWithRawResult(call: Operation, raw: unknown): 
     case "name":
       return { ...call, result: interpretNameRecordValue(asLiteralName(raw as string)) };
     case "addr":
-      return { ...call, result: interpretAddressRecordValue(raw as string) };
+      return { ...call, result: interpretAddressRecordValue(raw as Hex) };
     case "text":
       return { ...call, result: interpretTextRecordValue(raw as string) };
     case "contenthash":

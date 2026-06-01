@@ -1,6 +1,6 @@
 import type { Hex, InterpretedName, LiteralName } from "enssdk";
 import { isInterpretedName } from "enssdk";
-import { isAddress, isAddressEqual, isHex, zeroAddress } from "viem";
+import { isHex, zeroAddress } from "viem";
 
 import { hasNullByte } from "../null-bytes";
 
@@ -33,34 +33,31 @@ export function interpretNameRecordValue(value: LiteralName): InterpretedName | 
  *
  * The interpreted record value is either:
  * a) null, representing a non-existent or deletion of the record, or
- *   i. contains null bytes
- *   ii. empty string
- *   iii. empty hex (0x)
- *   iv. zeroAddress
- *   v. not valid hex
+ *   i. empty hex (0x)
+ *   ii. not valid hex
+ *   iii. zeroAddress
  * b) the on-chain record bytes as hex
  *
  * @param value - The address record value to interpret.
  * @returns The interpreted address bytes as hex or null if deleted.
  */
-export function interpretAddressRecordValue(value: string): Hex | null {
-  // TODO(null-bytes): store null bytes correctly — for now, interpret as deletion
-  if (hasNullByte(value)) return null;
-
-  // interpret empty string as deletion of address record
-  if (value === "") return null;
-
+export function interpretAddressRecordValue(value: Hex): Hex | null {
   // interpret empty bytes as deletion of address record
   if (value === "0x") return null;
 
-  if (!isHex(value)) return null;
+  // interpret malformed hex as non-existence of address record
+  if (!isHex(value, { strict: true })) return null;
 
-  const hex = value.toLowerCase() as Hex;
+  // normalize to lowercase
+  const normalized = value.toLowerCase() as Hex;
 
   // interpret zeroAddress as deletion
-  if (isAddress(hex, { strict: false }) && isAddressEqual(hex, zeroAddress)) return null;
+  // NOTE: direct string compare is ok here because both zeroAddress and `normalized` are
+  // normalized to lowercase 0x-prefixed hex strings
+  if (normalized === zeroAddress) return null;
 
-  return hex;
+  // otherwise return the address record bytes as-is
+  return normalized;
 }
 
 /**

@@ -202,7 +202,7 @@ export const resolverAddressRecord = onchainTable(
      * The value of this field is interpreted by `interpretAddressRecordValue` — see its implementation
      * for additional context and specific guarantees.
      */
-    value: t.text().notNull(),
+    value: t.hex().notNull(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
