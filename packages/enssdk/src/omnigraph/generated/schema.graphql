@@ -214,6 +214,11 @@ type BaseRegistrarRegistration implements Registration {
   start: BigInt!
 
   """
+  The TokenId for this Domain in the BaseRegistrar. This is the bigint encoding of the Domain's LabelHash.
+  """
+  tokenId: BigInt!
+
+  """
   The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
@@ -1749,6 +1754,8 @@ type WrappedBaseRegistrarRegistration {
   """The Fuses for this Registration's Domain in the NameWrapper."""
   fuses: Int!
 
-  """The TokenID for this Domain in the NameWrapper."""
+  """
+  The TokenId for this Domain in the NameWrapper. This is the bigint encoding of the Domain's Node.
+  """
   tokenId: BigInt!
 }
