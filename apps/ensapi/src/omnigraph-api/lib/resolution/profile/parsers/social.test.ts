@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { SocialGithubParser, SocialTelegramParser, SocialTwitterParser } from "./social";
+import {
+  SocialGithubParser,
+  SocialKeybaseParser,
+  SocialLinkedInParser,
+  SocialTelegramParser,
+  SocialTwitterParser,
+} from "./social";
 import { profileRecordsModel } from "./test-helpers";
 
 describe("SocialGithubParser", () => {
   it("has correct selection", () => {
-    expect(SocialGithubParser.selection).toEqual({ texts: ["com.github"] });
+    expect(SocialGithubParser.selection).toEqual({ texts: ["com.github", "vnd.github"] });
   });
 
   it.each([
@@ -101,7 +107,7 @@ describe("SocialGithubParser", () => {
 
 describe("SocialTwitterParser", () => {
   it("has correct selection", () => {
-    expect(SocialTwitterParser.selection).toEqual({ texts: ["com.twitter"] });
+    expect(SocialTwitterParser.selection).toEqual({ texts: ["com.twitter", "vnd.twitter"] });
   });
 
   it.each([
@@ -199,5 +205,158 @@ describe("SocialTelegramParser", () => {
     ["foreign social URL", { "org.telegram": "https://twitter.com/itslevchiks" }],
   ])("returns null: %s", (_message, texts) => {
     expect(SocialTelegramParser.parse(profileRecordsModel(texts))).toBeNull();
+  });
+});
+
+describe("SocialGithubParser (vnd.github fallback)", () => {
+  it("has correct selection (includes vnd.github)", () => {
+    expect(SocialGithubParser.selection).toEqual({ texts: ["com.github", "vnd.github"] });
+  });
+
+  it("falls back to vnd.github when com.github is unset", () => {
+    expect(SocialGithubParser.parse(profileRecordsModel({ "vnd.github": "itslevchiks" }))).toEqual({
+      handle: "itslevchiks",
+      httpUrl: "https://github.com/itslevchiks",
+    });
+  });
+
+  it("prefers com.github over vnd.github", () => {
+    expect(
+      SocialGithubParser.parse(
+        profileRecordsModel({ "com.github": "primary-user", "vnd.github": "legacy-user" }),
+      ),
+    ).toEqual({ handle: "primary-user", httpUrl: "https://github.com/primary-user" });
+  });
+
+  it("falls back to vnd.github when com.github is empty", () => {
+    expect(
+      SocialGithubParser.parse(
+        profileRecordsModel({ "com.github": "", "vnd.github": "legacy-user" }),
+      ),
+    ).toEqual({ handle: "legacy-user", httpUrl: "https://github.com/legacy-user" });
+  });
+});
+
+describe("SocialTwitterParser (vnd.twitter fallback)", () => {
+  it("has correct selection (includes vnd.twitter)", () => {
+    expect(SocialTwitterParser.selection).toEqual({ texts: ["com.twitter", "vnd.twitter"] });
+  });
+
+  it("falls back to vnd.twitter when com.twitter is unset", () => {
+    expect(
+      SocialTwitterParser.parse(profileRecordsModel({ "vnd.twitter": "itslevchiks" })),
+    ).toEqual({ handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" });
+  });
+
+  it("prefers com.twitter over vnd.twitter", () => {
+    expect(
+      SocialTwitterParser.parse(
+        profileRecordsModel({ "com.twitter": "primaryuser", "vnd.twitter": "legacyuser" }),
+      ),
+    ).toEqual({ handle: "primaryuser", httpUrl: "https://x.com/primaryuser" });
+  });
+});
+
+describe("SocialLinkedInParser", () => {
+  it("has correct selection", () => {
+    expect(SocialLinkedInParser.selection).toEqual({ texts: ["com.linkedin"] });
+  });
+
+  it.each([
+    [
+      "bare handle",
+      "itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
+    ],
+    [
+      "@ prefix",
+      "@itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
+    ],
+    [
+      "https URL",
+      "https://linkedin.com/in/itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
+    ],
+    [
+      "www hostname",
+      "https://www.linkedin.com/in/itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
+    ],
+    [
+      "handle with hyphen",
+      "my-handle",
+      { handle: "my-handle", httpUrl: "https://www.linkedin.com/in/my-handle" },
+    ],
+    [
+      "trailing slash",
+      "https://linkedin.com/in/itslevchiks/",
+      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
+    ],
+  ])("parses %s", (_message, input, expected) => {
+    expect(SocialLinkedInParser.parse(profileRecordsModel({ "com.linkedin": input }))).toEqual(
+      expected,
+    );
+  });
+
+  it.each([
+    ["record unset", {}],
+    ["empty string", { "com.linkedin": "" }],
+    ["invalid handle characters", { "com.linkedin": "bad handle!" }],
+    ["foreign social URL", { "com.linkedin": "https://twitter.com/itslevchiks" }],
+  ])("returns null: %s", (_message, texts) => {
+    expect(SocialLinkedInParser.parse(profileRecordsModel(texts))).toBeNull();
+  });
+});
+
+describe("SocialKeybaseParser", () => {
+  it("has correct selection", () => {
+    expect(SocialKeybaseParser.selection).toEqual({ texts: ["io.keybase"] });
+  });
+
+  it.each([
+    [
+      "bare handle",
+      "itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
+    ],
+    [
+      "@ prefix",
+      "@itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
+    ],
+    [
+      "https URL",
+      "https://keybase.io/itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
+    ],
+    [
+      "http URL",
+      "http://keybase.io/itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
+    ],
+    [
+      "without scheme",
+      "keybase.io/itslevchiks",
+      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
+    ],
+    [
+      "trailing slash",
+      "keybase.io/itslevchiks/",
+      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
+    ],
+  ])("parses %s", (_message, input, expected) => {
+    expect(SocialKeybaseParser.parse(profileRecordsModel({ "io.keybase": input }))).toEqual(
+      expected,
+    );
+  });
+
+  it.each([
+    ["record unset", {}],
+    ["empty string", { "io.keybase": "" }],
+    ["invalid handle characters", { "io.keybase": "bad handle!" }],
+    ["foreign social URL", { "io.keybase": "https://github.com/itslevchiks" }],
+  ])("returns null: %s", (_message, texts) => {
+    expect(SocialKeybaseParser.parse(profileRecordsModel(texts))).toBeNull();
   });
 });

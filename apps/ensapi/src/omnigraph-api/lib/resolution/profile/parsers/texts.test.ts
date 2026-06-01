@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { profileRecordsModel } from "./test-helpers";
-import { ProfileDescriptionParser, ProfileWebsiteParser } from "./texts";
+import { ProfileDescriptionParser, ProfileEmailParser, ProfileWebsiteParser } from "./texts";
 
 describe("ProfileDescriptionParser", () => {
   it("has correct selection", () => {
@@ -40,5 +40,25 @@ describe("ProfileWebsiteParser", () => {
     ["empty string", { url: "" }],
   ])("returns null: %s", (_message, texts) => {
     expect(ProfileWebsiteParser.parse(profileRecordsModel(texts))).toBeNull();
+  });
+});
+
+describe("ProfileEmailParser", () => {
+  it("has correct selection", () => {
+    expect(ProfileEmailParser.selection).toEqual({ texts: ["email"] });
+  });
+
+  it.each([
+    ["plain email", { email: "user@example.com" }, "user@example.com"],
+    ["email with dots", { email: "first.last@example.org" }, "first.last@example.org"],
+  ])("parses %s", (_message, texts, expected) => {
+    expect(ProfileEmailParser.parse(profileRecordsModel(texts))).toBe(expected);
+  });
+
+  it.each([
+    ["record unset", {}],
+    ["empty string", { email: "" }],
+  ])("returns null: %s", (_message, texts) => {
+    expect(ProfileEmailParser.parse(profileRecordsModel(texts))).toBeNull();
   });
 });

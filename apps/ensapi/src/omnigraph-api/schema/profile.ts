@@ -4,6 +4,7 @@ import {
   interpretProfileWebsiteHttpUrl,
   ProfileAvatarParser,
   ProfileDescriptionParser,
+  ProfileEmailParser,
   ProfileHeaderParser,
   ProfileWebsiteParser,
   profileImageHttpUrlDescription,
@@ -51,6 +52,16 @@ ProfileSocialsRef.implement({
       nullable: true,
       resolve: (model) => SOCIAL_PARSERS.twitter.parse(model),
     }),
+    linkedin: t.field({
+      type: ProfileSocialAccountRef,
+      nullable: true,
+      resolve: (model) => SOCIAL_PARSERS.linkedin.parse(model),
+    }),
+    keybase: t.field({
+      type: ProfileSocialAccountRef,
+      nullable: true,
+      resolve: (model) => SOCIAL_PARSERS.keybase.parse(model),
+    }),
   }),
 });
 
@@ -82,6 +93,48 @@ ProfileAddressesRef.implement({
       type: "SolanaAddress",
       nullable: true,
       resolve: (model) => ADDRESS_PARSERS.solana.parse(model),
+    }),
+    litecoin: t.field({
+      description: "The interpreted Litecoin address, or null when unset.",
+      type: "LitecoinAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.litecoin.parse(model),
+    }),
+    dogecoin: t.field({
+      description: "The interpreted Dogecoin address, or null when unset.",
+      type: "DogecoinAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.dogecoin.parse(model),
+    }),
+    monacoin: t.field({
+      description: "The interpreted Monacoin address, or null when unset.",
+      type: "MonacoinAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.monacoin.parse(model),
+    }),
+    rootstock: t.field({
+      description: "The interpreted Rootstock (RBTC) address, or null when unset.",
+      type: "RootstockAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.rootstock.parse(model),
+    }),
+    ripple: t.field({
+      description: "The interpreted Ripple (XRP) address, or null when unset.",
+      type: "RippleAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.ripple.parse(model),
+    }),
+    bitcoincash: t.field({
+      description: "The interpreted Bitcoin Cash address, or null when unset.",
+      type: "BitcoinCashAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.bitcoincash.parse(model),
+    }),
+    binance: t.field({
+      description: "The interpreted Binance Chain (BNB) address, or null when unset.",
+      type: "BinanceAddress",
+      nullable: true,
+      resolve: (model) => ADDRESS_PARSERS.binance.parse(model),
     }),
   }),
 });
@@ -147,6 +200,11 @@ DomainProfileRef.implement({
       description: "The profile description, or null when unset.",
       nullable: true,
       resolve: (model) => ProfileDescriptionParser.parse(model),
+    }),
+    email: t.string({
+      description: "The contact email address, or null when unset.",
+      nullable: true,
+      resolve: (model) => ProfileEmailParser.parse(model),
     }),
     addresses: t.field({
       type: ProfileAddressesRef,

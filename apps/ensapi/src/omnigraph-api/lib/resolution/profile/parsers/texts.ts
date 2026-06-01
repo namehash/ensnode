@@ -10,4 +10,5 @@ const textParser = (key: string): ProfileFieldParser<string> => ({
 });
 
 export const ProfileDescriptionParser: ProfileFieldParser<string> = textParser("description");
+export const ProfileEmailParser: ProfileFieldParser<string> = textParser("email");
 export const ProfileWebsiteParser: ProfileFieldParser<string> = textParser("url");

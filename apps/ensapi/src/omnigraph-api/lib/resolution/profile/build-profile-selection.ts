@@ -11,6 +11,7 @@ import {
   ADDRESS_PARSERS,
   ProfileAvatarParser,
   ProfileDescriptionParser,
+  ProfileEmailParser,
   ProfileHeaderParser,
   ProfileWebsiteParser,
   SOCIAL_PARSERS,
@@ -91,6 +92,9 @@ export function buildProfileSelectionFromResolveContainerInfo(
   }
   if (topLevelFields.has("website")) {
     merged = mergeRecordsSelections(merged, ProfileWebsiteParser.selection);
+  }
+  if (topLevelFields.has("email")) {
+    merged = mergeRecordsSelections(merged, ProfileEmailParser.selection);
   }
 
   // 3. Walk socials sub-fields

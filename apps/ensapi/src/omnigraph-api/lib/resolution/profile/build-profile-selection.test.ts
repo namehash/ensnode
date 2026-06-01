@@ -56,12 +56,12 @@ describe("buildProfileSelectionFromResolveContainerInfo", () => {
     [
       "socials.github",
       "profile { socials { github { handle httpUrl } } }",
-      { texts: ["com.github"] },
+      { texts: ["com.github", "vnd.github"] },
     ],
     [
       "socials.twitter",
       "profile { socials { twitter { handle httpUrl } } }",
-      { texts: ["com.twitter"] },
+      { texts: ["com.twitter", "vnd.twitter"] },
     ],
     [
       "socials.telegram",
@@ -89,7 +89,7 @@ describe("buildProfileSelectionFromResolveContainerInfo", () => {
       }
     `,
       {
-        texts: ["description", "avatar", "com.github", "com.twitter"],
+        texts: ["description", "avatar", "com.github", "vnd.github", "com.twitter", "vnd.twitter"],
         addresses: [60, 0],
       },
     ],

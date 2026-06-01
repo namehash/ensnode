@@ -238,9 +238,19 @@ scalar BeautifiedName
 scalar BigInt
 
 """
+BinanceAddress represents a Bech32-encoded Binance Chain (BNB) address (coin type 714).
+"""
+scalar BinanceAddress
+
+"""
 BitcoinAddress represents a Base58Check-encoded Bitcoin address (coin type 0).
 """
 scalar BitcoinAddress
+
+"""
+BitcoinCashAddress represents a CashAddr-encoded Bitcoin Cash address (coin type 145).
+"""
+scalar BitcoinCashAddress
 
 """A Canonical Name, exposed in each representation we support."""
 type CanonicalName {
@@ -274,6 +284,11 @@ enum ChainName {
 
 """CoinType represents an enssdk#CoinType."""
 scalar CoinType
+
+"""
+DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
+"""
+scalar DogecoinAddress
 
 """
 Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
@@ -402,6 +417,9 @@ type DomainProfile {
 
   """The profile description, or null when unset."""
   description: String
+
+  """The contact email address, or null when unset."""
+  email: String
   header: ProfileHeader
   socials: ProfileSocials
   website: ProfileWebsite
@@ -992,6 +1010,16 @@ type Label {
   interpreted: InterpretedLabel!
 }
 
+"""
+LitecoinAddress represents a Base58Check-encoded Litecoin address (coin type 2).
+"""
+scalar LitecoinAddress
+
+"""
+MonacoinAddress represents a Base58Check-encoded Monacoin address (coin type 22).
+"""
+scalar MonacoinAddress
+
 """Constructs a reference to a specific Node via one of `name` or `node`."""
 input NameOrNodeInput @oneOf {
   name: InterpretedName
@@ -1227,11 +1255,32 @@ type ProfileAddresses {
   """The interpreted Base address, or null when unset."""
   base: Address
 
+  """The interpreted Binance Chain (BNB) address, or null when unset."""
+  binance: BinanceAddress
+
   """The interpreted Bitcoin address, or null when unset."""
   bitcoin: BitcoinAddress
 
+  """The interpreted Bitcoin Cash address, or null when unset."""
+  bitcoincash: BitcoinCashAddress
+
+  """The interpreted Dogecoin address, or null when unset."""
+  dogecoin: DogecoinAddress
+
   """The interpreted Ethereum address, or null when unset."""
   ethereum: Address
+
+  """The interpreted Litecoin address, or null when unset."""
+  litecoin: LitecoinAddress
+
+  """The interpreted Monacoin address, or null when unset."""
+  monacoin: MonacoinAddress
+
+  """The interpreted Ripple (XRP) address, or null when unset."""
+  ripple: RippleAddress
+
+  """The interpreted Rootstock (RBTC) address, or null when unset."""
+  rootstock: RootstockAddress
 
   """The interpreted Solana address, or null when unset."""
   solana: SolanaAddress
@@ -1265,6 +1314,8 @@ type ProfileSocialAccount {
 """Interpreted social accounts on a Domain profile."""
 type ProfileSocials {
   github: ProfileSocialAccount
+  keybase: ProfileSocialAccount
+  linkedin: ProfileSocialAccount
   telegram: ProfileSocialAccount
   twitter: ProfileSocialAccount
 }
@@ -1694,6 +1745,16 @@ type ReverseResolve {
   """
   trace: JSON!
 }
+
+"""
+RippleAddress represents a Base58Check-encoded Ripple (XRP) address (coin type 144).
+"""
+scalar RippleAddress
+
+"""
+RootstockAddress represents an EIP-55 checksummed Rootstock (RBTC) address (coin type 137).
+"""
+scalar RootstockAddress
 
 """
 SolanaAddress represents a Base58-encoded Solana address (coin type 501).

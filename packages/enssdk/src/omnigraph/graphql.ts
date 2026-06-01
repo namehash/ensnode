@@ -3,15 +3,20 @@ import { initGraphQLTada } from "gql.tada";
 import type {
   BeautifiedLabel,
   BeautifiedName,
+  BinanceAddress,
   BitcoinAddress,
+  BitcoinCashAddress,
   ChainId,
   CoinType,
+  DogecoinAddress,
   DomainId,
   Hex,
   InterfaceId,
   InterpretedLabel,
   InterpretedName,
   JsonValue,
+  LitecoinAddress,
+  MonacoinAddress,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -22,6 +27,8 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
+  RippleAddress,
+  RootstockAddress,
   SolanaAddress,
 } from "../lib/types";
 import type { introspection } from "./generated/introspection";
@@ -45,6 +52,13 @@ export type OmnigraphScalars = {
   JSON: JsonValue;
   Address: NormalizedAddress;
   BitcoinAddress: BitcoinAddress;
+  LitecoinAddress: LitecoinAddress;
+  DogecoinAddress: DogecoinAddress;
+  MonacoinAddress: MonacoinAddress;
+  RootstockAddress: RootstockAddress;
+  RippleAddress: RippleAddress;
+  BitcoinCashAddress: BitcoinCashAddress;
+  BinanceAddress: BinanceAddress;
   SolanaAddress: SolanaAddress;
   Hex: Hex;
   ChainId: ChainId;

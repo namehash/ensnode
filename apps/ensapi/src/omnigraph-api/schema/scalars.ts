@@ -2,9 +2,12 @@ import { getCoderByCoinType } from "@ensdomains/address-encoder";
 import {
   type BeautifiedLabel,
   type BeautifiedName,
+  type BinanceAddress,
   type BitcoinAddress,
+  type BitcoinCashAddress,
   type ChainId,
   type CoinType,
+  type DogecoinAddress,
   type DomainId,
   type Hex,
   type InterfaceId,
@@ -14,6 +17,8 @@ import {
   isInterpretedLabel,
   isInterpretedName,
   type JsonValue,
+  type LitecoinAddress,
+  type MonacoinAddress,
   type Name,
   type Node,
   type NormalizedAddress,
@@ -25,6 +30,8 @@ import {
   type RenewalId,
   type ResolverId,
   type ResolverRecordsId,
+  type RippleAddress,
+  type RootstockAddress,
   type SolanaAddress,
 } from "enssdk";
 import { isHex, size } from "viem";
@@ -79,6 +86,53 @@ builder.scalarType("SolanaAddress", {
   description: "SolanaAddress represents a Base58-encoded Solana address (coin type 501).",
   serialize: (value: SolanaAddress) => value,
   parseValue: (value) => makeCoinAddressSchema("Solana", 501).parse(value) as SolanaAddress,
+});
+
+builder.scalarType("LitecoinAddress", {
+  description: "LitecoinAddress represents a Base58Check-encoded Litecoin address (coin type 2).",
+  serialize: (value: LitecoinAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Litecoin", 2).parse(value) as LitecoinAddress,
+});
+
+builder.scalarType("DogecoinAddress", {
+  description: "DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).",
+  serialize: (value: DogecoinAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Dogecoin", 3).parse(value) as DogecoinAddress,
+});
+
+builder.scalarType("MonacoinAddress", {
+  description: "MonacoinAddress represents a Base58Check-encoded Monacoin address (coin type 22).",
+  serialize: (value: MonacoinAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Monacoin", 22).parse(value) as MonacoinAddress,
+});
+
+builder.scalarType("RootstockAddress", {
+  description:
+    "RootstockAddress represents an EIP-55 checksummed Rootstock (RBTC) address (coin type 137).",
+  serialize: (value: RootstockAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Rootstock", 137).parse(value) as RootstockAddress,
+});
+
+builder.scalarType("RippleAddress", {
+  description:
+    "RippleAddress represents a Base58Check-encoded Ripple (XRP) address (coin type 144).",
+  serialize: (value: RippleAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Ripple", 144).parse(value) as RippleAddress,
+});
+
+builder.scalarType("BitcoinCashAddress", {
+  description:
+    "BitcoinCashAddress represents a CashAddr-encoded Bitcoin Cash address (coin type 145).",
+  serialize: (value: BitcoinCashAddress) => value,
+  parseValue: (value) =>
+    makeCoinAddressSchema("Bitcoin Cash", 145).parse(value) as BitcoinCashAddress,
+});
+
+builder.scalarType("BinanceAddress", {
+  description:
+    "BinanceAddress represents a Bech32-encoded Binance Chain (BNB) address (coin type 714).",
+  serialize: (value: BinanceAddress) => value,
+  parseValue: (value) => makeCoinAddressSchema("Binance", 714).parse(value) as BinanceAddress,
 });
 
 builder.scalarType("Hex", {
