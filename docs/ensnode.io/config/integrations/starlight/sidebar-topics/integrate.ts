@@ -29,7 +29,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/ens-subgraph",
         },
         {
-          label: "Key Limitations",
+          label: "Key Limitations 🚨",
           link: "/docs/integrate/ens-subgraph/key-limitations",
         },
         {
@@ -71,6 +71,10 @@ export const integrateSidebarTopic = {
         {
           label: "Overview",
           link: "/docs/integrate/omnigraph",
+        },
+        {
+          label: "Core Concepts",
+          link: "/docs/integrate/omnigraph/concepts",
         },
         {
           label: "Protocol Acceleration",
@@ -217,7 +221,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
-          label: "ENSEngine (webhooks)",
+          label: "ENSEngine (Webhooks)",
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],

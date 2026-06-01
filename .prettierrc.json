@@ -12,8 +12,8 @@
       }
     },
     {
-      "comment": "Walkthroughs mirror the example apps verbatim; don't reflow their embedded GraphQL.",
-      "files": ["docs/ensnode.io/src/components/walkthroughs/**/*.mdx", "examples/**/*.{ts,tsx}"],
+      "comment": "Don't reflow embedded code: hand-authored GraphQL examples throughout the docs, and the example apps that walkthroughs mirror verbatim.",
+      "files": ["docs/ensnode.io/**/*.{md,mdx}", "examples/**/*.{ts,tsx}"],
       "options": {
         "embeddedLanguageFormatting": "off"
       }

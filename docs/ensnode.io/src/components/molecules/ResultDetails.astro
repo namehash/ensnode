@@ -1,0 +1,8 @@
+---
+const { value, title = "View Query Result" } = Astro.props;
+---
+
+<details>
+  <summary>{title}</summary>
+  <pre class="overflow-x-auto"><code>{JSON.stringify(value, null, 2)}</code></pre>
+</details>

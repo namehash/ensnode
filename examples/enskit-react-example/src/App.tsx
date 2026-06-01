@@ -9,7 +9,7 @@ import { DomainByIdView, DomainByNameView } from "./DomainView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
 
-const EXAMPLE_ACCOUNT_ADDRESS = "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574";
+const EXAMPLE_ACCOUNT_ADDRESS = "0x801d2e48d378f161dba7ad7ad002ad557714c191";
 
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/hosted-instances

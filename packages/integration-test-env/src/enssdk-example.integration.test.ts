@@ -13,9 +13,7 @@ const EXAMPLE_DIR = join(
   "enssdk-example",
 );
 
-// TODO: uncomment when v2-sepolia (and other hosted instances) expose materialized
-// `canonical { name { interpreted } }` so examples can use the local orchestrator ENSApi.
-describe.skip("enssdk-example", () => {
+describe("enssdk-example", () => {
   it("smoke test: completes against the configured ENSNode with exit code 0", () => {
     const result = spawnSync("pnpm", ["start"], {
       cwd: EXAMPLE_DIR,

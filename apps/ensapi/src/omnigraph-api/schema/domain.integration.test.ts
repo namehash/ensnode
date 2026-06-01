@@ -1,8 +1,12 @@
 import {
   ADDR_REVERSE_NODE,
   asInterpretedLabel,
+  type CoinType,
+  type ContentType,
   type DomainId,
+  ETH_COIN_TYPE,
   ETH_NODE,
+  type Hex,
   type InterpretedLabel,
   type InterpretedName,
   labelhashInterpretedLabel,
@@ -11,12 +15,15 @@ import {
   makeENSv2DomainId,
   makeENSv2RegistryId,
   makeStorageId,
+  type NormalizedAddress,
 } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
+import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
@@ -482,5 +489,244 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     for (const event of events) {
       expect(event.timestamp).toBe(t);
     }
+  });
+});
+
+describe("Domain.records", () => {
+  type DomainRecordsResult = {
+    domain: {
+      resolve: {
+        records: {
+          addresses: Array<{ coinType: CoinType; address: Hex | null }>;
+          texts: Array<{ key: string; value: string | null }>;
+        } | null;
+      };
+    };
+  };
+
+  type DomainAllRecordsResult = {
+    domain: {
+      resolve: {
+        records: {
+          reverseName: string | null;
+          contenthash: string | null;
+          pubkey: { x: string; y: string } | null;
+          dnszonehash: string | null;
+          version: string | null;
+          abi: { contentType: ContentType; data: string } | null;
+          interfaces: Array<{ interfaceId: string; implementer: string | null }>;
+          // address is string (not Hex/NormalizedAddress) because non-EVM records may use non-Ethereum formats; matches GraphQL String field
+          addresses: Array<{ coinType: CoinType; address: Hex | null }>;
+          texts: Array<{ key: string; value: string | null }>;
+        } | null;
+      };
+    };
+  };
+
+  const DomainRecords = gql`
+    query DomainRecords($name: InterpretedName!, $addresses: [CoinType!]!, $texts: [String!]!) {
+      domain(by: { name: $name }) {
+        resolve {
+          records {
+            addresses(coinTypes: $addresses) { coinType address }
+            texts(keys: $texts) { key value }
+          }
+        }
+      }
+    }
+  `;
+
+  const DomainRecordsAll = gql`
+    query DomainRecordsAll(
+      $name: InterpretedName!
+      $addresses: [CoinType!]!
+      $texts: [String!]!
+      $contentTypeMask: BigInt!
+      $interfaceIds: [InterfaceId!]!
+    ) {
+      domain(by: { name: $name }) {
+        resolve {
+          records {
+            reverseName
+            contenthash
+            pubkey { x y }
+            dnszonehash
+            version
+            abi(contentTypeMask: $contentTypeMask) { contentType data }
+            interfaces(ids: $interfaceIds) { interfaceId implementer }
+            addresses(coinTypes: $addresses) { coinType address }
+            texts(keys: $texts) { key value }
+          }
+        }
+      }
+    }
+  `;
+
+  const BITCOIN_COIN_TYPE = 0;
+  const LITECOIN_COIN_TYPE = 2;
+
+  it("resolves address and text records for example.eth", async () => {
+    await expect(
+      request<DomainRecordsResult>(DomainRecords, {
+        name: "example.eth",
+        addresses: [ETH_COIN_TYPE],
+        texts: ["description"],
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            texts: [{ key: "description", value: "example.eth" }],
+            addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
+          },
+        },
+      },
+    });
+  });
+
+  it("resolves every supported record type for test.eth", async () => {
+    await expect(
+      request<DomainAllRecordsResult>(DomainRecordsAll, {
+        name: "test.eth",
+        addresses: [ETH_COIN_TYPE, 0, 2],
+        texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
+        // BigInt GraphQL vars must be strings here — JSON.stringify (used by the test client) cannot serialize bigint
+        contentTypeMask: "1",
+        interfaceIds: [fixtures.fourBytesInterface],
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            contenthash: fixtures.contenthash,
+            pubkey: { x: fixtures.publicKeyX, y: fixtures.publicKeyY },
+            dnszonehash: null,
+            version: expect.any(String),
+            abi: { contentType: "1", data: fixtures.abiBytes },
+            interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
+            addresses: [
+              { coinType: ETH_COIN_TYPE, address: accounts.owner.address },
+              { coinType: BITCOIN_COIN_TYPE, address: fixtures.bitcoinAddress },
+              { coinType: LITECOIN_COIN_TYPE, address: fixtures.litecoinAddress },
+            ],
+            texts: [
+              { key: "avatar", value: "https://example.com/avatar.png" },
+              { key: "description", value: "test.eth" },
+              { key: "url", value: "https://ens.domains" },
+              { key: "email", value: "test@ens.domains" },
+              { key: "com.twitter", value: "ensdomains" },
+              { key: "com.github", value: "ensdomains" },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it("returns null for an unnormalized canonical name (e.g. with labelhash)", async () => {
+    // A name with a label that is an encoded labelhash is an InterpretedName but not a normalized name.
+    // Even if it exists in the DB, resolve should return null.
+    const unnormalizedName =
+      "[0000000000000000000000000000000000000000000000000000000000000000].eth";
+    await expect(
+      request<DomainRecordsResult>(DomainRecords, {
+        name: unnormalizedName,
+        addresses: [60],
+        texts: ["description"],
+      }),
+    ).resolves.toMatchObject({
+      domain: null,
+    });
+  });
+
+  it("returns null for an ABI alias that does not match the returned content type", async () => {
+    // test.eth has ABI with contentType 1 (JSON)
+    // If we ask for contentType 2 (zlib-JSON), it should return null
+    const DomainRecordsAbi = gql`
+      query DomainRecordsAbi($name: InterpretedName!, $mask1: BigInt!, $mask2: BigInt!) {
+        domain(by: { name: $name }) {
+          resolve {
+            records {
+              abi1: abi(contentTypeMask: $mask1) { contentType data }
+              abi2: abi(contentTypeMask: $mask2) { contentType data }
+            }
+          }
+        }
+      }
+    `;
+
+    await expect(
+      request<{
+        domain: {
+          resolve: {
+            records: {
+              abi1: { contentType: ContentType; data: string } | null;
+              abi2: { contentType: ContentType; data: string } | null;
+            };
+          };
+        };
+      }>(DomainRecordsAbi, {
+        name: "test.eth",
+        mask1: "1", // JSON
+        mask2: "2", // zlib-JSON
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            abi1: { contentType: "1", data: fixtures.abiBytes },
+            abi2: null,
+          },
+        },
+      },
+    });
+  });
+});
+
+(INCLUDE_DEV_METHODS ? describe : describe.skip)("Domain.profile", () => {
+  type DomainProfileResult = {
+    domain: {
+      resolve: {
+        profile: {
+          description: string | null;
+          avatar: { url: string | null } | null;
+          // ethereum address is a checksummed EVM address, so NormalizedAddress is the narrowed type
+          addresses: { ethereum: NormalizedAddress | null } | null;
+          socials: { github: { handle: string | null; url: string | null } | null } | null;
+        } | null;
+      };
+    };
+  };
+
+  const DomainProfile = gql`
+    query DomainProfile($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        resolve {
+          profile {
+            description
+            avatar { url }
+            addresses { ethereum }
+            socials { github { handle url } }
+          }
+        }
+      }
+    }
+  `;
+
+  it("returns the preview null shape for a canonical domain", async () => {
+    await expect(
+      request<DomainProfileResult>(DomainProfile, { name: "test.eth" }),
+    ).resolves.toEqual({
+      domain: {
+        resolve: {
+          profile: {
+            description: null,
+            avatar: { url: null },
+            addresses: { ethereum: null },
+            socials: { github: { handle: null, url: null } },
+          },
+        },
+      },
+    });
   });
 });

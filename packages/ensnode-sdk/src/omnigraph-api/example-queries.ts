@@ -198,6 +198,36 @@ query DomainRegistration($name: InterpretedName!) {
     },
   },
 
+  ////////////////////
+  // Domain Records
+  ////////////////////
+  {
+    id: "domain-records",
+    query: `
+query DomainRecords(
+  $name: InterpretedName!
+) {
+  domain(by: { name: $name }) {
+    canonical { name { interpreted } }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) { coinType address }
+        texts(keys: ["description"]) { key value }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "vitalik.eth" },
+      [ENSNamespaceIds.EnsTestEnv]: {
+        name: DEVNET_NAME_WITH_OWNED_RESOLVER,
+      },
+      [ENSNamespaceIds.SepoliaV2]: {
+        name: SEPOLIA_V2_NAME,
+      },
+    },
+  },
+
   //////////////////////
   // Domain Subdomains
   //////////////////////
@@ -301,6 +331,38 @@ query AccountDomains(
     },
   },
 
+  /////////////////////////
+  // Account Primary Names
+  /////////////////////////
+  {
+    id: "account-primary-names",
+    query: `
+query AccountPrimaryNames($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    resolve {
+      primaryNames(where: { chains: [ETHEREUM, BASE] }) {
+        coinType
+        chain
+        name { interpreted beautified }
+        resolve {
+          records {
+            addresses(coinTypes: [60]) {
+              coinType
+              address
+            }
+          }
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
+    },
+  },
   ////////////////////
   // Account Events
   ////////////////////
