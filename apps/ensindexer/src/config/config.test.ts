@@ -531,6 +531,20 @@ describe("config (with base env)", () => {
 
       expect(mainnetConfig.indexedChainIds).not.toEqual(sepoliaConfig.indexedChainIds);
     });
+
+    // EFP exists on `mainnet` and `ens-test-env`. On the devnet all three EFP datasources
+    // (Base/Optimism/Ethereum) point at the single Anvil chain, so the plugin must activate and
+    // index exactly one chain — guarding both the datasource-presence unlock and the collapse.
+    it("derives the single devnet chain id for efp on ens-test-env", async () => {
+      vi.stubEnv("NAMESPACE", ENSNamespaceIds.EnsTestEnv);
+      vi.stubEnv("PLUGINS", PluginName.EFP);
+      stubRpcUrlsForNamespace(ENSNamespaceIds.EnsTestEnv);
+
+      const config = await getConfig();
+
+      expect(config.plugins).toContain(PluginName.EFP);
+      expect(config.indexedChainIds).toEqual(new Set([ensTestEnvChain.id]));
+    });
   });
 
   describe("additional checks", () => {
