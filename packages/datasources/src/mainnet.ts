@@ -509,22 +509,27 @@ export default {
    * The `ListRecords` contract is also deployed on Base (one of the three "list storage location"
    * chains a list NFT may point at via `UpdateListStorageLocation`).
    *
-   * Addresses and start blocks cross-checked against https://docs.efp.app and
-   * ethereumfollowprotocol/api-v2.
+   * Every address below is cross-checked against the official EFP deployments,
+   * https://docs.efp.app/production/deployments/ (and ethereumfollowprotocol/api-v2).
    */
   [DatasourceNames.EFPBase]: {
     chain: base,
     contracts: {
+      // EFPListRegistry, Base.
       ListRegistry: {
         abi: efp_ListRegistry,
         address: "0x0e688f5dca4a0a4729946acbc44c792341714e08",
         startBlock: 20180000,
       },
+      // EFPAccountMetadata, Base. NOTE: this is the SAME address as EFPListRecords on Ethereum
+      // mainnet (see EFPEthereum below). EFP deploys via CREATE2, so one address can map to a
+      // different contract on each chain; this is not a copy-paste error.
       AccountMetadata: {
         abi: efp_AccountMetadata,
         address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
         startBlock: 20180000,
       },
+      // EFPListRecords, Base.
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33",
@@ -539,6 +544,7 @@ export default {
   [DatasourceNames.EFPOptimism]: {
     chain: optimism,
     contracts: {
+      // EFPListRecords, Optimism.
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x4ca00413d850dcfa3516e14d21dae2772f2acb85",
@@ -553,6 +559,11 @@ export default {
   [DatasourceNames.EFPEthereum]: {
     chain: mainnet,
     contracts: {
+      // EFPListRecords, Ethereum mainnet. This shares the 0x5289…0F17EF address with
+      // EFPAccountMetadata on Base (above): EFP deploys via CREATE2, so the same address appears on
+      // multiple chains for different contracts. Confirmed as ListRecords on Ethereum mainnet at
+      // https://docs.efp.app/production/deployments/ (and ethereumfollowprotocol/api-v2); it is NOT
+      // a copy-paste of the Base AccountMetadata address.
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
