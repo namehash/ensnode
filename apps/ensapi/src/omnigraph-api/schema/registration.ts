@@ -246,6 +246,32 @@ BaseRegistrarRegistrationRef.implement({
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "BaseRegistrar",
   fields: (t) => ({
+    /////////////////////////////////////
+    // BaseRegistrarRegistration.tokenId
+    /////////////////////////////////////
+    tokenId: t.field({
+      description:
+        "The TokenId for this Domain in the BaseRegistrar. This is the bigint encoding of the Domain's LabelHash.",
+      type: "BigInt",
+      nullable: false,
+      resolve: async (parent, _args, ctx) => {
+        const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
+        if (!domain) {
+          throw new Error(
+            `Invariant(WrappedBaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
+          );
+        }
+
+        if (!isENSv1Domain(domain)) {
+          throw new Error(
+            `Invariant(WrappedBaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
+          );
+        }
+
+        return hexToBigInt(domain.labelHash);
+      },
+    }),
+
     //////////////////////////////////////
     // BaseRegistrarRegistration.baseCost
     //////////////////////////////////////
@@ -300,7 +326,7 @@ ThreeDNSRegistrationRef.implement({
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "ThreeDNS",
   fields: (t) => ({
-    //
+    // TODO: ThreeDNSRegistration.tokenId
   }),
 });
 
@@ -345,10 +371,10 @@ WrappedBaseRegistrarRegistrationRef.implement({
     // Wrapped.tokenId
     ///////////////////
     tokenId: t.field({
-      description: "The TokenID for this Domain in the NameWrapper.",
+      description:
+        "The TokenId for this Domain in the NameWrapper. This is the bigint encoding of the Domain's Node.",
       type: "BigInt",
       nullable: false,
-      // Only ENSv1 Domains can be wrapped; the NameWrapper's ERC1155 tokenId is the Domain's node.
       resolve: async (parent, _args, ctx) => {
         const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
         if (!domain) {
@@ -356,11 +382,13 @@ WrappedBaseRegistrarRegistrationRef.implement({
             `Invariant(WrappedBaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
           );
         }
+
         if (!isENSv1Domain(domain)) {
           throw new Error(
             `Invariant(WrappedBaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
           );
         }
+
         return hexToBigInt(domain.node);
       },
     }),
