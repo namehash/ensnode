@@ -31,7 +31,7 @@ AccelerationStatusRef.implement({
 //////////////////
 export const ChainName = builder.enumType("ChainName", {
   description:
-    "Primary-name chains supported by the Omnigraph API.\n@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.",
+    "The names of chains that the Omnigraph API supports identifying by name as a syntactic convenience. The Omnigraph API supports identification of additional chains beyond this list, but those chains must be identified through other mechanisms such as `coinType` or `chainId`.",
   values: CHAIN_NAME_VALUES,
 });
 

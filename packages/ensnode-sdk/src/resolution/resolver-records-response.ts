@@ -18,7 +18,8 @@ export type ResolverRecordsResponseBase = {
    * Address records, keyed by CoinType.
    * Value is null if no record for the specified CoinType is set.
    *
-   * Values are the on-chain record bytes as hex.
+   * Values are the "raw" resolved address record as hex. May be a hex value representing 0 or more bytes.
+   * There is no guarantee that an EVM coinType returns an address value of any particular byte length.
    */
   addresses: Record<CoinType, Hex | null>;
 

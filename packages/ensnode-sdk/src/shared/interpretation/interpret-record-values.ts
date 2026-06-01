@@ -1,5 +1,5 @@
 import type { Hex, InterpretedName, LiteralName } from "enssdk";
-import { isInterpretedName, toNormalizedAddress } from "enssdk";
+import { isInterpretedName } from "enssdk";
 import { isAddress, isAddressEqual, isHex, zeroAddress } from "viem";
 
 import { hasNullByte } from "../null-bytes";
@@ -59,9 +59,6 @@ export function interpretAddressRecordValue(value: string): Hex | null {
 
   // interpret zeroAddress as deletion
   if (isAddress(hex, { strict: false }) && isAddressEqual(hex, zeroAddress)) return null;
-
-  // normalize EVM addresses to lowercase NormalizedAddress hex
-  if (isAddress(hex, { strict: false })) return toNormalizedAddress(hex);
 
   return hex;
 }

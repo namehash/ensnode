@@ -254,8 +254,7 @@ type CanonicalName {
 scalar ChainId
 
 """
-Primary-name chains supported by the Omnigraph API.
-@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
+The names of chains that the Omnigraph API supports identifying by name as a syntactic convenience. The Omnigraph API supports identification of additional chains beyond this list, but those chains must be identified through other mechanisms such as `coinType` or `chainId`.
 """
 enum ChainName {
   ARBITRUM_ONE
@@ -1486,7 +1485,7 @@ type ResolvedAbiRecord {
 """A resolved address record for an ENS name."""
 type ResolvedAddressRecord {
   """
-  The on-chain address record bytes as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type.
+  The "raw" resolved address record as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. May be a hex value representing 0 or more bytes. There is no guarantee that an EVM coinType returns an address value of any particular byte length.
   """
   address: Hex
 
