@@ -47,25 +47,25 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
 
 ## 5. ENSDb Writers
 
-Build your own indexer for ENSDb by implementing the [ENSNode Plugin](/docs/integrate/integration-options/ensnode-plugins) specification. ENSDb Writers index onchain ENS data and write it into an ENSDb instance.
+Build your own indexer for ENSDb by implementing the [ENSNode Plugin](/docs/integrate/integration-options/ensnode-plugins) specifications you're interested to index. ENSDb Writers index onchain data and write it into an ENSDb instance according to the standards set by relevant ENSNode Plugins.
 
 <LinkCard
-  title="ENSDb Writers Documentation"
+  title="ENSDb Writer Documentation"
   href="/docs/integrate/integration-options/ensdb-writers"
 />
 
 ## 6. ENSDb Readers
 
-Build custom APIs on top of ENSDb. ENSDb Readers query indexed ENS data from an ENSDb instance and serve it through any API surface (GraphQL, REST, gRPC, etc.).
+Build custom APIs or other specialized services on top of ENSDb. ENSDb Readers read indexed ENS data from an ENSDb instance and serve it through any API surface (GraphQL, REST, gRPC, webhooks, etc.) or pipe it into specialized data processing pipelines through the PostgreSQL write-ahead-log.
 
 <LinkCard
-  title="ENSDb Readers Documentation"
+  title="ENSDb Reader Documentation"
   href="/docs/integrate/integration-options/ensdb-readers"
 />
 
 ## 7. ENSNode Plugins
 
-ENSNode Plugins are abstract specifications that define indexed data models for ENS. They are the key architectural piece that enables decoupling between ENSDb Writers and ENSDb Readers.
+ENSNode Plugins are abstract specifications that define indexed data models relevant to ENS. They are a key architectural piece that enables complete decoupling between ENSDb Writers and ENSDb Readers.
 
 <LinkCard
   title="ENSNode Plugins Documentation"

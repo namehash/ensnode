@@ -1,25 +1,19 @@
 ---
 title: ENSDb Readers (Custom APIs)
-description: How to build custom APIs on top of ENSDb, using the ENSDb Reader specification.
+description: How to build custom APIs and under services on top of ENSDb, using the ENSDb Reader standard.
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-## Standards-compliant ENSDb Readers
-
-There are multiple [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) apps created (and planned) by the NameHash team. Find out more about each of them below.
-
-:::note[Build your own ENSDb Reader]
-Continuing on the ideas shared in [ENSDb integration options page](/docs/integrate/integration-options/ensdb), you can build your own ENSDb Reader app and define a custom data model and capabilities that are required for your use cases. Feel free to reach out to the NameHash team on [Telegram](https://t.me/ensnode) if you want to build your own ENSDb Reader and want any help or guidance!
-:::
+## Current ENSDb Readers
 
 ### ENSApi
 
-ENSApi is a reference implementation of an [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) that includes standards-compliant web services:
+ENSApi is a reference implementation of an [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) that includes the following APIs:
 
-- A standards-compliant [ENS Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api) on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `unigraph` and `protocol-acceleration`.
-- A standards-compliant [ENS Subgraph GraphQL API](/docs/integrate/ens-subgraph) on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `subgraph`, `basenames`, `lineanames`, and `threedns`.
-- An API for accessing the metadata stored in ENSDb, including [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the indexing status from the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the overall [ENSNode stack of services](/docs/services) active in the ENSNode instance.
+- The new [ENS Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api) that's built on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `unigraph` and `protocol-acceleration`.
+- A backwards-compatible [ENS Subgraph GraphQL API](/docs/integrate/ens-subgraph) that's built on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `subgraph`, `basenames`, `lineanames`, and `threedns`.
+- APIs for various queries related to the the metadata stored in ENSDb, such as the indexing status from the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the overall [ENSNode stack of services](/docs/services) active in the ENSNode instance.
 
 <LinkCard
   title="Learn more about ENSApi"
@@ -27,7 +21,9 @@ ENSApi is a reference implementation of an [ENSDb Reader](/docs/services/ensdb/c
   href="/docs/services/ensapi"
 />
 
-### Other ENSDb Readers
+### New ENSDb Readers Under Development
+
+Multiple new [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) services are planned by the NameHash team. Find out more about each of them below.
 
 <LinkCard
   title="Learn more about ensdb-cli"
@@ -37,7 +33,7 @@ ENSApi is a reference implementation of an [ENSDb Reader](/docs/services/ensdb/c
 
 <LinkCard
   title="Learn more about ENSEngine"
-  description="A push-based web service allowing to track ENS data changes in real-time."
+  description="A push-based web service allowing you to track ENS data changes as they occur."
   href="/docs/integrate/integration-options/ensengine"
 />
 

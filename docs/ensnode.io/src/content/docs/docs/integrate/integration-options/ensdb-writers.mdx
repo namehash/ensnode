@@ -1,16 +1,11 @@
 ---
 title: ENSDb Writers (Indexers)
-description: How to build indexers for ENSDb, using the ENSDb Writer specification.
+description: How to build your own custom indexer implementation for ENSDb, using the ENSDb Writer specification.
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-An [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) defines how an indexing process for ENS looks like, including:
-
-- How to source onchain data about ENS (events, blocks, etc.)
-- How to process onchain data into an indexed data model (including transforming raw onchain data into a desired internal data model).
-- How to store that processed data in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance).
-- How to store metadata about the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance).
+An [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) is the implementation of an indexing service that implements one or more standards-compliant [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins) and implements a standards-compliant [ENSDb Metadata Writer](/docs/services/ensdb/concepts/glossary#ensdb-metadata-writer) that stores [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer).
 
 :::tip[Build your own ENSDb Writer]
 You can build your own ENSDb Writer in any language, using any indexing framework, as long as you follow the [ENSDb Standard](/docs/services/ensdb/concepts/glossary#ensdb-standard). The ENSDb Standard defines rules and constraints for how an ENSDb Writer should write data into an ENSDb instance in a way that maintains the integrity of the data and supports interoperability with any ENSDb Reader.
@@ -22,11 +17,11 @@ Your ENSDb Writer must include:
 
 :::
 
-## Standards-compliant ENSDb Writers
+## Current ENSDb Writers
 
 ### ENSIndexer
 
-[ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) built by the NameHash team. It is a multi-chain ENS indexer built on top of [Ponder](https://ponder.sh/), a modular blockchain indexing framework. ENSIndexer processes events from each relevant chain and transforms the data, storing it in your ENSDb instance.
+[ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) built by the NameHash team. It is a multi-chain ENS indexer built on top of [Ponder](https://ponder.sh/) that implements many ENSNode Plugins.
 
 <LinkCard
   title="Learn more about ENSIndexer"
@@ -34,15 +29,16 @@ Your ENSDb Writer must include:
   href="/docs/services/ensindexer"
 />
 
+## New ENSDb Writers Under Development or Discussions
+
 ### Envio
 
-The [Envio](https://envio.dev/) team is actively collaborating with NameHash Labs to build another standards-compliant [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) that uses Envio as the indexing engine. Their initial plugin is `subgraph`, with plans to support `unigraph` and `protocol-acceleration` after that.
+The [Envio](https://envio.dev/) team is actively collaborating with NameHash Labs to build another standards-compliant [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) that uses Envio as the indexing engine. Their initial ENSNode plugin under development is `subgraph`, with plans to support `unigraph` after that.
 
-## Other Potential ENSDb Writers
 
 ### Amp (Edge & Node)
 
-[Amp](https://www.edgeandnode.com/articles/stream-live-chain-data-into-your-analytics-stack-with-amp) by [Edge & Node](https://www.edgeandnode.com) is a next-generation blockchain data platform that transforms onchain activity into structured, verifiable datasets — preserving full cryptographic provenance for compliance and auditability. Amp can stream live onchain data, including live ENS state, making it a perfect foundation for a new production-grade ENSDb Writer implementation.
+[Edge & Node](https://www.edgeandnode.com) has discussions scheduled with the NameHash Labs team to investigate the use of their new [Amp](https://www.edgeandnode.com/articles/stream-live-chain-data-into-your-analytics-stack-with-amp) platform to implement an ENSDb Writer.
 
 ### Build Your Own
 
