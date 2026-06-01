@@ -1,3 +1,5 @@
+import type React from "react";
+
 export const CheckSolidIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="12"

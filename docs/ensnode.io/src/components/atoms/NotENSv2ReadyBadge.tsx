@@ -1,3 +1,4 @@
+import type React from "react";
 import { CheckSolidIcon } from "@components/atoms/icons/CheckSolidIcon";
 import { SkullIcon } from "@components/atoms/icons/SkullIcon";
 import { XMarkIcon } from "@components/atoms/icons/XMarkIcon";
