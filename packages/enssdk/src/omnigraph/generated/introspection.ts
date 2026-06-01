@@ -1145,10 +1145,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "DEFAULT",
-            "isDeprecated": false
-          },
-          {
             "name": "ETHEREUM",
             "isDeprecated": false
           },
@@ -4832,7 +4828,7 @@ const introspection = {
         "name": "PrimaryNameByInput",
         "inputFields": [
           {
-            "name": "chain",
+            "name": "chainName",
             "type": {
               "kind": "ENUM",
               "name": "ChainName"
@@ -4853,7 +4849,7 @@ const introspection = {
         "name": "PrimaryNameRecord",
         "fields": [
           {
-            "name": "chain",
+            "name": "chainName",
             "type": {
               "kind": "ENUM",
               "name": "ChainName"
@@ -4902,7 +4898,7 @@ const introspection = {
         "name": "PrimaryNamesWhereInput",
         "inputFields": [
           {
-            "name": "chains",
+            "name": "chainNames",
             "type": {
               "kind": "LIST",
               "ofType": {
@@ -6128,7 +6124,7 @@ const introspection = {
             "name": "address",
             "type": {
               "kind": "SCALAR",
-              "name": "String"
+              "name": "Hex"
             },
             "args": [],
             "isDeprecated": false

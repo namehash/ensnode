@@ -31,8 +31,14 @@ describe("interpretAddressRecordValue", () => {
     expect(interpretAddressRecordValue("0x")).toBeNull();
   });
 
-  it("returns as-is for non-EVM address", () => {
-    expect(interpretAddressRecordValue("someNonEvmAddress")).toBe("someNonEvmAddress");
+  it("returns null for non-hex values", () => {
+    expect(interpretAddressRecordValue("someNonHexString")).toBeNull();
+  });
+
+  it("returns lowercase hex for non-EVM address bytes", () => {
+    expect(interpretAddressRecordValue(`0x${"05".repeat(25).toUpperCase()}`)).toBe(
+      `0x${"05".repeat(25)}`,
+    );
   });
 
   it("returns null for zeroAddress", () => {

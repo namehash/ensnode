@@ -1,6 +1,6 @@
-import type { InterpretedName, LiteralName } from "enssdk";
+import type { Hex, InterpretedName, LiteralName } from "enssdk";
 import { isInterpretedName, toNormalizedAddress } from "enssdk";
-import { isAddress, isAddressEqual, zeroAddress } from "viem";
+import { isAddress, isAddressEqual, isHex, zeroAddress } from "viem";
 
 import { hasNullByte } from "../null-bytes";
 
@@ -29,7 +29,7 @@ export function interpretNameRecordValue(value: LiteralName): InterpretedName | 
 }
 
 /**
- * Interprets an address record value string and returns null if the value is interpreted as a deletion.
+ * Interprets an address record value and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
  * a) null, representing a non-existent or deletion of the record, or
@@ -37,14 +37,13 @@ export function interpretNameRecordValue(value: LiteralName): InterpretedName | 
  *   ii. empty string
  *   iii. empty hex (0x)
  *   iv. zeroAddress
- * b) an address record value that
- *   i. does not contain null bytes
- *   ii. (if is an EVM address) is lowercase
+ *   v. not valid hex
+ * b) the on-chain record bytes as hex
  *
  * @param value - The address record value to interpret.
- * @returns The interpreted address string or null if deleted.
+ * @returns The interpreted address bytes as hex or null if deleted.
  */
-export function interpretAddressRecordValue(value: string): string | null {
+export function interpretAddressRecordValue(value: string): Hex | null {
   // TODO(null-bytes): store null bytes correctly — for now, interpret as deletion
   if (hasNullByte(value)) return null;
 
@@ -54,14 +53,17 @@ export function interpretAddressRecordValue(value: string): string | null {
   // interpret empty bytes as deletion of address record
   if (value === "0x") return null;
 
-  // if it's not an EVM address, return as-is
-  if (!isAddress(value, { strict: false })) return value;
+  if (!isHex(value)) return null;
+
+  const hex = value.toLowerCase() as Hex;
 
   // interpret zeroAddress as deletion
-  if (isAddressEqual(value, zeroAddress)) return null;
+  if (isAddress(hex, { strict: false }) && isAddressEqual(hex, zeroAddress)) return null;
 
-  // otherwise normalize and return
-  return toNormalizedAddress(value);
+  // normalize EVM addresses to lowercase NormalizedAddress hex
+  if (isAddress(hex, { strict: false })) return toNormalizedAddress(hex);
+
+  return hex;
 }
 
 /**

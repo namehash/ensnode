@@ -254,13 +254,12 @@ type CanonicalName {
 scalar ChainId
 
 """
-Primary-name chains supported by the Omnigraph API. Use `DEFAULT` for the default EVM chain.
+Primary-name chains supported by the Omnigraph API.
 @see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
 """
 enum ChainName {
   ARBITRUM_ONE
   BASE
-  DEFAULT
   ETHEREUM
   LINEA
   OPTIMISM
@@ -1174,11 +1173,11 @@ type PermissionsUserEventsConnectionEdge {
 scalar PermissionsUserId
 
 """
-Select a primary name lookup target. Exactly one of `coinType` or `chain` must be provided.
+Select a primary name lookup target. Exactly one of `coinType` or `chainName` must be provided.
 """
 input PrimaryNameByInput @oneOf {
   """A `ChainName` to resolve the primary name for."""
-  chain: ChainName
+  chainName: ChainName
 
   """The ENSIP-9 coin type to resolve the primary name for."""
   coinType: CoinType
@@ -1189,7 +1188,7 @@ type PrimaryNameRecord {
   """
   The chain corresponding to `coinType`, or null when `coinType` is not represented in `ChainName`.
   """
-  chain: ChainName
+  chainName: ChainName
 
   """The canonical ENSIP-9 coin type for this primary name lookup."""
   coinType: CoinType!
@@ -1204,11 +1203,11 @@ type PrimaryNameRecord {
 }
 
 """
-Filter primary name lookups. Exactly one of `coinTypes` or `chains` must be provided.
+Filter primary name lookups. Exactly one of `coinTypes` or `chainNames` must be provided.
 """
 input PrimaryNamesWhereInput @oneOf {
   """`ChainName` values to resolve primary names for."""
-  chains: [ChainName!]
+  chainNames: [ChainName!]
 
   """Coin types to resolve primary names for."""
   coinTypes: [CoinType!]
@@ -1487,9 +1486,9 @@ type ResolvedAbiRecord {
 """A resolved address record for an ENS name."""
 type ResolvedAddressRecord {
   """
-  The raw address record value, or null if not set. May be any address format for the associated coin type and may require validation or preprocessing before use. Only EVM addresses are guaranteed to be NormalizedAddress values; see ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder).
+  The on-chain address record bytes as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type.
   """
-  address: String
+  address: Hex
 
   """The coin type for this address record."""
   coinType: CoinType!
@@ -1677,15 +1676,19 @@ type ReverseResolve {
   """
   acceleration: AccelerationStatus!
 
-  """The primary name for this Account on a specific coin type or chain."""
+  """
+  The primary name for this Account on a specific coin type or chain name.
+  """
   primaryName(
-    """Select a coin type or chain to resolve a primary name for."""
+    """Select a coin type or chain name to resolve a primary name for."""
     by: PrimaryNameByInput!
   ): PrimaryNameRecord!
 
-  """Primary names for this Account on the requested coin types or chains."""
+  """
+  Primary names for this Account on the requested coin types or chain names.
+  """
   primaryNames(
-    """Select coin types or chains to resolve primary names for."""
+    """Select coin types or chain names to resolve primary names for."""
     where: PrimaryNamesWhereInput!
   ): [PrimaryNameRecord!]!
 

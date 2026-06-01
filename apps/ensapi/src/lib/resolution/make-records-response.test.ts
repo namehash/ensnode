@@ -18,11 +18,11 @@ describe("makeRecordsResponse", () => {
 
   it("writes resolved address records keyed by CoinType", () => {
     const operations = [
-      { functionName: "addr", args: [node, 60n], result: "0x123" },
-      { functionName: "addr", args: [node, 1001n], result: "0x456" },
+      { functionName: "addr", args: [node, 60n], result: "0x1234" as Hex },
+      { functionName: "addr", args: [node, 1001n], result: "0x5678" as Hex },
     ] satisfies Operation[];
     expect(makeRecordsResponse(operations)).toEqual({
-      addresses: { 60: "0x123", 1001: "0x456" },
+      addresses: { 60: "0x1234", 1001: "0x5678" },
     });
   });
 
