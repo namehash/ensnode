@@ -50,6 +50,10 @@ export default function () {
       }
 
       const owner = event.args.to.toLowerCase() as Hex;
+      // A mint inserts the row; a later transfer of the same NFT updates only `owner`/`updatedAt`.
+      // `createdAt`, `nftChainId`, and `nftContractAddress` are mint-time values left untouched on
+      // conflict: an ERC-721 tokenId is unique for the ListRegistry's lifetime (a burned id is not
+      // re-minted) and the NFT never changes chain or contract.
       await context.ensDb
         .insert(ensIndexerSchema.efpLists)
         .values({

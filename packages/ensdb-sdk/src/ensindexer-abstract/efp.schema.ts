@@ -27,7 +27,7 @@ export const efpLists = onchainTable(
     tokenId: t.text().primaryKey(),
     /** Current ERC-721 owner of the list NFT. */
     owner: t.hex().notNull(),
-    /** Chain id of the `ListRegistry` NFT (always Base / 8453). */
+    /** Chain id of the `ListRegistry` NFT (Base / 8453 on mainnet; the active namespace's EFP deployment chain otherwise). */
     nftChainId: t.int8({ mode: "number" }).notNull(),
     /** `ListRegistry` contract address on `nftChainId`. */
     nftContractAddress: t.hex().notNull(),

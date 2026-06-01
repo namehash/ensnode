@@ -93,7 +93,8 @@ EfpListRef.implement({
     // EfpList.nftChainId
     /////////////////////
     nftChainId: t.field({
-      description: "Chain id of the ListRegistry NFT (always Base / 8453).",
+      description:
+        "Chain id of the ListRegistry NFT (Base / 8453 on the mainnet namespace; otherwise the active namespace's EFP deployment chain, e.g. 31337 on the ens-test-env devnet).",
       type: "ChainId",
       nullable: false,
       resolve: (list) => list.nftChainId as ChainId,

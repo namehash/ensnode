@@ -16,7 +16,7 @@
 
 import { type Hex, isHex } from "viem";
 
-import { EFP_LIST_OP_VERSION, EFP_RECORD_VERSION } from "../constants";
+import { EFP_LIST_OP_VERSION, EFP_RECORD_TYPE_ADDRESS, EFP_RECORD_VERSION } from "../constants";
 
 export interface ParsedListOp {
   /** Top-level list-op version. Always 1 today. */
@@ -93,8 +93,8 @@ export function parseRecord(data: Hex | string | null | undefined): ParsedRecord
 
   // The version byte is part of the record's decoding contract; EFP defines only version 1.
   if (version !== EFP_RECORD_VERSION) return null;
-  // EFP defines only record type 1 (a 20-byte address); types 0 and 2-255 are reserved.
-  if (recordType !== 1) return null;
+  // EFP defines only the address record type (a 20-byte address); types 0 and 2-255 are reserved.
+  if (recordType !== EFP_RECORD_TYPE_ADDRESS) return null;
 
   // Truncate any trailing junk to the 20-byte address; reject inputs missing the full address.
   const body = bytes.slice(

@@ -10,6 +10,9 @@ export const EFP_LIST_OP_VERSION = 1;
 export const EFP_RECORD_VERSION = 1;
 export const EFP_LSL_VERSION = 1;
 
+/** The only EFP `ListRecord` type EFP defines: a 20-byte address. Types 0 and 2-255 are reserved. */
+export const EFP_RECORD_TYPE_ADDRESS = 0x01;
+
 /**
  * EFP `ListOp` opcodes (op version 0x01), encoded as `version | opcode | data`.
  *

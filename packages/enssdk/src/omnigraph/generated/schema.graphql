@@ -873,7 +873,9 @@ type EfpList {
   """The address allowed to administer this list."""
   manager: Address
 
-  """Chain id of the ListRegistry NFT (always Base / 8453)."""
+  """
+  Chain id of the ListRegistry NFT (Base / 8453 on the mainnet namespace; otherwise the active namespace's EFP deployment chain, e.g. 31337 on the ens-test-env devnet).
+  """
   nftChainId: ChainId!
 
   """The ListRegistry contract address."""
