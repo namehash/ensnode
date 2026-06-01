@@ -256,8 +256,8 @@ a[rel="prev"]:hover {
 /* Override Starlight's default markdown link hover (which switches to
    --sl-color-white): keep links their base color on hover so only the
    underline-offset animates. */
-.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card *)),
-.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card *)) > span {
+.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card, .sl-link-card *)),
+.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card, .sl-link-card *)) > span {
   color: var(--sl-color-text-accent);
 }
 
