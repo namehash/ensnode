@@ -23,20 +23,20 @@ export const FeaturedENSNodeIntegrators = () => {
 
   return (
     <section className="w-full h-fit box-border flex flex-col flex-nowrap justify-center items-center gap-5 sm:gap-10 px-5 py-7 sm:px-8 sm:py-10 bg-[#011A25]">
-      <p className="text-sm sm:text-base leading-6 font-normal text-white text-balance">
+      <p className="text-sm sm:text-base leading-6 font-normal text-white text-balance text-center">
         Join the ENS ecosystem that's already building on ENSNode
       </p>
       <DisplayENSNodeIntegrators
         integrators={FEATURED_ENSNODE_INTEGRATORS}
-        className="flex min-[1270px]:hidden"
+        className="flex min-[1250px]:hidden"
       />
       <DisplayENSNodeIntegrators
         integrators={topIntegratorsRow}
-        className="hidden min-[1270px]:flex"
+        className="hidden min-[1250px]:flex"
       />
       <DisplayENSNodeIntegrators
         integrators={bottomIntegratorsRow}
-        className="hidden min-[1270px]:flex"
+        className="hidden min-[1250px]:flex"
       />
     </section>
   );
