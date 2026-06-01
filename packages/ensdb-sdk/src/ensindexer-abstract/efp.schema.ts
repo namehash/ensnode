@@ -12,7 +12,7 @@
  * Timestamps are Unix-seconds `bigint`s (the block timestamp), matching ENSNode convention.
  */
 
-import { index, onchainTable } from "ponder";
+import { index, onchainTable, sql } from "ponder";
 
 /**
  * One row per minted `ListRegistry` NFT (a "list"). EFP separates the NFT `owner`, the
@@ -55,6 +55,11 @@ export const efpLists = onchainTable(
       t.listStorageLocationContractAddress,
       t.listStorageLocationSlot,
     ),
+    // Numeric (not lexicographic) ordering of the text `tokenId` (a uint256, too large for an
+    // integer column) is index-backed via this expression index, so `efp.lists` /
+    // `Account.efp.lists` pagination — which compares and orders by `tokenId::numeric` — stays
+    // index-backed at mainnet-scale list counts instead of falling back to a sort.
+    idx_tokenId_numeric: index("efp_lists_token_id_numeric").on(sql`(${t.tokenId}::numeric)`),
   }),
 );
 
