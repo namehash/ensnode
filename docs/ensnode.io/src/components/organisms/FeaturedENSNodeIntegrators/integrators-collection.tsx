@@ -1,28 +1,28 @@
-import { AnticaptureLogo } from "@components/atoms/logos/ens-ecosystem-members/AnticaptureLogo";
-import { AtlasLogo } from "@components/atoms/logos/ens-ecosystem-members/AtlasLogo";
-import { BlockfulLogo } from "@components/atoms/logos/ens-ecosystem-members/BlockfulLogo";
-import { EnscribeLogo } from "@components/atoms/logos/ens-ecosystem-members/EnscribeLogo";
-import { ENSLabsLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSLabsLogo";
-import { ENSTestEnvLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSTestEnvLogo";
-import { ENSv2AppLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSv2AppLogo";
-import { ENSv2ExplorerLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSv2ExplorerLogo";
-import { ENSVisionLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSVisionLogo";
-import { ENSvolutionLogo } from "@components/atoms/logos/ens-ecosystem-members/ENSvolutionLogo";
-import { EthereumCommentsProtocolLogo } from "@components/atoms/logos/ens-ecosystem-members/EthereumCommentsProtocolLogo";
-import { EthIdLogo } from "@components/atoms/logos/ens-ecosystem-members/EthIdLogo";
-import { GrailsLogo } from "@components/atoms/logos/ens-ecosystem-members/GrailsLogo";
-import { JustaNameLogo } from "@components/atoms/logos/ens-ecosystem-members/JustaNameLogo";
-import { NamespaceLogo } from "@components/atoms/logos/ens-ecosystem-members/NamespaceLogo";
+import { AnticaptureLogo } from "@components/atoms/logos/featured-ensnode-integrators/AnticaptureLogo";
+import { AtlasLogo } from "@components/atoms/logos/featured-ensnode-integrators/AtlasLogo";
+import { BlockfulLogo } from "@components/atoms/logos/featured-ensnode-integrators/BlockfulLogo";
+import { EnscribeLogo } from "@components/atoms/logos/featured-ensnode-integrators/EnscribeLogo";
+import { ENSLabsLogo } from "@components/atoms/logos/featured-ensnode-integrators/ENSLabsLogo";
+import { ENSTestEnvLogo } from "@components/atoms/logos/featured-ensnode-integrators/ENSTestEnvLogo";
+import { ENSv2AppLogo } from "@components/atoms/logos/featured-ensnode-integrators/ENSv2AppLogo";
+import { ENSv2ExplorerLogo } from "@components/atoms/logos/featured-ensnode-integrators/ENSv2ExplorerLogo";
+import { ENSVisionLogo } from "@components/atoms/logos/featured-ensnode-integrators/ENSVisionLogo";
+import { ENSvolutionLogo } from "@components/atoms/logos/featured-ensnode-integrators/ENSvolutionLogo";
+import { EthereumCommentsProtocolLogo } from "@components/atoms/logos/featured-ensnode-integrators/EthereumCommentsProtocolLogo";
+import { EthIdLogo } from "@components/atoms/logos/featured-ensnode-integrators/EthIdLogo";
+import { GrailsLogo } from "@components/atoms/logos/featured-ensnode-integrators/GrailsLogo";
+import { JustaNameLogo } from "@components/atoms/logos/featured-ensnode-integrators/JustaNameLogo";
+import { NamespaceLogo } from "@components/atoms/logos/featured-ensnode-integrators/NamespaceLogo";
 import type { JSX } from "react";
 
-export interface ENSEcosystemMemberDisplayData {
+export interface FeaturedENSNodeIntegratorsDisplayData {
   name: string;
   websiteURL: URL;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
   customStyles?: string;
 }
 
-export const ENS_ECOSYSTEM_MEMBERS: ENSEcosystemMemberDisplayData[] = [
+export const FEATURED_ENSNODE_INTEGRATORS: FeaturedENSNodeIntegratorsDisplayData[] = [
   {
     name: "ENS Labs",
     websiteURL: new URL("https://www.enslabs.org/"),

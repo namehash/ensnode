@@ -5,13 +5,13 @@ import Header from "@components/organisms/Header.astro";
 import Hero from "@components/overrides/Hero.astro";
 import Layout from "../layouts/Layout.astro";
 import JoinTelegram from "../components/molecules/JoinTelegram";
-import { ENSEcosystemMembers } from "../components/organisms/ENSEcosystemMembers/index.tsx";
+import { FeaturedENSNodeIntegrators } from "../components/organisms/FeaturedENSNodeIntegrators/index.tsx";
 ---
 
 <Layout data-page="home">
   <Header />
   <Hero ensadminUrl={ENSADMIN_URL} />
-  <ENSEcosystemMembers client:load />
+  <FeaturedENSNodeIntegrators client:load />
   <section
     class="w-full h-fit box-border flex flex-col flex-nowrap justify-center items-center gap-10 sm:gap-20 p-5 sm:px-28 sm:py-[60px]">
     <JoinTelegram />
