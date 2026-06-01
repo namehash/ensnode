@@ -49,14 +49,14 @@ ReverseResolveRef.implement({
       }),
     }),
     primaryName: t.field({
-      description: "The primary name for this Account on a specific coin type or chain.",
+      description: "The primary name for this Account on a specific coin type or chain name.",
       type: PrimaryNameRecordRef,
       nullable: false,
       args: {
         by: t.arg({
           type: PrimaryNameByInput,
           required: true,
-          description: "Select a coin type or chain to resolve a primary name for.",
+          description: "Select a coin type or chain name to resolve a primary name for.",
         }),
       },
       resolve: ({ records, accelerate }, { by }) => {
@@ -69,14 +69,14 @@ ReverseResolveRef.implement({
       },
     }),
     primaryNames: t.field({
-      description: "Primary names for this Account on the requested coin types or chains.",
+      description: "Primary names for this Account on the requested coin types or chain names.",
       type: [PrimaryNameRecordRef],
       nullable: false,
       args: {
         where: t.arg({
           type: PrimaryNamesWhereInput,
           required: true,
-          description: "Select coin types or chains to resolve primary names for.",
+          description: "Select coin types or chain names to resolve primary names for.",
         }),
       },
       resolve: ({ records, accelerate }, { where }) => {

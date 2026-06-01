@@ -31,7 +31,7 @@ ResolvedRawTextRecordRef.implement({
 ///////////////////////////
 export const ResolvedAddressRecordRef = builder.objectRef<{
   coinType: CoinType;
-  address: string | null;
+  address: Hex | null;
 }>("ResolvedAddressRecord");
 
 ResolvedAddressRecordRef.implement({
@@ -43,9 +43,10 @@ ResolvedAddressRecordRef.implement({
       nullable: false,
       resolve: (r) => r.coinType,
     }),
-    address: t.exposeString("address", {
+    address: t.expose("address", {
+      type: "Hex",
       description:
-        "The raw address record value, or null if not set. May be any address format for the associated coin type and may require validation or preprocessing before use. Only EVM addresses are guaranteed to be NormalizedAddress values; see ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder).",
+        'The "raw" resolved address record as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. May be a hex value representing 0 or more bytes. There is no guarantee that an EVM coinType returns an address value of any particular byte length.',
       nullable: true,
     }),
   }),

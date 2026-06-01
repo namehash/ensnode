@@ -341,9 +341,9 @@ query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
-      primaryNames(where: { chains: [ETHEREUM, BASE] }) {
+      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         coinType
-        chain
+        chainName
         name { interpreted beautified }
         resolve {
           records {
