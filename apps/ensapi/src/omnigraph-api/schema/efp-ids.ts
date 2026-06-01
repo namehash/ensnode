@@ -7,9 +7,13 @@ import type { Hex } from "viem";
  * formats MUST stay in sync with the indexer.
  */
 
-/** `efp_account_metadata` key: `${address}-${key}` (lowercased address). */
+/**
+ * `efp_account_metadata` key: `${address}-${key}`. Mirrors the indexer's `accountMetadataId`: the
+ * address is lowercase (a NormalizedAddress) and NUL bytes are stripped from the free-form `key`
+ * (the indexer strips them before writing, so a lookup must strip them too to match the stored id).
+ */
 export function efpAccountMetadataId(address: NormalizedAddress, key: string): string {
-  return `${address}-${key}`;
+  return `${address}-${key.replace(/\0/g, "")}`;
 }
 
 /** `efp_list_storage_locations` key: `${chainId}-${contractAddress}-${slot}` (lowercased hex). */
