@@ -37,12 +37,6 @@ export const omnigraphCacheExchange = cacheExchange({
       return typeof key === "string" ? key : null;
     },
 
-    // ResolvedRecords are keyable by just `id`
-    ResolvedRecords: (data) => {
-      const key = data.id;
-      return typeof key === "string" ? key : null;
-    },
-
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
