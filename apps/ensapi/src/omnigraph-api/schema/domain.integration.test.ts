@@ -515,7 +515,6 @@ describe("Domain.records", () => {
           version: string | null;
           abi: { contentType: ContentType; data: string } | null;
           interfaces: Array<{ interfaceId: string; implementer: string | null }>;
-          // address is string (not Hex/NormalizedAddress) because non-EVM records may use non-Ethereum formats; matches GraphQL String field
           addresses: Array<{ coinType: CoinType; address: Hex | null }>;
           texts: Array<{ key: string; value: string | null }>;
         } | null;
