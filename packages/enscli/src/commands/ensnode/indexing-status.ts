@@ -2,7 +2,7 @@ import { defineCommand } from "citty";
 
 import { EnsNodeClient } from "@ensnode/ensnode-sdk";
 
-import { connectionArgs, outputArgs } from "../../lib/args";
+import { ensnodeArgs, outputArgs } from "../../lib/args";
 import { resolveEnsNodeUrl } from "../../lib/config";
 import { printResult, runSafely } from "../../lib/output";
 
@@ -12,7 +12,7 @@ export const indexingStatus = defineCommand({
     description: "Fetch the indexing status of an ENSNode instance",
   },
   args: {
-    ...connectionArgs,
+    ...ensnodeArgs,
     ...outputArgs,
   },
   run: ({ args }) =>

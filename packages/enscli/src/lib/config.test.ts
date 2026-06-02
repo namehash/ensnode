@@ -72,4 +72,16 @@ describe("resolveEnsRainbowUrl", () => {
       "http://localhost:3223/",
     );
   });
+
+  it("falls back to the ENSRAINBOW_URL env var", () => {
+    process.env.ENSRAINBOW_URL = "http://localhost:9998";
+    expect(resolveEnsRainbowUrl({}).href).toBe("http://localhost:9998/");
+  });
+
+  it("prefers the flag over the env var", () => {
+    process.env.ENSRAINBOW_URL = "http://localhost:9998";
+    expect(resolveEnsRainbowUrl({ "ensrainbow-url": "http://localhost:3223" }).href).toBe(
+      "http://localhost:3223/",
+    );
+  });
 });

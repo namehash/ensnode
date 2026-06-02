@@ -8,13 +8,13 @@ import { assertCleanIdentifier } from "../lib/validate";
 export const labelhash = defineCommand({
   meta: {
     name: "labelhash",
-    description: "Compute the ENS labelhash of a single label",
+    description: "Compute the LabelHash of a single Label",
   },
   args: {
     label: {
       type: "positional",
       required: true,
-      description: "The label to hash (e.g. vitalik)",
+      description: "The Label to labelhash (e.g. vitalik)",
     },
     ...outputArgs,
   },

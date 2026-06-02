@@ -2,7 +2,7 @@ import { defineCommand } from "citty";
 
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
-import { outputArgs, rainbowArgs } from "../../lib/args";
+import { ensRainbowArgs, outputArgs } from "../../lib/args";
 import { resolveEnsRainbowUrl } from "../../lib/config";
 import { printResult, runSafely } from "../../lib/output";
 import { assertCleanIdentifier } from "../../lib/validate";
@@ -18,7 +18,7 @@ export const heal = defineCommand({
       required: true,
       description: "The labelHash to heal (0x… or an encoded [hash])",
     },
-    ...rainbowArgs,
+    ...ensRainbowArgs,
     ...outputArgs,
   },
   run: ({ args }) =>

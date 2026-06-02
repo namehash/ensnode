@@ -8,13 +8,13 @@ import { assertCleanIdentifier } from "../lib/validate";
 export const namehash = defineCommand({
   meta: {
     name: "namehash",
-    description: "Compute the ENS namehash (node) of a name",
+    description: "Compute the Node of a Name",
   },
   args: {
     name: {
       type: "positional",
       required: true,
-      description: "The ENS name to hash (e.g. vitalik.eth)",
+      description: "The Name to namehash (e.g. vitalik.eth)",
     },
     ...outputArgs,
   },

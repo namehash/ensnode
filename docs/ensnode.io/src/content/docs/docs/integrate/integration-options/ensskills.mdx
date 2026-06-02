@@ -3,9 +3,10 @@ title: ensskills (AI agents)
 description: Versioned agent skills for ENS — install with skills-npm to give AI coding agents an opinionated, version-locked contract for the ENS Omnigraph.
 ---
 
-import { Aside, LinkCard } from "@astrojs/starlight/components";
+import { Aside, Code, LinkCard } from "@astrojs/starlight/components";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
 
-`ensskills` is a curated set of [agent skills](https://agentskills.io) that give AI coding agents — Claude Code, Cursor, Codex, and the rest — a well-defined contract for working with ENS. Left to their own devices, agents reinvent ENS from scratch every prompt, burning context rediscovering the protocol. `ensskills` hands them the right context — no more, no less — so they produce ENS code that actually works.
+`ensskills` is a curated set of [agent skills](https://agentskills.io) that give AI coding agents — Claude Code, Cursor, Codex, and the rest — a well-defined contract for working with ENS. Left to their own devices, agents reinvent ENS from scratch every prompt, burning context rediscovering the protocol. `ensskills` hands them the right context—no more, no less—so they produce ENS code that works correctly, the first time.
 
 The skills drive [`enscli`](/docs/integrate/integration-options/enscli) for live ENS lookups and steer agents toward [`enssdk`](/docs/integrate/integration-options/enssdk) / [`enskit`](/docs/integrate/integration-options/enskit) when writing integration code.
 
@@ -15,19 +16,20 @@ The skills drive [`enscli`](/docs/integrate/integration-options/enscli) for live
 
 Add both to your project and wire a `prepare` script:
 
-```jsonc
-// package.json
+<Code
+  lang="jsonc"
+  code={`// package.json
 {
   "devDependencies": {
-    "ensskills": "1.15.1",
+    "ensskills": "${snapshot.sdkVersion}",
     "skills-npm": "^1"
   },
   "scripts": {
     // re-syncs the pinned skills into your agent dirs on every install
     "prepare": "skills-npm"
   }
-}
-```
+}`}
+/>
 
 ```bash
 pnpm install   # symlinks the skills for your detected agents
@@ -41,10 +43,10 @@ pnpm install   # symlinks the skills for your detected agents
 
 - **`ens-protocol`** — how the ENS protocol works at a conceptual level: the nametree, normalization, namehash/labelhash, registry/resolver/registrar, forward & reverse resolution, primary names, records, and ENS across chains. Vendor-neutral, intentionally stable, with pull-as-needed reference pages. The mental model the other skills build on.
 - **`omnigraph`** — the monolithic ENS skill. Teaches the unified ENSv1 + ENSv2 datamodel, resolution via `Domain.resolve` / `Account.resolve`, Relay pagination, a condensed schema reference, vetted example queries, and how to execute and explore queries with `enscli`.
+- **`enscli`** — running ENS lookups from the shell: the output contract, namespace/URL resolution, input hardening, and every command (Omnigraph queries, offline schema exploration, `namehash`/`labelhash`, ENSRainbow healing, indexing status).
 
 The following are reserved and ship as stubs today, fleshed out in upcoming releases:
 
-- **`enscli`** — in-depth CLI usage.
 - **`enssdk`** — TypeScript integration with the typed Omnigraph client.
 - **`enskit`** — React integration (`useOmnigraphQuery`, cache directives, infinite pagination).
 - **`migrate-to-omnigraph`** — migrating from the legacy ENS Subgraph.

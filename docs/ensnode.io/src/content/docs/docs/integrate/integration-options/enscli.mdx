@@ -5,7 +5,7 @@ description: An agent- and human-friendly CLI for ENS — query the Omnigraph, e
 
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 
-`enscli` is the terminal-shaped entry point to ENS. It wraps [`enssdk`](/docs/integrate/integration-options/enssdk) and the [Omnigraph](/docs/integrate/omnigraph) so you can resolve names, look up records, search domains, and run ad-hoc GraphQL queries against any ENSNode instance — without writing a script first.
+`enscli` is the CLI entry point to ENS. It wraps [`enssdk`](/docs/integrate/integration-options/enssdk) and the [Omnigraph](/docs/integrate/omnigraph) so you can resolve names, look up records, search domains, and run ad-hoc GraphQL queries against any ENSNode instance — without writing a script first.
 
 It is designed to feel natural whether you drive it yourself or let an AI agent drive it: predictable arguments, machine-readable output, runtime schema introspection, and loud, structured errors.
 
@@ -14,7 +14,7 @@ It is designed to feel natural whether you drive it yourself or let an AI agent 
 No install step beyond `npx`:
 
 ```bash
-# Resolve a name's namehash
+# Namehash a Name
 npx enscli namehash vitalik.eth
 
 # Run a GraphQL query against the Omnigraph (default: mainnet)
@@ -25,7 +25,7 @@ npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { ad
 
 `enscli` is **read-only** and built for predictable parsing:
 
-- **JSON when piped, pretty in a TTY.** When stdout is not a terminal (the agent case), every command prints JSON; interactively you get a friendlier rendering. Force either with `--output json` or `--output pretty`.
+- **JSON when piped, pretty in a TTY.** When stdout is not a terminal (i.e. for agents), every command prints JSON; interactively you get a friendlier rendering. Force either with `--output json` or `--output pretty`.
 - **Structured errors.** Failures print `{ "error": { "message": "…" } }` to stderr and exit non-zero.
 - **Input hardening.** Names, labels, and hashes containing control characters or `?`/`#`/`%` are rejected before any network call.
 
@@ -37,12 +37,11 @@ Most `ensnode` commands talk to an ENSNode instance. The target URL is resolved 
 
 `--namespace` (alias `-n`, or the `NAMESPACE` env var) selects a NameHash-hosted instance:
 
-| Namespace      | Hosted default                         |
-| -------------- | -------------------------------------- |
-| `mainnet`      | `https://api.alpha.ensnode.io`         |
-| `sepolia`      | `https://api.alpha-sepolia.ensnode.io` |
-| `sepolia-v2`   | `https://api.v2-sepolia.ensnode.io`    |
-| `ens-test-env` | _(none — pass `--ensnode-url`)_        |
+| Namespace    | Hosted default                         |
+| ------------ | -------------------------------------- |
+| `mainnet`    | `https://api.alpha.ensnode.io`         |
+| `sepolia`    | `https://api.alpha-sepolia.ensnode.io` |
+| `sepolia-v2` | `https://api.v2-sepolia.ensnode.io`    |
 
 ```bash
 npx enscli ensnode indexing-status --namespace sepolia
@@ -58,16 +57,22 @@ ENSRainbow commands resolve their URL similarly via `--ensrainbow-url` / `ENSRAI
 Send a raw GraphQL query — the string is the exact payload, so the [schema](#ensnode-omnigraph-schema-typefield) doubles as your documentation.
 
 ```bash
-npx enscli ensnode omnigraph 'query D($n: InterpretedName!) {
-  domain(by: { name: $n }) {
+npx enscli ensnode omnigraph 'query D($name: InterpretedName!) {
+  domain(by: { name: $name }) {
     canonical { name { interpreted } }
     resolve { records { addresses(coinTypes: [60]) { address } } }
   }
-}' --variables '{"n":"vitalik.eth"}'
+}' --variables '{"name":"vitalik.eth"}'
 ```
 
 <Aside type="tip">
   GraphQL is naturally field-masked — select only the fields you need to keep responses small. Resolution lives in the graph: select `Domain.resolve` (records) and `Account.resolve` (primary names) inline rather than as separate calls.
+
+  <LinkCard
+    title="ENS Omnigraph API"
+    description="The full data model, resolution, and query patterns."
+    href="/docs/integrate/omnigraph"
+  />
 </Aside>
 
 ### `ensnode omnigraph schema [Type[.field]]`

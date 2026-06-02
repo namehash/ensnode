@@ -2,7 +2,7 @@
   "name": "enscli",
   "version": "1.15.1",
   "type": "module",
-  "description": "An agent- and human-friendly CLI for ENS, wrapping enssdk and the ENS Omnigraph",
+  "description": "An agent- and human-friendly CLI for ENS, ENSNode, and the Omnigraph API.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "ENS",
     "ENSNode",
     "Omnigraph",
-    "CLI"
+    "agent"
   ],
   "files": [
     "dist"

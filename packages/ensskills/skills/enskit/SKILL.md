@@ -1,6 +1,6 @@
 ---
 name: enskit
-description: Reference for building ENS React UIs with enskit (urql-based Omnigraph hooks like useOmnigraphQuery, cache directives, infinite pagination). Coming soon — for now the omnigraph skill covers the underlying query model.
+description: Reference for building ENS React UIs with enskit (urql-based Omnigraph hooks like useOmnigraphQuery, cache directives, infinite pagination). Coming soon.
 ---
 
 # enskit (coming soon)

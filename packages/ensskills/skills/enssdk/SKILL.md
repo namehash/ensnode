@@ -1,6 +1,6 @@
 ---
 name: enssdk
-description: Reference for integrating ENS into JavaScript/TypeScript apps with the enssdk library (typed Omnigraph client via gql.tada, hashing, normalization). Coming soon — for now the omnigraph skill covers the query model enssdk wraps.
+description: Reference for integrating ENS into JavaScript/TypeScript apps with the enssdk library (typed Omnigraph client via gql.tada, hashing, normalization). Coming soon.
 ---
 
 # enssdk (coming soon)

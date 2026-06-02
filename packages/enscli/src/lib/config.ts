@@ -1,36 +1,21 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseEnv } from "node:util";
 
 import { type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import { getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 
 /**
- * Minimal `.env` reader. Parses `cwd/.env` once into a map and never mutates `process.env`, so the
- * resolution precedence (CLI flag > process env > `.env`) stays explicit at each call site.
+ * `.env` reader. Parses `cwd/.env` once (via Node's built-in {@link parseEnv}) into a map and never
+ * mutates `process.env`, so the resolution precedence (CLI flag > process env > `.env`) stays
+ * explicit at each call site.
  */
-let dotEnv: Record<string, string> | null = null;
-function readDotEnv(): Record<string, string> {
+let dotEnv: Record<string, string | undefined> | null = null;
+function readDotEnv(): Record<string, string | undefined> {
   if (dotEnv) return dotEnv;
-  dotEnv = {};
   const path = resolve(process.cwd(), ".env");
-  if (!existsSync(path)) return dotEnv;
-
-  for (const rawLine of readFileSync(path, "utf8").split("\n")) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-    const eq = line.indexOf("=");
-    if (eq === -1) continue;
-    const key = line.slice(0, eq).trim();
-    let value = line.slice(eq + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    dotEnv[key] = value;
-  }
+  dotEnv = existsSync(path) ? parseEnv(readFileSync(path, "utf8")) : {};
   return dotEnv;
 }
 

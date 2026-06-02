@@ -2,7 +2,7 @@ import { defineCommand } from "citty";
 
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
-import { outputArgs, rainbowArgs } from "../../lib/args";
+import { ensRainbowArgs, outputArgs } from "../../lib/args";
 import { resolveEnsRainbowUrl } from "../../lib/config";
 import { printResult, runSafely } from "../../lib/output";
 
@@ -12,7 +12,7 @@ export const count = defineCommand({
     description: "Report the number of healable labels known to ENSRainbow",
   },
   args: {
-    ...rainbowArgs,
+    ...ensRainbowArgs,
     ...outputArgs,
   },
   run: ({ args }) =>

@@ -18,13 +18,19 @@ import {
   isObjectType,
 } from "graphql";
 
-// Imported from source on purpose (not a published export): the example queries are the single
-// source of truth, shared with the docs Omnigraph examples.
-import { GRAPHQL_API_EXAMPLE_QUERIES } from "../../ensnode-sdk/src/omnigraph-api/example-queries";
-
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const SDL_PATH = resolve(SCRIPT_DIR, "../../enssdk/src/omnigraph/generated/schema.graphql");
 const SKILL_PATH = resolve(SCRIPT_DIR, "../skills/omnigraph/SKILL.md");
+const EXAMPLE_QUERIES_PATH = resolve(
+  SCRIPT_DIR,
+  "../../ensnode-sdk/src/omnigraph-api/example-queries.ts",
+);
+
+interface ExampleQuery {
+  id: string;
+  query: string;
+  variables: { default: Record<string, unknown> };
+}
 
 /** Types rendered with full field listings; everything else is listed by name only. */
 const CORE_TYPES = [
@@ -105,7 +111,11 @@ function buildSchemaReference(schema: GraphQLSchema): string {
   return sections.join("\n\n");
 }
 
-function buildExamples(): string {
+async function buildExamples(): Promise<string> {
+  // load dynamically to avoid tsconfig root error
+  const { GRAPHQL_API_EXAMPLE_QUERIES } = (await import(EXAMPLE_QUERIES_PATH)) as {
+    GRAPHQL_API_EXAMPLE_QUERIES: ExampleQuery[];
+  };
   // Skip "hello-world": it's the playground welcome blurb, not a reusable query pattern.
   return GRAPHQL_API_EXAMPLE_QUERIES.filter((example) => example.id !== "hello-world")
     .map((example) => {
@@ -137,11 +147,11 @@ function replaceRegion(content: string, region: string, replacement: string): st
   return content.replace(pattern, `${start}\n${replacement}\n${end}`);
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const schema = buildSchema(readFileSync(SDL_PATH, "utf8"));
   let content = readFileSync(SKILL_PATH, "utf8");
   content = replaceRegion(content, "SCHEMA", buildSchemaReference(schema));
-  content = replaceRegion(content, "EXAMPLES", buildExamples());
+  content = replaceRegion(content, "EXAMPLES", await buildExamples());
   writeFileSync(SKILL_PATH, content);
   console.log(`Updated ${SKILL_PATH}`);
 }

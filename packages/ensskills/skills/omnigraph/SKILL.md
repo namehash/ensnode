@@ -29,7 +29,7 @@ npx enscli ensnode omnigraph '{ ... }' --namespace sepolia
 npx enscli ensnode omnigraph '{ ... }' --ensnode-url http://localhost:4334
 ```
 
-You can also POST `{ "query": "...", "variables": {...} }` to `/api/omnigraph` on any ENSNode instance — but prefer `enscli`, which handles namespaces, URLs, and JSON output for you.
+You can also POST `{ "query": "...", "variables": {...} }` to `/api/omnigraph` on any ENSNode instance — but prefer `enscli`, which handles namespaces, URLs, and JSON output for you. The **enscli** skill is the full CLI reference (output contract, namespace/URL resolution, every command).
 
 ## Discover the schema (no network)
 
@@ -57,7 +57,7 @@ A condensed reference is also inlined below.
 
 ## When the Omnigraph can't express it
 
-If a question genuinely isn't expressible in the Omnigraph schema, the underlying ENS state is also queryable via SQL over ENSDb (the `unigraph-sql` skill). Prefer the Omnigraph first; escalate to SQL only for shapes the GraphQL surface doesn't support, and consider opening a feature request.
+If a question genuinely isn't expressible in the Omnigraph schema, the underlying ENS state is also queryable via Unigraph SQL over ENSDb (the `unigraph-sql` skill). Prefer the Omnigraph first; escalate to SQL only for shapes the GraphQL surface doesn't support.
 
 ## Schema reference
 

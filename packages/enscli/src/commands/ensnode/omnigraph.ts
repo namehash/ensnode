@@ -2,7 +2,7 @@ import { defineCommand } from "citty";
 import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph as omnigraphModule } from "enssdk/omnigraph";
 
-import { connectionArgs, outputArgs } from "../../lib/args";
+import { ensnodeArgs, outputArgs } from "../../lib/args";
 import { resolveEnsNodeUrl } from "../../lib/config";
 import { printResult, runSafely } from "../../lib/output";
 import { runOmnigraphSchema } from "./omnigraph-schema";
@@ -32,7 +32,7 @@ export const omnigraph = defineCommand({
       type: "string",
       description: 'With "schema": list type and field names matching a keyword',
     },
-    ...connectionArgs,
+    ...ensnodeArgs,
     ...outputArgs,
   },
   run: ({ args }) =>

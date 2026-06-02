@@ -5,7 +5,7 @@ import type { ArgsDef } from "citty";
  *
  * Resolution precedence (see {@link ./config}): CLI flag > process env > `.env` > namespace default.
  */
-export const connectionArgs = {
+export const ensnodeArgs = {
   namespace: {
     type: "string",
     alias: "n",
@@ -17,8 +17,12 @@ export const connectionArgs = {
   },
 } satisfies ArgsDef;
 
-/** Args for selecting which ENSRainbow instance a command talks to. */
-export const rainbowArgs = {
+/**
+ * Args for selecting which ENSRainbow instance a command talks to.
+ *
+ * Resolution precedence (see {@link ./config}): CLI flag > process env > `.env` > default.
+ */
+export const ensRainbowArgs = {
   "ensrainbow-url": {
     type: "string",
     description: "ENSRainbow instance URL (or set ENSRAINBOW_URL)",

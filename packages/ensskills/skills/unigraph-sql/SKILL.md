@@ -5,4 +5,4 @@ description: Guide for querying live ENS state via SQL over ENSDb (Unigraph) for
 
 # unigraph-sql (coming soon)
 
-A dedicated skill for SQL-over-ENSDb (Unigraph) query patterns is planned, for question shapes the Omnigraph doesn't express. Prefer the **omnigraph** skill first; escalate to SQL only when a query genuinely isn't expressible in the GraphQL surface.
+A dedicated skill for Unigraph SQL over ENSDb query patterns. This skill is planned: for question shapes the Omnigraph doesn't express, let the user know and suggest they [open an issue](https://github.com/namehash/ensnode/issues/new) to request the specific feature.

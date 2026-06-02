@@ -9,11 +9,17 @@ npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { ad
 # Explore the schema offline
 npx enscli ensnode omnigraph schema Domain
 
-# Hashing
+# Namehashing, Labelhashing
 npx enscli namehash vitalik.eth
 npx enscli labelhash vitalik
 ```
 
-Outputs JSON when piped and a pretty form in a TTY. Read-only.
+Outputs JSON when piped and a pretty form in a TTY.
 
 See the [enscli documentation](https://ensnode.io/docs/integrate/integration-options/enscli) for the full command reference, namespaces, and configuration.
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

@@ -1,8 +1,113 @@
 ---
 name: enscli
-description: Reference for the enscli command-line tool (ENS hashing, Omnigraph queries, indexing status, ENSRainbow healing). Coming soon — for now the omnigraph skill documents enscli usage for querying ENS data.
+description: Drive the enscli command-line tool to read ENS data — run Omnigraph GraphQL queries, explore the schema offline, compute namehash/labelhash, heal labels via ENSRainbow, and check ENSNode indexing status. Use this when executing ENS lookups from a shell (the omnigraph skill authors queries; this skill runs them).
 ---
 
-# enscli (coming soon)
+# enscli
 
-A dedicated, in-depth `enscli` usage skill is planned. Until then, the **omnigraph** skill documents how to drive `enscli ensnode omnigraph` (and `omnigraph schema`) to read ENS data, and `npx enscli --help` lists every command.
+`enscli` is the terminal entry point to ENS. It wraps [`enssdk`](https://www.npmjs.com/package/enssdk) and the ENS Omnigraph so you can run GraphQL queries, explore the schema, compute hashes, and heal labels against any ENSNode instance — no install step beyond `npx`, no script to write first.
+
+It is built to be driven by an agent: predictable flags, machine-readable output, offline schema introspection, and loud structured errors. v0 is **read-only** (no mutations).
+
+To _author_ Omnigraph queries, use the **omnigraph** skill — it carries the schema reference and vetted example queries. This skill is about _running_ them and the other CLI commands. For protocol fundamentals, see the **ens-protocol** skill.
+
+## Output contract
+
+Rely on this when parsing results:
+
+- **JSON when piped, pretty in a TTY.** When stdout is not a terminal (the agent case) every command prints JSON; interactively you get a friendlier rendering. Force either with `--output json` / `--output pretty` (alias `-o`).
+- **Structured errors.** Failures print `{ "error": { "message": "…" } }` to stderr and exit non-zero. Always check the exit code.
+- **Input hardening.** Names, labels, and hashes containing control characters or `?` / `#` / `%` are rejected before any network call, so a hallucinated identifier fails locally and loudly rather than silently mis-resolving.
+
+## Selecting an ENSNode instance
+
+`ensnode` commands talk to an ENSNode instance. The URL is resolved with precedence **`--ensnode-url` flag → `ENSNODE_URL` env → `.env` → namespace default**. `--namespace` (alias `-n`, or the `NAMESPACE` env var) picks a NameHash-hosted instance:
+
+| Namespace      | Hosted default                         |
+| -------------- | -------------------------------------- |
+| `mainnet`      | `https://api.alpha.ensnode.io`         |
+| `sepolia`      | `https://api.alpha-sepolia.ensnode.io` |
+| `sepolia-v2`   | `https://api.v2-sepolia.ensnode.io`    |
+| `ens-test-env` | _(none — pass `--ensnode-url`)_        |
+
+`ens-test-env` has no hosted default, so it fails fast asking for `--ensnode-url`. ENSRainbow commands resolve their URL the same way via `--ensrainbow-url` / `ENSRAINBOW_URL`, defaulting to the hosted ENSRainbow.
+
+## Commands
+
+```
+enscli
+  ensnode
+    omnigraph <query>            run a raw GraphQL query (--variables '<json>')
+    omnigraph schema [Type[.field]]  explore the bundled schema offline (--search <kw>)
+    indexing-status              fetch an ENSNode instance's indexing status
+  ensrainbow
+    heal <labelhash>             heal a labelHash to its original label
+    count                        count healable labels known to ENSRainbow
+  namehash <name>                compute the Node of a Name
+  labelhash <label>              compute the LabelHash of a single Label
+```
+
+### `ensnode omnigraph <query>`
+
+The query string is the exact GraphQL payload — zero translation. Pass variables as a JSON object string. GraphQL is natively field-masked: select only the fields you need to keep responses (and your context) small.
+
+```bash
+# Inline query (default namespace: mainnet)
+npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { address } } }'
+
+# With variables
+npx enscli ensnode omnigraph 'query D($n: InterpretedName!) {
+  domain(by: { name: $n }) {
+    canonical { name { interpreted } }
+    resolve { records { addresses(coinTypes: [60]) { address } } }
+  }
+}' --variables '{"n":"vitalik.eth"}'
+
+# Against a specific namespace or instance
+npx enscli ensnode omnigraph '{ ... }' --namespace sepolia
+npx enscli ensnode omnigraph '{ ... }' --ensnode-url http://localhost:4334
+```
+
+Resolution lives in the graph — select `Domain.resolve` (records) and `Account.resolve` (primary names) inline rather than as separate calls. See the **omnigraph** skill for the full schema and query patterns.
+
+### `ensnode omnigraph schema [Type[.field]]`
+
+The schema ships with the CLI; explore it offline before writing a query rather than guessing field names.
+
+```bash
+npx enscli ensnode omnigraph schema                  # root query fields + the major types
+npx enscli ensnode omnigraph schema Domain           # a type's fields, with descriptions
+npx enscli ensnode omnigraph schema Domain.canonical # a single field
+npx enscli ensnode omnigraph schema --search primary # find types/fields by keyword
+```
+
+### `ensnode indexing-status`
+
+```bash
+npx enscli ensnode indexing-status
+npx enscli ensnode indexing-status --namespace sepolia-v2
+```
+
+### `ensrainbow heal <labelhash>` / `ensrainbow count`
+
+Recover the original label behind a labelHash (accepts a `0x…` hash or an encoded `[hash]`), or count how many labels ENSRainbow can heal.
+
+```bash
+npx enscli ensrainbow heal 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+npx enscli ensrainbow count
+```
+
+### `namehash <name>` / `labelhash <label>`
+
+Compute ENS hashes locally (no network). Inputs are normalized and validated via `enssdk` — never `toLowerCase()` a name yourself.
+
+```bash
+npx enscli namehash vitalik.eth
+npx enscli labelhash vitalik
+```
+
+## Related skills
+
+- **omnigraph** — author Omnigraph GraphQL queries (schema reference + vetted examples); run them with `enscli ensnode omnigraph`.
+- **ens-protocol** — the conceptual model (names, hashing, normalization, resolution, records) behind these commands.
+- **enssdk** — the TypeScript SDK `enscli` wraps, for in-app integration instead of the shell.

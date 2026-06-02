@@ -8,8 +8,7 @@ import { namehash } from "./commands/namehash";
 export const main = defineCommand({
   meta: {
     name: "enscli",
-    description:
-      "An agent- and human-friendly CLI for ENS. Outputs JSON when piped, pretty in a TTY. Read-only.",
+    description: "An agent- and human-friendly CLI for ENS, ENSNode, and the Omnigraph API.",
   },
   subCommands: {
     ensnode,
