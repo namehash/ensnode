@@ -65,6 +65,9 @@ export const DatasourceNames = {
   ReverseResolverArbitrum: "rrArbitrum",
   ReverseResolverScroll: "rrScroll",
   ENSv2Root: "ENSv2Root",
+  EFPBase: "efpBase",
+  EFPOptimism: "efpOptimism",
+  EFPEthereum: "efpEthereum",
 } as const;
 
 export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];

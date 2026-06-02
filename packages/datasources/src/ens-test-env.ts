@@ -1,3 +1,7 @@
+// ABIs for EFP Datasources
+import { AccountMetadata as efp_AccountMetadata } from "./abis/efp/AccountMetadata";
+import { ListRecords as efp_ListRecords } from "./abis/efp/ListRecords";
+import { ListRegistry as efp_ListRegistry } from "./abis/efp/ListRegistry";
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
@@ -11,7 +15,7 @@ import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
-import { contracts } from "./devnet/constants";
+import { contracts, efpContracts } from "./devnet/constants";
 import { ensTestEnvChain } from "./lib/chains";
 // Shared ABIs
 import { ResolverABI } from "./lib/ResolverABI";
@@ -160,6 +164,64 @@ export default {
       DefaultPublicResolver5: {
         abi: ResolverABI,
         address: contracts.PublicResolver,
+        startBlock: 0,
+      },
+    },
+  },
+
+  /**
+   * EFP Datasources
+   *
+   * The Ethereum Follow Protocol contracts, deployed onto the ens-test-env devnet by the EFP devnet
+   * image (attach mode) on top of the ENS deployment. On the `mainnet` namespace EFP spans Base,
+   * Optimism, and Ethereum; the single-chain devnet has only one EFP deployment, so all three EFP
+   * datasources resolve to `ensTestEnvChain` (id 31337) with the same `ListRecords` contract.
+   *
+   * The EFP plugin's Ponder config keys each contract by chain id, so the three datasources collapse
+   * to a single set of contracts on chain 31337 (no double-indexing). This relies on the
+   * `ListRecords` address being IDENTICAL across all three datasources below — if they diverge, the
+   * per-chain-id merge silently keeps only `EFPEthereum`'s.
+   *
+   * @see docker/services/efp-devnet.yml for how these contracts are deployed and addresses captured.
+   */
+  [DatasourceNames.EFPBase]: {
+    chain: ensTestEnvChain,
+    contracts: {
+      ListRegistry: {
+        abi: efp_ListRegistry,
+        address: efpContracts.EFPListRegistry,
+        startBlock: 0,
+      },
+      AccountMetadata: {
+        abi: efp_AccountMetadata,
+        address: efpContracts.EFPAccountMetadata,
+        startBlock: 0,
+      },
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: efpContracts.EFPListRecords,
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.EFPOptimism]: {
+    chain: ensTestEnvChain,
+    contracts: {
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: efpContracts.EFPListRecords,
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.EFPEthereum]: {
+    chain: ensTestEnvChain,
+    contracts: {
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: efpContracts.EFPListRecords,
         startBlock: 0,
       },
     },

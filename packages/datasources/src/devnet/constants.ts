@@ -94,6 +94,29 @@ export const contracts = {
 } as const satisfies Record<string, NormalizedAddress>;
 
 /**
+ * Deterministic addresses of the EFP (Ethereum Follow Protocol) contracts, deployed onto the
+ * ens-test-env devnet (chain 31337) by the EFP devnet image in attach mode, on top of the
+ * contracts-v2 ENS deployment. The three contracts the EFP plugin indexes, plus the `EFPListMinter`
+ * (not indexed) which the integration-test EFP seeder uses to mint lists.
+ *
+ * These addresses depend on the deployer's (Anvil account 0) nonce after the ENS deployment, so
+ * they are a function of BOTH the pinned ENS devnet image (`docker/services/devnet.yml`, run with
+ * `--testNames`) and the pinned EFP devnet image (`docker/services/efp-devnet.yml`). They were
+ * verified stable across clean redeploys. Re-capture whenever either image pin is bumped:
+ *
+ *   docker compose -f docker/docker-compose.devnet.yml up devnet efp-devnet
+ *   docker exec efp-devnet cat /app/deployments/devnet-31337.json
+ *
+ * @see https://github.com/ethereumfollowprotocol/contracts/pull/7
+ */
+export const efpContracts = {
+  EFPAccountMetadata: "0xd5ac451b0c50b9476107823af206ed814a2e2580",
+  EFPListRegistry: "0xf8e31cb472bc70500f08cd84917e5a1912ec8397",
+  EFPListRecords: "0xc0f115a19107322cfbf1cdbc7ea011c19ebdb4f8",
+  EFPListMinter: "0xc96304e3c037f81da488ed9dea1d8f2a48278a75",
+} as const satisfies Record<string, NormalizedAddress>;
+
+/**
  * Must match the devnet mnemonic in contracts-v2 (Anvil named accounts).
  * @see https://github.com/ensdomains/contracts-v2/blob/69bde1b345c47caf3d55a105b9f922280ba55f00/contracts/script/setup.ts#L56
  */
@@ -128,6 +151,35 @@ export const accounts = {
 export const addresses = {
   one: asNormalizedAddress(`0x${"1".repeat(40)}`),
 } as const satisfies Record<string, NormalizedAddress>;
+
+/**
+ * Synthetic EFP follow targets used by the integration EFP seeder (`integration-test-env`) and the
+ * EFP integration tests. Each anchors a distinct seeded record so tests can look it up by
+ * `recordData`; none is an indexed ENS account, so they also exercise `EfpListRecord.account`'s null
+ * path.
+ */
+export const efpSeedTargets = {
+  /** ADD + ADD_TAG("block") + ADD_TAG("block") -> tags === ["block"] (dedup). */
+  dedup: asNormalizedAddress(`0x${"d1".repeat(20)}`),
+  /** ADD + ADD_TAG("vip") + REMOVE + ADD -> record present, tags === [] (embed cascade + fresh). */
+  cascade: asNormalizedAddress(`0x${"ca".repeat(20)}`),
+  /** ADD + REMOVE(target + junk) -> record gone (canonical 22-byte keying). */
+  junk: asNormalizedAddress(`0x${"1c".repeat(20)}`),
+  /** Anchors a list whose `user` role must survive a storage-location re-point away and back. */
+  durable: asNormalizedAddress(`0x${"d0".repeat(20)}`),
+} as const satisfies Record<string, NormalizedAddress>;
+
+/** The `user` role set on the {@link efpSeedTargets.durable} list, re-derived after the re-point. */
+export const efpSeedRoleUser = asNormalizedAddress(`0x${"ab".repeat(20)}`);
+
+/**
+ * The Anvil account (mnemonic index 6) the EFP seeder mints its lists from. It has `primary-list`
+ * metadata (set by easyMintTo) but its lists' `user` is never itself, so it exercises the
+ * `primaryList` two-step validation's mismatch (rejection) branch.
+ */
+export const efpSeedActorAddress = asNormalizedAddress(
+  "0x976ea74026e726554db657fa54763abd0c3a0aa9",
+);
 
 export const fixtures = {
   abiBytes: `0x${"01".repeat(32)}`,

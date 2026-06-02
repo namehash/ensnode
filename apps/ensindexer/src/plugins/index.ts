@@ -2,6 +2,7 @@ import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import type { MergedTypes } from "@/lib/lib-helpers";
 
+import efpPlugin from "./efp/plugin";
 import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
 import registrarsPlugin from "./registrars/plugin";
 import basenamesPlugin from "./subgraph/plugins/basenames/plugin";
@@ -20,6 +21,7 @@ export const ALL_PLUGINS = [
   protocolAccelerationPlugin,
   registrarsPlugin,
   unigraphPlugin,
+  efpPlugin,
 ] as const;
 
 /**

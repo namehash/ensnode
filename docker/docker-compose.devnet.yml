@@ -19,6 +19,8 @@ services:
         condition: service_healthy
       devnet:
         condition: service_healthy
+      efp-devnet:
+        condition: service_healthy
 
   ensapi:
     extends:
@@ -77,6 +79,16 @@ services:
       file: services/devnet.yml
       service: devnet
 
+  efp-devnet:
+    extends:
+      file: services/efp-devnet.yml
+      service: efp-devnet
+    ports:
+      - "8001:8000"
+    depends_on:
+      devnet:
+        condition: service_healthy
+
 volumes:
   # Docker Compose requires volumes used by services to be declared in each
   # compose file that references them — they cannot be inherited via `extends`.
@@ -87,4 +99,7 @@ volumes:
     driver: local
   ensrainbow_data:
     name: ensnode_devnet_ensrainbow_data
+    driver: local
+  efp-deployments:
+    name: ensnode_devnet_efp_deployments
     driver: local
