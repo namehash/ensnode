@@ -38,8 +38,17 @@ describe("ProfileWebsiteParser", () => {
   it.each([
     ["record unset", {}],
     ["empty string", { url: "" }],
+    ["whitespace only", { url: "   " }],
+    ["non-http scheme", { url: "ipfs://example.com" }],
+    ["not a URL", { url: "not-a-url" }],
   ])("returns null: %s", (_message, texts) => {
     expect(ProfileWebsiteParser.parse(profileRecordsModel(texts))).toBeNull();
+  });
+
+  it("trims surrounding whitespace before parsing", () => {
+    expect(
+      ProfileWebsiteParser.parse(profileRecordsModel({ url: "  https://example.com  " })),
+    ).toBe("https://example.com");
   });
 });
 
@@ -58,7 +67,17 @@ describe("ProfileEmailParser", () => {
   it.each([
     ["record unset", {}],
     ["empty string", { email: "" }],
+    ["whitespace only", { email: "   " }],
+    ["missing @", { email: "userexample.com" }],
+    ["missing domain", { email: "user@" }],
+    ["spaces inside", { email: "user @example.com" }],
   ])("returns null: %s", (_message, texts) => {
     expect(ProfileEmailParser.parse(profileRecordsModel(texts))).toBeNull();
+  });
+
+  it("trims surrounding whitespace from valid email", () => {
+    expect(ProfileEmailParser.parse(profileRecordsModel({ email: "  user@example.com  " }))).toBe(
+      "user@example.com",
+    );
   });
 });

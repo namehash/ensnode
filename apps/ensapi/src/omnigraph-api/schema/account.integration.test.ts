@@ -2,7 +2,7 @@ import { ETH_COIN_TYPE, evmChainIdToCoinType, type Hex, type InterpretedName } f
 import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts, testEthTextRecords } from "@ensnode/datasources/devnet";
 
 import {
   AccountDomainsPaginated,
@@ -328,6 +328,10 @@ describe("Account.primaryName and Account.primaryNames", () => {
     name: CanonicalNameResult;
     resolve?: {
       records?: { addresses: Array<{ coinType: number; address: Hex | null }> } | null;
+      profile?: {
+        description: string | null;
+        avatar: { httpUrl: string | null } | null;
+      } | null;
     } | null;
   };
 
@@ -436,6 +440,24 @@ describe("Account.primaryName and Account.primaryNames", () => {
             resolve {
               records {
                 addresses(coinTypes: [60]) { coinType address }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedProfile = gql`
+    query AccountPrimaryNameChainedProfile($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              profile {
+                description
+                avatar { httpUrl }
               }
             }
           }
@@ -557,6 +579,28 @@ describe("Account.primaryName and Account.primaryNames", () => {
             resolve: {
               records: {
                 addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("chains forward resolution through primaryName.profile", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedProfile, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              profile: {
+                description: testEthTextRecords.description.value,
+                avatar: { httpUrl: testEthTextRecords.avatar.value },
               },
             },
           },

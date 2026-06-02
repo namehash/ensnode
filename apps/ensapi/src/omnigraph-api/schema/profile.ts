@@ -1,7 +1,6 @@
 import { builder } from "@/omnigraph-api/builder";
 import {
   ADDRESS_PARSERS,
-  interpretProfileWebsiteHttpUrl,
   ProfileAvatarParser,
   ProfileDescriptionParser,
   ProfileEmailParser,
@@ -171,7 +170,7 @@ ProfileWebsiteRef.implement({
     httpUrl: t.string({
       description: "The HTTP-compatible website URL, or null when unset.",
       nullable: true,
-      resolve: (model) => interpretProfileWebsiteHttpUrl(ProfileWebsiteParser.parse(model)),
+      resolve: (model) => ProfileWebsiteParser.parse(model),
     }),
   }),
 });
@@ -201,8 +200,9 @@ DomainProfileRef.implement({
       nullable: true,
       resolve: (model) => ProfileDescriptionParser.parse(model),
     }),
-    email: t.string({
-      description: "The contact email address, or null when unset.",
+    email: t.field({
+      description: "The contact email address, or null when unset or invalid.",
+      type: "Email",
       nullable: true,
       resolve: (model) => ProfileEmailParser.parse(model),
     }),

@@ -58,11 +58,6 @@ function interpretProfileImageHttpUrl(
   return getEnsMetadataServiceImageUrl(model.id, di.context.namespace, record)?.href ?? null;
 }
 
-/** Returns the raw website record when set; callers expose it as `httpUrl`. */
-export function interpretProfileWebsiteHttpUrl(rawValue: string | null | undefined): string | null {
-  return rawValue ?? null;
-}
-
 export const profileImageHttpUrlDescription = (recordLabel: "avatar" | "header") =>
   `Provides a HTTP-compatible URL for fetching the ${recordLabel} image that can be safely referenced as an image in web browsers. ` +
   `This is an abstraction over the "raw" ${recordLabel} record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. ` +

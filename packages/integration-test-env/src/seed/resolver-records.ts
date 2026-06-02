@@ -24,19 +24,14 @@ async function seedResolverRecordsForName(
     );
   }
 
-  // Text records
-  await setTextRecord(clients.owner, resolver, node, "avatar", "https://example.com/avatar.png");
-  await setTextRecord(clients.owner, resolver, node, "com.twitter", "ensdomains");
-  await setTextRecord(clients.owner, resolver, node, "com.github", "ensdomains");
-  await setTextRecord(clients.owner, resolver, node, "url", "https://ens.domains");
-  await setTextRecord(clients.owner, resolver, node, "email", "test@ens.domains");
-  await setTextRecord(clients.owner, resolver, node, "description", "test.eth");
+  for (const record of Object.values(fixtures.textRecords)) {
+    await setTextRecord(clients.owner, resolver, node, record.key, record.value);
+  }
 
   // Multi-coin addresses
-  // Coin 0 = Bitcoin
-  await setMulticoinAddress(clients.owner, resolver, node, 0n, fixtures.bitcoinAddress);
-  // Coin 2 = Litecoin
-  await setMulticoinAddress(clients.owner, resolver, node, 2n, fixtures.litecoinAddress);
+  for (const coin of Object.values(fixtures.rawAddresses)) {
+    await setMulticoinAddress(clients.owner, resolver, node, BigInt(coin.coinType), coin.raw);
+  }
 
   // Scalar resolver records
   await setContenthash(clients.owner, resolver, node, fixtures.contenthash);

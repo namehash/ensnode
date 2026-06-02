@@ -107,7 +107,9 @@ describe("SocialGithubParser", () => {
 
 describe("SocialTwitterParser", () => {
   it("has correct selection", () => {
-    expect(SocialTwitterParser.selection).toEqual({ texts: ["com.twitter", "vnd.twitter"] });
+    expect(SocialTwitterParser.selection).toEqual({
+      texts: ["com.x", "com.twitter", "vnd.twitter"],
+    });
   });
 
   it.each([
@@ -144,16 +146,14 @@ describe("SocialTwitterParser", () => {
       { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks?lang=en" },
     ],
   ])("parses %s", (_message, input, expected) => {
-    expect(SocialTwitterParser.parse(profileRecordsModel({ "com.twitter": input }))).toEqual(
-      expected,
-    );
+    expect(SocialTwitterParser.parse(profileRecordsModel({ "com.x": input }))).toEqual(expected);
   });
 
   it.each([
     ["record unset", {}],
-    ["empty string", { "com.twitter": "" }],
-    ["invalid handle characters", { "com.twitter": "hello world" }],
-    ["foreign social URL", { "com.twitter": "https://github.com/itslevchiks" }],
+    ["empty string", { "com.x": "" }],
+    ["invalid handle characters", { "com.x": "hello world" }],
+    ["foreign social URL", { "com.x": "https://github.com/itslevchiks" }],
   ])("returns null: %s", (_message, texts) => {
     expect(SocialTwitterParser.parse(profileRecordsModel(texts))).toBeNull();
   });
@@ -237,12 +237,34 @@ describe("SocialGithubParser (vnd.github fallback)", () => {
   });
 });
 
-describe("SocialTwitterParser (vnd.twitter fallback)", () => {
-  it("has correct selection (includes vnd.twitter)", () => {
-    expect(SocialTwitterParser.selection).toEqual({ texts: ["com.twitter", "vnd.twitter"] });
+describe("SocialTwitterParser (text key fallbacks)", () => {
+  it("has correct selection (includes com.twitter and vnd.twitter)", () => {
+    expect(SocialTwitterParser.selection).toEqual({
+      texts: ["com.x", "com.twitter", "vnd.twitter"],
+    });
   });
 
-  it("falls back to vnd.twitter when com.twitter is unset", () => {
+  it("falls back to com.twitter when com.x is unset", () => {
+    expect(
+      SocialTwitterParser.parse(profileRecordsModel({ "com.twitter": "itslevchiks" })),
+    ).toEqual({ handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" });
+  });
+
+  it("prefers com.x over com.twitter", () => {
+    expect(
+      SocialTwitterParser.parse(
+        profileRecordsModel({ "com.x": "primaryuser", "com.twitter": "legacyuser" }),
+      ),
+    ).toEqual({ handle: "primaryuser", httpUrl: "https://x.com/primaryuser" });
+  });
+
+  it("falls back to com.twitter when com.x is empty", () => {
+    expect(
+      SocialTwitterParser.parse(profileRecordsModel({ "com.x": "", "com.twitter": "legacyuser" })),
+    ).toEqual({ handle: "legacyuser", httpUrl: "https://x.com/legacyuser" });
+  });
+
+  it("falls back to vnd.twitter when com.x and com.twitter are unset", () => {
     expect(
       SocialTwitterParser.parse(profileRecordsModel({ "vnd.twitter": "itslevchiks" })),
     ).toEqual({ handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" });
@@ -254,6 +276,14 @@ describe("SocialTwitterParser (vnd.twitter fallback)", () => {
         profileRecordsModel({ "com.twitter": "primaryuser", "vnd.twitter": "legacyuser" }),
       ),
     ).toEqual({ handle: "primaryuser", httpUrl: "https://x.com/primaryuser" });
+  });
+
+  it("falls back to vnd.twitter when com.x and com.twitter are empty", () => {
+    expect(
+      SocialTwitterParser.parse(
+        profileRecordsModel({ "com.x": "", "com.twitter": "", "vnd.twitter": "legacyuser" }),
+      ),
+    ).toEqual({ handle: "legacyuser", httpUrl: "https://x.com/legacyuser" });
   });
 });
 

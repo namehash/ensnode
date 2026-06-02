@@ -1702,7 +1702,7 @@ const introspection = {
             "name": "email",
             "type": {
               "kind": "SCALAR",
-              "name": "String"
+              "name": "Email"
             },
             "args": [],
             "isDeprecated": false
@@ -3480,6 +3480,10 @@ const introspection = {
             "name": "Registration"
           }
         ]
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Email"
       },
       {
         "kind": "OBJECT",

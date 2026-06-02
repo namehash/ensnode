@@ -10,6 +10,7 @@ import type {
   CoinType,
   DogecoinAddress,
   DomainId,
+  Email,
   Hex,
   InterfaceId,
   InterpretedLabel,
@@ -51,6 +52,7 @@ export type OmnigraphScalars = {
   BigInt: `${bigint}`;
   JSON: JsonValue;
   Address: NormalizedAddress;
+  Email: Email;
   BitcoinAddress: BitcoinAddress;
   LitecoinAddress: LitecoinAddress;
   DogecoinAddress: DogecoinAddress;

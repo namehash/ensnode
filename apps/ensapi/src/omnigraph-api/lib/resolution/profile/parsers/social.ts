@@ -14,13 +14,11 @@ export type ParseSocialHandleOptions = {
   baseUrl: string;
   /** Regex pattern the extracted handle must match. */
   handlePattern: RegExp;
-  /**
-   * Number of leading path segments to skip when extracting the handle from a URL.
-   * Use when the profile handle lives at a sub-path (e.g. `/in/<handle>` on LinkedIn → 1).
-   * Defaults to 0.
-   */
-  pathOffset?: number;
 };
+
+function pathOffsetFromBaseUrl(baseUrl: string): number {
+  return new URL(baseUrl).pathname.split("/").filter((s) => s.length > 0).length;
+}
 
 /**
  * Normalizes a social handle from a raw ENS text record value.
@@ -41,8 +39,8 @@ export function parseSocialHandle({
   hostnames,
   baseUrl,
   handlePattern,
-  pathOffset = 0,
 }: ParseSocialHandleOptions): SocialHandleResult | null {
+  const pathOffset = pathOffsetFromBaseUrl(baseUrl);
   const raw = value?.trim();
   if (!raw) return null;
 
@@ -80,37 +78,37 @@ export function parseSocialHandle({
 }
 
 const socialParser = (
-  textKey: string,
+  textKeys: string | readonly string[],
   hostnames: readonly string[],
   baseUrl: string,
   handlePattern: RegExp,
-  options?: { fallbackTextKey?: string; pathOffset?: number },
-): ProfileFieldParser<SocialHandleResult> => ({
-  selection: {
-    texts: options?.fallbackTextKey ? [textKey, options.fallbackTextKey] : [textKey],
-  },
-  parse: (records) => {
-    const opts = { hostnames, baseUrl, handlePattern, pathOffset: options?.pathOffset };
-    const primary = parseSocialHandle({ value: records.texts?.[textKey], ...opts });
-    if (primary !== null || options?.fallbackTextKey === undefined) return primary;
-    return parseSocialHandle({ value: records.texts?.[options.fallbackTextKey], ...opts });
-  },
-});
+): ProfileFieldParser<SocialHandleResult> => {
+  const keys = typeof textKeys === "string" ? [textKeys] : [...textKeys];
+  const opts = { hostnames, baseUrl, handlePattern };
+  return {
+    selection: { texts: keys },
+    parse: (records) => {
+      for (const key of keys) {
+        const result = parseSocialHandle({ value: records.texts?.[key], ...opts });
+        if (result !== null) return result;
+      }
+      return null;
+    },
+  };
+};
 
 export const SocialGithubParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  "com.github",
+  ["com.github", "vnd.github"],
   ["github.com", "www.github.com"],
   "https://github.com",
   /^[A-Za-z0-9_./-]+$/,
-  { fallbackTextKey: "vnd.github" },
 );
 
 export const SocialTwitterParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  "com.twitter",
+  ["com.x", "com.twitter", "vnd.twitter"],
   ["twitter.com", "www.twitter.com", "x.com", "www.x.com"],
   "https://x.com",
   /^[A-Za-z0-9_]+$/,
-  { fallbackTextKey: "vnd.twitter" },
 );
 
 export const SocialTelegramParser: ProfileFieldParser<SocialHandleResult> = socialParser(
@@ -125,7 +123,6 @@ export const SocialLinkedInParser: ProfileFieldParser<SocialHandleResult> = soci
   ["linkedin.com", "www.linkedin.com"],
   "https://www.linkedin.com/in",
   /^[A-Za-z0-9_-]+$/,
-  { pathOffset: 1 },
 );
 
 export const SocialKeybaseParser: ProfileFieldParser<SocialHandleResult> = socialParser(

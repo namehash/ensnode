@@ -14,7 +14,6 @@ export {
 } from "./addresses";
 export type { ProfileImageResult } from "./images";
 export {
-  interpretProfileWebsiteHttpUrl,
   ProfileAvatarParser,
   ProfileHeaderParser,
   profileImageHttpUrlDescription,

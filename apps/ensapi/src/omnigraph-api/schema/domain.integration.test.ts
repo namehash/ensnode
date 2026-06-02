@@ -20,7 +20,7 @@ import {
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
+import { accounts, addresses, fixtures, testEthTextRecords } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
@@ -560,9 +560,6 @@ describe("Domain.records", () => {
     }
   `;
 
-  const BITCOIN_COIN_TYPE = 0;
-  const LITECOIN_COIN_TYPE = 2;
-
   it("resolves address and text records for example.eth", async () => {
     await expect(
       request<DomainRecordsResult>(DomainRecords, {
@@ -587,7 +584,16 @@ describe("Domain.records", () => {
       request<DomainAllRecordsResult>(DomainRecordsAll, {
         name: "test.eth",
         addresses: [ETH_COIN_TYPE, 0, 2],
-        texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
+        texts: [
+          testEthTextRecords.avatar.key,
+          testEthTextRecords.description.key,
+          testEthTextRecords.url.key,
+          testEthTextRecords.email.key,
+          testEthTextRecords.twitter.key,
+          testEthTextRecords.github.key,
+          testEthTextRecords.x.key,
+          testEthTextRecords.telegram.key,
+        ],
         // BigInt GraphQL vars must be strings here — JSON.stringify (used by the test client) cannot serialize bigint
         contentTypeMask: "1",
         interfaceIds: [fixtures.fourBytesInterface],
@@ -604,16 +610,24 @@ describe("Domain.records", () => {
             interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
             addresses: [
               { coinType: ETH_COIN_TYPE, address: accounts.owner.address },
-              { coinType: BITCOIN_COIN_TYPE, address: fixtures.bitcoinAddress },
-              { coinType: LITECOIN_COIN_TYPE, address: fixtures.litecoinAddress },
+              {
+                coinType: fixtures.rawAddresses.bitcoin.coinType,
+                address: fixtures.rawAddresses.bitcoin.raw,
+              },
+              {
+                coinType: fixtures.rawAddresses.litecoin.coinType,
+                address: fixtures.rawAddresses.litecoin.raw,
+              },
             ],
             texts: [
-              { key: "avatar", value: "https://example.com/avatar.png" },
-              { key: "description", value: "test.eth" },
-              { key: "url", value: "https://ens.domains" },
-              { key: "email", value: "test@ens.domains" },
-              { key: "com.twitter", value: "ensdomains" },
-              { key: "com.github", value: "ensdomains" },
+              testEthTextRecords.avatar,
+              testEthTextRecords.description,
+              testEthTextRecords.url,
+              testEthTextRecords.email,
+              testEthTextRecords.twitter,
+              testEthTextRecords.github,
+              testEthTextRecords.x,
+              testEthTextRecords.telegram,
             ],
           },
         },
@@ -702,8 +716,15 @@ describe("Domain.profile", () => {
           profile {
             description
             avatar { httpUrl }
-            addresses { ethereum }
-            socials { github { handle httpUrl } }
+            header { httpUrl }
+            website { httpUrl }
+            email
+            addresses { ethereum bitcoin litecoin solana }
+            socials {
+              github { httpUrl handle }
+              twitter { httpUrl handle }
+              telegram { httpUrl handle }
+            }
           }
         }
       }
@@ -717,10 +738,31 @@ describe("Domain.profile", () => {
       domain: {
         resolve: {
           profile: {
-            description: "test.eth",
-            avatar: { httpUrl: "https://example.com/avatar.png" },
-            addresses: { ethereum: accounts.owner.address },
-            socials: { github: { handle: "ensdomains", httpUrl: "https://github.com/ensdomains" } },
+            description: testEthTextRecords.description.value,
+            avatar: { httpUrl: testEthTextRecords.avatar.value },
+            header: { httpUrl: testEthTextRecords.header.value },
+            website: { httpUrl: testEthTextRecords.url.value },
+            email: testEthTextRecords.email.value,
+            addresses: {
+              ethereum: accounts.owner.address,
+              bitcoin: fixtures.rawAddresses.bitcoin.address,
+              litecoin: fixtures.rawAddresses.litecoin.address,
+              solana: fixtures.rawAddresses.solana.address,
+            },
+            socials: {
+              github: {
+                handle: "ensdomains",
+                httpUrl: "https://github.com/ensdomains",
+              },
+              telegram: {
+                handle: "ensdomains",
+                httpUrl: "https://t.me/ensdomains",
+              },
+              twitter: {
+                handle: "this_is_real_ensdomains_not_twitter_but_x_haha",
+                httpUrl: "https://x.com/this_is_real_ensdomains_not_twitter_but_x_haha",
+              },
+            },
           },
         },
       },

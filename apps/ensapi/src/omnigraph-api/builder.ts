@@ -15,6 +15,7 @@ import type {
   CoinType,
   DogecoinAddress,
   DomainId,
+  Email,
   Hex,
   InterfaceId,
   InterpretedLabel,
@@ -74,6 +75,7 @@ export type BuilderScalars = {
   BigInt: { Input: bigint; Output: bigint };
   JSON: { Input: JsonValue; Output: JsonValue };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
+  Email: { Input: Email; Output: Email };
   BitcoinAddress: { Input: BitcoinAddress; Output: BitcoinAddress };
   LitecoinAddress: { Input: LitecoinAddress; Output: LitecoinAddress };
   DogecoinAddress: { Input: DogecoinAddress; Output: DogecoinAddress };

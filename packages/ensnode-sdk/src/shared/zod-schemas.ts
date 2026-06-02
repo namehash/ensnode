@@ -6,6 +6,7 @@ import type {
   ChainId,
   DefaultableChainId,
   Duration,
+  Email,
   Hex,
   InterpretedName,
   Node,
@@ -153,6 +154,16 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
 /**
  * Parses a serialized representation of an EVM address into a {@link NormalizedAddress}.
  */
+/**
+ * Parses a string into a validated {@link Email} (trimmed).
+ */
+export const makeEmailSchema = (valueLabel: string = "Email") =>
+  z
+    .string({ error: `${valueLabel} must be a string.` })
+    .trim()
+    .pipe(z.email({ error: `${valueLabel} must be a valid email address.` }))
+    .transform((value) => value as Email);
+
 export const makeNormalizedAddressSchema = (valueLabel: string = "EVM address") =>
   z
     .string()

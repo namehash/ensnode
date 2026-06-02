@@ -9,6 +9,7 @@ import {
   type CoinType,
   type DogecoinAddress,
   type DomainId,
+  type Email,
   type Hex,
   type InterfaceId,
   type InterpretedLabel,
@@ -40,6 +41,7 @@ import { z } from "zod/v4";
 import {
   makeChainIdSchema,
   makeCoinTypeSchema,
+  makeEmailSchema,
   makeNormalizedAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -61,6 +63,12 @@ builder.scalarType("Address", {
   description: "Address represents an EVM Address in all lowercase.",
   serialize: (value: NormalizedAddress) => value,
   parseValue: (value) => makeNormalizedAddressSchema("Address").parse(value),
+});
+
+builder.scalarType("Email", {
+  description: "Email represents a validated contact email address.",
+  serialize: (value: Email) => value,
+  parseValue: (value) => makeEmailSchema("Email").parse(value),
 });
 
 const makeCoinAddressSchema = (label: string, coinType: number) =>

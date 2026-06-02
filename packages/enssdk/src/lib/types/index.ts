@@ -1,6 +1,7 @@
 export * from "./addresses";
 export * from "./coin-type";
 export * from "./eac";
+export * from "./email";
 export * from "./ens";
 export * from "./ensv2";
 export * from "./evm";

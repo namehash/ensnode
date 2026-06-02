@@ -624,6 +624,25 @@ query GetEthDomains {
 }`,
     variables: { default: {} },
   },
+  {
+    id: "domain-profile",
+    query: `
+query DomainProfile($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        description
+        avatar { httpUrl }
+        addresses { ethereum }
+        socials { github { handle httpUrl } }
+        website { httpUrl }
+        email
+      }
+    }
+  }
+}`,
+    variables: { default: { name: "vitalik.eth" } },
+  },
 ];
 
 const graphqlApiExampleQueryById = new Map(

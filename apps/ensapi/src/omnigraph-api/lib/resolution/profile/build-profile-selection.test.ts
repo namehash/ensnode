@@ -61,7 +61,7 @@ describe("buildProfileSelectionFromResolveContainerInfo", () => {
     [
       "socials.twitter",
       "profile { socials { twitter { handle httpUrl } } }",
-      { texts: ["com.twitter", "vnd.twitter"] },
+      { texts: ["com.x", "com.twitter", "vnd.twitter"] },
     ],
     [
       "socials.telegram",
@@ -89,7 +89,15 @@ describe("buildProfileSelectionFromResolveContainerInfo", () => {
       }
     `,
       {
-        texts: ["description", "avatar", "com.github", "vnd.github", "com.twitter", "vnd.twitter"],
+        texts: [
+          "description",
+          "avatar",
+          "com.github",
+          "vnd.github",
+          "com.x",
+          "com.twitter",
+          "vnd.twitter",
+        ],
         addresses: [60, 0],
       },
     ],

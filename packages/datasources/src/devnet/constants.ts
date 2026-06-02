@@ -1,4 +1,6 @@
-import type { NormalizedAddress } from "enssdk";
+import { type CoinName, coinNameToTypeMap, getCoderByCoinName } from "@ensdomains/address-encoder";
+import { bytesToHex } from "@ensdomains/address-encoder/utils";
+import type { CoinType, NormalizedAddress } from "enssdk";
 import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
@@ -129,12 +131,48 @@ export const addresses = {
   one: asNormalizedAddress(`0x${"1".repeat(40)}`),
 } as const satisfies Record<string, NormalizedAddress>;
 
+const getRawAddress = (coinName: CoinName, address: string) => {
+  const coder = getCoderByCoinName(coinName);
+  return {
+    coinType: coder.coinType,
+    raw: bytesToHex(coder.decode(address)),
+    address,
+  };
+};
+
+/**
+ * Text records seeded on `test.eth` (PermissionedResolver) in the ens-test-env devnet.
+ * @see packages/integration-test-env/src/seed/resolver-records.ts
+ */
+export const testEthTextRecords = {
+  avatar: { key: "avatar", value: "https://example.com/avatar.png" },
+  twitter: { key: "com.twitter", value: "ensdomains" },
+  github: { key: "com.github", value: "@ensdomains" },
+  x: { key: "com.x", value: "this_is_real_ensdomains_not_twitter_but_x_haha" },
+  telegram: { key: "org.telegram", value: "t.me/ensdomains" },
+  url: { key: "url", value: "https://ens.domains" },
+  email: { key: "email", value: "test@ens.domains" },
+  description: { key: "description", value: "test.eth" },
+  header: { key: "header", value: "https://example.com/header.png" },
+} as const;
+
+const rawAddresses = {
+  bitcoin: getRawAddress("btc", "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"),
+  litecoin: getRawAddress("ltc", "LaMT348PWRnrqeeWArpwQPbuanpXDZGEUz"),
+  dogecoin: getRawAddress("doge", "DBXu2kgc3xtvCUWFcxFE3r9hEYgmuaaCyD"),
+  monacoin: getRawAddress("mona", "MHxgS2XMXjeJ4if2PRRbWYcdwZPWfdwaDT"),
+  rootstock: getRawAddress("rbtc", "0x5aaEB6053f3e94c9b9a09f33669435E7ef1bEAeD"),
+  binance: getRawAddress("bnb", "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2"),
+  solana: getRawAddress("sol", "FncazAs6omJJjtLVzquzT9KoyXn6tFixr9kGjr42ktLj"),
+} as const satisfies Record<string, { coinType: CoinType; raw: Hex }>;
+
 export const fixtures = {
   abiBytes: `0x${"01".repeat(32)}`,
   fourBytesInterface: "0x11100111",
   publicKeyX: `0x${"02".repeat(32)}`,
   publicKeyY: `0x${"03".repeat(32)}`,
   contenthash: `0x${"04".repeat(32)}`,
-  bitcoinAddress: `0x${"05".repeat(25)}`,
-  litecoinAddress: `0x${"06".repeat(25)}`,
-} as const satisfies Record<string, Hex>;
+
+  rawAddresses: rawAddresses,
+  textRecords: testEthTextRecords,
+} as const;

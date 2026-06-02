@@ -421,8 +421,8 @@ type DomainProfile {
   """The profile description, or null when unset."""
   description: String
 
-  """The contact email address, or null when unset."""
-  email: String
+  """The contact email address, or null when unset or invalid."""
+  email: Email
   header: ProfileHeader
   socials: ProfileSocials
   website: ProfileWebsite
@@ -819,6 +819,9 @@ type ENSv2RegistryReservation implements Registration {
   """
   unregistrant: Account
 }
+
+"""Email represents a validated contact email address."""
+scalar Email
 
 """
 An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.
