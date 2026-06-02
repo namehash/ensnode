@@ -159,7 +159,7 @@ Keyed by `(chain_id, resolver, node, coin_type)`, where the composite key segmen
 | `address`   | `text`        | no       | Resolver contract address. Part of primary key.                                                                                                                                                               |
 | `node`      | `text`        | no       | Name namehash. Part of primary key.                                                                                                                                                                           |
 | `coin_type` | `numeric(78)` | no       | All well-known CoinTypes fit into a JavaScript number but NOT a Postgres `integer`, and must be stored as `bigint`. Part of primary key.                                                                      |
-| `value`     | `text`        | no       | The value of the Address Record specified by `((chain_id, resolver, node), coin_type)`. Interpreted by `interpretAddressRecordValue` — see its implementation for additional context and specific guarantees. |
+| `value`     | `hex`         | no       | The value of the Address Record specified by `((chain_id, resolver, node), coin_type)`. Interpreted by `interpretAddressRecordValue` — see its implementation for additional context and specific guarantees. |
 
 **Primary key:** `(chain_id, address, node, coin_type)`.
 

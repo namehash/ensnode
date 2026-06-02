@@ -43,10 +43,11 @@ ResolverRecordsRef.implement({
     ////////////////////////
     // ResolverRecords.name
     ////////////////////////
-    name: t.expose("name", {
+    name: t.field({
       description: "The `name` record for this `node`, if any.",
       type: "String",
       nullable: true,
+      resolve: (parent) => parent.name,
     }),
 
     ////////////////////////

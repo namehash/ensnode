@@ -20,7 +20,7 @@ import { ChainName } from "@/omnigraph-api/schema/resolution";
 export type PrimaryNameRecordModel = {
   address: Address;
   coinType: CoinType;
-  chain: ChainNameValue | null;
+  chainName: ChainNameValue | null;
   name: InterpretedName | null;
 };
 
@@ -40,12 +40,12 @@ PrimaryNameRecordRef.implement({
       nullable: false,
       resolve: (r) => r.coinType,
     }),
-    chain: t.field({
+    chainName: t.field({
       description:
         "The chain corresponding to `coinType`, or null when `coinType` is not represented in `ChainName`.",
       type: ChainName,
       nullable: true,
-      resolve: (r) => r.chain,
+      resolve: (r) => r.chainName,
     }),
     name: t.field({
       description:

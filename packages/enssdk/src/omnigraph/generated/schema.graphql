@@ -214,6 +214,11 @@ type BaseRegistrarRegistration implements Registration {
   start: BigInt!
 
   """
+  The TokenId for this Domain in the BaseRegistrar. This is the bigint encoding of the Domain's LabelHash.
+  """
+  tokenId: BigInt!
+
+  """
   The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
@@ -269,13 +274,11 @@ type CanonicalName {
 scalar ChainId
 
 """
-Primary-name chains supported by the Omnigraph API. Use `DEFAULT` for the default EVM chain.
-@see https://github.com/ensdomains/address-encoder/blob/master/docs/supported-cryptocurrencies.md for more details.
+The names of chains that the Omnigraph API supports identifying by name as a syntactic convenience. The Omnigraph API supports identification of additional chains beyond this list, but those chains must be identified through other mechanisms such as `coinType` or `chainId`.
 """
 enum ChainName {
   ARBITRUM_ONE
   BASE
-  DEFAULT
   ETHEREUM
   LINEA
   OPTIMISM
@@ -1210,11 +1213,11 @@ type PermissionsUserEventsConnectionEdge {
 scalar PermissionsUserId
 
 """
-Select a primary name lookup target. Exactly one of `coinType` or `chain` must be provided.
+Select a primary name lookup target. Exactly one of `coinType` or `chainName` must be provided.
 """
 input PrimaryNameByInput @oneOf {
   """A `ChainName` to resolve the primary name for."""
-  chain: ChainName
+  chainName: ChainName
 
   """The ENSIP-9 coin type to resolve the primary name for."""
   coinType: CoinType
@@ -1225,7 +1228,7 @@ type PrimaryNameRecord {
   """
   The chain corresponding to `coinType`, or null when `coinType` is not represented in `ChainName`.
   """
-  chain: ChainName
+  chainName: ChainName
 
   """The canonical ENSIP-9 coin type for this primary name lookup."""
   coinType: CoinType!
@@ -1240,11 +1243,11 @@ type PrimaryNameRecord {
 }
 
 """
-Filter primary name lookups. Exactly one of `coinTypes` or `chains` must be provided.
+Filter primary name lookups. Exactly one of `coinTypes` or `chainNames` must be provided.
 """
 input PrimaryNamesWhereInput @oneOf {
   """`ChainName` values to resolve primary names for."""
-  chains: [ChainName!]
+  chainNames: [ChainName!]
 
   """Coin types to resolve primary names for."""
   coinTypes: [CoinType!]
@@ -1538,9 +1541,9 @@ type ResolvedAbiRecord {
 """A resolved address record for an ENS name."""
 type ResolvedAddressRecord {
   """
-  The raw address record value, or null if not set. May be any address format for the associated coin type and may require validation or preprocessing before use. Only EVM addresses are guaranteed to be NormalizedAddress values; see ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder).
+  The "raw" resolved address record as hex, or null if not set, empty ("0x"), or zeroAddress. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. Guaranteed to be at least one byte of hex data. There is no guarantee that an EVM CoinType returns an address value of any particular byte length.
   """
-  address: String
+  address: Hex
 
   """The coin type for this address record."""
   coinType: CoinType!
@@ -1594,11 +1597,6 @@ type ResolvedRecords {
 
   """The IDNSZoneResolver zonehash raw bytes, or null if not set."""
   dnszonehash: Hex
-
-  """
-  Stable cache key for these records: the InterpretedName used to resolve them.
-  """
-  id: InterpretedName!
 
   """Resolved ERC-165 interface implementer records for the requested ids."""
   interfaces(
@@ -1728,15 +1726,19 @@ type ReverseResolve {
   """
   acceleration: AccelerationStatus!
 
-  """The primary name for this Account on a specific coin type or chain."""
+  """
+  The primary name for this Account on a specific coin type or chain name.
+  """
   primaryName(
-    """Select a coin type or chain to resolve a primary name for."""
+    """Select a coin type or chain name to resolve a primary name for."""
     by: PrimaryNameByInput!
   ): PrimaryNameRecord!
 
-  """Primary names for this Account on the requested coin types or chains."""
+  """
+  Primary names for this Account on the requested coin types or chain names.
+  """
   primaryNames(
-    """Select coin types or chains to resolve primary names for."""
+    """Select coin types or chain names to resolve primary names for."""
     where: PrimaryNamesWhereInput!
   ): [PrimaryNameRecord!]!
 
@@ -1818,6 +1820,8 @@ type WrappedBaseRegistrarRegistration {
   """The Fuses for this Registration's Domain in the NameWrapper."""
   fuses: Int!
 
-  """The TokenID for this Domain in the NameWrapper."""
+  """
+  The TokenId for this Domain in the NameWrapper. This is the bigint encoding of the Domain's Node.
+  """
   tokenId: BigInt!
 }

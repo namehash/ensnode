@@ -1056,6 +1056,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "tokenId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BigInt"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "unregistrant",
             "type": {
               "kind": "OBJECT",
@@ -1154,10 +1166,6 @@ const introspection = {
           },
           {
             "name": "BASE",
-            "isDeprecated": false
-          },
-          {
-            "name": "DEFAULT",
             "isDeprecated": false
           },
           {
@@ -4874,7 +4882,7 @@ const introspection = {
         "name": "PrimaryNameByInput",
         "inputFields": [
           {
-            "name": "chain",
+            "name": "chainName",
             "type": {
               "kind": "ENUM",
               "name": "ChainName"
@@ -4895,7 +4903,7 @@ const introspection = {
         "name": "PrimaryNameRecord",
         "fields": [
           {
-            "name": "chain",
+            "name": "chainName",
             "type": {
               "kind": "ENUM",
               "name": "ChainName"
@@ -4944,7 +4952,7 @@ const introspection = {
         "name": "PrimaryNamesWhereInput",
         "inputFields": [
           {
-            "name": "chains",
+            "name": "chainNames",
             "type": {
               "kind": "LIST",
               "ofType": {
@@ -6257,7 +6265,7 @@ const introspection = {
             "name": "address",
             "type": {
               "kind": "SCALAR",
-              "name": "String"
+              "name": "Hex"
             },
             "args": [],
             "isDeprecated": false
@@ -6437,18 +6445,6 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "Hex"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "InterpretedName"
-              }
             },
             "args": [],
             "isDeprecated": false
