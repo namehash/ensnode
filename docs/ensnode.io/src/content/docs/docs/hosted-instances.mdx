@@ -20,8 +20,6 @@ export const omnigraphUnactivated = `<em>Not activated.</em> This ENSNode instan
 export const ensProtocolAccelerationAvailable = `<em>Available.</em> Accelerate most of your ENS protocol resolution requests while maintaining full compliance with all ENS protocol standards and best practices.`;
 export const ensProtocolAccelerationUnavailable = `<em>Unavailable.</em> Your ENS protocol resolution requests will be serviced in full compliance with all ENS protocol standards and best practices. However, this ENSNode instance did not activate the <em>protocol-acceleration</em> plugin and therefore ENS resolution requests will be serviced accurately but without acceleration.`;
 
----
-
 ## Get Started Quickly
 
 NameHash Labs provides hosted instances of ENSNode for developers building on ENS and looking to get started quickly.
@@ -103,7 +101,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha.ensnode.io"
   namespace="mainnet"
   ensVersions="ENSv1 only (not also ENSv2 yet)"
-  plugins={`${pluginLink("unigraph")}, ${pluginLink("protocol-acceleration")}, ${pluginLink("subgraph")}, ${pluginLink("basenames")}, ${pluginLink("lineanames")}, ${pluginLink("threedns")}, ${pluginLink("registrars")}, ${pluginLink("tokenscope")}`} 
+  plugins={`${pluginLink("unigraph")}, ${pluginLink("protocol-acceleration")}, ${pluginLink("subgraph")}, ${pluginLink("basenames")}, ${pluginLink("lineanames")}, ${pluginLink("threedns")}, ${pluginLink("registrars")}, ${pluginLink("tokenscope")}`}
 >
   <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
