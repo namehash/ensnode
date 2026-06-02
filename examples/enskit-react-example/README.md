@@ -27,3 +27,9 @@ pnpm install
 
 VITE_ENSNODE_URL=http://localhost:4334 pnpm -F enskit-react-example dev
 ```
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.
