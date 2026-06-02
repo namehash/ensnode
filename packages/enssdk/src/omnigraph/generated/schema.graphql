@@ -413,7 +413,7 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
-"""An interpreted ENS profile for a name."""
+"""An interpreted profile for a name."""
 type DomainProfile {
   addresses: ProfileAddresses
   avatar: ProfileAvatar
@@ -963,7 +963,7 @@ type ForwardResolve {
   acceleration: AccelerationStatus!
 
   """
-  An interpreted ENS profile for this Domain. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile field was selected).
+  An interpreted profile for this name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile field was selected).
   """
   profile: DomainProfile
 
@@ -1256,7 +1256,7 @@ input PrimaryNamesWhereInput @oneOf {
   coinTypes: [CoinType!]
 }
 
-"""Interpreted address records on a Domain profile."""
+"""Interpreted address records on a Name profile."""
 type ProfileAddresses {
   """The interpreted Base address, or null when unset."""
   base: Address
@@ -1292,7 +1292,7 @@ type ProfileAddresses {
   solana: SolanaAddress
 }
 
-"""Interpreted avatar metadata on a Domain profile."""
+"""Interpreted avatar metadata on a Name profile."""
 type ProfileAvatar {
   """
   Provides a HTTP-compatible URL for fetching the avatar image that can be safely referenced as an image in web browsers. This is an abstraction over the "raw" avatar record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. Additional details here: https://docs.ens.domains/ensip/12
@@ -1300,7 +1300,7 @@ type ProfileAvatar {
   httpUrl: String
 }
 
-"""Interpreted header metadata on a Domain profile."""
+"""Interpreted header metadata on a Name profile."""
 type ProfileHeader {
   """
   Provides a HTTP-compatible URL for fetching the header image that can be safely referenced as an image in web browsers. This is an abstraction over the "raw" header record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. Additional details here: https://docs.ens.domains/ensip/12
@@ -1308,7 +1308,7 @@ type ProfileHeader {
   httpUrl: String
 }
 
-"""An interpreted social account on a Domain profile."""
+"""An interpreted social account on a Name profile."""
 type ProfileSocialAccount {
   """The social handle."""
   handle: String!
@@ -1317,7 +1317,7 @@ type ProfileSocialAccount {
   httpUrl: String!
 }
 
-"""Interpreted social accounts on a Domain profile."""
+"""Interpreted social accounts on a Name profile."""
 type ProfileSocials {
   github: ProfileSocialAccount
   keybase: ProfileSocialAccount
@@ -1326,7 +1326,7 @@ type ProfileSocials {
   twitter: ProfileSocialAccount
 }
 
-"""Interpreted website metadata on a Domain profile."""
+"""Interpreted website metadata on a Name profile."""
 type ProfileWebsite {
   """The HTTP-compatible website URL, or null when unset."""
   httpUrl: String

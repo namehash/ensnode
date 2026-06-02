@@ -46,7 +46,7 @@ ForwardResolveRef.implement({
     }),
     profile: t.field({
       description:
-        "An interpreted ENS profile for this Domain. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile field was selected).",
+        "An interpreted profile for this name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile field was selected).",
       type: DomainProfileRef,
       nullable: true,
       resolve: (parent) => parent.records,

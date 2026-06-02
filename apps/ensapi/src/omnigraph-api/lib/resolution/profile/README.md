@@ -1,4 +1,4 @@
-# Domain profile resolution
+# Name profile resolution
 
 Interpreted ENS profile fields exposed on `Domain.profile` (and `PrimaryNameRecord.profile`) in the Omnigraph API. Raw resolver records are resolved in one round-trip; each GraphQL field is backed by a `ProfileFieldParser` that declares its record selection and parsing logic.
 
@@ -77,13 +77,3 @@ Record names use a `texts.<key>` prefix for ENS text records and `addresses.<coi
 | `addresses.binance`                               | ✅     | [9](https://docs.ens.domains/ensip/9)                                            | Binance Chain (BNB) address (`coinType` 714). Bech32. GraphQL: `profile.addresses.binance`. Parser: `ProfileAddressBinanceParser`.                                                    |
 
 **Status legend:** ✅ done · 📋 planned · ➖ not planned
-
-Per [ENSIP-18](https://docs.ens.domains/ensip/18), profile service values should omit optional formatting (`@`, `/u/`, …) where possible; parsers should tolerate bare handles and full URLs.
-
-## Adding a new profile field
-
-1. Implement a `ProfileFieldParser` in the appropriate `parsers/*.ts` module (or add a new module).
-2. Export it from `parsers/index.ts`.
-3. Register selection merging in `build-profile-selection.ts`.
-4. Wire the GraphQL field in `schema/profile.ts`.
-5. Add table-driven tests (`it.each` OK + ERR rows) — see `.memory-bank/skills/table-driven-unit-tests/SKILL.md`.

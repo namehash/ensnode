@@ -18,7 +18,7 @@ export const ProfileSocialAccountRef =
   builder.objectRef<ProfileSocialAccountModel>("ProfileSocialAccount");
 
 ProfileSocialAccountRef.implement({
-  description: "An interpreted social account on a Domain profile.",
+  description: "An interpreted social account on a Name profile.",
   fields: (t) => ({
     handle: t.exposeString("handle", {
       description: "The social handle.",
@@ -34,7 +34,7 @@ ProfileSocialAccountRef.implement({
 export const ProfileSocialsRef = builder.objectRef<ResolvedRecordsModel>("ProfileSocials");
 
 ProfileSocialsRef.implement({
-  description: "Interpreted social accounts on a Domain profile.",
+  description: "Interpreted social accounts on a Name profile.",
   fields: (t) => ({
     github: t.field({
       type: ProfileSocialAccountRef,
@@ -67,7 +67,7 @@ ProfileSocialsRef.implement({
 export const ProfileAddressesRef = builder.objectRef<ResolvedRecordsModel>("ProfileAddresses");
 
 ProfileAddressesRef.implement({
-  description: "Interpreted address records on a Domain profile.",
+  description: "Interpreted address records on a Name profile.",
   fields: (t) => ({
     ethereum: t.field({
       description: "The interpreted Ethereum address, or null when unset.",
@@ -141,7 +141,7 @@ ProfileAddressesRef.implement({
 export const ProfileAvatarRef = builder.objectRef<ProfileImageModel>("ProfileAvatar");
 
 ProfileAvatarRef.implement({
-  description: "Interpreted avatar metadata on a Domain profile.",
+  description: "Interpreted avatar metadata on a Name profile.",
   fields: (t) => ({
     httpUrl: t.exposeString("httpUrl", {
       description: profileImageHttpUrlDescription("avatar"),
@@ -153,7 +153,7 @@ ProfileAvatarRef.implement({
 export const ProfileHeaderRef = builder.objectRef<ProfileImageModel>("ProfileHeader");
 
 ProfileHeaderRef.implement({
-  description: "Interpreted header metadata on a Domain profile.",
+  description: "Interpreted header metadata on a Name profile.",
   fields: (t) => ({
     httpUrl: t.exposeString("httpUrl", {
       description: profileImageHttpUrlDescription("header"),
@@ -165,7 +165,7 @@ ProfileHeaderRef.implement({
 export const ProfileWebsiteRef = builder.objectRef<ResolvedRecordsModel>("ProfileWebsite");
 
 ProfileWebsiteRef.implement({
-  description: "Interpreted website metadata on a Domain profile.",
+  description: "Interpreted website metadata on a Name profile.",
   fields: (t) => ({
     httpUrl: t.string({
       description: "The HTTP-compatible website URL, or null when unset.",
@@ -178,7 +178,7 @@ ProfileWebsiteRef.implement({
 export const DomainProfileRef = builder.objectRef<ResolvedRecordsModel>("DomainProfile");
 
 DomainProfileRef.implement({
-  description: "An interpreted ENS profile for a name.",
+  description: "An interpreted profile for a name.",
   fields: (t) => ({
     avatar: t.field({
       type: ProfileAvatarRef,
