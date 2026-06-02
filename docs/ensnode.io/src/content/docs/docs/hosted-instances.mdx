@@ -10,6 +10,8 @@ import HostedEnsNodeInstance from "@components/molecules/HostedEnsNodeInstance.a
 import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
 import EnsSubgraphCorrectnessPostEnsV2Launch from "@components/molecules/EnsSubgraphCorrectnessPostEnsV2Launch.astro";
 
+export const pluginLink = (pluginName) => `<a href="/docs/integrate/integration-options/ensnode-plugins#existing-plugins" class="underline">${pluginName}</a>`;
+
 export const subgraphCompatibilityApiLevel = `<em>API-level Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API. However, additional plugins have been activated which index a superset of data into the subgraph data model in ENSDb. This superset of indexed data means that the data returned for some ENS Subgraph API queries may be different.`;
 export const subgraphCompatibilityFull = `<em>Full Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API at both the API-level and the data-level. We have exhaustively tested and verified that every data record returned by this ENSNode instance's ENS Subgraph API is byte-for-byte identical with The Graph's ENS Subgraph API.`;
 export const omnigraphForEnsV1 = `<em>Activated.</em> Demonstrates the ENS Omnigraph's ability to support ENSv1 only before ENSv2 launches and both ENSv1 and ENSv2 are concurrently active. Until ENSv2 launches on this namespace, only ENSv1 domains will be available. As soon as ENSv2 launches on this namespace both ENSv1 and ENSv2 domains will be available.`;
@@ -17,6 +19,8 @@ export const omnigraphForEnsV1AndEnsV2 = `<em>Activated.</em> Powered by a polym
 export const omnigraphUnactivated = `<em>Not activated.</em> This ENSNode instance optimizes for maximum compatibility with the ENS Subgraph. Therefore it exclusively activates the <em>subgraph</em> plugin and does not activate the <em>unigraph</em> plugin that the ENS Omnigraph API requires.`;
 export const ensProtocolAccelerationAvailable = `<em>Available.</em> Accelerate most of your ENS protocol resolution requests while maintaining full compliance with all ENS protocol standards and best practices.`;
 export const ensProtocolAccelerationUnavailable = `<em>Unavailable.</em> Your ENS protocol resolution requests will be serviced in full compliance with all ENS protocol standards and best practices. However, this ENSNode instance did not activate the <em>protocol-acceleration</em> plugin and therefore ENS resolution requests will be serviced accurately but without acceleration.`;
+
+---
 
 ## Get Started Quickly
 
@@ -69,7 +73,7 @@ The `sepolia-v2` namespace is undergoing active development by the ENS Labs team
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.v2-sepolia.ensnode.io"
   namespace="sepolia-v2"
   ensVersions="ENSv1 + ENSv2 (concurrently activated together)"
-  plugins="<em>unigraph</em>, <em>protocol-acceleration</em>, <em>subgraph</em>"
+  plugins={`${pluginLink("unigraph")}, ${pluginLink("protocol-acceleration")}, ${pluginLink("subgraph")}`}
   >
   <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1AndEnsV2} />
@@ -99,7 +103,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha.ensnode.io"
   namespace="mainnet"
   ensVersions="ENSv1 only (not also ENSv2 yet)"
-  plugins="<em>unigraph</em>, <em>protocol-acceleration</em>, <em>subgraph</em>, basenames, lineanames, threedns, registrars, tokenscope"
+  plugins={`${pluginLink("unigraph")}, ${pluginLink("protocol-acceleration")}, ${pluginLink("subgraph")}, ${pluginLink("basenames")}, ${pluginLink("lineanames")}, ${pluginLink("threedns")}, ${pluginLink("registrars")}, ${pluginLink("tokenscope")}`} 
 >
   <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
@@ -121,7 +125,7 @@ These ENSNode instances do not constrain themselves to exclusively activating th
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha-sepolia.ensnode.io"
   namespace="sepolia"
   ensVersions="ENSv1 only (not also ENSv2 yet)"
-  plugins="<em>unigraph</em>, <em>protocol-acceleration</em>, <em>subgraph</em>, basenames, lineanames, registrars"
+  plugins={`${pluginLink("unigraph")}, ${pluginLink("protocol-acceleration")}, ${pluginLink("subgraph")}, ${pluginLink("basenames")}, ${pluginLink("lineanames")}, ${pluginLink("registrars")}`}
   >
   <Fragment slot="ens-omnigraph-api-icon" set:text={"✅"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphForEnsV1} />
@@ -147,7 +151,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.mainnet.ensnode.io"
   namespace="mainnet"
   ensVersions="ENSv1 only (not also ENSv2 yet)"
-  plugins="<em>subgraph</em>"
+  plugins={`${pluginLink("subgraph")}`}
   >
   <Fragment slot="ens-omnigraph-api-icon" set:text={"❌"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphUnactivated} />
@@ -169,7 +173,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.sepolia.ensnode.io"
   namespace="sepolia"
   ensVersions="ENSv1 only (not also ENSv2 yet)"
-  plugins="<em>subgraph</em>"
+  plugins={`${pluginLink("subgraph")}`}
   >
   <Fragment slot="ens-omnigraph-api-icon" set:text={"❌"} />
   <Fragment slot="ens-omnigraph-api" set:html={omnigraphUnactivated} />
