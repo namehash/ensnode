@@ -12,5 +12,5 @@ export interface ProfileFieldParser<TOutput> {
   /** The record keys this parser requires. Merged into the parent selection before resolution. */
   selection: ResolverRecordsSelection;
   /** Derive the GraphQL output from the resolved records, or null if the record is unset. */
-  parse(records: ResolvedRecordsModel): TOutput | null;
+  parse(result: ResolvedRecordsModel): TOutput | null;
 }

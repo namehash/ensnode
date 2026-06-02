@@ -87,10 +87,10 @@ const socialParser = (
   const opts = { hostnames, baseUrl, handlePattern };
   return {
     selection: { texts: keys },
-    parse: (records) => {
+    parse: (result) => {
       for (const key of keys) {
-        const result = parseSocialHandle({ value: records.texts?.[key], ...opts });
-        if (result !== null) return result;
+        const parsed = parseSocialHandle({ value: result.records.texts?.[key], ...opts });
+        if (parsed !== null) return parsed;
       }
       return null;
     },

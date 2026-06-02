@@ -8,8 +8,8 @@ const profileEmailSchema = makeEmailSchema("email text record");
 
 const textParser = (key: string): ProfileFieldParser<string> => ({
   selection: { texts: [key] },
-  parse: (records) => {
-    const raw = records.texts?.[key];
+  parse: (result) => {
+    const raw = result.records.texts?.[key];
     if (raw == null || raw === "") return null;
     return raw;
   },
@@ -19,8 +19,8 @@ export const ProfileDescriptionParser: ProfileFieldParser<string> = textParser("
 
 export const ProfileEmailParser: ProfileFieldParser<Email> = {
   selection: { texts: ["email"] },
-  parse: (records) => {
-    const raw = records.texts?.email?.trim();
+  parse: (result) => {
+    const raw = result.records.texts?.email?.trim();
     if (!raw) return null;
     const parsed = profileEmailSchema.safeParse(raw);
     return parsed.success ? parsed.data : null;
@@ -29,8 +29,8 @@ export const ProfileEmailParser: ProfileFieldParser<Email> = {
 
 const urlParser = (key: string): ProfileFieldParser<string> => ({
   selection: { texts: [key] },
-  parse: (records) => {
-    const trimmed = records.texts?.[key]?.trim();
+  parse: (result) => {
+    const trimmed = result.records.texts?.[key]?.trim();
     if (!trimmed) return null;
     if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
       return null;

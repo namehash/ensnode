@@ -267,4 +267,17 @@ describe("mergeRecordsSelections", () => {
       addresses: [60, 61],
     });
   });
+
+  it("deduplicates texts, addresses, and interfaces", () => {
+    expect(
+      mergeRecordsSelections(
+        { texts: ["avatar", "description"], addresses: [60], interfaces: ["0x01ffc9a7"] },
+        { texts: ["description", "email"], addresses: [60, 61], interfaces: ["0x01ffc9a7"] },
+      ),
+    ).toEqual({
+      texts: ["avatar", "description", "email"],
+      addresses: [60, 61],
+      interfaces: ["0x01ffc9a7"],
+    });
+  });
 });

@@ -1,6 +1,6 @@
 # Name profile resolution
 
-Interpreted ENS profile fields exposed on `Domain.profile` (and `PrimaryNameRecord.profile`) in the Omnigraph API. Raw resolver records are resolved in one round-trip; each GraphQL field is backed by a `ProfileFieldParser` that declares its record selection and parsing logic.
+Interpreted ENS profile fields exposed on `Domain.resolve.profile` (and `PrimaryNameRecord.resolve.profile`) in the Omnigraph API. Raw resolver records are resolved in one round-trip; each GraphQL field is backed by a `ProfileFieldParser` that declares its record selection and parsing logic.
 
 ## Architecture
 
@@ -21,7 +21,7 @@ GraphQL wiring lives in `apps/ensapi/src/omnigraph-api/schema/profile.ts`.
 Each parser is a singleton with:
 
 - `selection` — which text keys / coin types must be fetched
-- `parse(records)` — derive the GraphQL output from `ResolvedRecordsModel`
+- `parse(result)` — derive the GraphQL output from `ResolvedRecordsModel`
 
 `buildProfileSelectionFromResolveContainerInfo` merges parser selections based on the client's `profile { ... }` sub-selection.
 

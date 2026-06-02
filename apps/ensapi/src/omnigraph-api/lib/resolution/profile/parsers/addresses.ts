@@ -1,5 +1,4 @@
 import { type CoinName, getCoderByCoinName } from "@ensdomains/address-encoder";
-import { hexToBytes } from "@ensdomains/address-encoder/utils";
 import {
   type BinanceAddress,
   type BitcoinAddress,
@@ -13,7 +12,7 @@ import {
   type SolanaAddress,
   toNormalizedAddress,
 } from "enssdk";
-import { isHex } from "viem";
+import { isHex, toBytes } from "viem";
 
 import type { ProfileFieldParser } from "./types";
 
@@ -26,13 +25,13 @@ const buildAddressParser = <T extends string>(
 
   return {
     selection: { addresses: [coinType] },
-    parse: (records) => {
-      const raw = records.addresses?.[coinType];
+    parse: (result) => {
+      const raw = result.records.addresses?.[coinType];
       if (raw == null || raw === "0x") return null;
       if (!isHex(raw)) return null;
 
       try {
-        const bytes = hexToBytes(raw);
+        const bytes = toBytes(raw);
         if (bytes.length === 0 || bytes.every((byte) => byte === 0)) return null;
 
         const encoded = coder.encode(bytes);

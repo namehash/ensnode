@@ -201,27 +201,27 @@ DomainInterfaceRef.implement({
         const name = domain.canonicalName;
 
         if (!name || !isNormalizedName(name)) {
-          return { accelerate, canAccelerate, trace: null, records: null };
+          return { accelerate, canAccelerate, trace: null, result: null };
         }
 
-        const mergedSelection = mergeRecordsSelections(
+        const selection = mergeRecordsSelections(
           buildRecordsSelectionFromResolveContainerInfo(info),
           buildProfileSelectionFromResolveContainerInfo(info),
         );
 
-        if (!mergedSelection) {
-          return { accelerate, canAccelerate, trace: null, records: null };
+        if (!selection) {
+          return { accelerate, canAccelerate, trace: null, result: null };
         }
 
         const { trace, result } = await runWithTrace(() =>
-          resolveForward(name, mergedSelection, { accelerate, canAccelerate }),
+          resolveForward(name, selection, { accelerate, canAccelerate }),
         );
 
         return {
           accelerate,
           canAccelerate,
           trace,
-          records: toResolvedRecordsModel(name, result),
+          result: toResolvedRecordsModel(name, result),
         };
       },
     }),

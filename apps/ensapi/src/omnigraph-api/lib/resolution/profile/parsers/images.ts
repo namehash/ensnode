@@ -26,12 +26,12 @@ const buildImageParser = (
   record: EnsMetadataImageRecord,
 ): ProfileFieldParser<ProfileImageResult> => ({
   selection: { texts: [record] },
-  parse: (records) => {
-    const raw = records.texts?.[record]?.trim();
+  parse: (result) => {
+    const raw = result.records.texts?.[record]?.trim();
     if (!raw) return null;
 
     const httpUrl =
-      parseDirectImageHttpUrl(raw) ?? interpretProfileImageHttpUrl(records, raw, record);
+      parseDirectImageHttpUrl(raw) ?? interpretProfileImageHttpUrl(result, raw, record);
 
     return { httpUrl };
   },
@@ -55,7 +55,7 @@ function interpretProfileImageHttpUrl(
 ): string | null {
   if (!rawValue) return null;
 
-  return getEnsMetadataServiceImageUrl(model.id, di.context.namespace, record)?.href ?? null;
+  return getEnsMetadataServiceImageUrl(model.name, di.context.namespace, record)?.href ?? null;
 }
 
 export const profileImageHttpUrlDescription = (recordLabel: "avatar" | "header") =>

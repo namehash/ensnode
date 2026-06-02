@@ -2,15 +2,19 @@ import type { InterpretedName } from "enssdk";
 
 import type { ResolverRecordsResponseBase } from "@ensnode/ensnode-sdk";
 
-/** Cache key and resolution identity for {@link ResolvedRecordsRef}. */
-export type ResolvedRecordsModel = Partial<ResolverRecordsResponseBase> & {
-  id: InterpretedName;
+/** Resolved records for a name, including resolution identity and record payload. */
+export type ResolvedRecordsModel = {
+  name: InterpretedName;
+  records: Partial<ResolverRecordsResponseBase>;
 };
+
+/** Forward-resolution outcome carrying {@link ResolvedRecordsModel}. */
+export type ResolvedRecordsResultModel = ResolvedRecordsModel;
 
 export const toResolvedRecordsModel = (
   name: InterpretedName,
   response: Partial<ResolverRecordsResponseBase>,
 ): ResolvedRecordsModel => ({
-  id: name,
-  ...response,
+  name,
+  records: response,
 });
