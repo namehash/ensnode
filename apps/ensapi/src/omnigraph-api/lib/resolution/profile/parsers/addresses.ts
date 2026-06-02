@@ -1,4 +1,4 @@
-import { type CoinName, getCoderByCoinName, getCoderByCoinType } from "@ensdomains/address-encoder";
+import { type CoinName, getCoderByCoinName } from "@ensdomains/address-encoder";
 import { hexToBytes } from "@ensdomains/address-encoder/utils";
 import {
   type BinanceAddress,
@@ -18,27 +18,30 @@ import { isHex } from "viem";
 import type { ProfileFieldParser } from "./types";
 
 const buildAddressParser = <T extends string>(
-  coinNameOrType: CoinName | number,
-  format: (encoded: string) => T,
+  coinNameOrType: CoinName,
+  format?: (encoded: string) => T,
 ): ProfileFieldParser<T> => {
-  const coder =
-    typeof coinNameOrType === "number"
-      ? getCoderByCoinType(coinNameOrType)
-      : getCoderByCoinName(coinNameOrType);
+  const coder = getCoderByCoinName(coinNameOrType);
   const coinType = coder.coinType as CoinType;
 
   return {
     selection: { addresses: [coinType] },
     parse: (records) => {
       const raw = records.addresses?.[coinType];
-      if (raw == null || raw === "" || raw === "0x") return null;
+      if (raw == null || raw === "0x") return null;
       if (!isHex(raw)) return null;
 
       try {
         const bytes = hexToBytes(raw);
         if (bytes.length === 0 || bytes.every((byte) => byte === 0)) return null;
 
-        return format(coder.encode(bytes));
+        const encoded = coder.encode(bytes);
+
+        if (format) {
+          return format(encoded);
+        }
+
+        return encoded as T;
       } catch {
         return null;
       }
@@ -48,45 +51,17 @@ const buildAddressParser = <T extends string>(
 
 export const ProfileAddressEthereumParser = buildAddressParser("eth", toNormalizedAddress);
 export const ProfileAddressBaseParser = buildAddressParser("base", toNormalizedAddress);
-export const ProfileAddressBitcoinParser = buildAddressParser(
-  "btc",
-  (address) => address as BitcoinAddress,
-);
-export const ProfileAddressSolanaParser = buildAddressParser(
-  "sol",
-  (address) => address as SolanaAddress,
-);
-export const ProfileAddressLitecoinParser = buildAddressParser(
-  "ltc",
-  (address) => address as LitecoinAddress,
-);
-export const ProfileAddressDogecoinParser = buildAddressParser(
-  "doge",
-  (address) => address as DogecoinAddress,
-);
-export const ProfileAddressMonacoinParser = buildAddressParser(
-  "mona",
-  (address) => address as MonacoinAddress,
-);
-/** Rootstock (RBTC) — coinType 137, EIP-55 checksummed EVM address. */
-export const ProfileAddressRootstockParser = buildAddressParser(
-  137,
-  (address) => address as RootstockAddress,
-);
-export const ProfileAddressRippleParser = buildAddressParser(
-  "xrp",
-  (address) => address as RippleAddress,
-);
-export const ProfileAddressBitcoinCashParser = buildAddressParser(
-  "bch",
-  (address) => address as BitcoinCashAddress,
-);
-export const ProfileAddressBinanceParser = buildAddressParser(
-  "bnb",
-  (address) => address as BinanceAddress,
-);
+export const ProfileAddressBitcoinParser = buildAddressParser<BitcoinAddress>("btc");
+export const ProfileAddressSolanaParser = buildAddressParser<SolanaAddress>("sol");
+export const ProfileAddressLitecoinParser = buildAddressParser<LitecoinAddress>("ltc");
+export const ProfileAddressDogecoinParser = buildAddressParser<DogecoinAddress>("doge");
+export const ProfileAddressMonacoinParser = buildAddressParser<MonacoinAddress>("mona");
 
-/** All address parsers keyed by their GraphQL field name. */
+export const ProfileAddressRootstockParser = buildAddressParser<RootstockAddress>("rbtc");
+export const ProfileAddressRippleParser = buildAddressParser<RippleAddress>("xrp");
+export const ProfileAddressBitcoinCashParser = buildAddressParser<BitcoinCashAddress>("bch");
+export const ProfileAddressBinanceParser = buildAddressParser<BinanceAddress>("bnb");
+
 export const ADDRESS_PARSERS = {
   ethereum: ProfileAddressEthereumParser,
   base: ProfileAddressBaseParser,

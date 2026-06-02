@@ -1,4 +1,4 @@
-import { type CoinName, coinNameToTypeMap, getCoderByCoinName } from "@ensdomains/address-encoder";
+import { type CoinName, getCoderByCoinName } from "@ensdomains/address-encoder";
 import { bytesToHex } from "@ensdomains/address-encoder/utils";
 import type { CoinType, NormalizedAddress } from "enssdk";
 import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
