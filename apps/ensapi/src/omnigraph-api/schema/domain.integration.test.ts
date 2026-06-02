@@ -16,6 +16,7 @@ import {
   makeENSv2RegistryId,
   makeStorageId,
   type NormalizedAddress,
+  type UrlString,
 } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -701,9 +702,9 @@ describe("Domain.profile", () => {
       resolve: {
         profile: {
           description: string | null;
-          avatar: { httpUrl: string | null } | null;
+          avatar: { httpUrl: UrlString | null } | null;
           addresses: { ethereum: NormalizedAddress | null } | null;
-          socials: { github: { handle: string; httpUrl: string } | null } | null;
+          socials: { github: { handle: string; httpUrl: UrlString } | null } | null;
         } | null;
       };
     };

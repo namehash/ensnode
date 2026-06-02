@@ -1,4 +1,10 @@
-import { ETH_COIN_TYPE, evmChainIdToCoinType, type Hex, type InterpretedName } from "enssdk";
+import {
+  ETH_COIN_TYPE,
+  evmChainIdToCoinType,
+  type Hex,
+  type InterpretedName,
+  type UrlString,
+} from "enssdk";
 import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -330,7 +336,7 @@ describe("Account.primaryName and Account.primaryNames", () => {
       records?: { addresses: Array<{ coinType: number; address: Hex | null }> } | null;
       profile?: {
         description: string | null;
-        avatar: { httpUrl: string | null } | null;
+        avatar: { httpUrl: UrlString | null } | null;
       } | null;
     } | null;
   };
