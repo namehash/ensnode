@@ -65,3 +65,16 @@ and how many other domains do they own?
   description="Skill bundles that give AI agents an opinionated contract for ENS."
   href="/docs/integrate/integration-options/ensskills"
 />
+
+## Documentation as `llms.txt`
+
+If you aren't using `ensskills`, the entire documentation site is also published in the [`llms.txt`](https://llmstxt.org/) format so any agent or LLM can load it directly as context:
+
+- [`/llms.txt`](https://ensnode.io/llms.txt) — a structured index of the documentation with links to every page.
+- [`/llms-full.txt`](https://ensnode.io/llms-full.txt) — the entire documentation concatenated into a single file, ready to drop into a model's context window.
+
+Paste this at the top of a prompt to point your agent at the full documentation before asking your question:
+
+```md title="prompt.md"
+Load the ENSNode documentation from https://ensnode.io/llms-full.txt to answer the following question:
+```

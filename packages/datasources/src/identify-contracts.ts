@@ -28,7 +28,6 @@ export interface DatasourceContractMatch {
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param query - The address to identify, optionally scoped to a chain
- * @returns Every matching well-known contract within the namespace
  */
 export const identifyDatasourceContracts = (
   namespaceId: ENSNamespaceId,

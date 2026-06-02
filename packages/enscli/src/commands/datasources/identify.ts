@@ -45,6 +45,7 @@ function parseIdentifyQuery(input: string): DatasourceIdentifyQuery {
   const address = toNormalizedAddress(addressPart);
   if (chainIdPart === undefined) return { address };
 
+  // Only accept base-10 digits; Number() would otherwise coerce "1e3", "0x10", etc. into chain IDs.
   if (!/^\d+$/.test(chainIdPart)) {
     throw new Error(`Invalid chainId "${chainIdPart}". Expected a positive integer.`);
   }
@@ -91,7 +92,7 @@ export const identify = defineCommand({
           : data.matches
               .map(
                 (m) =>
-                  `${m.namespace} · ${m.datasource} · ${m.contract} — ${m.accountId} (${m.chain})`,
+                  `${m.namespace} · ${m.datasource} · ${m.contract} — ${m.accountId}${m.chain ? ` (${m.chain})` : ""}`,
               )
               .join("\n"),
       );

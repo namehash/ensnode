@@ -230,9 +230,5 @@ export const integrateSidebarTopic = {
         },
       ],
     },
-    {
-      label: "llms.txt",
-      link: "/docs/integrate/llms-txt",
-    },
   ],
 };
