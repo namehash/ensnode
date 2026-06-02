@@ -36,10 +36,10 @@ The easiest way to get started is through the new **ENS Omnigraph API** — the 
 <p align="center">
   Join the ENS ecosystem that's already building on ENSNode
   <br /><br />
-  <a href="https://ensnode.io">
+  <a href="https://ensnode.io/docs/integrate">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/ensnode-integrators-dark.svg">
-      <img alt="ENSNode" src=".github/assets/ensnode-integrators-light.svg" width="1217">
+      <img alt="Featured ENSNode integrators" src=".github/assets/ensnode-integrators-light.svg" width="1217">
     </picture>
   </a>
 </p>
