@@ -1,5 +1,6 @@
+import type { Hex } from "viem";
+
 import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
-import { Hex } from "viem";
 
 export const profileRecordsModel = (
   texts?: Record<string, string | null>,

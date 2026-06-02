@@ -1,8 +1,8 @@
+import type { Hex } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { ADDRESS_PARSERS } from "./addresses";
 import { profileRecordsModel } from "./test-helpers";
-import { Hex } from "viem";
 
 describe("ADDRESS_PARSERS", () => {
   it.each([
