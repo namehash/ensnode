@@ -17,6 +17,10 @@ export const integrateSidebarTopic = {
       link: "/docs/integrate/ensv2-readiness",
     },
     {
+      label: "AI/LLM Tooling 🤖",
+      link: "/docs/integrate/ai-llm",
+    },
+    {
       label: "ENS Subgraph",
       collapsed: true,
       badge: {
@@ -225,10 +229,6 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],
-    },
-    {
-      label: "AI / LLM Tooling",
-      link: "/docs/integrate/ai-llm",
     },
   ],
 };
