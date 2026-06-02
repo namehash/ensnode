@@ -42,7 +42,7 @@ Rely on this when parsing results:
 
 ## Commands
 
-```
+```text
 enscli
   ensnode
     omnigraph <query>            run a raw GraphQL query (--variables '<json>')

@@ -19,9 +19,10 @@ function readDotEnv(): Record<string, string | undefined> {
   return dotEnv;
 }
 
-/** Reads an env var with `.env` fallback (real env wins). */
+/** Reads an env var with `.env` fallback (real env wins). Empty strings are treated as unset. */
 function fromEnv(key: string): string | undefined {
-  return process.env[key] ?? readDotEnv()[key];
+  const value = process.env[key] ?? readDotEnv()[key];
+  return value !== undefined && value.length > 0 ? value : undefined;
 }
 
 /** Reads a CLI flag from citty's parsed args, tolerating both kebab and camelCase keys. */

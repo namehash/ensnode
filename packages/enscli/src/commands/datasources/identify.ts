@@ -45,6 +45,9 @@ function parseIdentifyQuery(input: string): DatasourceIdentifyQuery {
   const address = toNormalizedAddress(addressPart);
   if (chainIdPart === undefined) return { address };
 
+  if (!/^\d+$/.test(chainIdPart)) {
+    throw new Error(`Invalid chainId "${chainIdPart}". Expected a positive integer.`);
+  }
   const chainId = Number(chainIdPart);
   if (!Number.isInteger(chainId) || chainId <= 0) {
     throw new Error(`Invalid chainId "${chainIdPart}". Expected a positive integer.`);

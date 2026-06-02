@@ -90,7 +90,7 @@ _Represents a Domain, i.e. an individual Label within the ENS namegraph. It may 
 - events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection — All Events associated with this Domain.
 - id: DomainId! — A unique and stable reference to this Domain.
 - label: Label! — The Label associated with this Domain in the ENS Namegraph.
-- owner: Account — If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+- owner: Account — If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
 - parent: Domain — The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
 - registration: Registration — The latest Registration for this Domain, if exists.
 - registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection — All Registrations for a Domain, including the latest Registration.

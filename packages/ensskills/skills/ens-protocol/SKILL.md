@@ -28,13 +28,13 @@ Two hashes are frequently used for identification on-chain:
 - **labelhash** — `keccak256` of a single label (`enssdk`: `labelhashInterpretedLabel`). The result of this function is a `LabelHash`
 - **namehash** (ENSIP-1) — a recursive hash of the whole name into a 32-byte **node**, the on-chain identifier for that name (`enssdk`: `namehashInterpretedName`). `namehash("vitalik.eth")` walks the tree hashing each label. The result of this function is a `Node` (but is often (confusingly) referred to as the name's 'namehash' — in this documentation and in your communication with users, always prefer using `Node` to refer to the result of the `namehash` function).
 
-Always hash a normalized/Interpreted value, never raw input. Because Domains ae keyed by these hashes on-chain, in ENSv1 a label string is frequently **unknown** (you have only its hash). See [references/names-and-hashing.md](references/names-and-hashing.md).
+Always hash a normalized/Interpreted value, never raw input. Because Domains are keyed by these hashes on-chain, in ENSv1 a label string is frequently **unknown** (you have only its hash). See [references/names-and-hashing.md](references/names-and-hashing.md).
 
 ## Normalization (always)
 
 Before hashing, comparing, or displaying a name you must **normalize** it per [ENSIP-15](https://docs.ens.domains/ensip/15). Never `toLowerCase()` a name. Normalization makes `Vitalik.eth` and `vitalik.eth` resolve to the same node and defends against homoglyph spoofing (e.g. a Cyrillic `а` posing as Latin `a`). Two names are "the same" only after both are normalized.
 
-Don't run the algorithm yourself, use `enssdk` wraps `@adraffy/ens-normalize`. Validate with `isNormalizedName` / `isNormalizedLabel`, and coerce raw user input into a safe **Interpreted Name** with `asInterpretedName` (or into a safe **Interpreted Label** with `asInterpretedLabel`) — the branded type the SDK's hashing and query helpers require. See [references/names-and-hashing.md](references/names-and-hashing.md).
+Don't run the algorithm yourself; `enssdk` wraps `@adraffy/ens-normalize`. Validate with `isNormalizedName` / `isNormalizedLabel`, and coerce raw user input into a safe **Interpreted Name** with `asInterpretedName` (or into a safe **Interpreted Label** with `asInterpretedLabel`) — the branded type the SDK's hashing and query helpers require. See [references/names-and-hashing.md](references/names-and-hashing.md).
 
 ## Architecture: Registry, Resolver, Registrar
 
@@ -92,7 +92,7 @@ ENS is not "just mainnet." Names and subdomains live across L1, L2s, and offchai
 - **ENSv1**: names are a flat mapping of `namehash → state` on Ethereum mainnet (the registry + resolvers described above), with subdomains on other chains (Basenames, Lineanames, 3DNS) stitched in.
 - **ENSv2**: names become a **Namegraph** — a graph of `Registry → Domain → Registry → …` rather than a flat table — with much of the system on an L2, native subname delegation, and first-class onchain **Permissions** (roles governing who can do what).
 
-After ENSv2 launches there can be **two** onchain Domains for the same name (one per version); a name lookup starts at the ENSv2 root and returns whichever Domain resolution would use. So a Name is **not** a stable identifier. The closes thing to a stable identifier is, for ENSv1 `(chainId, registryAddress, node)` and for ENSv2 `(chainId, registryAddress, storageId)`.
+After ENSv2 launches there can be **two** onchain Domains for the same name (one per version); a name lookup starts at the ENSv2 root and returns whichever Domain resolution would use. So a Name is **not** a stable identifier. The closest thing to a stable identifier is, for ENSv1 `(chainId, registryAddress, node)` and for ENSv2 `(chainId, registryAddress, storageId)`.
 
 The fundamentals in this skill — names, normalization, hashing, the resolver/record model, forward/reverse resolution — hold across both versions. The safest way to stay version-agnostic is to read the unified data through the omnigraph instead of hardcoding ENSv1 assumptions. See [references/ensv1-and-ensv2.md](references/ensv1-and-ensv2.md).
 

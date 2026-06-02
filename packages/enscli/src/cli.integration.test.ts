@@ -53,9 +53,10 @@ describe("enscli", () => {
   it("omnigraph schema: describes a type from the bundled SDL (no network)", () => {
     const result = runCli(["ensnode", "omnigraph", "schema", "Domain"]);
     expect(result.status).toBe(0);
-    const schema = JSON.parse(result.stdout);
-    expect(schema.name).toBe("Domain");
-    expect(schema.fields.map((field: { name: string }) => field.name)).toContain("canonical");
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      name: "Domain",
+      fields: expect.arrayContaining([expect.objectContaining({ name: "canonical" })]),
+    });
   });
 
   it("rejects hallucinated identifiers with a structured error and non-zero exit", () => {

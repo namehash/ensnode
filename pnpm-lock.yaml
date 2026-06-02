@@ -1248,6 +1248,9 @@ importers:
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
       tsx:
         specifier: ^4.7.1
         version: 4.22.3

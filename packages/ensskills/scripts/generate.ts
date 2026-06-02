@@ -22,6 +22,7 @@ import {
   isInterfaceType,
   isObjectType,
 } from "graphql";
+import prettier from "prettier";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const SDL_PATH = resolve(SCRIPT_DIR, "../../enssdk/src/omnigraph/generated/schema.graphql");
@@ -189,20 +190,33 @@ function replaceRegion(content: string, region: string, replacement: string, pat
   return content.replace(pattern, `${start}\n${replacement}\n${end}`);
 }
 
+/**
+ * Writes a SKILL.md, formatted with Prettier so the output matches the linted committed state.
+ * Without this the raw region markdown drifts from `pnpm lint` (Prettier reflows markdown), so every
+ * `pnpm generate` would leave a noisy, lint-only diff.
+ */
+async function writeFormatted(path: string, content: string): Promise<void> {
+  const options = await prettier.resolveConfig(path);
+  writeFileSync(path, await prettier.format(content, { ...options, filepath: path }));
+}
+
 async function main(): Promise<void> {
   const schema = buildSchema(readFileSync(SDL_PATH, "utf8"));
   let content = readFileSync(SKILL_PATH, "utf8");
   content = replaceRegion(content, "SCHEMA", buildSchemaReference(schema), SKILL_PATH);
   content = replaceRegion(content, "EXAMPLES", await buildExamples(), SKILL_PATH);
-  writeFileSync(SKILL_PATH, content);
+  await writeFormatted(SKILL_PATH, content);
   console.log(`Updated ${SKILL_PATH}`);
 
   let enscliContent = readFileSync(ENSCLI_SKILL_PATH, "utf8");
   for (const [group, block] of await buildEnscliExamplesByGroup()) {
     enscliContent = replaceRegion(enscliContent, group, block, ENSCLI_SKILL_PATH);
   }
-  writeFileSync(ENSCLI_SKILL_PATH, enscliContent);
+  await writeFormatted(ENSCLI_SKILL_PATH, enscliContent);
   console.log(`Updated ${ENSCLI_SKILL_PATH}`);
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

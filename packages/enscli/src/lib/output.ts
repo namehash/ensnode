@@ -17,13 +17,13 @@ export function resolveFormat(args: Record<string, unknown>): "json" | "pretty" 
  * Prints a command result. In `pretty` mode, `prettyText` (when provided) renders a human-friendly
  * form; otherwise the full structured payload is printed as indented JSON.
  */
-export function printResult(
-  data: unknown,
+export function printResult<T>(
+  data: T,
   args: Record<string, unknown>,
-  prettyText?: (data: never) => string,
+  prettyText?: (data: T) => string,
 ): void {
   if (resolveFormat(args) === "pretty" && prettyText) {
-    process.stdout.write(`${prettyText(data as never)}\n`);
+    process.stdout.write(`${prettyText(data)}\n`);
   } else {
     process.stdout.write(`${toJson(data, { pretty: true })}\n`);
   }

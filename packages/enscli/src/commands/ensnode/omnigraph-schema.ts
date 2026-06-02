@@ -189,7 +189,13 @@ export function runOmnigraphSchema(
   }
 
   if (target.includes(".")) {
-    const [typeName, fieldName] = target.split(".", 2);
+    const segments = target.split(".");
+    if (segments.length !== 2 || segments.some((segment) => segment.length === 0)) {
+      throw new Error(
+        `Invalid target "${target}". Expected "Type" or "Type.field" (e.g. Domain or Domain.canonical).`,
+      );
+    }
+    const [typeName, fieldName] = segments;
     printResult(
       describeFieldPath(omnigraphSchema, typeName, fieldName),
       args,

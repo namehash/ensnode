@@ -50,11 +50,16 @@ export const omnigraph = defineCommand({
 
       let variables: Record<string, unknown> = {};
       if (typeof args.variables === "string" && args.variables.length > 0) {
+        let parsed: unknown;
         try {
-          variables = JSON.parse(args.variables);
+          parsed = JSON.parse(args.variables);
         } catch {
           throw new Error("Invalid --variables: expected a JSON object string.");
         }
+        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+          throw new Error("Invalid --variables: expected a JSON object, not an array or scalar.");
+        }
+        variables = parsed as Record<string, unknown>;
       }
 
       const client = getEnsNodeClient(args);
