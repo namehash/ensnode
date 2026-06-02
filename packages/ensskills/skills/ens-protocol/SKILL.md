@@ -21,7 +21,7 @@ This is the foundational _protocol_ skill the other ENS skills build on. To read
 
 ## The nametree
 
-ENS names are dot-separated **labels** read right-to-left from an unnamed **root**: `vitalik.eth` is the label `vitalik` under the TLD `eth` under the root. Every name is a node in this tree; a name's direct children are its **subdomains** (a.k.a. subdomains), e.g. `pay.vitalik.eth`. Owning a name lets you create subdomains under it. `.eth` is the native ENS TLD; most other TLDs are imported from DNS.
+ENS names are dot-separated **labels** read right-to-left from an unnamed **root**: `vitalik.eth` is the label `vitalik` under the TLD `eth` under the root. Every name is a node in this tree; a name's direct children are its **subnames** (a.k.a. subdomains), e.g. `pay.vitalik.eth`. Owning a name lets you create subnames under it. `.eth` is the native ENS TLD; most other TLDs are imported from DNS.
 
 Two hashes are frequently used for identification on-chain:
 
