@@ -87,7 +87,7 @@ An [ENSDb instance](#ensdb-instance) is considered multi-tenant when it stores d
 
 Within a single [ENSDb instance](#ensdb-instance):
 
-- Each [ENSIndexer instance](#ensindexer-instance) gets its own [ENSIndexer Schema](#ensindexer-schema) — fully isolated data following the [ENSIndexer Schema Definition](#ensindexer-schema-definition) that was current when the ENSIndexer instance started.
+- Each [ENSIndexer instance](#ensindexer-instance) gets its own [ENSIndexer Schema](#ensindexer-schema)—fully isolated data following the [ENSIndexer Schema Definition](#ensindexer-schema-definition) that was current when the ENSIndexer instance started.
 - All [ENSIndexer instances](#ensindexer-instance) share the [Ponder Schema](#ponder-schema), including the RPC cache.
 - Metadata of all [ENSIndexer instances](#ensindexer-instance) is tracked in the [ENSNode Schema](#ensnode-schema)
 
@@ -209,9 +209,9 @@ A TypeScript package published as [`@ensnode/ensdb-sdk`](https://www.npmjs.com/p
 
 The ENSDb SDK includes:
 
-- [EnsDbReader Client](#ensdb-reader-client) — An ENSDb client implementation for querying ENSDb Metadata, and building custom queries against the [ENSDb instance](#ensdb-instance).
-- [EnsDbWriter Client](#ensdb-writer-client) — An ENSDb client implementation for writing ENSNode Metadata and executing ENSNode migrations.
-- [Schema Definitions](#schema-definition) — Drizzle schemas for [ENSIndexer Schema](#ensindexer-schema) and [ENSNode Schema](#ensnode-schema).
+- [EnsDbReader Client](#ensdb-reader-client)—An ENSDb client implementation for querying ENSDb Metadata, and building custom queries against the [ENSDb instance](#ensdb-instance).
+- [EnsDbWriter Client](#ensdb-writer-client)—An ENSDb client implementation for writing ENSNode Metadata and executing ENSNode migrations.
+- [Schema Definitions](#schema-definition)—Drizzle schemas for [ENSIndexer Schema](#ensindexer-schema) and [ENSNode Schema](#ensnode-schema).
 
 ### ENSDb Reader Client
 
@@ -223,4 +223,4 @@ A class in [ENSDb SDK](#ensdb-sdk) that extends [ENSDb Reader Client](#ensdb-rea
 
 ## Related Documentation
 
-- [Database Schemas](/docs/services/ensdb/concepts/database-schemas) — Deep dive on schema types
+- [Database Schemas](/docs/services/ensdb/concepts/database-schemas)—Deep dive on schema types

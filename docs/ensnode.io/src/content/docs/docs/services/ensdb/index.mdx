@@ -1,6 +1,6 @@
 ---
 title: Getting started with ENSDb
-description: ENSDb is an open standard for bi-directional ENS integration. An ENSDb instance is a PostgreSQL database served from a PostgreSQL server — and a single server can serve multiple ENSDb instances.
+description: ENSDb is an open standard for bi-directional ENS integration. An ENSDb instance is a PostgreSQL database served from a PostgreSQL server—and a single server can serve multiple ENSDb instances.
 sidebar:
   label: Overview
   order: 1
@@ -17,14 +17,14 @@ Get the whole, live onchain state of ENS in your database.
 
 ### Open Standard
 
-ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the ENS onchain state in a PostgreSQL database — making the data accessible from any programming language.
+ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the ENS onchain state in a PostgreSQL database—making the data accessible from any programming language.
 
-The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have options: implement your own [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) or [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) in any language, or use the initial reference implementations provided by ENSNode — [ENSIndexer](/docs/services/ensindexer/) as an ENSDb Writer and [ENSApi](/docs/services/ensapi/) as an ENSDb Reader.
+The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have options: implement your own [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) or [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) in any language, or use the initial reference implementations provided by ENSNode—[ENSIndexer](/docs/services/ensindexer/) as an ENSDb Writer and [ENSApi](/docs/services/ensapi/) as an ENSDb Reader.
 
 <Aside type="tip" title="Build in Any Language">
   Each ENSDb instance runs in a standard PostgreSQL database, so to interact with it, you can use
   _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby,
-  Java, C# — the choice is yours.
+  Java, C#—the choice is yours.
 </Aside>
 
 ## What You Get
@@ -44,11 +44,11 @@ An **ENSDb instance** contains the **live onchain state of ENS**, including:
 
 By building on a PostgreSQL database, ENSDb inherits world-class capabilities:
 
-- ACID transactions — Data integrity guarantees
-- Complex queries — Joins, aggregations, window functions
-- Scalability — Replication, sharding, connection pooling
-- Ecosystem — Mature tools, ORMs, dashboards, analytics platforms
-- Reliability — Decades of production-proven technology
+- ACID transactions—Data integrity guarantees
+- Complex queries—Joins, aggregations, window functions
+- Scalability—Replication, sharding, connection pooling
+- Ecosystem—Mature tools, ORMs, dashboards, analytics platforms
+- Reliability—Decades of production-proven technology
 
 ## What You Can Build
 
@@ -100,5 +100,5 @@ ENSDb unlocks a new universe of ENS applications:
 
 ## Related Projects
 
-- **[ENSIndexer](/docs/services/ensindexer/)** — The reference [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) implementation
-- **[ENSApi](/docs/services/ensapi/)** — The reference [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) implementation
+- **[ENSIndexer](/docs/services/ensindexer/)**—The reference [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) implementation
+- **[ENSApi](/docs/services/ensapi/)**—The reference [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) implementation

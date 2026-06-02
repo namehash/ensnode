@@ -30,7 +30,7 @@ ENSNode must process labels from various onchain and offchain sources, each pote
 
 ### Labels, LabelHashes, labelhash function
 
-A **Label** is a human-readable string used as a segment of a **name** — i.e. `vitalik` and `eth` are the **Labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
+A **Label** is a human-readable string used as a segment of a **name**—i.e. `vitalik` and `eth` are the **Labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
 
 In the ENSv1 `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ Labels or that those Labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **Labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **Labels** that make up a name can be made **known**: human-readable **Labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **Label** for a given **LabelHash** can be determined via rainbow table lookups (via [ENSRainbow](/docs/services/ensrainbow)) and other strategies.
 
@@ -38,11 +38,11 @@ In the ENSv1 `Registry` contract, only the **name**'s **node** is registered on-
 
 When rendering a **name**, one must take care to differentiate between an _unknown_ **Label** (only identifiable by its 32-byte **LabelHash**) and a _known_ **Label** potentially composed of hex characters. To do so, the _unknown_ **Label**'s **LabelHash** is _encoded_ as `[{LabelHash}]`. Examples are likely helpful:
 
-- `vitalik.eth` — a _normalized_ **name** w/ _normalized_ & _known_ Labels
-- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a **name** composed of two Labels
+- `vitalik.eth`—a _normalized_ **name** w/ _normalized_ & _known_ Labels
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth`—a **name** composed of two Labels
   1. an _unknown_ Label (of unknown _normalization_): `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
   2. a _normalized_, _known_ Label: `eth`
-- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth` — a _normalized_ **name** composed of two Labels
+- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth`—a _normalized_ **name** composed of two Labels
   1. a _normalized_, _known_ Label (that just so happens to be a set of 64 literal hex characters): `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
   2. a _normalized_, _known_ Label: `eth`
 

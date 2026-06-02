@@ -1,6 +1,6 @@
 import { defineCommand } from "citty";
 
-import { EnsNodeClient } from "@ensnode/ensnode-sdk";
+import { EnsNodeClient, serializeEnsApiIndexingStatusResponse } from "@ensnode/ensnode-sdk";
 
 import { ensnodeArgs, outputArgs } from "../../lib/args";
 import { resolveEnsNodeUrl } from "../../lib/config";
@@ -19,7 +19,9 @@ export const indexingStatus = defineCommand({
     runSafely(async () => {
       const url = resolveEnsNodeUrl(args);
       const client = new EnsNodeClient({ url });
+      // `indexingStatus()` returns the deserialized form (whose `omnichainSnapshot.chains` is a Map,
+      // which JSON.stringify drops); serialize back to the JSON-safe wire shape before printing.
       const status = await client.indexingStatus();
-      printResult(status, args);
+      printResult(serializeEnsApiIndexingStatusResponse(status), args);
     }),
 });

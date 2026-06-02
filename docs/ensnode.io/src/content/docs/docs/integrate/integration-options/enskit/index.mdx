@@ -9,7 +9,7 @@ import snapshot from "@data/omnigraph-examples/snapshot.json";
 
 `enskit` is the React toolkit for ENSv2 development. It provides a fully typed Omnigraph API client (powered by [`urql`](https://nearform.com/open-source/urql/) and [`gql.tada`](https://gql-tada.0no.co/)), the `OmnigraphProvider`, and the `useOmnigraphQuery` hook for writing type-safe ENS queries with editor autocomplete, Relay-style pagination, and Omnigraph-specific cache directives.
 
-This guide walks you from an empty directory to a working React component that renders an [ENS Domain](/docs/concepts/the-ens-protocol) and a paginated list of its subdomains — the same flow as the [`DomainView`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in our example app.
+This guide walks you from an empty directory to a working React component that renders an [ENS Domain](/docs/concepts/the-ens-protocol) and a paginated list of its subdomains—the same flow as the [`DomainView`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in our example app.
 
 <IntegrateHostedEnsNodeTip />
 
@@ -32,7 +32,7 @@ npm install
 <Aside type="caution" title="Pin exact versions">
   Always pin **exact** versions (no `^` or `~`) of `enskit` and `enssdk`, and keep them on the same
   version. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada`
-  TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently
+  TypeScript plugin to type your queries—a minor or patch bump can change the schema and silently
   drift your generated types away from your queries. Locking exact versions keeps types and runtime
   in sync, and matched to the ENSNode version your hosted instance runs.
 </Aside>
@@ -103,11 +103,11 @@ export function App() {
 
 ## 5. Hello world
 
-Create `src/DomainView.tsx`. We'll start with the simplest possible query — look up the `eth` Domain and render its owner and protocol version.
+Create `src/DomainView.tsx`. We'll start with the simplest possible query—look up the `eth` Domain and render its owner and protocol version.
 
 <Aside type="tip" title="InterpretedName">
   An **InterpretedName** is a Name whose labels are each either normalized or represented as an
-  [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the
+  [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`)—the
   canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a
   known-safe string as one; for user input, validate first. See [Interpreted
   Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
@@ -156,13 +156,13 @@ export function DomainView() {
 ```
 
 <Aside type="note" title="BeautifiedName">
-  `beautified` is the display-ready form of the Canonical Name — its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`) — so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
+  `beautified` is the display-ready form of the Canonical Name—its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`)—so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
 </Aside>
 
 A few things to notice:
 
-- `graphql(...)` parses your query at typecheck time. Hover over `result.data` and you'll see it's typed exactly to your selection set — try removing `owner { address }` from the query and watch the access below become a type error.
-- `domain` is a union of `ENSv1Domain | ENSv2Domain` (both implement the `Domain` interface). The Omnigraph unifies ENSv1 and ENSv2 behind the same query — `__typename` tells you which one you got.
+- `graphql(...)` parses your query at typecheck time. Hover over `result.data` and you'll see it's typed exactly to your selection set—try removing `owner { address }` from the query and watch the access below become a type error.
+- `domain` is a union of `ENSv1Domain | ENSv2Domain` (both implement the `Domain` interface). The Omnigraph unifies ENSv1 and ENSv2 behind the same query—`__typename` tells you which one you got.
 - `canonical` may be `null` for non-canonical names (e.g. Domains whose name cannot be inferred). **Always** guard the access; TypeScript will help you.
 
 ## 6. List subdomains
@@ -225,7 +225,7 @@ export function DomainView() {
 
 ## 7. Extract a typed fragment
 
-Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed shape for components that render a Domain.
+Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain. Extract a `DomainFragment` to deduplicate the selection—and get a reusable, fully-typed shape for components that render a Domain.
 
 ```tsx title="src/DomainView.tsx" ins={1,4-10,16,18,23,26-39,57-59,65}
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
@@ -301,11 +301,11 @@ export function DomainView() {
 }
 ```
 
-`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment` — `RenderDomain` accepts any of them. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
+`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment`—`RenderDomain` accepts any of them. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
 
 ## 8. Paginate with "Load more"
 
-`subdomains` is a Relay Connection — page through it with the `first` and `after` arguments. Add `pageInfo { hasNextPage endCursor }` to the query, track the cursor in component state, and wire up a "Next page" button.
+`subdomains` is a Relay Connection—page through it with the `first` and `after` arguments. Add `pageInfo { hasNextPage endCursor }` to the query, track the cursor in component state, and wire up a "Next page" button.
 
 ```tsx title="src/DomainView.tsx" ins={1,6,9,11,19,23,27,53-61}
 import { useState } from "react";
@@ -385,7 +385,7 @@ Open the printed URL and you should see the `eth` Domain, its owner, and the fir
 ## Where to go next
 
 - Try the [Interactive Example](/docs/integrate/integration-options/enskit/example): edit and run the full `enskit-react-example` app in your browser with a live preview.
-- Swap the hardcoded `"eth"` for a name from props or a router — see [`EnsureInterpretedName`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in the example app for safe handling of user-provided names.
+- Swap the hardcoded `"eth"` for a name from props or a router—see [`EnsureInterpretedName`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in the example app for safe handling of user-provided names.
 - See [Omnigraph examples](/docs/integrate/omnigraph/examples) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
 - See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 - Need data outside React? Use [`enssdk`](/docs/integrate/integration-options/enssdk) directly with the same `graphql(...)` helper.
@@ -410,6 +410,6 @@ Open the printed URL and you should see the `eth` Domain, its owner, and the fir
 
 <LinkCard
   title="urql documentation"
-  description="The GraphQL client enskit builds on — useful for understanding cache exchanges and customizing the client."
+  description="The GraphQL client enskit builds on—useful for understanding cache exchanges and customizing the client."
   href="https://nearform.com/open-source/urql/"
 />

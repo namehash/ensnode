@@ -6,11 +6,11 @@ description: Query the ENS Omnigraph API directly via HTTP from any language.
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 
-The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
+The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport—any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
 
-This guide walks you through the minimum: a single `fetch` call against `/api/omnigraph` — the same flow as our [omnigraph-graphql-example](https://github.com/namehash/ensnode/tree/main/examples/omnigraph-graphql-example).
+This guide walks you through the minimum: a single `fetch` call against `/api/omnigraph`—the same flow as our [omnigraph-graphql-example](https://github.com/namehash/ensnode/tree/main/examples/omnigraph-graphql-example).
 
-If you want end-to-end typed queries (via [`gql.tada`](https://gql-tada.0no.co/)) with editor autocomplete and a built-in client, use [`enssdk`](/docs/integrate/integration-options/enssdk) instead — but if you need to integrate from a language without first-class GraphQL tooling, or you're already in a stack with its own GraphQL client, this is the path.
+If you want end-to-end typed queries (via [`gql.tada`](https://gql-tada.0no.co/)) with editor autocomplete and a built-in client, use [`enssdk`](/docs/integrate/integration-options/enssdk) instead—but if you need to integrate from a language without first-class GraphQL tooling, or you're already in a stack with its own GraphQL client, this is the path.
 
 <IntegrateHostedEnsNodeTip />
 
@@ -37,7 +37,7 @@ curl -sS -X POST \
 ```
 
 <Aside type="note" title="BeautifiedName">
-  `beautified` is the display-ready form of the Canonical Name — its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`) — so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
+  `beautified` is the display-ready form of the Canonical Name—its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`)—so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
 </Aside>
 
 The rest of this guide builds the same thing in TypeScript using `fetch`, so you have something to extend.
@@ -155,8 +155,8 @@ main().catch((err) => {
 
 A few things to notice:
 
-- **`InterpretedName` is a scalar.** From the wire's perspective it's just a string — the server validates the format. Pass `"eth"` as a plain string in `variables`.
-- **`subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm).** Cursor through with `first`, `after`, `pageInfo { hasNextPage endCursor }` — same shape as any Relay-style API.
+- **`InterpretedName` is a scalar.** From the wire's perspective it's just a string—the server validates the format. Pass `"eth"` as a plain string in `variables`.
+- **`subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm).** Cursor through with `first`, `after`, `pageInfo { hasNextPage endCursor }`—same shape as any Relay-style API.
 - **Hand-written types.** We're maintaining `interface Domain` and `interface QueryResult` ourselves here. If you want these generated and kept in sync with your queries automatically, use [`enssdk`](/docs/integrate/integration-options/enssdk).
 
 ## 4. Run it
@@ -169,8 +169,8 @@ You should see the `eth` Domain, its owner, and the first 20 of its subdomains.
 
 ## Where to go next
 
-- Want typed queries with editor autocomplete and a real GraphQL client? Use [`enssdk`](/docs/integrate/integration-options/enssdk) — same API, with `gql.tada` types and an `EnsNodeClient`.
-- Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper plus `useOmnigraphQuery` and a graphcache.
+- Want typed queries with editor autocomplete and a real GraphQL client? Use [`enssdk`](/docs/integrate/integration-options/enssdk)—same API, with `gql.tada` types and an `EnsNodeClient`.
+- Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit)—same `graphql(...)` helper plus `useOmnigraphQuery` and a graphcache.
 - See [Omnigraph examples](/docs/integrate/omnigraph/examples) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
 - See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 
@@ -182,7 +182,7 @@ You should see the `eth` Domain, its owner, and the first 20 of its subdomains.
 
 <LinkCard
   title="GraphQL specification"
-  description="Variables, fragments, directives — the underlying spec the Omnigraph follows."
+  description="Variables, fragments, directives—the underlying spec the Omnigraph follows."
   href="https://graphql.org/learn/"
 />
 

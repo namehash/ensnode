@@ -7,11 +7,11 @@ import { Code, LinkCard, Aside } from "@astrojs/starlight/components";
 import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
 import snapshot from "@data/omnigraph-examples/snapshot.json";
 
-`enssdk` is the foundational TypeScript/JavaScript SDK for ENS development. It's a fully modular and tree-shakeable modern TypeScript/JavaScript package that provides ENS-specific types and helpers — usable from any JS runtime, browser or server.
+`enssdk` is the foundational TypeScript/JavaScript SDK for ENS development. It's a fully modular and tree-shakeable modern TypeScript/JavaScript package that provides ENS-specific types and helpers—usable from any JS runtime, browser or server.
 
 `enssdk` also directly integrates with ENSNode, providing an `EnsNodeClient` (via `createEnsNodeClient`) that can be extended with a fully-typed Omnigraph API client (powered by [`gql.tada`](https://gql-tada.0no.co/)).
 
-This guide walks you from an empty directory to a working TypeScript script that queries the `eth` Domain and queries its subdomains — the same flow as our [enssdk-example](https://github.com/namehash/ensnode/tree/main/examples/enssdk-example).
+This guide walks you from an empty directory to a working TypeScript script that queries the `eth` Domain and queries its subdomains—the same flow as our [enssdk-example](https://github.com/namehash/ensnode/tree/main/examples/enssdk-example).
 
 <IntegrateHostedEnsNodeTip />
 
@@ -35,7 +35,7 @@ We'll use [`tsx`](https://tsx.is/) to run TypeScript directly without a bundler.
 
 <Aside type="caution" title="Pin exact versions">
   Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is
-  bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a
+  bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries—a
   minor or patch bump can change the schema and silently drift your generated types away from your
   queries. Locking the exact version keeps types and runtime in sync, and matched to the ENSNode
   version your hosted instance runs.
@@ -108,11 +108,11 @@ const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
 
 ## 5. Hello world
 
-Add your first query — look up the `eth` Domain and print its owner and protocol version.
+Add your first query—look up the `eth` Domain and print its owner and protocol version.
 
 <Aside type="tip" title="InterpretedName">
   An **InterpretedName** is a Name whose labels are each either normalized or represented as an
-  [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the
+  [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`)—the
   canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a
   known-safe string as one; for user input, validate first. See [Interpreted
   Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
@@ -162,18 +162,18 @@ main().catch((err) => {
 ```
 
 <Aside type="note" title="BeautifiedName">
-  `beautified` is the display-ready form of the Canonical Name — its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`) — so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
+  `beautified` is the display-ready form of the Canonical Name—its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`)—so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
 </Aside>
 
 A few things to notice:
 
-- `graphql(...)` parses your query at typecheck time. Hover over `result.data` and you'll see it's typed exactly to your selection set — try removing `owner { address }` from the query and watch the access below become a type error.
-- `domain` is a union of `ENSv1Domain | ENSv2Domain` (both implement the `Domain` interface). The Omnigraph unifies ENSv1 and ENSv2 behind the same query — `__typename` tells you which one you got.
+- `graphql(...)` parses your query at typecheck time. Hover over `result.data` and you'll see it's typed exactly to your selection set—try removing `owner { address }` from the query and watch the access below become a type error.
+- `domain` is a union of `ENSv1Domain | ENSv2Domain` (both implement the `Domain` interface). The Omnigraph unifies ENSv1 and ENSv2 behind the same query—`__typename` tells you which one you got.
 - `canonical` is `null` for non-canonical Domains (e.g. Domains whose name cannot be inferred). When non-null, `canonical.name.beautified` is the Domain's Canonical Name, beautified for display. **Always** guard the access; TypeScript will help you.
 
 ## 6. List subdomains
 
-Expand the query to also fetch the Domain's subdomains. `subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm) — pass `first: 20` to cap the page, and select `totalCount` to learn how many subdomains exist in total.
+Expand the query to also fetch the Domain's subdomains. `subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm)—pass `first: 20` to cap the page, and select `totalCount` to learn how many subdomains exist in total.
 
 ```ts title="src/index.ts" ins={7-12,34-38}
 const HelloWorldQuery = graphql(`
@@ -217,13 +217,13 @@ async function main() {
 }
 ```
 
-Notice we're now writing the same canonical/owner rendering twice — once for the parent Domain and once inside the subdomain loop. We'll fix that next.
+Notice we're now writing the same canonical/owner rendering twice—once for the parent Domain and once inside the subdomain loop. We'll fix that next.
 
-To page beyond the first 20, the connection also exposes `pageInfo { hasNextPage endCursor }` and accepts an `after: String` cursor — see [Relay's connection spec](https://relay.dev/graphql/connections.htm).
+To page beyond the first 20, the connection also exposes `pageInfo { hasNextPage endCursor }` and accepts an `after: String` cursor—see [Relay's connection spec](https://relay.dev/graphql/connections.htm).
 
 ## 7. Extract a typed fragment
 
-Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain, and rendering them the same way. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed function that formats a Domain.
+Notice we're selecting the same fields (`canonical { name { beautified } }`, `owner { address }`) on the parent Domain _and_ on each subdomain, and rendering them the same way. Extract a `DomainFragment` to deduplicate the selection—and get a reusable, fully-typed function that formats a Domain.
 
 ```ts title="src/index.ts" ins={3,11-17,23,26,31,34-40,56,59}
 import { asInterpretedName } from "enssdk";
@@ -289,7 +289,7 @@ async function main() {
 }
 ```
 
-`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment` — `formatDomain` accepts any of them, including each `node` in the subdomain edges. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
+`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment`—`formatDomain` accepts any of them, including each `node` in the subdomain edges. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
 
 ## 8. Run it
 
@@ -305,7 +305,7 @@ You should see the `eth` Domain, followed by its first 20 subdomains and the tot
 
 - See [Omnigraph examples](/docs/integrate/omnigraph/examples) for ready-to-copy GraphQL queries: account-owned domains, events, registrar permissions, full-text search, and more.
 - See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
-- Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper, with `useOmnigraphQuery` and a graphcache.
+- Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit)—same `graphql(...)` helper, with `useOmnigraphQuery` and a graphcache.
 
 <LinkCard
   title="Interactive Example ⚡"

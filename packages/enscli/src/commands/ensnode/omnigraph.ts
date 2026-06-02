@@ -1,9 +1,7 @@
 import { defineCommand } from "citty";
-import { createEnsNodeClient } from "enssdk/core";
-import { omnigraph as omnigraphModule } from "enssdk/omnigraph";
 
 import { ensnodeArgs, outputArgs } from "../../lib/args";
-import { resolveEnsNodeUrl } from "../../lib/config";
+import { getEnsNodeClient } from "../../lib/get-ensnode-client";
 import { printResult, runSafely } from "../../lib/output";
 import { runOmnigraphSchema } from "./omnigraph-schema";
 
@@ -59,8 +57,7 @@ export const omnigraph = defineCommand({
         }
       }
 
-      const url = resolveEnsNodeUrl(args).href;
-      const client = createEnsNodeClient({ url }).extend(omnigraphModule);
+      const client = getEnsNodeClient(args);
       const result = await client.omnigraph.query<unknown, Record<string, unknown>>({
         query: args.query,
         variables,

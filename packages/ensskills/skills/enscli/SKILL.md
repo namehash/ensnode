@@ -51,6 +51,8 @@ enscli
 
 The query string is the exact GraphQL payload — zero translation. Pass variables as a JSON object string. GraphQL is natively field-masked: select only the fields you need to keep responses (and your context) small.
 
+<!-- AUTOGEN:omnigraph start -->
+
 ```bash
 # Inline query (default namespace: mainnet)
 npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { address } } }'
@@ -62,8 +64,13 @@ npx enscli ensnode omnigraph 'query D($n: InterpretedName!) {
     resolve { records { addresses(coinTypes: [60]) { address } } }
   }
 }' --variables '{"n":"vitalik.eth"}'
+```
 
-# Against a specific namespace or instance
+<!-- AUTOGEN:omnigraph end -->
+
+Target a specific namespace or instance with the same query — `--namespace sepolia` (a hosted default) or `--ensnode-url http://localhost:4334` (any instance):
+
+```bash
 npx enscli ensnode omnigraph '{ ... }' --namespace sepolia
 npx enscli ensnode omnigraph '{ ... }' --ensnode-url http://localhost:4334
 ```
@@ -74,37 +81,69 @@ Resolution lives in the graph — select `Domain.resolve` (records) and `Account
 
 The schema ships with the CLI; explore it offline before writing a query rather than guessing field names.
 
+<!-- AUTOGEN:omnigraph-schema start -->
+
 ```bash
-npx enscli ensnode omnigraph schema                  # root query fields + the major types
-npx enscli ensnode omnigraph schema Domain           # a type's fields, with descriptions
-npx enscli ensnode omnigraph schema Domain.canonical # a single field
-npx enscli ensnode omnigraph schema --search primary # find types/fields by keyword
+# root query fields + the major types
+npx enscli ensnode omnigraph schema
+
+# a type's fields, with descriptions
+npx enscli ensnode omnigraph schema Domain
+
+# a single field
+npx enscli ensnode omnigraph schema Domain.canonical
+
+# find types/fields by keyword
+npx enscli ensnode omnigraph schema --search primary
 ```
+
+<!-- AUTOGEN:omnigraph-schema end -->
 
 ### `ensnode indexing-status`
 
+<!-- AUTOGEN:indexing-status start -->
+
 ```bash
+# Default namespace (mainnet)
 npx enscli ensnode indexing-status
+
+# A specific namespace
 npx enscli ensnode indexing-status --namespace sepolia-v2
 ```
+
+<!-- AUTOGEN:indexing-status end -->
 
 ### `ensrainbow heal <labelhash>` / `ensrainbow count`
 
 Recover the original label behind a labelHash (accepts a `0x…` hash or an encoded `[hash]`), or count how many labels ENSRainbow can heal.
 
+<!-- AUTOGEN:ensrainbow start -->
+
 ```bash
+# Heal a labelHash to its original label
 npx enscli ensrainbow heal 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+
+# Count the labels ENSRainbow can heal
 npx enscli ensrainbow count
 ```
+
+<!-- AUTOGEN:ensrainbow end -->
 
 ### `namehash <name>` / `labelhash <label>`
 
 Compute ENS hashes locally (no network). Inputs are normalized and validated via `enssdk` — never `toLowerCase()` a name yourself.
 
+<!-- AUTOGEN:hash start -->
+
 ```bash
+# Compute the Node of a Name (offline)
 npx enscli namehash vitalik.eth
+
+# Compute the LabelHash of a Label (offline)
 npx enscli labelhash vitalik
 ```
+
+<!-- AUTOGEN:hash end -->
 
 ## Related skills
 

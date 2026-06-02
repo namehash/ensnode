@@ -4,11 +4,28 @@ import { fileURLToPath } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { ENSCLI_EXAMPLE_COMMANDS, type EnscliExampleBackend } from "./example-commands";
+
 const PKG_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(PKG_DIR, "dist", "cli.js");
 
+const ENSNODE_URL = process.env.ENSNODE_URL ?? "http://localhost:4334";
+const ENSRAINBOW_URL = process.env.ENSRAINBOW_URL ?? "http://localhost:3223";
+
 function runCli(args: string[]) {
   return spawnSync("node", [CLI, ...args], { cwd: PKG_DIR, env: process.env, encoding: "utf8" });
+}
+
+// Point a backend-dependent example at the devnet, overriding any namespace baked into the example.
+function backendArgs(backend: EnscliExampleBackend): string[] {
+  switch (backend) {
+    case "ensnode":
+      return ["--ensnode-url", ENSNODE_URL];
+    case "ensrainbow":
+      return ["--ensrainbow-url", ENSRAINBOW_URL];
+    case "none":
+      return [];
+  }
 }
 
 // Build the self-contained bin (inlines the Omnigraph SDL) and spawn the built artifact, mirroring
@@ -73,4 +90,21 @@ describe("enscli", () => {
     expect(result.status).toBe(0);
     expect(JSON.parse(result.stdout)).toBeTypeOf("object");
   });
+});
+
+// Every command shipped in the `enscli` agent skill must actually run, so the skill never ships a
+// stale flag or a query that drifted from the schema. Driven by the same single source the ensskills
+// `generate` script renders into the SKILL.md.
+describe("enscli skill examples", () => {
+  it.each(ENSCLI_EXAMPLE_COMMANDS.map((example) => ({ ...example, name: example.id })))(
+    "$name runs successfully",
+    ({ args, group, backend }) => {
+      const result = runCli([...args, ...backendArgs(backend)]);
+      expect(result.status, result.stderr).toBe(0);
+      // GraphQL errors mean the query is invalid against the live schema, even with exit 0.
+      if (group === "omnigraph") {
+        expect(JSON.parse(result.stdout).errors).toBeUndefined();
+      }
+    },
+  );
 });

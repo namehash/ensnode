@@ -1,13 +1,13 @@
 ---
 title: Unigraph Schema Reference
-description: The unified ENSv1 + ENSv2 data model of the ENS Unigraph — every table, column, and index.
+description: The unified ENSv1 + ENSv2 data model of the ENS Unigraph—every table, column, and index.
 sidebar:
   label: Schema Reference
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-This is the canonical reference for the **Unigraph schema** — the unified, polymorphic data model that the [`unigraph` plugin](/docs/services/ensindexer) materializes into [ENSDb](/docs/services/ensdb). It models ENSv1 and ENSv2 with shared, polymorphic entities (Domains, Registries, Registrations, Renewals, Resolvers), so the same query shape works across both protocol versions.
+This is the canonical reference for the **Unigraph schema**—the unified, polymorphic data model that the [`unigraph` plugin](/docs/services/ensindexer) materializes into [ENSDb](/docs/services/ensdb). It models ENSv1 and ENSv2 with shared, polymorphic entities (Domains, Registries, Registrations, Renewals, Resolvers), so the same query shape works across both protocol versions.
 
 Each ENSIndexer instance owns a dedicated database schema (e.g. `ensindexer_0`) holding all of its indexed Unigraph data, fully isolated from other instances.
 
@@ -121,7 +121,7 @@ the Event responsible for its existence.
 | `timestamp`         | `numeric(78)` | no       | Block timestamp.                                                                                                                                                                                                                                                        |
 | `transaction_hash`  | `text`        | no       | Transaction hash.                                                                                                                                                                                                                                                       |
 | `transaction_index` | `integer`     | no       | Index of the transaction within the block.                                                                                                                                                                                                                              |
-| `from`              | `text`        | no       | Transaction sender address (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `sender` for the HCA-aware actor.                                                                                                                  |
+| `from`              | `text`        | no       | Transaction sender address (`tx.from`). Never HCA-aware—always the EOA/relayer that submitted the transaction. Use `sender` for the HCA-aware actor.                                                                                                                  |
 | `sender`            | `text`        | no       | The HCA account address if used, otherwise `Transaction.from`. For ENSv2 events that emit an explicit `sender` / `owner` / `account` argument, this is set from that argument. For all other events (and all ENSv1 events), this falls back to `from` (i.e. `tx.from`). |
 | `to`                | `text`        | yes      | Transaction recipient address. A `null` value means this was a contract-deployment transaction.                                                                                                                                                                         |
 | `address`           | `text`        | no       | Address of the contract that emitted the log.                                                                                                                                                                                                                           |
@@ -167,7 +167,7 @@ Join table linking a `permissions` record to its associated `events`.
 
 ## permissions_user_events
 
-Join table linking a `permissions_users` record to its associated `events` — i.e. the per-`(contract, resource, user)` history of role grants, revokes, and bitmap mutations.
+Join table linking a `permissions_users` record to its associated `events`—i.e. the per-`(contract, resource, user)` history of role grants, revokes, and bitmap mutations.
 
 | Column                | Type   | Nullable |
 | --------------------- | ------ | -------- |
@@ -199,7 +199,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 | `canonical`           | `boolean`      | no       | Whether this Registry is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Default `false`. |
 | `has_children`        | `boolean`      | no       | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`.                                                                                                                                                                                                                                                                                    |
 
-**Indexes:** `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
+**Indexes:** `(chain_id, address)`—non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
 
 **Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chain_id, address)`.
 
@@ -229,7 +229,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `canonical_depth`           | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                            |
 | `canonical_node`            | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                                                              |
 
-**Indexes:** `type`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed), `(registry_id, left(canonical_name, 256), id)` (composite expression index for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N` — the `Domain.subdomains` shape; the 256-char prefix bounds the index tuple under btree's per-tuple max, and NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan), `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
+**Indexes:** `type`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed), `(registry_id, left(canonical_name, 256), id)` (composite expression index for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N`—the `Domain.subdomains` shape; the 256-char prefix bounds the index tuple under btree's per-tuple max, and NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan), `canonical_name` (hash, exact match—avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth`—typeahead and depth-ordered browse).
 
 **Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 

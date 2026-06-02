@@ -1,0 +1,47 @@
+---
+import { Aside } from "@astrojs/starlight/components";
+
+import snapshot from "@data/omnigraph-examples/snapshot.json";
+
+// The ENSNode suite is version-locked to the production-deployed Omnigraph (see the vendored
+// `@data/omnigraph-examples/snapshot.json`). The SDK bundles the Omnigraph schema (consumed by the
+// `gql.tada` TypeScript plugin) and `ensskills` bundles the schema plus example queries, so pinning
+// the matching version keeps generated types / agent knowledge aligned with the deployed API.
+interface Props {
+  // "sdk" warns about pinning enssdk/enskit for gql.tada types; "skills" warns about pinning
+  // ensskills/enscli for agent knowledge.
+  variant: "sdk" | "skills";
+}
+
+const { variant } = Astro.props;
+const VERSION = snapshot.sdkVersion;
+---
+
+<Aside type="caution" title="Version compatibility with hosted instances">
+  <a href="/docs/hosted-instances">Our hosted ENSNode instances</a> currently run ENSNode <code
+    >{VERSION}</code
+  >.{" "}
+  {
+    variant === "sdk" ? (
+      <Fragment>
+        The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the{" "}
+        <code>gql.tada</code> TypeScript plugin to type your queries, so pin an <strong>exact</strong>{" "}
+        version (no <code>^</code> or <code>~</code>) of <code>enssdk@{VERSION}</code> (and{" "}
+        <code>enskit@{VERSION}</code> when using React) to keep your generated types matched to the
+        deployed schema. Use these exact install commands:
+        <pre>{`npm install enssdk@${VERSION}
+# or, for React apps:
+npm install enskit@${VERSION} enssdk@${VERSION}`}</pre>
+      </Fragment>
+    ) : (
+      <Fragment>
+        <code>ensskills</code> is version-locked to the ENSNode suite—the Omnigraph schema and
+        example queries the skills teach are bundled at a specific version—so pin an{" "}
+        <strong>exact</strong> version (no <code>^</code> or <code>~</code>) of{" "}
+        <code>ensskills</code>, and drive the matching <code>enscli</code>, both at{" "}
+        <code>{VERSION}</code>, to keep your agent's ENS knowledge and queries matched to the
+        deployed API.
+      </Fragment>
+    )
+  }
+</Aside>

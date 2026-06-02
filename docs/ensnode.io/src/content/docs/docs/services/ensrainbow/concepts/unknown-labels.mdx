@@ -23,9 +23,9 @@ When an unknown label is encountered, it is represented as an **Encoded LabelHas
 
 **Examples:**
 
-- `vitalik.eth` — a normalized name with known labels
-- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a name with an unknown label encoded as a labelhash, followed by the known label `eth`
-- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].[af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc].eth` — a name with multiple unknown labels, each encoded as a labelhash
+- `vitalik.eth`—a normalized name with known labels
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth`—a name with an unknown label encoded as a labelhash, followed by the known label `eth`
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].[af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc].eth`—a name with multiple unknown labels, each encoded as a labelhash
 
 **Important:** Labels formatted as encoded labelhashes need to be carefully interpreted depending on the context as either [**literal labels**](/docs/reference/terminology#literal-label) or [**interpreted labels**](/docs/reference/terminology#interpreted-label). ENSNode (unlike the ENS Subgraph) guarantees that all labels it returns are interpreted labels so long as ENSNode's `SUBGRAPH_COMPAT` is not activated (off by default).
 

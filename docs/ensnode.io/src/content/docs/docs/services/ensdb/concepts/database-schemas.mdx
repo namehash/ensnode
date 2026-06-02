@@ -31,7 +31,7 @@ Possible key-value pairs are defined by the `EnsNodeMetadata` union type. As of 
 | `key`                     | `text`  | no       | Allowed keys: `indexing_metadata_context`.                                                                                                                                                    |
 | `value`                   | `jsonb` | no       | Guaranteed to be a serialized representation of a JSON object.                                                                                                                                |
 
-**Primary key:** `(ens_indexer_schema_name, key)` — ensures that there is only one record for each key per ENSIndexer instance.
+**Primary key:** `(ens_indexer_schema_name, key)`—ensures that there is only one record for each key per ENSIndexer instance.
 
 #### Known keys
 
@@ -51,7 +51,7 @@ The ENSIndexer Schema is modular, composed of multiple logical database sub-sche
 
 ### Unigraph
 
-The Unigraph schema — the unified, polymorphic ENSv1 + ENSv2 data model — is documented in full in its canonical reference in the Integrate section:
+The Unigraph schema—the unified, polymorphic ENSv1 + ENSv2 data model—is documented in full in its canonical reference in the Integrate section:
 
 :::tip[Unigraph Schema Reference]
 The complete table-by-table reference for the Unigraph schema now lives at **[Unigraph Schema Reference](/docs/integrate/unigraph/schema-reference)**.
@@ -76,7 +76,7 @@ This is **not** a cohesive, materialized index of all of an account's Primary Na
 - `[coinType].reverse`
 - **Not** `*.addr.reverse`
 
-These records **cannot** be queried directly and used as a source of truth — you **must** perform Forward Resolution to resolve a consistent set of an Account's ENSIP-19 Primary Names. These records are used to power Protocol Acceleration for those ReverseResolvers backed by a `StandaloneReverseRegistrar`.
+These records **cannot** be queried directly and used as a source of truth—you **must** perform Forward Resolution to resolve a consistent set of an Account's ENSIP-19 Primary Names. These records are used to power Protocol Acceleration for those ReverseResolvers backed by a `StandaloneReverseRegistrar`.
 :::
 
 | Column      | Type          | Nullable | Description                                                                                                                     |
@@ -102,7 +102,7 @@ It is keyed by `(chain_id, address, domain_id)` to match the on-chain data model
 
 **Primary key:** `(chain_id, address, domain_id)`.
 
-**Indexes:** `domain_id` — secondary lookup off the PK. The namegraph-walk recursive CTE in `get-domain-by-interpreted-name` left-joins on `domain_id` alone, which the PK (leading-column `chain_id, address`) cannot serve.
+**Indexes:** `domain_id`—secondary lookup off the PK. The namegraph-walk recursive CTE in `get-domain-by-interpreted-name` left-joins on `domain_id` alone, which the PK (leading-column `chain_id, address`) cannot serve.
 
 **Relations:** has one `resolver` via `(chain_id, resolver)`.
 
@@ -141,7 +141,7 @@ These record values do **not** allow the caller to confidently resolve records f
 | `pubkeyX`     | `text`        | yes      | PubkeyResolver X coordinate. Invariant: both `pubkeyX` and `pubkeyY` are either both `null` or both set.                                                                                                                                                                                    |
 | `pubkeyY`     | `text`        | yes      | PubkeyResolver Y coordinate. Invariant: both `pubkeyX` and `pubkeyY` are either both `null` or both set.                                                                                                                                                                                    |
 | `dnszonehash` | `text`        | yes      | `IDNSZoneResolver` zone hash, or `null` if not set.                                                                                                                                                                                                                                         |
-| `version`     | `numeric(78)` | yes      | `IVersionableResolver` version. `null` when no `VersionChanged` event has been seen for this `(chain_id, address, node)` — the resolver may not implement `IVersionableResolver`, or simply may never have been version-bumped. Consumers should treat `null` as "unknown" rather than `0`. |
+| `version`     | `numeric(78)` | yes      | `IVersionableResolver` version. `null` when no `VersionChanged` event has been seen for this `(chain_id, address, node)`—the resolver may not implement `IVersionableResolver`, or simply may never have been version-bumped. Consumers should treat `null` as "unknown" rather than `0`. |
 
 **Indexes:** unique on `(chain_id, address, node)`.
 
@@ -159,7 +159,7 @@ Keyed by `(chain_id, resolver, node, coin_type)`, where the composite key segmen
 | `address`   | `text`        | no       | Resolver contract address. Part of primary key.                                                                                                                                                               |
 | `node`      | `text`        | no       | Name namehash. Part of primary key.                                                                                                                                                                           |
 | `coin_type` | `numeric(78)` | no       | All well-known CoinTypes fit into a JavaScript number but NOT a Postgres `integer`, and must be stored as `bigint`. Part of primary key.                                                                      |
-| `value`     | `hex`         | no       | The value of the Address Record specified by `((chain_id, resolver, node), coin_type)`. Interpreted by `interpretAddressRecordValue` — see its implementation for additional context and specific guarantees. |
+| `value`     | `hex`         | no       | The value of the Address Record specified by `((chain_id, resolver, node), coin_type)`. Interpreted by `interpretAddressRecordValue`—see its implementation for additional context and specific guarantees. |
 
 **Primary key:** `(chain_id, address, node, coin_type)`.
 
@@ -177,7 +177,7 @@ Keyed by `(chain_id, resolver, node, key)`, where the composite key segment `(ch
 | `address`  | `text`   | no       | Resolver contract address. Part of primary key.                                                                                                                                                   |
 | `node`     | `text`   | no       | Name namehash. Part of primary key.                                                                                                                                                               |
 | `key`      | `text`   | no       | Text record key. Part of primary key.                                                                                                                                                             |
-| `value`    | `text`   | no       | The value of the Text Record specified by `((chain_id, resolver, node), key)`. Interpreted by `interpretTextRecordValue` — see its implementation for additional context and specific guarantees. |
+| `value`    | `text`   | no       | The value of the Text Record specified by `((chain_id, resolver, node), key)`. Interpreted by `interpretTextRecordValue`—see its implementation for additional context and specific guarantees. |
 
 **Primary key:** `(chain_id, address, node, key)`.
 
@@ -190,7 +190,7 @@ Tracks the migration status of a node, keyed by `(parent_node, label_hash)`. Due
 The set of nodes registered in the (new) Registry contract on the ENS Root Chain is stored here. When a `RegistryOld#NewOwner` event is encountered (which emits both `parent_node` and `label_hash` directly), the relevant row is looked up here; if it exists, the event is ignored.
 
 :::note
-This logic is only necessary for the ENS Root Chain — the only chain that includes the Registry migration. This Registry migration tracking is isolated to the Protocol Acceleration plugin. The subgraph plugin implements its own Registry migration logic. By isolating this logic here, the Protocol Acceleration plugin can be run independently of other plugins. The Unigraph plugin depends on the Protocol Acceleration plugin in order to piggyback on this Registry migration logic.
+This logic is only necessary for the ENS Root Chain—the only chain that includes the Registry migration. This Registry migration tracking is isolated to the Protocol Acceleration plugin. The subgraph plugin implements its own Registry migration logic. By isolating this logic here, the Protocol Acceleration plugin can be run independently of other plugins. The Unigraph plugin depends on the Protocol Acceleration plugin in order to piggyback on this Registry migration logic.
 :::
 
 The composite key is chosen so that Ponder's profile-pattern matcher can decompose it from event args directly, keeping the read on the indexing-cache prefetch hot-path.
@@ -222,7 +222,7 @@ Models the lifecycle of ENS name registrations and renewals as logical actions, 
 
 #### Enums
 
-**`registrar_action_type`** — Types of "logical registrar action".
+**`registrar_action_type`**—Types of "logical registrar action".
 
 | Value          |
 | -------------- |
@@ -288,7 +288,7 @@ The state from both events is aggregated into a single logical registrar action.
 | `base_cost`            | `numeric(78)`           | yes      | Base cost in wei. Guaranteed to be `null` if and only if `total` is `null`. Otherwise a non-negative value.                                                                                                                                                                                    |
 | `premium`              | `numeric(78)`           | yes      | Premium cost in wei above `base_cost`. Guaranteed to be `null` if and only if `total` is `null`. Guaranteed to be zero when `type` is `renewal`.                                                                                                                                               |
 | `total`                | `numeric(78)`           | yes      | Total cost in wei, equal to the sum of `base_cost` and `premium`. Guaranteed to be `null` if and only if both `base_cost` and `premium` are `null`.                                                                                                                                            |
-| `registrant`           | `text`                  | no       | Identifies the address that initiated the action and is paying `total` (if applicable). May not be the owner of the name — there are no restrictions on who may renew a name, and the initial owner may be distinct from the registrant. Guaranteed to be a fully lowercase address.           |
+| `registrant`           | `text`                  | no       | Identifies the address that initiated the action and is paying `total` (if applicable). May not be the owner of the name—there are no restrictions on who may renew a name, and the initial owner may be distinct from the registrant. Guaranteed to be a fully lowercase address.           |
 | `encoded_referrer`     | `text`                  | yes      | The raw 32-byte referrer value emitted on-chain. `null` if no referrer information was present in the indexed events.                                                                                                                                                                          |
 | `decoded_referrer`     | `text`                  | yes      | The referrer address decoded from `encoded_referrer` using strict left-zero-padding validation. `null` if `encoded_referrer` is `null`. May be the zero address to represent that an `encoded_referrer` is defined but interpreted as no referrer. Guaranteed to be a fully lowercase address. |
 | `block_number`         | `numeric(78)`           | no       | Block number that includes the action. The chainId of this block is the same as is referenced in `subregistry_id`.                                                                                                                                                                             |
@@ -302,7 +302,7 @@ The state from both events is aggregated into a single logical registrar action.
 
 ##### id format
 
-The `id` value is a Ponder checkpoint string — a fixed-length decimal string encoding the following fields (left to right, most to least significant):
+The `id` value is a Ponder checkpoint string—a fixed-length decimal string encoding the following fields (left to right, most to least significant):
 
 | Field               | Width (digits) | Description                               |
 | ------------------- | -------------- | ----------------------------------------- |
@@ -326,7 +326,7 @@ If `type` is `renewal`: represents the incremental increase in duration made to 
 1. A renewal with 10 days incremental duration: the lifecycle remains "expired" but now has 70 days of grace period remaining.
 2. A renewal with 50 days incremental duration: the lifecycle becomes "active" again but will expire again in 20 days.
 
-After the grace period expires entirely, the name is considered "released" and can no longer be renewed — it must be registered again, starting a new lifecycle.
+After the grace period expires entirely, the name is considered "released" and can no longer be renewed—it must be registered again, starting a new lifecycle.
 
 #### \_ensindexer_registrar_action_metadata
 
@@ -378,8 +378,8 @@ A complete re-implementation of the legacy ENS Subgraph data model. When the `su
 
 **Indexes:**
 
-- `name` — hash index, because some `name` values exceed the btree max row size (8191 bytes).
-- `name` — GIN trigram index for partial-match filters (`_contains`, `_starts_with`, `_ends_with`).
+- `name`—hash index, because some `name` values exceed the btree max row size (8191 bytes).
+- `name`—GIN trigram index for partial-match filters (`_contains`, `_starts_with`, `_ends_with`).
 - `labelhash`, `parent_id`, `owner_id`, `registrant_id`, `wrapped_owner_id`, `resolved_address_id`.
 
 **Relations:** has one `subgraph_accounts` record (resolved_address), has one `subgraph_accounts` record (owner), has one `subgraph_accounts` record (registrant), has one `subgraph_accounts` record (wrapped_owner), has one `subgraph_resolvers` record, has one `subgraph_domains` record (parent), has many `subgraph_domains` records (subdomains), has one `subgraph_wrapped_domains` record, has one `subgraph_registrations` record, has many domain event tables.
@@ -518,7 +518,7 @@ After an NFT is indexed, it is never deleted from the index. When an indexed NFT
 | Column             | Type          | Nullable | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------ | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`               | `text`        | no       | The CAIP-19 Asset ID of the token. A globally unique reference to this token. Primary key.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `domain_id`        | `text`        | no       | The namehash (Node) of the ENS name associated with the token. An ENS name may have more than one distinct token across time. It is also possible for multiple distinct tokens for an ENS name to have a `mint_status` of `minted` at the same time — for example, when a direct subname of `.eth` is wrapped by the NameWrapper (one `minted` token managed by the `BaseRegistrar`, owned by the NameWrapper; one `minted` token managed by the NameWrapper, owned by the effective owner).                                |
+| `domain_id`        | `text`        | no       | The namehash (Node) of the ENS name associated with the token. An ENS name may have more than one distinct token across time. It is also possible for multiple distinct tokens for an ENS name to have a `mint_status` of `minted` at the same time—for example, when a direct subname of `.eth` is wrapped by the NameWrapper (one `minted` token managed by the `BaseRegistrar`, owned by the NameWrapper; one `minted` token managed by the NameWrapper, owned by the effective owner).                                |
 | `chain_id`         | `bigint`      | no       | The chain that manages the token.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `contract_address` | `text`        | no       | The address of the contract on `chain_id` that manages the token.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `token_id`         | `numeric(78)` | no       | The tokenId of the token managed by `contract_address`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
