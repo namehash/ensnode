@@ -8,48 +8,94 @@ import {
   SocialTwitterParser,
 } from "./social";
 import { profileRecordsModel } from "./test-helpers";
+import type { ProfileFieldParser } from "./types";
 
-describe("SocialGithubParser", () => {
-  it("has correct selection", () => {
-    expect(SocialGithubParser.selection).toEqual({ texts: ["com.github", "vnd.github"] });
+type SocialResult = { handle: string; httpUrl: string };
+
+/**
+ * Generates common test cases shared across social parsers:
+ * bare handle, @-prefixed, leading/trailing whitespace.
+ */
+function commonParseCases(
+  handle: string,
+  expected: SocialResult,
+): [label: string, input: string, expected: SocialResult][] {
+  return [
+    ["bare handle", handle, expected],
+    ["@ prefix", `@${handle}`, expected],
+    ["surrounding whitespace", `  ${handle}  `, expected],
+  ];
+}
+
+/**
+ * Generates common null-result test cases shared across social parsers.
+ */
+function commonNullCases(primaryKey: string): [label: string, texts: Record<string, string>][] {
+  return [
+    ["record unset", {}],
+    ["empty string", { [primaryKey]: "" }],
+    ["whitespace only", { [primaryKey]: "   " }],
+  ];
+}
+
+/**
+ * Generates URL-variant test cases for a given hostname and base URL.
+ */
+function urlVariantCases(
+  handle: string,
+  hostname: string,
+  expected: SocialResult,
+): [label: string, input: string, expected: SocialResult][] {
+  return [
+    ["https URL", `https://${hostname}/${handle}`, expected],
+    ["http URL", `http://${hostname}/${handle}`, expected],
+    ["hostname without scheme", `${hostname}/${handle}`, expected],
+    ["trailing slash", `https://${hostname}/${handle}/`, expected],
+  ];
+}
+
+function describeSocialParser(
+  name: string,
+  parser: ProfileFieldParser<SocialResult>,
+  primaryKey: string,
+  {
+    selection,
+    parseCases,
+    nullCases = [],
+  }: {
+    selection: { texts: string[] };
+    parseCases: [label: string, input: string, expected: SocialResult][];
+    nullCases?: [label: string, texts: Record<string, string>][];
+  },
+) {
+  describe(name, () => {
+    it("has correct selection", () => {
+      expect(parser.selection).toEqual(selection);
+    });
+
+    it.each(parseCases)("parses %s", (_label, input, expected) => {
+      expect(parser.parse(profileRecordsModel({ [primaryKey]: input }))).toEqual(expected);
+    });
+
+    it.each([...commonNullCases(primaryKey), ...nullCases])("returns null: %s", (_label, texts) => {
+      expect(parser.parse(profileRecordsModel(texts))).toBeNull();
+    });
   });
+}
 
-  it.each([
-    [
-      "bare handle",
-      "itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
-    [
-      "@ prefix",
-      "@itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
-    [
-      "https URL",
-      "https://github.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
-    [
-      "http URL",
-      "http://github.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
-    [
-      "hostname without scheme",
-      "github.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
-    [
-      "www hostname",
-      "www.github.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
-    [
-      "trailing slash",
-      "https://github.com/itslevchiks/",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
-    ],
+// --- GitHub ---
+
+const EXPECTED_GITHUB: SocialResult = {
+  handle: "itslevchiks",
+  httpUrl: "https://github.com/itslevchiks",
+};
+
+describeSocialParser("SocialGithubParser", SocialGithubParser, "com.github", {
+  selection: { texts: ["com.github", "vnd.github"] },
+  parseCases: [
+    ...commonParseCases("itslevchiks", EXPECTED_GITHUB),
+    ...urlVariantCases("itslevchiks", "github.com", EXPECTED_GITHUB),
+    ["www hostname", "www.github.com/itslevchiks", EXPECTED_GITHUB],
     [
       "query string",
       "https://github.com/itslevchiks?tab=repos",
@@ -59,11 +105,6 @@ describe("SocialGithubParser", () => {
       "hash fragment",
       "https://github.com/itslevchiks#readme",
       { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks#readme" },
-    ],
-    [
-      "surrounding whitespace",
-      "  itslevchiks  ",
-      { handle: "itslevchiks", httpUrl: "https://github.com/itslevchiks" },
     ],
     [
       "hyphen and underscore",
@@ -88,136 +129,116 @@ describe("SocialGithubParser", () => {
       "itslevchiks/some-repo",
       { handle: "itslevchiks/some-repo", httpUrl: "https://github.com/itslevchiks/some-repo" },
     ],
-  ])("parses %s", (_message, input, expected) => {
-    expect(SocialGithubParser.parse(profileRecordsModel({ "com.github": input }))).toEqual(
-      expected,
-    );
-  });
-
-  it.each([
-    ["record unset", {}],
-    ["empty string", { "com.github": "" }],
-    ["whitespace only", { "com.github": "   " }],
+  ],
+  nullCases: [
     ["invalid handle characters", { "com.github": "invalid user name!" }],
     ["foreign social URL", { "com.github": "https://twitter.com/itslevchiks" }],
-  ])("returns null: %s", (_message, texts) => {
-    expect(SocialGithubParser.parse(profileRecordsModel(texts))).toBeNull();
-  });
+  ],
 });
 
-describe("SocialTwitterParser", () => {
-  it("has correct selection", () => {
-    expect(SocialTwitterParser.selection).toEqual({
-      texts: ["com.x", "com.twitter", "vnd.twitter"],
-    });
-  });
+// --- Twitter ---
 
-  it.each([
-    ["bare handle", "itslevchiks", { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" }],
-    ["@ prefix", "@itslevchiks", { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" }],
-    [
-      "https x.com URL",
-      "https://x.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" },
-    ],
-    [
-      "http x.com URL",
-      "http://x.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" },
-    ],
-    [
-      "x.com without scheme",
-      "x.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" },
-    ],
-    [
-      "twitter.com hostname",
-      "www.twitter.com/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" },
-    ],
-    [
-      "trailing slash",
-      "twitter.com/itslevchiks/",
-      { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" },
-    ],
+const EXPECTED_TWITTER: SocialResult = {
+  handle: "itslevchiks",
+  httpUrl: "https://x.com/itslevchiks",
+};
+
+describeSocialParser("SocialTwitterParser", SocialTwitterParser, "com.x", {
+  selection: { texts: ["com.x", "com.twitter", "vnd.twitter"] },
+  parseCases: [
+    ...commonParseCases("itslevchiks", EXPECTED_TWITTER),
+    ["https x.com URL", "https://x.com/itslevchiks", EXPECTED_TWITTER],
+    ["http x.com URL", "http://x.com/itslevchiks", EXPECTED_TWITTER],
+    ["x.com without scheme", "x.com/itslevchiks", EXPECTED_TWITTER],
+    ["twitter.com hostname", "www.twitter.com/itslevchiks", EXPECTED_TWITTER],
+    ["trailing slash", "twitter.com/itslevchiks/", EXPECTED_TWITTER],
     [
       "query string",
       "twitter.com/itslevchiks?lang=en",
       { handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks?lang=en" },
     ],
-  ])("parses %s", (_message, input, expected) => {
-    expect(SocialTwitterParser.parse(profileRecordsModel({ "com.x": input }))).toEqual(expected);
-  });
-
-  it.each([
-    ["record unset", {}],
-    ["empty string", { "com.x": "" }],
+  ],
+  nullCases: [
     ["invalid handle characters", { "com.x": "hello world" }],
     ["foreign social URL", { "com.x": "https://github.com/itslevchiks" }],
-  ])("returns null: %s", (_message, texts) => {
-    expect(SocialTwitterParser.parse(profileRecordsModel(texts))).toBeNull();
-  });
+  ],
 });
 
-describe("SocialTelegramParser", () => {
-  it("has correct selection", () => {
-    expect(SocialTelegramParser.selection).toEqual({ texts: ["org.telegram"] });
-  });
+// --- Telegram ---
 
-  it.each([
-    ["bare handle", "itslevchiks", { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" }],
-    ["@ prefix", "@itslevchiks", { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" }],
-    [
-      "https t.me URL",
-      "https://t.me/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" },
-    ],
-    [
-      "http t.me URL",
-      "http://t.me/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" },
-    ],
-    [
-      "t.me without scheme",
-      "t.me/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" },
-    ],
-    [
-      "telegram.me hostname",
-      "telegram.me/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" },
-    ],
-    [
-      "trailing slash",
-      "t.me/itslevchiks/",
-      { handle: "itslevchiks", httpUrl: "https://t.me/itslevchiks" },
-    ],
-  ])("parses %s", (_message, input, expected) => {
-    expect(SocialTelegramParser.parse(profileRecordsModel({ "org.telegram": input }))).toEqual(
-      expected,
-    );
-  });
+const EXPECTED_TELEGRAM: SocialResult = {
+  handle: "itslevchiks",
+  httpUrl: "https://t.me/itslevchiks",
+};
 
-  it.each([
-    ["record unset", {}],
-    ["empty string", { "org.telegram": "" }],
+describeSocialParser("SocialTelegramParser", SocialTelegramParser, "org.telegram", {
+  selection: { texts: ["org.telegram"] },
+  parseCases: [
+    ...commonParseCases("itslevchiks", EXPECTED_TELEGRAM),
+    ["https t.me URL", "https://t.me/itslevchiks", EXPECTED_TELEGRAM],
+    ["http t.me URL", "http://t.me/itslevchiks", EXPECTED_TELEGRAM],
+    ["t.me without scheme", "t.me/itslevchiks", EXPECTED_TELEGRAM],
+    ["telegram.me hostname", "telegram.me/itslevchiks", EXPECTED_TELEGRAM],
+    ["trailing slash", "t.me/itslevchiks/", EXPECTED_TELEGRAM],
+  ],
+  nullCases: [
     ["invalid handle characters", { "org.telegram": "bad handle!" }],
     ["foreign social URL", { "org.telegram": "https://twitter.com/itslevchiks" }],
-  ])("returns null: %s", (_message, texts) => {
-    expect(SocialTelegramParser.parse(profileRecordsModel(texts))).toBeNull();
-  });
+  ],
 });
 
-describe("SocialGithubParser (vnd.github fallback)", () => {
-  it("has correct selection (includes vnd.github)", () => {
-    expect(SocialGithubParser.selection).toEqual({ texts: ["com.github", "vnd.github"] });
-  });
+// --- LinkedIn ---
 
+const EXPECTED_LINKEDIN: SocialResult = {
+  handle: "itslevchiks",
+  httpUrl: "https://www.linkedin.com/in/itslevchiks",
+};
+
+describeSocialParser("SocialLinkedInParser", SocialLinkedInParser, "com.linkedin", {
+  selection: { texts: ["com.linkedin"] },
+  parseCases: [
+    ...commonParseCases("itslevchiks", EXPECTED_LINKEDIN),
+    ["https URL", "https://linkedin.com/in/itslevchiks", EXPECTED_LINKEDIN],
+    ["www hostname", "https://www.linkedin.com/in/itslevchiks", EXPECTED_LINKEDIN],
+    [
+      "handle with hyphen",
+      "my-handle",
+      { handle: "my-handle", httpUrl: "https://www.linkedin.com/in/my-handle" },
+    ],
+    ["trailing slash", "https://linkedin.com/in/itslevchiks/", EXPECTED_LINKEDIN],
+  ],
+  nullCases: [
+    ["invalid handle characters", { "com.linkedin": "bad handle!" }],
+    ["foreign social URL", { "com.linkedin": "https://twitter.com/itslevchiks" }],
+  ],
+});
+
+// --- Keybase ---
+
+const EXPECTED_KEYBASE: SocialResult = {
+  handle: "itslevchiks",
+  httpUrl: "https://keybase.io/itslevchiks",
+};
+
+describeSocialParser("SocialKeybaseParser", SocialKeybaseParser, "io.keybase", {
+  selection: { texts: ["io.keybase"] },
+  parseCases: [
+    ...commonParseCases("itslevchiks", EXPECTED_KEYBASE),
+    ...urlVariantCases("itslevchiks", "keybase.io", EXPECTED_KEYBASE),
+  ],
+  nullCases: [
+    ["invalid handle characters", { "io.keybase": "bad handle!" }],
+    ["foreign social URL", { "io.keybase": "https://github.com/itslevchiks" }],
+  ],
+});
+
+// --- Fallback key tests ---
+
+describe("SocialGithubParser (vnd.github fallback)", () => {
   it("falls back to vnd.github when com.github is unset", () => {
-    expect(SocialGithubParser.parse(profileRecordsModel({ "vnd.github": "itslevchiks" }))).toEqual({
-      handle: "itslevchiks",
-      httpUrl: "https://github.com/itslevchiks",
-    });
+    expect(SocialGithubParser.parse(profileRecordsModel({ "vnd.github": "itslevchiks" }))).toEqual(
+      EXPECTED_GITHUB,
+    );
   });
 
   it("prefers com.github over vnd.github", () => {
@@ -238,16 +259,10 @@ describe("SocialGithubParser (vnd.github fallback)", () => {
 });
 
 describe("SocialTwitterParser (text key fallbacks)", () => {
-  it("has correct selection (includes com.twitter and vnd.twitter)", () => {
-    expect(SocialTwitterParser.selection).toEqual({
-      texts: ["com.x", "com.twitter", "vnd.twitter"],
-    });
-  });
-
   it("falls back to com.twitter when com.x is unset", () => {
     expect(
       SocialTwitterParser.parse(profileRecordsModel({ "com.twitter": "itslevchiks" })),
-    ).toEqual({ handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" });
+    ).toEqual(EXPECTED_TWITTER);
   });
 
   it("prefers com.x over com.twitter", () => {
@@ -267,7 +282,7 @@ describe("SocialTwitterParser (text key fallbacks)", () => {
   it("falls back to vnd.twitter when com.x and com.twitter are unset", () => {
     expect(
       SocialTwitterParser.parse(profileRecordsModel({ "vnd.twitter": "itslevchiks" })),
-    ).toEqual({ handle: "itslevchiks", httpUrl: "https://x.com/itslevchiks" });
+    ).toEqual(EXPECTED_TWITTER);
   });
 
   it("prefers com.twitter over vnd.twitter", () => {
@@ -284,109 +299,5 @@ describe("SocialTwitterParser (text key fallbacks)", () => {
         profileRecordsModel({ "com.x": "", "com.twitter": "", "vnd.twitter": "legacyuser" }),
       ),
     ).toEqual({ handle: "legacyuser", httpUrl: "https://x.com/legacyuser" });
-  });
-});
-
-describe("SocialLinkedInParser", () => {
-  it("has correct selection", () => {
-    expect(SocialLinkedInParser.selection).toEqual({ texts: ["com.linkedin"] });
-  });
-
-  it.each([
-    [
-      "bare handle",
-      "itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
-    ],
-    [
-      "@ prefix",
-      "@itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
-    ],
-    [
-      "https URL",
-      "https://linkedin.com/in/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
-    ],
-    [
-      "www hostname",
-      "https://www.linkedin.com/in/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
-    ],
-    [
-      "handle with hyphen",
-      "my-handle",
-      { handle: "my-handle", httpUrl: "https://www.linkedin.com/in/my-handle" },
-    ],
-    [
-      "trailing slash",
-      "https://linkedin.com/in/itslevchiks/",
-      { handle: "itslevchiks", httpUrl: "https://www.linkedin.com/in/itslevchiks" },
-    ],
-  ])("parses %s", (_message, input, expected) => {
-    expect(SocialLinkedInParser.parse(profileRecordsModel({ "com.linkedin": input }))).toEqual(
-      expected,
-    );
-  });
-
-  it.each([
-    ["record unset", {}],
-    ["empty string", { "com.linkedin": "" }],
-    ["invalid handle characters", { "com.linkedin": "bad handle!" }],
-    ["foreign social URL", { "com.linkedin": "https://twitter.com/itslevchiks" }],
-  ])("returns null: %s", (_message, texts) => {
-    expect(SocialLinkedInParser.parse(profileRecordsModel(texts))).toBeNull();
-  });
-});
-
-describe("SocialKeybaseParser", () => {
-  it("has correct selection", () => {
-    expect(SocialKeybaseParser.selection).toEqual({ texts: ["io.keybase"] });
-  });
-
-  it.each([
-    [
-      "bare handle",
-      "itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
-    ],
-    [
-      "@ prefix",
-      "@itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
-    ],
-    [
-      "https URL",
-      "https://keybase.io/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
-    ],
-    [
-      "http URL",
-      "http://keybase.io/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
-    ],
-    [
-      "without scheme",
-      "keybase.io/itslevchiks",
-      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
-    ],
-    [
-      "trailing slash",
-      "keybase.io/itslevchiks/",
-      { handle: "itslevchiks", httpUrl: "https://keybase.io/itslevchiks" },
-    ],
-  ])("parses %s", (_message, input, expected) => {
-    expect(SocialKeybaseParser.parse(profileRecordsModel({ "io.keybase": input }))).toEqual(
-      expected,
-    );
-  });
-
-  it.each([
-    ["record unset", {}],
-    ["empty string", { "io.keybase": "" }],
-    ["invalid handle characters", { "io.keybase": "bad handle!" }],
-    ["foreign social URL", { "io.keybase": "https://github.com/itslevchiks" }],
-  ])("returns null: %s", (_message, texts) => {
-    expect(SocialKeybaseParser.parse(profileRecordsModel(texts))).toBeNull();
   });
 });
