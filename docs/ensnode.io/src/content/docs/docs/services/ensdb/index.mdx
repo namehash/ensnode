@@ -30,7 +30,10 @@ The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) is i
 
 ### Complete ENS State
 
-An **ENSDb instance** contains the **live onchain state of ENS**, including:
+An **ENSDb instance** contains the **live onchain state of ENS**.
+
+:::note[ENSNode plugins define indexed data]
+Depending on the activated [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins) for your [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) instance, data indexed in ENSDb may include:
 
 - Domains (ENSv1 and ENSv2)
 - Registrations and renewals
@@ -38,6 +41,7 @@ An **ENSDb instance** contains the **live onchain state of ENS**, including:
 - Events and ownership history
 - NFT/token data for names
 - … and more!
+  :::
 
 ### PostgreSQL Benefits
 

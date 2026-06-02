@@ -53,11 +53,11 @@ Any [PostgreSQL database](#postgresql-database) following the ENSDb Standard is 
 
 ### ENSNode Plugin
 
-An abstract specification that defines how a specific aspect of the ENS namespace is indexed into [ENSDb](/docs/services/ensdb). A plugin defines: a name, datasources (which onchain contracts to index as a function of the ENS namespace), dependency relationships with other plugins, an indexed data model with indexes, and standards and invariants for how onchain events are translated into that indexed data model during indexing. Any [ENSDb Writer](#ensdb-writer) can implement an ENSNode Plugin.
+An abstract specification that defines how a specific aspect of the [ENS namespace](/docs/hosted-instances#ens-namespaces) is indexed into [ENSDb](/docs/services/ensdb). A plugin defines: a name, datasources (which onchain contracts to index as a function of the ENS namespace), dependency relationships with other plugins, an indexed data model with indexes, and standards and invariants for how onchain events are translated into that indexed data model during indexing. Any [ENSDb Writer](#ensdb-writer) can implement an ENSNode Plugin.
 
 ### ENSDb Writer
 
-Any application that implements one or more standard-compliant [ENSNode Plugins](#ensnode-plugin) and includes an [ENSDb Metadata Writer](#ensdb-metadata-writer), writing ENS data into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Writer. Other implementations of ENSDb Writers can be built in any language, and can use different indexing frameworks (i.e. [Ponder](https://ponder.sh/), [Envio](https://envio.dev/), [rindexer](https://rindexer.xyz/)), [Amp](https://ampup.sh/) from Edge & Node, etc as long as they follow the ENSDb Standard.
+Any application that implements one or more standard-compliant [ENSNode Plugins](#ensnode-plugin) and includes an [ENSDb Metadata Writer](#ensdb-metadata-writer), writing ENS data into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Writer. Other implementations of ENSDb Writers can be built in any language, and can use different indexing frameworks (i.e. [Ponder](https://ponder.sh/), [Envio](https://envio.dev/), [rindexer](https://rindexer.xyz/), [Amp](https://ampup.sh/) from Edge & Node, etc.), as long as they follow the ENSDb Standard.
 
 ### ENSDb Metadata Writer
 
@@ -161,7 +161,7 @@ The `key` column identifies the type of metadata:
 
 #### Indexing Metadata Context
 
-A data model that describes indexing metadata context. The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The data model may include fields such as:
+A data model that describes indexing metadata context. The actual context data structure may evolve over time as the needs of the ENSNode stack evolve. The data model may include fields such as:
 
 - `version`: The version of the Indexing Metadata Context structure
 - `indexingStatus`: the current Indexing Status of the [ENSDb Writer](#ensdb-writer) instance (i.e. the [Indexing Status](#indexing-status) of the [ENSIndexer instance](#ensindexer-instance)).

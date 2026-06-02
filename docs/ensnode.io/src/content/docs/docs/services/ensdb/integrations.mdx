@@ -1,0 +1,37 @@
+---
+title: Using ENSDb
+description: Guides for integrating and using ENSDb in your applications.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+You can interact with the ENSDb instance using the dedicated TypeScript SDK or the regular PostgreSQL interface. This section provides guides for both methods, as well as troubleshooting tips and answers to frequently asked questions.
+
+<LinkCard
+  title="Interact with ENSDb"
+  description="Connect to ENSDb and try example queries. Each example query is presented in raw SQL (any PostgreSQL client, any language) and as TypeScript code using the <code>@ensnode/ensdb-sdk</code> package."
+  href="/docs/integrate/unigraph/examples"
+/>
+
+## Future possibilities
+
+Use an ENSDb instance as an event source for building reactive systems that respond to ENS state changes.
+
+With sub-second query latency and real-time updates, you can build applications that react to registration lifecycle updates, ownership transfers, resolver updates, and more.
+
+## Example Use Cases
+
+### Analytics & Dashboards
+
+Use [PeerDB](https://www.peerdb.io/) and stream indexed ENS data from ENSDb to your data warehouse or analytics tool.
+
+### Event-Based Engines
+
+Integrate [Sequin](https://sequinstream.com/) to build reactive systems that respond in realtime to ENS state changes.
+
+### Cache Layers
+
+Try out [S2](https://s2.dev/) to build cache layers and materialized views on top of your ENSDb instance.

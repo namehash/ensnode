@@ -46,28 +46,11 @@ export const servicesSidebarTopic = {
             { label: "Database Schemas", link: "/docs/services/ensdb/concepts/database-schemas" },
           ],
         },
+        { label: "Integrations", link: "/docs/services/ensdb/integrations" },
+
         {
-          label: "Usage",
-          collapsed: true,
-          items: [
-            { label: "Overview", link: "/docs/services/ensdb/usage" },
-            { label: "ENSDb SDK", link: "/docs/services/ensdb/usage/sdk" },
-            { label: "ENSDb SQL", link: "/docs/services/ensdb/usage/sql" },
-          ],
-        },
-        {
-          label: "Integrations",
-          collapsed: true,
-          items: [
-            {
-              label: "ENSNode Reference Implementation",
-              link: "/docs/services/ensdb/integrations/ensnode",
-            },
-            {
-              label: "Future Possibilities",
-              link: "/docs/services/ensdb/integrations/future-possibilities",
-            },
-          ],
+          label: "Reference Implementation",
+          link: "/docs/services/ensdb/reference-implementation",
         },
       ],
     },

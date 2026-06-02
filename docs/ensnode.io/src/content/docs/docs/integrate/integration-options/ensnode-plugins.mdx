@@ -12,7 +12,7 @@ An **ENSNode Plugin** is an abstract specification that defines how onchain data
 Each ENSNode Plugin defines:
 
 - **Name** — e.g. `unigraph`, `protocol-acceleration`, `subgraph`.
-- **Datasources** — which onchain contracts should be indexed, as a function of an ENS namespace.
+- **Datasources** — which onchain contracts should be indexed, as a function of an [ENS namespace](/docs/hosted-instances#ens-namespaces).
 - **Dependency relationships** — other plugins that must (or must not) be activated concurrently.
 - **Indexed data model** — the tables, columns, and indexes that implementations of the plugin must produce in ENSDb.
 - **Standards and invariants** — rules for how onchain events from the datasources are translated into the indexed data model during indexing.

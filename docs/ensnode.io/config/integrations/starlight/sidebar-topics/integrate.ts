@@ -229,7 +229,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensskills",
         },
         {
-          label: "ensdb-cli (ENSDb Snapshots)",
+          label: "ensdb-cli (Snapshots)",
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
