@@ -78,20 +78,6 @@ npx skills add https://github.com/namehash/ensnode/tree/v${snapshot.sdkVersion}/
   `}
 />
 
-<Code
-  lang="bash"
-  code={`# list all skills in ensskills
-npx skills add https://github.com/namehash/ensnode/tree/v${snapshot.sdkVersion}/packages/ensskills/skills --list
-  `}
-/>
-
-<Code
-  lang="bash"
-  code={`# add just the skill you want
-npx skills add https://github.com/namehash/ensnode/tree/v${snapshot.sdkVersion}/packages/ensskills/skills --skill omnigraph
-  `}
-/>
-
 It detects your agents and writes the skills into each (`.claude/skills`, `.cursor/skills`, …). Bump the tag in the URL to upgrade.
 
 <Aside type="note">

@@ -8,12 +8,12 @@ sidebar:
 
 ## Endpoint Summary
 
-| Endpoint                   | Purpose                                                                                 | Key Response Types                                            |
-| -------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Endpoint                   | Purpose                                                                               | Key Response Types                                            |
+| -------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | `GET /health`              | Liveness probe—succeeds as soon as the HTTP server is accepting requests              | `{ status: "ok" }`                                            |
 | `GET /ready`               | Readiness probe—succeeds once the database has been downloaded, validated, and opened | `ReadyResponse`, `ServiceUnavailableError`                    |
-| `GET /v1/heal/{labelhash}` | Heal a single labelhash                                                                 | `HealSuccess`, `HealError`                                    |
-| `GET /v1/labels/count`     | Current healable label count                                                            | `CountSuccess`, `CountServerError`, `ServiceUnavailableError` |
+| `GET /v1/heal/{labelhash}` | Heal a single labelhash                                                               | `HealSuccess`, `HealError`                                    |
+| `GET /v1/labels/count`     | Current healable label count                                                          | `CountSuccess`, `CountServerError`, `ServiceUnavailableError` |
 | `GET /v1/config`           | Public configuration of the running instance—available immediately at startup         | `ENSRainbowPublicConfig`                                      |
 
 :::tip[Deterministic Results]

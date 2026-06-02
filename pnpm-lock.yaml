@@ -923,6 +923,9 @@ importers:
 
   examples/ensskills-example:
     devDependencies:
+      enscli:
+        specifier: workspace:*
+        version: link:../../packages/enscli
       ensskills:
         specifier: workspace:*
         version: link:../../packages/ensskills

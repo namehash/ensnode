@@ -9,7 +9,15 @@ description: Drive the enscli command-line tool to read ENS data — run Omnigra
 
 It is built to be driven by an agent: predictable flags, machine-readable output, offline schema introspection, and loud structured errors. v0 is **read-only** (no mutations).
 
-To _author_ Omnigraph queries, use the **omnigraph** skill — it carries the schema reference and vetted example queries. This skill is about _running_ them and the other CLI commands. For protocol fundamentals, see the **ens-protocol** skill.
+This skill is about _running_ queries and the other CLI commands.
+
+## Dependencies
+
+This skill depends on the following sibling skills — load them first:
+
+- **`base`** — the shared working conventions every ENS skill assumes.
+- **`ens-protocol`** — the conceptual model (names, hashing, normalization, resolution, records) behind every command here.
+- **`omnigraph`** — **required before running ANY `ensnode omnigraph` query, no exceptions.** It carries the schema reference and vetted example queries, and shows how to traverse relationships in a single query. Don't author field selections from memory — field semantics are easy to get wrong.
 
 ## Output contract
 
@@ -43,6 +51,8 @@ enscli
   ensrainbow
     heal <labelhash>             heal a labelHash to its original label
     count                        count healable labels known to ENSRainbow
+  datasources
+    identify <address>           identify a well-known ENS contract by address (offline)
   namehash <name>                compute the Node of a Name
   labelhash <label>              compute the LabelHash of a single Label
 ```
@@ -50,6 +60,8 @@ enscli
 ### `ensnode omnigraph <query>`
 
 The query string is the exact GraphQL payload — zero translation. Pass variables as a JSON object string. GraphQL is natively field-masked: select only the fields you need to keep responses (and your context) small.
+
+> **With the `omnigraph` skill loaded (see dependencies above), still confirm every field you didn't copy verbatim from a vetted example** — check it offline with `enscli ensnode omnigraph schema <Type[.field]>`. A previous query succeeding does **not** license guessing the next one — the trap is to copy one canned example, get an answer, then hand-author the follow-up from memory. The two things most often wrong when guessed: **required input args** (a field rejects the call because it needs a `where`/`by` argument) and **non-leaf fields** (an object field needs a sub-selection, not a bare name).
 
 <!-- AUTOGEN:omnigraph start -->
 
@@ -129,6 +141,27 @@ npx enscli ensrainbow count
 
 <!-- AUTOGEN:ensrainbow end -->
 
+### `datasources identify <address>`
+
+Identify a well-known ENS contract by address — given `0xabc…`, report which datasource contract it is across the namespace's chains. Fully offline (the catalog ships with the CLI). Accepts a bare address, a chain-scoped `chainId:address`, or full CAIP-10 `eip155:chainId:address`; `--namespace` (default `mainnet`) selects which namespace to search.
+
+Output is `{ query, matches }`. **A miss is not an error: `matches` is `[]` and the exit code is `0`** — branch on `matches.length`, don't rely on the exit code. Each match carries `namespace`, `datasource`, `contract`, `chainId`, `chain`, `address`, and the CAIP-10 `accountId`. Contracts indexed only by event (no fixed address) can't be identified and are never returned.
+
+<!-- AUTOGEN:datasources start -->
+
+```bash
+# Identify a well-known contract by address (default namespace: mainnet, offline)
+npx enscli datasources identify 0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e
+
+# Scope to a chain with chainId:address (eip155:1:0x… also accepted)
+npx enscli datasources identify 1:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85
+
+# Search a different namespace
+npx enscli datasources identify 0x94f523b8261b815b87effcf4d18e6abef18d6e4b --namespace sepolia
+```
+
+<!-- AUTOGEN:datasources end -->
+
 ### `namehash <name>` / `labelhash <label>`
 
 Compute ENS hashes locally (no network). Inputs are normalized and validated via `enssdk` — never `toLowerCase()` a name yourself.
@@ -147,6 +180,6 @@ npx enscli labelhash vitalik
 
 ## Related skills
 
-- **omnigraph** — author Omnigraph GraphQL queries (schema reference + vetted examples); run them with `enscli ensnode omnigraph`.
-- **ens-protocol** — the conceptual model (names, hashing, normalization, resolution, records) behind these commands.
+See **dependencies** above for `ens-protocol` and `omnigraph`. Also related:
+
 - **enssdk** — the TypeScript SDK `enscli` wraps, for in-app integration instead of the shell.

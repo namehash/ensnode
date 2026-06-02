@@ -5,6 +5,7 @@ export { L2ReverseRegistrar as L2ReverseRegistrarABI } from "./abis/root/L2Rever
 export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
 export { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 export { ThreeDNSToken as ThreeDNSTokenABI } from "./abis/threedns/ThreeDNSToken";
+export * from "./identify-contracts";
 export { AnyRegistrarABI } from "./lib/AnyRegistrarABI";
 export { AnyRegistrarControllerABI } from "./lib/AnyRegistrarControllerABI";
 export * from "./lib/chains";

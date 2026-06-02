@@ -141,7 +141,7 @@ DomainInterfaceRef.implement({
     owner: t.field({
       type: AccountRef,
       description:
-        "If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).",
+        "If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).",
       nullable: true,
       resolve: (parent) => parent.ownerId,
     }),

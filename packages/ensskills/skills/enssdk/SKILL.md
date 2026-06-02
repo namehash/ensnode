@@ -5,4 +5,12 @@ description: Reference for integrating ENS into JavaScript/TypeScript apps with 
 
 # enssdk (coming soon)
 
-A dedicated `enssdk` integration skill is planned (typed Omnigraph queries with `gql.tada`, client setup, hashing/normalization helpers). Until then, the **omnigraph** skill covers the query model and data shapes that `enssdk` exposes in TypeScript, and the **ens-protocol** skill covers the underlying protocol (names, hashing, normalization, resolution) that the SDK's helpers and types reflect.
+A dedicated `enssdk` integration skill is planned (typed Omnigraph queries with `gql.tada`, client setup, hashing/normalization helpers). Until then, lean on the skills it depends on.
+
+## Dependencies
+
+This skill depends on the following sibling skills — load them first:
+
+- **`base`** — the shared working conventions every ENS skill assumes.
+- **`ens-protocol`** — the underlying protocol (names, hashing, normalization, resolution) the SDK's helpers and types reflect.
+- **`omnigraph`** — the query model and data shapes `enssdk` exposes in TypeScript.

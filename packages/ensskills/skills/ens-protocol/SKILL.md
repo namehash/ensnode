@@ -13,6 +13,12 @@ When writing ENS code, use **enssdk** for the operations that are easy to get wr
 
 Definitions follow the [ENSNode Terminology Reference](https://ensnode.io/docs/reference/terminology).
 
+## Dependencies
+
+- **`base`** — the shared working conventions every ENS skill assumes (prefer the Omnigraph for reads, use `enssdk` primitives, `Node` terminology, output hygiene).
+
+This is the foundational _protocol_ skill the other ENS skills build on. To read live ENS state, use **`omnigraph`**; to write ENS code, use **`enssdk`** (both depend on this skill).
+
 ## The nametree
 
 ENS names are dot-separated **labels** read right-to-left from an unnamed **root**: `vitalik.eth` is the label `vitalik` under the TLD `eth` under the root. Every name is a node in this tree; a name's direct children are its **subdomains** (a.k.a. subdomains), e.g. `pay.vitalik.eth`. Owning a name lets you create subdomains under it. `.eth` is the native ENS TLD; most other TLDs are imported from DNS.
@@ -67,6 +73,7 @@ In code, validate and normalize addresses with `enssdk`'s `toNormalizedAddress` 
 - **Forward resolution** — name → records (`vitalik.eth` → its ETH address, avatar, …). This is the common direction.
 - **Reverse resolution** — address → a **primary name** (the name the address owner chose to display). An address can claim _any_ name as its reverse record, so a reverse result is **only trustworthy after forward-verifying it**: resolve the claimed name and confirm it points back to the same address. Skipping this is the single most common ENS integration bug.
 - **Primary names are multichain** (ENSIP-19): an address can set a primary name per chain, not only on mainnet.
+- **Owner ≠ resolved address.** The address that _owns_ a name (controls it in the registry / holds its NFT) is set independently from the address the name _resolves to_ (its coinType-`60` address record). They are frequently different **by design** — e.g. holding a name in a cold/hardware wallet or multisig while resolving it to a hot wallet — so a mismatch is normal and often good practice, not a sign of bad/test data. Never infer the owner from the resolved address (or vice versa); read each from its own field.
 
 Modern resolution goes through a **Universal Resolver** that also handles **offchain / L2 names** via **CCIP-Read** (EIP-3668) and **wildcard** resolution (ENSIP-10) — this is how subdomains living on an L2 or in an offchain database (Basenames, `uni.eth`, `cb.id`, …) resolve seamlessly. You generally don't call registry/resolver contracts by hand, and should prefer using the `UniversalResolver` in most (all) cases. See [references/resolution.md](references/resolution.md).
 

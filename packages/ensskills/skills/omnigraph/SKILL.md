@@ -9,7 +9,14 @@ The **Omnigraph** is a single GraphQL API (Relay spec) over an ENSNode index tha
 
 **Reach for the Omnigraph instead of** querying contracts/RPC directly, the legacy ENS Subgraph, or stitching together multiple calls. One query typically replaces a whole pipeline.
 
-New to how ENS works? The **ens-protocol** skill explains the protocol this API models — names and the nametree, normalization, resolution, registries/resolvers/registrars, and records. Read it first if the data shapes below don't yet make sense.
+## Dependencies
+
+This skill depends on the following sibling skills — load them first:
+
+- **`base`** — the shared working conventions every ENS skill assumes.
+- **`ens-protocol`** — the protocol this API models (names and the nametree, normalization, resolution, registries/resolvers/registrars, records). Read it first if the data shapes below don't yet make sense.
+
+To _run_ the queries you author here, use a runner: **`enscli`** from a shell (every example below uses it), or **`enssdk`** from TypeScript. Those runners depend on this skill, not the other way around.
 
 ## How to run a query
 

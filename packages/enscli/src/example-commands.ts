@@ -14,6 +14,7 @@ export type EnscliExampleGroup =
   | "omnigraph-schema"
   | "indexing-status"
   | "ensrainbow"
+  | "datasources"
   | "hash";
 
 /**
@@ -119,6 +120,33 @@ export const ENSCLI_EXAMPLE_COMMANDS: EnscliExample[] = [
     args: ["ensrainbow", "count"],
     group: "ensrainbow",
     backend: "ensrainbow",
+  },
+  {
+    id: "datasources-identify",
+    comment: "Identify a well-known contract by address (default namespace: mainnet, offline)",
+    args: ["datasources", "identify", "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e"],
+    group: "datasources",
+    backend: "none",
+  },
+  {
+    id: "datasources-identify-chain-scoped",
+    comment: "Scope to a chain with chainId:address (eip155:1:0x… also accepted)",
+    args: ["datasources", "identify", "1:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"],
+    group: "datasources",
+    backend: "none",
+  },
+  {
+    id: "datasources-identify-namespace",
+    comment: "Search a different namespace",
+    args: [
+      "datasources",
+      "identify",
+      "0x94f523b8261b815b87effcf4d18e6abef18d6e4b",
+      "--namespace",
+      "sepolia",
+    ],
+    group: "datasources",
+    backend: "none",
   },
   {
     id: "namehash",

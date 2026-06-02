@@ -25,10 +25,10 @@ const VERSION = snapshot.sdkVersion;
     variant === "sdk" ? (
       <Fragment>
         The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the{" "}
-        <code>gql.tada</code> TypeScript plugin to type your queries, so pin an <strong>exact</strong>{" "}
-        version (no <code>^</code> or <code>~</code>) of <code>enssdk@{VERSION}</code> (and{" "}
-        <code>enskit@{VERSION}</code> when using React) to keep your generated types matched to the
-        deployed schema. Use these exact install commands:
+        <code>gql.tada</code> TypeScript plugin to type your queries, so pin an{" "}
+        <strong>exact</strong> version (no <code>^</code> or <code>~</code>) of{" "}
+        <code>enssdk@{VERSION}</code> (and <code>enskit@{VERSION}</code> when using React) to keep
+        your generated types matched to the deployed schema. Use these exact install commands:
         <pre>{`npm install enssdk@${VERSION}
 # or, for React apps:
 npm install enskit@${VERSION} enssdk@${VERSION}`}</pre>

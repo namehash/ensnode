@@ -5,4 +5,12 @@ description: Guide for migrating an app from the legacy ENS Subgraph API to the 
 
 # migrate-to-omnigraph (coming soon)
 
-A dedicated migration skill is planned: rewriting legacy ENS Subgraph queries onto the Omnigraph, adapting application logic (flattening connections, offset→cursor pagination), and opening feature requests for any gaps. Until then, the **omnigraph** skill covers the target datamodel and query patterns.
+A dedicated migration skill is planned: rewriting legacy ENS Subgraph queries onto the Omnigraph, adapting application logic (flattening connections, offset→cursor pagination), and opening feature requests for any gaps. Until then, lean on the skills it depends on.
+
+## Dependencies
+
+This skill depends on the following sibling skills — load them first:
+
+- **`base`** — the shared working conventions every ENS skill assumes.
+- **`ens-protocol`** — the protocol model behind both the legacy Subgraph and the Omnigraph.
+- **`omnigraph`** — the target datamodel and query patterns you're migrating to.
