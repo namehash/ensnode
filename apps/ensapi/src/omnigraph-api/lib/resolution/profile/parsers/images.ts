@@ -27,8 +27,8 @@ const buildImageParser = (
 ): ProfileFieldParser<ProfileImageResult> => ({
   selection: { texts: [record] },
   parse: (records) => {
-    const raw = records.texts?.[record];
-    if (raw == null || raw === "") return null;
+    const raw = records.texts?.[record]?.trim();
+    if (!raw) return null;
 
     const httpUrl =
       parseDirectImageHttpUrl(raw) ?? interpretProfileImageHttpUrl(records, raw, record);

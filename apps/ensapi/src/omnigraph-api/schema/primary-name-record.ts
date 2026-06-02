@@ -66,13 +66,10 @@ PrimaryNameRecordRef.implement({
           return { accelerate, canAccelerate, trace: null, records: null };
         }
 
-        const mergedSelection =
-          name && isNormalizedName(name)
-            ? mergeRecordsSelections(
-                buildRecordsSelectionFromResolveContainerInfo(info),
-                buildProfileSelectionFromResolveContainerInfo(info),
-              )
-            : null;
+        const mergedSelection = mergeRecordsSelections(
+          buildRecordsSelectionFromResolveContainerInfo(info),
+          buildProfileSelectionFromResolveContainerInfo(info),
+        );
 
         if (!mergedSelection) {
           return { accelerate, canAccelerate, trace: null, records: null };

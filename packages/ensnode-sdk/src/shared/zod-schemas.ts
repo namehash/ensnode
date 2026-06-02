@@ -152,9 +152,6 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
- * Parses a serialized representation of an EVM address into a {@link NormalizedAddress}.
- */
-/**
  * Parses a string into a validated {@link Email} (trimmed).
  */
 export const makeEmailSchema = (valueLabel: string = "Email") =>
@@ -164,6 +161,9 @@ export const makeEmailSchema = (valueLabel: string = "Email") =>
     .pipe(z.email({ error: `${valueLabel} must be a valid email address.` }))
     .transform((value) => value as Email);
 
+/**
+ * Parses a serialized representation of an EVM address into a {@link NormalizedAddress}.
+ */
 export const makeNormalizedAddressSchema = (valueLabel: string = "EVM address") =>
   z
     .string()

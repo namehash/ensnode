@@ -116,7 +116,24 @@ describe("buildProfileSelectionFromResolveContainerInfo", () => {
     ).toBeNull();
   });
 
-  it("builds selection from inline fragments within profile selection", () => {
+  it("builds selection from inline fragment within profile selection", () => {
+    expect(
+      buildProfileSelectionFromResolveContainerInfo(
+        resolveInfoForSubselection(`
+          profile {
+            ... on DomainProfile {
+              description
+              avatar { httpUrl }
+            }
+          }
+        `),
+      ),
+    ).toEqual({
+      texts: ["description", "avatar"],
+    });
+  });
+
+  it("builds selection from named fragment spread within profile selection", () => {
     const doc = parse(`
       fragment ProfileFields on DomainProfile {
         description

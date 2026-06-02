@@ -27,9 +27,8 @@ function pathOffsetFromBaseUrl(baseUrl: string): number {
  * - Bare handle: `itslevchiks`
  * - With leading @: `@itslevchiks`
  * - Full URL: `https://github.com/itslevchiks`, `http://github.com/itslevchiks`
- * - Repo URL (when `allowDeepPath`): `https://github.com/itslevchiks/my-repo`
+ * - Repo URL: `https://github.com/itslevchiks/my-repo`
  * - URL without scheme: `github.com/itslevchiks`
- * - Trailing slash, query strings, hash fragments are ignored
  *
  * Returns null when the value is missing, empty, unparseable, or the extracted
  * handle does not pass the character-class validation.
@@ -53,7 +52,8 @@ export function parseSocialHandle({
     const url = new URL(toParse);
     if (hostnames.includes(url.hostname)) {
       const segments = url.pathname.split("/").filter((s) => s.length > 0);
-      handle = segments.slice(pathOffset).join("/") ?? null;
+      handle = segments.slice(pathOffset).join("/");
+      handle = handle === "" ? null : handle;
 
       if (handle) {
         const baseUrlParsed = new URL(baseUrl);

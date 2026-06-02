@@ -20,8 +20,8 @@ export const ProfileDescriptionParser: ProfileFieldParser<string> = textParser("
 export const ProfileEmailParser: ProfileFieldParser<Email> = {
   selection: { texts: ["email"] },
   parse: (records) => {
-    const raw = records.texts?.email;
-    if (raw == null || raw === "") return null;
+    const raw = records.texts?.email?.trim();
+    if (!raw) return null;
     const parsed = profileEmailSchema.safeParse(raw);
     return parsed.success ? parsed.data : null;
   },
@@ -30,9 +30,8 @@ export const ProfileEmailParser: ProfileFieldParser<Email> = {
 const urlParser = (key: string): ProfileFieldParser<string> => ({
   selection: { texts: [key] },
   parse: (records) => {
-    const raw = records.texts?.[key];
-    if (raw == null || raw === "") return null;
-    const trimmed = raw.trim();
+    const trimmed = records.texts?.[key]?.trim();
+    if (!trimmed) return null;
     if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
       return null;
     }

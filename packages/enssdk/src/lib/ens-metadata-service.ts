@@ -10,6 +10,8 @@ const METADATA_NETWORKS = {
 
 type MetadataNetwork = (typeof METADATA_NETWORKS)[keyof typeof METADATA_NETWORKS];
 
+const URI_SCHEME_PATTERN = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
+
 function namespaceIdToMetadataNetwork(namespaceId: string): MetadataNetwork | null {
   switch (namespaceId) {
     case "mainnet":
@@ -34,6 +36,8 @@ export function getEnsMetadataServiceImageUrl(
   namespaceId: string,
   record: EnsMetadataImageRecord,
 ): URL | null {
+  if (name.startsWith("//") || URI_SCHEME_PATTERN.test(name)) return null;
+
   const network = namespaceIdToMetadataNetwork(namespaceId);
   if (!network) return null;
 
