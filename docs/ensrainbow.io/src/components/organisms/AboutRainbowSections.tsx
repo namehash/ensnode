@@ -1,8 +1,8 @@
 import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 import { Fragment } from "react";
 
+import ensNodeBannerBg from "../../assets/ENSNodeBannerBg.svg";
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
-import ensNode from "../../assets/ENSNodeBannerLight.svg";
 import { ENSNodeBanner } from "../atoms/ENSNodeBanner.tsx";
 import { ENSProfile } from "../atoms/ENSProfile.tsx";
 import { ENSProfileMobile } from "../atoms/ENSProfileMobile.tsx";
@@ -106,7 +106,17 @@ const rainbowSections: AboutRainbowProps[] = [
     mobileImageOnTop: true,
     svgImage: (
       <div className="w-full flex flex-row justify-center items-center xl:justify-end pt-7 pb-5 sm:max-xl:pt-16 sm:max-xl:pb-8">
-        <ENSNodeBanner styles="relative z-10 w-2/3 sm:w-1/2 xl:w-3/4 h-auto" />
+        <div className="relative w-full max-w-[640px] aspect-[640/340] flex items-center justify-center">
+          <img
+            src={ensNodeBannerBg.src}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full rotate-180"
+          />
+          <div className="relative z-10 w-[68.75%] aspect-[11/6] flex items-center justify-center bg-white border border-gray-200 rounded-[20px]">
+            <ENSNodeBanner styles="w-[55%] max-w-[240px] h-auto" />
+          </div>
+        </div>
       </div>
     ),
   },
