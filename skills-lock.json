@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-dx-cli-scale": {
+      "source": "jpoehnelt/skills",
+      "sourceType": "github",
+      "skillPath": "agent-dx-cli-scale/SKILL.md",
+      "computedHash": "1d2aa0d3cfa03501af8656283631b61f572f6458ed7958f232f8acd5601386fa"
+    }
+  }
+}

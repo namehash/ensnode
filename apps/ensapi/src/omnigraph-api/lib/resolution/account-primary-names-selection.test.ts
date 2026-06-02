@@ -23,7 +23,7 @@ const PrimaryNameByInputType = new GraphQLInputObjectType({
   name: "PrimaryNameByInput",
   fields: {
     coinType: { type: GraphQLInt },
-    chain: { type: GraphQLString },
+    chainName: { type: GraphQLString },
   },
 });
 
@@ -31,7 +31,7 @@ const PrimaryNamesWhereInputType = new GraphQLInputObjectType({
   name: "PrimaryNamesWhereInput",
   fields: {
     coinTypes: { type: new GraphQLList(GraphQLInt) },
-    chains: { type: new GraphQLList(GraphQLString) },
+    chainNames: { type: new GraphQLList(GraphQLString) },
   },
 });
 
@@ -85,9 +85,9 @@ describe("buildAccountPrimaryNamesSelection", () => {
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([60, 0]);
   });
 
-  it("extracts coin type from primaryName(by: { chain: ETHEREUM })", () => {
+  it("extracts coin type from primaryName(by: { chainName: ETHEREUM })", () => {
     const info = resolveInfoForAccountResolveSubselection(
-      'primaryName(by: { chain: "ETHEREUM" }) { name }',
+      'primaryName(by: { chainName: "ETHEREUM" }) { name }',
     );
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([coinNameToTypeMap.eth]);
   });
@@ -105,14 +105,13 @@ describe("buildAccountPrimaryNamesSelection", () => {
         one: primaryName(by: { coinType: ${coinNameToTypeMap.btc} }) { name }
         two: primaryName(by: { coinType: ${coinNameToTypeMap.ltc} }) { name }
         three: primaryNames(where: { coinTypes: [${coinNameToTypeMap.doge}, ${coinNameToTypeMap.sol}] }) { name }
-        four: primaryNames(where: { chains: ["DEFAULT", "ETHEREUM", "ARBITRUM_ONE"] }) { name }
-        five: primaryName(by: { chain: "BASE" }) { name }
+        four: primaryNames(where: { chainNames: ["ETHEREUM", "ARBITRUM_ONE"] }) { name }
+        five: primaryName(by: { chainName: "BASE" }) { name }
       `);
 
     expect(buildAccountPrimaryNamesSelection(info)).toEqual([
       coinNameToTypeMap.doge,
       coinNameToTypeMap.sol,
-      coinNameToTypeMap.default,
       coinNameToTypeMap.eth,
       coinNameToTypeMap.arb1,
       coinNameToTypeMap.btc,

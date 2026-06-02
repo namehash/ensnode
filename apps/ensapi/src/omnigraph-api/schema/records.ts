@@ -14,14 +14,18 @@ ResolvedRawTextRecordRef.implement({
   description:
     "A resolved 'raw' text record for an ENS name. Value is any possible string and may require additional validation or preprocessing before use.",
   fields: (t) => ({
-    key: t.exposeString("key", {
+    key: t.field({
+      type: "String",
       description: "The text record key.",
       nullable: false,
+      resolve: (r) => r.key,
     }),
-    value: t.exposeString("value", {
+    value: t.field({
+      type: "String",
       description:
         "The 'raw' text record value, or null if not set. Value is any possible string and may require additional validation or preprocessing before use.",
       nullable: true,
+      resolve: (r) => r.value,
     }),
   }),
 });
@@ -31,7 +35,7 @@ ResolvedRawTextRecordRef.implement({
 ///////////////////////////
 export const ResolvedAddressRecordRef = builder.objectRef<{
   coinType: CoinType;
-  address: string | null;
+  address: Hex | null;
 }>("ResolvedAddressRecord");
 
 ResolvedAddressRecordRef.implement({
@@ -43,10 +47,12 @@ ResolvedAddressRecordRef.implement({
       nullable: false,
       resolve: (r) => r.coinType,
     }),
-    address: t.exposeString("address", {
+    address: t.field({
+      type: "Hex",
       description:
-        "The raw address record value, or null if not set. May be any address format for the associated coin type and may require validation or preprocessing before use. Only EVM addresses are guaranteed to be NormalizedAddress values; see ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder).",
+        'The "raw" resolved address record as hex, or null if not set, empty ("0x"), or zeroAddress. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. Guaranteed to be at least one byte of hex data. There is no guarantee that an EVM CoinType returns an address value of any particular byte length.',
       nullable: true,
+      resolve: (r) => r.address,
     }),
   }),
 });
@@ -131,12 +137,6 @@ export const ResolvedRecordsRef = builder.objectRef<ResolvedRecordsModel>("Resol
 ResolvedRecordsRef.implement({
   description: "Records resolved for a specific ENS name via the ENS protocol.",
   fields: (t) => ({
-    id: t.field({
-      description: "Stable cache key for these records: the InterpretedName used to resolve them.",
-      type: "InterpretedName",
-      nullable: false,
-      resolve: (parent) => parent.id,
-    }),
     reverseName: t.string({
       description:
         "The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.",

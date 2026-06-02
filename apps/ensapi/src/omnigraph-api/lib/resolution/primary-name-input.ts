@@ -11,9 +11,9 @@ import type {
  */
 export const normalizePrimaryNameByInput = (by: PrimaryNameByInputValue): CoinType => {
   if (by.coinType != null) return by.coinType;
-  if (by.chain != null) return chainNameToCoinType(by.chain);
+  if (by.chainName != null) return chainNameToCoinType(by.chainName);
   // this should never happen as the schema with `@oneOf` prevents it
-  throw new Error("PrimaryNameByInput must specify exactly one of coinType or chain.");
+  throw new Error("PrimaryNameByInput must specify exactly one of coinType or chainName.");
 };
 
 /**
@@ -23,7 +23,7 @@ export const normalizeAccountPrimaryNamesWhereInput = (
   where: PrimaryNamesWhereInputValue,
 ): CoinType[] => {
   if (where.coinTypes != null) return where.coinTypes;
-  if (where.chains != null) return where.chains.map(chainNameToCoinType);
+  if (where.chainNames != null) return where.chainNames.map(chainNameToCoinType);
   // this should never happen as the schema with `@oneOf` prevents it
-  throw new Error("PrimaryNamesWhereInput must specify exactly one of coinTypes or chains.");
+  throw new Error("PrimaryNamesWhereInput must specify exactly one of coinTypes or chainNames.");
 };
