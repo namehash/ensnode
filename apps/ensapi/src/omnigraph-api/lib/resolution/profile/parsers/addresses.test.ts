@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ADDRESS_PARSERS } from "./addresses";
 import { profileRecordsModel } from "./test-helpers";
+import { Hex } from "viem";
 
 describe("ADDRESS_PARSERS", () => {
   it.each([
@@ -83,12 +84,12 @@ describe("ADDRESS_PARSERS", () => {
     ["record unset", undefined],
     ["empty string", ""],
     ["0x sentinel", "0x"],
-    ["non-hex value", "not-hex"],
+    ["non-hex value", "0xnot-hex"],
   ] as const)("returns null: %s (%s)", (_message, raw) => {
     for (const [field, parser] of Object.entries(ADDRESS_PARSERS)) {
       const coinType = parser.selection.addresses?.[0];
       if (coinType == null) throw new Error(`Coin type not found for parser ${field}`);
-      const model = raw === undefined ? {} : { [coinType]: raw };
+      const model = raw === undefined ? {} : { [coinType]: raw as Hex };
       expect(parser.parse(profileRecordsModel({}, model))).toBeNull();
     }
   });
