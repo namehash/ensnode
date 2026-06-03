@@ -21,11 +21,15 @@ export const NotENSv2ReadyBadge = ({ transitionStages }: NotENSv2ReadyBadgeProps
       maxTooltipWidth={250}
       placement={isMobile ? "bottom" : "right"}
       trigger={
-        <span className="w-fit flex flex-row flex-nowrap justify-center items-center gap-1 px-1.5 py-0.5 rounded-sm text-white bg-[#ef4444] cursor-default font-semibold leading-5 text-xs">
+        <button
+          type="button"
+          aria-label="Not ENSv2 ready"
+          className="w-fit flex flex-row flex-nowrap justify-center items-center gap-1 px-1.5 py-0.5 rounded-sm text-white bg-[#ef4444] cursor-default font-semibold leading-5 text-xs"
+        >
           <SkullIcon className="w-3 h-3 shrink-0" />
           Not ENSv2 ready
           <NotENSv2ReadyInfoIcon className="w-3 h-3 shrink-0 opacity-50" />
-        </span>
+        </button>
       }
     >
       <ENSv2NotReadyTooltipContent transitionStages={transitionStages} />
