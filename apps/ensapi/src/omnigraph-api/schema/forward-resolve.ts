@@ -3,8 +3,7 @@ import type { JsonValue } from "enssdk";
 import type { TracingTrace } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/omnigraph-api/builder";
-import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
-import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
+import type { ResolvedRecordsResultModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
 import { DomainProfileRef } from "@/omnigraph-api/schema/profile";
 import { ResolvedRecordsRef } from "@/omnigraph-api/schema/records";
 import { AccelerationStatusRef } from "@/omnigraph-api/schema/resolution";
@@ -13,7 +12,7 @@ export type ForwardResolveModel = {
   accelerate: boolean;
   canAccelerate: boolean;
   trace: TracingTrace | null;
-  records: ResolvedRecordsModel | null;
+  result: ResolvedRecordsResultModel | null;
 };
 
 export const ForwardResolveRef = builder.objectRef<ForwardResolveModel>("ForwardResolve");
@@ -43,16 +42,14 @@ ForwardResolveRef.implement({
       type: ResolvedRecordsRef,
       nullable: true,
       tracing: true,
-      resolve: (parent) => parent.records,
+      resolve: (parent) => parent.result,
     }),
-    ...(INCLUDE_DEV_METHODS && {
-      profile: t.field({
-        description:
-          "PREVIEW: An interpreted ENS profile for this Domain. Types are defined for query ergonomics; resolution is not yet wired. Returns null when the domain is not canonical or normalized.",
-        type: DomainProfileRef,
-        nullable: true,
-        resolve: (parent) => (parent.records ? {} : null),
-      }),
+    profile: t.field({
+      description:
+        "The interpreted profile of an ENS name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).",
+      type: DomainProfileRef,
+      nullable: true,
+      resolve: (parent) => parent.result,
     }),
   }),
 });

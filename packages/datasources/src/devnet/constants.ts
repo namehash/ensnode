@@ -1,7 +1,4 @@
 import type { NormalizedAddress } from "enssdk";
-import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
-import type { Hex } from "viem";
-import { mnemonicToAccount } from "viem/accounts";
 
 /**
  * Deterministic contract addresses for the ENS contracts-v2 devnet used by ens-test-env.
@@ -92,49 +89,3 @@ export const contracts = {
   MockUSDC: "0xfd471836031dc5108809d173a067e8486b9047a3",
   MockDAI: "0xcbeaf3bde82155f56486fb5a1072cb8baaf547cc",
 } as const satisfies Record<string, NormalizedAddress>;
-
-/**
- * Must match the devnet mnemonic in contracts-v2 (Anvil named accounts).
- * @see https://github.com/ensdomains/contracts-v2/blob/69bde1b345c47caf3d55a105b9f922280ba55f00/contracts/script/setup.ts#L56
- */
-const mnemonic = "test test test test test test test test test test test junk";
-
-function createAccount(addressIndex: number, resolver: NormalizedAddress) {
-  const account = mnemonicToAccount(mnemonic, { addressIndex });
-  return {
-    ...account,
-    address: toNormalizedAddress(account.address),
-    resolver,
-  };
-}
-
-/**
- * Named accounts from the ens-test-env devnet.
- * They are NOT real Ethereum Mainnet or testnet addresses.
- * You can use `pnpm devnet` to see actual data in devnet
- *
- * @see https://github.com/ensdomains/ens-test-env
- */
-export const accounts = {
-  deployer: createAccount(0, asNormalizedAddress("0x9c97ec2d79944fa55aa2eb6385bc8711cacf18d2")),
-  owner: createAccount(1, asNormalizedAddress("0x8550d35164e7f86bb6adf4cedb3f012913c9d563")),
-  user: createAccount(2, asNormalizedAddress("0x98a84b915ffe27241033ac8f29c6b7849a0fb6e4")),
-  user2: createAccount(3, asNormalizedAddress("0xd04f8f3726a417cfadeea604fc94cf66112b9af6")),
-} as const;
-
-/**
- * Fixtures for seeding the devnet with test data.
- */
-export const addresses = {
-  one: asNormalizedAddress(`0x${"1".repeat(40)}`),
-} as const satisfies Record<string, NormalizedAddress>;
-
-export const fixtures = {
-  abiBytes: `0x${"01".repeat(32)}`,
-  fourBytesInterface: "0x11100111",
-  publicKeyX: `0x${"02".repeat(32)}`,
-  publicKeyY: `0x${"03".repeat(32)}`,
-  contenthash: `0x${"04".repeat(32)}`,
-  bitcoinAddress: `0x${"05".repeat(25)}`,
-  litecoinAddress: `0x${"06".repeat(25)}`,
-} as const satisfies Record<string, Hex>;

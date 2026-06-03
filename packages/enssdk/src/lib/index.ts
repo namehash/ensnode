@@ -4,6 +4,7 @@ export * from "./caip";
 export * from "./coin-type";
 export * from "./constants";
 export * from "./dns-encoded-name";
+export * from "./ens-metadata-service";
 export * from "./ids";
 export * from "./interface-id";
 export * from "./interpret-token-id";
