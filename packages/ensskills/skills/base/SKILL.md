@@ -1,6 +1,6 @@
 ---
 name: base
-description: Shared working conventions every ENS skill assumes — prefer the Omnigraph for reads, use enssdk for the easy-to-get-wrong primitives, prefer `Node` over "namehash" in user-facing communication, follow the ENSNode terminology reference, and report results without leaking internal procedure. Foundational dependency of every other ENS skill.
+description: Shared working conventions every ENS skill assumes — prefer the ENS Omnigraph for reads, use enssdk for the easy-to-get-wrong primitives, prefer `Node` over "namehash" in user-facing communication, follow the ENSNode terminology reference, and report results without leaking internal procedure. Foundational dependency of every other ENS skill.
 ---
 
 # ENS Skills — Base Conventions

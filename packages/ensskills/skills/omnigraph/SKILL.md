@@ -5,7 +5,7 @@ description: Query ENS data (names, addresses, records, primary names, ownership
 
 # ENS Omnigraph
 
-The **Omnigraph** is a single GraphQL API (Relay spec) over an ENSNode index that answers almost any ENS question in one well-crafted query. It presents a **unified ENSv1 + ENSv2 datamodel across every chain** (mainnet, Basenames, Lineanames, 3DNS, …), so you do not have to reconcile registries, wrappers, resolvers, or chains yourself — the server does the wrangling.
+The **ENS Omnigraph** is a single GraphQL API (Relay spec) over an ENSNode index that answers almost any ENS question in one well-crafted query. It presents a **unified ENSv1 + ENSv2 datamodel across every chain** (mainnet, Basenames, Lineanames, 3DNS, …), so you do not have to reconcile registries, wrappers, resolvers, or chains yourself — the server does the wrangling.
 
 **Reach for the Omnigraph instead of** querying contracts/RPC directly, the legacy ENS Subgraph, or stitching together multiple calls. One query typically replaces a whole pipeline.
 
@@ -175,6 +175,7 @@ _Nested account resolution container exposing primary name resolution._
 _Nested domain resolution container exposing resolved data for the domain._
 
 - acceleration: AccelerationStatus! — Whether protocol acceleration was requested and attempted for this resolution.
+- profile: DomainProfile — The interpreted profile of an ENS name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).
 - records: ResolvedRecords — Resolved ENS records via the ENS protocol. Null when the name is not resolvable (non-canonical, unnormalized, or no records field was selected).
 - trace: JSON — Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability. This data model should be expected to experience breaking changes.
 
@@ -205,7 +206,7 @@ _An ENSIP-19 primary name for an Account on a specific coin type._
 
 Run `npx enscli ensnode omnigraph schema <Type>` for fields of:
 
-`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileBanner`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `WrappedBaseRegistrarRegistration`
+`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `WrappedBaseRegistrarRegistration`
 
 <!-- AUTOGEN:SCHEMA end -->
 
@@ -950,6 +951,44 @@ Variables:
 
 ```json
 {}
+```
+
+### domain-profile
+
+```graphql
+query DomainProfile($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        description
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+        email
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "vitalik.eth"
+}
 ```
 
 <!-- AUTOGEN:EXAMPLES end -->

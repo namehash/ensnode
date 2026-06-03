@@ -15,7 +15,7 @@ Definitions follow the [ENSNode Terminology Reference](https://ensnode.io/docs/r
 
 ## Dependencies
 
-- **`base`** — the shared working conventions every ENS skill assumes (prefer the Omnigraph for reads, use `enssdk` primitives, `Node` terminology, output hygiene).
+- **`base`** — the shared working conventions every ENS skill assumes (prefer the ENS Omnigraph for reads, use `enssdk` primitives, `Node` terminology, output hygiene).
 
 This is the foundational _protocol_ skill the other ENS skills build on. To read live ENS state, use **`omnigraph`**; to write ENS code, use **`enssdk`** (both depend on this skill).
 

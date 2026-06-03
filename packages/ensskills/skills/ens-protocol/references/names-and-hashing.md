@@ -15,7 +15,7 @@ Definitions follow the [ENSNode Terminology Reference](https://ensnode.io/docs/r
 - The normalization algorithm evolves with Unicode releases, so a label can become normalizable in a newer version. When two systems compare names/labels, they must use the **same** normalization version or guarantees break.
 - Compare names for equality **only after normalizing both**.
 
-In `enssdk`: check with `isNormalizedName` / `isNormalizedLabel`; turn raw input into a branded **Interpreted Name/Label** with `asInterpretedName` / `asInterpretedLabel` (an Interpreted value is a normalized literal, or an Encoded LabelHash when the literal is unknown/unnormalized). The `InterpretedName` / `InterpretedLabel` types are what the hashing and Omnigraph query helpers accept, so coercing at the input boundary makes the rest of an integration correct by construction.
+In `enssdk`: check with `isNormalizedName` / `isNormalizedLabel`; turn raw input into a branded **Interpreted Name/Label** with `asInterpretedName` / `asInterpretedLabel` (an Interpreted value is a normalized literal, or an Encoded LabelHash when the literal is unknown/unnormalized). The `InterpretedName` / `InterpretedLabel` types are what the hashing and ENS Omnigraph query helpers accept, so coercing at the input boundary makes the rest of an integration correct by construction.
 
 ## namehash and labelhash
 

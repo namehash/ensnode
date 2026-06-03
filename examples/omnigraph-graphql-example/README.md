@@ -1,4 +1,4 @@
-# Omnigraph GraphQL Example
+# ENS Omnigraph GraphQL Example
 
 A minimal TypeScript script demonstrating how to query the ENS Omnigraph API directly over HTTP — no SDK, just `fetch`.
 

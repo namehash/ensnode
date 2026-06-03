@@ -1,6 +1,6 @@
 ---
 name: enscli
-description: Drive the enscli command-line tool to read ENS data — run Omnigraph GraphQL queries, explore the schema offline, compute namehash/labelhash, heal labels via ENSRainbow, and check ENSNode indexing status. Use this when executing ENS lookups from a shell (the omnigraph skill authors queries; this skill runs them).
+description: Drive the enscli command-line tool to read ENS data — run ENS Omnigraph GraphQL queries, explore the schema offline, compute namehash/labelhash, heal labels via ENSRainbow, and check ENSNode indexing status. Use this when executing ENS lookups from a shell (the omnigraph skill authors queries; this skill runs them).
 ---
 
 # enscli
