@@ -16,7 +16,6 @@ export type { ProfileImageResult } from "./images";
 export {
   ProfileAvatarParser,
   ProfileHeaderParser,
-  profileImageHttpUrlDescription,
 } from "./images";
 export {
   SOCIAL_PARSERS,

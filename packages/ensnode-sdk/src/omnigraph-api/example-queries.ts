@@ -1,7 +1,7 @@
 import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts } from "@ensnode/integration-test-env/devnet";
 
 import { getDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";

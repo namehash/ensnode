@@ -2,8 +2,9 @@ import { type Address, type Hex, namehash, toHex } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
-import { addresses, contracts, fixtures } from "@ensnode/datasources/devnet";
+import { contracts } from "@ensnode/datasources/devnet";
 
+import { addresses, fixtures } from "../devnet/fixtures";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 import { waitForTransactionReceipt } from "./index";
 

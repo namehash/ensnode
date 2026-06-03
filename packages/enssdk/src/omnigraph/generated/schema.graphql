@@ -413,18 +413,43 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
-"""An interpreted profile for a name."""
+"""
+An interpreted profile for a name. Individual fields return null when their raw record is unset or cannot be interpreted; see each field's description for validation rules.
+"""
 type DomainProfile {
+  """
+  Interpreted multicoin address records on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
+  """
   addresses: ProfileAddresses
+
+  """
+  Interpreted avatar metadata. Returns null when the raw avatar record is unset or empty.
+  """
   avatar: ProfileAvatar
 
-  """The profile description, or null when unset."""
+  """
+  The profile description. Returns null when the raw record is unset or empty. Non-empty values are returned as-is without format validation.
+  """
   description: String
 
-  """The contact email address, or null when unset or invalid."""
+  """
+  The contact email address. Returns null when the raw record is unset, empty, or fails email validation.
+  """
   email: Email
+
+  """
+  Interpreted header metadata. Returns null when the raw header record is unset or empty.
+  """
   header: ProfileHeader
+
+  """
+  Interpreted social accounts on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
+  """
   socials: ProfileSocials
+
+  """
+  Interpreted website metadata. Returns null when the raw url record is unset, empty, or cannot be parsed as a valid http(s) URL.
+  """
   website: ProfileWebsite
 }
 
@@ -963,7 +988,7 @@ type ForwardResolve {
   acceleration: AccelerationStatus!
 
   """
-  An interpreted profile for this name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile field was selected).
+  An interpreted profile for this name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).
   """
   profile: DomainProfile
 
@@ -1256,46 +1281,70 @@ input PrimaryNamesWhereInput @oneOf {
   coinTypes: [CoinType!]
 }
 
-"""Interpreted address records on a Name profile."""
+"""
+Interpreted multicoin address records on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
+"""
 type ProfileAddresses {
-  """The interpreted Base address, or null when unset."""
+  """
+  The interpreted Base address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   base: Address
 
-  """The interpreted Binance Chain (BNB) address, or null when unset."""
+  """
+  The interpreted Binance Chain (BNB) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   binance: BinanceAddress
 
-  """The interpreted Bitcoin address, or null when unset."""
+  """
+  The interpreted Bitcoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   bitcoin: BitcoinAddress
 
-  """The interpreted Bitcoin Cash address, or null when unset."""
+  """
+  The interpreted Bitcoin Cash address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   bitcoincash: BitcoinCashAddress
 
-  """The interpreted Dogecoin address, or null when unset."""
+  """
+  The interpreted Dogecoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   dogecoin: DogecoinAddress
 
-  """The interpreted Ethereum address, or null when unset."""
+  """
+  The interpreted Ethereum address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   ethereum: Address
 
-  """The interpreted Litecoin address, or null when unset."""
+  """
+  The interpreted Litecoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   litecoin: LitecoinAddress
 
-  """The interpreted Monacoin address, or null when unset."""
+  """
+  The interpreted Monacoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   monacoin: MonacoinAddress
 
-  """The interpreted Ripple (XRP) address, or null when unset."""
+  """
+  The interpreted Ripple (XRP) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   ripple: RippleAddress
 
-  """The interpreted Rootstock (RBTC) address, or null when unset."""
+  """
+  The interpreted Rootstock (RBTC) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   rootstock: RootstockAddress
 
-  """The interpreted Solana address, or null when unset."""
+  """
+  The interpreted Solana address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   solana: SolanaAddress
 }
 
 """Interpreted avatar metadata on a Name profile."""
 type ProfileAvatar {
   """
-  Provides a HTTP-compatible URL for fetching the avatar image that can be safely referenced as an image in web browsers. This is an abstraction over the "raw" avatar record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. Additional details here: https://docs.ens.domains/ensip/12
+  HTTP-compatible URL for fetching the avatar image in web browsers. Abstraction over the raw avatar record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
   """
   httpUrl: String
 }
@@ -1303,32 +1352,59 @@ type ProfileAvatar {
 """Interpreted header metadata on a Name profile."""
 type ProfileHeader {
   """
-  Provides a HTTP-compatible URL for fetching the header image that can be safely referenced as an image in web browsers. This is an abstraction over the "raw" header record, which may reference non-HTTP compatible URLs or encodings including IPFS urls, CAIP-22 / CAIP-29 NFT References, and more edge cases that cannot be trivially referenced as an image in most web browsers. Additional details here: https://docs.ens.domains/ensip/12
+  HTTP-compatible URL for fetching the header image in web browsers. Abstraction over the raw header record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
   """
   httpUrl: String
 }
 
-"""An interpreted social account on a Name profile."""
+"""
+An interpreted social account. Only returned when the raw record was successfully parsed; otherwise the parent social field is null.
+"""
 type ProfileSocialAccount {
-  """The social handle."""
+  """The normalized social handle extracted from the raw record."""
   handle: String!
 
-  """The HTTP-compatible social profile URL."""
+  """The canonical HTTP-compatible social profile URL."""
   httpUrl: String!
 }
 
-"""Interpreted social accounts on a Name profile."""
+"""
+Interpreted social accounts on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
+"""
 type ProfileSocials {
+  """
+  The interpreted GitHub account. Returns null when the raw record is unset, empty, or cannot be parsed as a GitHub handle or profile URL.
+  """
   github: ProfileSocialAccount
+
+  """
+  The interpreted Keybase account. Returns null when the raw record is unset, empty, or cannot be parsed as a Keybase handle or profile URL.
+  """
   keybase: ProfileSocialAccount
+
+  """
+  The interpreted LinkedIn account. Returns null when the raw record is unset, empty, or cannot be parsed as a LinkedIn handle or profile URL.
+  """
   linkedin: ProfileSocialAccount
+
+  """
+  The interpreted Telegram account. Returns null when the raw record is unset, empty, or cannot be parsed as a Telegram handle or profile URL.
+  """
   telegram: ProfileSocialAccount
+
+  """
+  The interpreted X (Twitter) account. Returns null when the raw record is unset, empty, or cannot be parsed as a X (Twitter) handle or profile URL.
+  """
   twitter: ProfileSocialAccount
 }
 
-"""Interpreted website metadata on a Name profile."""
+"""
+Interpreted website metadata. Returns null when the raw url record is unset, empty, or cannot be parsed as a valid http(s) URL.
+"""
 type ProfileWebsite {
-  """The HTTP-compatible website URL, or null when unset."""
+  """
+  The HTTP-compatible website URL. Returns null when the raw url record is unset, empty, not an http(s) URL, or cannot be parsed as a valid URL.
+  """
   httpUrl: String
 }
 

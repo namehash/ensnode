@@ -21,8 +21,13 @@ import {
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { accounts, addresses, fixtures, testEthTextRecords } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
+import {
+  accounts,
+  addresses,
+  fixtures,
+  testEthTextRecords,
+} from "@ensnode/integration-test-env/devnet";
 
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {

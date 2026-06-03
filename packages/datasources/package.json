@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "@ponder/utils": "^0.2.18",
-    "enssdk": "workspace:*",
-    "@ensdomains/address-encoder": "^1.1.2"
+    "enssdk": "workspace:*"
   }
 }

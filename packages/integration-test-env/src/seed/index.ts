@@ -11,8 +11,8 @@ import {
 } from "viem";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import { accounts } from "@ensnode/datasources/devnet";
 
+import { accounts } from "../devnet/fixtures";
 import { seedPrimaryNameRecords } from "./primary-names";
 import { seedResolverRecords } from "./resolver-records";
 

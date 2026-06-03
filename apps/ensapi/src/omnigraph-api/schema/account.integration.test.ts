@@ -8,7 +8,7 @@ import {
 import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { accounts, testEthTextRecords } from "@ensnode/datasources/devnet";
+import { accounts, testEthTextRecords } from "@ensnode/integration-test-env/devnet";
 
 import {
   AccountDomainsPaginated,
