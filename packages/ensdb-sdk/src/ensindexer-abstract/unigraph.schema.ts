@@ -430,9 +430,11 @@ export const registration = onchainTable(
 
     // has a start
     start: t.bigint().notNull(),
+
     // may have an expiry
     expiry: t.bigint(),
-    // maybe have a grace period (BaseRegistrar)
+
+    // may have a grace period (BaseRegistrar)
     gracePeriod: t.bigint(),
 
     // registrar AccountId

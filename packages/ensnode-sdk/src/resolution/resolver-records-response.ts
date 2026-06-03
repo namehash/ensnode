@@ -18,11 +18,10 @@ export type ResolverRecordsResponseBase = {
    * Address records, keyed by CoinType.
    * Value is null if no record for the specified CoinType is set.
    *
-   * NOTE: ENS resolver address records can store arbitrary string values,
-   * including non-EVM addresses — always validate the record value against
-   * the format your application expects.
+   * Values are the "raw" resolved address record as hex. May be a hex value representing 0 or more bytes.
+   * There is no guarantee that an EVM coinType returns an address value of any particular byte length.
    */
-  addresses: Record<CoinType, string | null>;
+  addresses: Record<CoinType, Hex | null>;
 
   /**
    * Text records, keyed by key.
@@ -82,7 +81,7 @@ export type ResolverRecordsResponseBase = {
  * // results in the following type
  * type Response = {
  *   readonly name: Name | null;
- *   readonly addresses: Record<"60", string | null>;
+ *   readonly addresses: Record<"60", Hex | null>;
  *   readonly texts: Record<"avatar" | "com.twitter", string | null>;
  * }
  * ```
@@ -92,7 +91,7 @@ export type ResolverRecordsResponse<T extends ResolverRecordsSelection = Resolve
     [K in keyof T as T[K] extends true | readonly any[] | bigint ? K : never]: K extends "addresses"
       ? Record<
           `${T["addresses"] extends readonly CoinType[] ? T["addresses"][number] : never}`,
-          string | null
+          Hex | null
         >
       : K extends "texts"
         ? Record<T["texts"] extends readonly string[] ? T["texts"][number] : never, string | null>

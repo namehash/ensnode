@@ -262,13 +262,15 @@ a[rel="prev"]:hover {
    --sl-color-white): keep links their base color on hover so only the
    underline-offset animates. */
 .sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card, .sl-link-card *)),
-.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card, .sl-link-card *)) > span {
+.sl-markdown-content a:hover:not(:where(.not-content *, .sl-link-card, .sl-link-card *)) > span,
+.omnigraph-required-table-content {
   color: var(--sl-color-text-accent);
 }
 
 .sl-markdown-content > p a:not(:has(code), [role="tab"]),
 .sl-markdown-content :is(ul, ol) > li a:not(:has(code), [role="tab"]),
-.starlight-aside__content a {
+.starlight-aside__content a,
+.omnigraph-required-table-content {
   text-decoration: underline;
   text-underline-offset: 4px;
 

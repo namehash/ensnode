@@ -7,7 +7,6 @@ import type { CoinType } from "enssdk";
  * GraphQL `ChainName` enum values.
  */
 export const CHAIN_NAME_ENTRIES = [
-  ["default", "DEFAULT"],
   ["eth", "ETHEREUM"],
   ["base", "BASE"],
   ["op", "OPTIMISM"],

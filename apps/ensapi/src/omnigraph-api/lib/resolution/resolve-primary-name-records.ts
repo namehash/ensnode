@@ -27,7 +27,7 @@ const toPrimaryNameRecord = (
 ): PrimaryNameRecordModel => ({
   address,
   coinType,
-  chain: coinTypeToChainName(coinType),
+  chainName: coinTypeToChainName(coinType),
   name,
 });
 

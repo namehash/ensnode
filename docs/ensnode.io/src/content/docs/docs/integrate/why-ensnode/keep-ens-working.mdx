@@ -1,0 +1,343 @@
+---
+title: Keep ENS apps working 🚨
+description: A vast ecosystem of apps depends on the ENS Subgraph — all need to be upgraded to the ENS Omnigraph to keep working in ENSv2.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import UpgradeToOmnigraphRequiredTable from "@components/molecules/upgrade-to-omnigraph-required-table/index.astro";
+import ENSSubgraphDependentApp from "@components/molecules/upgrade-to-omnigraph-required-table/ENSSubgraphDependentApp.astro";
+
+## The ENS Subgraph is not ENSv2 compatible
+
+Over the years, the ENS Subgraph quietly became one of the most depended-on pieces of infrastructure in ENS. An enormous swath of the ENS ecosystem — and much of the broader web3 / Ethereum ecosystem — reads ENS data through it, directly or indirectly.
+
+### Usage at scale
+
+The ENS Subgraph is a cornerstone of the current ENS architecture (ENSv1), handling an extraordinary volume of requests:
+
+- **Approx. 2 million average daily requests**
+- **Over 717 million requests annually**
+
+<figure>
+  <img src="/ens-subgraph-usage.png" alt="ENS Subgraph usage metrics showing daily query volume" />
+  <figcaption>
+    ENS Subgraph daily query volume following the transition to Graph Network hosting (June 20, 2024
+    onward)
+  </figcaption>
+</figure>
+
+This volume sets the floor: it's the minimum scale at which any replacement must operate.
+
+## Applications dependent on the ENS Subgraph
+
+The list below is a **partial** map of the projects and applications that depend on the ENS Subgraph for their functionality — directly, or indirectly. When ENSv2 launches, indexed ENS data must keep flowing to all of these, or they break.
+
+### ENS Registrars
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://app.ens.domains/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Official ENS Manager App</strong></a> — the official interface for ENS domain registration and management.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://grails.app/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Grails</strong></a> — by the <a href="https://ethid.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">EthId Foundation</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://ensvision.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Vision</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://opensea.io/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>OpenSea</strong></a> and <a href="https://rarible.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Rarible</strong></a> — via their dependency on the ENS Metadata Service.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://ens.tools/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Tools</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://snipe.zone/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Snipe Zone</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/blockful/nameful" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Nameful</strong></a> — by <a href="https://www.blockful.io/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Blockful</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://names.linea.build/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Linea Names</strong></a> — primary management interface for <code class="bg-[var(--sl-color-bg-inline-code)] text-xs px-1.5 py-0.5 -my-0.5">linea.eth</code> subnames on Linea.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/hibbb/ensbook" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENSBook</strong></a> — by <a href="https://x.com/forlbb" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Liuliuben</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/frolic/ens-ideas" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Ideas</strong></a> — by <a href="https://x.com/frolic" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Frolic</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### Wallets
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://rainbow.me/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Rainbow Wallet</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://www.myetherwallet.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>MyEtherWallet</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/safe-global/safe-transaction-service" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Safe Transaction Service</strong></a> — by <a href="https://safe.global/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Safe</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://rotki.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Rotki</strong></a> — privacy-preserving portfolio tracking.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### Chain Explorers
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://www.blockscout.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Blockscout</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://www.ethvm.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>EthVM</strong></a> — by <a href="https://www.myetherwallet.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">MyEtherWallet</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://explorer.cartesi.io/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Cartesi Explorer</strong></a> — by <a href="https://cartesi.io/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Cartesi</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### DAO Infrastructure
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://snapshot.box/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Snapshot</strong></a> — via <a href="https://github.com/snapshot-labs/stamp" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Stamp</a>. This is a distinct integration from <code class="bg-[var(--sl-color-bg-inline-code)] text-xs px-1.5 py-0.5 -my-0.5">snapshot.js</code>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/snapshot-labs/snapshot.js" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Snapshot.js</strong></a> — TypeScript library for Snapshot integration.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://daostar.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>DAOStar</strong></a> — by <a href="https://Metagov.org" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Metagov</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://ensmetadata.app/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Metadata Manager</strong></a> — by <a href="https://lighthouse.cx/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Lighthouse</a> (<a href="https://discuss.ens.domains/t/kickoff-organizational-metadata-on-ens/21459/7?u=lightwalker.eth" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">more info</a>).
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://op-govquests.vercel.app/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Optimism GovQuests</strong></a> — by <a href="https://bleu.builders/en" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Bleu</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### ENS History Viewers
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://www.ensvolution.xyz/?name=nick.eth" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENSvolution</strong></a> — by <a href="https://www.justaname.id/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">JustaName</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://www.pastens.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>PastENS</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://swiss-knife.xyz/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Swiss Knife</strong></a> — by <a href="https://x.com/apoorveth" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">apoorv.eth</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://wayback-machine.eth.limo/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Wayback Machine</strong></a> — by <a href="https://blossom.software/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Blossom</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### Developer Tools
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://www.enscribe.xyz/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Enscribe</strong></a> — ENS contract naming platform
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/ensdomains/ensjs" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENSjs</strong></a> — The official ENS JavaScript library.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/ensdomains/ens-test-env" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Test Environment</strong></a> — The official testing environment for ENS development.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://adraffy.github.io/ens-normalize.js/test/resolver.html" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Resolver</strong></a> — by <a href="https://raffy.antistupid.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Andrew Raffensperger</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://tools.ens.xyz/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Tools</strong></a> — by <a href="https://www.enslabs.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">ENS Labs</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/ensdomains/ens-misctools" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Tools</strong></a> — by Serenae.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://ensdata.net/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Data</strong></a> — by <a href="https://wojtek.im/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Pugson</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/safe-global/safe-eth-py" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>safe-eth-py</strong></a> — by <a href="https://safe.global/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Safe</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### ENS CLI Tools
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/stevedylandev/atlas" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Atlas</strong></a> — by <a href="https://x.com/stevedylandev" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Steve Dylan</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/estmcmxci/ensemble-beta" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Ensemble</strong></a> — by <a href="https://x.com/estmcmxci" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">estmcmxci</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/estmcmxci/basenames-cli" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Basenames CLI</strong></a> — by <a href="https://x.com/estmcmxci" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">estmcmxci</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/grailsmarket/cli" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Grails CLI</strong></a> — by the <a href="https://ethid.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">EthId Foundation</a> (uses the Grails API, which uses ENSNode).
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### ENS AI Agents
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/thenamespace/ens-mcp" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS MCP Service</strong></a> — by <a href="https://www.namespace.ninja/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Namespace</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://discuss.ens.domains/t/introducing-the-ens-mcp-server-bringing-ens-to-claude-and-other-ai-assistants/20347" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS MCP Service</strong></a> — by <a href="https://www.justaname.id/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">JustaName</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/kukapay/ens-mcp" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS MCP Service</strong></a> — by <a href="https://github.com/kukapay" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Kukapay</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/thenamespace/skills" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Skills</strong></a> — by <a href="https://www.namespace.ninja/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Namespace</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/Koploseus/PrismOS" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>PrismOS</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://humanens.eth.limo/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>HumanENS</strong></a> (<a href="https://github.com/z-purr/HumanENS" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">GitHub</a>)
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://nayym.xyz/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>nayym</strong></a> (<a href="https://github.com/thisisommore/nayym-cli" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">GitHub</a>)
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### ENS Avatar & Metadata Services
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/ensdomains/ens-metadata-service" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Metadata Service</strong></a> — the primary service used across the ENS ecosystem for loading ENS avatar images.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/snapshot-labs/stamp" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Stamp</strong></a> — by <a href="https://snapshot.box/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Snapshot Labs</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/ethereumidentitykit/ens-metadata-flarecloud" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Metadata Flarecloud</strong></a> — by the <a href="https://ethid.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">EthId Foundation</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### Social Applications
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://efp.app/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Ethereum Follow Protocol</strong></a> — onchain social graph protocol.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://next.id/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Next.ID</strong></a>
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://web3.bio/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Web3.bio</strong></a> — builds on <a href="https://next.id/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Next.ID</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://eth.cd/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Eth.cd</strong></a> — builds on <a href="https://next.id/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Next.ID</a>, by <a href="https://webhash.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Webhash</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://github.com/ethereumidentitykit/ens-market-bot" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENS Market Bot</strong></a> — by the <a href="https://ethid.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">EthId Foundation</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://ns-assignment.vercel.app/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>LinkChain</strong></a> (<a href="https://github.com/divi2806/ns-assignment" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">GitHub</a>)
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={true} toOmnigraphAPI={false}>
+  <a href="https://dapprank.eth.link/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Dapp Rank</strong></a> — by <a href="https://x.com/joelthorst" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Joel Thorstensson</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://decentraland.org/builder/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Decentraland Builder</strong></a> (<a href="https://github.com/decentraland/builder" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">GitHub</a>) — by <a href="https://decentraland.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Decentraland</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://decentraland.org/create" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>Decentraland Creator Hub</strong></a> (<a href="https://github.com/decentraland/creator-hub" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">GitHub</a>) — by <a href="https://decentraland.org/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Decentraland</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+### Subname Providers
+
+<UpgradeToOmnigraphRequiredTable>
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://github.com/thenamespace/l2-subnames" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>L2 Subnames</strong></a> — by <a href="https://www.namespace.ninja/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">Namespace</a>.
+  </ENSSubgraphDependentApp>
+
+  <ENSSubgraphDependentApp toENSNodeSubgraphCompatibleEndpoint={false} toOmnigraphAPI={false}>
+  <a href="https://enspro.xyz/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content"><strong>ENSPro</strong></a> — by <a href="https://namestone.com/" target="_blank" rel="noopener noreferrer" class="omnigraph-required-table-content">NameStone</a>.
+  </ENSSubgraphDependentApp>
+</UpgradeToOmnigraphRequiredTable>
+
+:::note[Help us expand this list]
+Do you know of other applications that rely on the ENS Subgraph that aren't listed here? Please [open a PR](https://github.com/namehash/ensnode) to update this documentation.
+:::
+
+## What this means
+
+The breadth of applications above shows that indexed ENS data is critical infrastructure for ENS and the broader ecosystem — and that there is large, proven demand for it today. When ENSv2 launches, the Subgraph's [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) become breaking for these apps. ENSNode exists to keep indexed ENS data flowing through the transition and beyond, with a robust, scalable, multichain, ENSv2-ready replacement.
+
+## Already building directly on ENSNode
+
+A growing set of companies and apps have already moved onto ENSNode — [see who's already building on ENSNode](/docs/integrate/why-ensnode#join-those-already-building-on-ensnode).
+
+## Next Steps
+
+Next, consider the key limitations of the legacy ENS Subgraph.
+
+<LinkCard
+  href="/docs/integrate/ens-subgraph/key-limitations"
+  title="Key Limitations of the Subgraph 🚨"
+  description="The full list of ways the ENS Subgraph falls short — and gets worse with ENSv2."
+/>
+
+Or, prepare your app or platform for ENSv2 by adopting ENSNode's Omnigraph API.
+
+<LinkCard
+  href="/docs/integrate/omnigraph"
+  title="ENS Omnigraph API"
+  description="The ENSv2-ready replacement. Start here for new integrations."
+/>

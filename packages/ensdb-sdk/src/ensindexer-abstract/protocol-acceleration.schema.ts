@@ -197,12 +197,12 @@ export const resolverAddressRecord = onchainTable(
     coinType: t.bigint().notNull(),
 
     /**
-     * Represents the value of the Addresss Record specified by ((chainId, resolver, node), coinType).
+     * Represents the value of the Address Record specified by ((chainId, resolver, node), coinType).
      *
      * The value of this field is interpreted by `interpretAddressRecordValue` — see its implementation
      * for additional context and specific guarantees.
      */
-    value: t.text().notNull(),
+    value: t.hex().notNull(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
