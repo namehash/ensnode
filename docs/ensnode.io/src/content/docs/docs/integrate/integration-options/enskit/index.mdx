@@ -262,7 +262,7 @@ function RenderDomain({ data }: { data: FragmentOf<typeof DomainFragment> }) {
       <span>{domain.canonical ? domain.canonical.name.beautified : "Unnamed Domain"}</span>{" "}
       <span>({domain.__typename})</span>{" "}
       <span>
- — Owner <code>{domain.owner?.address ?? "0x0"}</code>
+        — Owner <code>{domain.owner?.address ?? "0x0"}</code>
       </span>
     </>
   );

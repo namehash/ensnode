@@ -1,6 +1,6 @@
 # ensskills
 
-Versioned [agent skills](https://agentskills.io) for ENS — teach AI coding agents (Claude Code, Cursor, Codex, …) the ENS Omnigraph.
+Versioned agent skills for ENS — teach AI coding agents (Claude Code, Cursor, Codex, …) the ENS Omnigraph.
 
 `ensskills` ships `SKILL.md` bundles under `skills/`. Install them one of two ways — both **pin to an exact version**, never a moving `main`, so skills stay in lockstep with your ENSNode suite.
 

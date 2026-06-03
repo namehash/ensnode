@@ -1,7 +1,7 @@
 # `ensskills` Example
 
 A minimal Node project for dogfooding the [`ensskills`](../../packages/ensskills) package — the
-versioned [agent skills](https://agentskills.io) that teach AI coding agents the ENS Omnigraph.
+versioned agent skills that teach AI coding agents the ENS Omnigraph.
 
 Unlike the published quickstart (which pins `ensskills` to an exact version), this example installs
 it from the workspace (`ensskills: workspace:*`) so you exercise whatever is on your current branch.
