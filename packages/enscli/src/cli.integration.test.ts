@@ -31,7 +31,15 @@ function backendArgs(backend: EnscliExampleBackend): string[] {
 // Build the self-contained bin (inlines the Omnigraph SDL) and spawn the built artifact, mirroring
 // how a published `enscli` runs.
 beforeAll(() => {
-  execFileSync("pnpm", ["build"], { cwd: PKG_DIR, stdio: "ignore" });
+  // Quiet on success; surface the build logs on failure so CI errors are diagnosable.
+  try {
+    execFileSync("pnpm", ["build"], { cwd: PKG_DIR, stdio: "pipe" });
+  } catch (error) {
+    const e = error as { stdout?: Buffer; stderr?: Buffer };
+    if (e.stdout) process.stdout.write(e.stdout);
+    if (e.stderr) process.stderr.write(e.stderr);
+    throw error;
+  }
 }, 60_000);
 
 describe("enscli", () => {
