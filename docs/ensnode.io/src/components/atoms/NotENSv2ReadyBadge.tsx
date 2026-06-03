@@ -3,6 +3,7 @@ import { CheckSolidIcon } from "@components/atoms/icons/CheckSolidIcon";
 import { SkullIcon } from "@components/atoms/icons/SkullIcon";
 import { XMarkIcon } from "@components/atoms/icons/XMarkIcon";
 import { Tooltip } from "@namehash/namehash-ui/legacy";
+import { useIsMobile } from "@namehash/namehash-ui";
 
 export interface ENSSubgraphDependentApplicationTransitionStages {
   toENSNodeSubgraphCompatibleEndpoint: boolean;
@@ -13,14 +14,16 @@ interface NotENSv2ReadyBadgeProps {
   transitionStages: ENSSubgraphDependentApplicationTransitionStages;
 }
 export const NotENSv2ReadyBadge = ({ transitionStages }: NotENSv2ReadyBadgeProps) => {
+  const isMobile = useIsMobile(440);
   return (
     <Tooltip
       sideOffset={-4}
       maxTooltipWidth={250}
+      placement={isMobile ? "bottom" : "right"}
       trigger={
-        <span className="w-fit flex flex-row flex-nowrap justify-center items-center gap-1 px-1.5 py-0.5 rounded-sm text-white bg-red-500 cursor-default font-semibold leading-5 text-xs">
+        <span className="w-fit flex flex-row flex-nowrap justify-center items-center gap-1 px-1.5 py-0.5 rounded-sm text-white bg-[#ef4444] cursor-default font-semibold leading-5 text-xs">
           <SkullIcon className="w-3 h-3 shrink-0" />
-          ENSv2 not ready
+          Not ENSv2 ready
           <NotENSv2ReadyInfoIcon className="w-3 h-3 shrink-0 opacity-50" />
         </span>
       }
@@ -31,11 +34,10 @@ export const NotENSv2ReadyBadge = ({ transitionStages }: NotENSv2ReadyBadgeProps
 };
 
 const ENSv2NotReadyTooltipContent = ({ transitionStages }: NotENSv2ReadyBadgeProps) => {
-  const transitionInfoStyles =
-    "flex flex-row flex-nowrap justify-start items-start gap-1 -mx-1 -my-1";
+  const transitionInfoStyles = "flex flex-row flex-nowrap justify-start items-start gap-1.5";
 
   return (
-    <div className="h-fit flex flex-col justify-start items-start gap-2 cursor-default">
+    <div className="h-fit flex flex-col justify-start items-start gap-2 cursor-default -mx-1 py-1">
       <div className={transitionInfoStyles}>
         {transitionStages.toENSNodeSubgraphCompatibleEndpoint ? (
           <CheckSolidIcon className="w-5 h-5 shrink-0 pt-1" />
