@@ -11,7 +11,7 @@ export const profileSocialFieldDescription = (platform: string) =>
   )}`;
 
 export const profileWebsiteFieldDescription =
-  "Interpreted website metadata. Returns null when the raw url record is unset, empty, or cannot be parsed as a valid http(s) URL.";
+  "The interpreted website on the profile of an ENS name.";
 
 export const profileImageHttpUrlFieldDescription = (recordLabel: "avatar" | "header") =>
   `HTTP-compatible URL for fetching the ${recordLabel} image in web browsers. Abstraction over the raw ${recordLabel} record (IPFS, CAIP NFT references, etc.). ${nullWhenUninterpretable(
@@ -19,7 +19,7 @@ export const profileImageHttpUrlFieldDescription = (recordLabel: "avatar" | "hea
   )} See https://docs.ens.domains/ensip/12.`;
 
 export const profileAddressesContainerDescription =
-  "Interpreted multicoin address records on a Name profile. Each field returns null independently when its raw record cannot be interpreted.";
+  "The interpreted addresses on the profile of an ENS name.";
 
 export const profileSocialsContainerDescription =
-  "Interpreted social accounts on a Name profile. Each field returns null independently when its raw record cannot be interpreted.";
+  "The interpreted social accounts on the profile of an ENS name.";

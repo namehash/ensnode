@@ -25,15 +25,14 @@ export const ProfileSocialAccountRef =
   builder.objectRef<ProfileSocialAccountModel>("ProfileSocialAccount");
 
 ProfileSocialAccountRef.implement({
-  description:
-    "An interpreted social account. Only returned when the raw record was successfully parsed; otherwise the parent social field is null.",
+  description: "An interpreted social account on the profile of an ENS name.",
   fields: (t) => ({
     handle: t.exposeString("handle", {
-      description: "The normalized social handle extracted from the raw record.",
+      description: "The handle of the social account.",
       nullable: false,
     }),
     httpUrl: t.exposeString("httpUrl", {
-      description: "The canonical HTTP-compatible social profile URL.",
+      description: "The HTTP-compatible url to the social account.",
       nullable: false,
     }),
   }),
@@ -154,7 +153,7 @@ ProfileAddressesRef.implement({
 export const ProfileAvatarRef = builder.objectRef<ProfileImageModel>("ProfileAvatar");
 
 ProfileAvatarRef.implement({
-  description: "Interpreted avatar metadata on a Name profile.",
+  description: "The interpreted avatar image on the profile of an ENS name.",
   fields: (t) => ({
     httpUrl: t.exposeString("httpUrl", {
       description: profileImageHttpUrlFieldDescription("avatar"),
@@ -166,7 +165,7 @@ ProfileAvatarRef.implement({
 export const ProfileHeaderRef = builder.objectRef<ProfileImageModel>("ProfileHeader");
 
 ProfileHeaderRef.implement({
-  description: "Interpreted header metadata on a Name profile.",
+  description: "The interpreted header image on the profile of an ENS name.",
   fields: (t) => ({
     httpUrl: t.exposeString("httpUrl", {
       description: profileImageHttpUrlFieldDescription("header"),
@@ -192,8 +191,7 @@ ProfileWebsiteRef.implement({
 export const DomainProfileRef = builder.objectRef<ResolvedRecordsModel>("DomainProfile");
 
 DomainProfileRef.implement({
-  description:
-    "An interpreted profile for a name. Individual fields return null when their raw record is unset or cannot be interpreted; see each field's description for validation rules.",
+  description: "The interpreted profile of an ENS name.",
   fields: (t) => ({
     avatar: t.field({
       description:
@@ -216,14 +214,13 @@ DomainProfileRef.implement({
       resolve: (model) => (ProfileWebsiteInterpreter.interpret(model) ? model : null),
     }),
     description: t.string({
-      description:
-        "The profile description. Returns null when the raw record is unset or empty. Non-empty values are returned as-is without format validation.",
+      description: "The interpreted description on the profile of an ENS name, or null when unset.",
       nullable: true,
       resolve: (model) => ProfileDescriptionInterpreter.interpret(model),
     }),
     email: t.field({
       description:
-        "The contact email address. Returns null when the raw record is unset, empty, or fails email validation.",
+        "The interpreted email address on the profile of an ENS name, or null when unset or invalid.",
       type: "Email",
       nullable: true,
       resolve: (model) => ProfileEmailInterpreter.interpret(model),

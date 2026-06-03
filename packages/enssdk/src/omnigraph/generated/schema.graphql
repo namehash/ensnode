@@ -413,13 +413,9 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
-"""
-An interpreted profile for a name. Individual fields return null when their raw record is unset or cannot be interpreted; see each field's description for validation rules.
-"""
+"""The interpreted profile of an ENS name."""
 type DomainProfile {
-  """
-  Interpreted multicoin address records on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
-  """
+  """The interpreted addresses on the profile of an ENS name."""
   addresses: ProfileAddresses
 
   """
@@ -428,12 +424,12 @@ type DomainProfile {
   avatar: ProfileAvatar
 
   """
-  The profile description. Returns null when the raw record is unset or empty. Non-empty values are returned as-is without format validation.
+  The interpreted description on the profile of an ENS name, or null when unset.
   """
   description: String
 
   """
-  The contact email address. Returns null when the raw record is unset, empty, or fails email validation.
+  The interpreted email address on the profile of an ENS name, or null when unset or invalid.
   """
   email: Email
 
@@ -442,14 +438,10 @@ type DomainProfile {
   """
   header: ProfileHeader
 
-  """
-  Interpreted social accounts on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
-  """
+  """The interpreted social accounts on the profile of an ENS name."""
   socials: ProfileSocials
 
-  """
-  Interpreted website metadata. Returns null when the raw url record is unset, empty, or cannot be parsed as a valid http(s) URL.
-  """
+  """The interpreted website on the profile of an ENS name."""
   website: ProfileWebsite
 }
 
@@ -988,7 +980,7 @@ type ForwardResolve {
   acceleration: AccelerationStatus!
 
   """
-  An interpreted profile for this name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).
+  The interpreted profile of an ENS name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).
   """
   profile: DomainProfile
 
@@ -1281,9 +1273,7 @@ input PrimaryNamesWhereInput @oneOf {
   coinTypes: [CoinType!]
 }
 
-"""
-Interpreted multicoin address records on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
-"""
+"""The interpreted addresses on the profile of an ENS name."""
 type ProfileAddresses {
   """
   The interpreted Base address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
@@ -1341,7 +1331,7 @@ type ProfileAddresses {
   solana: SolanaAddress
 }
 
-"""Interpreted avatar metadata on a Name profile."""
+"""The interpreted avatar image on the profile of an ENS name."""
 type ProfileAvatar {
   """
   HTTP-compatible URL for fetching the avatar image in web browsers. Abstraction over the raw avatar record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
@@ -1349,7 +1339,7 @@ type ProfileAvatar {
   httpUrl: String
 }
 
-"""Interpreted header metadata on a Name profile."""
+"""The interpreted header image on the profile of an ENS name."""
 type ProfileHeader {
   """
   HTTP-compatible URL for fetching the header image in web browsers. Abstraction over the raw header record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
@@ -1357,20 +1347,16 @@ type ProfileHeader {
   httpUrl: String
 }
 
-"""
-An interpreted social account. Only returned when the raw record was successfully parsed; otherwise the parent social field is null.
-"""
+"""An interpreted social account on the profile of an ENS name."""
 type ProfileSocialAccount {
-  """The normalized social handle extracted from the raw record."""
+  """The handle of the social account."""
   handle: String!
 
-  """The canonical HTTP-compatible social profile URL."""
+  """The HTTP-compatible url to the social account."""
   httpUrl: String!
 }
 
-"""
-Interpreted social accounts on a Name profile. Each field returns null independently when its raw record cannot be interpreted.
-"""
+"""The interpreted social accounts on the profile of an ENS name."""
 type ProfileSocials {
   """
   The interpreted GitHub account. Returns null when the raw record is unset, empty, or cannot be parsed as a GitHub handle or profile URL.
@@ -1398,9 +1384,7 @@ type ProfileSocials {
   twitter: ProfileSocialAccount
 }
 
-"""
-Interpreted website metadata. Returns null when the raw url record is unset, empty, or cannot be parsed as a valid http(s) URL.
-"""
+"""The interpreted website on the profile of an ENS name."""
 type ProfileWebsite {
   """
   The HTTP-compatible website URL. Returns null when the raw url record is unset, empty, not an http(s) URL, or cannot be parsed as a valid URL.
