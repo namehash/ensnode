@@ -1,0 +1,60 @@
+---
+/**
+ * Renders an array of row objects (or a single row object) as an HTML table
+ * with auto-detected column headers.
+ */
+interface Props {
+  rows: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const { rows } = Astro.props;
+
+const data = Array.isArray(rows) ? rows : [rows];
+const columns = data.length > 0 ? Object.keys(data[0]) : [];
+
+function formatCell(value: unknown): string {
+  if (value === null) return "NULL";
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value);
+}
+---
+
+<div class="sql-result-table-wrapper not-content">
+  <table class="sql-result-table">
+    <thead>
+      <tr>
+        <th class="sql-result-rownum">#</th>
+        {columns.map((col) => <th>{col}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {
+        data.map((row, i) => (
+          <tr>
+            <td class="sql-result-rownum">
+              <span class="sql-result-rownum-label">{i + 1}</span>
+            </td>
+            {columns.map((col) => {
+              const value = row[col];
+              const text = formatCell(value);
+              const isComplex = value !== null && (typeof value === "object" || text.length > 80);
+              return (
+                <td>
+                  {isComplex ? (
+                    <pre class="sql-result-cell-pre">
+                      <code>{text}</code>
+                    </pre>
+                  ) : value === null ? (
+                    <span class="sql-result-null">{text}</span>
+                  ) : (
+                    <code>{text}</code>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
