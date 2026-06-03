@@ -1,12 +1,48 @@
 {
   "name": "enscli",
   "version": "1.15.1",
-  "description": "Reserved for the ENSNode project by NameHash Labs. See https://ensnode.io",
+  "type": "module",
+  "description": "An agent- and human-friendly CLI for ENS, ENSNode, and the Omnigraph API.",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/namehash/ensnode.git",
+    "url": "git+https://github.com/namehash/ensnode.git",
     "directory": "packages/enscli"
   },
-  "license": "MIT",
-  "homepage": "https://ensnode.io"
+  "homepage": "https://ensnode.io",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "Omnigraph",
+    "agent"
+  ],
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "enscli": "./dist/cli.js"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "build": "tsup",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "test": "vitest",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@ensnode/datasources": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "@ensnode/ensrainbow-sdk": "workspace:*",
+    "citty": "^0.1.6",
+    "enssdk": "workspace:*",
+    "graphql": "^16.11.0"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
 }
