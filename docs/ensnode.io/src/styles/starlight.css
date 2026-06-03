@@ -108,10 +108,15 @@
     var(--aside-caution-color) 70%,
     transparent
   );
+  --aside-note-card-bg: color-mix(in srgb, var(--aside-note-color) 20%, transparent);
+  --aside-note-card-bg-hover: color-mix(in srgb, var(--aside-note-color) 30%, transparent);
+  --aside-note-card-border: color-mix(in srgb, var(--aside-note-color) 50%, transparent);
+  --aside-note-card-border-hover: color-mix(in srgb, var(--aside-note-color) 70%, transparent);
 
   --aside-danger-card-title-hover: color-mix(in srgb, var(--aside-danger-color), black 35%);
   --aside-tip-card-title-hover: color-mix(in srgb, var(--aside-tip-color), black 35%);
   --aside-caution-card-title-hover: color-mix(in srgb, var(--aside-caution-color), black 35%);
+  --aside-note-card-title-hover: color-mix(in srgb, var(--aside-note-color), black 35%);
 }
 
 /* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
@@ -652,10 +657,16 @@ starlight-tabs ul[role="tablist"] {
   --aside-color: var(--aside-note-color);
 
   & .sl-link-card {
-    border-color: var(--aside-color);
+    background-color: var(--aside-note-card-bg);
+    border-color: var(--aside-note-card-border);
+  }
+
+  & .sl-link-card:hover {
+    background-color: var(--aside-note-card-bg-hover);
+    border-color: var(--aside-note-card-border-hover);
 
     & .title {
-      color: var(--aside-color);
+      color: var(--aside-note-card-title-hover);
     }
 
     & .icon {
