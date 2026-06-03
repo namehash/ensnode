@@ -23,8 +23,8 @@ function formatCell(value: unknown): string {
   <table class="sql-result-table">
     <thead>
       <tr>
-        <th class="sql-result-rownum">#</th>
-        {columns.map((col) => <th>{col}</th>)}
+        <th scope="col" class="sql-result-rownum">#</th>
+        {columns.map((col) => <th scope="col">{col}</th>)}
       </tr>
     </thead>
     <tbody>

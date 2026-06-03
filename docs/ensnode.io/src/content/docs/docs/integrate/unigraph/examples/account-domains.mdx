@@ -23,8 +23,7 @@ WHERE owner_id = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
 GROUP BY type;
 `;
 
-export const tsExampleSnippet = `
-import { count, eq } from "drizzle-orm";
+export const tsExampleSnippet = `import { count, eq } from "drizzle-orm";
 
 const counts = await ensDb
 \t.select({ type: ensIndexerSchema.domain.type, count: count() })
