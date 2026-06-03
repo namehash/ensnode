@@ -23,17 +23,6 @@ Pick the path that matches your project. Either way, **pin to an exact `ensskill
 
 Add both to your project and wire a `prepare` script:
 
-{/* TEMP prerelease: remove this Aside at the first official release that publishes enscli + ensskills */}
-
-<Aside type="caution" title="Prerelease">
-  `enscli` and `ensskills` are newer than the current `v{snapshot.sdkVersion}` release, so they
-  aren't published at that version yet. Until the first official release that includes them, the
-  snippets below pin to a prerelease snapshot build published from `main` (an exact snapshot version
-  and an immutable `main` commit, functional against the hosted instances running
-  `{snapshot.sdkVersion}`) — they'll move to an exact `v…` tag like the rest of the suite at that
-  release.
-</Aside>
-
 <Code
   lang="jsonc"
   code={`// package.json
@@ -72,14 +61,6 @@ export default defineConfig({
 });`}
 />
 
-<Aside type="caution">
-  The agent is keyed `claude-code`, not `claude` — an unrecognized key silently symlinks nothing. See the [`skills-npm` agent list](https://github.com/antfu/skills-npm) for every supported key.
-</Aside>
-
-<Aside type="note">
-  In a monorepo, `skills-npm` walks up to the workspace root (it looks for `pnpm-workspace.yaml`, `lerna.json`, or a `package.json` with a `workspaces` field) and installs there. To scope it to one package instead, run it with `--cwd .` — i.e. `"prepare": "skills-npm --cwd ."`. See [`examples/ensskills-example`](https://github.com/namehash/ensnode/tree/main/examples/ensskills-example) for a worked setup.
-</Aside>
-
 ## Quickstart (`npx skills`)
 
 Not in a Node project? Vercel's [`skills`](https://github.com/vercel-labs/skills) tool installs the skills straight from this repo — no `package.json`, no `skills-npm`. Point it at the `packages/ensskills/skills` directory on the matching **release tag** (the `v` prefix matters):
@@ -92,10 +73,6 @@ npx skills add https://github.com/namehash/ensnode/tree/${ENSCLI_ENSSKILLS_GIT_R
 />
 
 It detects your agents and writes the skills into each (`.claude/skills`, `.cursor/skills`, …). Bump the tag in the URL to upgrade.
-
-<Aside type="note">
-  Pinning to an exact version is intentional: ENS skills are version-locked to the ENSNode suite, so you always get skills that match the APIs you're targeting. With `skills-npm` that's the pinned npm version; with `npx skills` it's the `v…` release tag in the URL. Avoid pulling skills from a moving git branch — except during the prerelease window noted above, which pins to an immutable `main` commit and an exact snapshot version until the first official release.
-</Aside>
 
 ## Skills included
 
