@@ -1,6 +1,6 @@
 ---
-"enscli": minor
-"ensskills": minor
+"enscli": patch
+"ensskills": patch
 "@ensnode/ensnode-sdk": patch
 ---
 

@@ -1,7 +1,7 @@
 ---
-"@ensnode/datasources": minor
-"enscli": minor
-"ensskills": minor
+"@ensnode/datasources": patch
+"enscli": patch
+"ensskills": patch
 ---
 
 Add contract identification by address.
