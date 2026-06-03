@@ -10,15 +10,25 @@ export const integrateSidebarTopic = {
     },
     {
       label: "Why ENSNode?",
-      link: "/docs/integrate/why-ensnode",
-    },
-    {
-      label: "ENSv2 Readiness",
-      link: "/docs/integrate/ensv2-readiness",
+      collapsed: false,
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/why-ensnode",
+        },
+        {
+          label: "Keep ENS apps working 🚨",
+          link: "/docs/integrate/why-ensnode/keep-ens-working",
+        },
+        {
+          label: "ENSv2 Readiness",
+          link: "/docs/integrate/why-ensnode/ensv2-readiness",
+        },
+      ],
     },
     {
       label: "ENS Subgraph",
-      collapsed: true,
+      collapsed: false,
       badge: {
         text: "LEGACY",
         variant: "danger",

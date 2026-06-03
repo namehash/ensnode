@@ -82,11 +82,12 @@ export default defineConfig({
       "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
     "/docs/reference/rest-api": "/docs/services/ensapi/reference/api-reference",
     "/docs/integrate/hosted-instances": "/docs/hosted-instances",
-    "/docs/integrate/migrate-from-subgraph": "/docs/integrate/ensv2-readiness",
-    "/docs/reference/ensnode-v2-notes": "/docs/integrate/ensv2-readiness",
+    "/docs/integrate/migrate-from-subgraph": "/docs/integrate/why-ensnode/ensv2-readiness",
+    "/docs/reference/ensnode-v2-notes": "/docs/integrate/why-ensnode/ensv2-readiness",
     "/docs/reference/mainnet-registered-subnames-of-subregistries": "/docs/integrate/omnigraph",
-    "/docs/reference/roadmap": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/roadmap": "/docs/integrate/why-ensnode/ensv2-readiness",
     "/docs/reference/what-is-ensnode": "/docs/integrate/why-ensnode",
+    "/docs/integrate/ensv2-readiness": "/docs/integrate/why-ensnode/ensv2-readiness",
   },
   env: {
     schema: {
