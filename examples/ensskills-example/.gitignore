@@ -1,0 +1,5 @@
+node_modules
+
+# symlinks created by skills-npm
+**/skills/npm-*
+.claude/skills/npm-*

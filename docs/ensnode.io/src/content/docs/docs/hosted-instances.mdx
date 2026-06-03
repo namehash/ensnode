@@ -7,7 +7,7 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 import HostedEnsNodeInstance from "@components/molecules/HostedEnsNodeInstance.astro";
-import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
+import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVersionWarning.astro";
 import EnsSubgraphCorrectnessPostEnsV2Launch from "@components/molecules/EnsSubgraphCorrectnessPostEnsV2Launch.astro";
 
 export const subgraphCompatibilityApiLevel = `<em>API-level Subgraph Compatibility.</em> This ENSNode instance has a fully backwards compatible ENS Subgraph GraphQL API. However, additional plugins have been activated which index a superset of data into the subgraph data model in ENSDb. This superset of indexed data means that the data returned for some ENS Subgraph API queries may be different.`;
@@ -24,7 +24,7 @@ NameHash Labs provides hosted instances of ENSNode for developers building on EN
 
 These instances are currently provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
 
-<HostedInstanceSdkVersionWarning />
+<HostedInstanceVersionWarning variant="sdk" />
 
 ### ENS Namespaces
 

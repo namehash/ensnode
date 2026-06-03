@@ -40,14 +40,14 @@ Unknown labels are a consequence of the ENS Registry not emitting the actual lab
 **Understanding the distinction:**
 
 - The ENS Registry contract ([`ENSRegistryWithFallback`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code)) stores the **node** for each name (the node is a 32-byte hash of a name computed via `namehash`)
-- All subnames in the ENS Registry are created by calling [`setSubnodeOwner`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code#F1#L84). This emits a `NewOwner` event for the newly created subname. However, this event contains a parameter misleadingly named `label` that is **not actually the label string**—it's the **labelhash** of the new subname's label.
+- All subnames in the ENS Registry are created by calling [`setSubnodeOwner`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code#F1#L84). This emits a `NewOwner` event for the newly created subname. However, this event contains a parameter misleadingly named `label` that is **not actually the label string** — it's the **labelhash** of the new subname's label.
 
 ```solidity title="ENSRegistryWithFallback.sol"
 event NewOwner(bytes32 indexed node, bytes32 indexed label, address owner);
 //                                                   ^^^^^ This is actually a labelhash, not a label!
 ```
 
-**The critical issue:** When a subname is added to the Registry, the Registry doesn't emit the label of the newly created subname—only the labelhash of the new subname's label. This means:
+**The critical issue:** When a subname is added to the Registry, the Registry doesn't emit the label of the newly created subname — only the labelhash of the new subname's label. This means:
 
 1. **Indexers may only receive the labelhashes of subnames**, and are not guaranteed to always receive the human-readable label
 2. **Many subnames are created through contracts that wrap the Registry** (like `ETHRegistrarController` or `NameWrapper`). These contracts emit additional events with the actual label string, enabling indexers to automatically discover such labels
@@ -79,7 +79,7 @@ Unknown labels are a **permanent architectural constraint** of the ENS protocol,
 
 ### 1. Protocol Design Immutability
 
-The ENS Registry contract is immutable—it cannot be changed or upgraded. The design decision to emit only labelhashes (not labels) in `NewOwner` events is permanent.
+The ENS Registry contract is immutable — it cannot be changed or upgraded. The design decision to emit only labelhashes (not labels) in `NewOwner` events is permanent.
 
 ### 2. Cryptographic One-Way Function
 
@@ -96,7 +96,7 @@ const labelHash = labelhashInterpretedLabel(asInterpretedLabel("vitalik"));
 - Given a label, you can compute its labelhash: `labelhash("vitalik") → 0xaf2c...`
 - Given a labelhash, you **cannot** reverse it to get the original label: `0xaf2c... → ???`
 
-This means that without external knowledge (rainbow tables, event logs, etc.), a labelhash cannot be converted back to its original label. This one-way property is exactly why rainbow tables—and ENSRainbow—are necessary.
+This means that without external knowledge (rainbow tables, event logs, etc.), a labelhash cannot be converted back to its original label. This one-way property is exactly why rainbow tables — and ENSRainbow — are necessary.
 
 ### 3. Ongoing Subname Creation
 
