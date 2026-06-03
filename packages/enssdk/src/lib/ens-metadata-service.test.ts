@@ -1,13 +1,16 @@
 import { asInterpretedName, type Name } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import {
-  getEnsMetadataServiceAvatarUrl,
-  getEnsMetadataServiceImageUrl,
-} from "./ens-metadata-service";
+import { getEnsMetadataServiceImageUrl } from "./ens-metadata-service";
 
 describe("getEnsMetadataServiceImageUrl", () => {
   const name = asInterpretedName("vitalik.eth");
+
+  it("returns a mainnet avatar URL", () => {
+    expect(
+      getEnsMetadataServiceImageUrl(asInterpretedName("test.eth"), "mainnet", "avatar")?.href,
+    ).toBe("https://metadata.ens.domains/mainnet/avatar/test.eth");
+  });
 
   it("returns a sepolia header URL", () => {
     expect(getEnsMetadataServiceImageUrl(name, "sepolia", "header")?.href).toBe(
@@ -27,14 +30,5 @@ describe("getEnsMetadataServiceImageUrl", () => {
     ["custom scheme", "javascript:alert(1)"],
   ])("returns null for non-name input: %s", (_message, maliciousName) => {
     expect(getEnsMetadataServiceImageUrl(maliciousName as Name, "mainnet", "avatar")).toBeNull();
-  });
-});
-
-describe("getEnsMetadataServiceAvatarUrl", () => {
-  it("delegates to the avatar image endpoint", () => {
-    const name = asInterpretedName("test.eth");
-    expect(getEnsMetadataServiceAvatarUrl(name, "mainnet")?.href).toBe(
-      "https://metadata.ens.domains/mainnet/avatar/test.eth",
-    );
   });
 });

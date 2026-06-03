@@ -36,22 +36,13 @@ export function getEnsMetadataServiceImageUrl(
   namespaceId: string,
   record: EnsMetadataImageRecord,
 ): URL | null {
+  // `new URL(name, base)` resolves absolute and protocol-relative `name` values against their
+  // own authority, not `base`. Reject URI-like inputs so only a name path segment is appended
+  // under `https://metadata.ens.domains/{network}/{record}/`.
   if (name.startsWith("//") || URI_SCHEME_PATTERN.test(name)) return null;
 
   const network = namespaceIdToMetadataNetwork(namespaceId);
   if (!network) return null;
 
   return new URL(name, `https://metadata.ens.domains/${network}/${record}/`);
-}
-
-/**
- * Build the avatar image URL for a name on the given ENS namespace that (once fetched) would
- * load the avatar image for the given name from the ENS Metadata Service
- * (https://metadata.ens.domains/docs).
- *
- * The returned URL is dynamically built based on the provided ENS namespace. Not all ENS
- * namespaces are supported by the ENS Metadata Service. Therefore, the returned URL may be null.
- */
-export function getEnsMetadataServiceAvatarUrl(name: Name, namespaceId: string): URL | null {
-  return getEnsMetadataServiceImageUrl(name, namespaceId, "avatar");
 }

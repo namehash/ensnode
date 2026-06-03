@@ -1,7 +1,5 @@
 import "./styles.css";
 
-export { getEnsMetadataServiceAvatarUrl } from "enssdk";
-
 export * from "./components/chains/ChainIcon";
 export * from "./components/chains/ChainName";
 export * from "./components/datetime/AbsoluteTime";
