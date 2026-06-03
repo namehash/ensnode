@@ -28,7 +28,7 @@ const defaultResultNote =
   <Tabs syncKey="unigraph-client">
     <TabItem label="SQL" icon="database">
       <div class="px-5">
-        <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
+        <slot name="sql-tab-note" />
       </div>
 
       <StaticExampleCodeSection badge="SQL" lang="sql" code={sql.codeSnippet} />

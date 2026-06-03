@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import UnigraphStaticExample from "@components/molecules/UnigraphStaticExample.astro";
+import EnsNodeSchemaIntro from "@components/molecules/EnsNodeSchemaIntro.astro";
 
 export const ensDbSdkResultJson = {
   strategy: "omnichain",
@@ -144,5 +145,6 @@ Read the indexing status snapshot for an ENSIndexer instance from the shared `en
  ensdbsdk={{
   codeSnippet: tsExampleSnippet,
   result: ensDbSdkResultJson,
- }}
- />
+ }}>
+  <EnsNodeSchemaIntro slot="sql-tab-note"/>
+ </UnigraphStaticExample>

@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import UnigraphStaticExample from "@components/molecules/UnigraphStaticExample.astro";
+import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
 
 export const unigraphSqlResultJson = [
   {
@@ -92,5 +93,6 @@ Canonical fields are populated on every Domain reachable from the canonical root
  ensdbsdk={{
   codeSnippet: tsExampleSnippet,
   result: ensDbSdkResultJson,
- }}
- />
+ }}>
+  <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" slot="sql-tab-note"/>
+ </UnigraphStaticExample>

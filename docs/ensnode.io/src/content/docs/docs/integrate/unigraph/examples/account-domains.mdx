@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import UnigraphStaticExample from "@components/molecules/UnigraphStaticExample.astro";
+import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
 
 export const resultJson = [
   {
@@ -47,4 +48,6 @@ Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` v
   codeSnippet: tsExampleSnippet,
   result: resultJson,
  }}
- />
+>
+  <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" slot="sql-tab-note"/>
+</UnigraphStaticExample>
