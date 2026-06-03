@@ -454,7 +454,6 @@ ul.top-level details details > summary .group-label span {
 
 /* Unify the styling of Starlight tabs with our Omnigraph Static example tabs */
 starlight-tabs ul[role="tablist"] {
-  border-bottom: none;
   margin-top: 0;
   padding-left: 20px;
   padding-top: 12px;
@@ -483,9 +482,13 @@ starlight-tabs ul[role="tablist"] {
 
     box-shadow: none;
 
+    &:hover {
+      color: var(--sl-color-accent-high);
+    }
+
     &:is([aria-selected="true"]) {
       color: var(--sl-color-text-accent);
-      box-shadow: inset 0 -2px 0 var(--sl-tab-color-border);
+      box-shadow: inset 0 -2px 0 var(--sl-color-text-accent);
     }
 
     & svg {
