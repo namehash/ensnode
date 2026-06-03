@@ -52,19 +52,19 @@ If you'd like to highlight additional query patterns of the ENS Subgraph GraphQL
 
 ### ENSjs Subgraph functions
 
-- [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getDecodedName.ts)—gets the full name for a name with unknown labels from the subgraph (heals encoded labels, splits the name into labels, finds domains by id, and queries the domain by namehash).
-- [`getNameHistory`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNameHistory.ts)—retrieves all events associated with a name.
-- [`getNamesForAddress`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts)—gets all names related to an address via registrant, owner, wrappedOwner, and resolvedAddress; supports `searchString`, filtering (by expiry, reverse records, empty domains), ordering (by expiry date, name, labelName, createdAt), and pagination.
-- [`getSubgraphRecords`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRecords.ts)—gets the records for a name from the subgraph; allows querying by a specific resolver id.
-- [`getSubgraphRegistrant`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRegistrant.ts)—gets the name registrant from the subgraph (`.eth` second-level domains only).
-- [`getSubnames`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubnames.ts)—gets the subnames for a name; supports `searchString`, filtering (by expiry, empty domains), ordering, and pagination.
+- [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — gets the full name for a name with unknown labels from the subgraph (heals encoded labels, splits the name into labels, finds domains by id, and queries the domain by namehash).
+- [`getNameHistory`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNameHistory.ts) — retrieves all events associated with a name.
+- [`getNamesForAddress`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts) — gets all names related to an address via registrant, owner, wrappedOwner, and resolvedAddress; supports `searchString`, filtering (by expiry, reverse records, empty domains), ordering (by expiry date, name, labelName, createdAt), and pagination.
+- [`getSubgraphRecords`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRecords.ts) — gets the records for a name from the subgraph; allows querying by a specific resolver id.
+- [`getSubgraphRegistrant`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRegistrant.ts) — gets the name registrant from the subgraph (`.eth` second-level domains only).
+- [`getSubnames`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubnames.ts) — gets the subnames for a name; supports `searchString`, filtering (by expiry, empty domains), ordering, and pagination.
 
 ### ENSv1 Manager App queries
 
 These query patterns come from the ENSv1 Manager App (`ens-app-v3`). They may not go through ENSjs directly, but they're useful references for the kinds of Subgraph queries real apps depend on:
 
-- [`useResolverExists`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useResolverExists.ts#L27)—checks if a resolver exists.
-- [`useRegistrationData`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useRegistrationData.ts#L31)—gets registration by id and `nameRegistered` events.
+- [`useResolverExists`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useResolverExists.ts#L27) — checks if a resolver exists.
+- [`useRegistrationData`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useRegistrationData.ts#L31) — gets registration by id and `nameRegistered` events.
 
 ## ENSjs Documentation
 

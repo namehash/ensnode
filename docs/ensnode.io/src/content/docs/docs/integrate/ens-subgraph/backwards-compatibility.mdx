@@ -7,7 +7,7 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-This page is background on the ENS Subgraph and the ecosystem ENSNode grew out of. ENSNode maintains a verified Subgraph-compatible API for migrating existing integrations, but it is **not** the path forward for ENSv2—see [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) and the [ENS Omnigraph API](/docs/integrate/omnigraph) for what is.
+This page is background on the ENS Subgraph and the ecosystem ENSNode grew out of. ENSNode maintains a verified Subgraph-compatible API for migrating existing integrations, but it is **not** the path forward for ENSv2 — see [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) and the [ENS Omnigraph API](/docs/integrate/omnigraph) for what is.
 
 ## The Graph & Graph Node
 
@@ -54,8 +54,8 @@ When `SUBGRAPH_COMPAT=false` (default), ENSIndexer operates in enhanced mode wit
 
 ENSNode has developed tooling to verify subgraph compatibility and ease migration from the ENS Subgraph. The tools in the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) repository help users verify ENSNode's subgraph-compatibility.
 
-1. `snapshot-eq`—verify subgraph-equivalent data via snapshots at specific blockheights
-2. 🚧 `proxy-eq`—verify live query compatibility & easing migrations from the Subgraph to ENSNode by identifying any response discrepancies while using an app in real-time
+1. `snapshot-eq` — verify subgraph-equivalent data via snapshots at specific blockheights
+2. 🚧 `proxy-eq` — verify live query compatibility & easing migrations from the Subgraph to ENSNode by identifying any response discrepancies while using an app in real-time
 
 See the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) README for additional context and usage instructions.
 
@@ -67,7 +67,7 @@ See the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph
 
 ## Querying the Subgraph-Compatible API correctly
 
-The care required to query the ENS Subgraph correctly is itself one of its [Key Limitations](/docs/integrate/ens-subgraph/key-limitations)—the guidance below exists because the Subgraph data model exposes raw protocol internals that every client has to handle carefully. If you are migrating an existing integration onto ENSNode's Subgraph-compatible API, the following patterns apply.
+The care required to query the ENS Subgraph correctly is itself one of its [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) — the guidance below exists because the Subgraph data model exposes raw protocol internals that every client has to handle carefully. If you are migrating an existing integration onto ENSNode's Subgraph-compatible API, the following patterns apply.
 
 :::note[Terminology]
 It may be helpful to refer to the [Terminology](/docs/reference/terminology) guide when reading this section.
@@ -145,7 +145,7 @@ The query will return the domain information:
 
 When querying for name values sourced directly from onchain data (e.g., ENS NFTs, contract events), you must:
 
-1. Skip any normalization step—the name value passed to namehash must be exactly as it appears onchain, even if unnormalized.
+1. Skip any normalization step — the name value passed to namehash must be exactly as it appears onchain, even if unnormalized.
 2. Calculate the node by taking the namehash of the onchain name (without any normalization). Be warned however that unnormalized labels may contain "." characters within the label value which can confuse namehash if special precautions are not taken.
 3. Query the domain id using the node of the name.
 
@@ -182,7 +182,7 @@ When an **Unknown** or `subgraph-unindexable` label is encountered, ENSNode repr
 Consider an unnormalized label that literally looks like `[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]`. Because this label contains square brackets (`subgraph-unindexable` characters), it will be represented as the unknown label:
 `[80968d00b78a91f47b233eaa213576293d16dadcbbdceb257bca94b08451ba7f]`
 
-Therefore, this represents the `subgraph-unindexable` label as an **Encoded LabelHash**, encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered `subgraph-unindexable`—they create ambiguity between literal labels and the representation of **Encoded LabelHashes**.
+Therefore, this represents the `subgraph-unindexable` label as an **Encoded LabelHash**, encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered `subgraph-unindexable` — they create ambiguity between literal labels and the representation of **Encoded LabelHashes**.
 
 When ENSNode encounters a `subgraph-unindexable` label, it will represent it as an **Encoded LabelHash** even if the actual label data is available.
 

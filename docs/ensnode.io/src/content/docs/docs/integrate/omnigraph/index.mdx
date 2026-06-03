@@ -5,11 +5,11 @@ description: The world's first and only API providing unified access to the full
 
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
 
-The **ENS Omnigraph API** is the world's first and only API providing unified access to the full state of ENSv1 and ENSv2. It's a single, polymorphic GraphQL API over **both ENSv1 and ENSv2**—write your query once and get correct, typed results regardless of which protocol version a given Domain lives in.
+The **ENS Omnigraph API** is the world's first and only API providing unified access to the full state of ENSv1 and ENSv2. It's a single, polymorphic GraphQL API over **both ENSv1 and ENSv2** — write your query once and get correct, typed results regardless of which protocol version a given Domain lives in.
 
 <Aside type="caution" title="ENSv1 and ENSv2 will coexist">
   Unlike traditional software, **ENSv2 does not replace ENSv1**. When ENSv2 launches, ENSv1 doesn't
-  stop existing—both protocols coexist onchain, at the same time, even though ENSv2 has a
+  stop existing — both protocols coexist onchain, at the same time, even though ENSv2 has a
   substantially different onchain data model from ENSv1.
 
 That's exactly why developers building on ENS need ENSNode and the ENS Omnigraph API: it's the
@@ -24,16 +24,16 @@ The Omnigraph is delivered by [ENSApi](/docs/services/ensapi) on top of the inde
 
 ## One unified API over ENSv1 + ENSv2
 
-When ENSv2 launches in **Summer 2026**, the two protocol versions coexist—and the Omnigraph keeps your app working against both, at the same time, with no code changes. Both ENSv1 and ENSv2 Domains are indexed concurrently and exposed through a unified schema.
+When ENSv2 launches in **Summer 2026**, the two protocol versions coexist — and the Omnigraph keeps your app working against both, at the same time, with no code changes. Both ENSv1 and ENSv2 Domains are indexed concurrently and exposed through a unified schema.
 
-Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a typed result whether that name lives in ENSv1 or ENSv2—your code doesn't have to know which at query time.
+Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a typed result whether that name lives in ENSv1 or ENSv2 — your code doesn't have to know which at query time.
 
 ## What you get
 
-- **Multichain in one query**—mainnet `.eth`, Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) all in a single unified schema.
-- **Typed, no footguns**—names and labels are normalized for you, so rendering them in a UI is trivial.
-- **The full ENS picture**—resolve records, search Domains, list what an address owns, read a complete history of onchain Events, inspect Permissions, and more.
-- **Built-in pagination**—Relay-spec connections mean infinite scroll and stable pagination work out of the box.
+- **Multichain in one query** — mainnet `.eth`, Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) all in a single unified schema.
+- **Typed, no footguns** — names and labels are normalized for you, so rendering them in a UI is trivial.
+- **The full ENS picture** — resolve records, search Domains, list what an address owns, read a complete history of onchain Events, inspect Permissions, and more.
+- **Built-in pagination** — Relay-spec connections mean infinite scroll and stable pagination work out of the box.
 
 ## Your first query
 
@@ -61,12 +61,12 @@ That's a simple shape to get started. When you're ready to understand the data m
 <CardGrid>
   <LinkCard
     title="Core Concepts"
-    description="The data model behind the Omnigraph—Namegraph, canonicality, polymorphism, Events, and Permissions."
+    description="The data model behind the Omnigraph — Namegraph, canonicality, polymorphism, Events, and Permissions."
     href="/docs/integrate/omnigraph/concepts"
   />
   <LinkCard
     title="Examples"
-    description="Worked queries for the most common ENS access patterns—Domain by name, subdomains, events, permissions, and more."
+    description="Worked queries for the most common ENS access patterns — Domain by name, subdomains, events, permissions, and more."
     href="/docs/integrate/omnigraph/examples"
   />
   <LinkCard
@@ -76,7 +76,7 @@ That's a simple shape to get started. When you're ready to understand the data m
   />
   <LinkCard
     title="Integration Options"
-    description="enskit (React), enssdk (TypeScript), or raw GraphQL—pick the integration shape that fits your stack."
+    description="enskit (React), enssdk (TypeScript), or raw GraphQL — pick the integration shape that fits your stack."
     href="/docs/integrate/integration-options"
   />
 </CardGrid>

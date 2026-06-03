@@ -1,12 +1,12 @@
 ---
 title: enscli (CLI)
-description: An agent- and human-friendly CLI for ENS—query the ENS Omnigraph, explore the schema, resolve hashes, heal labels, and check indexing status from the terminal.
+description: An agent- and human-friendly CLI for ENS — query the ENS Omnigraph, explore the schema, resolve hashes, heal labels, and check indexing status from the terminal.
 ---
 
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVersionWarning.astro";
 
-`enscli` is the CLI entry point to ENS. It wraps [`enssdk`](/docs/integrate/integration-options/enssdk) and the [ENS Omnigraph](/docs/integrate/omnigraph) so you can resolve names, look up records, search domains, and run ad-hoc GraphQL queries against any ENSNode instance—without writing a script first.
+`enscli` is the CLI entry point to ENS. It wraps [`enssdk`](/docs/integrate/integration-options/enssdk) and the [ENS Omnigraph](/docs/integrate/omnigraph) so you can resolve names, look up records, search domains, and run ad-hoc GraphQL queries against any ENSNode instance — without writing a script first.
 
 It is designed to feel natural whether you drive it yourself or let an AI agent drive it: predictable arguments, machine-readable output, runtime schema introspection, and loud, structured errors.
 
@@ -57,7 +57,7 @@ ENSRainbow commands resolve their URL similarly via `--ensrainbow-url` / `ENSRAI
 
 ### `ensnode omnigraph <query>`
 
-Send a raw GraphQL query—the string is the exact payload, so the [schema](#ensnode-omnigraph-schema-typefield) doubles as your documentation.
+Send a raw GraphQL query — the string is the exact payload, so the [schema](#ensnode-omnigraph-schema-typefield) doubles as your documentation.
 
 ```bash
 npx enscli ensnode omnigraph 'query D($name: InterpretedName!) {
@@ -69,7 +69,7 @@ npx enscli ensnode omnigraph 'query D($name: InterpretedName!) {
 ```
 
 <Aside type="tip">
-  GraphQL is naturally field-masked—select only the fields you need to keep responses small and avoid context bloat. Resolution lives in the graph: select `Domain.resolve` (records) and `Account.resolve` (primary names) inline rather than as separate calls.
+  GraphQL is naturally field-masked — select only the fields you need to keep responses small and avoid context bloat. Resolution lives in the graph: select `Domain.resolve` (records) and `Account.resolve` (primary names) inline rather than as separate calls.
 
   <LinkCard
     title="ENS Omnigraph API"
@@ -80,7 +80,7 @@ npx enscli ensnode omnigraph 'query D($name: InterpretedName!) {
 
 ### `ensnode omnigraph schema [Type[.field]]`
 
-Explore the Omnigraph schema offline (it ships with the CLI—no network):
+Explore the Omnigraph schema offline (it ships with the CLI — no network):
 
 ```bash
 npx enscli ensnode omnigraph schema                  # root query fields + major types
@@ -104,7 +104,7 @@ npx enscli ensrainbow count
 
 ### `datasources identify <address>`
 
-Identify a well-known ENS contract by address—given `0xabc…`, report which datasource contract it is across the namespace's chains. Fully offline (the datasource catalog ships with the CLI). Accepts a bare address, a chain-scoped `chainId:address`, or full CAIP-10 `eip155:chainId:address`; `--namespace` (default `mainnet`) selects which namespace to search.
+Identify a well-known ENS contract by address — given `0xabc…`, report which datasource contract it is across the namespace's chains. Fully offline (the datasource catalog ships with the CLI). Accepts a bare address, a chain-scoped `chainId:address`, or full CAIP-10 `eip155:chainId:address`; `--namespace` (default `mainnet`) selects which namespace to search.
 
 ```bash
 npx enscli datasources identify 0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e         # bare address (mainnet)

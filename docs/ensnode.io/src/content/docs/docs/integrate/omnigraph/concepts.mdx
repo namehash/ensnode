@@ -1,6 +1,6 @@
 ---
 title: ENS Omnigraph Core Concepts
-description: The core data-model concepts behind the ENS Omnigraph API—Namegraph, Unigraph, canonicality, polymorphism, Interpreted Names, Events, and Permissions.
+description: The core data-model concepts behind the ENS Omnigraph API — Namegraph, Unigraph, canonicality, polymorphism, Interpreted Names, Events, and Permissions.
 sidebar:
   label: Core Concepts
 ---
@@ -11,7 +11,7 @@ While the [ENS Omnigraph API](/docs/integrate/omnigraph) abstracts away most of 
 
 <Aside type="caution" title="ENSv1 and ENSv2 will coexist">
   Unlike traditional software, **ENSv2 does not replace ENSv1**. When ENSv2 launches, ENSv1 doesn't
-  stop existing—both protocols coexist onchain, at the same time, even though ENSv2 has a
+  stop existing — both protocols coexist onchain, at the same time, even though ENSv2 has a
   substantially different onchain data model from ENSv1.
 
 That's exactly why developers building on ENS need ENSNode and the ENS Omnigraph API: it's the
@@ -106,7 +106,7 @@ flowchart TD
     baseReg --> jesse
 ```
 
-The same query shape works for any indexed name regardless of chain or protocol version—here, a Basename on Base:
+The same query shape works for any indexed name regardless of chain or protocol version — here, a Basename on Base:
 
 ```graphql title="example.gql"
 query Basenames {
@@ -141,7 +141,7 @@ This is part of why there's a distinction between a Domain's `id` (the stable, u
 
 ## Canonicality
 
-Given that a Domain entity (say, the `sub` in `sub.example.eth`) can be reached by infinitely many aliases (for example, `sub.other.eth`), it becomes important to determine a _canonical_ reference to the Domain—this is the **Canonical Name**. Canonicality is also connected to nameability within the Unigraph; if an ENSv2 Domain exists on-chain but isn't eventually connected to the ENSv1 or ENSv2 Root Registry via a series of canonical names, **it doesn't have a Canonical Name!**
+Given that a Domain entity (say, the `sub` in `sub.example.eth`) can be reached by infinitely many aliases (for example, `sub.other.eth`), it becomes important to determine a _canonical_ reference to the Domain — this is the **Canonical Name**. Canonicality is also connected to nameability within the Unigraph; if an ENSv2 Domain exists on-chain but isn't eventually connected to the ENSv1 or ENSv2 Root Registry via a series of canonical names, **it doesn't have a Canonical Name!**
 
 Within the Omnigraph API the complexity of the Namegraph is reduced, and all Canonical Domains are queryable, searchable, and addressable by said Canonical Name. Domains that are not canonical are _still_ referenceable by `id` (eg. `domain(by: { id: DomainId! })`).
 
@@ -165,7 +165,7 @@ query Canonicality {
 
 ## Stable IDs vs. Namegraph addressing
 
-Every entity in the Omnigraph has an `id`—a nominally-typed, stable reference to a specific on-chain entity (`DomainId`, `RegistryId`, `RegistrationId`, etc.).
+Every entity in the Omnigraph has an `id` — a nominally-typed, stable reference to a specific on-chain entity (`DomainId`, `RegistryId`, `RegistrationId`, etc.).
 
 For Domains, when you already have an `id` and want to reference the _exact same_ on-chain entity, query it by `id`: `domain(by: { id: "..." })` which is stable across time, even if its Canonical Name could change.
 
@@ -174,9 +174,9 @@ Addressing a Domain by **name** is a different operation. It's **forward travers
 These two views are not interchangeable:
 
 - The `id` you receive from a name lookup _is_ the stable reference to the on-chain entity that the Namegraph currently resolves `"vitalik.eth"` to.
-- But `"vitalik.eth"` is not a stable reference to that entity. The Namegraph can be re-parented or re-aliased—and tomorrow, `"vitalik.eth"` may resolve to an entirely different on-chain Domain, which may have a different resolver with different records.
+- But `"vitalik.eth"` is not a stable reference to that entity. The Namegraph can be re-parented or re-aliased — and tomorrow, `"vitalik.eth"` may resolve to an entirely different on-chain Domain, which may have a different resolver with different records.
 
-Address the exact on-chain entity by `id`—stable across time:
+Address the exact on-chain entity by `id` — stable across time:
 
 ```graphql title="example.gql"
 query ById {
@@ -186,7 +186,7 @@ query ById {
 }
 ```
 
-Address by `name` to perform forward traversal—you get whichever entity the name resolves to right now:
+Address by `name` to perform forward traversal — you get whichever entity the name resolves to right now:
 
 ```graphql title="example.gql"
 query ByName {
@@ -212,7 +212,7 @@ So if you're writing an application that shows a profile for `vitalik.eth`, `by:
 - `Registry` → `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Registry`
 - `Registration` → `BaseRegistrarRegistration`, `NameWrapperRegistration`, `ThreeDNSRegistration`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`
 
-Shared fields are available unconditionally on the interface. Protocol- or implementation-specific fields are reached via typed inline fragments—`... on ENSv1Domain { rootRegistryOwner }`, `... on ENSv2Domain { tokenId }`, `... on BaseRegistrarRegistration { wrapped { fuses } }`, `... on NameWrapperRegistration { fuses }`. The result is a single query that compiles, type-checks, and returns the right fields for whichever concrete type each record turns out to be.
+Shared fields are available unconditionally on the interface. Protocol- or implementation-specific fields are reached via typed inline fragments — `... on ENSv1Domain { rootRegistryOwner }`, `... on ENSv2Domain { tokenId }`, `... on BaseRegistrarRegistration { wrapped { fuses } }`, `... on NameWrapperRegistration { fuses }`. The result is a single query that compiles, type-checks, and returns the right fields for whichever concrete type each record turns out to be.
 
 ```graphql title="example.gql"
 query Polymorphism {
@@ -234,7 +234,7 @@ query Polymorphism {
 
 ## InterpretedNames and InterpretedLabels everywhere
 
-Every name and label crossing the Omnigraph surface is an **Interpreted Name** (or **Interpreted Label**). Each label in an Interpreted Name is either a normalized literal label or an Encoded LabelHash (`[abc123…]`) when the literal isn't known or is unnormalized. This eliminates one of the most common ENS UI footguns—unnormalized labels, unhealed hashes, and rendering surprises—at the schema layer, making UI rendering trivial. See [terminology](/docs/reference/terminology#interpreted-label) for the full definition.
+Every name and label crossing the Omnigraph surface is an **Interpreted Name** (or **Interpreted Label**). Each label in an Interpreted Name is either a normalized literal label or an Encoded LabelHash (`[abc123…]`) when the literal isn't known or is unnormalized. This eliminates one of the most common ENS UI footguns — unnormalized labels, unhealed hashes, and rendering surprises — at the schema layer, making UI rendering trivial. See [terminology](/docs/reference/terminology#interpreted-label) for the full definition.
 
 In addition, both provide a `beautified` variant, where the [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form is rendered. This allows your UI to trivially render the best form of a name or label, without further logic.
 
@@ -335,7 +335,7 @@ query Beautified {
 
 ## Relay-spec connections
 
-Collection and paginated relationship fields in the schema follow the [Relay-spec Connection](https://relay.dev/graphql/connections.htm) pattern with `edges`, `pageInfo`, and `totalCount`. Cursor-based pagination is idiomatic in urql, Apollo, Relay, and most modern GraphQL clients—infinite scroll and stable pagination work out of the box, with no per-endpoint plumbing.
+Collection and paginated relationship fields in the schema follow the [Relay-spec Connection](https://relay.dev/graphql/connections.htm) pattern with `edges`, `pageInfo`, and `totalCount`. Cursor-based pagination is idiomatic in urql, Apollo, Relay, and most modern GraphQL clients — infinite scroll and stable pagination work out of the box, with no per-endpoint plumbing.
 
 ```graphql title="example.gql"
 query RelayConnections {
@@ -364,10 +364,10 @@ query RelayConnections {
 
 The Omnigraph indexes every onchain Event relevant to ENS and exposes it from the entities each Event relates to:
 
-- `Domain.events`—every Event for a specific Domain
-- `Resolver.events`—every Event emitted by a specific Resolver
-- `Account.events`—every Event for which an Account is the HCA-aware `sender`
-- `Permissions.events`, `PermissionsUser.events`—Permission grant and revocation history
+- `Domain.events` — every Event for a specific Domain
+- `Resolver.events` — every Event emitted by a specific Resolver
+- `Account.events` — every Event for which an Account is the HCA-aware `sender`
+- `Permissions.events`, `PermissionsUser.events` — Permission grant and revocation history
 
 Each `Event` carries chain, block, transaction, and log metadata, plus an HCA-aware `sender` field distinct from the raw `tx.from` for HCA-mediated transactions.
 
@@ -393,7 +393,7 @@ In ENSv2, many contracts (like `Registry` and `PermissionedResolver`) have **Per
 
 Permissions are modeled as top-level entities. `Permissions` represents a contract that manages role grants; `PermissionsResource` is an addressable resource within that contract; `PermissionsUser` is a specific user's role bitmap on a specific resource.
 
-Registries, Resolvers, and ENSv2 Domains all expose their Permissions directly (`Registry.permissions`, `Resolver.permissions`, `ENSv2Domain.permissions`), and an `Account` can be queried for every Permission it's been granted (`Account.permissions`, `Account.registryPermissions`, `Account.resolverPermissions`). Access-aware UIs—"which Domains can this address manage?", "who can update this Registry?"—become a single query.
+Registries, Resolvers, and ENSv2 Domains all expose their Permissions directly (`Registry.permissions`, `Resolver.permissions`, `ENSv2Domain.permissions`), and an `Account` can be queried for every Permission it's been granted (`Account.permissions`, `Account.registryPermissions`, `Account.resolverPermissions`). Access-aware UIs — "which Domains can this address manage?", "who can update this Registry?" — become a single query.
 
 ### Permissions a user holds
 
