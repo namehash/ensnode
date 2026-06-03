@@ -9,7 +9,7 @@ import { Aside } from "@astrojs/starlight/components";
 
 This is the canonical reference for the **Unigraph schema** — the unified, polymorphic data model that the `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins) (implemented in [ENSIndexer](/docs/services/ensindexer)) materializes into [ENSDb](/docs/services/ensdb). It models ENSv1 and ENSv2 with shared, polymorphic entities (Domains, Registries, Registrations, Renewals, Resolvers), so the same query shape works across both protocol versions.
 
-Each ENSIndexer instance owns a dedicated database schema (e.g. `ensindexer_0`) holding all of its indexed Unigraph data, fully isolated from other instances.
+Each [ENSIndexer instance](/docs/services/ensdb/concepts/glossary#ensindexer-instance) owns a dedicated [ENSDb Writer Schema](/docs/services/ensdb/concepts/glossary#ensdb-writer-schema) (e.g. `ensindexer_0`) holding all of its indexed Unigraph data, fully isolated from other instances.
 
 <Aside type="caution" title="Unigraph plugin hard dependency">
   The Unigraph plugin has a hard dependency on the **Protocol Acceleration** plugin (Domain–Resolver

@@ -11,7 +11,7 @@ This page explains the different database schemas in ENSDb, including the ENSNod
 
 ## Overview of ENSDb Schemas
 
-ENSDb instance can have two distinct kinds of database schemas: a single shared **ENSNode Schema** for operational metadata, and one **ENSDb Writer Schema** per running ENSDb Writer instance for all indexed ENS data. <a href="https://dbdiagram.io/d/ENSDb-69f0d325ddb9320fdc7bd564" target="_blank" rel="noopener noreferrer">View Interactive Diagram of ENSDb Schemas</a>.
+An ENSDb instance can have two distinct kinds of database schemas: a single shared **ENSNode Schema** for operational metadata, and one **ENSDb Writer Schema** per running ENSDb Writer instance for all indexed ENS data. <a href="https://dbdiagram.io/d/ENSDb-69f0d325ddb9320fdc7bd564" target="_blank" rel="noopener noreferrer">View Interactive Diagram of ENSDb Schemas</a>.
 
 ## ENSNode Schema
 
@@ -45,7 +45,7 @@ Possible key-value pairs are defined by the `EnsNodeMetadata` union type. As of 
 
 Each ENSDb Writer instance owns a dedicated database schema in ENSDb. All indexed ENS data for that instance lives within it, fully isolated from other instances.
 
-The ENSDb Writer Schema is modular and can be composed of multiple logical database sub-schemas. Each sub-schema is implemented for the exact requirements determined by a specific implementation of an [ENSNode Plugin](#ensnode-plugin).
+The ENSDb Writer Schema is modular and can be composed of multiple logical database sub-schemas. Each sub-schema is implemented for the exact requirements determined by a specific implementation of an [ENSNode Plugin](/docs/services/ensdb/concepts/glossary#ensnode-plugin).
 
 ---
 

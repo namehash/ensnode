@@ -61,7 +61,7 @@ Any application that implements one or more standard-compliant [ENSNode Plugins]
 
 ### ENSDb Metadata Writer
 
-Any application that writes metadata about an [ENSDb Writer](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) records into the [ENSNode Metadata Table](/docs/services/ensdb/concepts/glossary#ensnode-metadata-table) for each ENSIndexer instance that has ever connected to the ENSDb instance. Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
+Any application that writes metadata about an [ENSDb Writer](#ensdb-writer) into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Metadata Writer, which writes [Indexing Metadata Context](#indexing-metadata-context) records into the [ENSNode Metadata Table](#ensnode-metadata-table) for each ENSIndexer instance that has ever connected to the ENSDb instance. Other implementations of ENSDb Metadata Writers can be built in any language, as long as they follow the ENSDb Standard.
 
 ### ENSDb Reader
 
@@ -98,7 +98,7 @@ Within a single [ENSDb instance](#ensdb-instance):
 - Each [ENSDb Writer](#ensdb-writer) instance gets its own ENSDb Writer Schema — fully isolated data following the [ENSDb Writer Schema Definition](#ensdb-writer-schema-definition) that was current when the instance started.
 - Metadata of all [ENSDb Writer](#ensdb-writer) instances is tracked in the [ENSNode Schema](#ensnode-schema)
 
-This enables separate indexing by multiple [ENSDb Writer](#ensdb-writer) instance with different configs. The configs may require indexing just certain chains. For example, one [ENSDb Writer](#ensdb-writer) instance is configured to index data just from the Ethereum Mainnet, while another [ENSDb Writer](#ensdb-writer) instance is configured to index data from both, Ethereum Mainnet, and Base Mainnet. Each of these [ENSDb Writer](#ensdb-writer) instances would have its own ENSDb Writer Schema in the same [ENSDb instance](#ensdb-instance).
+This enables separate indexing by multiple [ENSDb Writer](#ensdb-writer) instances with different configs. The configs may require indexing just certain chains. For example, one [ENSDb Writer](#ensdb-writer) instance is configured to index data just from the Ethereum Mainnet, while another [ENSDb Writer](#ensdb-writer) instance is configured to index data from both, Ethereum Mainnet, and Base Mainnet. Each of these [ENSDb Writer](#ensdb-writer) instances would have its own ENSDb Writer Schema in the same [ENSDb instance](#ensdb-instance).
 
 ### Ponder runtime
 

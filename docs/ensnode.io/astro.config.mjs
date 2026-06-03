@@ -73,6 +73,8 @@ export default defineConfig({
     "/docs/services/ensdb/usage": "/docs/services/ensdb/integrations",
     "/docs/services/ensdb/usage/sdk": "/docs/integrate/unigraph/examples",
     "/docs/services/ensdb/usage/sql": "/docs/integrate/unigraph/examples",
+    "/docs/services/ensdb/integrations/ensnode": "/docs/services/ensdb/reference-implementation",
+    "/docs/services/ensdb/integrations/future-possibilities": "/docs/services/ensdb/integrations",
     "/ensadmin": "/docs/services/ensadmin",
     "/ensapi": "/docs/services/ensapi",
     "/ensdb": "/docs/services/ensdb",
