@@ -63,9 +63,9 @@ export const ensDbSdkResultJson = [
   },
 ];
 
-export const exampleSQLSnippet = `SELECT * FROM ensindexer_0.domains\nWHERE canonical_name = 'vitalik.eth';`
+export const sqlExampleSnippet = `SELECT * FROM ensindexer_0.domains\nWHERE canonical_name = 'vitalik.eth';`
 
-export const exampleTSSnippet = `import { eq } from "drizzle-orm";
+export const tsExampleSnippet = `import { eq } from "drizzle-orm";
 
 const [vitalik] = await ensDb
 \t.select()
@@ -86,11 +86,11 @@ Canonical fields are populated on every Domain reachable from the canonical root
 
 <UnigraphStaticExample
  sql={{
-  codeSnippet: exampleSQLSnippet,
+  codeSnippet: sqlExampleSnippet,
   result: unigraphSqlResultJson,
  }}
  ensdbsdk={{
-  codeSnippet: exampleTSSnippet,
+  codeSnippet: tsExampleSnippet,
   result: ensDbSdkResultJson
  }}
  />

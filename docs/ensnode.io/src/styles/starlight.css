@@ -749,8 +749,7 @@ starlight-tabs ul[role="tablist"] {
   overflow: auto;
   max-height: 420px;
   margin: 1rem 20px;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-radius: 12px;
   border: 1px solid var(--sl-color-gray-5);
 }
 

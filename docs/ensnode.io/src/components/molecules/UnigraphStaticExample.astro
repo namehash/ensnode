@@ -6,15 +6,15 @@ import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import StaticExampleCodeSection from "@components/molecules/omnigraph-static-example/StaticExampleCodeSection.astro";
 import StaticExampleNote from "@components/molecules/omnigraph-static-example/StaticExampleNote.astro";
 
-interface unigraphExampleTabData {
+interface UnigraphExampleTabData {
   codeSnippet: string;
   result: Record<string, unknown> | Array<Record<string, unknown>>;
   resultNote?: string;
 }
 
 interface Props {
-  sql: unigraphExampleTabData;
-  ensdbsdk: unigraphExampleTabData;
+  sql: UnigraphExampleTabData;
+  ensdbsdk: UnigraphExampleTabData;
 }
 
 const { sql, ensdbsdk } = Astro.props;
