@@ -9,6 +9,10 @@ import { Tabs, TabItem } from "@astrojs/starlight/components";
 import ResultDetails from "@components/molecules/ResultDetails.astro";
 import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import UnigraphStaticExampleWrapper from "@components/molecules/unigraph-static-example/index.astro";
+import StaticExampleCodeSection from "@components/molecules/omnigraph-static-example/StaticExampleCodeSection.astro";
+import StaticExampleOutputSection from "@components/molecules/omnigraph-static-example/StaticExampleOutputSection.astro";
+import { stringifyJsonForDocs } from "@lib/examples/omnigraph/docs-utils";
 
 export const unigraphSqlResultJson = [
   {
@@ -66,6 +70,8 @@ export const ensDbSdkResultJson = [
   },
 ];
 
+export const exampleSQLSnippet = `SELECT * FROM ensindexer_0.domains\nWHERE canonical_name = 'vitalik.eth';`
+
 :::caution[`unigraph` plugin required]
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
@@ -76,20 +82,24 @@ Fetch a Domain by its canonical name. Because `canonical_name` is materialized a
 Canonical fields are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`. In SQL, these columns are `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth`; in `ensdb-sdk`, the corresponding fields are `canonicalName`, `canonicalPath`, `canonicalNode`, and `canonicalDepth`.
 :::
 
+<UnigraphStaticExampleWrapper>
 <Tabs syncKey="unigraph-client">
-  <TabItem label="SQL">
+  <TabItem label="SQL" icon="database">
+    <div class="px-5">
     <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
+    </div>
 
-```sql
-SELECT * FROM ensindexer_0.domains
-WHERE canonical_name = 'vitalik.eth';
-```
+    <StaticExampleCodeSection badge="SQL" lang="sql" code={exampleSQLSnippet} />
 
-    <ResultDetails value={unigraphSqlResultJson} />
+    <StaticExampleOutputSection
+      uid="unigraph-domain-by-name-result-sql"
+      responseJson={stringifyJsonForDocs(unigraphSqlResultJson)}
+      heading="Output"
+    />
 
   </TabItem>
 
-  <TabItem label="ensdb-sdk (TypeScript)">
+  <TabItem label="ensdb-sdk (TypeScript)" icon="seti:typescript">
     <EnsDbReaderIntro />
 
 ```typescript
@@ -107,3 +117,4 @@ console.log(vitalik);
 
   </TabItem>
 </Tabs>
+</UnigraphStaticExampleWrapper>
