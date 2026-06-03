@@ -671,6 +671,7 @@ starlight-tabs ul[role="tablist"] {
 .sl-markdown-content .expressive-code .frame:not(.not-content) {
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: none;
   border-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 25%);
 }
 
