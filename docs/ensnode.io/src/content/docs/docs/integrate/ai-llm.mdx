@@ -4,7 +4,8 @@ description: AI and LLM tooling for building on ENSv2.
 ---
 
 import { Code, LinkCard } from "@astrojs/starlight/components";
-import snapshot from "@data/omnigraph-examples/snapshot.json";
+{/* TEMP prerelease: enscli/ensskills install pins — remove at first official release (see enscli-ensskills-prerelease.ts) */}
+import { ENSCLI_ENSSKILLS_NPM_SPEC, ENSCLI_ENSSKILLS_GIT_REF } from "@data/enscli-ensskills-prerelease";
 import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVersionWarning.astro";
 
 We're building the infrastructure to make ENS a first-class citizen for AI agents.
@@ -22,7 +23,7 @@ Add `ensskills` and [`skills-npm`](https://github.com/antfu/skills-npm) to your 
   code={`// package.json
   {
     "devDependencies": {
-      "ensskills": "${snapshot.sdkVersion}",
+      "ensskills": "${ENSCLI_ENSSKILLS_NPM_SPEC}",
       "skills-npm": "^1"
     },
     "scripts": {
@@ -38,11 +39,11 @@ npm install   # symlinks the skills for your detected agents
 
 ## Quickstart (`npx skills`)
 
-Not in a Node project? [`skills`](https://github.com/vercel-labs/skills) installs every ENS skill straight from the repo, pinned to the matching release tag:
+Not in a Node project? [`skills`](https://github.com/vercel-labs/skills) installs every ENS skill straight from the repo. It normally pins to the matching `v…` release tag; during the current prerelease window it tracks `main` until `enscli`/`ensskills` ship in their first official release:
 
 <Code
   lang="bash"
-  code={`npx skills add https://github.com/namehash/ensnode/tree/v${snapshot.sdkVersion}/packages/ensskills/skills --skill '*'`}
+  code={`npx skills add https://github.com/namehash/ensnode/tree/${ENSCLI_ENSSKILLS_GIT_REF}/packages/ensskills/skills --skill '*'`}
 />
 
 ## Next Steps
