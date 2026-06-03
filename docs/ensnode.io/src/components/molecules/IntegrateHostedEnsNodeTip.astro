@@ -1,11 +1,11 @@
 ---
 import { Aside, LinkCard } from "@astrojs/starlight/components";
-import HostedInstanceSdkVersionWarning from "./HostedInstanceSdkVersionWarning.astro";
+import HostedInstanceVersionWarning from "./HostedInstanceVersionWarning.astro";
 ---
 
 <Aside type="tip" title="No backend required">
   You don't need to run your own ENSNode to follow this guide — the steps below default to a
   NameHash-hosted instance. Browse the available deployments below.
 </Aside>
-<HostedInstanceSdkVersionWarning />
+<HostedInstanceVersionWarning variant="sdk" />
 <LinkCard title="Hosted ENSNode Instances" href="/docs/hosted-instances" />

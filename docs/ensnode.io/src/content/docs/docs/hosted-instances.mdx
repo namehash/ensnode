@@ -7,7 +7,7 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 import HostedEnsNodeInstance from "@components/molecules/HostedEnsNodeInstance.astro";
-import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
+import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVersionWarning.astro";
 import EnsSubgraphCorrectnessPostEnsV2Launch from "@components/molecules/EnsSubgraphCorrectnessPostEnsV2Launch.astro";
 
 export const pluginLink = (pluginName) => `<a href="/docs/integrate/integration-options/ensnode-plugins#existing-plugins" class="underline">${pluginName}</a>`;
@@ -26,7 +26,7 @@ NameHash Labs provides hosted instances of ENSNode for developers building on EN
 
 These instances are currently provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
 
-<HostedInstanceSdkVersionWarning />
+<HostedInstanceVersionWarning variant="sdk" />
 
 ### ENS Namespaces
 

@@ -1,12 +1,41 @@
 {
   "name": "ensskills",
   "version": "1.15.1",
-  "description": "Reserved for the ENSNode project by NameHash Labs. See https://ensnode.io",
+  "type": "module",
+  "description": "Agent skills for ENS — install with skills-npm to teach AI coding agents the ENS Omnigraph",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/namehash/ensnode.git",
+    "url": "git+https://github.com/namehash/ensnode.git",
     "directory": "packages/ensskills"
   },
-  "license": "MIT",
-  "homepage": "https://ensnode.io"
+  "homepage": "https://ensnode.io",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "Omnigraph",
+    "agent",
+    "skills",
+    "SKILL.md"
+  ],
+  "files": [
+    "skills"
+  ],
+  "scripts": {
+    "generate": "tsx scripts/generate.ts",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsgo --noEmit"
+  },
+  "devDependencies": {
+    "@ensnode/datasources": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "enssdk": "workspace:*",
+    "graphql": "^16.11.0",
+    "prettier": "catalog:",
+    "tsx": "^4.7.1",
+    "typescript": "catalog:"
+  }
 }
