@@ -28,8 +28,10 @@ Add both to your project and wire a `prepare` script:
 <Aside type="caution" title="Prerelease">
   `enscli` and `ensskills` are newer than the current `v{snapshot.sdkVersion}` release, so they
   aren't published at that version yet. Until the first official release that includes them, the
-  snippets below track the `@next` npm tag and the `main` branch — they'll pin to an exact `v…` tag
-  like the rest of the suite at that release.
+  snippets below pin to a prerelease snapshot build published from `main` (an exact snapshot version
+  and an immutable `main` commit, functional against the hosted instances running
+  `{snapshot.sdkVersion}`) — they'll move to an exact `v…` tag like the rest of the suite at that
+  release.
 </Aside>
 
 <Code
@@ -92,7 +94,7 @@ npx skills add https://github.com/namehash/ensnode/tree/${ENSCLI_ENSSKILLS_GIT_R
 It detects your agents and writes the skills into each (`.claude/skills`, `.cursor/skills`, …). Bump the tag in the URL to upgrade.
 
 <Aside type="note">
-  Pinning to an exact version is intentional: ENS skills are version-locked to the ENSNode suite, so you always get skills that match the APIs you're targeting. With `skills-npm` that's the pinned npm version; with `npx skills` it's the `v…` release tag in the URL. Avoid pulling skills from a moving git branch — except during the prerelease window noted above, which tracks `main`/`@next` until the first official release.
+  Pinning to an exact version is intentional: ENS skills are version-locked to the ENSNode suite, so you always get skills that match the APIs you're targeting. With `skills-npm` that's the pinned npm version; with `npx skills` it's the `v…` release tag in the URL. Avoid pulling skills from a moving git branch — except during the prerelease window noted above, which pins to an immutable `main` commit and an exact snapshot version until the first official release.
 </Aside>
 
 ## Skills included
