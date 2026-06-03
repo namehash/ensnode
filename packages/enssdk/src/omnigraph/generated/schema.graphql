@@ -214,6 +214,11 @@ type BaseRegistrarRegistration implements Registration {
   start: BigInt!
 
   """
+  The TokenId for this Domain in the BaseRegistrar. This is the bigint encoding of the Domain's LabelHash.
+  """
+  tokenId: BigInt!
+
+  """
   The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
@@ -1485,7 +1490,7 @@ type ResolvedAbiRecord {
 """A resolved address record for an ENS name."""
 type ResolvedAddressRecord {
   """
-  The "raw" resolved address record as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. May be a hex value representing 0 or more bytes. There is no guarantee that an EVM coinType returns an address value of any particular byte length.
+  The "raw" resolved address record as hex, or null if not set, empty ("0x"), or zeroAddress. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. Guaranteed to be at least one byte of hex data. There is no guarantee that an EVM CoinType returns an address value of any particular byte length.
   """
   address: Hex
 
@@ -1541,11 +1546,6 @@ type ResolvedRecords {
 
   """The IDNSZoneResolver zonehash raw bytes, or null if not set."""
   dnszonehash: Hex
-
-  """
-  Stable cache key for these records: the InterpretedName used to resolve them.
-  """
-  id: InterpretedName!
 
   """Resolved ERC-165 interface implementer records for the requested ids."""
   interfaces(
@@ -1754,6 +1754,8 @@ type WrappedBaseRegistrarRegistration {
   """The Fuses for this Registration's Domain in the NameWrapper."""
   fuses: Int!
 
-  """The TokenID for this Domain in the NameWrapper."""
+  """
+  The TokenId for this Domain in the NameWrapper. This is the bigint encoding of the Domain's Node.
+  """
   tokenId: BigInt!
 }

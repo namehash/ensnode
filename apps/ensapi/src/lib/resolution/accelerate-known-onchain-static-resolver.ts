@@ -1,4 +1,4 @@
-import type { AccountId, Hex, Node } from "enssdk";
+import type { AccountId, Node } from "enssdk";
 
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
@@ -50,7 +50,7 @@ function resolveOperationWithIndex(op: Operation, records: IndexedRecords): Oper
     case "addr": {
       const coinType = op.args[1];
       const found = records?.addressRecords.find((r) => r.coinType === coinType);
-      return { ...op, result: (found?.value ?? null) as Hex | null };
+      return { ...op, result: found?.value ?? null };
     }
     case "text": {
       const key = op.args[1];

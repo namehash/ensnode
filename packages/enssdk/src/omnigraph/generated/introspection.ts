@@ -1056,6 +1056,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "tokenId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BigInt"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "unregistrant",
             "type": {
               "kind": "OBJECT",
@@ -6304,18 +6316,6 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "Hex"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "InterpretedName"
-              }
             },
             "args": [],
             "isDeprecated": false

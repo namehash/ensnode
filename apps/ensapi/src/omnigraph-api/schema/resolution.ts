@@ -15,13 +15,17 @@ export const AccelerationStatusRef =
 AccelerationStatusRef.implement({
   description: "Execution status metadata for a resolver strategy.",
   fields: (t) => ({
-    requested: t.exposeBoolean("requested", {
+    requested: t.field({
+      type: "Boolean",
       description: "Whether protocol acceleration was requested by the caller.",
       nullable: false,
+      resolve: (parent) => parent.requested,
     }),
-    attempted: t.exposeBoolean("attempted", {
+    attempted: t.field({
+      type: "Boolean",
       description: "Whether protocol acceleration was attempted at runtime.",
       nullable: false,
+      resolve: (parent) => parent.attempted,
     }),
   }),
 });
