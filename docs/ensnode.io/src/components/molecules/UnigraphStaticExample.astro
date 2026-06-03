@@ -1,0 +1,55 @@
+---
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SqlResultTable from "@components/molecules/SqlResultTable.astro";
+import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import StaticExampleCodeSection from "@components/molecules/omnigraph-static-example/StaticExampleCodeSection.astro";
+import StaticExampleNote from "@components/molecules/omnigraph-static-example/StaticExampleNote.astro";
+
+interface unigraphExampleTabData {
+  codeSnippet: string;
+  result: Record<string, unknown> | Array<Record<string, unknown>>;
+  resultNote?: string;
+}
+
+interface Props {
+  sql: unigraphExampleTabData;
+  ensdbsdk: unigraphExampleTabData;
+}
+
+const { sql, ensdbsdk } = Astro.props;
+
+const defaultResultNote =
+  "Output matches a SQL response snapshot; live output depends on your ENSNode instance.";
+---
+
+<div
+  class="not-content not-prose static-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]">
+  <Tabs syncKey="unigraph-client">
+    <TabItem label="SQL" icon="database">
+      <div class="px-5">
+        <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
+      </div>
+
+      <StaticExampleCodeSection badge="SQL" lang="sql" code={sql.codeSnippet} />
+
+      <SqlResultTable rows={sql.result} />
+
+      <StaticExampleNote class="px-5 pb-5">{sql.resultNote ?? defaultResultNote}</StaticExampleNote>
+    </TabItem>
+
+    <TabItem label="ensdb-sdk (TypeScript)" icon="seti:typescript">
+      <div class="px-5">
+        <EnsDbReaderIntro />
+      </div>
+
+      <StaticExampleCodeSection badge="TypeScript" lang="ts" code={ensdbsdk.codeSnippet} />
+
+      <SqlResultTable rows={ensdbsdk.result} />
+
+      <StaticExampleNote class="px-5 pb-5"
+        >{ensdbsdk.resultNote ?? defaultResultNote}</StaticExampleNote
+      >
+    </TabItem>
+  </Tabs>
+</div>

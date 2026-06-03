@@ -5,13 +5,7 @@ sidebar:
   label: Domain by Name
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
-import ResultDetails from "@components/molecules/ResultDetails.astro";
-import SqlResultTable from "@components/molecules/SqlResultTable.astro";
-import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
-import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
-import UnigraphStaticExampleWrapper from "@components/molecules/unigraph-static-example/index.astro";
-import StaticExampleCodeSection from "@components/molecules/omnigraph-static-example/StaticExampleCodeSection.astro";
+import UnigraphStaticExample from "@components/molecules/UnigraphStaticExample.astro";
 
 export const unigraphSqlResultJson = [
   {
@@ -71,6 +65,15 @@ export const ensDbSdkResultJson = [
 
 export const exampleSQLSnippet = `SELECT * FROM ensindexer_0.domains\nWHERE canonical_name = 'vitalik.eth';`
 
+export const exampleTSSnippet = `import { eq } from "drizzle-orm";
+
+const [vitalik] = await ensDb
+\t.select()
+\t.from(ensIndexerSchema.domain)
+\t.where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+
+console.log(vitalik);`
+
 :::caution[`unigraph` plugin required]
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
@@ -81,35 +84,13 @@ Fetch a Domain by its canonical name. Because `canonical_name` is materialized a
 Canonical fields are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`. In SQL, these columns are `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth`; in `ensdb-sdk`, the corresponding fields are `canonicalName`, `canonicalPath`, `canonicalNode`, and `canonicalDepth`.
 :::
 
-<UnigraphStaticExampleWrapper>
-<Tabs syncKey="unigraph-client">
-  <TabItem label="SQL" icon="database">
-    <div class="px-5">
-    <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
-    </div>
-
-    <StaticExampleCodeSection badge="SQL" lang="sql" code={exampleSQLSnippet} />
-
-    <SqlResultTable rows={unigraphSqlResultJson} />
-
-  </TabItem>
-
-  <TabItem label="ensdb-sdk (TypeScript)" icon="seti:typescript">
-    <EnsDbReaderIntro />
-
-```typescript
-import { eq } from "drizzle-orm";
-
-const [vitalik] = await ensDb
-  .select()
-  .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
-
-console.log(vitalik);
-```
-
-    <ResultDetails value={ensDbSdkResultJson} />
-
-  </TabItem>
-</Tabs>
-</UnigraphStaticExampleWrapper>
+<UnigraphStaticExample
+ sql={{
+  codeSnippet: exampleSQLSnippet,
+  result: unigraphSqlResultJson,
+ }}
+ ensdbsdk={{
+  codeSnippet: exampleTSSnippet,
+  result: ensDbSdkResultJson
+ }}
+ />

@@ -130,16 +130,22 @@
   }
 
   /* Docked + collapsed: show only the top-level topic icons */
-  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within) .sidebar-content> :not(.starlight-sidebar-topics) {
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    .sidebar-content
+    > :not(.starlight-sidebar-topics) {
     display: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within) .starlight-sidebar-topics-icon+div {
+  .page[data-sidebar-docked]
+    nav.sidebar:not(:hover):not(:focus-within)
+    .starlight-sidebar-topics-icon
+    + div {
     display: none;
   }
 
   /* Docked + collapsed: Highlight only the icon of the current topic */
-  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within) a.starlight-sidebar-topics-current {
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    a.starlight-sidebar-topics-current {
     background-color: transparent !important;
   }
 }
@@ -199,7 +205,7 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent);
 }
 
-.content-panel+.content-panel {
+.content-panel + .content-panel {
   border-top: 0;
   padding-top: 0;
 }
@@ -218,13 +224,13 @@ a[rel="prev"]:hover {
    --sl-color-white): keep links their base color on hover so only the
    underline-offset animates. */
 .sl-markdown-content a:hover:not(:where(.not-content *)),
-.sl-markdown-content a:hover:not(:where(.not-content *))>span,
+.sl-markdown-content a:hover:not(:where(.not-content *)) > span,
 .omnigraph-required-table-content {
   color: var(--sl-color-text-accent);
 }
 
-.sl-markdown-content>p a:not(:has(code), [role="tab"]),
-.sl-markdown-content :is(ul, ol)>li a:not(:has(code), [role="tab"]),
+.sl-markdown-content > p a:not(:has(code), [role="tab"]),
+.sl-markdown-content :is(ul, ol) > li a:not(:has(code), [role="tab"]),
 .starlight-aside__content a,
 .omnigraph-required-table-content {
   text-decoration: underline;
@@ -237,8 +243,8 @@ a[rel="prev"]:hover {
   }
 }
 
-.sl-markdown-content>p a:has(code):not([role="tab"]),
-.sl-markdown-content :is(ul, ol)>li a:has(code):not([role="tab"]) {
+.sl-markdown-content > p a:has(code):not([role="tab"]),
+.sl-markdown-content :is(ul, ol) > li a:has(code):not([role="tab"]) {
   text-decoration: underline;
   text-underline-offset: 4px;
 
@@ -253,7 +259,7 @@ starlight-toc a:hover {
   color: var(--sl-color-text-accent);
 }
 
-.sl-markdown-content :is(h1, h2, h3, h4, h5, h6)>a {
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
   color: var(--sl-color-white);
   display: inline;
   text-decoration: none;
@@ -294,7 +300,7 @@ starlight-toc a:hover {
   justify-content: space-between;
   margin-top: 3rem;
 
-  &>a {
+  & > a {
     flex-basis: unset;
     flex-grow: unset;
     width: fit-content;
@@ -312,7 +318,7 @@ starlight-toc a:hover {
       margin-left: auto;
     }
 
-    &>span {
+    & > span {
       font-size: 0.75rem;
 
       .link-title {
@@ -320,7 +326,7 @@ starlight-toc a:hover {
       }
     }
 
-    &>svg {
+    & > svg {
       align-self: self-end;
       color: var(--pagination-arrow-color);
       font-size: 1.25rem;
@@ -328,7 +334,7 @@ starlight-toc a:hover {
     }
   }
 
-  &>a:hover>svg {
+  & > a:hover > svg {
     color: var(--sl-color-white);
   }
 }
@@ -341,8 +347,8 @@ starlight-toc a:hover {
 }
 
 #starlight__sidebar .starlight-sidebar-topics a,
-#starlight__sidebar .top-level>li>a,
-#starlight__sidebar .top-level>li>details>summary .group-label span,
+#starlight__sidebar .top-level > li > a,
+#starlight__sidebar .top-level > li > details > summary .group-label span,
 #starlight__sidebar a[aria-current="page"] {
   font-weight: 500;
 }
@@ -352,8 +358,8 @@ starlight-toc a:hover {
 * * expandable items (in all states), including nested ones
 */
 #starlight__sidebar a:not([aria-current="page"]):hover,
-#starlight__sidebar details details>summary:hover,
-#starlight__sidebar details>summary:hover {
+#starlight__sidebar details details > summary:hover,
+#starlight__sidebar details > summary:hover {
   background-color: rgba(128, 128, 128, 0.1);
   border-radius: 6px;
 }
@@ -361,14 +367,14 @@ starlight-toc a:hover {
 /** Additional styling required for the
  * expandable items in the sidebar
  */
-#starlight__sidebar details details>summary:hover {
+#starlight__sidebar details details > summary:hover {
   & span {
     color: var(--sl-color-white);
   }
 }
 
-#starlight__sidebar details details>summary,
-#starlight__sidebar details>summary {
+#starlight__sidebar details details > summary,
+#starlight__sidebar details > summary {
   transition: all 0.2s ease-in-out;
 
   &:hover {
@@ -404,7 +410,7 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
  * * not bolded
  * * the same color as the rest of the sidebar text
  */
-ul.top-level details details>summary .group-label span {
+ul.top-level details details > summary .group-label span {
   @media (min-width: 50rem) {
     font-size: var(--sl-text-sm);
   }
@@ -510,9 +516,11 @@ starlight-tabs ul[role="tablist"] {
   }
 
   & code {
-    background-color: color-mix(in srgb,
-        var(--aside-color) var(--aside-code-strength, 12%),
-        transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--aside-color) var(--aside-code-strength, 12%),
+      transparent
+    );
     border-radius: 4px;
   }
 }
@@ -716,7 +724,7 @@ starlight-tabs ul[role="tablist"] {
 
 /* Other elements are rounded accordingly */
 .sl-markdown-content .expressive-code figcaption:is(.header),
-.sl-markdown-content .expressive-code figcaption:is(.header)>span {
+.sl-markdown-content .expressive-code figcaption:is(.header) > span {
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 }
@@ -726,12 +734,12 @@ starlight-tabs ul[role="tablist"] {
   border-bottom-right-radius: 12px;
 }
 
-.sl-markdown-content div[role="tabpanel"]>.expressive-code:not(:has(figcaption:not(:empty))) pre {
+.sl-markdown-content div[role="tabpanel"] > .expressive-code:not(:has(figcaption:not(:empty))) pre {
   border-radius: 12px;
 }
 
 /* Additional border for the "filename" tab in the code snippets */
-.sl-markdown-content .expressive-code figcaption:is(.header):has(.title:not(:empty))>span {
+.sl-markdown-content .expressive-code figcaption:is(.header):has(.title:not(:empty)) > span {
   border-right: 1px solid var(--color-border);
   border-top: 1px solid var(--color-border);
 }
@@ -740,8 +748,9 @@ starlight-tabs ul[role="tablist"] {
 .sql-result-table-wrapper {
   overflow: auto;
   max-height: 420px;
-  margin: 1rem 0;
-  border-radius: 12px;
+  margin: 1rem 20px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
   border: 1px solid var(--sl-color-gray-5);
 }
 
@@ -836,4 +845,12 @@ starlight-tabs ul[role="tablist"] {
 .sql-result-null {
   color: var(--sl-color-gray-3);
   font-style: italic;
+}
+
+/* 
+  Additional global styles for the .static-example class 
+  inside the Unigraph example 
+*/
+.static-example starlight-tabs .expressive-code .frame > pre {
+  border-radius: 12px;
 }
