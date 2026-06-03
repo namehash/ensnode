@@ -6,6 +6,7 @@ import type {
   ChainId,
   DefaultableChainId,
   Duration,
+  Email,
   Hex,
   InterpretedName,
   Node,
@@ -149,6 +150,16 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .string({ error: `${valueLabel} must be a string representing a coin type.` })
     .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
+
+/**
+ * Parses a string into a validated {@link Email} (trimmed).
+ */
+export const makeEmailSchema = (valueLabel: string = "Email") =>
+  z
+    .string({ error: `${valueLabel} must be a string.` })
+    .trim()
+    .pipe(z.email({ error: `${valueLabel} must be a valid email address.` }))
+    .transform((value) => value as Email);
 
 /**
  * Parses a serialized representation of an EVM address into a {@link NormalizedAddress}.

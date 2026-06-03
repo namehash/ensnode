@@ -1,7 +1,7 @@
 import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts } from "@ensnode/integration-test-env/devnet";
 
 import { getDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
@@ -623,6 +623,25 @@ query GetEthDomains {
   }
 }`,
     variables: { default: {} },
+  },
+  {
+    id: "domain-profile",
+    query: `
+query DomainProfile($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        description
+        avatar { httpUrl }
+        addresses { ethereum }
+        socials { github { handle httpUrl } }
+        website { httpUrl }
+        email
+      }
+    }
+  }
+}`,
+    variables: { default: { name: "vitalik.eth" } },
   },
 ];
 

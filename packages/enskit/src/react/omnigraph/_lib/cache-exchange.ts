@@ -52,7 +52,7 @@ export const omnigraphCacheExchange = cacheExchange({
     // dont forget to add cache strategy when DomainProfile is wired
     DomainProfile: EMBEDDED_DATA,
     ProfileAvatar: EMBEDDED_DATA,
-    ProfileBanner: EMBEDDED_DATA,
+    ProfileHeader: EMBEDDED_DATA,
     ProfileWebsite: EMBEDDED_DATA,
     ProfileAddresses: EMBEDDED_DATA,
     ProfileSocials: EMBEDDED_DATA,

@@ -10,7 +10,7 @@ import {
   type SelectionSetNode,
 } from "graphql";
 
-import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { isSelectionEmpty, type ResolverRecordsSelection, uniq } from "@ensnode/ensnode-sdk";
 
 import {
   getParametricRecordsSelectionField,
@@ -126,6 +126,41 @@ function buildRecordsSelectionFromRecordsFieldNodes(
   }
 
   return recordsSelection;
+}
+
+/**
+ * Merges two nullable {@link ResolverRecordsSelection} objects into one.
+ *
+ * - `texts`, `addresses`, and `interfaces` arrays are unioned with duplicates removed.
+ * - `abi` content-type bitmasks are OR-ed so that all requested content types are fetched.
+ * - Boolean flags are OR-ed.
+ * - Returns null only when both inputs are null.
+ */
+export function mergeRecordsSelections(
+  a: ResolverRecordsSelection | null,
+  b: ResolverRecordsSelection | null,
+): ResolverRecordsSelection | null {
+  if (!a && !b) return null;
+  if (!a) return b;
+  if (!b) return a;
+
+  return {
+    name: a.name || b.name || undefined,
+    texts: a.texts || b.texts ? uniq([...(a.texts ?? []), ...(b.texts ?? [])]) : undefined,
+    addresses:
+      a.addresses || b.addresses
+        ? uniq([...(a.addresses ?? []), ...(b.addresses ?? [])])
+        : undefined,
+    contenthash: a.contenthash || b.contenthash || undefined,
+    pubkey: a.pubkey || b.pubkey || undefined,
+    abi: a.abi !== undefined || b.abi !== undefined ? (a.abi ?? 0n) | (b.abi ?? 0n) : undefined,
+    interfaces:
+      a.interfaces || b.interfaces
+        ? uniq([...(a.interfaces ?? []), ...(b.interfaces ?? [])])
+        : undefined,
+    dnszonehash: a.dnszonehash || b.dnszonehash || undefined,
+    version: a.version || b.version || undefined,
+  };
 }
 
 /**
