@@ -1,0 +1,17 @@
+---
+import { NotENSv2ReadyBadge } from "@components/atoms/NotENSv2ReadyBadge";
+import type { ENSSubgraphDependentApplicationTransitionStages } from "@components/atoms/NotENSv2ReadyBadge";
+
+interface Props extends ENSSubgraphDependentApplicationTransitionStages {}
+
+const { toENSNodeSubgraphCompatibleEndpoint, toOmnigraphAPI } = Astro.props;
+---
+
+<div
+  class="w-full h-fit flex flex-col justify-start items-start gap-2.5 px-4 py-3 border-t border-gray-200">
+  <slot />
+  <NotENSv2ReadyBadge
+    transitionStages={{ toENSNodeSubgraphCompatibleEndpoint, toOmnigraphAPI }}
+    client:load
+  />
+</div>
