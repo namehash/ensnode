@@ -7,29 +7,48 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
 ENSNode is the full-stack ENSv2 development platform — a single, unified API over **both ENSv1 and ENSv2**, with first-class multichain support and the integration surfaces (React, TypeScript, GraphQL, Postgres) you need to ship.
 
-## Built for ENSv2 from day one
+## The Subgraph won't survive ENSv2
 
 [ENSv2](https://ens.domains/ensv2) is a fundamental change to ENS's onchain data model. The legacy ENS Subgraph wasn't designed for it, and it never will be — single-chain, no resolution, no understanding of the new ENSv2 Namegraph. Apps that stay on the Subgraph will be left behind the moment ENSv2 launches.
 
+:::danger[🚨 What's at stake]
+Indexed ENS data is critical infrastructure for ENS — and the legacy ENS Subgraph is fundamentally unsuitable for ENSv2. When ENSv2 launches, that gap becomes breaking for many of ENS's most important apps.
+
+<LinkCard
+  title="Keep ENS apps working 🚨"
+  description="Much of the ENS ecosystem quietly relies on the Subgraph today, and risks going dark when ENSv2 launches."
+  href="/docs/integrate/ens-subgraph"
+/>
+<LinkCard
+  title="Overcome critical limitations of the ENS Subgraph 🚨"
+  description="Why the Subgraph falls short today, and breaks with ENSv2."
+  href="/docs/integrate/ens-subgraph/key-limitations"
+/>
+:::
+
+## ENSNode is built for ENSv2
+
 ENSNode is built around ENSv2 from the ground up. The same query works against an ENSv1 name today and an ENSv2 name the moment it goes live — with **zero downtime or code changes** in your app.
+
+:::tip[✅ Ready the moment ENSv2 launches]
+Adopt the ENS Omnigraph today and your app is ENSv2-ready before ENSv2 even ships — no rewrite, no scramble, no downtime.
 
 <LinkCard
   title="ENSv2 Readiness"
   description="What you need to do to prepare your app for ENSv2."
   href="/docs/integrate/why-ensnode/ensv2-readiness"
 />
+:::
 
-## One unified API over ENSv1 + ENSv2
+## How ENSNode delivers
 
-The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that returns a polymorphic, unified view of every ENS Domain — regardless of whether it lives in an ENSv1 Nametree, the ENSv2 Namegraph, on mainnet, or on an L2 subregistry such as base.eth subnames on Base.
+Three capabilities make ENSNode the foundation for ENSv2 apps:
+
+**One unified API over ENSv1 + ENSv2** — The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that returns a polymorphic, unified view of every ENS Domain — regardless of whether it lives in an ENSv1 Nametree, the ENSv2 Namegraph, on mainnet, or on an L2 subregistry such as base.eth subnames on Base. ENSv1 and ENSv2 coexist after the ENSv2 launch; your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of which protocol version the underlying domain is on.
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
-ENSv1 and ENSv2 coexist after the ENSv2 launch. The Omnigraph simplifies that split: your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of whether the underlying domain is on ENSv1 or ENSv2.
-
-## Multichain by default
-
-ENSNode provides the world's best indexing coverage for ENS, spanning every chain that matters, including:
+**Multichain by default** — ENSNode provides the world's best indexing coverage for ENS, spanning every chain that matters:
 
 - **Mainnet** — the canonical ENS root and `.eth` registrations
 - **Basenames** (`.base.eth`) on Base
@@ -38,32 +57,13 @@ ENSNode provides the world's best indexing coverage for ENS, spanning every chai
 
 No more wiring up a per-chain Subgraph, reconciling overlapping ENS Nametrees, or writing CCIP-Read logic in your app — ENSNode handles forward and reverse resolution, including offchain gateways, server-side.
 
-## Full-stack integration surfaces
+**Full-stack integration surfaces** — whatever your stack looks like, there's an ENSNode integration shaped for it: React, TypeScript, GraphQL, or direct Postgres access.
 
-Whatever your stack looks like, there's an ENSNode integration shaped for it.
-
-  <LinkCard
-    title="ENSNode integration options"
-    description="Explore the different ways to integrate with ENSNode based on your stack, runtime, and needs."
-    href="/docs/integrate/integration-options"
-  />
-
-## Why it matters beyond your app
-
-Indexed ENS data is critical infrastructure for ENS — and the legacy ENS Subgraph is fundamentally unsuitable for ENSv2. Closing that gap is required for many of ENS's most important apps.
-
-<CardGrid>
-  <LinkCard
-    title="Keep ENS apps working 🚨"
-    description="Much of the ENS ecosystem quietly relies on the Subgraph today, and risks going dark when ENSv2 launches."
-    href="/docs/integrate/ens-subgraph"
-  />
-  <LinkCard
-    title="Overcome critical limitations of the ENS Subgraph 🚨"
-    description="Why the Subgraph falls short today, and breaks with ENSv2."
-    href="/docs/integrate/ens-subgraph/key-limitations"
-  />
-</CardGrid>
+<LinkCard
+  title="ENSNode integration options"
+  description="Explore the different ways to integrate with ENSNode based on your stack, runtime, and needs."
+  href="/docs/integrate/integration-options"
+/>
 
 ## Join those already building on ENSNode
 

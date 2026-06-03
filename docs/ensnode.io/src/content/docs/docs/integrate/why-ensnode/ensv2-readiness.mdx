@@ -5,20 +5,31 @@ description: How building with ENSNode today prepares your application for ENSv2
 
 import { LinkCard, Aside } from "@astrojs/starlight/components";
 
-<Aside type="note" icon="approve-check-circle" title="Be ready!">
+<Aside type="tip" icon="approve-check-circle" title="Be ready!">
   Build with the **ENS Omnigraph** today and your app will support **ENSv2** the moment it launches
   — with zero downtime or code changes.
+
+  <LinkCard
+    title="ENS Omnigraph API"
+    href="/docs/integrate/omnigraph"
+    description="The ENSv2-ready, unified GraphQL API over both ENSv1 and ENSv2 — start here."
+  />
 </Aside>
 
 ## Historical limitations of building on ENS
 
-Full access to ENS data formerly required two separate data-fetching strategies working in parallel: **ENS resolution** (RPC calls with CCIP-Read, e.g. via `viem` or `wagmi`) and **indexed ENS data** (the ENS Subgraph). Neither system alone was complete — resolution is "close to the metal" and the Subgraph carries a long list of [Key Limitations](/docs/integrate/ens-subgraph/key-limitations). And **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
+Full access to ENS data formerly required two separate data-fetching strategies working in parallel: **ENS resolution** (RPC calls with CCIP-Read, e.g. via `viem` or `wagmi`) and **indexed ENS data** (the ENS Subgraph). Neither system alone was complete — resolution is "close to the metal" and the Subgraph carries a long list of [Key Limitations](/docs/integrate/ens-subgraph/key-limitations).
 
-<LinkCard
-  title="Key Limitations of the ENS Subgraph"
-  description="The full breakdown of what the Subgraph can't do — and why it breaks with ENSv2."
-  href="/docs/integrate/ens-subgraph/key-limitations"
-/>
+<Aside type="danger" title="🚨 It only gets harder with ENSv2">
+  **With ENSv2, the complexity of ENS's onchain state space meaningfully increases** — and the
+  Subgraph's limitations turn from inconveniences into breaking failures.
+
+  <LinkCard
+    title="Key Limitations of the ENS Subgraph 🚨"
+    description="The full breakdown of what the Subgraph can't do — and why it breaks with ENSv2."
+    href="/docs/integrate/ens-subgraph/key-limitations"
+  />
+</Aside>
 
 ## How ENSNode solves this
 

@@ -7,6 +7,16 @@ import { LinkCard } from "@astrojs/starlight/components";
 import UpgradeToOmnigraphRequiredTable from "@components/molecules/upgrade-to-omnigraph-required-table/index.astro";
 import ENSSubgraphDependentApp from "@components/molecules/upgrade-to-omnigraph-required-table/ENSSubgraphDependentApp.astro";
 
+:::danger[🚨 These apps go dark when ENSv2 launches]
+Hundreds of apps quietly read ENS data through the ENS Subgraph today. **The moment ENSv2 launches, the Subgraph stops being a reliable source of ENS data** — and every app that depends on it is at risk until it upgrades to the ENS Omnigraph API.
+
+<LinkCard
+  title="Key Limitations of the ENS Subgraph 🚨"
+  href="/docs/integrate/ens-subgraph/key-limitations"
+  description="The full list of ways the ENS Subgraph falls short today — and why each one breaks with ENSv2."
+/>
+:::
+
 ## The ENS Subgraph is not ENSv2 compatible
 
 Over the years, the ENS Subgraph quietly became one of the most depended-on pieces of infrastructure in ENS. An enormous swath of the ENS ecosystem — and much of the broader web3 / Ethereum ecosystem — reads ENS data through it, directly or indirectly.
@@ -326,18 +336,22 @@ A growing set of companies and apps have already moved onto ENSNode — [see who
 
 ## Next Steps
 
-Next, consider the key limitations of the legacy ENS Subgraph.
+:::danger[🚨 The problem only gets worse]
+Every one of the Subgraph's [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) turns from an inconvenience today into a breaking failure the moment ENSv2 launches. Staying on the Subgraph is not an option.
 
 <LinkCard
   href="/docs/integrate/ens-subgraph/key-limitations"
   title="Key Limitations of the Subgraph 🚨"
   description="The full list of ways the ENS Subgraph falls short — and gets worse with ENSv2."
 />
+:::
 
-Or, prepare your app or platform for ENSv2 by adopting ENSNode's Omnigraph API.
+:::tip[✅ The path forward: the ENS Omnigraph API]
+Prepare your app or platform for ENSv2 by adopting ENSNode's Omnigraph API — one unified, typed GraphQL API over **both ENSv1 and ENSv2**, multichain by default, with zero downtime or code changes when ENSv2 goes live.
 
 <LinkCard
   href="/docs/integrate/omnigraph"
   title="ENS Omnigraph API"
   description="The ENSv2-ready replacement. Start here for new integrations."
 />
+:::
