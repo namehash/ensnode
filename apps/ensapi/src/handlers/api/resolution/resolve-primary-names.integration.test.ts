@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts } from "@ensnode/integration-test-env/devnet";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 

@@ -8,14 +8,21 @@ import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-open
 import type {
   BeautifiedLabel,
   BeautifiedName,
+  BinanceAddress,
+  BitcoinAddress,
+  BitcoinCashAddress,
   ChainId,
   CoinType,
+  DogecoinAddress,
   DomainId,
+  Email,
   Hex,
   InterfaceId,
   InterpretedLabel,
   InterpretedName,
   JsonValue,
+  LitecoinAddress,
+  MonacoinAddress,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -26,6 +33,9 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
+  RippleAddress,
+  RootstockAddress,
+  SolanaAddress,
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
@@ -65,6 +75,16 @@ export type BuilderScalars = {
   BigInt: { Input: bigint; Output: bigint };
   JSON: { Input: JsonValue; Output: JsonValue };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
+  Email: { Input: Email; Output: Email };
+  BitcoinAddress: { Input: BitcoinAddress; Output: BitcoinAddress };
+  LitecoinAddress: { Input: LitecoinAddress; Output: LitecoinAddress };
+  DogecoinAddress: { Input: DogecoinAddress; Output: DogecoinAddress };
+  MonacoinAddress: { Input: MonacoinAddress; Output: MonacoinAddress };
+  RootstockAddress: { Input: RootstockAddress; Output: RootstockAddress };
+  RippleAddress: { Input: RippleAddress; Output: RippleAddress };
+  BitcoinCashAddress: { Input: BitcoinCashAddress; Output: BitcoinCashAddress };
+  BinanceAddress: { Input: BinanceAddress; Output: BinanceAddress };
+  SolanaAddress: { Input: SolanaAddress; Output: SolanaAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };

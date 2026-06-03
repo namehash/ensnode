@@ -22,8 +22,12 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { buildProfileSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/profile/build-profile-selection";
 import { toResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
-import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
+import {
+  buildRecordsSelectionFromResolveContainerInfo,
+  mergeRecordsSelections,
+} from "@/omnigraph-api/lib/resolution/records-selection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
@@ -197,23 +201,27 @@ DomainInterfaceRef.implement({
         const name = domain.canonicalName;
 
         if (!name || !isNormalizedName(name)) {
-          return { accelerate, canAccelerate, trace: null, records: null };
+          return { accelerate, canAccelerate, trace: null, result: null };
         }
 
-        const recordsSelection = buildRecordsSelectionFromResolveContainerInfo(info);
-        if (!recordsSelection) {
-          return { accelerate, canAccelerate, trace: null, records: null };
+        const selection = mergeRecordsSelections(
+          buildRecordsSelectionFromResolveContainerInfo(info),
+          buildProfileSelectionFromResolveContainerInfo(info),
+        );
+
+        if (!selection) {
+          return { accelerate, canAccelerate, trace: null, result: null };
         }
 
         const { trace, result } = await runWithTrace(() =>
-          resolveForward(name, recordsSelection, { accelerate, canAccelerate }),
+          resolveForward(name, selection, { accelerate, canAccelerate }),
         );
 
         return {
           accelerate,
           canAccelerate,
           trace,
-          records: toResolvedRecordsModel(name, result),
+          result: toResolvedRecordsModel(name, result),
         };
       },
     }),

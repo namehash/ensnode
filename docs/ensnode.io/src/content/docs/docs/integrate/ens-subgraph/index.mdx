@@ -1,6 +1,6 @@
 ---
 title: ENS Subgraph
-description: The ENS Subgraph quietly became critical infrastructure for ENS and the broader web3 ecosystem—and it cannot carry that ecosystem into ENSv2. Here's who depends on it, and what comes next.
+description: The ENS Subgraph quietly became critical infrastructure for ENS and the broader web3 ecosystem — and it cannot carry that ecosystem into ENSv2. Here's who depends on it, and what comes next.
 sidebar:
   label: Overview
   order: 1
@@ -11,6 +11,11 @@ import { LinkCard } from "@astrojs/starlight/components";
 :::danger[🚨 The ENS Subgraph is not ENSv2 compatible]
 The ENS Subgraph **fundamentally fails as a source of ENS data as soon as ENSv2 launches.**
 
+<LinkCard
+  title="Keep ENS apps working 🚨"
+  href="/docs/integrate/why-ensnode/keep-ens-working"
+  description="See apps currently set to break when ENSv2 launches unless they upgrade to the new ENS Omnigraph API."
+/>
 <LinkCard
   title="Key Limitations 🚨"
   href="/docs/integrate/ens-subgraph/key-limitations"
@@ -24,7 +29,7 @@ The [ENS Omnigraph API](/docs/integrate/omnigraph) is the ENSv2-ready replacemen
 <LinkCard
   href="/docs/integrate/omnigraph"
   title="ENS Omnigraph API"
-  description="ENSv2-ready unified GraphQL API over both ENSv1 and ENSv2—start here for new integrations."
+  description="ENSv2-ready unified GraphQL API over both ENSv1 and ENSv2 — start here for new integrations."
 />
 <LinkCard
   href="/docs/integrate/unigraph"
@@ -33,165 +38,12 @@ The [ENS Omnigraph API](/docs/integrate/omnigraph) is the ENSv2-ready replacemen
 />
 :::
 
-## The ENS Subgraph became critical infrastructure
+## ENSNode Subgraph compatibility
 
-Over the years, the ENS Subgraph quietly became one of the most depended-on pieces of infrastructure in ENS. An enormous swath of the ENS ecosystem—and much of the broader web3 / Ethereum ecosystem—reads ENS data through it, directly or indirectly.
-
-### Usage at scale
-
-The ENS Subgraph is a cornerstone of the current ENS architecture (ENSv1), handling an extraordinary volume of requests:
-
-- **Approx. 2 million average daily requests**
-- **Over 717 million requests annually**
-
-<figure>
-  <img src="/ens-subgraph-usage.png" alt="ENS Subgraph usage metrics showing daily query volume" />
-  <figcaption>
-    ENS Subgraph daily query volume following the transition to Graph Network hosting (June 20, 2024
-    onward)
-  </figcaption>
-</figure>
-
-This volume sets the floor: it's the minimum scale at which any replacement must operate.
-
-## Applications dependent on the ENS Subgraph
-
-The list below is a **partial** map of the projects and applications that depend on the ENS Subgraph for their functionality—directly, or indirectly through services like the ENS Metadata Service, ENSjs, or the Ethereum Comments Protocol. When ENSv2 launches, indexed ENS data must keep flowing to all of these, or they break.
-
-### Critical ENS Apps & Infrastructure
-
-- **[Official ENS Manager App](https://app.ens.domains/)**—the primary interface for ENS domain management.
-- **[ENS Metadata Service](https://github.com/ensdomains/ens-metadata-service)**—used by numerous downstream services including NFT marketplaces (OpenSea, Rarible), Rainbow Wallet, and Rotki.
-- **[ENSjs](https://github.com/ensdomains/ensjs)**—JavaScript library for ENS integration, used by many ENS-integrated applications.
-- **[ENS Test Environment](https://github.com/ensdomains/ens-test-env)**—testing framework for ENS development.
-- **[Linea Names](https://github.com/Consensys/linea-ens)**—primary management interface for `linea.eth` subnames on Linea.
-
-### ENS Registrars
-
-- **[Grails](https://grails.app/)**—by the [EthId Foundation](https://ethid.org/).
-- **[ENS Vision](https://ensvision.com/)**
-- **[OpenSea](https://opensea.io/)** and **[Rarible](https://rarible.com/)**—via their dependency on the ENS Metadata Service.
-- **[ENS Tools](https://ens.tools/)**
-- **[Snipe Zone](https://snipe.zone/)**
-- **[Nameful](https://github.com/blockful/nameful)**—by [Blockful](https://www.blockful.io/).
-
-### Wallets
-
-- **[Rainbow Wallet](https://rainbow.me/)**—mobile wallet and browser extension.
-- **[MyEtherWallet](https://www.myetherwallet.com/)**—Ethereum wallet.
-- **[Safe Transaction Service](https://github.com/safe-global/safe-transaction-service)**—by [Safe](https://safe.global/).
-
-### Chain Explorers
-
-- **[Blockscout](https://www.blockscout.com/)**—blockchain explorer platform.
-- **[EthVM](https://www.ethvm.com/)**—by [MyEtherWallet](https://www.myetherwallet.com/).
-- **[Cartesi Explorer](https://explorer.cartesi.io/)**—by [Cartesi](https://cartesi.io/).
-
-### DAO Infrastructure
-
-- **[Snapshot.js](https://github.com/snapshot-labs/snapshot.js)**—TypeScript library for Snapshot integration.
-- **[Snapshot](https://snapshot.box/)**—via [Stamp](https://github.com/snapshot-labs/stamp). This is a distinct integration from `snapshot.js`.
-- **[DAOStar](https://daostar.org/)**—by [Metagov](http://Metagov.org).
-- **[ENS Metadata Manager](https://ensmetadata.app/)**—by [Lighthouse](https://lighthouse.cx/) ([more info](https://discuss.ens.domains/t/kickoff-organizational-metadata-on-ens/21459/7?u=lightwalker.eth)).
-- **[Optimism GovQuests](https://op-govquests.vercel.app/)**—by [Bleu](https://bleu.builders/en).
-
-### ENS History Viewers
-
-- **[ENSvolution](https://www.ensvolution.xyz/?name=nick.eth)**—by [JustaName](https://www.justaname.id/).
-- **[PastENS](https://www.pastens.com/)**
-- **[Swiss Knife](https://swiss-knife.xyz/)**—by [apoorv.eth](https://x.com/apoorveth).
-- **[ENS Wayback Machine](https://wayback-machine.eth.limo/)**—by [Blossom](https://blossom.software/).
-
-### ENS Developer Tools
-
-- **[ENS Resolver](https://adraffy.github.io/ens-normalize.js/test/resolver.html)**—by [Andrew Raffensperger](https://raffy.antistupid.com/).
-- **[ENS Tools](https://tools.ens.xyz/)**—by [ENS Labs](https://www.enslabs.org/).
-- **[ENS Tools](https://github.com/ensdomains/ens-misctools)**—by Serenae.
-
-### ENS CLI Tools
-
-- **[Atlas](https://github.com/stevedylandev/atlas)**—by [Steve Dylan](https://x.com/stevedylandev).
-- **[Ensemble](https://github.com/estmcmxci/ensemble-beta)**—by [estmcmxci](https://x.com/estmcmxci).
-- **[Basenames CLI](https://github.com/estmcmxci/basenames-cli)**—by [estmcmxci](https://x.com/estmcmxci).
-- **[Grails CLI](https://github.com/grailsmarket/cli)**—by the [EthId Foundation](https://ethid.org/) (uses the Grails API, which uses ENSNode).
-
-### ENS MCP Servers
-
-- **[ENS MCP Service](https://github.com/thenamespace/ens-mcp)**—by [Namespace](https://www.namespace.ninja/).
-- **[ENS MCP Service](https://discuss.ens.domains/t/introducing-the-ens-mcp-server-bringing-ens-to-claude-and-other-ai-assistants/20347)**—by [JustaName](https://www.justaname.id/).
-- **[ENS MCP Service](https://github.com/kukapay/ens-mcp)**—by [Kukapay](https://github.com/kukapay).
-
-### ENS Avatar & Metadata Services
-
-- **[Stamp](https://github.com/snapshot-labs/stamp)**—by [Snapshot Labs](https://snapshot.box/).
-- **[ENS Metadata Flarecloud](https://github.com/ethereumidentitykit/ens-metadata-flarecloud)**—by the [EthId Foundation](https://ethid.org/).
-
-### ENS Contract Naming Platforms
-
-- **[Enscribe](https://www.enscribe.xyz/)**
-
-### Ethereum Libraries
-
-- **[safe-eth-py](https://github.com/safe-global/safe-eth-py)**—by [Safe](https://safe.global/).
-
-### ENS Social Media Services
-
-- **[ENS Market Bot](https://github.com/ethereumidentitykit/ens-market-bot)**—by the [EthId Foundation](https://ethid.org/).
-
-### AI Agents / x402 / Micropayments / Proof of Humanity
-
-- **[Skills](https://github.com/thenamespace/skills)**—by [Namespace](https://www.namespace.ninja/).
-- **[PrismOS](https://github.com/Koploseus/PrismOS)**
-- **[HumanENS](https://humanens.eth.limo/)** ([GitHub](https://github.com/z-purr/HumanENS))
-- **[nayym](https://nayym.xyz/)** ([GitHub](https://github.com/thisisommore/nayym-cli))
-
-### DeFi Applications
-
-- **[Rotki](https://rotki.com/)**—privacy-preserving portfolio tracking.
-
-### Social Applications
-
-- **[Ethereum Follow Protocol](https://efp.app/)**—onchain social graph protocol.
-- **[LinkChain](https://ns-assignment.vercel.app/)** ([GitHub](https://github.com/divi2806/ns-assignment))
-- **[Dapp Rank](https://dapprank.eth.link/)**—by [Joel Thorstensson](https://x.com/joelthorst).
-- **[Decentraland Builder](https://decentraland.org/builder/)** ([GitHub](https://github.com/decentraland/builder))—by [Decentraland](https://decentraland.org/).
-- **[Decentraland Creator Hub](https://decentraland.org/create)** ([GitHub](https://github.com/decentraland/creator-hub))—by [Decentraland](https://decentraland.org/).
-
-### Other Key Applications
-
-- **[ENSPro](https://enspro.xyz/)**—by NameStone.
-- **[ENSBook](https://github.com/hibbb/ensbook)**—by Liuliuben.
-- **[L2 Subnames](https://github.com/thenamespace/l2-subnames)**—by Namespace.
-- **[ENS Data](https://ensdata.net/)**—by Pugson.
-- **[ENS Ideas](https://github.com/frolic/ens-ideas)**—by Frolic.
-- **[Next.ID](https://next.id/)**—which also powers [Web3.bio](http://web3.bio/) (by Yan Zhu) and [Eth.cd](https://eth.cd/) (by Webhash / Hid).
-
-:::note[Help us expand this list]
-Do you know of other applications that rely on the ENS Subgraph that aren't listed here? Please [open a PR](https://github.com/namehash/ensnode) to update this documentation.
-:::
-
-## What this means
-
-The breadth of applications above shows that indexed ENS data is critical infrastructure for ENS and the broader ecosystem—and that there is large, proven demand for it today. When ENSv2 launches, the Subgraph's [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) become breaking for these apps. ENSNode exists to keep indexed ENS data flowing through the transition and beyond, with a robust, scalable, multichain, ENSv2-ready replacement.
-
-## Already building directly on ENSNode
-
-A growing set of companies and apps have already moved onto ENSNode and future-proofed their ENS applications—[see who's already building on ENSNode](/docs/integrate/why-ensnode#join-those-already-building-on-ensnode).
-
-## Next Steps
-
-Next, consider the key limitations of the legacy ENS Subgraph.
+ENSNode maintains a verified Subgraph-compatible API for migrating existing integrations from The Graph, but it is **not** the path forward for ENSv2.
 
 <LinkCard
-  href="/docs/integrate/ens-subgraph/key-limitations"
-  title="Key Limitations"
-  description="The full list of ways the ENS Subgraph falls short—and gets worse with ENSv2."
-/>
-
-Or, prepare your app or platform for ENSv2 by adopting ENSNode's Omnigraph API.
-
-<LinkCard
-  href="/docs/integrate/omnigraph"
-  title="ENS Omnigraph API"
-  description="The ENSv2-ready replacement. Start here for new integrations."
+  href="/docs/integrate/ens-subgraph/backwards-compatibility#ensnodes-backwards-compatibility-with-the-ens-subgraph"
+  title="ENSNode’s Backwards Compatibility with the ENS Subgraph"
+  description="A verified Subgraph-compatible GraphQL endpoint for migrating existing integrations to ENSNode."
 />

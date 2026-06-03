@@ -242,6 +242,21 @@ scalar BeautifiedName
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
+"""
+BinanceAddress represents a Bech32-encoded Binance Chain (BNB) address (coin type 714).
+"""
+scalar BinanceAddress
+
+"""
+BitcoinAddress represents a Base58Check-encoded Bitcoin address (coin type 0).
+"""
+scalar BitcoinAddress
+
+"""
+BitcoinCashAddress represents a CashAddr-encoded Bitcoin Cash address (coin type 145).
+"""
+scalar BitcoinCashAddress
+
 """A Canonical Name, exposed in each representation we support."""
 type CanonicalName {
   """
@@ -272,6 +287,11 @@ enum ChainName {
 
 """CoinType represents an enssdk#CoinType."""
 scalar CoinType
+
+"""
+DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
+"""
+scalar DogecoinAddress
 
 """
 Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
@@ -393,17 +413,35 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
-"""
-PREVIEW: An interpreted ENS profile for a name. Types are defined for query ergonomics; resolution is not yet wired.
-"""
+"""The interpreted profile of an ENS name."""
 type DomainProfile {
+  """The interpreted addresses on the profile of an ENS name."""
   addresses: ProfileAddresses
-  avatar: ProfileAvatar
-  banner: ProfileBanner
 
-  """The profile description, or null when unset."""
+  """
+  Interpreted avatar metadata. Returns null when the raw avatar record is unset or empty.
+  """
+  avatar: ProfileAvatar
+
+  """
+  The interpreted description on the profile of an ENS name, or null when unset.
+  """
   description: String
+
+  """
+  The interpreted email address on the profile of an ENS name, or null when unset or invalid.
+  """
+  email: Email
+
+  """
+  Interpreted header metadata. Returns null when the raw header record is unset or empty.
+  """
+  header: ProfileHeader
+
+  """The interpreted social accounts on the profile of an ENS name."""
   socials: ProfileSocials
+
+  """The interpreted website on the profile of an ENS name."""
   website: ProfileWebsite
 }
 
@@ -799,6 +837,9 @@ type ENSv2RegistryReservation implements Registration {
   unregistrant: Account
 }
 
+"""Email represents a validated contact email address."""
+scalar Email
+
 """
 An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.
 """
@@ -939,6 +980,11 @@ type ForwardResolve {
   acceleration: AccelerationStatus!
 
   """
+  The interpreted profile of an ENS name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).
+  """
+  profile: DomainProfile
+
+  """
   Resolved ENS records via the ENS protocol. Null when the name is not resolvable (non-canonical, unnormalized, or no records field was selected).
   """
   records: ResolvedRecords
@@ -986,6 +1032,16 @@ type Label {
   """
   interpreted: InterpretedLabel!
 }
+
+"""
+LitecoinAddress represents a Base58Check-encoded Litecoin address (coin type 2).
+"""
+scalar LitecoinAddress
+
+"""
+MonacoinAddress represents a Base58Check-encoded Monacoin address (coin type 22).
+"""
+scalar MonacoinAddress
 
 """Constructs a reference to a specific Node via one of `name` or `node`."""
 input NameOrNodeInput @oneOf {
@@ -1217,65 +1273,123 @@ input PrimaryNamesWhereInput @oneOf {
   coinTypes: [CoinType!]
 }
 
-"""
-PREVIEW: Interpreted address records on a Domain profile. Not yet resolved.
-"""
+"""The interpreted addresses on the profile of an ENS name."""
 type ProfileAddresses {
-  """The interpreted Base address, or null when unset."""
+  """
+  The interpreted Base address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   base: Address
 
-  """The interpreted Bitcoin address, or null when unset."""
-  bitcoin: String
+  """
+  The interpreted Binance Chain (BNB) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  binance: BinanceAddress
 
-  """The interpreted Ethereum address, or null when unset."""
+  """
+  The interpreted Bitcoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  bitcoin: BitcoinAddress
+
+  """
+  The interpreted Bitcoin Cash address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  bitcoincash: BitcoinCashAddress
+
+  """
+  The interpreted Dogecoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  dogecoin: DogecoinAddress
+
+  """
+  The interpreted Ethereum address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
   ethereum: Address
 
-  """The interpreted Solana address, or null when unset."""
-  solana: String
+  """
+  The interpreted Litecoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  litecoin: LitecoinAddress
+
+  """
+  The interpreted Monacoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  monacoin: MonacoinAddress
+
+  """
+  The interpreted Ripple (XRP) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  ripple: RippleAddress
+
+  """
+  The interpreted Rootstock (RBTC) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  rootstock: RootstockAddress
+
+  """
+  The interpreted Solana address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  solana: SolanaAddress
 }
 
-"""
-PREVIEW: Interpreted avatar metadata on a Domain profile. Not yet resolved.
-"""
+"""The interpreted avatar image on the profile of an ENS name."""
 type ProfileAvatar {
-  """The resolved avatar URL, or null when unset."""
-  url: String
+  """
+  HTTP-compatible URL for fetching the avatar image in web browsers. Abstraction over the raw avatar record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
+  """
+  httpUrl: String
 }
 
-"""
-PREVIEW: Interpreted banner metadata on a Domain profile. Not yet resolved.
-"""
-type ProfileBanner {
-  """The resolved banner URL, or null when unset."""
-  url: String
+"""The interpreted header image on the profile of an ENS name."""
+type ProfileHeader {
+  """
+  HTTP-compatible URL for fetching the header image in web browsers. Abstraction over the raw header record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
+  """
+  httpUrl: String
 }
 
-"""
-PREVIEW: An interpreted social account on a Domain profile. Not yet resolved.
-"""
+"""An interpreted social account on the profile of an ENS name."""
 type ProfileSocialAccount {
-  """The social handle, or null when unset."""
-  handle: String
+  """The handle of the social account."""
+  handle: String!
 
-  """The social profile URL, or null when unset."""
-  url: String
+  """The HTTP-compatible url to the social account."""
+  httpUrl: String!
 }
 
-"""
-PREVIEW: Interpreted social accounts on a Domain profile. Not yet resolved.
-"""
+"""The interpreted social accounts on the profile of an ENS name."""
 type ProfileSocials {
+  """
+  The interpreted GitHub account. Returns null when the raw record is unset, empty, or cannot be parsed as a GitHub handle or profile URL.
+  """
   github: ProfileSocialAccount
+
+  """
+  The interpreted Keybase account. Returns null when the raw record is unset, empty, or cannot be parsed as a Keybase handle or profile URL.
+  """
+  keybase: ProfileSocialAccount
+
+  """
+  The interpreted LinkedIn account. Returns null when the raw record is unset, empty, or cannot be parsed as a LinkedIn handle or profile URL.
+  """
+  linkedin: ProfileSocialAccount
+
+  """
+  The interpreted Telegram account. Returns null when the raw record is unset, empty, or cannot be parsed as a Telegram handle or profile URL.
+  """
   telegram: ProfileSocialAccount
+
+  """
+  The interpreted X (Twitter) account. Returns null when the raw record is unset, empty, or cannot be parsed as a X (Twitter) handle or profile URL.
+  """
   twitter: ProfileSocialAccount
 }
 
-"""
-PREVIEW: Interpreted website metadata on a Domain profile. Not yet resolved.
-"""
+"""The interpreted website on the profile of an ENS name."""
 type ProfileWebsite {
-  """The resolved website URL, or null when unset."""
-  url: String
+  """
+  The HTTP-compatible website URL. Returns null when the raw url record is unset, empty, not an http(s) URL, or cannot be parsed as a valid URL.
+  """
+  httpUrl: String
 }
 
 type Query {
@@ -1696,6 +1810,21 @@ type ReverseResolve {
   """
   trace: JSON!
 }
+
+"""
+RippleAddress represents a Base58Check-encoded Ripple (XRP) address (coin type 144).
+"""
+scalar RippleAddress
+
+"""
+RootstockAddress represents an EIP-55 checksummed Rootstock (RBTC) address (coin type 137).
+"""
+scalar RootstockAddress
+
+"""
+SolanaAddress represents a Base58-encoded Solana address (coin type 501).
+"""
+scalar SolanaAddress
 
 """Filter for Domain.subdomains query."""
 input SubdomainsWhereInput {
