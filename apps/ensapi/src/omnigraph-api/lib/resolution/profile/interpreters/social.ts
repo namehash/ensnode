@@ -1,4 +1,4 @@
-import type { ProfileFieldParser } from "./types";
+import type { ProfileFieldInterpreter } from "./types";
 
 export type SocialHandleResult = {
   handle: string;
@@ -77,17 +77,17 @@ export function parseSocialHandle({
   return { handle, httpUrl: httpUrl ?? `${baseUrl}/${handle}` };
 }
 
-const socialParser = (
+const socialInterpreter = (
   textKeys: string | readonly string[],
   hostnames: readonly string[],
   baseUrl: string,
   handlePattern: RegExp,
-): ProfileFieldParser<SocialHandleResult> => {
+): ProfileFieldInterpreter<SocialHandleResult> => {
   const keys = typeof textKeys === "string" ? [textKeys] : [...textKeys];
   const opts = { hostnames, baseUrl, handlePattern };
   return {
     selection: { texts: keys },
-    parse: (result) => {
+    interpret: (result) => {
       for (const key of keys) {
         const parsed = parseSocialHandle({ value: result.records.texts?.[key], ...opts });
         if (parsed !== null) return parsed;
@@ -97,46 +97,51 @@ const socialParser = (
   };
 };
 
-export const SocialGithubParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  ["com.github", "vnd.github"],
-  ["github.com", "www.github.com"],
-  "https://github.com",
-  /^[A-Za-z0-9_./-]+$/,
-);
+export const SocialGithubInterpreter: ProfileFieldInterpreter<SocialHandleResult> =
+  socialInterpreter(
+    ["com.github", "vnd.github"],
+    ["github.com", "www.github.com"],
+    "https://github.com",
+    /^[A-Za-z0-9_./-]+$/,
+  );
 
-export const SocialTwitterParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  ["com.x", "com.twitter", "vnd.twitter"],
-  ["twitter.com", "www.twitter.com", "x.com", "www.x.com"],
-  "https://x.com",
-  /^[A-Za-z0-9_]+$/,
-);
+export const SocialTwitterInterpreter: ProfileFieldInterpreter<SocialHandleResult> =
+  socialInterpreter(
+    ["com.x", "com.twitter", "vnd.twitter"],
+    ["twitter.com", "www.twitter.com", "x.com", "www.x.com"],
+    "https://x.com",
+    /^[A-Za-z0-9_]+$/,
+  );
 
-export const SocialTelegramParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  "org.telegram",
-  ["t.me", "telegram.me", "www.telegram.me", "www.t.me"],
-  "https://t.me",
-  /^[A-Za-z0-9_]+$/,
-);
+export const SocialTelegramInterpreter: ProfileFieldInterpreter<SocialHandleResult> =
+  socialInterpreter(
+    "org.telegram",
+    ["t.me", "telegram.me", "www.telegram.me", "www.t.me"],
+    "https://t.me",
+    /^[A-Za-z0-9_]+$/,
+  );
 
-export const SocialLinkedInParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  "com.linkedin",
-  ["linkedin.com", "www.linkedin.com"],
-  "https://www.linkedin.com/in",
-  /^[A-Za-z0-9_-]+$/,
-);
+export const SocialLinkedInInterpreter: ProfileFieldInterpreter<SocialHandleResult> =
+  socialInterpreter(
+    "com.linkedin",
+    ["linkedin.com", "www.linkedin.com"],
+    "https://www.linkedin.com/in",
+    /^[A-Za-z0-9_-]+$/,
+  );
 
-export const SocialKeybaseParser: ProfileFieldParser<SocialHandleResult> = socialParser(
-  "io.keybase",
-  ["keybase.io", "www.keybase.io"],
-  "https://keybase.io",
-  /^[A-Za-z0-9_]+$/,
-);
+export const SocialKeybaseInterpreter: ProfileFieldInterpreter<SocialHandleResult> =
+  socialInterpreter(
+    "io.keybase",
+    ["keybase.io", "www.keybase.io"],
+    "https://keybase.io",
+    /^[A-Za-z0-9_]+$/,
+  );
 
-/** All social parsers keyed by their GraphQL field name. */
-export const SOCIAL_PARSERS = {
-  github: SocialGithubParser,
-  twitter: SocialTwitterParser,
-  telegram: SocialTelegramParser,
-  linkedin: SocialLinkedInParser,
-  keybase: SocialKeybaseParser,
-} as const satisfies Record<string, ProfileFieldParser<SocialHandleResult>>;
+/** All social interpreters keyed by their GraphQL field name. */
+export const SOCIAL_INTERPRETERS = {
+  github: SocialGithubInterpreter,
+  twitter: SocialTwitterInterpreter,
+  telegram: SocialTelegramInterpreter,
+  linkedin: SocialLinkedInInterpreter,
+  keybase: SocialKeybaseInterpreter,
+} as const satisfies Record<string, ProfileFieldInterpreter<SocialHandleResult>>;

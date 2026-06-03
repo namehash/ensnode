@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  SocialGithubParser,
-  SocialKeybaseParser,
-  SocialLinkedInParser,
-  SocialTelegramParser,
-  SocialTwitterParser,
+  SocialGithubInterpreter,
+  SocialKeybaseInterpreter,
+  SocialLinkedInInterpreter,
+  SocialTelegramInterpreter,
+  SocialTwitterInterpreter,
 } from "./social";
 import { profileRecordsModel } from "./test-helpers";
-import type { ProfileFieldParser } from "./types";
+import type { ProfileFieldInterpreter } from "./types";
 
 type SocialResult = { handle: string; httpUrl: string };
 
 /**
- * Generates common test cases shared across social parsers:
+ * Generates common test cases shared across social interpreters:
  * bare handle, @-prefixed, leading/trailing whitespace.
  */
 function commonParseCases(
@@ -28,7 +28,7 @@ function commonParseCases(
 }
 
 /**
- * Generates common null-result test cases shared across social parsers.
+ * Generates common null-result test cases shared across social interpreters.
  */
 function commonNullCases(primaryKey: string): [label: string, texts: Record<string, string>][] {
   return [
@@ -54,9 +54,9 @@ function urlVariantCases(
   ];
 }
 
-function describeSocialParser(
+function describeSocialInterpreter(
   name: string,
-  parser: ProfileFieldParser<SocialResult>,
+  interpreter: ProfileFieldInterpreter<SocialResult>,
   primaryKey: string,
   {
     selection,
@@ -70,15 +70,15 @@ function describeSocialParser(
 ) {
   describe(name, () => {
     it("has correct selection", () => {
-      expect(parser.selection).toEqual(selection);
+      expect(interpreter.selection).toEqual(selection);
     });
 
-    it.each(parseCases)("parses %s", (_label, input, expected) => {
-      expect(parser.parse(profileRecordsModel({ [primaryKey]: input }))).toEqual(expected);
+    it.each(parseCases)("interprets %s", (_label, input, expected) => {
+      expect(interpreter.interpret(profileRecordsModel({ [primaryKey]: input }))).toEqual(expected);
     });
 
     it.each([...commonNullCases(primaryKey), ...nullCases])("returns null: %s", (_label, texts) => {
-      expect(parser.parse(profileRecordsModel(texts))).toBeNull();
+      expect(interpreter.interpret(profileRecordsModel(texts))).toBeNull();
     });
   });
 }
@@ -90,7 +90,7 @@ const EXPECTED_GITHUB: SocialResult = {
   httpUrl: "https://github.com/itslevchiks",
 };
 
-describeSocialParser("SocialGithubParser", SocialGithubParser, "com.github", {
+describeSocialInterpreter("SocialGithubInterpreter", SocialGithubInterpreter, "com.github", {
   selection: { texts: ["com.github", "vnd.github"] },
   parseCases: [
     ...commonParseCases("itslevchiks", EXPECTED_GITHUB),
@@ -143,7 +143,7 @@ const EXPECTED_TWITTER: SocialResult = {
   httpUrl: "https://x.com/itslevchiks",
 };
 
-describeSocialParser("SocialTwitterParser", SocialTwitterParser, "com.x", {
+describeSocialInterpreter("SocialTwitterInterpreter", SocialTwitterInterpreter, "com.x", {
   selection: { texts: ["com.x", "com.twitter", "vnd.twitter"] },
   parseCases: [
     ...commonParseCases("itslevchiks", EXPECTED_TWITTER),
@@ -171,7 +171,7 @@ const EXPECTED_TELEGRAM: SocialResult = {
   httpUrl: "https://t.me/itslevchiks",
 };
 
-describeSocialParser("SocialTelegramParser", SocialTelegramParser, "org.telegram", {
+describeSocialInterpreter("SocialTelegramInterpreter", SocialTelegramInterpreter, "org.telegram", {
   selection: { texts: ["org.telegram"] },
   parseCases: [
     ...commonParseCases("itslevchiks", EXPECTED_TELEGRAM),
@@ -194,7 +194,7 @@ const EXPECTED_LINKEDIN: SocialResult = {
   httpUrl: "https://www.linkedin.com/in/itslevchiks",
 };
 
-describeSocialParser("SocialLinkedInParser", SocialLinkedInParser, "com.linkedin", {
+describeSocialInterpreter("SocialLinkedInInterpreter", SocialLinkedInInterpreter, "com.linkedin", {
   selection: { texts: ["com.linkedin"] },
   parseCases: [
     ...commonParseCases("itslevchiks", EXPECTED_LINKEDIN),
@@ -220,7 +220,7 @@ const EXPECTED_KEYBASE: SocialResult = {
   httpUrl: "https://keybase.io/itslevchiks",
 };
 
-describeSocialParser("SocialKeybaseParser", SocialKeybaseParser, "io.keybase", {
+describeSocialInterpreter("SocialKeybaseInterpreter", SocialKeybaseInterpreter, "io.keybase", {
   selection: { texts: ["io.keybase"] },
   parseCases: [
     ...commonParseCases("itslevchiks", EXPECTED_KEYBASE),
@@ -234,16 +234,16 @@ describeSocialParser("SocialKeybaseParser", SocialKeybaseParser, "io.keybase", {
 
 // --- Fallback key tests ---
 
-describe("SocialGithubParser (vnd.github fallback)", () => {
+describe("SocialGithubInterpreter (vnd.github fallback)", () => {
   it("falls back to vnd.github when com.github is unset", () => {
-    expect(SocialGithubParser.parse(profileRecordsModel({ "vnd.github": "itslevchiks" }))).toEqual(
-      EXPECTED_GITHUB,
-    );
+    expect(
+      SocialGithubInterpreter.interpret(profileRecordsModel({ "vnd.github": "itslevchiks" })),
+    ).toEqual(EXPECTED_GITHUB);
   });
 
   it("prefers com.github over vnd.github", () => {
     expect(
-      SocialGithubParser.parse(
+      SocialGithubInterpreter.interpret(
         profileRecordsModel({ "com.github": "primary-user", "vnd.github": "legacy-user" }),
       ),
     ).toEqual({ handle: "primary-user", httpUrl: "https://github.com/primary-user" });
@@ -251,23 +251,23 @@ describe("SocialGithubParser (vnd.github fallback)", () => {
 
   it("falls back to vnd.github when com.github is empty", () => {
     expect(
-      SocialGithubParser.parse(
+      SocialGithubInterpreter.interpret(
         profileRecordsModel({ "com.github": "", "vnd.github": "legacy-user" }),
       ),
     ).toEqual({ handle: "legacy-user", httpUrl: "https://github.com/legacy-user" });
   });
 });
 
-describe("SocialTwitterParser (text key fallbacks)", () => {
+describe("SocialTwitterInterpreter (text key fallbacks)", () => {
   it("falls back to com.twitter when com.x is unset", () => {
     expect(
-      SocialTwitterParser.parse(profileRecordsModel({ "com.twitter": "itslevchiks" })),
+      SocialTwitterInterpreter.interpret(profileRecordsModel({ "com.twitter": "itslevchiks" })),
     ).toEqual(EXPECTED_TWITTER);
   });
 
   it("prefers com.x over com.twitter", () => {
     expect(
-      SocialTwitterParser.parse(
+      SocialTwitterInterpreter.interpret(
         profileRecordsModel({ "com.x": "primaryuser", "com.twitter": "legacyuser" }),
       ),
     ).toEqual({ handle: "primaryuser", httpUrl: "https://x.com/primaryuser" });
@@ -275,19 +275,21 @@ describe("SocialTwitterParser (text key fallbacks)", () => {
 
   it("falls back to com.twitter when com.x is empty", () => {
     expect(
-      SocialTwitterParser.parse(profileRecordsModel({ "com.x": "", "com.twitter": "legacyuser" })),
+      SocialTwitterInterpreter.interpret(
+        profileRecordsModel({ "com.x": "", "com.twitter": "legacyuser" }),
+      ),
     ).toEqual({ handle: "legacyuser", httpUrl: "https://x.com/legacyuser" });
   });
 
   it("falls back to vnd.twitter when com.x and com.twitter are unset", () => {
     expect(
-      SocialTwitterParser.parse(profileRecordsModel({ "vnd.twitter": "itslevchiks" })),
+      SocialTwitterInterpreter.interpret(profileRecordsModel({ "vnd.twitter": "itslevchiks" })),
     ).toEqual(EXPECTED_TWITTER);
   });
 
   it("prefers com.twitter over vnd.twitter", () => {
     expect(
-      SocialTwitterParser.parse(
+      SocialTwitterInterpreter.interpret(
         profileRecordsModel({ "com.twitter": "primaryuser", "vnd.twitter": "legacyuser" }),
       ),
     ).toEqual({ handle: "primaryuser", httpUrl: "https://x.com/primaryuser" });
@@ -295,7 +297,7 @@ describe("SocialTwitterParser (text key fallbacks)", () => {
 
   it("falls back to vnd.twitter when com.x and com.twitter are empty", () => {
     expect(
-      SocialTwitterParser.parse(
+      SocialTwitterInterpreter.interpret(
         profileRecordsModel({ "com.x": "", "com.twitter": "", "vnd.twitter": "legacyuser" }),
       ),
     ).toEqual({ handle: "legacyuser", httpUrl: "https://x.com/legacyuser" });

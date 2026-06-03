@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ProfileAvatarParser, ProfileHeaderParser } from "./images";
+import { ProfileAvatarInterpreter, ProfileHeaderInterpreter } from "./images";
 import { profileRecordsModel } from "./test-helpers";
 
 vi.mock("@/di", () => ({
@@ -11,9 +11,9 @@ vi.mock("@/di", () => ({
   },
 }));
 
-describe("ProfileAvatarParser", () => {
+describe("ProfileAvatarInterpreter", () => {
   it("has correct selection", () => {
-    expect(ProfileAvatarParser.selection).toEqual({ texts: ["avatar"] });
+    expect(ProfileAvatarInterpreter.selection).toEqual({ texts: ["avatar"] });
   });
 
   it.each([
@@ -38,20 +38,20 @@ describe("ProfileAvatarParser", () => {
       { httpUrl: "https://metadata.ens.domains/sepolia/avatar/test.eth" },
     ],
   ])("parses %s", (_message, texts, expected) => {
-    expect(ProfileAvatarParser.parse(profileRecordsModel(texts))).toEqual(expected);
+    expect(ProfileAvatarInterpreter.interpret(profileRecordsModel(texts))).toEqual(expected);
   });
 
   it.each([
     ["record unset", {}],
     ["empty string", { avatar: "" }],
   ])("returns null: %s", (_message, texts) => {
-    expect(ProfileAvatarParser.parse(profileRecordsModel(texts))).toBeNull();
+    expect(ProfileAvatarInterpreter.interpret(profileRecordsModel(texts))).toBeNull();
   });
 });
 
-describe("ProfileHeaderParser", () => {
+describe("ProfileHeaderInterpreter", () => {
   it("has correct selection", () => {
-    expect(ProfileHeaderParser.selection).toEqual({ texts: ["header"] });
+    expect(ProfileHeaderInterpreter.selection).toEqual({ texts: ["header"] });
   });
 
   it.each([
@@ -76,13 +76,13 @@ describe("ProfileHeaderParser", () => {
       { httpUrl: "https://metadata.ens.domains/sepolia/header/test.eth" },
     ],
   ])("parses %s", (_message, texts, expected) => {
-    expect(ProfileHeaderParser.parse(profileRecordsModel(texts))).toEqual(expected);
+    expect(ProfileHeaderInterpreter.interpret(profileRecordsModel(texts))).toEqual(expected);
   });
 
   it.each([
     ["record unset", {}],
     ["empty string", { header: "" }],
   ])("returns null: %s", (_message, texts) => {
-    expect(ProfileHeaderParser.parse(profileRecordsModel(texts))).toBeNull();
+    expect(ProfileHeaderInterpreter.interpret(profileRecordsModel(texts))).toBeNull();
   });
 });

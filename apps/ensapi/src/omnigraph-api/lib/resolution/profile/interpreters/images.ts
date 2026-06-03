@@ -3,7 +3,7 @@ import { type EnsMetadataImageRecord, getEnsMetadataServiceImageUrl } from "enss
 import di from "@/di";
 import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
 
-import type { ProfileFieldParser } from "./types";
+import type { ProfileFieldInterpreter } from "./types";
 
 export type ProfileImageResult = {
   httpUrl: string | null;
@@ -22,11 +22,11 @@ function parseDirectImageHttpUrl(raw: string): string | null {
   }
 }
 
-const buildImageParser = (
+const buildImageInterpreter = (
   record: EnsMetadataImageRecord,
-): ProfileFieldParser<ProfileImageResult> => ({
+): ProfileFieldInterpreter<ProfileImageResult> => ({
   selection: { texts: [record] },
-  parse: (result) => {
+  interpret: (result) => {
     const raw = result.records.texts?.[record]?.trim();
     if (!raw) return null;
 
@@ -37,10 +37,10 @@ const buildImageParser = (
   },
 });
 
-export const ProfileAvatarParser: ProfileFieldParser<ProfileImageResult> =
-  buildImageParser("avatar");
-export const ProfileHeaderParser: ProfileFieldParser<ProfileImageResult> =
-  buildImageParser("header");
+export const ProfileAvatarInterpreter: ProfileFieldInterpreter<ProfileImageResult> =
+  buildImageInterpreter("avatar");
+export const ProfileHeaderInterpreter: ProfileFieldInterpreter<ProfileImageResult> =
+  buildImageInterpreter("header");
 
 /**
  * Derives an HTTP-compatible profile image URL from a resolved records model.

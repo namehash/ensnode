@@ -1,10 +1,10 @@
 import type { Hex } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { ADDRESS_PARSERS } from "./addresses";
+import { ADDRESS_INTERPRETERS } from "./addresses";
 import { profileRecordsModel } from "./test-helpers";
 
-describe("ADDRESS_PARSERS", () => {
+describe("ADDRESS_INTERPRETERS", () => {
   it.each([
     [
       "ethereum",
@@ -74,10 +74,10 @@ describe("ADDRESS_PARSERS", () => {
       "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
     ],
   ] as const)("parses %s address", (field, coinType, raw, expected) => {
-    expect(ADDRESS_PARSERS[field].selection).toEqual({ addresses: [coinType] });
-    expect(ADDRESS_PARSERS[field].parse(profileRecordsModel({}, { [coinType]: raw }))).toBe(
-      expected,
-    );
+    expect(ADDRESS_INTERPRETERS[field].selection).toEqual({ addresses: [coinType] });
+    expect(
+      ADDRESS_INTERPRETERS[field].interpret(profileRecordsModel({}, { [coinType]: raw })),
+    ).toBe(expected);
   });
 
   it.each([
@@ -86,11 +86,11 @@ describe("ADDRESS_PARSERS", () => {
     ["0x sentinel", "0x"],
     ["non-hex value", "0xnot-hex"],
   ] as const)("returns null: %s (%s)", (_message, raw) => {
-    for (const [field, parser] of Object.entries(ADDRESS_PARSERS)) {
-      const coinType = parser.selection.addresses?.[0];
-      if (coinType == null) throw new Error(`Coin type not found for parser ${field}`);
+    for (const [field, interpreter] of Object.entries(ADDRESS_INTERPRETERS)) {
+      const coinType = interpreter.selection.addresses?.[0];
+      if (coinType == null) throw new Error(`Coin type not found for interpreter ${field}`);
       const model = raw === undefined ? {} : { [coinType]: raw as Hex };
-      expect(parser.parse(profileRecordsModel({}, model))).toBeNull();
+      expect(interpreter.interpret(profileRecordsModel({}, model))).toBeNull();
     }
   });
 });

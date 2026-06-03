@@ -8,14 +8,14 @@ import {
 } from "@/omnigraph-api/lib/resolution/records-selection";
 
 import {
-  ADDRESS_PARSERS,
-  ProfileAvatarParser,
-  ProfileDescriptionParser,
-  ProfileEmailParser,
-  ProfileHeaderParser,
-  ProfileWebsiteParser,
-  SOCIAL_PARSERS,
-} from "./parsers";
+  ADDRESS_INTERPRETERS,
+  ProfileAvatarInterpreter,
+  ProfileDescriptionInterpreter,
+  ProfileEmailInterpreter,
+  ProfileHeaderInterpreter,
+  ProfileWebsiteInterpreter,
+  SOCIAL_INTERPRETERS,
+} from "./interpreters";
 
 /** Collect all FieldNodes named `fieldName` within a set of parent FieldNodes. */
 function collectSubFieldNodes(
@@ -82,28 +82,28 @@ export function buildProfileSelectionFromResolveContainerInfo(
   const topLevelFields = collectChildFieldNames(profileNodes, info);
 
   if (topLevelFields.has("description")) {
-    merged = mergeRecordsSelections(merged, ProfileDescriptionParser.selection);
+    merged = mergeRecordsSelections(merged, ProfileDescriptionInterpreter.selection);
   }
   if (topLevelFields.has("avatar")) {
-    merged = mergeRecordsSelections(merged, ProfileAvatarParser.selection);
+    merged = mergeRecordsSelections(merged, ProfileAvatarInterpreter.selection);
   }
   if (topLevelFields.has("header")) {
-    merged = mergeRecordsSelections(merged, ProfileHeaderParser.selection);
+    merged = mergeRecordsSelections(merged, ProfileHeaderInterpreter.selection);
   }
   if (topLevelFields.has("website")) {
-    merged = mergeRecordsSelections(merged, ProfileWebsiteParser.selection);
+    merged = mergeRecordsSelections(merged, ProfileWebsiteInterpreter.selection);
   }
   if (topLevelFields.has("email")) {
-    merged = mergeRecordsSelections(merged, ProfileEmailParser.selection);
+    merged = mergeRecordsSelections(merged, ProfileEmailInterpreter.selection);
   }
 
   // 3. Walk socials sub-fields
   const socialsNodes = collectSubFieldNodes(profileNodes, "socials", info);
   if (socialsNodes.length > 0) {
     const socialFields = collectChildFieldNames(socialsNodes, info);
-    for (const [fieldName, parser] of Object.entries(SOCIAL_PARSERS)) {
+    for (const [fieldName, interpreter] of Object.entries(SOCIAL_INTERPRETERS)) {
       if (socialFields.has(fieldName)) {
-        merged = mergeRecordsSelections(merged, parser.selection);
+        merged = mergeRecordsSelections(merged, interpreter.selection);
       }
     }
   }
@@ -112,9 +112,9 @@ export function buildProfileSelectionFromResolveContainerInfo(
   const addressesNodes = collectSubFieldNodes(profileNodes, "addresses", info);
   if (addressesNodes.length > 0) {
     const addressFields = collectChildFieldNames(addressesNodes, info);
-    for (const [fieldName, parser] of Object.entries(ADDRESS_PARSERS)) {
+    for (const [fieldName, interpreter] of Object.entries(ADDRESS_INTERPRETERS)) {
       if (addressFields.has(fieldName)) {
-        merged = mergeRecordsSelections(merged, parser.selection);
+        merged = mergeRecordsSelections(merged, interpreter.selection);
       }
     }
   }

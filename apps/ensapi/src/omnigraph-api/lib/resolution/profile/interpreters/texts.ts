@@ -2,24 +2,25 @@ import type { Email } from "enssdk";
 
 import { makeEmailSchema } from "@ensnode/ensnode-sdk/internal";
 
-import type { ProfileFieldParser } from "./types";
+import type { ProfileFieldInterpreter } from "./types";
 
 const profileEmailSchema = makeEmailSchema("email text record");
 
-const textParser = (key: string): ProfileFieldParser<string> => ({
+const textInterpreter = (key: string): ProfileFieldInterpreter<string> => ({
   selection: { texts: [key] },
-  parse: (result) => {
+  interpret: (result) => {
     const raw = result.records.texts?.[key];
     if (raw == null || raw === "") return null;
     return raw;
   },
 });
 
-export const ProfileDescriptionParser: ProfileFieldParser<string> = textParser("description");
+export const ProfileDescriptionInterpreter: ProfileFieldInterpreter<string> =
+  textInterpreter("description");
 
-export const ProfileEmailParser: ProfileFieldParser<Email> = {
+export const ProfileEmailInterpreter: ProfileFieldInterpreter<Email> = {
   selection: { texts: ["email"] },
-  parse: (result) => {
+  interpret: (result) => {
     const raw = result.records.texts?.email?.trim();
     if (!raw) return null;
     const parsed = profileEmailSchema.safeParse(raw);
@@ -27,9 +28,9 @@ export const ProfileEmailParser: ProfileFieldParser<Email> = {
   },
 };
 
-const urlParser = (key: string): ProfileFieldParser<string> => ({
+const urlInterpreter = (key: string): ProfileFieldInterpreter<string> => ({
   selection: { texts: [key] },
-  parse: (result) => {
+  interpret: (result) => {
     const trimmed = result.records.texts?.[key]?.trim();
     if (!trimmed) return null;
     if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
@@ -45,4 +46,4 @@ const urlParser = (key: string): ProfileFieldParser<string> => ({
   },
 });
 
-export const ProfileWebsiteParser: ProfileFieldParser<string> = urlParser("url");
+export const ProfileWebsiteInterpreter: ProfileFieldInterpreter<string> = urlInterpreter("url");
