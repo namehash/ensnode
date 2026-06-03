@@ -17,7 +17,7 @@ Performing SQL queries on the ENS Unigraph requires that you have the `unigraph`
 
 ## Connect
 
-The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each ENSIndexer instance writes to its own **ENSIndexer Schema** (e.g. `ensindexer_0`); shared operational metadata lives in the `ensnode` schema.
+The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) instance writes to its own **ENSDb Writer Schema** (e.g. `ensindexer_0`). Each instance of [ENSDb Metadata Writer](/docs/services/ensdb/concepts/glossary#ensdb-metadata-writer) writes to a shared operational [metadata table](/docs/services/ensdb/concepts/glossary#ensnode-metadata-table) in the [`ensnode` schema](/docs/services/ensdb/concepts/glossary#ensnode-schema).
 
 <Tabs syncKey="unigraph-client">
   <TabItem label="SQL">
@@ -25,7 +25,7 @@ The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each
 psql postgresql://user:password@host:5432/ensdb_devnet
 ```
 
-Discover the available ENSIndexer Schemas:
+Discover the available ENSDb Writer Schemas:
 
 ```sql
 SELECT DISTINCT ens_indexer_schema_name
@@ -39,13 +39,13 @@ npm install @ensnode/ensdb-sdk
 ```
 
 :::note[ENSDb Reader]
-The `EnsDbReader` object enables you to build custom queries against the Unigraph data model in ENSDb. Use the `ensDb` field to build queries with the Drizzle ORM, and the `ensIndexerSchema` field to reference database objects (i.e. the Unigraph tables) within the [ENSIndexer Schema](/docs/services/ensdb/concepts/glossary#ensindexer-schema) in a type-safe way.
+The `EnsDbReader` object enables you to build custom queries against the Unigraph data model in ENSDb. Use the `ensDb` field to build queries with the Drizzle ORM, and the `ensIndexerSchema` field to reference database objects (i.e. the Unigraph tables) within the [ENSDb Writer Schema](/docs/services/ensdb/concepts/glossary#ensdb-writer-schema) in a type-safe way.
 :::
 
 ```typescript
 import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
-// Connect by providing a connection string and the ENSIndexer Schema Name to query
+// Connect by providing a connection string and the ENSDb Writer Schema Name to query
 const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
 const { ensDb, ensIndexerSchema } = ensDbReader;
 ```

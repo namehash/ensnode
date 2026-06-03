@@ -25,10 +25,10 @@ flowchart LR
         subgraph PostgreSQLServer["PostgreSQL Server instance"]
             ENSDb[(ENSDb instance)]
             NS(ENSNode Schema)
-            EIS(ENSIndexer Schema)
+            EWS(ENSDb Writer Schema)
 
             ENSDb -->|has| NS
-            ENSDb -->|has| EIS
+            ENSDb -->|has| EWS
         end
     end
 

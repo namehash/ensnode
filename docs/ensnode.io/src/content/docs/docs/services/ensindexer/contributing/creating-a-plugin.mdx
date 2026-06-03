@@ -28,7 +28,7 @@ ENSIndexer will only activate the ENSNode Plugins which you specify in the `PLUG
 
 Each ENSNode Plugin implemented in ENSIndexer is a standalone TypeScript module that can be developed and tested independently, while all ENSNode Plugins are deployed together as part of the single ENSIndexer service and activated via the `PLUGINS` environment variable. The ENSNode Plugin can define its own indexed data models and indexing logic. It must include two main files:
 
-- `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific onchain events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the relevant indexed data model inside the ENSIndexer Schema.
+- `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific onchain events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the relevant indexed data model inside the [ENSDb Writer Schema](/docs/services/ensdb/concepts/glossary#ensdb-writer-schema).
 - `plugin.ts`: This file defines the plugin itself, including its name, description, and any configuration options, like datasources to be used for specifying onchain contracts that will be indexed.
 
 ### Event handlers
