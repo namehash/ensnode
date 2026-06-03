@@ -56,7 +56,6 @@ const CORE_TYPES = [
   "DomainResolver",
   "Registry",
   "Permissions",
-  "Root",
   "ReverseResolve",
   "ForwardResolve",
   "ResolvedRecords",

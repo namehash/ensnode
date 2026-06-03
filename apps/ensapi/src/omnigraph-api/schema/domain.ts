@@ -279,7 +279,7 @@ DomainInterfaceRef.implement({
     // Domain.subdomains
     /////////////////////
     subdomains: t.connection({
-      description: "All Domains that are direct descendents of this Domain in the namegraph.",
+      description: "All Domains that are direct descendants of this Domain in the namegraph.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: SubdomainsWhereInput }),

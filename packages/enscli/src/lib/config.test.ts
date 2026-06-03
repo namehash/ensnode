@@ -8,7 +8,7 @@ let saved: Record<string, string | undefined>;
 
 beforeEach(() => {
   saved = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
-  for (const key of ENV_KEYS) delete process.env[key];
+  for (const key of ENV_KEYS) process.env[key] = "";
 });
 
 afterEach(() => {

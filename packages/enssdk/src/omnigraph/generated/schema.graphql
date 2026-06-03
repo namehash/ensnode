@@ -343,7 +343,7 @@ interface Domain {
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendents of this Domain in the namegraph.
+  All Domains that are direct descendants of this Domain in the namegraph.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -584,7 +584,7 @@ type ENSv1Domain implements Domain {
   rootRegistryOwner: Account
 
   """
-  All Domains that are direct descendents of this Domain in the namegraph.
+  All Domains that are direct descendants of this Domain in the namegraph.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -700,7 +700,7 @@ type ENSv2Domain implements Domain {
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendents of this Domain in the namegraph.
+  All Domains that are direct descendants of this Domain in the namegraph.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 

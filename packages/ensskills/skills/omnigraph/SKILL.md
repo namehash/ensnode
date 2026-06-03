@@ -97,7 +97,7 @@ _Represents a Domain, i.e. an individual Label within the ENS namegraph. It may 
 - registry: Registry! — The Registry under which this Domain exists.
 - resolve(accelerate: Boolean): ForwardResolve! — Resolve protocol-level data for this Domain.
 - resolver: DomainResolver! — Resolver relationship metadata for this Domain.
-- subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection — All Domains that are direct descendents of this Domain in the namegraph.
+- subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection — All Domains that are direct descendants of this Domain in the namegraph.
 - subregistry: Registry — The Registry this Domain declares as its Subregistry, if exists.
 
 #### DomainCanonical
