@@ -28,7 +28,7 @@ export const ProfileEmailInterpreter: ProfileFieldInterpreter<Email> = {
   },
 };
 
-const urlInterpreter = (key: string): ProfileFieldInterpreter<string> => ({
+const httpUrlInterpreter = (key: string): ProfileFieldInterpreter<string> => ({
   selection: { texts: [key] },
   interpret: (result) => {
     const trimmed = result.records.texts?.[key]?.trim();
@@ -46,4 +46,4 @@ const urlInterpreter = (key: string): ProfileFieldInterpreter<string> => ({
   },
 });
 
-export const ProfileWebsiteInterpreter: ProfileFieldInterpreter<string> = urlInterpreter("url");
+export const ProfileWebsiteInterpreter: ProfileFieldInterpreter<string> = httpUrlInterpreter("url");
