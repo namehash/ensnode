@@ -668,7 +668,7 @@ starlight-tabs ul[role="tablist"] {
 
 /* Radius + overflow live on the figure so the horizontal scrollbar inside
    <pre> gets clipped by the rounded shape instead of overlapping it. */
-.sl-markdown-content .expressive-code .frame:not(.not-content) {
+.sl-markdown-content .expressive-code .frame {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: none;
