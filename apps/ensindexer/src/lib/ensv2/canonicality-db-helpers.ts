@@ -11,6 +11,10 @@ import type {
   RegistryId,
 } from "enssdk";
 
+import {
+  CANONICAL_NAME_PREFIX_LENGTH,
+  truncateCanonicalNamePrefix,
+} from "@ensnode/ensdb-sdk/ensindexer-abstract";
 import { isRootRegistryId } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver, isBridgedTargetRegistry } from "@ensnode/ensnode-sdk/internal";
 
@@ -151,6 +155,7 @@ export async function ensureDomainInRegistry(
     await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({
       canonical: true,
       canonicalName,
+      __canonicalNamePrefix: truncateCanonicalNamePrefix(canonicalName),
       canonicalLabelHashPath,
       canonicalPath,
       canonicalDepth: canonicalLabelHashPath.length,
@@ -359,8 +364,9 @@ async function reconcileRegistryCanonicality(
 
 /**
  * Propagate a Label heal to every canonical Domain whose `canonicalLabelHashPath` contains
- * `labelHash`. Re-renders `canonical_name` by joining each path element to its current
- * `label.interpreted` value. `canonicalLabelHashPath` is head-first (root → leaf), but
+ * `labelHash`. Re-renders `canonical_name` (and its materialized `__canonical_name_prefix`) by
+ * joining each path element to its current `label.interpreted` value, computing the name once in a
+ * CTE so the `string_agg` isn't run twice. `canonicalLabelHashPath` is head-first (root → leaf), but
  * `canonicalName` is the standard leaf-first ENS string (e.g. "vitalik.eth"), so the
  * WITH ORDINALITY rows are joined in DESC ordinal order.
  *
@@ -376,14 +382,23 @@ export async function cascadeLabelHeal(
   labelHash: LabelHash,
 ): Promise<void> {
   await context.ensDb.sql.execute(sql`
-    UPDATE ${ensIndexerSchema.domain} AS d
-      SET canonical_name = (
-        SELECT string_agg(l.interpreted, '.' ORDER BY p.ord DESC)
-        FROM unnest(d.canonical_label_hash_path) WITH ORDINALITY AS p(lh, ord)
-        JOIN ${ensIndexerSchema.label} l ON l.label_hash = p.lh
-      )
+    WITH healed AS (
+      SELECT
+        d.id,
+        (
+          SELECT string_agg(l.interpreted, '.' ORDER BY p.ord DESC)
+          FROM unnest(d.canonical_label_hash_path) WITH ORDINALITY AS p(lh, ord)
+          JOIN ${ensIndexerSchema.label} l ON l.label_hash = p.lh
+        ) AS name
+      FROM ${ensIndexerSchema.domain} d
       WHERE d.canonical = true
-        AND d.canonical_label_hash_path @> ARRAY[${labelHash}]::text[];
+        AND d.canonical_label_hash_path @> ARRAY[${labelHash}]::text[]
+    )
+    UPDATE ${ensIndexerSchema.domain} AS d
+      SET canonical_name = h.name,
+          __canonical_name_prefix = left(h.name, ${CANONICAL_NAME_PREFIX_LENGTH})
+      FROM healed h
+      WHERE d.id = h.id;
   `);
 }
 
@@ -494,6 +509,7 @@ async function cascadeCanonicality(
     UPDATE ${ensIndexerSchema.domain} AS d
       SET canonical = ${nextCanonical},
           canonical_name = CASE WHEN ${nextCanonical} THEN dt.new_name ELSE NULL END,
+          __canonical_name_prefix = CASE WHEN ${nextCanonical} THEN left(dt.new_name, ${CANONICAL_NAME_PREFIX_LENGTH}) ELSE NULL END,
           canonical_label_hash_path = CASE WHEN ${nextCanonical} THEN dt.new_path ELSE NULL END,
           canonical_path = CASE WHEN ${nextCanonical} THEN dt.new_path_ids ELSE NULL END,
           canonical_depth = CASE WHEN ${nextCanonical} THEN array_length(dt.new_path, 1) ELSE NULL END,

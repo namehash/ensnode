@@ -65,7 +65,9 @@ const VERSION_TO_DOMAIN_TYPE: Record<
 function nameCondition(filter: typeof DomainsNameFilter.$inferInput): SQL {
   const { ensIndexerSchema } = di.context;
   if (filter.starts_with) {
-    return ilike(ensIndexerSchema.domain.canonicalName, `${filter.starts_with}%`);
+    // prefix / substring search runs against the materialized, length-capped prefix column (backed
+    // by its GIN trigram index); exact `eq`/`in` below stay on the full `canonicalName`.
+    return ilike(ensIndexerSchema.domain.__canonicalNamePrefix, `${filter.starts_with}%`);
   }
 
   if (filter.eq) {
