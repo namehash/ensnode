@@ -21,6 +21,28 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  */
 
 /**
+ * Materializes the latest Registration's sort keys onto the Domain row, if it exists.
+ *
+ * Preminted names (BaseRegistrar `registerOnly` on Basenames/Lineanames) have a Registration before
+ * their Domain row exists, and Ponder's `update` throws on an absent row. Such a Domain materializes
+ * these columns from its latest Registration when it's created (see ENSv1Registry NewOwner).
+ */
+async function materializeDomainLatestRegistration(
+  context: IndexingEngineContext,
+  domainId: DomainId,
+  values: Partial<
+    Pick<
+      typeof ensIndexerSchema.domain.$inferInsert,
+      "__latestRegistrationStart" | "__latestRegistrationExpiry"
+    >
+  >,
+) {
+  const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
+  if (!domain) return;
+  await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set(values);
+}
+
+/**
  * Gets the latest Registration for the provided `domainId`.
  */
 export async function getLatestRegistration(context: IndexingEngineContext, domainId: DomainId) {
@@ -58,8 +80,8 @@ export async function insertLatestRegistration(
     .values({ domainId, registrationIndex })
     .onConflictDoUpdate({ registrationIndex });
 
-  // materialize Domain.__latestRegistration*
-  await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({
+  // conditionally materialize Domain.__latestRegistration*
+  await materializeDomainLatestRegistration(context, domainId, {
     __latestRegistrationStart: values.start,
     __latestRegistrationExpiry: values.expiry ?? REGISTRATION_SORT_SENTINEL,
   });
@@ -86,10 +108,10 @@ export async function updateLatestRegistrationExpiry(
 ) {
   await context.ensDb.update(ensIndexerSchema.registration, { id: registrationId }).set({ expiry });
 
-  // materialize Domain.__latestRegistrationExpiry
-  await context.ensDb
-    .update(ensIndexerSchema.domain, { id: domainId })
-    .set({ __latestRegistrationExpiry: expiry ?? REGISTRATION_SORT_SENTINEL });
+  // conditionally materialize Domain.__latestRegistrationExpiry
+  await materializeDomainLatestRegistration(context, domainId, {
+    __latestRegistrationExpiry: expiry ?? REGISTRATION_SORT_SENTINEL,
+  });
 }
 
 /**
