@@ -849,10 +849,19 @@ starlight-tabs ul[role="tablist"] {
   font-style: italic;
 }
 
-/* 
-  Additional global styles for the .static-example class 
-  inside the Unigraph example 
+/*
+  Additional global styles for the .static-example class
+  inside the Unigraph example
 */
-.static-example starlight-tabs .expressive-code .frame > pre {
+.static-example starlight-tabs .expressive-code .frame > pre:not([data-language="bash"]) {
   border-radius: 12px;
+}
+
+/*
+  Make sure that code blocks inside asides are styled properly inside the static examples
+*/
+.static-example starlight-tabs .starlight-aside :not(pre) > code {
+  margin-block: -0.125rem;
+  padding: 0.125rem 0.375rem;
+  font-size: var(--sl-text-code-sm);
 }

@@ -1,0 +1,52 @@
+---
+import SqlResultTable from "@components/molecules/SqlResultTable.astro";
+import StaticExampleCodeSection from "@components/molecules/omnigraph-static-example/StaticExampleCodeSection.astro";
+import StaticExampleNote from "@components/molecules/omnigraph-static-example/StaticExampleNote.astro";
+import UnigraphExampleWrapper from "@components/molecules/unigraph-static-example/UnigraphExampleWrapper.astro";
+import UnigraphExampleSQLTab from "./UnigraphExampleSQLTab.astro";
+import UnigraphExampleEnsDbSdkTab from "./UnigraphExampleEnsDbSdkTab.astro";
+
+interface UnigraphExampleTabData {
+  codeSnippet: string;
+  result: Record<string, unknown> | Array<Record<string, unknown>>;
+  resultNote?: string;
+}
+
+interface Props {
+  sql: UnigraphExampleTabData;
+  ensDbSdk: UnigraphExampleTabData;
+}
+
+const { sql, ensDbSdk } = Astro.props;
+
+const defaultResultNote =
+  "Output matches a SQL response snapshot; live output depends on your ENSNode instance.";
+---
+
+<UnigraphExampleWrapper>
+  <UnigraphExampleSQLTab>
+    <div class="px-5">
+      <slot name="sql-tab-note" />
+    </div>
+
+    <StaticExampleCodeSection badge="SQL" lang="sql" code={sql.codeSnippet} />
+
+    <SqlResultTable rows={sql.result} />
+
+    <StaticExampleNote class="px-5 pb-5">{sql.resultNote ?? defaultResultNote}</StaticExampleNote>
+  </UnigraphExampleSQLTab>
+
+  <UnigraphExampleEnsDbSdkTab>
+    <div class="px-5">
+      <slot name="ensdb-sdk-tab-note" />
+    </div>
+
+    <StaticExampleCodeSection badge="TypeScript" lang="ts" code={ensDbSdk.codeSnippet} />
+
+    <SqlResultTable rows={ensDbSdk.result} />
+
+    <StaticExampleNote class="px-5 pb-5">
+      {ensDbSdk.resultNote ?? defaultResultNote}
+    </StaticExampleNote>
+  </UnigraphExampleEnsDbSdkTab>
+</UnigraphExampleWrapper>

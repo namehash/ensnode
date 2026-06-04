@@ -5,7 +5,24 @@ sidebar:
   label: Overview
 ---
 
-import { LinkCard, Tabs, TabItem } from "@astrojs/starlight/components";
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+import UnigraphExampleWrapper from "@components/molecules/unigraph-static-example/UnigraphExampleWrapper.astro";
+import UnigraphExampleSQLTab from "@components/molecules/unigraph-static-example/UnigraphExampleSQLTab.astro";
+import UnigraphExampleEnsDbSdkTab from "@components/molecules/unigraph-static-example/UnigraphExampleEnsDbSdkTab.astro";
+import StaticExampleCodeSection from "@components/molecules/omnigraph-static-example/StaticExampleCodeSection.astro";
+
+export const bashSQLConnectSnippet = `psql postgresql://user:password@host:5432/ensdb_devnet`;
+
+export const sqlDiscoverSnippet = `SELECT DISTINCT ens_indexer_schema_name
+FROM ensnode.metadata;`;
+
+export const tsConnectCodeSnippet = `import { EnsDbReader } from "@ensnode/ensdb-sdk";
+
+// Connect by providing a connection string and the ENSIndexer Schema Name to query
+const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const { ensDb, ensIndexerSchema } = ensDbReader;`;
+
+export const bashSdkInstallSnippet = `npm install @ensnode/ensdb-sdk`;
 
 These examples show the same queries two ways: in **raw SQL** (any PostgreSQL client, any language) and with the typed **[`@ensnode/ensdb-sdk`](https://www.npmjs.com/package/@ensnode/ensdb-sdk)** for TypeScript projects.
 
@@ -19,39 +36,32 @@ Performing SQL queries on the ENS Unigraph requires that you have the `unigraph`
 
 The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each ENSIndexer instance writes to its own **ENSIndexer Schema** (e.g. `ensindexer_0`); shared operational metadata lives in the `ensnode` schema.
 
-<Tabs syncKey="unigraph-client">
-  <TabItem label="SQL">
-```bash
-psql postgresql://user:password@host:5432/ensdb_devnet
-```
+<UnigraphExampleWrapper>
+  <UnigraphExampleSQLTab>
+    <div class="-mt-3">
+      <StaticExampleCodeSection lang="bash" code={bashSQLConnectSnippet} />
+    </div>
 
-Discover the available ENSIndexer Schemas:
+    <p class="p-5 pb-0">Discover the available ENSIndexer Schemas:</p>
 
-```sql
-SELECT DISTINCT ens_indexer_schema_name
-FROM ensnode.metadata;
-```
+    <StaticExampleCodeSection badge="SQL" lang="sql" code={sqlDiscoverSnippet} />
 
-  </TabItem>
-  <TabItem label="ensdb-sdk (TypeScript)">
-```bash
-npm install @ensnode/ensdb-sdk
-```
+  </UnigraphExampleSQLTab>
+  <UnigraphExampleEnsDbSdkTab>
+    <div class="-mt-3">
+      <StaticExampleCodeSection lang="bash" code={bashSdkInstallSnippet} />
+    </div>
+    
+    <div class="px-5 pt-5">
+      <Aside type="note" title="ENSDb Reader">
+        The `EnsDbReader` object enables you to build custom queries against the Unigraph data model in ENSDb. Use the `ensDb` field to build queries with the Drizzle ORM, and the `ensIndexerSchema` field to reference database objects (i.e. the Unigraph tables) within the [ENSIndexer Schema](/docs/services/ensdb/concepts/glossary#ensindexer-schema) in a type-safe way.
+      </Aside>
+    </div>
 
-:::note[ENSDb Reader]
-The `EnsDbReader` object enables you to build custom queries against the Unigraph data model in ENSDb. Use the `ensDb` field to build queries with the Drizzle ORM, and the `ensIndexerSchema` field to reference database objects (i.e. the Unigraph tables) within the [ENSIndexer Schema](/docs/services/ensdb/concepts/glossary#ensindexer-schema) in a type-safe way.
-:::
+    <StaticExampleCodeSection badge="TypeScript" lang="ts" code={tsConnectCodeSnippet} />
 
-```typescript
-import { EnsDbReader } from "@ensnode/ensdb-sdk";
-
-// Connect by providing a connection string and the ENSIndexer Schema Name to query
-const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
-const { ensDb, ensIndexerSchema } = ensDbReader;
-```
-
-  </TabItem>
-</Tabs>
+  </UnigraphExampleEnsDbSdkTab>
+</UnigraphExampleWrapper>
 
 ## Examples
 

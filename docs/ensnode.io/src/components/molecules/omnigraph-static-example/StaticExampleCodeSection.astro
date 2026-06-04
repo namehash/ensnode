@@ -4,7 +4,7 @@ import { Code } from "@astrojs/starlight/components";
 import { staticExampleCodeWrapClass, staticExampleSectionXClass } from "./constants";
 
 interface Props {
-  badge: string;
+  badge?: string;
   headingId?: string;
   code: string;
   lang: string;
@@ -18,11 +18,15 @@ const sectionClass = `border-b border-black/[0.05] pb-5 pt-3 dark:border-white/[
 ---
 
 <section class={sectionClass} {...headingId ? { "aria-labelledby": headingId } : {}}>
-  <div class="mb-2.5">
-    <span id={headingId} class={badgeClass}>
-      {badge}
-    </span>
-  </div>
+  {
+    badge && (
+      <div class="mb-2.5">
+        <span id={headingId} class={badgeClass}>
+          {badge}
+        </span>
+      </div>
+    )
+  }
   <div class={staticExampleCodeWrapClass}>
     <Code code={code} lang={lang} />
   </div>
