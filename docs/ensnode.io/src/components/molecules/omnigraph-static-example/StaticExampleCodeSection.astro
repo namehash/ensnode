@@ -16,7 +16,7 @@ const { badge, headingId, code, lang } = Astro.props;
 const sectionClass = `border-b border-black/[0.05] pb-5 pt-3 dark:border-white/[0.06] ${staticExampleSectionXClass}`;
 ---
 
-<section class={sectionClass} {...headingId ? { "aria-labelledby": headingId } : {}}>
+<section class={sectionClass} {...badge && headingId ? { "aria-labelledby": headingId } : {}}>
   {
     badge && (
       <div class="mb-2.5">
