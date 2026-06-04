@@ -82,7 +82,7 @@ query Namegraph {
 
 The **Unigraph** is the entire collection of these disjoint ENSv2 Namegraphs and multiple ENSv1 Nametables, combined together into a single unified data model using ENS Resolution semantics. Navigating the Unigraph from `"eth"` down to `"vitalik.eth"` and beyond looks identical regardless of whether the underlying entities are ENSv1 or ENSv2.
 
-The [`unigraph` plugin](/docs/services/ensindexer) in ENSIndexer is what builds this unified model. The Unigraph constructs two Namegraphs, one rooted at the ENSv1 Root Registry and another rooted at the ENSv2 Root Registry. It's also where multichain coverage lives: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are all stitched into the ENSv1 Namegraph.
+The `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins), implemented in [ENSIndexer](/docs/services/ensindexer), is what builds this unified model. The Unigraph constructs two Namegraphs, one rooted at the ENSv1 Root Registry and another rooted at the ENSv2 Root Registry. It also includes special support for unifying multiple ENSv1 Nametables across multiple chains into the unigraph, including: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`).
 
 ```mermaid
 flowchart TD

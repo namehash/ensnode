@@ -34,7 +34,7 @@ Performing SQL queries on the ENS Unigraph requires that you have the `unigraph`
 
 ## Connect
 
-The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each ENSIndexer instance writes to its own **ENSIndexer Schema** (e.g. `ensindexer_0`); shared operational metadata lives in the `ensnode` schema.
+The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) instance writes to its own **ENSDb Writer Schema** (e.g. `ensindexer_0`). Each instance of [ENSDb Metadata Writer](/docs/services/ensdb/concepts/glossary#ensdb-metadata-writer) writes to a shared operational [metadata table](/docs/services/ensdb/concepts/glossary#ensnode-metadata-table) in the [`ensnode` schema](/docs/services/ensdb/concepts/glossary#ensnode-schema).
 
 <UnigraphExampleWrapper>
   <UnigraphExampleSQLTab>
@@ -42,11 +42,12 @@ The Unigraph lives in [ENSDb](/docs/services/ensdb), a PostgreSQL database. Each
       <StaticExampleCodeSection lang="bash" code={bashSQLConnectSnippet} />
     </div>
 
-    <p class="p-5 pb-0">Discover the available ENSIndexer Schemas:</p>
+    <p class="p-5 pb-0">Discover the available ENSDb Writer Schemas:</p>
 
     <StaticExampleCodeSection badge="SQL" lang="sql" code={sqlDiscoverSnippet} />
 
   </UnigraphExampleSQLTab>
+
   <UnigraphExampleEnsDbSdkTab>
     <div class="-mt-3">
       <StaticExampleCodeSection lang="bash" code={bashSdkInstallSnippet} />
