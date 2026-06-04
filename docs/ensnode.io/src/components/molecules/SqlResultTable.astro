@@ -31,9 +31,9 @@ function formatCell(value: unknown): string {
       {
         data.map((row, i) => (
           <tr>
-            <td class="sql-result-rownum">
+            <th scope="row" class="sql-result-rownum">
               <span class="sql-result-rownum-label">{i + 1}</span>
-            </td>
+            </th>
             {columns.map((col) => {
               const value = row[col];
               const text = formatCell(value);
