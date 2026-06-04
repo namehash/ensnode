@@ -60,17 +60,17 @@ Performing SQL queries on the ENS Unigraph requires that you have the `unigraph`
 Fetch a Domain by its canonical name. Because `canonical_name` is materialized across both ENSv1 and ENSv2, the same lookup works regardless of protocol version. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 :::tip[Searching vs. displaying]
-A `canonical_name` can be very long, but it's the full, correct name — always **select and display `canonical_name`**. When you need to **search** by prefix (`LIKE 'vit%'`), match against the materialized `__canonical_name_prefix` column (the first 64 code points of `canonical_name`, backed by a GIN trigram index) so the `LIKE` filter is index-backed:
+A `canonical_name` can be very long, but it's the full, correct name — always **select and display `canonical_name`**. When you need to **search** by prefix (`ILIKE 'vit%'`, case-insensitive to match the Omnigraph `starts_with` filter), match against the materialized `__canonical_name_prefix` column (the first 64 code points of `canonical_name`, backed by a GIN trigram index) so the `ILIKE` filter is index-backed:
 
 ```sql
 SELECT id, type, canonical_name, canonical_node, owner_id
 FROM ensindexer_0.domains
-WHERE __canonical_name_prefix LIKE 'vit%'
+WHERE __canonical_name_prefix ILIKE 'vit%'
 ORDER BY __canonical_name_prefix
 LIMIT 10;
 ```
 
-The `SELECT` still returns `canonical_name`; only the `LIKE` / `ORDER BY` use the prefix. The GIN trigram index backs the `LIKE` filter; the `ORDER BY` then sorts the matched set (cheap under a small `LIMIT`) — scope the query by `registry_id` to use the `(registry_id, __canonical_name_prefix, id)` btree for fully index-backed ordering. For exact matches, use `canonical_name` directly (`canonical_name = 'vitalik.eth'`).
+The `SELECT` still returns `canonical_name`; only the `ILIKE` / `ORDER BY` use the prefix. The GIN trigram index backs the `ILIKE` filter; the `ORDER BY` then sorts the matched set (cheap under a small `LIMIT`) — scope the query by `registry_id` to use the `(registry_id, __canonical_name_prefix, id)` btree for fully index-backed ordering. For exact matches, use `canonical_name` directly (`canonical_name = 'vitalik.eth'`).
 :::
 
 :::note[Canonical fields]
