@@ -275,7 +275,8 @@ export const CANONICAL_NAME_PREFIX_LENGTH = 64;
  * write paths in `canonicality-db-helpers.ts`.
  */
 export function truncateCanonicalNamePrefix(name: Name | null): Name | null {
-  return name === null ? null : [...name].slice(0, CANONICAL_NAME_PREFIX_LENGTH).join("");
+  if (name === null) return null;
+  return [...name].slice(0, CANONICAL_NAME_PREFIX_LENGTH).join("");
 }
 
 export const domain = onchainTable(
@@ -378,10 +379,10 @@ export const domain = onchainTable(
     // `WHERE registry_id = X` lookups via prefix scan.
     byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
 
-    // composite for `WHERE registry_id = X ORDER BY __canonical_name_prefix LIMIT N`
-    // (Domain.subdomains and other find-domains queries when ordering by NAME). Orders by the
-    // materialized, length-capped prefix column so callers ORDER BY the plain column (no
-    // `left(...)` expression to replicate) and the index tuple stays under btree's per-tuple max.
+    // composite for `WHERE registry_id = X ORDER BY __canonical_name_prefix LIMIT N` (Domain.subdomains
+    // and other find-domains queries when ordering by NAME). The length-capped prefix keeps the
+    // index tuple under btree's per-tuple max (~2712 bytes); 64 code points × max 4-byte UTF-8 =
+    // 256 bytes, leaving ample room for the registry_id and id columns.
     byRegistryAndCanonicalNamePrefix: index().on(t.registryId, t.__canonicalNamePrefix, t.id),
 
     // hash index avoids the btree 8191-byte row-size hazard for spam names

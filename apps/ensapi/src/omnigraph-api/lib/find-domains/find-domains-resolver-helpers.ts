@@ -1,24 +1,9 @@
 import { asc, desc, type SQL, sql } from "drizzle-orm";
 
-import { truncateCanonicalNamePrefix } from "@ensnode/ensdb-sdk/ensindexer-abstract";
-
 import di from "@/di";
 import type { DomainCursor } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
-
-/**
- * Truncate a `canonicalName` to the materialized `__canonical_name_prefix` length when writing the
- * `DomainCursor.value` of NAME orderings. Pre-truncating once at encode time keeps the encoded
- * cursor small (long names hit thousands of characters) and lets `cursorFilter` compare directly
- * against the `__canonical_name_prefix` column with no per-row `left(...)`.
- *
- * Delegates to {@link truncateCanonicalNamePrefix} so the cursor prefix is byte-identical to the
- * column the NAME index sorts on.
- */
-export function truncateNameForCursor(name: string | null): string | null {
-  return truncateCanonicalNamePrefix(name);
-}
 
 /**
  * The order column / expression for each `DomainsOrderBy` value.
@@ -94,8 +79,6 @@ export function cursorFilter(
   const value = (() => {
     switch (cursor.by) {
       case "NAME":
-        // Already pre-truncated at encode time (see `truncateNameForCursor`), so this matches the
-        // `__canonical_name_prefix` column the NAME order sorts on directly.
         return sql`${cursor.value}::text`;
       case "DEPTH":
         return sql`${cursor.value}::int`;

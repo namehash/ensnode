@@ -3,6 +3,8 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, ilike, inArray, type SQL, sql } from "drizzle-orm";
 import type { NormalizedAddress, RegistryId } from "enssdk";
 
+import { truncateCanonicalNamePrefix } from "@ensnode/ensdb-sdk/ensindexer-abstract";
+
 import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
@@ -11,7 +13,6 @@ import { DomainCursors } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import {
   cursorFilter,
   orderFindDomains,
-  truncateNameForCursor,
 } from "@/omnigraph-api/lib/find-domains/find-domains-resolver-helpers";
 import type { DomainOrderValue } from "@/omnigraph-api/lib/find-domains/types";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
@@ -65,8 +66,6 @@ const VERSION_TO_DOMAIN_TYPE: Record<
 function nameCondition(filter: typeof DomainsNameFilter.$inferInput): SQL {
   const { ensIndexerSchema } = di.context;
   if (filter.starts_with) {
-    // prefix / substring search runs against the materialized, length-capped prefix column (backed
-    // by its GIN trigram index); exact `eq`/`in` below stay on the full `canonicalName`.
     return ilike(ensIndexerSchema.domain.__canonicalNamePrefix, `${filter.starts_with}%`);
   }
 
@@ -257,7 +256,7 @@ export function resolveFindDomains(
             const __orderValue: DomainOrderValue = (() => {
               switch (orderBy) {
                 case "NAME":
-                  return truncateNameForCursor(domain.canonicalName);
+                  return truncateCanonicalNamePrefix(domain.canonicalName);
                 case "DEPTH":
                   return domain.canonicalDepth;
                 case "REGISTRATION_TIMESTAMP":

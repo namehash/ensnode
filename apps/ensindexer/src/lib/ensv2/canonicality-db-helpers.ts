@@ -382,7 +382,7 @@ export async function cascadeLabelHeal(
   labelHash: LabelHash,
 ): Promise<void> {
   await context.ensDb.sql.execute(sql`
-    WITH healed AS (
+    WITH canonical_name AS (
       SELECT
         d.id,
         (
@@ -395,10 +395,10 @@ export async function cascadeLabelHeal(
         AND d.canonical_label_hash_path @> ARRAY[${labelHash}]::text[]
     )
     UPDATE ${ensIndexerSchema.domain} AS d
-      SET canonical_name = h.name,
-          __canonical_name_prefix = left(h.name, ${CANONICAL_NAME_PREFIX_LENGTH})
-      FROM healed h
-      WHERE d.id = h.id;
+      SET canonical_name = canonical_name.name,
+          __canonical_name_prefix = left(canonical_name.name, ${CANONICAL_NAME_PREFIX_LENGTH})
+      FROM canonical_name
+      WHERE d.id = canonical_name.id;
   `);
 }
 
