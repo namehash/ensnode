@@ -14,6 +14,7 @@ export function buildPublicClient(
     chain: getENSRootChain(namespace),
     batch: {
       multicall: {
+        // bytes per batch; default is 1024
         batchSize: 2048,
       },
     },
