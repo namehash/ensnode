@@ -3,8 +3,6 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, ilike, inArray, type SQL, sql } from "drizzle-orm";
 import type { NormalizedAddress, RegistryId } from "enssdk";
 
-import { truncateCanonicalNamePrefix } from "@ensnode/ensdb-sdk/ensindexer-abstract";
-
 import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
@@ -256,7 +254,7 @@ export function resolveFindDomains(
             const __orderValue: DomainOrderValue = (() => {
               switch (orderBy) {
                 case "NAME":
-                  return truncateCanonicalNamePrefix(domain.canonicalName);
+                  return domain.__canonicalNamePrefix;
                 case "DEPTH":
                   return domain.canonicalDepth;
                 case "REGISTRATION_TIMESTAMP":
