@@ -258,6 +258,18 @@ export const relations_registry = relations(registry, ({ one, many }) => ({
 // Domains
 ///////////
 
+/**
+ * Sentinel "+∞" sort value materialized into `Domain.__latestRegistrationStart` /
+ * `__latestRegistrationExpiry` when the value is absent — a Domain with no Registration, or a
+ * Registration that never expires. Holding those sort columns NOT NULL (absent → this sentinel)
+ * lets REGISTRATION_*-ordered find-domains queries use a plain `(registry_id, col, id)` composite
+ * index in both directions with a plain keyset tuple, with no NULL-placement special casing.
+ *
+ * @dev uint256 max — larger than every real timestamp/expiry, including the uint64-max ENSv2
+ * "never expires" expiry. It sorts last for ASC ("oldest"/"expiring soonest") and first for DESC.
+ */
+export const REGISTRATION_SORT_SENTINEL = 2n ** 256n - 1n;
+
 export const domainType = onchainEnum("DomainType", ["ENSv1Domain", "ENSv2Domain"]);
 
 export const domain = onchainTable(
@@ -335,6 +347,30 @@ export const domain = onchainTable(
      */
     canonicalNode: t.hex().$type<Node>(),
 
+    /**
+     * Materialized `start` of this Domain's latest Registration, or {@link REGISTRATION_SORT_SENTINEL}
+     * when the Domain has no Registration. Mirror of the latest `registration.start` (see
+     * `latestRegistrationIndex`), maintained inline by `registration-db-helpers.ts`.
+     *
+     * @dev Exists purely so REGISTRATION_TIMESTAMP-ordered find-domains queries can use the
+     * `(registry_id, __latest_registration_start, id)` composite index instead of joining through
+     * `latest_registration_indexes` → `registrations` and sorting. Held NOT NULL (absent → sentinel)
+     * so the keyset stays a plain tuple compare with no NULL-placement special casing; see
+     * find-domains-resolver-helpers.ts. Double-underscore prefix marks it as an internal
+     * materialized mirror, not part of the on-chain protocol surface; the canonical (possibly null)
+     * value lives on the Registration entity.
+     */
+    __latestRegistrationStart: t.bigint().notNull().default(REGISTRATION_SORT_SENTINEL),
+
+    /**
+     * Materialized `expiry` of this Domain's latest Registration, or {@link REGISTRATION_SORT_SENTINEL}
+     * when the Domain has no Registration or its latest Registration never expires (effectively +∞).
+     * Mirror of the latest `registration.expiry`, maintained inline by `registration-db-helpers.ts`.
+     *
+     * @dev See `__latestRegistrationStart`. Backs REGISTRATION_EXPIRY-ordered queries.
+     */
+    __latestRegistrationExpiry: t.bigint().notNull().default(REGISTRATION_SORT_SENTINEL),
+
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
   (t) => ({
@@ -371,6 +407,24 @@ export const domain = onchainTable(
     byCanonicalNode: index().using("hash", t.canonicalNode),
     // btree for ORDER BY canonical_depth (typeahead and DEPTH-ordered browse)
     byCanonicalDepth: index().on(t.canonicalDepth),
+
+    // Composites for `WHERE registry_id = X ORDER BY <latest registration value> LIMIT N`
+    // (REGISTRATION_TIMESTAMP / REGISTRATION_EXPIRY ordering in find-domains queries). The latest
+    // registration's start/expiry is mirrored onto the Domain row (see `__latestRegistration*`) so
+    // the order is an index-ordered scan, not a join through `latest_registration_indexes` →
+    // `registrations` followed by a sort. The columns are NOT NULL (absent → `REGISTRATION_SORT_SENTINEL`),
+    // so a single plain composite per column serves both ASC and DESC (forward / backward scan) with
+    // a plain keyset tuple — see find-domains-resolver-helpers.ts.
+    byRegistryAndLatestRegistrationStart: index().on(
+      t.registryId,
+      t.__latestRegistrationStart,
+      t.id,
+    ),
+    byRegistryAndLatestRegistrationExpiry: index().on(
+      t.registryId,
+      t.__latestRegistrationExpiry,
+      t.id,
+    ),
   }),
 );
 

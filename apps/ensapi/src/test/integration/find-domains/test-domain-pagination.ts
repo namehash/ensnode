@@ -58,22 +58,37 @@ function assertOrdering(
 ) {
   const values = domains.map((n) => getSortValue(n, by));
 
+  // Registration orderings use SQL-default NULL placement (ASC → last, DESC → first); NAME/DEPTH
+  // keep NULLS LAST in both directions. See find-domains-resolver-helpers.ts.
+  const nullsFirst =
+    (by === "REGISTRATION_TIMESTAMP" || by === "REGISTRATION_EXPIRY") && dir === "DESC";
+
   for (let i = 0; i < values.length - 1; i++) {
     const a = values[i];
     const b = values[i + 1];
 
-    // nulls sort last regardless of direction
-    if (a === null) {
-      // a is null => b must also be null (everything after should be null)
-      expect(
-        b,
-        `expected null at index ${i + 1} because index ${i} was null (nulls last)`,
-      ).toBeNull();
-      continue;
-    }
-    if (b === null) {
+    if (nullsFirst) {
+      // nulls first: a non-null must not be followed by a null
+      if (b === null) {
+        expect(
+          a,
+          `expected null at index ${i} because index ${i + 1} was null (nulls first)`,
+        ).toBeNull();
+        continue;
+      }
+      // a is null, b is non-null => fine (null sorts first)
+      if (a === null) continue;
+    } else {
+      // nulls last: a null must be followed only by nulls
+      if (a === null) {
+        expect(
+          b,
+          `expected null at index ${i + 1} because index ${i} was null (nulls last)`,
+        ).toBeNull();
+        continue;
+      }
       // a is non-null, b is null => fine (null sorts last)
-      continue;
+      if (b === null) continue;
     }
 
     if (by === "NAME") {

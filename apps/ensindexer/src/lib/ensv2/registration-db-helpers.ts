@@ -1,5 +1,7 @@
 import { type DomainId, makeRegistrationId, makeRenewalId } from "enssdk";
 
+import { REGISTRATION_SORT_SENTINEL } from "@ensnode/ensdb-sdk/ensindexer-abstract";
+
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
@@ -55,6 +57,39 @@ export async function insertLatestRegistration(
     .insert(ensIndexerSchema.latestRegistrationIndex)
     .values({ domainId, registrationIndex })
     .onConflictDoUpdate({ registrationIndex });
+
+  // materialize Domain.__latestRegistration* (absent expiry → sentinel; columns are NOT NULL)
+  await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({
+    __latestRegistrationStart: values.start,
+    __latestRegistrationExpiry: values.expiry ?? REGISTRATION_SORT_SENTINEL,
+  });
+}
+
+/**
+ * Updates the expiry of a Domain's latest Registration.
+ *
+ * @dev materializes Domain.__latestRegistrationExpiry
+ * @dev callers MUST pass the Domain's _latest_ Registration; we don't validate that the provided
+ *      `registrationId` is actually the latest
+ */
+export async function updateLatestRegistrationExpiry(
+  context: IndexingEngineContext,
+  {
+    domainId,
+    registrationId,
+    expiry,
+  }: {
+    domainId: DomainId;
+    registrationId: ReturnType<typeof makeRegistrationId>;
+    expiry: bigint | null;
+  },
+) {
+  await context.ensDb.update(ensIndexerSchema.registration, { id: registrationId }).set({ expiry });
+
+  // mirror onto the Domain sort column (absent expiry → sentinel; column is NOT NULL)
+  await context.ensDb
+    .update(ensIndexerSchema.domain, { id: domainId })
+    .set({ __latestRegistrationExpiry: expiry ?? REGISTRATION_SORT_SENTINEL });
 }
 
 /**

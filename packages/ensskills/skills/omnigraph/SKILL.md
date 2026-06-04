@@ -444,6 +444,41 @@ Variables:
 }
 ```
 
+### domain-subdomains-recently-registered
+
+```graphql
+query RecentlyRegisteredSubdomains($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    canonical {
+      name {
+        interpreted
+        beautified
+      }
+    }
+    subdomains(first: 10, order: { by: REGISTRATION_TIMESTAMP, dir: DESC }) {
+      edges {
+        node {
+          canonical {
+            name {
+              interpreted
+              beautified
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "eth"
+}
+```
+
 ### subdomains-pagination
 
 ```graphql

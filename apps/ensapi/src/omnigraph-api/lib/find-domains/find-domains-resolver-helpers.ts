@@ -58,10 +58,23 @@ function getOrderColumn(orderBy: typeof DomainsOrderBy.$inferType): SQL {
     case "DEPTH":
       return sql`${ensIndexerSchema.domain.canonicalDepth}`;
     case "REGISTRATION_TIMESTAMP":
-      return sql`${ensIndexerSchema.registration.start}`;
+      return sql`${ensIndexerSchema.domain.__latestRegistrationStart}`;
     case "REGISTRATION_EXPIRY":
-      return sql`${ensIndexerSchema.registration.expiry}`;
+      return sql`${ensIndexerSchema.domain.__latestRegistrationExpiry}`;
   }
+}
+
+/**
+ * Whether this is a registration ordering, whose sort columns (`Domain.__latestRegistration*`) are
+ * sentinel-backed and NOT NULL (see `REGISTRATION_SORT_SENTINEL`).
+ *
+ * Because those columns never hold NULL, the ORDER BY omits any NULLS clause so a single plain
+ * `(registry_id, <col>, id)` composite serves both directions (ASC forward / DESC backward) with a
+ * plain keyset tuple. The sentinel sorts last for ASC ("oldest" / "expiring soonest") and first for
+ * DESC. NAME / DEPTH columns are nullable and keep their NULLS-LAST behavior.
+ */
+function isRegistrationOrdering(orderBy: typeof DomainsOrderBy.$inferType): boolean {
+  return orderBy === "REGISTRATION_TIMESTAMP" || orderBy === "REGISTRATION_EXPIRY";
 }
 
 /**
@@ -105,7 +118,9 @@ export function cursorFilter(
   const idCmp = sql`${ensIndexerSchema.domain.id} ${op} ${cursor.id}`;
 
   // NULL cursor values need explicit handling because Postgres tuple comparison with NULL yields
-  // NULL/unknown. With NULLS LAST ordering, non-NULL values come before NULL values.
+  // NULL/unknown. Reached only for NAME/DEPTH (whose columns are nullable, NULLS LAST); registration
+  // sort columns are sentinel-backed NOT NULL, so their cursor value is never null. With NULLS LAST,
+  // non-NULL values come before NULL values.
   if (cursor.value === null) {
     return direction === "after"
       ? sql`(${orderColumn} IS NULL AND ${idCmp})`
@@ -124,6 +139,11 @@ export function cursorFilter(
         return sql`${cursor.value}::int`;
       case "REGISTRATION_TIMESTAMP":
       case "REGISTRATION_EXPIRY":
+        // Ponder's `t.bigint()` columns are `numeric(78,0)` (they hold EVM uint256 values, e.g. the
+        // uint64-max "never expires" expiry sentinel), so the materialized `__latestRegistration*`
+        // columns are numeric too. Cast the cursor value to the same type: it matches the column
+        // exactly (no `col::…` coercion) so the keyset tuple compare stays an Index Cond, and it
+        // avoids the `::bigint` overflow on values beyond int8 range.
         return sql`${cursor.value}::numeric(78,0)`;
     }
   })();
@@ -150,11 +170,17 @@ export function orderFindDomains(
   const effectiveDesc = isEffectiveDesc(orderDir, inverted);
   const orderColumn = getOrderColumn(orderBy);
 
-  // Always use NULLS LAST so unregistered domains (NULL registration fields)
-  // appear at the end regardless of sort direction
-  const primaryOrder = effectiveDesc
-    ? sql`${orderColumn} DESC NULLS LAST`
-    : sql`${orderColumn} ASC NULLS LAST`;
+  // Registration sort columns are sentinel-backed NOT NULL, so the ORDER BY omits any NULLS clause —
+  // that lets the plain `(registry_id, <col>, id)` composite serve both directions (ASC forward /
+  // DESC backward); the sentinel (+∞) sorts last for ASC and first for DESC. NAME / DEPTH columns
+  // are nullable and keep NULLS LAST in both directions.
+  const primaryOrder = isRegistrationOrdering(orderBy)
+    ? effectiveDesc
+      ? sql`${orderColumn} DESC`
+      : sql`${orderColumn} ASC`
+    : effectiveDesc
+      ? sql`${orderColumn} DESC NULLS LAST`
+      : sql`${orderColumn} ASC NULLS LAST`;
 
   const { ensIndexerSchema } = di.context;
   // Always include id as tiebreaker for stable ordering

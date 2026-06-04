@@ -32,8 +32,22 @@
     }
   },
   {
+    "id": "domain-records",
+    "query": "query DomainRecords(\n  $name: InterpretedName!\n) {\n  domain(by: { name: $name }) {\n    canonical { name { interpreted } }\n    resolve {\n      records {\n        addresses(coinTypes: [60]) { coinType address }\n        texts(keys: [\"description\"]) { key value }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "roppp.eth"
+    }
+  },
+  {
     "id": "domain-subdomains",
     "query": "query DomainSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted beautified } }\n    subdomains(first: 10) {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "eth"
+    }
+  },
+  {
+    "id": "domain-subdomains-recently-registered",
+    "query": "query RecentlyRegisteredSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted beautified } }\n    subdomains(first: 10, order: {by: REGISTRATION_TIMESTAMP, dir: DESC}) {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "name": "eth"
     }
@@ -56,6 +70,13 @@
   {
     "id": "domains-by-address",
     "query": "query AccountDomains(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    domains {\n      edges {\n        node {\n          label { interpreted }\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+    }
+  },
+  {
+    "id": "account-primary-names",
+    "query": "query AccountPrimaryNames($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {\n        coinType\n        chainName\n        name { interpreted beautified }\n        resolve {\n          records {\n            addresses(coinTypes: [60]) {\n              coinType\n              address\n            }\n          }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
     }
@@ -134,5 +155,12 @@
     "id": "eth-by-version",
     "query": "query GetEthDomains {\n  domains(where: { name: { eq: \"eth\" } }) {\n    edges {\n      node {\n        __typename\n        id\n      }\n    }\n  }\n}",
     "variables": {}
+  },
+  {
+    "id": "domain-profile",
+    "query": "query DomainProfile($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolve {\n      profile {\n        description\n        avatar { httpUrl }\n        addresses { ethereum }\n        socials { github { handle httpUrl } }\n        website { httpUrl }\n        email\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "vitalik.eth"
+    }
   }
 ]

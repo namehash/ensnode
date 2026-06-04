@@ -31,6 +31,7 @@ import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
   insertLatestRegistration,
+  updateLatestRegistrationExpiry,
 } from "@/lib/ensv2/registration-db-helpers";
 import { ensureRegistry } from "@/lib/ensv2/registry-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -196,10 +197,15 @@ export default function () {
       // unregistering a label just immediately sets its expiration to event.block.timestamp, which
       // effectively removes it from resolution (which interprets expired names as non-existent)
       const unregistrantId = await ensureAccount(context, unregistrant);
-      await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
+      // set expiry to now (+ materialize Domain.__latestRegistrationExpiry)
+      await updateLatestRegistrationExpiry(context, {
+        domainId,
+        registrationId: registration.id,
         expiry: event.block.timestamp,
-        unregistrantId,
       });
+      await context.ensDb
+        .update(ensIndexerSchema.registration, { id: registration.id })
+        .set({ unregistrantId });
 
       // NOTE(shrugs): PermissionedRegistry also increments eacVersionId and tokenVersionId if there was a
       // previous owner, but i'm not sure if we need to handle that detail here
@@ -243,10 +249,12 @@ export default function () {
         );
       }
 
-      // update Registration
-      await context.ensDb
-        .update(ensIndexerSchema.registration, { id: registration.id })
-        .set({ expiry });
+      // update Registration (and its materialized mirror on the Domain)
+      await updateLatestRegistrationExpiry(context, {
+        domainId,
+        registrationId: registration.id,
+        expiry,
+      });
 
       // push event to domain history
       const senderId = await ensureAccount(context, sender);

@@ -146,11 +146,34 @@ export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
 //////////////////////
 
 export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
-  description: "Fields by which domains can be ordered",
-  values: ["NAME", "DEPTH", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
+  description: "Fields by which domains can be ordered.",
+  values: {
+    NAME: { description: "Order by the Domain's Canonical Name, alphabetically." },
+    DEPTH: {
+      description: "Order by Canonical Name depth (number of labels); e.g. `eth` < `vitalik.eth`.",
+    },
+    REGISTRATION_TIMESTAMP: {
+      description:
+        "Order by the start time of the Domain's latest Registration. A Domain with no Registration has no timestamp and sorts last when `dir: ASC` (“oldest registered first”) and first when `dir: DESC` (“most recently registered first”).",
+    },
+    REGISTRATION_EXPIRY: {
+      description:
+        "Order by the expiry of the Domain's latest Registration. A Domain that never expires (or has no Registration) is treated as +∞: it sorts last when `dir: ASC` (“expiring soonest first”) and first when `dir: DESC` (“expiring latest first”).",
+    },
+  },
 });
 
 export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
+
+/**
+ * Shared description fragment documenting ordering / NULL-placement behavior, appended to every
+ * find-domains-based connection field (Query.domains, Account.domains, Registry.domains,
+ * Domain.subdomains). Kept in one place so the semantics are documented exactly once.
+ */
+export const DOMAINS_ORDERING_DESCRIPTION =
+  "Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or " +
+  "REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration " +
+  "treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.";
 
 export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
   description: "Ordering options for domains query. If no order is provided, the default is ASC.",
