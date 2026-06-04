@@ -58,7 +58,7 @@ export async function insertLatestRegistration(
     .values({ domainId, registrationIndex })
     .onConflictDoUpdate({ registrationIndex });
 
-  // materialize Domain.__latestRegistration* (absent expiry → sentinel; columns are NOT NULL)
+  // materialize Domain.__latestRegistration*
   await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({
     __latestRegistrationStart: values.start,
     __latestRegistrationExpiry: values.expiry ?? REGISTRATION_SORT_SENTINEL,
@@ -86,7 +86,7 @@ export async function updateLatestRegistrationExpiry(
 ) {
   await context.ensDb.update(ensIndexerSchema.registration, { id: registrationId }).set({ expiry });
 
-  // mirror onto the Domain sort column (absent expiry → sentinel; column is NOT NULL)
+  // materialize Domain.__latestRegistrationExpiry
   await context.ensDb
     .update(ensIndexerSchema.domain, { id: domainId })
     .set({ __latestRegistrationExpiry: expiry ?? REGISTRATION_SORT_SENTINEL });

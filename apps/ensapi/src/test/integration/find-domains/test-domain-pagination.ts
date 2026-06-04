@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { shouldUseNullsLast } from "@/omnigraph-api/lib/find-domains/find-domains-resolver-helpers";
 import type { DomainsOrderByValue, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirectionValue } from "@/omnigraph-api/schema/order-direction";
 import type { PaginatedDomainResult } from "@/test/integration/find-domains/domain-pagination-queries";
@@ -60,8 +61,7 @@ function assertOrdering(
 
   // Registration orderings use SQL-default NULL placement (ASC → last, DESC → first); NAME/DEPTH
   // keep NULLS LAST in both directions. See find-domains-resolver-helpers.ts.
-  const nullsFirst =
-    (by === "REGISTRATION_TIMESTAMP" || by === "REGISTRATION_EXPIRY") && dir === "DESC";
+  const nullsFirst = !shouldUseNullsLast(by) && dir === "DESC";
 
   for (let i = 0; i < values.length - 1; i++) {
     const a = values[i];

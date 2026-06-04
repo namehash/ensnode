@@ -5,7 +5,6 @@ import type { NormalizedAddress, RegistryId } from "enssdk";
 
 import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { makeLogger } from "@/lib/logger";
 import { DomainCursors } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import {
   cursorFilter,
@@ -29,7 +28,6 @@ import type { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-ver
 type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
 
 const tracer = trace.getTracer("find-domains");
-const logger = makeLogger("find-domains");
 
 const DOMAINS_DEFAULT_ORDER = { by: "NAME", dir: "ASC" } satisfies DomainsOrderValue;
 
@@ -91,10 +89,8 @@ function getDefaultOrder(where: DomainsWhere | undefined | null): DomainsOrderVa
 }
 
 /**
- * GraphQL API resolver for domain connection queries. Builds a single flat SELECT over `domains`
- * (filters and ordering both resolve against `domains` columns) and hydrates fully-formed Domain
- * rows in keyset order. Handles cursor-based pagination and ordering. Used by `Query.domains`,
- * `Account.domains`, `Registry.domains`, and `Domain.subdomains`.
+ * GraphQL API resolver for domain connection queries. Handles cursor-based pagination and ordering.
+ * Used by `Query.domains`, `Account.domains`, `Registry.domains`, and `Domain.subdomains`.
  *
  * @param args - Compound `where` filter, optional ordering, and relay connection args
  */
@@ -164,13 +160,8 @@ export function resolveFindDomains({
           const beforeCursor = before ? DomainCursors.decode(before) : undefined;
           const afterCursor = after ? DomainCursors.decode(after) : undefined;
 
-          // Hydrate Domains directly: every order value lives on `domains` and the only eagerly
-          // loaded relation is `label`, so a single relational query (mirroring the Domain
-          // dataloader's `with: { label: true }`) returns fully-formed Domain rows in keyset order —
-          // no second round-trip through the dataloader. The keyset/order scan still rides the
-          // `domains` composite indexes; `label` is joined only for the `LIMIT`ed rows.
           const { ensDb } = di.context;
-          const finalQuery = ensDb.query.domain.findMany({
+          const query = ensDb.query.domain.findMany({
             where: and(
               filterConditions,
               beforeCursor ? cursorFilter(beforeCursor, orderBy, orderDir, "before") : undefined,
@@ -181,16 +172,14 @@ export function resolveFindDomains({
             with: { label: true },
           });
 
-          logger.debug({ sql: finalQuery.toSQL() });
-
-          const loadedDomains = await withActiveSpanAsync(
+          const domains = await withActiveSpanAsync(
             tracer,
             "find-domains.connection",
             { orderBy, orderDir, limit },
-            () => finalQuery,
+            () => query.execute(),
           );
 
-          return loadedDomains.map((domain): DomainWithOrderValue => {
+          return domains.map((domain): DomainWithOrderValue => {
             const __orderValue: DomainOrderValue = (() => {
               switch (orderBy) {
                 case "NAME":

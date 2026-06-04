@@ -65,16 +65,15 @@ function getOrderColumn(orderBy: typeof DomainsOrderBy.$inferType): SQL {
 }
 
 /**
- * Whether this is a registration ordering, whose sort columns (`Domain.__latestRegistration*`) are
- * sentinel-backed and NOT NULL (see `REGISTRATION_SORT_SENTINEL`).
+ * Whether the ORDER BY for this column needs an explicit NULLS LAST clause.
  *
- * Because those columns never hold NULL, the ORDER BY omits any NULLS clause so a single plain
- * `(registry_id, <col>, id)` composite serves both directions (ASC forward / DESC backward) with a
- * plain keyset tuple. The sentinel sorts last for ASC ("oldest" / "expiring soonest") and first for
- * DESC. NAME / DEPTH columns are nullable and keep their NULLS-LAST behavior.
+ * The registration sort columns (`Domain.__latestRegistration*`) materialize an infinity sentinel
+ * (see `REGISTRATION_SORT_SENTINEL`) in place of an absent value, so they're NOT NULL — there are no
+ * NULLs to sort last, and a plain `(registry_id, <col>, id)` composite serves both directions.
+ * NAME / DEPTH columns are nullable and keep NULLS LAST.
  */
-function isRegistrationOrdering(orderBy: typeof DomainsOrderBy.$inferType): boolean {
-  return orderBy === "REGISTRATION_TIMESTAMP" || orderBy === "REGISTRATION_EXPIRY";
+export function shouldUseNullsLast(orderBy: typeof DomainsOrderBy.$inferType): boolean {
+  return orderBy === "NAME" || orderBy === "DEPTH";
 }
 
 /**
@@ -139,11 +138,7 @@ export function cursorFilter(
         return sql`${cursor.value}::int`;
       case "REGISTRATION_TIMESTAMP":
       case "REGISTRATION_EXPIRY":
-        // Ponder's `t.bigint()` columns are `numeric(78,0)` (they hold EVM uint256 values, e.g. the
-        // uint64-max "never expires" expiry sentinel), so the materialized `__latestRegistration*`
-        // columns are numeric too. Cast the cursor value to the same type: it matches the column
-        // exactly (no `col::…` coercion) so the keyset tuple compare stays an Index Cond, and it
-        // avoids the `::bigint` overflow on values beyond int8 range.
+        // ponder bigints are numeric(78,0)
         return sql`${cursor.value}::numeric(78,0)`;
     }
   })();
@@ -170,17 +165,13 @@ export function orderFindDomains(
   const effectiveDesc = isEffectiveDesc(orderDir, inverted);
   const orderColumn = getOrderColumn(orderBy);
 
-  // Registration sort columns are sentinel-backed NOT NULL, so the ORDER BY omits any NULLS clause —
-  // that lets the plain `(registry_id, <col>, id)` composite serve both directions (ASC forward /
-  // DESC backward); the sentinel (+∞) sorts last for ASC and first for DESC. NAME / DEPTH columns
-  // are nullable and keep NULLS LAST in both directions.
-  const primaryOrder = isRegistrationOrdering(orderBy)
+  const primaryOrder = shouldUseNullsLast(orderBy)
     ? effectiveDesc
-      ? sql`${orderColumn} DESC`
-      : sql`${orderColumn} ASC`
-    : effectiveDesc
       ? sql`${orderColumn} DESC NULLS LAST`
-      : sql`${orderColumn} ASC NULLS LAST`;
+      : sql`${orderColumn} ASC NULLS LAST`
+    : effectiveDesc
+      ? sql`${orderColumn} DESC`
+      : sql`${orderColumn} ASC`;
 
   const { ensIndexerSchema } = di.context;
   // Always include id as tiebreaker for stable ordering

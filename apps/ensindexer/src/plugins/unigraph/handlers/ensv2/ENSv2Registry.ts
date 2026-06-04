@@ -197,7 +197,7 @@ export default function () {
       // unregistering a label just immediately sets its expiration to event.block.timestamp, which
       // effectively removes it from resolution (which interprets expired names as non-existent)
       const unregistrantId = await ensureAccount(context, unregistrant);
-      // set expiry to now (+ materialize Domain.__latestRegistrationExpiry)
+      // update registration expiry to now
       await updateLatestRegistrationExpiry(context, {
         domainId,
         registrationId: registration.id,
