@@ -4,11 +4,12 @@ import { Aside } from "@astrojs/starlight/components";
 const { ensDbWriterSchemaName = "ensindexer_0" } = Astro.props;
 ---
 
-<Aside type="note" title="What is an ENSDb Writer Schema?">
+<Aside type="note" title={`What is an \`${ensDbWriterSchemaName}\`?`}>
   <p>
-    An <a href="/docs/services/ensdb/concepts/glossary#ensdb-writer-schema">ENSDb Writer Schema</a> is
-    a database schema within an <a href="/docs/services/ensdb/concepts/glossary#ensdb-instance"
-      >ENSDb instance</a
+    It is a name of the <a href="/docs/services/ensdb/concepts/glossary#ensdb-writer-schema"
+      >ENSDb Writer Schema</a
+    >, which is a database schema within an <a
+      href="/docs/services/ensdb/concepts/glossary#ensdb-instance">ENSDb instance</a
     >, used to store indexed ENS data from a given <a
       href="/docs/services/ensdb/concepts/glossary#ensdb-writer">ENSDb Writer</a
     > instance. We use <code>{ensDbWriterSchemaName}</code> as the <a

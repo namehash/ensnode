@@ -5,6 +5,7 @@ import StaticExampleNote from "@components/molecules/omnigraph-static-example/St
 import UnigraphExampleWrapper from "@components/molecules/unigraph-static-example/UnigraphExampleWrapper.astro";
 import UnigraphExampleSQLTab from "./UnigraphExampleSQLTab.astro";
 import UnigraphExampleEnsDbSdkTab from "./UnigraphExampleEnsDbSdkTab.astro";
+import Pill from "@components/atoms/Pill.astro";
 
 interface UnigraphExampleTabData {
   codeSnippet: string;
@@ -20,7 +21,7 @@ interface Props {
 const { sql, ensDbSdk } = Astro.props;
 
 const defaultResultNote =
-  "Output matches a SQL response snapshot; live output depends on your ENSNode instance.";
+  "Output matches a result snapshot; live output depends on your ENSNode instance.";
 ---
 
 <UnigraphExampleWrapper>
@@ -30,6 +31,10 @@ const defaultResultNote =
     </div>
 
     <StaticExampleCodeSection badge="SQL" lang="sql" code={sql.codeSnippet} />
+
+    <div class="px-5 mt-4">
+      <Pill>Output</Pill>
+    </div>
 
     <SqlResultTable rows={sql.result} />
 
@@ -42,6 +47,10 @@ const defaultResultNote =
     </div>
 
     <StaticExampleCodeSection badge="TypeScript" lang="ts" code={ensDbSdk.codeSnippet} />
+
+    <div class="px-5 mt-4">
+      <Pill>Output</Pill>
+    </div>
 
     <SqlResultTable rows={ensDbSdk.result} />
 

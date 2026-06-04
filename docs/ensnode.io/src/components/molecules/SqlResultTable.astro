@@ -41,9 +41,8 @@ function formatCell(value: unknown): string {
               return (
                 <td>
                   {isComplex ? (
-                    <pre class="sql-result-cell-pre">
-                      <code>{text}</code>
-                    </pre>
+                    // prettier-ignore
+                    <pre class="sql-result-cell-pre"><code>{text}</code></pre>
                   ) : value === null ? (
                     <span class="sql-result-null">{text}</span>
                   ) : (
