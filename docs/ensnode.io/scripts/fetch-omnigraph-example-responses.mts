@@ -10,9 +10,16 @@ function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
 }
 
+function logWarn(message: string, id?: string) {
+  console.warn(`[omnigraph-examples] WARN: ${message} ${id ? `for example '${id}'` : ""}`);
+}
+
 function logError(message: string, id?: string) {
   console.error(`[omnigraph-examples] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
 }
+
+const TIMEOUT_MS = 120_000;
+const WARN_THRESHOLD_MS = 5_000;
 
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../src/data/omnigraph-examples");
 const examplesPath = join(dataDir, "examples.json");
@@ -72,11 +79,12 @@ for (const id of exampleIds) {
   const query = example.query.trim();
   const variables = example.variables;
 
+  const started = performance.now();
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -85,21 +93,23 @@ for (const id of exampleIds) {
     process.exit(1);
   }
 
-  const body = await response.json();
+  const body = (await response.json()) as Record<string, unknown>;
+  const durationMs = Math.round(performance.now() - started);
 
-  if (
-    typeof body === "object" &&
-    body !== null &&
-    "errors" in body &&
-    Array.isArray((body as { errors: unknown }).errors) &&
-    (body as { errors: unknown[] }).errors.length > 0
-  ) {
+  if ("errors" in body && Array.isArray(body.errors) && body.errors.length > 0) {
     logError(`GraphQL errors: ${JSON.stringify(body, null, 2)}`, id);
     process.exit(1);
   }
 
+  if (durationMs > WARN_THRESHOLD_MS) {
+    logWarn(
+      `Took ${durationMs}ms (threshold ${WARN_THRESHOLD_MS}ms). Omnigraph examples should stay fast. Consider changing input variables or simplifying the example query.`,
+      id,
+    );
+  }
+
   out[id] = body;
-  logStep("Success", id);
+  logStep(`Success in ${durationMs}ms`, id);
 }
 
 logStep(`Writing responses to ${outputPath}`);

@@ -4,7 +4,10 @@ import { resolveStaticExampleStackBlitzProject } from "./resolveProject";
 
 describe("resolveStaticExampleStackBlitzProject", () => {
   it("rebuilds an enssdk project from a known example id", () => {
-    const project = resolveStaticExampleStackBlitzProject("domain-by-name", "enssdk");
+    const project = resolveStaticExampleStackBlitzProject(
+      "domain-by-name-type-condition",
+      "enssdk",
+    );
 
     expect(project.title).toBe("Domain By Name using enssdk");
     expect(project.description).toContain("Load a domain by interpreted name");
@@ -14,7 +17,10 @@ describe("resolveStaticExampleStackBlitzProject", () => {
   });
 
   it("rebuilds an enskit project from a known example id", () => {
-    const project = resolveStaticExampleStackBlitzProject("domain-by-name", "enskit");
+    const project = resolveStaticExampleStackBlitzProject(
+      "domain-by-name-type-condition",
+      "enskit",
+    );
 
     expect(project.title).toBe("Domain By Name using enskit");
     expect(project.description).toContain("Load a domain by interpreted name");

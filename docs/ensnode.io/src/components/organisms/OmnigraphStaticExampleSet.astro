@@ -82,7 +82,7 @@ const data = resolveOmnigraphStaticExample(id);
             responseJson={data.responseJson}
             adminUrl={data.adminUrl}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
-            hostedInstanceNamespace={data.hostedInstanceNamespace}
+            hostedInstanceLabel={data.hostedInstanceLabel}
           />
         ) : null}
         {panel === "enssdk" ? (
@@ -94,7 +94,7 @@ const data = resolveOmnigraphStaticExample(id);
             setupSnippets={data.enssdkSetupSnippets}
             responseJson={data.responseJson}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
-            hostedInstanceNamespace={data.hostedInstanceNamespace}
+            hostedInstanceLabel={data.hostedInstanceLabel}
           />
         ) : null}
         {panel === "enskit" ? (
@@ -106,7 +106,7 @@ const data = resolveOmnigraphStaticExample(id);
             setupSnippets={data.enskitSetupSnippets}
             responseJson={data.responseJson}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
-            hostedInstanceNamespace={data.hostedInstanceNamespace}
+            hostedInstanceLabel={data.hostedInstanceLabel}
           />
         ) : null}
         {panel === "curl" ? (

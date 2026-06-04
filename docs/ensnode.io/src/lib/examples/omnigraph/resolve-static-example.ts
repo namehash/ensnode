@@ -1,11 +1,9 @@
-import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
-
 import { ENSADMIN_URL } from "astro:env/client";
 
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
 import {
   DOCS_HOSTED_INSTANCE_ANCHOR,
-  DOCS_OMNIGRAPH_NAMESPACE,
+  DOCS_HOSTED_INSTANCE_LABEL,
 } from "@lib/examples/omnigraph/constants";
 import {
   buildEnskitSetupSnippets,
@@ -28,7 +26,7 @@ export interface OmnigraphStaticExampleData {
   variablesJson: string;
   responseJson: string | null;
   hostedInstanceDocUrl: string;
-  hostedInstanceNamespace: ENSNamespaceId;
+  hostedInstanceLabel: string;
   adminUrl: string;
   enssdkSnippet: string;
   enskitSnippet: string;
@@ -49,7 +47,7 @@ export function resolveOmnigraphStaticExample(exampleId: string): OmnigraphStati
     variablesJson: stringifyJsonForDocs(example.variables),
     responseJson: example.response ? stringifyJsonForDocs(example.response) : null,
     hostedInstanceDocUrl: getHostedEnsNodeInstanceDocUrl(DOCS_HOSTED_INSTANCE_ANCHOR),
-    hostedInstanceNamespace: DOCS_OMNIGRAPH_NAMESPACE,
+    hostedInstanceLabel: DOCS_HOSTED_INSTANCE_LABEL,
     adminUrl: buildEnsAdminOmnigraphUrl({
       ensadminBaseUrl: ENSADMIN_URL,
       query: example.query,

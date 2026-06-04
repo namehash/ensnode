@@ -11,10 +11,6 @@ import ENSAdminImage from "@workspace/docs/ensnode.io/src/components/atoms/image
 
 The ENS Omnigraph API can resolve ENS records against ENSNode's indexed data instead of live RPC using **ENS Protocol Acceleration**. The Omnigraph effectively implements the ENS Universal Resolver on top of the indexed ENS data model in [ENSDb](/docs/services/ensdb), so most resolutions complete in a single API call — no RPC round trips and no CCIP-Read gateways for your app to orchestrate — while still returning results that follow the ENS resolution protocol exactly.
 
-:::note[Omnigraph Resolution Coming Soon 🚧]
-Protocol Accelerated Resolution is currently available via the [ENSApi Resolution API](/docs/services/ensapi/reference/api-reference#tag/resolution) but will be moved to the Omnigraph in an upcoming release. The following document describes how Protocol Acceleration _currently_ works (via ENSApi's HTTP API), as well as how it will eventually work within the Omnigraph API.
-:::
-
 <FasterLookupImage styles="w-full h-auto" />
 
 ## The problem with RPC-based resolution

@@ -14,6 +14,21 @@ export const OMNIGRAPH_EXAMPLES_META: Record<
   },
   "domain-by-name": {
     name: "Domain By Name",
+    description: "Load a domain by interpreted name, including profile information.",
+    category: "Resolution",
+  },
+  "domain-profile": {
+    name: "Domain Profile",
+    description: "Load a domain's high-level profile (avatar, socials, addresses, and more).",
+    category: "Resolution",
+  },
+  "domain-records": {
+    name: "Domain Records",
+    description: "For given name resolve raw records like `addresses`, `texts`, `contenthash` etc.",
+    category: "Resolution",
+  },
+  "domain-by-name-type-condition": {
+    name: "Domain By Name",
     description:
       "Load a domain by interpreted name, including v1/v2 discriminated fields and subregistry on ENSv2.",
     category: "Resolution",
@@ -37,6 +52,11 @@ export const OMNIGRAPH_EXAMPLES_META: Record<
     name: "Account Events",
     description: "Events touching an account across indexed ENS contracts.",
     category: "History",
+  },
+  "account-primary-name": {
+    name: "Account Primary Name",
+    description: "Load a primary name for an account on Ethereum, including profile information.",
+    category: "Accounts",
   },
   "registry-domains": {
     name: "Registry Domains",
@@ -65,7 +85,8 @@ export const OMNIGRAPH_EXAMPLES_META: Record<
   },
   namegraph: {
     name: "Namegraph",
-    description: "Walk the root tree: root → domains → nested subdomains (depth-limited).",
+    description:
+      "Walk a domain's registry, parent, subregistry, and direct subdomains (as in Core Concepts).",
     category: "Exploration",
   },
   "account-migrated-names": {

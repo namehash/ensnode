@@ -39,20 +39,33 @@ With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to
 
 ```ts title="example.ts"
 // create and extend an EnsNodeClient with Omnigraph API support
-const client = createEnsNodeClient({ url: process.env.ENSNODE_URL! }).extend(omnigraph);
+const client = createEnsNodeClient({
+        url: process.env.ENSNODE_URL!
+    })
+    .extend(omnigraph);
 
 // this is fully typechecked and supports editor autocomplete!
 const HelloWorldQuery = graphql(`
   query HelloWorld {
-    domain(by: { name: "eth" }) {
+    domain(by: { name: "vitalik.eth" }) {
       canonical { name { beautified } }
       owner { address }
+      resolve {
+        profile {
+          description
+          addresses {
+            ethereum
+          }
+        }
+      }
     }
   }
 `);
 
 // `result` is fully typed!
-const result = await client.omnigraph.query({ query: HelloWorldQuery });
+const result = await client.omnigraph.query({
+    query: HelloWorldQuery
+});
 ```
 
 <Aside type="note" title="BeautifiedName">
@@ -87,6 +100,14 @@ const DomainByNameQuery = graphql(`
     domain(by: { name: $name }) {
       canonical { name { beautified } }
       owner { address }
+      resolve {
+        profile {
+          description
+          addresses {
+            ethereum
+          }
+        }
+      }
     }
   }
 `);
@@ -106,6 +127,8 @@ export function DomainCard({ name }: { name: InterpretedName }) {
     <div>
       <p>Name: {domain.canonical?.name.beautified ?? "Unnamed Domain"}</p>
       <p>Owner: {domain.owner?.address ?? "Unowned"}</p>
+      <p>Ethereum address: {domain.resolve?.profile?.addresses?.ethereum}</p>
+      <p>Description: {domain.resolve?.profile?.description}</p>
     </div>
   );
 }

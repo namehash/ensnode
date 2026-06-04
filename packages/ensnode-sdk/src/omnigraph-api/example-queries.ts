@@ -40,6 +40,10 @@ const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 const SEPOLIA_V2_NAME = asInterpretedName("roppp.eth");
 
+const VITALIK_NAME = asInterpretedName("vitalik.eth");
+
+const GREG_NAME = asInterpretedName("gregskril.eth");
+
 const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ReverseResolverRoot,
@@ -126,11 +130,35 @@ query FindDomains(
     },
   },
 
-  ///////////////////
-  // Domain By Name
-  ///////////////////
   {
     id: "domain-by-name",
+    query: `
+query DomainByName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    canonical { name { beautified } }
+    owner { address }
+    resolve {
+      profile {
+        description
+        addresses {
+          ethereum
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
+      [ENSNamespaceIds.Mainnet]: { name: VITALIK_NAME },
+    },
+  },
+
+  ////////////////////////////////
+  // Domain By Name Type Condition
+  ////////////////////////////////
+  {
+    id: "domain-by-name-type-condition",
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -193,7 +221,7 @@ query DomainRegistration($name: InterpretedName!) {
   }
 }`,
     variables: {
-      default: { name: "vitalik.eth" },
+      default: { name: VITALIK_NAME },
       [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
   },
@@ -204,21 +232,30 @@ query DomainRegistration($name: InterpretedName!) {
   {
     id: "domain-records",
     query: `
-query DomainRecords(
-  $name: InterpretedName!
-) {
-  domain(by: { name: $name }) {
-    canonical { name { interpreted } }
+query DomainRecords($name: InterpretedName!) {
+  domain(by: {name: $name}) {
+    canonical {
+      name {
+        interpreted
+      }
+    }
     resolve {
       records {
-        addresses(coinTypes: [60]) { coinType address }
-        texts(keys: ["description"]) { key value }
+        addresses(coinTypes: [60, 2147483658, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["description", "avatar", "url", "com.github", "com.twitter"]) {
+          key
+          value
+        }
+        contenthash
       }
     }
   }
 }`,
     variables: {
-      default: { name: "vitalik.eth" },
+      default: { name: GREG_NAME },
       [ENSNamespaceIds.EnsTestEnv]: {
         name: DEVNET_NAME_WITH_OWNED_RESOLVER,
       },
@@ -226,6 +263,47 @@ query DomainRecords(
         name: SEPOLIA_V2_NAME,
       },
     },
+  },
+
+  {
+    id: "domain-profile",
+    query: `
+query DomainProfile($name: InterpretedName!) {
+  domain(by: {name: $name}) {
+    resolve {
+      profile {
+        description
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          base
+          solana
+          bitcoin
+          rootstock
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+        header {
+          httpUrl
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: GREG_NAME } },
   },
 
   //////////////////////
@@ -237,7 +315,10 @@ query DomainRecords(
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
     canonical { name { interpreted beautified } }
-    subdomains(first: 10) {
+    subdomains(first: 10, order: {
+       by: NAME,
+       dir: ASC
+    }) {
       edges {
         node {
           canonical { name { interpreted beautified } }
@@ -246,7 +327,11 @@ query DomainSubdomains($name: InterpretedName!) {
     }
   }
 }`,
-    variables: { default: { name: "eth" } },
+    variables: {
+      default: { name: "eth" },
+      // in mainnet there is too many subdomains of eth
+      [ENSNamespaceIds.Mainnet]: { name: "base.eth" },
+    },
   },
 
   ////////////////////////
@@ -335,21 +420,21 @@ query AccountDomains(
   // Account Primary Names
   /////////////////////////
   {
-    id: "account-primary-names",
+    id: "account-primary-name",
     query: `
-query AccountPrimaryNames($address: Address!) {
+query AccountPrimaryName($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
-      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
-        coinType
-        chainName
+      primaryName(by: { chainName: ETHEREUM }) {
         name { interpreted beautified }
         resolve {
-          records {
-            addresses(coinTypes: [60]) {
-              coinType
-              address
+          profile {
+            description
+            socials {
+              twitter {
+                httpUrl
+              }
             }
           }
         }
@@ -508,15 +593,18 @@ query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
       assigned {
-        records { edges { node { node keys coinTypes } } }
-        permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
-        events { totalCount edges { node { topics data timestamp } } }
+        contract {
+          address
+        }
+        events(first: 5) {
+          edges { node { topics data timestamp } }
+        }
       }
     }
   }
 }`,
     variables: {
-      default: { name: "vitalik.eth" },
+      default: { name: VITALIK_NAME },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
       [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
@@ -623,25 +711,6 @@ query GetEthDomains {
   }
 }`,
     variables: { default: {} },
-  },
-  {
-    id: "domain-profile",
-    query: `
-query DomainProfile($name: InterpretedName!) {
-  domain(by: { name: $name }) {
-    resolve {
-      profile {
-        description
-        avatar { httpUrl }
-        addresses { ethereum }
-        socials { github { handle httpUrl } }
-        website { httpUrl }
-        email
-      }
-    }
-  }
-}`,
-    variables: { default: { name: "vitalik.eth" } },
   },
 ];
 

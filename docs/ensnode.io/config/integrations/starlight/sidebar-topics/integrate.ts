@@ -107,6 +107,14 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/omnigraph/examples/domain-by-name",
             },
             {
+              label: "Domain Profile",
+              link: "/docs/integrate/omnigraph/examples/domain-profile",
+            },
+            {
+              label: "Domain Raw Records",
+              link: "/docs/integrate/omnigraph/examples/domain-records",
+            },
+            {
               label: "Find Domains",
               link: "/docs/integrate/omnigraph/examples/find-domains",
             },
@@ -117,6 +125,10 @@ export const integrateSidebarTopic = {
             {
               label: "Domain Events",
               link: "/docs/integrate/omnigraph/examples/domain-events",
+            },
+            {
+              label: "Account Primary Name",
+              link: "/docs/integrate/omnigraph/examples/account-primary-name",
             },
             {
               label: "Account Domains",

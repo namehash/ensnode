@@ -2,8 +2,6 @@
 /**
  * Omnigraph panel: GraphQL request is query + variables; result is a separate output section.
  */
-import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
-
 import StaticExampleActionBar from "./StaticExampleActionBar.astro";
 import StaticExampleCodeSection from "./StaticExampleCodeSection.astro";
 import StaticExampleOutputSection from "./StaticExampleOutputSection.astro";
@@ -15,7 +13,7 @@ interface Props {
   responseJson: string | null;
   adminUrl: string;
   hostedInstanceDocUrl: string;
-  hostedInstanceNamespace: ENSNamespaceId;
+  hostedInstanceLabel: string;
 }
 
 const {
@@ -25,7 +23,7 @@ const {
   responseJson,
   adminUrl,
   hostedInstanceDocUrl,
-  hostedInstanceNamespace,
+  hostedInstanceLabel,
 } = Astro.props;
 ---
 
@@ -33,7 +31,7 @@ const {
   variant="ensadmin"
   adminUrl={adminUrl}
   hostedInstanceDocUrl={hostedInstanceDocUrl}
-  hostedInstanceNamespace={hostedInstanceNamespace}
+  hostedInstanceLabel={hostedInstanceLabel}
 />
 
 <StaticExampleCodeSection
