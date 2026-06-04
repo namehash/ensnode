@@ -276,7 +276,15 @@ export const CANONICAL_NAME_PREFIX_LENGTH = 64;
  */
 export function truncateCanonicalNamePrefix(name: Name | null): Name | null {
   if (name === null) return null;
-  return [...name].slice(0, CANONICAL_NAME_PREFIX_LENGTH).join("");
+  // iterate code points and stop at the cap rather than spreading the whole string, which can be
+  // thousands of code points for spam names on a hot path (indexer writes + cursor encoding)
+  let prefix = "";
+  let count = 0;
+  for (const codePoint of name) {
+    prefix += codePoint;
+    if (++count >= CANONICAL_NAME_PREFIX_LENGTH) break;
+  }
+  return prefix;
 }
 
 export const domain = onchainTable(
