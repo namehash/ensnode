@@ -164,7 +164,7 @@ async function findResolverWithUniversalResolver(
  * // Returns: "0x123..." or null if no resolver found
  * ```
  */
-async function findResolverWithIndex(
+export async function findResolverWithIndex(
   registry: AccountId,
   name: InterpretedName,
 ): Promise<FindResolverResult> {
