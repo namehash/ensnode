@@ -400,7 +400,10 @@ export const domain = onchainTable(
      * materialized mirror, not part of the on-chain protocol surface; the canonical (possibly null)
      * value lives on the Registration entity.
      */
-    __latestRegistrationStart: t.bigint().notNull().default(REGISTRATION_SORT_SENTINEL),
+    __latestRegistrationStart: t
+      .bigint("__latest_registration_start")
+      .notNull()
+      .default(REGISTRATION_SORT_SENTINEL),
 
     /**
      * Materialized `expiry` of this Domain's latest Registration, or {@link REGISTRATION_SORT_SENTINEL}
@@ -409,7 +412,10 @@ export const domain = onchainTable(
      *
      * @dev See `__latestRegistrationStart`. Backs REGISTRATION_EXPIRY-ordered queries.
      */
-    __latestRegistrationExpiry: t.bigint().notNull().default(REGISTRATION_SORT_SENTINEL),
+    __latestRegistrationExpiry: t
+      .bigint("__latest_registration_expiry")
+      .notNull()
+      .default(REGISTRATION_SORT_SENTINEL),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
