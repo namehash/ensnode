@@ -13,7 +13,7 @@ type Account {
   address: Address!
 
   """
-  The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection
 
@@ -345,7 +345,7 @@ interface Domain {
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -599,7 +599,7 @@ type ENSv1Domain implements Domain {
   rootRegistryOwner: Account
 
   """
-  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -620,7 +620,7 @@ type ENSv1Registry implements Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
@@ -647,7 +647,7 @@ type ENSv1VirtualRegistry implements Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
@@ -719,7 +719,7 @@ type ENSv2Domain implements Domain {
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -752,7 +752,7 @@ type ENSv2Registry implements Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
@@ -1421,7 +1421,7 @@ type Query {
   domain(by: DomainIdInput!): Domain
 
   """
-  Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
@@ -1526,7 +1526,7 @@ interface Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 

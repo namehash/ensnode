@@ -172,8 +172,9 @@ export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
  */
 export const DOMAINS_ORDERING_DESCRIPTION =
   "Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or " +
-  "REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration " +
-  "treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.";
+  "REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no " +
+  "Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when " +
+  "`dir: ASC` and first when `dir: DESC`.";
 
 export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
   description: "Ordering options for domains query. If no order is provided, the default is ASC.",
