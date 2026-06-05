@@ -50,7 +50,7 @@ LIMIT 5;
     resultNote,
   },
   sdk: {
-    codeSnippet: `import { and, asc, eq, sql } from "drizzle-orm";
+    codeSnippet: `import { and, eq, sql } from "drizzle-orm";
 
 const q = "vitalik";
 const limit = 5;
