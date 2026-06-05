@@ -10,7 +10,7 @@ import {
 } from "enssdk";
 import type { PublicClient } from "viem";
 
-import { DatasourceNames, getENSRootChainId, maybeGetDatasource } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
@@ -23,13 +23,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 import {
   isBridgedResolver,
-  isExtendedResolver,
   isKnownENSIP19ReverseResolver,
   isStaticResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
 import di from "@/di";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
@@ -203,13 +202,13 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           const canAttemptAcceleration = accelerate && canAccelerate;
 
           // TODO: re-enable protocol acceleration for ENSv2
-          const temp_isENSv2Namespace = maybeGetDatasource(
+          const isENSv2Namespace = !!maybeGetDatasource(
             di.context.namespace,
             DatasourceNames.ENSv2Root,
           );
 
           // when we cannot attempt acceleration or ENSv2 is deployed (temp), delegate to UniversalResolver
-          if (!canAttemptAcceleration || temp_isENSv2Namespace) {
+          if (!canAttemptAcceleration || isENSv2Namespace) {
             operations = await resolveViaUniversalResolver(name, operations, publicClient);
             logOperations(operations, logger);
             return makeRecordsResponse<SELECTION>(operations);
@@ -327,71 +326,23 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           }
 
           ////////////////////////////////////////////////////////////////////////////
-          // 4. Resolve remaining operations.
-          //    From here, we MUST execute EVM code to be compliant with ENS Protocol.
+          // 4. Resolve remaining operations via RPC
           ////////////////////////////////////////////////////////////////////////////
 
-          if (chainId === getENSRootChainId(di.context.namespace)) {
-            // On the ENS Root Chain, we have access to the UniversalResolver, so delegate to it
-            // rather than calling the discovered resolver directly.
-            //
-            // The reason for this is because a resolver's on-chain behavior can depend on being
-            // called by the canonical UniversalResolver. for example the URTestResolver gates
-            // IExtendedResolver support on `msg.sender == UniversalResolver.implementation()` — which
-            // ENSApi cannot reproduce off-chain. Delegating keeps Root Chain resolution 1:1 with
-            // the on-chain UniversalResolver.
-            operations = await resolveViaUniversalResolver(name, operations, publicClient);
-          } else {
-            // On a shadow Registry chain (e.g. Basenames/Lineanames) there is no UniversalResolver,
-            // so we resolve from the indicated activeResolver directly
-
-            // 4.1 Determine Resolver ENSIP-10 support + requirement.
-            const extended = await withEnsProtocolStep(
-              TraceableENSProtocol.ForwardResolution,
-              ForwardResolutionProtocolStep.RequireResolver,
-              { chainId, activeResolver, requiresWildcardSupport },
-              async (stepSpan) => {
-                const extended = await withSpanAsync(
-                  tracer,
-                  "isExtendedResolver",
-                  { chainId, address: activeResolver },
-                  () => isExtendedResolver({ address: activeResolver, publicClient }),
-                );
-
-                stepSpan.setAttribute("isExtendedResolver", extended);
-
-                return extended;
-              },
-            );
-
-            // if we require wildcard support and this is NOT an extended resolver, the resolver is
-            // not valid, i.e. there is no active resolver for the name
-            // https://docs.ens.domains/ensip/10/#specification
-            if (requiresWildcardSupport && !extended) {
-              return makeRecordsResponse<SELECTION>(operations);
-            }
-
-            // 4.2 Resolve remaining operations via RPC
-            operations = await withEnsProtocolStep(
-              TraceableENSProtocol.ForwardResolution,
-              ForwardResolutionProtocolStep.ExecuteResolveCalls,
-              {},
-              () =>
-                executeOperations({
-                  name,
-                  resolverAddress: activeResolver,
-                  // NOTE: ENSIP-10 specifies that if a resolver supports IExtendedResolver,
-                  // the client MUST use the ENSIP-10 resolve() method over the legacy methods.
-                  useENSIP10Resolve: extended,
-                  operations,
-                  publicClient,
-                }),
-            );
-          }
-
-          ////////////////////////////////////////////////////////////////////////////
-          // 5. We're done! All `operations` should now be resolved.
-          ////////////////////////////////////////////////////////////////////////////
+          // On the ENS Root Chain, we have access to the UniversalResolver, so delegate to it
+          // rather than calling the discovered resolver directly.
+          //
+          // The reason for this is that a resolver's on-chain behavior can depend on being
+          // called by the canonical UniversalResolver. for example the URTestResolver gates
+          // IExtendedResolver support on `msg.sender == UniversalResolver.implementation()` — which
+          // ENSApi cannot reproduce off-chain. Delegating keeps Root Chain resolution 1:1 with
+          // the on-chain UniversalResolver.
+          //
+          // Finally, if we are resolving on a shadow Registry chain (e.g. Basenames/Lineanames) for
+          // which we have recursed into _resolveForward AND the operations were not resolved above,
+          // then we need to execute EVM code, for which calling the UniversalResolver is also the
+          // correct approach.
+          operations = await resolveViaUniversalResolver(name, operations, publicClient);
 
           // Invariant: all operations must be resolved
           if (!operations.every(isOperationResolved)) {
