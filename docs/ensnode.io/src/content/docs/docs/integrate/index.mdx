@@ -196,6 +196,9 @@ Same query: `address -> primary name -> forward profile` — via raw GraphQL wit
 Beyond [`enssdk`](/docs/integrate/integration-options/enssdk), [`enskit`](/docs/integrate/integration-options/enskit), and the [Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api), ENSNode exposes a deeper set of integration surfaces for advanced use cases:
 
 - **[ENSDb (SQL)](/docs/integrate/integration-options/ensdb)** — query the indexed ENSv1 and ENSv2 datasets directly via SQL for custom analytics or your own service layer, from any language with a Postgres driver.
+- **[ENSDb Writers (Indexers)](/docs/integrate/integration-options/ensdb-writers)** — build your own ENSDb Writer to index ENS data into your own ENSDb instance.
+- **[ENSDb Readers](/docs/integrate/integration-options/ensdb-readers)** — build your own ENSDb Reader to query your own ENSDb instance through any interface of your choice.
+- **[ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins)** — define how onchain data should be indexed into ENSDb.
 - **[enscli (CLI)](/docs/integrate/integration-options/enscli)** — resolve names, look up records, and run ad-hoc Omnigraph queries from the terminal — built for humans and AI agents alike.
 - **[ensskills (AI agents)](/docs/integrate/integration-options/ensskills)** — a curated set of skills that gives AI coding agents a well-defined contract for working with ENS.
 - **[ensdb-cli (ENSDb Snapshots)](/docs/integrate/integration-options/ensdb-cli)** — bootstrap a fresh ENSDb in minutes from portable, versioned snapshots instead of waiting days on a full historical backfill.

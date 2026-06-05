@@ -1,5 +1,7 @@
 import { type DomainId, makeRegistrationId, makeRenewalId } from "enssdk";
 
+import { REGISTRATION_SORT_SENTINEL } from "@ensnode/ensdb-sdk/ensindexer-abstract";
+
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
@@ -17,6 +19,28 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * We use pointer tables (latestRegistrationIndex, latestRenewalIndex) to track the latest index for
  * each type of entity.
  */
+
+/**
+ * Materializes the latest Registration's sort keys onto the Domain row, if it exists.
+ *
+ * Preminted names (BaseRegistrar `registerOnly` on Basenames/Lineanames) have a Registration before
+ * their Domain row exists, and Ponder's `update` throws on an absent row. Such a Domain materializes
+ * these columns from its latest Registration when it's created (see ENSv1Registry NewOwner).
+ */
+async function materializeDomainLatestRegistration(
+  context: IndexingEngineContext,
+  domainId: DomainId,
+  values: Partial<
+    Pick<
+      typeof ensIndexerSchema.domain.$inferInsert,
+      "__latestRegistrationStart" | "__latestRegistrationExpiry"
+    >
+  >,
+) {
+  const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
+  if (!domain) return;
+  await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set(values);
+}
 
 /**
  * Gets the latest Registration for the provided `domainId`.
@@ -55,6 +79,39 @@ export async function insertLatestRegistration(
     .insert(ensIndexerSchema.latestRegistrationIndex)
     .values({ domainId, registrationIndex })
     .onConflictDoUpdate({ registrationIndex });
+
+  // conditionally materialize Domain.__latestRegistration*
+  await materializeDomainLatestRegistration(context, domainId, {
+    __latestRegistrationStart: values.start,
+    __latestRegistrationExpiry: values.expiry ?? REGISTRATION_SORT_SENTINEL,
+  });
+}
+
+/**
+ * Updates the expiry of a Domain's latest Registration.
+ *
+ * @dev materializes Domain.__latestRegistrationExpiry
+ * @dev callers MUST pass the Domain's _latest_ Registration; we don't validate that the provided
+ *      `registrationId` is actually the latest
+ */
+export async function updateLatestRegistrationExpiry(
+  context: IndexingEngineContext,
+  {
+    domainId,
+    registrationId,
+    expiry,
+  }: {
+    domainId: DomainId;
+    registrationId: ReturnType<typeof makeRegistrationId>;
+    expiry: bigint | null;
+  },
+) {
+  await context.ensDb.update(ensIndexerSchema.registration, { id: registrationId }).set({ expiry });
+
+  // conditionally materialize Domain.__latestRegistrationExpiry
+  await materializeDomainLatestRegistration(context, domainId, {
+    __latestRegistrationExpiry: expiry ?? REGISTRATION_SORT_SENTINEL,
+  });
 }
 
 /**

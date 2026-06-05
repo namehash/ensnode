@@ -32,7 +32,9 @@ The Unigraph models both protocol versions with the **same polymorphic entities*
 
 ## The Canonical Nametree
 
+:::note[The Canonical Nametree]
 The **Canonical Nametree** is the set of all Domains that have an inferrable **Canonical Name** — materialized from the namegraph. For every Domain in it, the canonical fields are populated — `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth` — across both ENSv1 and ENSv2. That means you can look a name up by `canonical_name = 'vitalik.eth'`, order by `canonical_depth`, or walk a name's path **without branching on protocol version** and without traversing the namegraph yourself.
+:::
 
 Multichain coverage is part of the same model: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are materialized into the same Unigraph as mainnet `.eth`, so a single query spans every indexable name.
 

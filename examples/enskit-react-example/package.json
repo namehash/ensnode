@@ -16,7 +16,7 @@
     "enssdk": "1.15.1",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-router": "^7.6.1"
+    "react-router": "^7.17.0"
   },
   "devDependencies": {
     "@types/react": "catalog:",

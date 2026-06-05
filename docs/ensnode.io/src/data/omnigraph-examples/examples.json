@@ -48,6 +48,13 @@
     }
   },
   {
+    "id": "domain-subdomains-recently-registered",
+    "query": "query RecentlyRegisteredSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted beautified } }\n    subdomains(first: 10, order: {by: REGISTRATION_TIMESTAMP, dir: DESC}) {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "eth"
+    }
+  },
+  {
     "id": "domain-events",
     "query": "query DomainEvents($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    events {\n      totalCount\n      edges {\n        node {\n          from\n          to\n          topics\n          data\n          timestamp\n          transactionHash\n        }\n      }\n    }\n  }\n}",
     "variables": {

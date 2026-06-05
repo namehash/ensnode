@@ -14,6 +14,7 @@ import {
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
+import { REGISTRATION_SORT_SENTINEL } from "@ensnode/ensdb-sdk/ensindexer-abstract";
 import {
   ENSNamespaceIds,
   getENSRootChainId,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
+import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
 import { ensureRegistry } from "@/lib/ensv2/registry-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
@@ -178,6 +180,10 @@ export default function () {
     // (BaseRegistrar, NameWrapper) because (a) the root Registry is the source of truth even when
     // no Registrar is in use, and (b) Registrar events fire _after_ Registry events, so they
     // re-materialize over the value we set here.
+    // a preminted name (BaseRegistrar `registerOnly`) has a Registration before its Domain exists, so
+    // materialize its sort keys here on creation; a normal name has none yet (its Registrar
+    // NameRegistered materializes them afterwards). Set on insert only so owner-changes don't clobber.
+    const registration = await getLatestRegistration(context, domainId);
     await context.ensDb
       .insert(ensIndexerSchema.domain)
       .values({
@@ -188,6 +194,12 @@ export default function () {
         labelHash,
         ownerId,
         rootRegistryOwnerId: ownerId,
+        ...(registration
+          ? {
+              __latestRegistrationStart: registration.start,
+              __latestRegistrationExpiry: registration.expiry ?? REGISTRATION_SORT_SENTINEL,
+            }
+          : {}),
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
 

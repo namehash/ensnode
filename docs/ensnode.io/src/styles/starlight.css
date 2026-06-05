@@ -490,15 +490,49 @@ ul.top-level details details > summary .group-label span {
   transform: none !important;
 }
 
-/* Align "tablist" component to the left
- * and remove the default full-width underline
- */
+/* Unify the styling of Starlight tabs with our Omnigraph Static example tabs */
 starlight-tabs ul[role="tablist"] {
-  padding-left: 0;
-  border-bottom: none;
+  margin-top: 0;
+  padding-left: 20px;
+  padding-top: 12px;
+
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
   & a[role="tab"] {
-    padding-bottom: 8px;
+    padding: 8px 0 10px 0;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: color 0.2s ease-in-out;
+
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    line-height: 1;
+    color: var(--sl-color-gray-3);
+
+    box-shadow: none;
+
+    &:hover {
+      color: var(--sl-color-accent-high);
+    }
+
+    &:is([aria-selected="true"]) {
+      color: var(--sl-color-text-accent);
+      box-shadow: inset 0 -2px 0 var(--sl-color-text-accent);
+    }
+
+    & svg {
+      width: 16px;
+      height: 16px;
+    }
   }
 }
 
@@ -537,7 +571,8 @@ starlight-tabs ul[role="tablist"] {
   font-size: 16px;
   font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 125% */
+  line-height: 20px;
+  /* 125% */
 }
 
 .starlight-aside__content {
@@ -545,7 +580,8 @@ starlight-tabs ul[role="tablist"] {
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
-  line-height: 24px; /* 171.429% */
+  line-height: 24px;
+  /* 171.429% */
 
   margin-top: 10px;
 
@@ -681,7 +717,8 @@ starlight-tabs ul[role="tablist"] {
  * hack since Starlight doesn't allow overriding icons directly. */
 
 .starlight-sidebar-topics-icon svg {
-  display: none; /* Hide the default SVG icon */
+  display: none;
+  /* Hide the default SVG icon */
 }
 
 /* Default sidebar icon (parent) */
@@ -713,15 +750,19 @@ starlight-tabs ul[role="tablist"] {
 .starlight-sidebar-topics a[href*="/integrate"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/integrate-with-ensv2.svg");
 }
+
 .starlight-sidebar-topics a[href*="/hosted-instances"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/hosted-instances.svg");
 }
+
 .starlight-sidebar-topics a[href*="/self-host"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/self-host-ensnode.svg");
 }
+
 .starlight-sidebar-topics a[href*="/services"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/ensnode-services.svg");
 }
+
 .starlight-sidebar-topics a[href*="/reference"] .starlight-sidebar-topics-icon {
   --sidebar-icon: url("../assets/custom-sidebar-icons/reference.svg");
 }
@@ -767,4 +808,123 @@ starlight-tabs ul[role="tablist"] {
 .sl-markdown-content .expressive-code figcaption:is(.header):has(.title:not(:empty)) > span {
   border-right: 1px solid var(--color-border);
   border-top: 1px solid var(--color-border);
+}
+
+/* SQL Result Table styles */
+.sql-result-table-wrapper {
+  overflow: auto;
+  max-height: 420px;
+  margin: 1rem 20px;
+  border-radius: 12px;
+  border: 1px solid var(--sl-color-gray-5);
+}
+
+.sql-result-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--sl-color-white);
+}
+
+.sql-result-table th,
+.sql-result-table td {
+  padding: 0.375rem 0.625rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  border-right: 1px solid var(--sl-color-gray-5);
+}
+
+.sql-result-table th:last-child,
+.sql-result-table td:last-child {
+  border-right: none;
+}
+
+.sql-result-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--sl-color-gray-6);
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+}
+
+.sql-result-table td {
+  background-color: var(--sl-color-black);
+  white-space: nowrap;
+}
+
+.sql-result-table tbody tr:hover td {
+  background-color: var(--color-gray-50);
+}
+
+.sql-result-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.sql-result-table td code {
+  background: none;
+  padding: 0;
+  font-size: 0.75rem;
+  word-break: normal;
+  color: inherit;
+}
+
+/* Row number column */
+.sql-result-rownum {
+  width: 2.25rem;
+  min-width: 2.25rem;
+  max-width: 2.25rem;
+  text-align: center !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+.sql-result-rownum-label {
+  color: var(--sl-color-gray-3);
+  font-size: 0.75rem;
+}
+
+.sql-result-cell-pre {
+  margin: 0;
+  background: none;
+  padding: 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sql-result-cell-pre code {
+  background: none;
+  padding: 0;
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: inherit;
+}
+
+.sql-result-null {
+  color: var(--sl-color-gray-3);
+  font-style: italic;
+}
+
+/*
+  Additional global styles for the .static-example class
+  inside the Unigraph example
+*/
+.static-example starlight-tabs .expressive-code .frame > pre:not([data-language="bash"]) {
+  border-radius: 12px;
+}
+
+/*
+  Make sure that code blocks inside asides are styled properly inside the static examples
+*/
+.static-example starlight-tabs .starlight-aside :not(pre) > code {
+  margin-block: -0.125rem;
+  padding: 0.125rem 0.375rem;
+  font-size: var(--sl-text-code-sm);
 }

@@ -62,6 +62,14 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     hostSeparatePage: true,
   },
   {
+    id: "domain-subdomains-recently-registered",
+    title: "Recently Registered Subdomains",
+    description: "List a parent domain's subdomains ordered by most recent registration first.",
+    category: "Resolution",
+    namespace: ENSNamespaceIds.SepoliaV2,
+    hostSeparatePage: true,
+  },
+  {
     id: "domain-events",
     title: "Domain Events",
     description: "Raw contract events associated with a domain's registry records.",

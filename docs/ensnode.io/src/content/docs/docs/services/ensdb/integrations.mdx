@@ -1,10 +1,19 @@
 ---
-title: Future Possibilities
-description: Explore the future possibilities and potential applications of ENSDb in various domains, including custom APIs, analytics, developer tools, event-based engines, data pipelines, and AI agents.
-sidebar:
-  label: Future Possibilities
-  order: 2
+title: Using ENSDb
+description: Guides for integrating and using ENSDb in your applications.
 ---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+You can interact with the ENSDb instance using the dedicated TypeScript SDK or the regular PostgreSQL interface. This section provides guides for both methods, as well as troubleshooting tips and answers to frequently asked questions.
+
+<LinkCard
+  title="Interact with ENSDb"
+  description="Connect to ENSDb and try example queries. Each example query is presented in raw SQL (any PostgreSQL client, any language) and as TypeScript code using the <code>@ensnode/ensdb-sdk</code> package."
+  href="/docs/integrate/unigraph/examples"
+/>
+
+## Future possibilities
 
 Use an ENSDb instance as an event source for building reactive systems that respond to ENS state changes.
 
