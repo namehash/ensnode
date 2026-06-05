@@ -1,4 +1,7 @@
+import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
+
+const resultNote = outputSource("Alpha Sepolia");
 
 /**
  * Example query for fetching the latest registrations across all Domains.
@@ -88,6 +91,7 @@ LIMIT 5;
           "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x56fc11b057812d300b43fd13136ee7e656fa9081e5a3063ed011224302b3658f",
       },
     ],
+    resultNote,
   },
   sdk: {
     codeSnippet: `import { and, desc, eq, ne, lte, sql } from "drizzle-orm";
@@ -179,5 +183,6 @@ console.log(recentRegistrations);`,
           "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x56fc11b057812d300b43fd13136ee7e656fa9081e5a3063ed011224302b3658f",
       },
     ],
+    resultNote,
   },
 } satisfies QueryExample;

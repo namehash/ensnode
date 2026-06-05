@@ -1,6 +1,9 @@
+import { outputSource } from "@data/unigraph-examples/utils";
 import type { QueryExample } from "./types";
 
-const result = {
+const resultNote = outputSource("Alpha");
+
+const indexingMetadataContextPartial = {
   indexingStatus: {
     strategy: "omnichain",
     snapshotTime: 1779795066,
@@ -116,7 +119,8 @@ FROM "ensnode".metadata
 WHERE ens_indexer_schema_name = 'ensindexer_0'
 AND key = 'indexing_metadata_context';
 `,
-    result: { indexing_status_snapshot: result.indexingStatus },
+    result: { indexing_status_snapshot: indexingMetadataContextPartial.indexingStatus },
+    resultNote,
   },
   sdk: {
     codeSnippet: `import { IndexingMetadataContextStatusCodes } from "@ensnode/ensdb-sdk";
@@ -127,6 +131,7 @@ if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.In
   const { indexingStatus } = indexingMetadataContext;
   console.log({ indexingStatus });
 }`,
-    result: { indexingStatus: result.indexingStatus },
+    result: { indexingStatus: indexingMetadataContextPartial.indexingStatus },
+    resultNote,
   },
 } satisfies QueryExample;

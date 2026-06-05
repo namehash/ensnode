@@ -1,4 +1,7 @@
+import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
+
+const resultNote = outputSource("V2 Sepolia");
 
 /**
  * Example query for fetching recent events for a Domain by its canonical name.
@@ -16,7 +19,7 @@ export const exampleDomainEvents = {
 FROM "ensindexer_0".events e
 JOIN "ensindexer_0".domain_events de ON e.id = de.event_id
 JOIN "ensindexer_0".domains d ON de.domain_id = d.id
-WHERE d.canonical_name = 'vitalik.eth'
+WHERE d.canonical_name = 'wrapnation.eth'
 AND d.canonical = true
 ORDER BY e.block_number DESC, e.log_index DESC
 LIMIT 5;
@@ -24,60 +27,41 @@ LIMIT 5;
     result: [
       {
         chain_id: "11155111",
-        block_number: "6023942",
-        transaction_hash: "0x6206e95dc5ba5fc8d0804283498f17bac18081437b4198c824b62ee851622ba5",
-        log_index: 194,
-        contract_address: "0xfed6a969aaa60e4961fcd3ebf1a2e8913ac65b72",
-        sender: "0x225f137127d9067788314bc7fcc1f36746a3c3b5",
+        block_number: "10918673",
+        transaction_hash: "0xca5e111932f0b26e1d458c690c5dfe8b2b8165ee2a937c04e4021e93a71954e4",
+        log_index: 42,
+        contract_address: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
+        sender: "0x801d2e48d378f161dba7ad7ad002ad557714c191",
         domain_id:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+          "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
       },
       {
         chain_id: "11155111",
-        block_number: "6023942",
-        transaction_hash: "0x6206e95dc5ba5fc8d0804283498f17bac18081437b4198c824b62ee851622ba5",
-        log_index: 193,
-        contract_address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-        sender: "0x225f137127d9067788314bc7fcc1f36746a3c3b5",
+        block_number: "10918673",
+        transaction_hash: "0xca5e111932f0b26e1d458c690c5dfe8b2b8165ee2a937c04e4021e93a71954e4",
+        log_index: 38,
+        contract_address: "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1",
+        sender: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
         domain_id:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+          "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
       },
       {
         chain_id: "11155111",
-        block_number: "4107392",
-        transaction_hash: "0xf143118eb4100361f040b1ae5627562125f0cf1717073a8204befe5e512c80d4",
-        log_index: 22,
-        contract_address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
-        sender: "0x179a862703a4adfb29896552df9e307980d19285",
+        block_number: "10918673",
+        transaction_hash: "0xca5e111932f0b26e1d458c690c5dfe8b2b8165ee2a937c04e4021e93a71954e4",
+        log_index: 37,
+        contract_address: "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1",
+        sender: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
         domain_id:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-      },
-      {
-        chain_id: "11155111",
-        block_number: "4107386",
-        transaction_hash: "0x6410de03e9a2f12543e491d1048209e5638d702948cf23d48a63d96a50efd20d",
-        log_index: 19,
-        contract_address: "0xfed6a969aaa60e4961fcd3ebf1a2e8913ac65b72",
-        sender: "0x179a862703a4adfb29896552df9e307980d19285",
-        domain_id:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-      },
-      {
-        chain_id: "11155111",
-        block_number: "4107386",
-        transaction_hash: "0x6410de03e9a2f12543e491d1048209e5638d702948cf23d48a63d96a50efd20d",
-        log_index: 16,
-        contract_address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
-        sender: "0x179a862703a4adfb29896552df9e307980d19285",
-        domain_id:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+          "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
       },
     ],
+    resultNote,
   },
   sdk: {
     codeSnippet: `import { and, desc, eq } from "drizzle-orm";
 
-const name = "vitalik.eth";
+const name = "wrapnation.eth";
 const limit = 5;
 
 const domainEvents = await ensDb
@@ -115,54 +99,35 @@ console.log(domainEvents);`,
     result: [
       {
         chainId: 11155111,
-        blockNumber: "6023942",
-        transactionHash: "0x6206e95dc5ba5fc8d0804283498f17bac18081437b4198c824b62ee851622ba5",
-        logIndex: 194,
-        contractAddress: "0xfed6a969aaa60e4961fcd3ebf1a2e8913ac65b72",
-        sender: "0x225f137127d9067788314bc7fcc1f36746a3c3b5",
+        blockNumber: "10918673",
+        transactionHash: "0xca5e111932f0b26e1d458c690c5dfe8b2b8165ee2a937c04e4021e93a71954e4",
+        logIndex: 42,
+        contractAddress: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
+        sender: "0x801d2e48d378f161dba7ad7ad002ad557714c191",
         domainId:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+          "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
       },
       {
         chainId: 11155111,
-        blockNumber: "6023942",
-        transactionHash: "0x6206e95dc5ba5fc8d0804283498f17bac18081437b4198c824b62ee851622ba5",
-        logIndex: 193,
-        contractAddress: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-        sender: "0x225f137127d9067788314bc7fcc1f36746a3c3b5",
+        blockNumber: "10918673",
+        transactionHash: "0xca5e111932f0b26e1d458c690c5dfe8b2b8165ee2a937c04e4021e93a71954e4",
+        logIndex: 38,
+        contractAddress: "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1",
+        sender: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
         domainId:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+          "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
       },
       {
         chainId: 11155111,
-        blockNumber: "4107392",
-        transactionHash: "0xf143118eb4100361f040b1ae5627562125f0cf1717073a8204befe5e512c80d4",
-        logIndex: 22,
-        contractAddress: "0x0635513f179d50a207757e05759cbd106d7dfce8",
-        sender: "0x179a862703a4adfb29896552df9e307980d19285",
+        blockNumber: "10918673",
+        transactionHash: "0xca5e111932f0b26e1d458c690c5dfe8b2b8165ee2a937c04e4021e93a71954e4",
+        logIndex: 37,
+        contractAddress: "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1",
+        sender: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
         domainId:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-      },
-      {
-        chainId: 11155111,
-        blockNumber: "4107386",
-        transactionHash: "0x6410de03e9a2f12543e491d1048209e5638d702948cf23d48a63d96a50efd20d",
-        logIndex: 19,
-        contractAddress: "0xfed6a969aaa60e4961fcd3ebf1a2e8913ac65b72",
-        sender: "0x179a862703a4adfb29896552df9e307980d19285",
-        domainId:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-      },
-      {
-        chainId: 11155111,
-        blockNumber: "4107386",
-        transactionHash: "0x6410de03e9a2f12543e491d1048209e5638d702948cf23d48a63d96a50efd20d",
-        logIndex: 16,
-        contractAddress: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
-        sender: "0x179a862703a4adfb29896552df9e307980d19285",
-        domainId:
-          "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+          "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
       },
     ],
+    resultNote,
   },
 } satisfies QueryExample;

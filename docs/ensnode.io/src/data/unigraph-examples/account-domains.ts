@@ -1,4 +1,7 @@
+import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
+
+const resultNote = outputSource("V2 Sepolia");
 
 /**
  * Example query for fetching Domains by their owner's address,
@@ -93,6 +96,7 @@ LIMIT 10;`,
         owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
       },
     ],
+    resultNote,
   },
   sdk: {
     codeSnippet: `import { and, eq, asc } from "drizzle-orm";
@@ -194,5 +198,6 @@ console.log(accountDomains);`,
         ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
       },
     ],
+    resultNote,
   },
 } satisfies QueryExample;

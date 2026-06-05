@@ -1,0 +1,2 @@
+export const outputSource = (source: "V2 Sepolia" | "Alpha" | "Alpha Sepolia") =>
+  `Output matches a point in time snapshot of ENSDb result from our "${source}" <a href="/docs/hosted-instances">Hosted ENSNode instance</a>. Live output depends on the configuration of your ENSNode instance and also changes that may have happened in ENS since this point in time snapshot example response was captured.`;

@@ -1,4 +1,7 @@
+import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
+
+const resultNote = outputSource("Alpha Sepolia");
 
 /**
  * Example query for fetching ENS registrations that are expiring soon.
@@ -70,6 +73,7 @@ LIMIT 5;
           "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x13403c49bb9d168c7f18b830b5dd86f562e3e203fe2fc545927e5f609e3e6417",
       },
     ],
+    resultNote,
   },
   sdk: {
     codeSnippet: `import { and, asc, eq, gte, lte, sql } from "drizzle-orm";
@@ -164,5 +168,6 @@ console.log(expiringRegistrations);`,
           "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x13403c49bb9d168c7f18b830b5dd86f562e3e203fe2fc545927e5f609e3e6417",
       },
     ],
+    resultNote,
   },
 } satisfies QueryExample;

@@ -1,6 +1,7 @@
 export interface CodeExample {
   codeSnippet: string;
   result: unknown;
+  resultNote?: string;
 }
 
 export interface QueryExample {
