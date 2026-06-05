@@ -1,4 +1,4 @@
-# Omnigraph GraphQL Example
+# ENS Omnigraph GraphQL Example
 
 A minimal TypeScript script demonstrating how to query the ENS Omnigraph API directly over HTTP — no SDK, just `fetch`.
 
@@ -27,3 +27,9 @@ pnpm install
 
 ENSNODE_URL=http://localhost:4334 pnpm -F omnigraph-graphql-example start
 ```
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

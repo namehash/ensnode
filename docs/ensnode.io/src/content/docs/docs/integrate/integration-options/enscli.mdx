@@ -1,38 +1,142 @@
 ---
 title: enscli (CLI)
-description: Coming soon — an agent- and human-friendly CLI for the ENS Omnigraph API, wrapping enssdk.
+description: An agent- and human-friendly CLI for ENS — query the ENS Omnigraph, explore the schema, resolve hashes, heal labels, and check indexing status from the terminal.
 ---
 
 import { Aside, LinkCard } from "@astrojs/starlight/components";
+import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVersionWarning.astro";
 
-<Aside type="caution" title="Coming soon">
-  **`enscli`** is a planned ENS CLI that wraps
-  [`enssdk`](/docs/integrate/integration-options/enssdk) to bring the ENS Omnigraph to the terminal.
-  The npm name is reserved; we're still shaping the design. `enscli` will ship soon.
+`enscli` is the CLI entry point to ENS. It wraps [`enssdk`](/docs/integrate/integration-options/enssdk) and the [ENS Omnigraph](/docs/integrate/omnigraph) so you can resolve names, look up records, search domains, and run ad-hoc GraphQL queries against any ENSNode instance — without writing a script first.
+
+It is designed to feel natural whether you drive it yourself or let an AI agent drive it: predictable arguments, machine-readable output, runtime schema introspection, and loud, structured errors.
+
+<HostedInstanceVersionWarning variant="skills" />
+
+## Quick start
+
+No install step beyond `npx`:
+
+```bash
+# Namehash a Name
+npx enscli namehash vitalik.eth
+
+# Run a GraphQL query against the Omnigraph (default: mainnet)
+npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { address } } }'
+```
+
+## Output contract
+
+`enscli` is built for predictable parsing:
+
+- **JSON when piped, pretty in a TTY.** When stdout is not a terminal (i.e. for agents), every command prints JSON; interactively you get a friendlier rendering. Force either with `--output json` or `--output pretty`.
+- **Structured errors.** Failures print `{ "error": { "message": "…" } }` to stderr and exit non-zero.
+- **Input hardening.** Names, labels, and hashes containing control characters or `?`/`#`/`%` are rejected before any network call.
+
+## Selecting an ENSNode instance
+
+Most `ensnode` commands talk to an ENSNode instance. The target URL is resolved with this precedence:
+
+**`--ensnode-url` flag → `ENSNODE_URL` env → `.env` → namespace default.**
+
+`--namespace` (alias `-n`, or the `NAMESPACE` env var) selects a NameHash-hosted instance:
+
+| Namespace    | Hosted default                         |
+| ------------ | -------------------------------------- |
+| `mainnet`    | `https://api.alpha.ensnode.io`         |
+| `sepolia`    | `https://api.alpha-sepolia.ensnode.io` |
+| `sepolia-v2` | `https://api.v2-sepolia.ensnode.io`    |
+
+```bash
+npx enscli ensnode indexing-status --namespace sepolia
+npx enscli ensnode indexing-status --ensnode-url http://localhost:4334
+```
+
+ENSRainbow commands resolve their URL similarly via `--ensrainbow-url` / `ENSRAINBOW_URL`.
+
+## Commands
+
+### `ensnode omnigraph <query>`
+
+Send a raw GraphQL query — the string is the exact payload, so the [schema](#ensnode-omnigraph-schema-typefield) doubles as your documentation.
+
+```bash
+npx enscli ensnode omnigraph 'query D($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    canonical { name { interpreted } }
+    resolve { records { addresses(coinTypes: [60]) { address } } }
+  }
+}' --variables '{"name":"vitalik.eth"}'
+```
+
+<Aside type="tip">
+  GraphQL is naturally field-masked — select only the fields you need to keep responses small and avoid context bloat. Resolution lives in the graph: select `Domain.resolve` (records) and `Account.resolve` (primary names) inline rather than as separate calls.
+
+  <LinkCard
+    title="ENS Omnigraph API"
+    description="The full data model, resolution, and query patterns."
+    href="/docs/integrate/omnigraph"
+  />
 </Aside>
 
-`enscli` will be the terminal-shaped entry point to the [ENS Omnigraph](/docs/integrate/omnigraph) — a single CLI for resolving names, looking up records, searching domains, and running ad-hoc queries against any ENSNode instance.
+### `ensnode omnigraph schema [Type[.field]]`
 
-Designed to feel natural whether you're driving it yourself or letting an AI agent drive. From a terminal it's one `npx` away with sensible defaults against the public Omnigraph; for agents it's predictable arguments, structured output, and machine-readable help.
+Explore the Omnigraph schema offline (it ships with the CLI — no network):
 
-## Built for
+```bash
+npx enscli ensnode omnigraph schema                  # root query fields + major types
+npx enscli ensnode omnigraph schema Domain           # a type's fields, with descriptions
+npx enscli ensnode omnigraph schema Domain.canonical # a single field
+npx enscli ensnode omnigraph schema --search primary # find types/fields by keyword
+```
 
-- Developers exploring or validating an ENS integration from a terminal, without writing a script first.
-- Operators wiring ENS lookups into shell pipelines, cron, or CI.
-- AI coding agents driving [`ensskills`](/docs/integrate/integration-options/ensskills), which reach into the protocol through `enscli`.
+### `ensnode indexing-status`
+
+```bash
+npx enscli ensnode indexing-status
+```
+
+### `ensrainbow heal <labelhash>` / `ensrainbow count`
+
+```bash
+npx enscli ensrainbow heal 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+npx enscli ensrainbow count
+```
+
+### `datasources identify <address>`
+
+Identify a well-known ENS contract by address — given `0xabc…`, report which datasource contract it is across the namespace's chains. Fully offline (the datasource catalog ships with the CLI). Accepts a bare address, a chain-scoped `chainId:address`, or full CAIP-10 `eip155:chainId:address`; `--namespace` (default `mainnet`) selects which namespace to search.
+
+```bash
+npx enscli datasources identify 0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e         # bare address (mainnet)
+npx enscli datasources identify 1:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85       # scope to a chain
+npx enscli datasources identify 0x94f523b8261b815b87effcf4d18e6abef18d6e4b -n sepolia  # another namespace
+```
+
+The result is `{ query, matches }`. A miss is not an error: `matches` is `[]` with exit code `0`, so branch on `matches.length` rather than the exit code. Contracts indexed only by event (no fixed address) can't be identified and are never returned.
+
+### `namehash <name>` / `labelhash <label>`
+
+```bash
+npx enscli namehash vitalik.eth
+npx enscli labelhash vitalik
+```
+
+## For AI agents
+
+`enscli` is the runtime that [`ensskills`](/docs/integrate/integration-options/ensskills) drive on your agent's behalf. The `omnigraph` skill teaches an agent to author queries and run them through `enscli`, with the schema available via `omnigraph schema`. See the [ensskills docs](/docs/integrate/integration-options/ensskills) to install them.
 
 ## Related
-
-<LinkCard
-  title="enssdk"
-  description="The TypeScript SDK that enscli wraps."
-  href="/docs/integrate/integration-options/enssdk"
-/>
 
 <LinkCard
   title="ensskills"
   description="The agent-skill bundles that drive enscli on a developer's behalf."
   href="/docs/integrate/integration-options/ensskills"
+/>
+
+<LinkCard
+  title="enssdk"
+  description="The TypeScript SDK that enscli wraps."
+  href="/docs/integrate/integration-options/enssdk"
 />
 
 <LinkCard

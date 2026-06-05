@@ -10,15 +10,29 @@ export const integrateSidebarTopic = {
     },
     {
       label: "Why ENSNode?",
-      link: "/docs/integrate/why-ensnode",
+      collapsed: false,
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/why-ensnode",
+        },
+        {
+          label: "Keep ENS apps working 🚨",
+          link: "/docs/integrate/why-ensnode/keep-ens-working",
+        },
+        {
+          label: "ENSv2 Readiness",
+          link: "/docs/integrate/why-ensnode/ensv2-readiness",
+        },
+      ],
     },
     {
-      label: "ENSv2 Readiness",
-      link: "/docs/integrate/ensv2-readiness",
+      label: "AI/LLM Tooling 🤖",
+      link: "/docs/integrate/ai-llm",
     },
     {
       label: "ENS Subgraph",
-      collapsed: true,
+      collapsed: false,
       badge: {
         text: "LEGACY",
         variant: "danger",
@@ -209,6 +223,18 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
+          label: "ENSDb Writers (Indexers)",
+          link: "/docs/integrate/integration-options/ensdb-writers",
+        },
+        {
+          label: "ENSDb Readers (Custom APIs)",
+          link: "/docs/integrate/integration-options/ensdb-readers",
+        },
+        {
+          label: "ENSNode Plugins (data models)",
+          link: "/docs/integrate/integration-options/ensnode-plugins",
+        },
+        {
           label: "enscli (CLI)",
           link: "/docs/integrate/integration-options/enscli",
         },
@@ -217,7 +243,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensskills",
         },
         {
-          label: "ensdb-cli (ENSDb Snapshots)",
+          label: "ensdb-cli (Snapshots)",
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
@@ -225,10 +251,6 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],
-    },
-    {
-      label: "AI / LLM Tooling",
-      link: "/docs/integrate/ai-llm",
     },
   ],
 };

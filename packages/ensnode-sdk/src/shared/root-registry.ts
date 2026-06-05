@@ -1,4 +1,10 @@
-import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId, type RegistryId } from "enssdk";
+import {
+  type AccountId,
+  makeConcreteRegistryId,
+  makeENSv1RegistryId,
+  makeENSv2RegistryId,
+  type RegistryId,
+} from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 
@@ -81,12 +87,20 @@ export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
 //////////////
 
 /**
+ * Gets the AccountId representing the preferred Root Registry for the selected `namespace` —
+ * the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry. Used as the entry
+ * point for resolution-time namegraph traversal.
+ */
+export const getRootRegistry = (namespace: ENSNamespaceId) =>
+  maybeGetENSv2RootRegistry(namespace) ?? getENSv1RootRegistry(namespace);
+
+/**
  * Gets the RegistryId representing the preferred Root Registry for the selected `namespace` —
  * the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry. Used as the entry
  * point for resolution-time namegraph traversal.
  */
 export const getRootRegistryId = (namespace: ENSNamespaceId) =>
-  maybeGetENSv2RootRegistryId(namespace) ?? getENSv1RootRegistryId(namespace);
+  makeConcreteRegistryId(getRootRegistry(namespace));
 
 /**
  * Determines whether `registryId` is a Root Registry (ENSv1 Root or, when defined, ENSv2 Root)

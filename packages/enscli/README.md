@@ -1,5 +1,25 @@
 # enscli
 
-This package name is reserved for the [ENSNode](https://ensnode.io) project by [NameHash Labs](https://namehashlabs.org).
+An agent- and human-friendly CLI for ENS, wrapping [`enssdk`](https://www.npmjs.com/package/enssdk) and the ENS Omnigraph.
 
-For more information, visit [ensnode.io](https://ensnode.io).
+```bash
+# Query the Omnigraph (defaults to the NameHash-hosted mainnet instance)
+npx enscli ensnode omnigraph '{ domain(by: { name: "vitalik.eth" }) { owner { address } } }'
+
+# Explore the schema offline
+npx enscli ensnode omnigraph schema Domain
+
+# Namehashing, Labelhashing
+npx enscli namehash vitalik.eth
+npx enscli labelhash vitalik
+```
+
+Outputs JSON when piped and a pretty form in a TTY.
+
+See the [enscli documentation](https://ensnode.io/docs/integrate/integration-options/enscli) for the full command reference, namespaces, and configuration.
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

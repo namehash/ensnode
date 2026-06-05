@@ -1,0 +1,10 @@
+---
+import { Tabs } from "@astrojs/starlight/components";
+---
+
+<div
+  class="not-content not-prose static-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]">
+  <Tabs syncKey="unigraph-client">
+    <slot />
+  </Tabs>
+</div>

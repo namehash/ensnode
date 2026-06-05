@@ -1,4 +1,5 @@
 import { asLiteralName } from "enssdk";
+import { type Hex, toHex } from "viem";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -23,16 +24,16 @@ describe("interpretNameRecordValue", () => {
 });
 
 describe("interpretAddressRecordValue", () => {
-  it("returns null for empty string", () => {
-    expect(interpretAddressRecordValue("")).toBeNull();
+  it("returns null for empty string (type override)", () => {
+    expect(interpretAddressRecordValue("" as Hex)).toBeNull();
   });
 
   it("returns null for '0x'", () => {
     expect(interpretAddressRecordValue("0x")).toBeNull();
   });
 
-  it("returns null for non-hex values", () => {
-    expect(interpretAddressRecordValue("someNonHexString")).toBeNull();
+  it("returns null for non-hex values (type override)", () => {
+    expect(interpretAddressRecordValue("someNonHexString" as Hex)).toBeNull();
   });
 
   it("returns lowercase hex for non-EVM address bytes", () => {
@@ -54,8 +55,8 @@ describe("interpretAddressRecordValue", () => {
     );
   });
 
-  it("interprets null-byte-containing string as deletion", () => {
-    expect(interpretAddressRecordValue("example\u0000")).toBeNull();
+  it("represents null-bytes correctly", () => {
+    expect(interpretAddressRecordValue(toHex("\u0000"))).toBe("0x00");
   });
 });
 

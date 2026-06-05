@@ -42,6 +42,7 @@
     "prepublish": "tsup",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
+    "typecheck": "tsgo --noEmit",
     "test": "vitest"
   },
   "peerDependencies": {

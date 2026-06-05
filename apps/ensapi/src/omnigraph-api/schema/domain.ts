@@ -22,8 +22,12 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { buildProfileSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/profile/build-profile-selection";
 import { toResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
-import { buildRecordsSelectionFromResolveContainerInfo } from "@/omnigraph-api/lib/resolution/records-selection";
+import {
+  buildRecordsSelectionFromResolveContainerInfo,
+  mergeRecordsSelections,
+} from "@/omnigraph-api/lib/resolution/records-selection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
@@ -33,6 +37,7 @@ import {
 } from "@/omnigraph-api/schema/constants";
 import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
 import {
+  DOMAINS_ORDERING_DESCRIPTION,
   DomainPermissionsWhereInput,
   DomainsOrderInput,
   SubdomainsWhereInput,
@@ -141,7 +146,7 @@ DomainInterfaceRef.implement({
     owner: t.field({
       type: AccountRef,
       description:
-        "If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).",
+        "If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).",
       nullable: true,
       resolve: (parent) => parent.ownerId,
     }),
@@ -197,23 +202,27 @@ DomainInterfaceRef.implement({
         const name = domain.canonicalName;
 
         if (!name || !isNormalizedName(name)) {
-          return { accelerate, canAccelerate, trace: null, records: null };
+          return { accelerate, canAccelerate, trace: null, result: null };
         }
 
-        const recordsSelection = buildRecordsSelectionFromResolveContainerInfo(info);
-        if (!recordsSelection) {
-          return { accelerate, canAccelerate, trace: null, records: null };
+        const selection = mergeRecordsSelections(
+          buildRecordsSelectionFromResolveContainerInfo(info),
+          buildProfileSelectionFromResolveContainerInfo(info),
+        );
+
+        if (!selection) {
+          return { accelerate, canAccelerate, trace: null, result: null };
         }
 
         const { trace, result } = await runWithTrace(() =>
-          resolveForward(name, recordsSelection, { accelerate, canAccelerate }),
+          resolveForward(name, selection, { accelerate, canAccelerate }),
         );
 
         return {
           accelerate,
           canAccelerate,
           trace,
-          records: toResolvedRecordsModel(name, result),
+          result: toResolvedRecordsModel(name, result),
         };
       },
     }),
@@ -271,16 +280,16 @@ DomainInterfaceRef.implement({
     // Domain.subdomains
     /////////////////////
     subdomains: t.connection({
-      description: "All Domains that are direct descendents of this Domain in the namegraph.",
+      description: `All Domains that are direct descendants of this Domain in the namegraph. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: SubdomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+      resolve: (parent, { where, order, ...connectionArgs }) => {
         if (!parent.subregistryId) return EMPTY_CONNECTION;
 
-        return resolveFindDomains(context, {
+        return resolveFindDomains({
           where: { ...where, registryId: parent.subregistryId },
           order,
           ...connectionArgs,

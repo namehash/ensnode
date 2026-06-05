@@ -1,5 +1,5 @@
 import type { ChainId } from "enssdk";
-import { createPublicClient, fallback, http, type PublicClient } from "viem";
+import type { PublicClient } from "viem";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { type EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
@@ -18,6 +18,7 @@ import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/co
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { makeLogger } from "@/lib/logger";
+import { buildRootChainPublicClient } from "@/lib/public-client";
 
 const logger = makeLogger("di");
 
@@ -152,12 +153,10 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get rootChainPublicClient(): PublicClient {
       if (instances.rootChainPublicClient === undefined) {
-        // Create an viem#PublicClient that uses a fallback() transport with all specified HTTP RPCs
-        instances.rootChainPublicClient = createPublicClient({
-          transport: fallback(
-            context.rootChainRpcConfig.httpRPCs.map((url) => http(url.toString())),
-          ),
-        });
+        instances.rootChainPublicClient = buildRootChainPublicClient(
+          context.rootChainRpcConfig,
+          context.namespace,
+        );
       }
 
       return instances.rootChainPublicClient;

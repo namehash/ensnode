@@ -66,6 +66,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@ensnode/integration-test-env": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "@types/prismjs": "^1.26.6",

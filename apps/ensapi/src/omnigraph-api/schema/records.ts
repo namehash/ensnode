@@ -14,14 +14,18 @@ ResolvedRawTextRecordRef.implement({
   description:
     "A resolved 'raw' text record for an ENS name. Value is any possible string and may require additional validation or preprocessing before use.",
   fields: (t) => ({
-    key: t.exposeString("key", {
+    key: t.field({
+      type: "String",
       description: "The text record key.",
       nullable: false,
+      resolve: (r) => r.key,
     }),
-    value: t.exposeString("value", {
+    value: t.field({
+      type: "String",
       description:
         "The 'raw' text record value, or null if not set. Value is any possible string and may require additional validation or preprocessing before use.",
       nullable: true,
+      resolve: (r) => r.value,
     }),
   }),
 });
@@ -43,11 +47,12 @@ ResolvedAddressRecordRef.implement({
       nullable: false,
       resolve: (r) => r.coinType,
     }),
-    address: t.expose("address", {
+    address: t.field({
       type: "Hex",
       description:
-        'The "raw" resolved address record as hex, or null if not set. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. May be a hex value representing 0 or more bytes. There is no guarantee that an EVM coinType returns an address value of any particular byte length.',
+        'The "raw" resolved address record as hex, or null if not set, empty ("0x"), or zeroAddress. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. Guaranteed to be at least one byte of hex data. There is no guarantee that an EVM CoinType returns an address value of any particular byte length.',
       nullable: true,
+      resolve: (r) => r.address,
     }),
   }),
 });
@@ -125,48 +130,45 @@ ResolvedInterfaceRecordRef.implement({
 ////////////////////
 // ResolvedRecords
 ////////////////////
-export type { ResolvedRecordsModel };
+export type {
+  ResolvedRecordsModel,
+  ResolvedRecordsResultModel,
+} from "@/omnigraph-api/lib/resolution/records-profile-model";
 
 export const ResolvedRecordsRef = builder.objectRef<ResolvedRecordsModel>("ResolvedRecords");
 
 ResolvedRecordsRef.implement({
   description: "Records resolved for a specific ENS name via the ENS protocol.",
   fields: (t) => ({
-    id: t.field({
-      description: "Stable cache key for these records: the InterpretedName used to resolve them.",
-      type: "InterpretedName",
-      nullable: false,
-      resolve: (parent) => parent.id,
-    }),
     reverseName: t.string({
       description:
         "The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.",
       nullable: true,
-      resolve: (r) => r.name ?? null,
+      resolve: (r) => r.records.name ?? null,
     }),
     contenthash: t.field({
       description: "The ENSIP-7 contenthash record raw bytes, or null if not set.",
       type: "Hex",
       nullable: true,
-      resolve: (r) => r.contenthash ?? null,
+      resolve: (r) => r.records.contenthash ?? null,
     }),
     pubkey: t.field({
       description: "The PubkeyResolver (x, y) pair, or null if not set.",
       type: ResolvedPubkeyRecordRef,
       nullable: true,
-      resolve: (r) => r.pubkey ?? null,
+      resolve: (r) => r.records.pubkey ?? null,
     }),
     dnszonehash: t.field({
       description: "The IDNSZoneResolver zonehash raw bytes, or null if not set.",
       type: "Hex",
       nullable: true,
-      resolve: (r) => r.dnszonehash ?? null,
+      resolve: (r) => r.records.dnszonehash ?? null,
     }),
     version: t.field({
       description: "The IVersionableResolver version, or null if not set or unavailable.",
       type: "BigInt",
       nullable: true,
-      resolve: (r) => r.version ?? null,
+      resolve: (r) => r.records.version ?? null,
     }),
     abi: t.field({
       description:
@@ -192,11 +194,11 @@ ResolvedRecordsRef.implement({
 
         @see https://docs.ens.domains/ensip/4/
         */
-        if (!r.abi) return null;
+        if (!r.records.abi) return null;
         // check if the found contentType matches the requested contentTypeMask
-        const foundContentType = r.abi.contentType & contentTypeMask;
+        const foundContentType = r.records.abi.contentType & contentTypeMask;
         if (foundContentType === 0n) return null;
-        return r.abi;
+        return r.records.abi;
       },
     }),
     interfaces: t.field({
@@ -212,10 +214,10 @@ ResolvedRecordsRef.implement({
       },
       resolve: (r, { ids }) =>
         // preserve the order of requested interface ids
-        r.interfaces
+        r.records.interfaces
           ? ids.map((interfaceId) => ({
               interfaceId,
-              implementer: r.interfaces?.[interfaceId] ?? null,
+              implementer: r.records.interfaces?.[interfaceId] ?? null,
             }))
           : [],
     }),
@@ -231,7 +233,7 @@ ResolvedRecordsRef.implement({
       },
       resolve: (r, { keys }) =>
         // preserve the order of requested text keys
-        r.texts ? keys.map((key) => ({ key, value: r.texts?.[key] ?? null })) : [],
+        r.records.texts ? keys.map((key) => ({ key, value: r.records.texts?.[key] ?? null })) : [],
     }),
     addresses: t.field({
       description: "Resolved address records for the requested coin types.",
@@ -245,11 +247,11 @@ ResolvedRecordsRef.implement({
         }),
       },
       resolve: (r, { coinTypes }) =>
-        r.addresses
+        r.records.addresses
           ? // preserve the order of requested coin types
             coinTypes.map((coinType) => ({
               coinType,
-              address: r.addresses?.[coinType] ?? null,
+              address: r.records.addresses?.[coinType] ?? null,
             }))
           : [],
     }),

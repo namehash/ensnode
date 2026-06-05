@@ -14,6 +14,7 @@ import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import {
+  DOMAINS_ORDERING_DESCRIPTION,
   DomainIdInput,
   DomainsOrderInput,
   DomainsWhereInput,
@@ -106,14 +107,14 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description: "Find Canonical Domains by Name.",
+      description: `Find Canonical Domains by Name. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (_, { where, order, ...connectionArgs }, context) =>
-        resolveFindDomains(context, { where, order, ...connectionArgs }),
+      resolve: (_, { where, order, ...connectionArgs }) =>
+        resolveFindDomains({ where, order, ...connectionArgs }),
     }),
 
     //////////////////////////////////

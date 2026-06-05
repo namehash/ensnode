@@ -1,7 +1,10 @@
 import type { DomainId } from "enssdk";
 
 import { builder } from "@/omnigraph-api/builder";
-import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
+import {
+  getDomainAssignedResolver,
+  getDomainEffectiveResolver,
+} from "@/omnigraph-api/lib/get-domain-resolver";
 import { ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 ////////////////////////////////
@@ -20,7 +23,18 @@ DomainResolverRef.implement({
         "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.",
       type: ResolverRef,
       nullable: true,
-      resolve: (domainId) => getDomainResolver(domainId),
+      resolve: (domainId) => getDomainAssignedResolver(domainId),
+    }),
+
+    ////////////////////////////
+    // DomainResolver.effective
+    ////////////////////////////
+    effective: t.field({
+      description:
+        "The Resolver that ENS Forward Resolution (ENSIP-10) lands on for this Domain — i.e. its _effective_ Resolver. Null when no active Resolver exists or the Domain is not in the Canonical Nametree.",
+      type: ResolverRef,
+      nullable: true,
+      resolve: (domainId) => getDomainEffectiveResolver(domainId),
     }),
   }),
 });
