@@ -74,7 +74,7 @@ If a question genuinely isn't expressible in the Omnigraph schema, the underlyin
 
 - account(by: AccountByInput!): Account — Identify an Account by ID or Address.
 - domain(by: DomainIdInput!): Domain — Identify a Domain by Name or DomainId
-- domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection — Find Canonical Domains by Name.
+- domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection — Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
 - permissions(by: PermissionsIdInput!): Permissions — Identify Permissions by ID or AccountId.
 - registry(by: RegistryIdInput!): Registry — Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
 - resolver(by: ResolverIdInput!): Resolver — Identify a Resolver by ID or AccountId.
@@ -97,7 +97,7 @@ _Represents a Domain, i.e. an individual Label within the ENS namegraph. It may 
 - registry: Registry! — The Registry under which this Domain exists.
 - resolve(accelerate: Boolean): ForwardResolve! — Resolve protocol-level data for this Domain.
 - resolver: DomainResolver! — Resolver relationship metadata for this Domain.
-- subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection — All Domains that are direct descendants of this Domain in the namegraph.
+- subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection — All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
 - subregistry: Registry — The Registry this Domain declares as its Subregistry, if exists.
 
 #### DomainCanonical
@@ -114,7 +114,7 @@ _Canonicality metadata for a Domain, including its name, depth, path, and node (
 _Represents an individual Account, keyed by its Address._
 
 - address: Address! — An EVM Address that uniquely identifies this Account on-chain.
-- domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection — The Domains that are owned by the Account.
+- domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection — The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
 - events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection — All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
 - id: Address! — A unique reference to this Account.
 - permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection — The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
@@ -147,7 +147,7 @@ _A Registry represents a Registry contract in the ENS namegraph. It may be an EN
 
 - canonical: Boolean! — Whether the Registry is Canonical.
 - contract: AccountId! — Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
-- domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection — The Domains managed by this Registry.
+- domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection — The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
 - id: RegistryId! — A unique reference to this Registry.
 - parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection — The Domains for which this Registry is a Subregistry.
 - permissions: Permissions — The Permissions managed by this Registry.
@@ -422,6 +422,41 @@ query DomainSubdomains($name: InterpretedName!) {
       }
     }
     subdomains(first: 10) {
+      edges {
+        node {
+          canonical {
+            name {
+              interpreted
+              beautified
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "eth"
+}
+```
+
+### domain-subdomains-recently-registered
+
+```graphql
+query RecentlyRegisteredSubdomains($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    canonical {
+      name {
+        interpreted
+        beautified
+      }
+    }
+    subdomains(first: 10, order: { by: REGISTRATION_TIMESTAMP, dir: DESC }) {
       edges {
         node {
           canonical {

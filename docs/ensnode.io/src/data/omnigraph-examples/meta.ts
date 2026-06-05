@@ -23,6 +23,11 @@ export const OMNIGRAPH_EXAMPLES_META: Record<
     description: "Paginate direct child names under a parent domain.",
     category: "Resolution",
   },
+  "domain-subdomains-recently-registered": {
+    name: "Recently Registered Subdomains",
+    description: "List a parent domain's subdomains ordered by most recent registration first.",
+    category: "Resolution",
+  },
   "domain-events": {
     name: "Domain Events",
     description: "Raw contract events associated with a domain’s registry records.",
