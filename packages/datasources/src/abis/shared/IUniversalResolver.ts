@@ -2,15 +2,6 @@ import type { Abi } from "viem";
 
 export const IUniversalResolver = [
   {
-    inputs: [
-      { internalType: "address", name: "owner", type: "address" },
-      { internalType: "contract ENS", name: "ens", type: "address" },
-      { internalType: "contract IGatewayProvider", name: "batchGatewayProvider", type: "address" },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
     inputs: [{ internalType: "bytes", name: "dns", type: "bytes" }],
     name: "DNSDecodingFailed",
     type: "error",

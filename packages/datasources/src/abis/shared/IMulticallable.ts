@@ -1,6 +1,5 @@
 import type { Abi } from "viem";
 
-// function multicall(bytes[] calldata data) external view returns (bytes[] memory);
 export const IMulticallable = [
   {
     type: "function",
