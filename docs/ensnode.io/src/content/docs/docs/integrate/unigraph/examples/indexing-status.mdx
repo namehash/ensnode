@@ -121,7 +121,7 @@ export const unigraphSqlResultJson = {
 
 export const sqlExampleSnippet = `-- Indexing status snapshot for the \`ensindexer_0\` ENSIndexer Schema
 SELECT value -> 'indexingStatus' as indexing_status_snapshot
-FROM ensnode.metadata
+FROM "ensnode".metadata
 WHERE ens_indexer_schema_name = 'ensindexer_0'
 AND key = 'indexing_metadata_context';
 `;

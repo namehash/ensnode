@@ -1,0 +1,72 @@
+---
+title: Domain by Name
+description: Fetch a Domain from the ENS Unigraph by its canonical name.
+sidebar:
+  label: Domain by Name
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+
+export const unigraphSqlResultJson = [
+  {
+    id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+    type: "ENSv1Domain",
+    canonical_name: "vitalik.eth",
+    canonical_node: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+    owner_id: "0x220866b1a2219f40e72f5c628b65d54268ca3a9d",
+  },
+];
+
+export const ensDbSdkResultJson = [
+  {
+    id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+    type: "ENSv1Domain",
+    canonicalName: "vitalik.eth",
+    canonicalNode: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+    ownerId: "0x220866b1a2219f40e72f5c628b65d54268ca3a9d",
+  },
+];
+
+export const sqlExampleSnippet = `SELECT
+	id,
+	type,
+	canonical_name,
+	canonical_node,
+	owner_id
+FROM ensindexer_0.domains
+WHERE canonical_name = 'vitalik.eth';`
+
+export const tsExampleSnippet = `import { eq } from "drizzle-orm";
+
+const [vitalik] = await ensDb
+\t.select({
+\t\tid: ensIndexerSchema.domain.id,
+\t\ttype: ensIndexerSchema.domain.type,
+\t\tcanonicalName: ensIndexerSchema.domain.canonicalName,
+\t\tcanonicalNode: ensIndexerSchema.domain.canonicalNode,
+\t\townerId: ensIndexerSchema.domain.ownerId,
+\t})
+\t.from(ensIndexerSchema.domain)
+\t.where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+
+console.log(vitalik);`
+
+:::caution[`unigraph` plugin required]
+Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
+:::
+
+Fetch a Domain by its canonical name. Because `canonical_name` is materialized across both ENSv1 and ENSv2, the same lookup works regardless of protocol version. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+:::note[Canonical fields]
+Canonical fields are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`. In SQL, these columns are `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth`; in `ensdb-sdk`, the corresponding fields are `canonicalName`, `canonicalPath`, `canonicalNode`, and `canonicalDepth`.
+:::
+
+<UnigraphStaticExample
+  sql={{ codeSnippet: sqlExampleSnippet, result: unigraphSqlResultJson }}
+  ensDbSdk={{ codeSnippet: tsExampleSnippet, result: ensDbSdkResultJson }}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+ </UnigraphStaticExample>

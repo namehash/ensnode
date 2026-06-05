@@ -175,7 +175,7 @@ export const integrateSidebarTopic = {
           collapsed: true,
           items: [
             {
-              label: "Overview",
+              label: "Connect",
               link: "/docs/integrate/unigraph/examples",
             },
             {
@@ -183,8 +183,32 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/unigraph/examples/domain-by-name",
             },
             {
+              label: "Domain Fuzzy Search",
+              link: "/docs/integrate/unigraph/examples/domains-fuzzy-search-by-name",
+            },
+            {
+              label: "Domain Events",
+              link: "/docs/integrate/unigraph/examples/domain-events",
+            },
+            {
+              label: "Subdomains",
+              link: "/docs/integrate/unigraph/examples/subdomains-by-parent-name",
+            },
+            {
               label: "Account Domains",
               link: "/docs/integrate/unigraph/examples/account-domains",
+            },
+            {
+              label: "Account Permissions",
+              link: "/docs/integrate/unigraph/examples/account-permissions",
+            },
+            {
+              label: "Latest Registrations",
+              link: "/docs/integrate/unigraph/examples/latest-registrations",
+            },
+            {
+              label: "Exipring Registrations",
+              link: "/docs/integrate/unigraph/examples/expiring-registrations",
             },
             {
               label: "Indexing Status",
@@ -231,7 +255,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb-readers",
         },
         {
-          label: "ENSNode Plugins (data models)",
+          label: "ENSNode Plugins (Data Models)",
           link: "/docs/integrate/integration-options/ensnode-plugins",
         },
         {

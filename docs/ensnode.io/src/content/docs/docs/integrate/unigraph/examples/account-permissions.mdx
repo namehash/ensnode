@@ -1,8 +1,8 @@
 ---
-title: Account Domains
-description: Count an address's Domains, grouped by protocol version (ENSv1 vs ENSv2).
+title: Fuzzy Search for ENS Names
+description: Perform a fuzzy search for ENS names.
 sidebar:
-  label: Account Domains
+  label: Fuzzy Search
 ---
 
 import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
@@ -20,25 +20,19 @@ export const resultJson = [
   }
 ];
 
-export const sqlExample = {
-  codeSnippet: `SELECT type, count(*) FROM ensindexer_0.domains
+export const sqlExampleSnippet = `SELECT type, count(*) FROM ensindexer_0.domains
 WHERE owner_id = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
 GROUP BY type;
-`,
-  result: resultJson,
-};
+`;
 
-export const tsExample = {
-  codeSnippet: `import { count, eq } from "drizzle-orm";
+export const tsExampleSnippet = `import { count, eq } from "drizzle-orm";
 
 const counts = await ensDb
-.select({ type: ensIndexerSchema.domain.type, count: count() })
-.from(ensIndexerSchema.domain)
-.where(eq(ensIndexerSchema.domain.ownerId, "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"))
-.groupBy(ensIndexerSchema.domain.type);
-`,
-result: resultJson,
-};
+\t.select({ type: ensIndexerSchema.domain.type, count: count() })
+\t.from(ensIndexerSchema.domain)
+\t.where(eq(ensIndexerSchema.domain.ownerId, "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"))
+\t.groupBy(ensIndexerSchema.domain.type);
+`
 
 :::caution[`unigraph` plugin required]
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
@@ -47,8 +41,14 @@ Performing SQL queries on the ENS Unigraph requires that you have the `unigraph`
 Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample
- sql={sqlExample}
- ensDbSdk={tsExample}
+ sql={{
+  codeSnippet: sqlExampleSnippet,
+  result: resultJson,
+ }}
+ ensDbSdk={{
+  codeSnippet: tsExampleSnippet,
+  result: resultJson,
+ }}
 >
   <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
   <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>

@@ -1,0 +1,25 @@
+---
+title: Subdomains
+description: Subdomains under an ENS name.
+sidebar:
+  label: Subdomains
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleSubdomainsByParentName } from "@data/unigraph-examples/subdomains-by-parent-name";
+
+:::caution[`unigraph` plugin required]
+Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
+:::
+
+Get a list of subdomains for the `eth` domain, including their Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<UnigraphStaticExample
+ sql={exampleSubdomainsByParentName.sql}
+ ensDbSdk={exampleSubdomainsByParentName.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>
