@@ -18,7 +18,7 @@ import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/co
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { makeLogger } from "@/lib/logger";
-import { buildPublicClient } from "@/lib/public-client";
+import { buildRootChainPublicClient } from "@/lib/public-client";
 
 const logger = makeLogger("di");
 
@@ -153,7 +153,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get rootChainPublicClient(): PublicClient {
       if (instances.rootChainPublicClient === undefined) {
-        instances.rootChainPublicClient = buildPublicClient(
+        instances.rootChainPublicClient = buildRootChainPublicClient(
           context.rootChainRpcConfig,
           context.namespace,
         );

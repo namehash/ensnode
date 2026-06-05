@@ -6,7 +6,7 @@ import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 /**
  * Builds a viem {@link PublicClient} for the ENS root chain with a fallback transport over all HTTP RPCs.
  */
-export function buildPublicClient(
+export function buildRootChainPublicClient(
   rootChainRpcConfig: RpcConfig,
   namespace: ENSNamespaceId,
 ): PublicClient {
