@@ -1,10 +1,6 @@
 import { ENSADMIN_URL } from "astro:env/client";
-
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
-import {
-  DOCS_HOSTED_INSTANCE_ANCHOR,
-  DOCS_HOSTED_INSTANCE_LABEL,
-} from "@lib/examples/omnigraph/constants";
+import { getDocsOmnigraphNamespaceConfig } from "@lib/examples/omnigraph/constants";
 import {
   buildEnskitSetupSnippets,
   buildEnskitSnippet,
@@ -27,6 +23,7 @@ export interface OmnigraphStaticExampleData {
   responseJson: string | null;
   hostedInstanceDocUrl: string;
   hostedInstanceLabel: string;
+  responseSourceLabel: string;
   adminUrl: string;
   enssdkSnippet: string;
   enskitSnippet: string;
@@ -39,6 +36,7 @@ export interface OmnigraphStaticExampleData {
 export function resolveOmnigraphStaticExample(exampleId: string): OmnigraphStaticExampleData {
   const example = getOmnigraphExampleById(exampleId);
   const uid = exampleId.replace(/[^a-zA-Z0-9_-]/g, "-");
+  const responseSource = getDocsOmnigraphNamespaceConfig(example.namespace);
 
   return {
     exampleId,
@@ -46,8 +44,9 @@ export function resolveOmnigraphStaticExample(exampleId: string): OmnigraphStati
     query: example.query,
     variablesJson: stringifyJsonForDocs(example.variables),
     responseJson: example.response ? stringifyJsonForDocs(example.response) : null,
-    hostedInstanceDocUrl: getHostedEnsNodeInstanceDocUrl(DOCS_HOSTED_INSTANCE_ANCHOR),
-    hostedInstanceLabel: DOCS_HOSTED_INSTANCE_LABEL,
+    hostedInstanceDocUrl: getHostedEnsNodeInstanceDocUrl(responseSource.hostedInstanceAnchor),
+    hostedInstanceLabel: responseSource.hostedInstanceLabel,
+    responseSourceLabel: responseSource.hostedInstanceLabel,
     adminUrl: buildEnsAdminOmnigraphUrl({
       ensadminBaseUrl: ENSADMIN_URL,
       query: example.query,

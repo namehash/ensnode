@@ -12,10 +12,11 @@ import {
 interface Props {
   uid: string;
   responseJson: string;
+  responseSourceLabel: string;
   heading?: string;
 }
 
-const { uid, responseJson, heading = "Output" } = Astro.props;
+const { uid, responseJson, responseSourceLabel, heading = "Output" } = Astro.props;
 
 const badgeClass =
   "inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]";
@@ -35,5 +36,7 @@ const headingId = `${uid}-output-heading`;
     style={`max-height: ${staticExampleOutputMaxHeight}`}>
     <Code code={responseJson} lang="json" />
   </div>
-  <StaticExampleNote class="pt-3">{staticExampleOutputSnapshotNote}</StaticExampleNote>
+  <StaticExampleNote class="pt-3">
+    {staticExampleOutputSnapshotNote(responseSourceLabel)}
+  </StaticExampleNote>
 </section>

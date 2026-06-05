@@ -83,6 +83,7 @@ const data = resolveOmnigraphStaticExample(id);
             adminUrl={data.adminUrl}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
             hostedInstanceLabel={data.hostedInstanceLabel}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
         {panel === "enssdk" ? (
@@ -95,6 +96,7 @@ const data = resolveOmnigraphStaticExample(id);
             responseJson={data.responseJson}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
             hostedInstanceLabel={data.hostedInstanceLabel}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
         {panel === "enskit" ? (
@@ -107,6 +109,7 @@ const data = resolveOmnigraphStaticExample(id);
             responseJson={data.responseJson}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
             hostedInstanceLabel={data.hostedInstanceLabel}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
         {panel === "curl" ? (
@@ -114,6 +117,7 @@ const data = resolveOmnigraphStaticExample(id);
             uid={data.uid}
             curlExample={data.curlExample}
             responseJson={data.responseJson}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
       </div>

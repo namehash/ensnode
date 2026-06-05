@@ -14,6 +14,7 @@ interface Props {
   adminUrl: string;
   hostedInstanceDocUrl: string;
   hostedInstanceLabel: string;
+  responseSourceLabel: string;
 }
 
 const {
@@ -24,6 +25,7 @@ const {
   adminUrl,
   hostedInstanceDocUrl,
   hostedInstanceLabel,
+  responseSourceLabel,
 } = Astro.props;
 ---
 
@@ -50,6 +52,11 @@ const {
 
 {
   responseJson ? (
-    <StaticExampleOutputSection uid={uid} responseJson={responseJson} heading="Output" />
+    <StaticExampleOutputSection
+      uid={uid}
+      responseJson={responseJson}
+      responseSourceLabel={responseSourceLabel}
+      heading="Output"
+    />
   ) : null
 }

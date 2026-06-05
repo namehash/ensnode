@@ -18,5 +18,6 @@ export const staticExampleMutedTextClass =
   "text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)]";
 
 /** Shown under illustrative JSON output snapshots in static Omnigraph examples. */
-export const staticExampleOutputSnapshotNote =
-  "Output matches a GraphQL Response snapshot; live output depends on your ENSNode instance.";
+export function staticExampleOutputSnapshotNote(responseSourceLabel: string): string {
+  return `Output matches a GraphQL Response from ${responseSourceLabel}; live output depends on your ENSNode instance.`;
+}

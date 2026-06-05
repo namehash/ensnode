@@ -162,6 +162,14 @@ export const integrateSidebarTopic = {
               label: "Namegraph",
               link: "/docs/integrate/omnigraph/examples/namegraph",
             },
+            {
+              label: "Account Migration Counts",
+              link: "/docs/integrate/omnigraph/examples/account-migrated-names",
+            },
+            {
+              label: "ETH TLD By Version",
+              link: "/docs/integrate/omnigraph/examples/eth-by-version",
+            },
           ],
         },
         {

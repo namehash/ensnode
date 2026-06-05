@@ -2,9 +2,9 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
+import { OMNIGRAPH_EXAMPLES_CONFIG } from "../src/data/omnigraph-examples/config.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
-import { ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
+import { getDocsOmnigraphNamespaceConfig } from "../src/lib/examples/omnigraph/constants.ts";
 
 function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
@@ -34,8 +34,8 @@ const snapshotById = new Map(
   (JSON.parse(readFileSync(examplesPath, "utf8")) as SnapshotExample[]).map((e) => [e.id, e]),
 );
 
-// Only fetch responses for the rendered set: meta entries supported by the vendored snapshot.
-const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[])
+// Only fetch responses for the rendered set: config entries supported by the vendored snapshot.
+const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_CONFIG) as string[])
   .filter((id) => snapshotById.has(id))
   .sort();
 
@@ -56,14 +56,10 @@ if (argIds.length > 0) {
 
 const exampleIds = argIds.length > 0 ? argIds : allExampleIds;
 
-// Endpoint defaults to the production v2 Sepolia URL; override to fill responses from a
-// staged deployment (e.g. blue/green) before that version is promoted to the prod URL.
-const url = new URL("/api/omnigraph", process.env.OMNIGRAPH_ENDPOINT ?? ENSNODE_URL).toString();
-
 logStep(
   argIds.length > 0
-    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples from ${url}: ${exampleIds.join(", ")}`
-    : `Fetching all ${exampleIds.length} Omnigraph examples from ${url}`,
+    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples: ${exampleIds.join(", ")}`
+    : `Fetching all ${exampleIds.length} Omnigraph examples (per-example namespace endpoints)`,
 );
 
 // When refreshing a subset, load the existing responses so unaffected entries are preserved.
@@ -76,8 +72,20 @@ for (const id of exampleIds) {
   logStep("Getting example query", id);
 
   const example = snapshotById.get(id)!;
+  const config = OMNIGRAPH_EXAMPLES_CONFIG[id];
+  if (!config) {
+    logError(`No OMNIGRAPH_EXAMPLES_CONFIG entry for id`, id);
+    process.exit(1);
+  }
+
+  const endpointOverride = process.env.OMNIGRAPH_ENDPOINT;
+  const baseUrl = endpointOverride ?? getDocsOmnigraphNamespaceConfig(config.namespace).ensnodeUrl;
+  const url = new URL("/api/omnigraph", baseUrl).toString();
+
   const query = example.query.trim();
   const variables = example.variables;
+
+  logStep(`POST ${url}`, id);
 
   const started = performance.now();
   const response = await fetch(url, {

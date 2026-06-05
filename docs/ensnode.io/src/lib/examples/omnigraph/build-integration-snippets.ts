@@ -1,5 +1,5 @@
 import snapshot from "@data/omnigraph-examples/snapshot.json";
-import { ENSNODE_URL } from "@lib/examples/omnigraph/constants";
+import { DEFAULT_ENSNODE_URL } from "@lib/examples/omnigraph/constants";
 
 /** Package managers shown in Setup tabs (npm default). */
 export type SetupPackageManager = "npm" | "pnpm";
@@ -18,7 +18,7 @@ export function buildEnssdkSetupSnippets(): Record<SetupPackageManager, string> 
   const deps = `enssdk@${npmSdkVersion}`;
   const devDeps = "tsx typescript @types/node";
   const pasteStep = "# 3. Paste the TypeScript snippet above into src/index.ts";
-  const runEnv = `ENSNODE_URL=${ENSNODE_URL}`;
+  const runEnv = `ENSNODE_URL=${DEFAULT_ENSNODE_URL}`;
 
   return {
     npm: `# 1. Create project
@@ -48,7 +48,7 @@ export function buildEnskitSetupSnippets(): Record<SetupPackageManager, string> 
   const deps = `enskit@${npmSdkVersion} enssdk@${npmSdkVersion}`;
   const viteFlags = "--template react-ts --no-interactive --no-immediate";
   const pasteStep = "# 3. Copy the TSX snippet above into src/App.tsx";
-  const runEnv = `VITE_ENSNODE_URL=${ENSNODE_URL}`;
+  const runEnv = `VITE_ENSNODE_URL=${DEFAULT_ENSNODE_URL}`;
 
   return {
     npm: `# 1. Create project
@@ -160,7 +160,7 @@ export function buildEnssdkSnippet(params: {
 ${interpretedNameImport}import { graphql, omnigraph } from "enssdk/omnigraph";
 
 const client = createEnsNodeClient({ 
-  url: process.env.ENSNODE_URL || "${ENSNODE_URL}"
+  url: process.env.ENSNODE_URL || "${DEFAULT_ENSNODE_URL}"
 }).extend(omnigraph);
 
 const ${opName}Query = graphql(\`
@@ -198,7 +198,7 @@ import { createEnsNodeClient } from "enssdk/core";
 ${interpretedNameImport}import { omnigraph } from "enssdk/omnigraph";
 
 const client = createEnsNodeClient({
-  url: import.meta.env.VITE_ENSNODE_URL || "${ENSNODE_URL}"
+  url: import.meta.env.VITE_ENSNODE_URL || "${DEFAULT_ENSNODE_URL}"
 }).extend(omnigraph);
 
 const ${opName}Query = graphql(\`
