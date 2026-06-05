@@ -18,9 +18,8 @@ const { variant, hostedInstanceDocUrl, hostedInstanceLabel } = Astro.props;
         <a
           href={hostedInstanceDocUrl}
           class:list={["text-sm", staticExampleHostedInstanceLinkClass]}>
-          {hostedInstanceLabel}
-        </a>{" "}
-        ENSNode instance.
+          {hostedInstanceLabel} ENSNode instance.
+        </a>
       </>
     ) : (
       <>Opens an editable StackBlitz project with this snippet.</>

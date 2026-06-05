@@ -44,10 +44,9 @@ const headingId = `${uid}-output-heading`;
     <Code code={responseJson} lang="json" />
   </div>
   <StaticExampleNote class="pt-3">
-    Output matches a GraphQL Response from{" "}
+    Output matches a point in time snapshot GraphQL response from our{" "}
     <a href={responseSourceDocUrl} class={staticExampleHostedInstanceLinkClass}
-      >{responseSourceLabel}</a
-    >
-    ; live output depends on your ENSNode instance.
+      >{responseSourceLabel} ENSNode instance</a
+    >. Live output depends on the configuration of your ENSNode instance and ENS state updates.
   </StaticExampleNote>
 </section>

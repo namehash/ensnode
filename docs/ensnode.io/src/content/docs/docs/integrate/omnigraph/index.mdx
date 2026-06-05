@@ -4,6 +4,7 @@ description: The world's first and only API providing unified access to the full
 ---
 
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
 The **ENS Omnigraph API** is the world's first and only API providing unified access to the full state of ENSv1 and ENSv2. It's a single, polymorphic GraphQL API over **both ENSv1 and ENSv2** — write your query once and get correct, typed results regardless of which protocol version a given Domain lives in.
 
@@ -37,24 +38,12 @@ Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a t
 
 ## Your first query
 
-Look up a Domain by name and read its owner:
+<OmnigraphStaticExampleSet
+  id="hello-world"
+  hideBackToExamples
+/>
 
-```graphql title="example.gql"
-query GetDomain {
-  domain(by: { name: "vitalik.eth" }) {
-    canonical {
-      name {
-        interpreted
-      }
-    }
-    owner {
-      address
-    }
-  }
-}
-```
-
-That's a simple shape to get started. When you're ready to understand the data model underneath, see [Core Concepts](/docs/integrate/omnigraph/concepts).
+Browse more patterns in [Examples](/docs/integrate/omnigraph/examples). When you're ready to understand the data model underneath, see [Core Concepts](/docs/integrate/omnigraph/concepts).
 
 ## Next steps
 

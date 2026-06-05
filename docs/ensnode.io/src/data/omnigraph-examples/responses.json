@@ -6,11 +6,11 @@
           "trace": [
             {
               "scope": "protocol-tracing",
-              "id": "span-22295-1780656325775",
-              "traceId": "trace-1780656325775-4vo8uopvm",
+              "id": "span-24259-1780668772037",
+              "traceId": "trace-1780668772034-colecazbo",
               "name": "forward-resolution:forward-resolution",
-              "timestamp": 1780656325775000,
-              "duration": 32000,
+              "timestamp": 1780668772037000,
+              "duration": 33000,
               "attributes": {
                 "ens.protocol": "forward-resolution",
                 "ens.protocol.step": "forward-resolution",
@@ -30,7 +30,7 @@
                     "ens.protocol.step": "active-resolver-exists",
                     "ens.protocol.step.result": true
                   },
-                  "time": 1780656325777000
+                  "time": 1780668772040000
                 },
                 {
                   "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -39,7 +39,7 @@
                     "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                     "ens.protocol.step.result": false
                   },
-                  "time": 1780656325777000
+                  "time": 1780668772040000
                 },
                 {
                   "name": "forward-resolution:accelerate-known-onchain-static-resolver (false)",
@@ -48,21 +48,21 @@
                     "ens.protocol.step": "accelerate-known-onchain-static-resolver",
                     "ens.protocol.step.result": false
                   },
-                  "time": 1780656325777000
+                  "time": 1780668772040000
                 }
               ],
               "children": [
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-22296-1780656325775",
-                  "traceId": "trace-1780656325775-4vo8uopvm",
+                  "id": "span-24260-1780668772037",
+                  "traceId": "trace-1780668772034-colecazbo",
                   "parentSpanContext": {
-                    "traceId": "trace-1780656325775-4vo8uopvm",
-                    "spanId": "span-22295-1780656325775"
+                    "traceId": "trace-1780668772034-colecazbo",
+                    "spanId": "span-24259-1780668772037"
                   },
                   "name": "forward-resolution:find-resolver",
-                  "timestamp": 1780656325775000,
-                  "duration": 2000,
+                  "timestamp": 1780668772037000,
+                  "duration": 3000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
                     "ens.protocol.step": "find-resolver",
@@ -77,15 +77,15 @@
                 },
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-22297-1780656325777",
-                  "traceId": "trace-1780656325775-4vo8uopvm",
+                  "id": "span-24261-1780668772040",
+                  "traceId": "trace-1780668772034-colecazbo",
                   "parentSpanContext": {
-                    "traceId": "trace-1780656325775-4vo8uopvm",
-                    "spanId": "span-22295-1780656325775"
+                    "traceId": "trace-1780668772034-colecazbo",
+                    "spanId": "span-24259-1780668772037"
                   },
                   "name": "forward-resolution:require-resolver",
-                  "timestamp": 1780656325777000,
-                  "duration": 19000,
+                  "timestamp": 1780668772040000,
+                  "duration": 21000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
                     "ens.protocol.step": "require-resolver",
@@ -102,15 +102,15 @@
                 },
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-22298-1780656325796",
-                  "traceId": "trace-1780656325775-4vo8uopvm",
+                  "id": "span-24262-1780668772061",
+                  "traceId": "trace-1780668772034-colecazbo",
                   "parentSpanContext": {
-                    "traceId": "trace-1780656325775-4vo8uopvm",
-                    "spanId": "span-22295-1780656325775"
+                    "traceId": "trace-1780668772034-colecazbo",
+                    "spanId": "span-24259-1780668772037"
                   },
                   "name": "forward-resolution:execute-resolve-calls",
-                  "timestamp": 1780656325796000,
-                  "duration": 11000,
+                  "timestamp": 1780668772061000,
+                  "duration": 9000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
                     "ens.protocol.step": "execute-resolve-calls"
@@ -1171,11 +1171,11 @@
   "account-migrated-names": {
     "data": {
       "account": {
-        "v2DomainsCount": {
-          "totalCount": 1249
-        },
         "v1DomainsCount": {
           "totalCount": 6
+        },
+        "v2DomainsCount": {
+          "totalCount": 1249
         }
       }
     }
@@ -1259,6 +1259,7 @@
     "data": {
       "domain": {
         "events": {
+          "totalCount": 6,
           "edges": [
             {
               "node": {
@@ -1344,8 +1345,7 @@
                 "transactionHash": "0x5010048015b739d47dfad0b864d210e59167b0be86a4f2b47cb446075f9b8e56"
               }
             }
-          ],
-          "totalCount": 6
+          ]
         }
       }
     }
@@ -3390,10 +3390,50 @@
       }
     }
   },
+  "hello-world": {
+    "data": {
+      "account": {
+        "v2DomainsCount": {
+          "totalCount": 0
+        },
+        "v1DomainsCount": {
+          "totalCount": 514
+        },
+        "resolve": {
+          "primaryName": {
+            "name": {
+              "interpreted": "vitalik.eth",
+              "beautified": "vitalik.eth"
+            },
+            "resolve": {
+              "profile": {
+                "description": "mi pinxe lo crino tcati",
+                "avatar": {
+                  "httpUrl": "https://euc.li/vitalik.eth"
+                },
+                "addresses": {
+                  "ethereum": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+                },
+                "socials": {
+                  "twitter": {
+                    "handle": "VitalikButerin",
+                    "httpUrl": "https://x.com/VitalikButerin"
+                  },
+                  "github": {
+                    "handle": "vbuterin",
+                    "httpUrl": "https://github.com/vbuterin"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "namegraph": {
     "data": {
       "domain": {
-        "parent": null,
         "registry": {
           "id": "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
           "contract": {
@@ -3401,6 +3441,7 @@
             "address": "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e"
           }
         },
+        "parent": null,
         "subdomains": {
           "edges": [
             {
@@ -5760,6 +5801,12 @@
             },
             {
               "node": {
+                "resource": "0",
+                "roles": "7719472615821079694904732333912527190217998977709370935963838933860875309329"
+              }
+            },
+            {
+              "node": {
                 "resource": "112554048520345018269255786667391470421317806528110367240542760381540064034816",
                 "roles": "97409655027181761882228017414928043058140282880"
               }
@@ -6030,6 +6077,24 @@
             },
             {
               "node": {
+                "resource": "0",
+                "roles": "7719472615821079694904732333912527190217998977709370935963838933860875309329"
+              }
+            },
+            {
+              "node": {
+                "resource": "0",
+                "roles": "7719472615821079694904732333912527190217998977709370935963838933860875309329"
+              }
+            },
+            {
+              "node": {
+                "resource": "0",
+                "roles": "7719472615821079694904732333912527190217998977709370935963838933860875309329"
+              }
+            },
+            {
+              "node": {
                 "resource": "13745410162180979511186111952571013076222578555317446954035494354210248458240",
                 "roles": "97409655027181761882228017414928043058140282880"
               }
@@ -6042,13 +6107,31 @@
             },
             {
               "node": {
+                "resource": "29588676716480209945595451351538514693239127549265935677760067295565741817856",
+                "roles": "97409655027181761882228017414928043058140282880"
+              }
+            },
+            {
+              "node": {
                 "resource": "31736322403445946548532460939268115232246339827395863117619766682272753778688",
                 "roles": "97409655027181761882228017414928043058140282880"
               }
             },
             {
               "node": {
+                "resource": "38818288555943150738880477358746435492613383332454334246757624031005196156928",
+                "roles": "97409655027181761882228017414928043058140282880"
+              }
+            },
+            {
+              "node": {
                 "resource": "63785541820993465192042433892148730832643037490597670760498734623659808260096",
+                "roles": "97409655027181761882228017414928043058140282880"
+              }
+            },
+            {
+              "node": {
+                "resource": "73023341055808835879186591303559677761247155661452437175148968486535090405376",
                 "roles": "97409655027181761882228017414928043058140282880"
               }
             },
@@ -6067,48 +6150,6 @@
             {
               "node": {
                 "resource": "103868244565005153685472930816800188156072080527826024224867352621882598752256",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "112148247289050404383163358581446075174679349669810732817237246229525351628800",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "113496937590509701538466432478879907535189286588065688299471307765143325114368",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "13302394102300747465659074421300489273052104662126971087135273331541397209088",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "21938043553513802374538263015201796589121725328925699815953296099556081008640",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "30031410956466539409329572042834626850714888309222059767211834742340763779072",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "30166873793351246120262010003076545765451990617869617561029632148999159939072",
-                "roles": "358292832037329894457564098653916839351947520"
-              }
-            },
-            {
-              "node": {
-                "resource": "39189147829333990189759366365378966893534837875361659862943329783516552495104",
                 "roles": "358292832037329894457564098653916839351947520"
               }
             }

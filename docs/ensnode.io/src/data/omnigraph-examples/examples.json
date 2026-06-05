@@ -1,5 +1,12 @@
 [
   {
+    "id": "hello-world",
+    "query": "query HelloWorld($address: Address!) {\n  # Load an Account by address\n  account(by: { address: $address }) {\n    resolve {\n      # Resolve the primary name for the account\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          # Resolve the profile (resolver records) \n          # for the primary name in the same query\n          profile {\n            description\n            avatar { httpUrl }\n            addresses { ethereum }\n            socials {\n              twitter { handle httpUrl }\n              github { handle httpUrl }\n            }\n          }\n        }\n      }\n    }\n\n    # Load the ENSv1 and ENSv2 domains owned by the account\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
+    "variables": {
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+    }
+  },
+  {
     "id": "domain-by-name",
     "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { beautified } }\n    owner { address }\n    resolve {\n      profile {\n        description\n        addresses {\n          ethereum\n        }\n      }\n    }\n  }\n}",
     "variables": {

@@ -76,18 +76,39 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   ////////////////
   {
     id: "hello-world",
-    query: `#
-# Welcome to this interactive playground for
-# ENSNode's GraphQL API!
-#
-# You can get started by typing your query here or by using
-# the Explorer on the left to select the data you want to query.
-#
-# There are also example queries in the tabs above ☝️
-query HelloWorld {
-  domain(by: { name: "eth" }) { canonical { name { interpreted beautified } } owner { address } }
+    query: `query HelloWorld($address: Address!) {
+  # Load an Account by address
+  account(by: { address: $address }) {
+    resolve {
+      # Resolve the primary name for the account
+      primaryName(by: { chainName: ETHEREUM }) {
+        name { interpreted beautified }
+        resolve {
+          # Resolve the profile (resolver records) 
+          # for the primary name in the same query
+          profile {
+            description
+            avatar { httpUrl }
+            addresses { ethereum }
+            socials {
+              twitter { handle httpUrl }
+              github { handle httpUrl }
+            }
+          }
+        }
+      }
+    }
+
+    # Load the ENSv1 and ENSv2 domains owned by the account
+    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
+    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
+  }
 }`,
-    variables: { default: {} },
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 },
+    },
   },
 
   /////////////////

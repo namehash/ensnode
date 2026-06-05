@@ -13,6 +13,15 @@ export type OmnigraphExampleConfig = {
 /** Human-authored example copy, display order, and target namespace. Responses live in `responses.json` (refresh with `pnpm omnigraph-examples:refresh-responses`). */
 export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
+    id: "hello-world",
+    title: "Hello World",
+    description:
+      "From a wallet address: Ethereum primary name and interpreted profile, plus ENSv1 and ENSv2 ownership counts.",
+    category: "Introduction",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: false,
+  },
+  {
     id: "domain-by-name",
     title: "Domain By Name",
     description: "Load a domain by interpreted name, including profile information.",
