@@ -7,11 +7,11 @@
           "trace": [
             {
               "scope": "protocol-tracing",
-              "id": "span-28747-1780677562597",
-              "traceId": "trace-1780677562597-q1cf5y968",
+              "id": "span-28795-1780677847832",
+              "traceId": "trace-1780677847832-ia7yzkaya",
               "name": "reverse-resolution:reverse-resolution",
-              "timestamp": 1780677562597000,
-              "duration": 43000,
+              "timestamp": 1780677847832000,
+              "duration": 248000,
               "attributes": {
                 "ens.protocol": "reverse-resolution",
                 "ens.protocol.step": "reverse-resolution",
@@ -30,7 +30,7 @@
                     "ens.protocol.step": "name-record-exists-check",
                     "ens.protocol.step.result": true
                   },
-                  "time": 1780677562629000
+                  "time": 1780677848074000
                 },
                 {
                   "name": "reverse-resolution:verify-resolved-address-matches-address (true)",
@@ -39,21 +39,21 @@
                     "ens.protocol.step": "verify-resolved-address-matches-address",
                     "ens.protocol.step.result": true
                   },
-                  "time": 1780677562640000
+                  "time": 1780677848080000
                 }
               ],
               "children": [
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-28748-1780677562597",
-                  "traceId": "trace-1780677562597-q1cf5y968",
+                  "id": "span-28796-1780677847832",
+                  "traceId": "trace-1780677847832-ia7yzkaya",
                   "parentSpanContext": {
-                    "traceId": "trace-1780677562597-q1cf5y968",
-                    "spanId": "span-28747-1780677562597"
+                    "traceId": "trace-1780677847832-ia7yzkaya",
+                    "spanId": "span-28795-1780677847832"
                   },
                   "name": "reverse-resolution:resolve-reverse-name",
-                  "timestamp": 1780677562597000,
-                  "duration": 32000,
+                  "timestamp": 1780677847832000,
+                  "duration": 242000,
                   "attributes": {
                     "ens.protocol": "reverse-resolution",
                     "ens.protocol.step": "resolve-reverse-name",
@@ -66,15 +66,15 @@
                   "children": [
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28749-1780677562597",
-                      "traceId": "trace-1780677562597-q1cf5y968",
+                      "id": "span-28797-1780677847832",
+                      "traceId": "trace-1780677847832-ia7yzkaya",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677562597-q1cf5y968",
-                        "spanId": "span-28748-1780677562597"
+                        "traceId": "trace-1780677847832-ia7yzkaya",
+                        "spanId": "span-28796-1780677847832"
                       },
                       "name": "forward-resolution:forward-resolution",
-                      "timestamp": 1780677562597000,
-                      "duration": 32000,
+                      "timestamp": 1780677847832000,
+                      "duration": 242000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
                         "ens.protocol.step": "forward-resolution",
@@ -94,7 +94,7 @@
                             "ens.protocol.step": "active-resolver-exists",
                             "ens.protocol.step.result": true
                           },
-                          "time": 1780677562601000
+                          "time": 1780677847835000
                         },
                         {
                           "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -103,7 +103,7 @@
                             "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                             "ens.protocol.step.result": false
                           },
-                          "time": 1780677562601000
+                          "time": 1780677847835000
                         },
                         {
                           "name": "forward-resolution:accelerate-known-onchain-static-resolver (false)",
@@ -112,21 +112,21 @@
                             "ens.protocol.step": "accelerate-known-onchain-static-resolver",
                             "ens.protocol.step.result": false
                           },
-                          "time": 1780677562601000
+                          "time": 1780677847836000
                         }
                       ],
                       "children": [
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28750-1780677562597",
-                          "traceId": "trace-1780677562597-q1cf5y968",
+                          "id": "span-28798-1780677847832",
+                          "traceId": "trace-1780677847832-ia7yzkaya",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677562597-q1cf5y968",
-                            "spanId": "span-28749-1780677562597"
+                            "traceId": "trace-1780677847832-ia7yzkaya",
+                            "spanId": "span-28797-1780677847832"
                           },
                           "name": "forward-resolution:find-resolver",
-                          "timestamp": 1780677562597000,
-                          "duration": 4000,
+                          "timestamp": 1780677847832000,
+                          "duration": 3000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "find-resolver",
@@ -141,15 +141,15 @@
                         },
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28751-1780677562601",
-                          "traceId": "trace-1780677562597-q1cf5y968",
+                          "id": "span-28799-1780677847836",
+                          "traceId": "trace-1780677847832-ia7yzkaya",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677562597-q1cf5y968",
-                            "spanId": "span-28749-1780677562597"
+                            "traceId": "trace-1780677847832-ia7yzkaya",
+                            "spanId": "span-28797-1780677847832"
                           },
                           "name": "forward-resolution:require-resolver",
-                          "timestamp": 1780677562601000,
-                          "duration": 20000,
+                          "timestamp": 1780677847836000,
+                          "duration": 228000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "require-resolver",
@@ -166,15 +166,15 @@
                         },
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28752-1780677562621",
-                          "traceId": "trace-1780677562597-q1cf5y968",
+                          "id": "span-28800-1780677848064",
+                          "traceId": "trace-1780677847832-ia7yzkaya",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677562597-q1cf5y968",
-                            "spanId": "span-28749-1780677562597"
+                            "traceId": "trace-1780677847832-ia7yzkaya",
+                            "spanId": "span-28797-1780677847832"
                           },
                           "name": "forward-resolution:execute-resolve-calls",
-                          "timestamp": 1780677562621000,
-                          "duration": 8000,
+                          "timestamp": 1780677848064000,
+                          "duration": 10000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "execute-resolve-calls"
@@ -191,15 +191,15 @@
                 },
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-28753-1780677562629",
-                  "traceId": "trace-1780677562597-q1cf5y968",
+                  "id": "span-28801-1780677848074",
+                  "traceId": "trace-1780677847832-ia7yzkaya",
                   "parentSpanContext": {
-                    "traceId": "trace-1780677562597-q1cf5y968",
-                    "spanId": "span-28747-1780677562597"
+                    "traceId": "trace-1780677847832-ia7yzkaya",
+                    "spanId": "span-28795-1780677847832"
                   },
                   "name": "reverse-resolution:forward-resolve-address-record",
-                  "timestamp": 1780677562629000,
-                  "duration": 11000,
+                  "timestamp": 1780677848074000,
+                  "duration": 6000,
                   "attributes": {
                     "ens.protocol": "reverse-resolution",
                     "ens.protocol.step": "forward-resolve-address-record",
@@ -212,15 +212,15 @@
                   "children": [
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28754-1780677562629",
-                      "traceId": "trace-1780677562597-q1cf5y968",
+                      "id": "span-28802-1780677848074",
+                      "traceId": "trace-1780677847832-ia7yzkaya",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677562597-q1cf5y968",
-                        "spanId": "span-28753-1780677562629"
+                        "traceId": "trace-1780677847832-ia7yzkaya",
+                        "spanId": "span-28801-1780677848074"
                       },
                       "name": "forward-resolution:forward-resolution",
-                      "timestamp": 1780677562629000,
-                      "duration": 11000,
+                      "timestamp": 1780677848074000,
+                      "duration": 6000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
                         "ens.protocol.step": "forward-resolution",
@@ -240,7 +240,7 @@
                             "ens.protocol.step": "active-resolver-exists",
                             "ens.protocol.step.result": true
                           },
-                          "time": 1780677562637000
+                          "time": 1780677848076000
                         },
                         {
                           "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -249,21 +249,21 @@
                             "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                             "ens.protocol.step.result": false
                           },
-                          "time": 1780677562637000
+                          "time": 1780677848076000
                         }
                       ],
                       "children": [
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28755-1780677562629",
-                          "traceId": "trace-1780677562597-q1cf5y968",
+                          "id": "span-28803-1780677848074",
+                          "traceId": "trace-1780677847832-ia7yzkaya",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677562597-q1cf5y968",
-                            "spanId": "span-28754-1780677562629"
+                            "traceId": "trace-1780677847832-ia7yzkaya",
+                            "spanId": "span-28802-1780677848074"
                           },
                           "name": "forward-resolution:find-resolver",
-                          "timestamp": 1780677562629000,
-                          "duration": 8000,
+                          "timestamp": 1780677848074000,
+                          "duration": 2000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "find-resolver",
@@ -278,15 +278,15 @@
                         },
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28756-1780677562637",
-                          "traceId": "trace-1780677562597-q1cf5y968",
+                          "id": "span-28804-1780677848076",
+                          "traceId": "trace-1780677847832-ia7yzkaya",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677562597-q1cf5y968",
-                            "spanId": "span-28754-1780677562629"
+                            "traceId": "trace-1780677847832-ia7yzkaya",
+                            "spanId": "span-28802-1780677848074"
                           },
                           "name": "forward-resolution:accelerate-known-onchain-static-resolver",
-                          "timestamp": 1780677562637000,
-                          "duration": 3000,
+                          "timestamp": 1780677848076000,
+                          "duration": 4000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "accelerate-known-onchain-static-resolver"
@@ -317,11 +317,11 @@
               "trace": [
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-28757-1780677562641",
-                  "traceId": "trace-1780677562641-hjj5jtc5k",
+                  "id": "span-28805-1780677848081",
+                  "traceId": "trace-1780677848081-yhbkxoiix",
                   "name": "forward-resolution:forward-resolution",
-                  "timestamp": 1780677562641000,
-                  "duration": 6000,
+                  "timestamp": 1780677848081000,
+                  "duration": 4000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
                     "ens.protocol.step": "forward-resolution",
@@ -341,7 +341,7 @@
                         "ens.protocol.step": "active-resolver-exists",
                         "ens.protocol.step.result": true
                       },
-                      "time": 1780677562644000
+                      "time": 1780677848083000
                     },
                     {
                       "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -350,20 +350,20 @@
                         "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                         "ens.protocol.step.result": false
                       },
-                      "time": 1780677562645000
+                      "time": 1780677848083000
                     }
                   ],
                   "children": [
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28758-1780677562642",
-                      "traceId": "trace-1780677562641-hjj5jtc5k",
+                      "id": "span-28806-1780677848081",
+                      "traceId": "trace-1780677848081-yhbkxoiix",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677562641-hjj5jtc5k",
-                        "spanId": "span-28757-1780677562641"
+                        "traceId": "trace-1780677848081-yhbkxoiix",
+                        "spanId": "span-28805-1780677848081"
                       },
                       "name": "forward-resolution:find-resolver",
-                      "timestamp": 1780677562642000,
+                      "timestamp": 1780677848081000,
                       "duration": 2000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
@@ -379,14 +379,14 @@
                     },
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28759-1780677562645",
-                      "traceId": "trace-1780677562641-hjj5jtc5k",
+                      "id": "span-28807-1780677848083",
+                      "traceId": "trace-1780677848081-yhbkxoiix",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677562641-hjj5jtc5k",
-                        "spanId": "span-28757-1780677562641"
+                        "traceId": "trace-1780677848081-yhbkxoiix",
+                        "spanId": "span-28805-1780677848081"
                       },
                       "name": "forward-resolution:accelerate-known-onchain-static-resolver",
-                      "timestamp": 1780677562645000,
+                      "timestamp": 1780677848083000,
                       "duration": 2000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
@@ -1446,11 +1446,11 @@
   "account-migrated-names": {
     "data": {
       "account": {
-        "v1DomainsCount": {
-          "totalCount": 6
-        },
         "v2DomainsCount": {
           "totalCount": 1249
+        },
+        "v1DomainsCount": {
+          "totalCount": 6
         }
       }
     }
@@ -1534,6 +1534,7 @@
     "data": {
       "domain": {
         "events": {
+          "totalCount": 6,
           "edges": [
             {
               "node": {
@@ -1619,8 +1620,7 @@
                 "transactionHash": "0x5010048015b739d47dfad0b864d210e59167b0be86a4f2b47cb446075f9b8e56"
               }
             }
-          ],
-          "totalCount": 6
+          ]
         }
       }
     }
