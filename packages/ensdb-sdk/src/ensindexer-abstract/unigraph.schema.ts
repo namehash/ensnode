@@ -5,6 +5,7 @@ import type {
   InterpretedName,
   LabelHash,
   LabelHashPath,
+  Name,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -272,6 +273,32 @@ export const REGISTRATION_SORT_SENTINEL = 2n ** 256n - 1n;
 
 export const domainType = onchainEnum("DomainType", ["ENSv1Domain", "ENSv2Domain"]);
 
+/**
+ * Length cap (in code points) of the materialized `domain.__canonicalNamePrefix`. Sized for
+ * typeahead and left-anchored search; longer (invariably spam) names truncate here and tie-break
+ * by `id` in NAME ordering. Kept small to bound the prefix indexes.
+ */
+export const CANONICAL_NAME_PREFIX_LENGTH = 64;
+
+/**
+ * Truncate a Canonical Name to {@link CANONICAL_NAME_PREFIX_LENGTH} for `domain.__canonicalNamePrefix`.
+ * Uses code-point iteration so the JS-side prefix is byte-identical to Postgres `left(text, N)`
+ * (which counts code points), keeping the materialized column consistent across the JS and raw-SQL
+ * write paths in `canonicality-db-helpers.ts`.
+ */
+export function truncateCanonicalNamePrefix(name: Name | null): Name | null {
+  if (name === null) return null;
+  // iterate code points and stop at the cap rather than spreading the whole string, which can be
+  // thousands of code points for spam names on a hot path (indexer writes + cursor encoding)
+  let prefix = "";
+  let count = 0;
+  for (const codePoint of name) {
+    prefix += codePoint;
+    if (++count >= CANONICAL_NAME_PREFIX_LENGTH) break;
+  }
+  return prefix;
+}
+
 export const domain = onchainTable(
   "domains",
   (t) => ({
@@ -313,6 +340,19 @@ export const domain = onchainTable(
      * @example "vitalik.eth"
      */
     canonicalName: t.text().$type<InterpretedName>(),
+
+    /**
+     * Materialized prefix of `canonicalName` (first {@link CANONICAL_NAME_PREFIX_LENGTH} code
+     * points), NULL iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`.
+     *
+     * Powers left-anchored / substring search (`__canonical_name_prefix LIKE 'vit%'`) and NAME
+     * ordering without `canonical_name`'s full-length btree size hazard. The `__` prefix marks it
+     * an internal implementation detail (mirrors `Registry.__hasChildren`); query `canonical_name`
+     * for exact matches and display.
+     *
+     * @example "vitalik.eth"
+     */
+    __canonicalNamePrefix: t.text("__canonical_name_prefix").$type<Name>(),
 
     /**
      * Materialized Canonical LabelHashPath, NULL iff `canonical = false`.
@@ -383,24 +423,18 @@ export const domain = onchainTable(
     // `WHERE registry_id = X` lookups via prefix scan.
     byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
 
-    // composite for `WHERE registry_id = X ORDER BY canonical_name LIMIT N` (Domain.subdomains
-    // and other find-domains queries when ordering by NAME). Uses `left(canonical_name, 256)`
-    // to bound the index tuple under btree's per-tuple max (~2712 bytes): 256 chars × max 4-byte
-    // UTF-8 = 1024 bytes, leaving ample room for the registry_id and id columns. Names beyond
-    // 256 chars (currently <0.0001% of mainnet) collide on the truncated prefix and tie-break by
-    // id; this is acceptable since such names are invariably spam. Callers MUST sort by the same
-    // expression for the planner to use this index for ordered scan.
-    byRegistryAndCanonicalNameLeft: index().on(
-      t.registryId,
-      sql`left(${t.canonicalName}, 256)`,
-      t.id,
-    ),
+    // composite for `WHERE registry_id = X ORDER BY __canonical_name_prefix LIMIT N` (Domain.subdomains
+    // and other find-domains queries when ordering by NAME). The length-capped prefix keeps the
+    // index tuple under btree's per-tuple max (~2712 bytes); 64 code points × max 4-byte UTF-8 =
+    // 256 bytes, leaving ample room for the registry_id and id columns.
+    byRegistryAndCanonicalNamePrefix: index().on(t.registryId, t.__canonicalNamePrefix, t.id),
 
     // hash index avoids the btree 8191-byte row-size hazard for spam names
     byCanonicalNameExact: index().using("hash", t.canonicalName),
-    // GIN trigram index for substring / similarity queries (inline `gin_trgm_ops` via `sql`
-    // because passing it through `.op()` gets dropped by Ponder)
-    byCanonicalNameFuzzy: index().using("gin", sql`${t.canonicalName} gin_trgm_ops`),
+    // GIN trigram on the length-capped prefix for left-anchored (`LIKE 'vit%'`) and substring
+    // search (inline `gin_trgm_ops` via `sql` because passing it through `.op()` gets dropped by
+    // Ponder)
+    byCanonicalNamePrefixFuzzy: index().using("gin", sql`${t.__canonicalNamePrefix} gin_trgm_ops`),
     // GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup
     byCanonicalLabelHashPath: index().using("gin", t.canonicalLabelHashPath),
     // hash index for resolver-record → canonical-domain joins

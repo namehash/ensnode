@@ -492,7 +492,7 @@ input DomainsNameFilter @oneOf {
   in: [InterpretedName!]
 
   """
-  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).
+  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized). Matched against the first 64 code points of the name; prefixes longer than 64 code points never match.
   """
   starts_with: String
 }

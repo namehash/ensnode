@@ -9,7 +9,6 @@ import { DomainCursors } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import {
   cursorFilter,
   orderFindDomains,
-  truncateNameForCursor,
 } from "@/omnigraph-api/lib/find-domains/find-domains-resolver-helpers";
 import type { DomainOrderValue } from "@/omnigraph-api/lib/find-domains/types";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
@@ -61,7 +60,7 @@ const VERSION_TO_DOMAIN_TYPE: Record<
 function nameCondition(filter: typeof DomainsNameFilter.$inferInput): SQL {
   const { ensIndexerSchema } = di.context;
   if (filter.starts_with) {
-    return ilike(ensIndexerSchema.domain.canonicalName, `${filter.starts_with}%`);
+    return ilike(ensIndexerSchema.domain.__canonicalNamePrefix, `${filter.starts_with}%`);
   }
 
   if (filter.eq) {
@@ -183,7 +182,7 @@ export function resolveFindDomains({
             const __orderValue: DomainOrderValue = (() => {
               switch (orderBy) {
                 case "NAME":
-                  return truncateNameForCursor(domain.canonicalName);
+                  return domain.__canonicalNamePrefix;
                 case "DEPTH":
                   return domain.canonicalDepth;
                 case "REGISTRATION_TIMESTAMP":

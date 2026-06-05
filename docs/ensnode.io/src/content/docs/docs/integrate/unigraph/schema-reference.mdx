@@ -130,7 +130,12 @@ the Event responsible for its existence.
 | `topics`            | `text[]`      | no       | All log topics.                                                                                                                                                                                                                                                         |
 | `data`              | `text`        | no       | Log data.                                                                                                                                                                                                                                                               |
 
-**Indexes:** `selector`, `from`, `sender`, `timestamp`.
+**Indexes:**
+
+- `selector`
+- `from`
+- `sender`
+- `timestamp`
 
 ## domain_events
 
@@ -199,7 +204,9 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 | `canonical`           | `boolean`      | no       | Whether this Registry is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Default `false`. |
 | `has_children`        | `boolean`      | no       | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`.                                                                                                                                                                                                                                                                                    |
 
-**Indexes:** `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
+**Indexes:**
+
+- `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
 
 **Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chain_id, address)`.
 
@@ -223,13 +230,26 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `owner_id`                  | `text`        | yes      | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used).                                                                                                                                                                                                                                                                                                                                                                               |
 | `root_registry_owner_id`    | `text`        | yes      | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `canonical`                 | `boolean`     | no       | Whether this Domain is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Mirrors the parent Registry's flag. Default `false`. |
-| `canonical_name`            | `text`        | yes      | Materialized Canonical Name, `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Example: `"vitalik.eth"`.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `canonical_name`            | `text`        | yes      | Materialized Canonical Name, `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Use for exact matches (`canonical_name = 'vitalik.eth'`) and display. Example: `"vitalik.eth"`.                                                                                                                                                                                                                                                                                                                  |
+| `__canonical_name_prefix`   | `text`        | yes      | Materialized prefix of `canonical_name` (first 64 code points), `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Use for left-anchored / substring search (`__canonical_name_prefix ILIKE 'vit%'`, case-insensitive to match the Omnigraph `starts_with` filter) and NAME ordering without `canonical_name`'s full-length btree size hazard. The `__` prefix marks it an internal implementation detail — query `canonical_name` for exact matches and display.                                |
 | `canonical_label_hash_path` | `text[]`      | yes      | Materialized Canonical LabelHashPath, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[labelhash("eth"), labelhash("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                          |
 | `canonical_path`            | `text[]`      | yes      | Materialized Canonical Domain Path, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[DomainId("eth"), DomainId("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                              |
 | `canonical_depth`           | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                            |
 | `canonical_node`            | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`.                                                                                                                                                                                                                                                                                                                                              |
 
-**Indexes:** `type`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed), `(registry_id, left(canonical_name, 256), id)` (composite expression index for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N` — the `Domain.subdomains` shape; the 256-char prefix bounds the index tuple under btree's per-tuple max, and NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan), `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
+**Indexes:**
+
+- `type`
+- `subregistry_id` (partial: non-null only)
+- `owner_id`
+- `label_hash`
+- `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed)
+- `(registry_id, __canonical_name_prefix, id)` (composite for registry-scoped `WHERE registry_id = X ORDER BY __canonical_name_prefix LIMIT N` — the `Domain.subdomains` shape; the length-capped prefix keeps the index tuple under btree's per-tuple max)
+- `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names)
+- `__canonical_name_prefix` (GIN trigram for left-anchored `ILIKE 'vit%'` and substring search)
+- `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup)
+- `canonical_node` (hash, for resolver-record → canonical-domain joins)
+- `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse)
 
 **Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 
@@ -242,7 +262,10 @@ Internal rainbow table mapping a `label_hash` to its interpreted label string. D
 | `label_hash`  | `text` | no       | `keccak256` of the label. Primary key. |
 | `interpreted` | `text` | no       | The interpreted label string.          |
 
-**Indexes:** `interpreted` (hash index for exact match), `interpreted` (GIN trigram index for prefix/substring `LIKE`)
+**Indexes:**
+
+- `interpreted` (hash index for exact match)
+- `interpreted` (GIN trigram index for prefix/substring `LIKE`)
 
 **Relations:** has many `domains`.
 
@@ -270,7 +293,9 @@ A registration is keyed by `id`.
 | `wrapped`            | `boolean`          | no       | Whether the registration is currently wrapped by the NameWrapper. Default `false`.                                                                             |
 | `event_id`           | `text`             | no       | The event that created this registration record.                                                                                                               |
 
-**Indexes:** unique on `(domain_id, registration_index)`.
+**Indexes:**
+
+- unique on `(domain_id, registration_index)`
 
 **Relations:** belongs to one `domains` record, has one `accounts` record (registrant), has one `accounts` record (unregistrant), has many `renewals`, has one `events` record.
 
@@ -301,7 +326,9 @@ A renewal is keyed by `id` and belongs to a specific registration.
 | `premium`            | `numeric(78)` | yes      | Premium cost in wei above base. ENSv1 `RegistrarControllers` only.                |
 | `event_id`           | `text`        | no       | The event that created this renewal record.                                       |
 
-**Indexes:** unique on `(domain_id, registration_index, renewal_index)`.
+**Indexes:**
+
+- unique on `(domain_id, registration_index, renewal_index)`
 
 **Relations:** belongs to one `registrations` record via `(domain_id, registration_index)`, has one `events` record via `(event_id)`.
 
@@ -327,7 +354,9 @@ An ENSv2 permissions contract instance.
 | `chain_id` | `bigint` | no       | Chain the permissions contract is deployed on. |
 | `address`  | `text`   | no       | Address of the permissions contract.           |
 
-**Indexes:** unique on `(chain_id, address)`.
+**Indexes:**
+
+- unique on `(chain_id, address)`
 
 **Relations:** has many `permissions_resources`, has many `permissions_users`.
 
@@ -342,7 +371,9 @@ A resource managed by a `permissions` contract.
 | `address`  | `text`        | no       | Address of the parent permissions contract.            |
 | `resource` | `numeric(78)` | no       | Resource identifier (a `uint256` token ID or similar). |
 
-**Indexes:** unique on `(chain_id, address, resource)`.
+**Indexes:**
+
+- unique on `(chain_id, address, resource)`
 
 **Relations:** belongs to one `permissions` via `(chain_id, address)`.
 
@@ -359,6 +390,8 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 | `user`     | `text`        | no       | The user/grantee address this Permission is granted to (the HCA account address if used). |
 | `roles`    | `numeric(78)` | no       | Roles bitmap for this user on this resource.                                              |
 
-**Indexes:** unique on `(chain_id, address, resource, user)`.
+**Indexes:**
+
+- unique on `(chain_id, address, resource, user)`
 
 **Relations:** has one `accounts` record (user), belongs to one `permissions` record via `(chain_id, address)`, belongs to one `permissions_resource` record via `(chain_id, address, resource)`.

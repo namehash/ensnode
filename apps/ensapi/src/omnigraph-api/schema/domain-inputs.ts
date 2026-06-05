@@ -69,7 +69,7 @@ export const DomainsNameFilter = builder.inputType("DomainsNameFilter", {
   fields: (t) => ({
     starts_with: t.string({
       description:
-        "Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).",
+        "Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized). Matched against the first 64 code points of the name; prefixes longer than 64 code points never match.",
       validate: { minLength: 1 },
     }),
     eq: t.field({
