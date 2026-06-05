@@ -31,7 +31,7 @@ DomainResolverRef.implement({
     ////////////////////////////
     effective: t.field({
       description:
-        "The Resolver that ENS Forward Resolution (ENSIP-10) lands on for this Domain — i.e. its _effective_ Resolver, identified by walking the name hierarchy within the Domain's Registry. Null when no active Resolver exists or the Domain is not in the canonical nametree.",
+        "The Resolver that ENS Forward Resolution (ENSIP-10) lands on for this Domain — i.e. its _effective_ Resolver. Null when no active Resolver exists or the Domain is not in the Canonical Nametree.",
       type: ResolverRef,
       nullable: true,
       resolve: (domainId) => getDomainEffectiveResolver(domainId),
