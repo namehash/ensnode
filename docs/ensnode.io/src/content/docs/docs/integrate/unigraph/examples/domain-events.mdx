@@ -14,7 +14,7 @@ import { exampleDomainEvents } from "@data/unigraph-examples/domain-events";
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
 
-Fetch recent events for a Domain by its canonical name. This example joins the `events`, `domain_events`, and `domains` tables to retrieve domain events associated with the `vitalik.eth` name.
+Fetch recent events for a Domain by its canonical name. This example joins the `events`, `domain_events`, and `domains` tables to retrieve domain events associated with the `vitalik.eth` name. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 :::note[Canonical fields]
 Canonical fields are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`. In SQL, these columns are `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth`; in `ensdb-sdk`, the corresponding fields are `canonicalName`, `canonicalPath`, `canonicalNode`, and `canonicalDepth`.

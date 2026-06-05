@@ -1,7 +1,7 @@
 import type { QueryExample } from "./types";
 
 /**
- * Example query for fetching recent events for a Domain by its canonical name.
+ * Example query for fetching ENS registrations that are expiring soon.
  */
 export const exampleExpiringRegistrations = {
   sql: {

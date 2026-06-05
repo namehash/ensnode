@@ -203,7 +203,7 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/unigraph/examples/latest-registrations",
             },
             {
-              label: "Exipring Registrations",
+              label: "Expiring Registrations",
               link: "/docs/integrate/unigraph/examples/expiring-registrations",
             },
             {

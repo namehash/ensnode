@@ -14,7 +14,7 @@ import { exampleExpiringRegistrations } from "@data/unigraph-examples/expiring-r
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
 
-Fetch Domains with registrations expiring within a certain timeframe. This example uses a simple `WHERE` clause to filter for Domains with `expiry_date` between the current time and a specified future time (e.g., 3 days from now). See [Connect](/docs/integrate/unigraph/examples) for setup.
+Fetch Domains with registrations expiring within a certain timeframe. This example uses a simple `WHERE` clause to filter for Domains with `expiry` between the current time and a specified future time (e.g., 3 days from now). See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample
  sql={exampleExpiringRegistrations.sql}

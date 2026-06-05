@@ -1,7 +1,7 @@
 import type { QueryExample } from "./types";
 
 /**
- * Example query for fetching the latest registrations for a Domain by its canonical name.
+ * Example query for fetching the latest registrations across all Domains.
  */
 export const exampleLatestRegistrations = {
   sql: {
@@ -9,6 +9,10 @@ export const exampleLatestRegistrations = {
   d.canonical_name,
   r.start,
   r.expiry,
+  r.grace_period,
+  r.base,
+  r.premium,
+  r.type as registration_type,
   d.owner_id,
   d.id as domain_id
 FROM "ensindexer_0".registrations r
@@ -20,7 +24,7 @@ WHERE r.start <= EXTRACT(EPOCH FROM NOW())
   AND d.canonical = true
   AND r.type <> 'NameWrapper'
 ORDER BY r.start DESC
-LIMIT 15;
+LIMIT 5;
 `,
     result: [
       {
@@ -86,7 +90,7 @@ LIMIT 15;
     ],
   },
   sdk: {
-    codeSnippet: `import { and, asc, eq, ne, lte, sql } from "drizzle-orm";
+    codeSnippet: `import { and, desc, eq, ne, lte, sql } from "drizzle-orm";
 
 const limit = 5;
 

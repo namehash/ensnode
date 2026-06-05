@@ -14,7 +14,7 @@ import { exampleAccountDomains } from "@data/unigraph-examples/account-domains";
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
 
-Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
+Fetch the Domains owned by an address (across both ENSv1 and ENSv2), including each Domain's `type` (`ENSv1Domain` vs `ENSv2Domain`). See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample
  sql={exampleAccountDomains.sql}

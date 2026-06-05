@@ -95,7 +95,7 @@ LIMIT 10;`,
     ],
   },
   sdk: {
-    codeSnippet: `import { and, eq } from "drizzle-orm";
+    codeSnippet: `import { and, eq, asc } from "drizzle-orm";
 
 const owner = "0xffffffffff52d316b7bd028358089bc8066b8f80";
 const limit = 10;

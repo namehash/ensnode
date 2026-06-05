@@ -1,6 +1,6 @@
 import type { QueryExample } from "./types";
 
-const indexingStatusSnapshot = {
+const result = {
   indexingStatus: {
     strategy: "omnichain",
     snapshotTime: 1779795066,
@@ -116,7 +116,7 @@ FROM "ensnode".metadata
 WHERE ens_indexer_schema_name = 'ensindexer_0'
 AND key = 'indexing_metadata_context';
 `,
-    result: { indexing_status_snapshot: indexingStatusSnapshot },
+    result: { indexing_status_snapshot: result.indexingStatus },
   },
   sdk: {
     codeSnippet: `import { IndexingMetadataContextStatusCodes } from "@ensnode/ensdb-sdk";
@@ -127,6 +127,6 @@ if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.In
   const { indexingStatus } = indexingMetadataContext;
   console.log({ indexingStatus });
 }`,
-    result: { indexingStatus: indexingStatusSnapshot },
+    result: { indexingStatus: result.indexingStatus },
   },
 } satisfies QueryExample;
