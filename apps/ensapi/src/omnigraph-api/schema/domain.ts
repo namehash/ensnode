@@ -37,6 +37,7 @@ import {
 } from "@/omnigraph-api/schema/constants";
 import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
 import {
+  DOMAINS_ORDERING_DESCRIPTION,
   DomainPermissionsWhereInput,
   DomainsOrderInput,
   SubdomainsWhereInput,
@@ -279,16 +280,16 @@ DomainInterfaceRef.implement({
     // Domain.subdomains
     /////////////////////
     subdomains: t.connection({
-      description: "All Domains that are direct descendants of this Domain in the namegraph.",
+      description: `All Domains that are direct descendants of this Domain in the namegraph. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: SubdomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+      resolve: (parent, { where, order, ...connectionArgs }) => {
         if (!parent.subregistryId) return EMPTY_CONNECTION;
 
-        return resolveFindDomains(context, {
+        return resolveFindDomains({
           where: { ...where, registryId: parent.subregistryId },
           order,
           ...connectionArgs,

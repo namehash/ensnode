@@ -13,7 +13,11 @@ import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
-import { DomainsOrderInput, RegistryDomainsWhereInput } from "@/omnigraph-api/schema/domain-inputs";
+import {
+  DOMAINS_ORDERING_DESCRIPTION,
+  DomainsOrderInput,
+  RegistryDomainsWhereInput,
+} from "@/omnigraph-api/schema/domain-inputs";
 import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
 
 ///////////////////////////////////
@@ -121,14 +125,14 @@ RegistryInterfaceRef.implement({
     // Registry.domains
     //////////////////////
     domains: t.connection({
-      description: "The Domains managed by this Registry.",
+      description: `The Domains managed by this Registry. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: RegistryDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) =>
-        resolveFindDomains(context, {
+      resolve: (parent, { where, order, ...connectionArgs }) =>
+        resolveFindDomains({
           where: { ...where, registryId: parent.id },
           order,
           ...connectionArgs,

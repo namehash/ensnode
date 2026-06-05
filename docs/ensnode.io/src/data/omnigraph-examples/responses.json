@@ -2536,5 +2536,81 @@
         }
       }
     }
+  },
+  "domain-subdomains-recently-registered": {
+    "data": {
+      "domain": {
+        "canonical": {
+          "name": {
+            "interpreted": "eth",
+            "beautified": "eth"
+          }
+        },
+        "subdomains": {
+          "edges": [
+            {
+              "node": {
+                "canonical": {
+                  "name": {
+                    "interpreted": "wrapnation.eth",
+                    "beautified": "wrapnation.eth"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "canonical": {
+                  "name": {
+                    "interpreted": "katrenpadu.eth",
+                    "beautified": "katrenpadu.eth"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "canonical": {
+                  "name": {
+                    "interpreted": "roppp.eth",
+                    "beautified": "roppp.eth"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "canonical": {
+                  "name": {
+                    "interpreted": "sfmpfvtoicv2ok.eth",
+                    "beautified": "sfmpfvtoicv2ok.eth"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "canonical": {
+                  "name": {
+                    "interpreted": "sfmpfv44d0mig.eth",
+                    "beautified": "sfmpfv44d0mig.eth"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "canonical": {
+                  "name": {
+                    "interpreted": "sfmpfv44d0res.eth",
+                    "beautified": "sfmpfv44d0res.eth"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
   }
 }

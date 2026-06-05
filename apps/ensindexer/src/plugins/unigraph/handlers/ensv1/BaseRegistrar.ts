@@ -23,6 +23,7 @@ import {
   getLatestRegistration,
   insertLatestRegistration,
   insertLatestRenewal,
+  updateLatestRegistrationExpiry,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
@@ -237,9 +238,11 @@ export default function () {
       const duration = expiry - registration.expiry;
 
       // update the registration
-      await context.ensDb
-        .update(ensIndexerSchema.registration, { id: registration.id })
-        .set({ expiry });
+      await updateLatestRegistrationExpiry(context, {
+        domainId,
+        registrationId: registration.id,
+        expiry,
+      });
 
       // insert Renewal
       const eventId = await ensureEvent(context, event);

@@ -17,7 +17,11 @@ import {
   RESOLVE_ACCELERATE_ARG,
 } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
-import { AccountDomainsWhereInput, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
+import {
+  AccountDomainsWhereInput,
+  DOMAINS_ORDERING_DESCRIPTION,
+  DomainsOrderInput,
+} from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
@@ -115,14 +119,14 @@ AccountRef.implement({
     // Account.domains
     ////////////////////
     domains: t.connection({
-      description: "The Domains that are owned by the Account.",
+      description: `The Domains that are owned by the Account. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: AccountDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) =>
-        resolveFindDomains(context, {
+      resolve: (parent, { where, order, ...connectionArgs }) =>
+        resolveFindDomains({
           where: { ...where, ownerId: parent.id },
           order,
           ...connectionArgs,

@@ -249,6 +249,27 @@ query DomainSubdomains($name: InterpretedName!) {
     variables: { default: { name: "eth" } },
   },
 
+  ////////////////////////////////////
+  // Most Recently Registered Subdomains
+  ////////////////////////////////////
+  {
+    id: "domain-subdomains-recently-registered",
+    query: `
+query RecentlyRegisteredSubdomains($name: InterpretedName!) {
+  domain(by: {name: $name}) {
+    canonical { name { interpreted beautified } }
+    subdomains(first: 10, order: {by: REGISTRATION_TIMESTAMP, dir: DESC}) {
+      edges {
+        node {
+          canonical { name { interpreted beautified } }
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: "eth" } },
+  },
+
   ////////////////////////
   // Subdomains Pagination
   ////////////////////////
