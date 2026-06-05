@@ -23,7 +23,7 @@ import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import {
   forwardWalkDisjointNamegraph,
   hasResolver,
-} from "@/lib/protocol-acceleration/forward-walk-namegraph";
+} from "@/lib/protocol-acceleration/forward-walk-disjoint-namegraph";
 import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");

@@ -8,7 +8,7 @@ import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
-const tracer = trace.getTracer("forward-walk-namegraph");
+const tracer = trace.getTracer("forward-walk-disjoint-namegraph");
 
 // TODO(fold-protocol-acceleration): this walk reads the Unigraph-maintained `domain` table (the
 // Registry hierarchy), not Protocol Acceleration tables. Once the plugins are folded it can move to

@@ -24,7 +24,7 @@ import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-s
 import {
   forwardWalkDisjointNamegraph,
   hasResolver,
-} from "@/lib/protocol-acceleration/forward-walk-namegraph";
+} from "@/lib/protocol-acceleration/forward-walk-disjoint-namegraph";
 
 type FindResolverResult =
   | {
