@@ -46,22 +46,22 @@ const sdkVersion = (
 
 const sdkExampleById = new Map(EXAMPLE_QUERIES_FROM_SDK.map((ex) => [ex.id, ex]));
 
-const examples: SnapshotExample[] = Object.entries(OMNIGRAPH_EXAMPLES_CONFIG).flatMap(
-  ([id, config]) => {
-    const ex = sdkExampleById.get(id);
-    if (!ex) {
-      console.warn(`[omnigraph:snapshot] Skipping config id "${id}" — not in SDK example queries`);
-      return [];
-    }
-    return [
-      {
-        id,
-        query: ex.query.trim(),
-        variables: getNamespaceSpecificValue(config.namespace, ex.variables),
-      },
-    ];
-  },
-);
+const examples: SnapshotExample[] = OMNIGRAPH_EXAMPLES_CONFIG.flatMap((config) => {
+  const ex = sdkExampleById.get(config.id);
+  if (!ex) {
+    console.warn(
+      `[omnigraph:snapshot] Skipping config id "${config.id}" — not in SDK example queries`,
+    );
+    return [];
+  }
+  return [
+    {
+      id: config.id,
+      query: ex.query.trim(),
+      variables: getNamespaceSpecificValue(config.namespace, ex.variables),
+    },
+  ];
+});
 
 // Fail fast if any example is invalid against this version's schema.
 const invalid = examples.flatMap((ex) => {

@@ -7,7 +7,7 @@ const jsonObjectSchema = z.record(z.string(), z.unknown());
 
 export const OmnigraphExampleQuerySchema = z.object({
   id: z.string(),
-  name: z.string(),
+  title: z.string(),
   description: z.string(),
   category: z.string(),
   namespace: z.custom<DocsOmnigraphExampleNamespace>(),
@@ -15,6 +15,7 @@ export const OmnigraphExampleQuerySchema = z.object({
   variables: jsonObjectSchema,
   response: jsonObjectSchema.optional(),
   connection: z.string(),
+  href: z.string().optional(),
 });
 
 export type OmnigraphExampleQuery = z.infer<typeof OmnigraphExampleQuerySchema>;

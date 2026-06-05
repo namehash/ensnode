@@ -39,4 +39,6 @@ export function getDocsOmnigraphNamespaceConfig(
 }
 
 // Used for interactive playgrounds
-export const DEFAULT_ENSNODE_URL = getDocsOmnigraphNamespaceConfig(ENSNamespaceIds.Mainnet).ensnodeUrl;
+export const DEFAULT_ENSNODE_URL = getDocsOmnigraphNamespaceConfig(
+  ENSNamespaceIds.Mainnet,
+).ensnodeUrl;

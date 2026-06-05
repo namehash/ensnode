@@ -1,3 +1,5 @@
+import { OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS } from "../../../../src/data/omnigraph-examples/config.ts";
+
 export const integrateSidebarTopic = {
   id: "integrate-with-ensv2",
   label: "Integrate with ENSv2",
@@ -97,80 +99,7 @@ export const integrateSidebarTopic = {
         {
           label: "Examples",
           collapsed: true,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/omnigraph/examples",
-            },
-            {
-              label: "Domain By Name",
-              link: "/docs/integrate/omnigraph/examples/domain-by-name",
-            },
-            {
-              label: "Domain Profile",
-              link: "/docs/integrate/omnigraph/examples/domain-profile",
-            },
-            {
-              label: "Domain Raw Records",
-              link: "/docs/integrate/omnigraph/examples/domain-records",
-            },
-            {
-              label: "Find Domains",
-              link: "/docs/integrate/omnigraph/examples/find-domains",
-            },
-            {
-              label: "Domain Subdomains",
-              link: "/docs/integrate/omnigraph/examples/domain-subdomains",
-            },
-            {
-              label: "Domain Events",
-              link: "/docs/integrate/omnigraph/examples/domain-events",
-            },
-            {
-              label: "Account Primary Name",
-              link: "/docs/integrate/omnigraph/examples/account-primary-name",
-            },
-            {
-              label: "Account Domains",
-              link: "/docs/integrate/omnigraph/examples/domains-by-address",
-            },
-            {
-              label: "Account Events",
-              link: "/docs/integrate/omnigraph/examples/account-events",
-            },
-            {
-              label: "Registry Domains",
-              link: "/docs/integrate/omnigraph/examples/registry-domains",
-            },
-            {
-              label: "Permissions By Contract",
-              link: "/docs/integrate/omnigraph/examples/permissions-by-contract",
-            },
-            {
-              label: "Permissions By User",
-              link: "/docs/integrate/omnigraph/examples/permissions-by-user",
-            },
-            {
-              label: "Account Resolver Permissions",
-              link: "/docs/integrate/omnigraph/examples/account-resolver-permissions",
-            },
-            {
-              label: "Domain Resolver",
-              link: "/docs/integrate/omnigraph/examples/domain-resolver",
-            },
-            {
-              label: "Namegraph",
-              link: "/docs/integrate/omnigraph/examples/namegraph",
-            },
-            {
-              label: "Account Migration Counts",
-              link: "/docs/integrate/omnigraph/examples/account-migrated-names",
-            },
-            {
-              label: "ETH TLD By Version",
-              link: "/docs/integrate/omnigraph/examples/eth-by-version",
-            },
-          ],
+          items: OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS,
         },
         {
           label: "Schema Reference",

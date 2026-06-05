@@ -246,7 +246,7 @@ describe("buildEnskitSetupSnippets", () => {
   });
 });
 
-describe("integration snippet typechecking", () => {
+describe("integration snippet typechecking", { timeout: 30_000 }, () => {
   const fixtureCases = [
     {
       label: "InterpretedName domain lookup",

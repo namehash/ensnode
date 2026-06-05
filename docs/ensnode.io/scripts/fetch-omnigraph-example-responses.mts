@@ -2,7 +2,10 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { OMNIGRAPH_EXAMPLES_CONFIG } from "../src/data/omnigraph-examples/config.ts";
+import {
+  getOmnigraphExampleConfigById,
+  OMNIGRAPH_EXAMPLES_CONFIG,
+} from "../src/data/omnigraph-examples/config.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
 import { getDocsOmnigraphNamespaceConfig } from "../src/lib/examples/omnigraph/constants.ts";
 
@@ -35,7 +38,7 @@ const snapshotById = new Map(
 );
 
 // Only fetch responses for the rendered set: config entries supported by the vendored snapshot.
-const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_CONFIG) as string[])
+const allExampleIds = OMNIGRAPH_EXAMPLES_CONFIG.map((config) => config.id)
   .filter((id) => snapshotById.has(id))
   .sort();
 
@@ -72,7 +75,7 @@ for (const id of exampleIds) {
   logStep("Getting example query", id);
 
   const example = snapshotById.get(id)!;
-  const config = OMNIGRAPH_EXAMPLES_CONFIG[id];
+  const config = getOmnigraphExampleConfigById(id);
   if (!config) {
     logError(`No OMNIGRAPH_EXAMPLES_CONFIG entry for id`, id);
     process.exit(1);

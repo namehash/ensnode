@@ -1,8 +1,7 @@
 {
   "version": "v1.15.1",
-  "commit": "0e445fe3",
+  "commit": "135a5206",
   "sdkVersion": "1.15.1",
   "schemaTag": "v1.15.1",
-  "endpoint": "https://api.alpha.ensnode.io",
-  "snapshottedAt": "2026-06-04"
+  "snapshottedAt": "2026-06-05"
 }

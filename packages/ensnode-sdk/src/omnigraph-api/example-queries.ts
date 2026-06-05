@@ -650,31 +650,19 @@ query ResolverByAddress($contract: AccountIdInput!) {
     id: "namegraph",
     query: `
 query Namegraph {
-  root {
-    id
-    domains {
-      edges {
-        node {
-          canonical { name { interpreted beautified } }
-
-          subdomains {
-            edges {
-              node {
-                canonical { name { interpreted beautified } }
-
-                subdomains {
-                  edges {
-                    node {
-                      canonical { name { interpreted beautified } }
-                    }
-                  }
-                }
-              }
-            }
+  domain(by: { name: "eth" }) {
+    registry { id contract { chainId address } }
+    parent { id }
+    subregistry {
+      domains {
+        edges {
+          node {
+            canonical { name { beautified } }
           }
         }
       }
     }
+    subdomains { edges { node { canonical { name { beautified } } } } }
   }
 }`,
     variables: { default: {} },
@@ -712,6 +700,27 @@ query GetEthDomains {
 }`,
     variables: { default: {} },
   },
+  {
+    id: "accelerate-resolve",
+    query: `
+query AccelerateResolve {
+  domain(by: { name: "eth" }) {
+    resolve(accelerate: true) {
+      trace
+      acceleration {
+        requested
+        attempted
+      }
+      records {
+        addresses(coinTypes: [60]) {
+          address
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { } },
+  }
 ];
 
 const graphqlApiExampleQueryById = new Map(
