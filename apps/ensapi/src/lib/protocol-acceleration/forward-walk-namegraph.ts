@@ -10,6 +10,9 @@ import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
 const tracer = trace.getTracer("forward-walk-namegraph");
 
+// TODO(fold-protocol-acceleration): this walk reads the Unigraph-maintained `domain` table (the
+// Registry hierarchy), not Protocol Acceleration tables. Once the plugins are folded it can move to
+// omnigraph-api/lib/ alongside its other consumer (get-domain-by-interpreted-name.ts).
 export interface WalkResultRow {
   domainId: DomainId;
   depth: number;
