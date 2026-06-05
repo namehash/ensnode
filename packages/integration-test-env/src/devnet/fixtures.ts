@@ -76,6 +76,19 @@ const rawAddresses = {
   solana: getRawAddress("sol", "FncazAs6omJJjtLVzquzT9KoyXn6tFixr9kGjr42ktLj"),
 } as const satisfies Record<string, { coinType: CoinType; raw: Hex }>;
 
+/**
+ * An effective-Resolver fallback fixture: `noresolver.parent.eth` is seeded WITHOUT a Resolver under
+ * `parent.eth` (which has the PermissionedResolver), so its _effective_ Resolver resolves — via
+ * ENSIP-10 fallback — to `parent.eth`'s Resolver.
+ * @see packages/integration-test-env/src/seed/effective-resolver-fallback.ts
+ */
+export const effectiveResolverFallback = {
+  parentLabel: "parent",
+  parentName: "parent.eth",
+  subnameLabel: "noresolver",
+  subname: "noresolver.parent.eth",
+} as const;
+
 export const fixtures = {
   abiBytes: `0x${"01".repeat(32)}`,
   fourBytesInterface: "0x11100111",

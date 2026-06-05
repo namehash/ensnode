@@ -464,6 +464,11 @@ type DomainResolver {
   The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
   """
   assigned: Resolver
+
+  """
+  The Resolver that ENS Forward Resolution (ENSIP-10) lands on for this Domain — i.e. its _effective_ Resolver. Null when no active Resolver exists or the Domain is not in the Canonical Nametree.
+  """
+  effective: Resolver
 }
 
 type DomainSubdomainsConnection {
