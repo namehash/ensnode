@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { DOCS_OMNIGRAPH_NAMESPACE_CONFIG } from "@lib/examples/omnigraph/constants";
 
 import {
-  getOmnigraphExamplePageHref,
+  getOmnigraphExamplesCatalogItems,
   OMNIGRAPH_EXAMPLES_CONFIG,
   OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS,
 } from "./config";
@@ -47,17 +47,25 @@ describe("OMNIGRAPH_EXAMPLES_CONFIG", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("builds sidebar items in config order after the overview link", () => {
-    const pageConfigs = OMNIGRAPH_EXAMPLES_CONFIG.filter((config) => config.hostSeparatePage);
+  it("builds sidebar items in catalog order after the overview link", () => {
+    const catalogItems = getOmnigraphExamplesCatalogItems();
     expect(OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS[0]).toEqual({
       label: "Overview",
       link: "/docs/integrate/omnigraph/examples",
     });
     expect(OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS.slice(1)).toEqual(
-      pageConfigs.map((config) => ({
-        label: config.title,
-        link: getOmnigraphExamplePageHref(config),
+      catalogItems.map((item) => ({
+        label: item.title,
+        link: item.href,
       })),
     );
+  });
+
+  it("lists guide pages before hosted example pages in the catalog", () => {
+    const items = getOmnigraphExamplesCatalogItems();
+    const resolverRecordsIndex = items.findIndex((item) => item.href.endsWith("/resolver-records"));
+    const domainByNameIndex = items.findIndex((item) => item.href.endsWith("/domain-by-name"));
+    expect(resolverRecordsIndex).toBe(0);
+    expect(domainByNameIndex).toBeGreaterThan(resolverRecordsIndex);
   });
 });

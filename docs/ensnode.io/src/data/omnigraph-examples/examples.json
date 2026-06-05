@@ -28,6 +28,13 @@
     }
   },
   {
+    "id": "domain-profile-compare",
+    "query": "query DomainProfileCompare($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolve {\n      profile {\n        avatar {\n          httpUrl\n        }\n        addresses {\n          ethereum\n          solana\n        }\n        socials {\n          github {\n            handle\n            httpUrl\n          }\n          twitter {\n            handle\n            httpUrl\n          }\n        }\n        website {\n          httpUrl\n        }\n      }\n      records {\n        addresses(coinTypes: [60, 501]) {\n          coinType\n          address\n        }\n        texts(keys: [\"avatar\", \"com.twitter\", \"com.github\", \"url\"]) {\n          key\n          value\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "gregskril.eth"
+    }
+  },
+  {
     "id": "find-domains",
     "query": "query FindDomains(\n  $name: DomainsNameFilter!\n  $order: DomainsOrderInput\n) {\n  domains(\n    where: { name: $name }\n    order: $order\n    first: 20\n  ) {\n    edges {\n      node {\n        __typename\n        id\n        label { interpreted hash }\n        canonical { name { interpreted beautified } }\n\n        registration { expiry event { timestamp } }\n      }\n    }\n  }\n}",
     "variables": {

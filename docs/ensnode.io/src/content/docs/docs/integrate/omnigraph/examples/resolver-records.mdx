@@ -1,0 +1,35 @@
+---
+title: Resolver Records
+description: Interpreted profile vs raw protocol records — when convenience saves you from encoding bugs, and when raw keeps full resolver power.
+sidebar:
+  order: 3
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
+
+Most apps that show an ENS profile start with a simple ask: _given a name, render avatar, bio, links, and multichain addresses._ Behind that one UI row sits a surprising amount of protocol work — forward resolution across resolver contracts, coin-type encoding, inconsistent text-record keys, avatar formats that may be URLs, IPFS paths, or NFT references, and user input that is often empty or invalid.
+
+The Omnigraph exposes **two resolution layers** on `domain.resolve` so you can choose how much interpretation you want the API to do for you.
+
+## Interpreted profile — ready to render
+
+`resolve.profile` is a consumer-shaped view of the most common display fields.
+Addresses are keyed by chain (`ethereum`, `solana`, `base`, …) in chain-native encodings.
+Social accounts arrive as `{ handle, httpUrl }` pairs.
+Avatar and header images expose `httpUrl` values you can drop straight into `<img src="…" />`, including derivation from NFT references per [ENSIP-12](https://docs.ens.domains/ensip/12).
+Unset or unparseable records are `null` — safe to render without extra guards.
+
+<OmnigraphStaticExampleSet id="domain-profile" hideDescription hideBackToExamples />
+
+## Raw records — full protocol surface
+
+`resolve.records` returns protocol-accurate resolver data: numeric coin types, arbitrary text keys and unparsed bytes. This is the shape you would work with if you decoded resolver storage yourself — or if you need records that `profile` does not model.
+
+<OmnigraphStaticExampleSet id="domain-records" hideDescription hideBackToExamples />
+
+## Side by side in one query
+
+The same resolution request can return **both** layers. Compare interpreted and raw branches on one name in one query.
+
+<OmnigraphStaticExampleSet id="domain-profile-compare" hideDescription hideBackToExamples />

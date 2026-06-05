@@ -327,6 +327,50 @@ query DomainProfile($name: InterpretedName!) {
     variables: { default: { name: GREG_NAME } },
   },
 
+  {
+    id: "domain-profile-compare",
+    query: `
+query DomainProfileCompare($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          solana
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+      }
+      records {
+        addresses(coinTypes: [60, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "com.github", "url"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: GREG_NAME } },
+  },
+
   //////////////////////
   // Domain Subdomains
   //////////////////////

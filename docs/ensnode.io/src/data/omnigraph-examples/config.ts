@@ -10,6 +10,22 @@ export type OmnigraphExampleConfig = {
   hostSeparatePage: boolean;
 };
 
+export type OmnigraphExamplesGuidePage = {
+  slug: string;
+  title: string;
+  description: string;
+};
+
+/** Narrative docs pages under Examples that embed multiple Omnigraph example queries. */
+export const OMNIGRAPH_EXAMPLES_GUIDE_PAGES: OmnigraphExamplesGuidePage[] = [
+  {
+    slug: "resolver-records",
+    title: "Resolver Records",
+    description:
+      "Interpreted profile vs raw protocol records on the same name — when convenience saves you from encoding bugs, and when raw keeps full resolver power.",
+  },
+];
+
 /** Human-authored example copy, display order, and target namespace. Responses live in `responses.json` (refresh with `pnpm omnigraph-examples:refresh-responses`). */
 export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
@@ -35,7 +51,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     description: "Load a domain's high-level profile (avatar, socials, addresses, and more).",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
-    hostSeparatePage: true,
+    hostSeparatePage: false,
   },
   {
     id: "domain-records",
@@ -43,7 +59,16 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     description: "For given name resolve raw records like `addresses`, `texts`, `contenthash` etc.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
-    hostSeparatePage: true,
+    hostSeparatePage: false,
+  },
+  {
+    id: "domain-profile-compare",
+    title: "Profile And Records Compare",
+    description:
+      "Resolve interpreted profile and raw records in one query to compare shapes side by side.",
+    category: "Resolution",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: false,
   },
   {
     id: "find-domains",
@@ -172,12 +197,48 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
 
 export const OMNIGRAPH_EXAMPLES_INDEX_PATH = "/docs/integrate/omnigraph/examples" as const;
 
+export function getOmnigraphExamplesGuideHref(slug: string): string {
+  return `${OMNIGRAPH_EXAMPLES_INDEX_PATH}/${slug}`;
+}
+
 export function getOmnigraphExamplePageHref(
   config: Pick<OmnigraphExampleConfig, "id" | "hostSeparatePage">,
 ): string | undefined {
   if (!config.hostSeparatePage) return undefined;
   return `${OMNIGRAPH_EXAMPLES_INDEX_PATH}/${config.id}`;
 }
+
+export type OmnigraphExamplesCatalogItem = {
+  title: string;
+  description: string;
+  href: string;
+};
+
+/** Examples index and sidebar order: hosted example pages interleaved with guide pages. */
+export function getOmnigraphExamplesCatalogItems(): OmnigraphExamplesCatalogItem[] {
+  const items: OmnigraphExamplesCatalogItem[] = [];
+
+  for (const guide of OMNIGRAPH_EXAMPLES_GUIDE_PAGES) {
+    items.push({
+      title: guide.title,
+      description: guide.description,
+      href: getOmnigraphExamplesGuideHref(guide.slug),
+    });
+  }
+
+  for (const config of OMNIGRAPH_EXAMPLES_CONFIG.filter((config) => config.hostSeparatePage)) {
+    items.push({
+      title: config.title,
+      description: config.description,
+      href: getOmnigraphExamplePageHref(config)!,
+    });
+  }
+
+  return items;
+}
+
+/** Precomputed catalog for MDX and sidebar — import this instead of calling the getter in `.mdx` files. */
+export const OMNIGRAPH_EXAMPLES_CATALOG_ITEMS = getOmnigraphExamplesCatalogItems();
 
 const omnigraphExampleConfigById = new Map(
   OMNIGRAPH_EXAMPLES_CONFIG.map((config) => [config.id, config]),
@@ -187,11 +248,11 @@ export function getOmnigraphExampleConfigById(id: string): OmnigraphExampleConfi
   return omnigraphExampleConfigById.get(id);
 }
 
-/** Starlight sidebar items under ENS Omnigraph API → Examples (order matches config). */
+/** Starlight sidebar items under ENS Omnigraph API → Examples (order matches catalog). */
 export const OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS: { label: string; link: string }[] = [
   { label: "Overview", link: OMNIGRAPH_EXAMPLES_INDEX_PATH },
-  ...OMNIGRAPH_EXAMPLES_CONFIG.filter((config) => config.hostSeparatePage).map((config) => ({
-    label: config.title,
-    link: getOmnigraphExamplePageHref(config)!,
+  ...OMNIGRAPH_EXAMPLES_CATALOG_ITEMS.map((item) => ({
+    label: item.title,
+    link: item.href,
   })),
 ];

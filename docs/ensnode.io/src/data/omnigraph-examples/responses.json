@@ -6,11 +6,11 @@
           "trace": [
             {
               "scope": "protocol-tracing",
-              "id": "span-24259-1780668772037",
-              "traceId": "trace-1780668772034-colecazbo",
+              "id": "span-24913-1780671537763",
+              "traceId": "trace-1780671537763-dwzdh4myi",
               "name": "forward-resolution:forward-resolution",
-              "timestamp": 1780668772037000,
-              "duration": 33000,
+              "timestamp": 1780671537763000,
+              "duration": 31000,
               "attributes": {
                 "ens.protocol": "forward-resolution",
                 "ens.protocol.step": "forward-resolution",
@@ -30,7 +30,7 @@
                     "ens.protocol.step": "active-resolver-exists",
                     "ens.protocol.step.result": true
                   },
-                  "time": 1780668772040000
+                  "time": 1780671537765000
                 },
                 {
                   "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -39,7 +39,7 @@
                     "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                     "ens.protocol.step.result": false
                   },
-                  "time": 1780668772040000
+                  "time": 1780671537765000
                 },
                 {
                   "name": "forward-resolution:accelerate-known-onchain-static-resolver (false)",
@@ -48,21 +48,21 @@
                     "ens.protocol.step": "accelerate-known-onchain-static-resolver",
                     "ens.protocol.step.result": false
                   },
-                  "time": 1780668772040000
+                  "time": 1780671537765000
                 }
               ],
               "children": [
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-24260-1780668772037",
-                  "traceId": "trace-1780668772034-colecazbo",
+                  "id": "span-24914-1780671537763",
+                  "traceId": "trace-1780671537763-dwzdh4myi",
                   "parentSpanContext": {
-                    "traceId": "trace-1780668772034-colecazbo",
-                    "spanId": "span-24259-1780668772037"
+                    "traceId": "trace-1780671537763-dwzdh4myi",
+                    "spanId": "span-24913-1780671537763"
                   },
                   "name": "forward-resolution:find-resolver",
-                  "timestamp": 1780668772037000,
-                  "duration": 3000,
+                  "timestamp": 1780671537763000,
+                  "duration": 2000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
                     "ens.protocol.step": "find-resolver",
@@ -77,15 +77,15 @@
                 },
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-24261-1780668772040",
-                  "traceId": "trace-1780668772034-colecazbo",
+                  "id": "span-24915-1780671537765",
+                  "traceId": "trace-1780671537763-dwzdh4myi",
                   "parentSpanContext": {
-                    "traceId": "trace-1780668772034-colecazbo",
-                    "spanId": "span-24259-1780668772037"
+                    "traceId": "trace-1780671537763-dwzdh4myi",
+                    "spanId": "span-24913-1780671537763"
                   },
                   "name": "forward-resolution:require-resolver",
-                  "timestamp": 1780668772040000,
-                  "duration": 21000,
+                  "timestamp": 1780671537765000,
+                  "duration": 20000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
                     "ens.protocol.step": "require-resolver",
@@ -102,14 +102,14 @@
                 },
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-24262-1780668772061",
-                  "traceId": "trace-1780668772034-colecazbo",
+                  "id": "span-24916-1780671537785",
+                  "traceId": "trace-1780671537763-dwzdh4myi",
                   "parentSpanContext": {
-                    "traceId": "trace-1780668772034-colecazbo",
-                    "spanId": "span-24259-1780668772037"
+                    "traceId": "trace-1780671537763-dwzdh4myi",
+                    "spanId": "span-24913-1780671537763"
                   },
                   "name": "forward-resolution:execute-resolve-calls",
-                  "timestamp": 1780668772061000,
+                  "timestamp": 1780671537785000,
                   "duration": 9000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
@@ -1171,11 +1171,11 @@
   "account-migrated-names": {
     "data": {
       "account": {
-        "v1DomainsCount": {
-          "totalCount": 6
-        },
         "v2DomainsCount": {
           "totalCount": 1249
+        },
+        "v1DomainsCount": {
+          "totalCount": 6
         }
       }
     }
@@ -1382,6 +1382,66 @@
             "header": {
               "httpUrl": "https://files.gregskril.com/cdn/QmfGaXqmqasCrKktBgD4AvvJb3DLndiKXdz457uBGLTFGK"
             }
+          }
+        }
+      }
+    }
+  },
+  "domain-profile-compare": {
+    "data": {
+      "domain": {
+        "resolve": {
+          "profile": {
+            "avatar": {
+              "httpUrl": "https://gregskril.com/img/profile.jpg"
+            },
+            "addresses": {
+              "ethereum": "0x179a862703a4adfb29896552df9e307980d19285",
+              "solana": "2JQANQn1kccapb7GT8XScf9qBy59uMo9vh9WwVQhwStJ"
+            },
+            "socials": {
+              "github": {
+                "handle": "gskril",
+                "httpUrl": "https://github.com/gskril"
+              },
+              "twitter": {
+                "handle": "gregskril",
+                "httpUrl": "https://x.com/gregskril"
+              }
+            },
+            "website": {
+              "httpUrl": "https://gregskril.com/"
+            }
+          },
+          "records": {
+            "addresses": [
+              {
+                "coinType": 60,
+                "address": "0x179a862703a4adfb29896552df9e307980d19285"
+              },
+              {
+                "coinType": 501,
+                "address": "0x1350bfe02357c8bc583d7514f44ba2c31821d8739160e7b79a0a94bc113a4f73"
+              }
+            ],
+            "texts": [
+              {
+                "key": "avatar",
+                "value": "https://gregskril.com/img/profile.jpg"
+              },
+              {
+                "key": "com.twitter",
+                "value": "gregskril"
+              },
+              {
+                "key": "com.github",
+                "value": "gskril"
+              },
+              {
+                "key": "url",
+                "value": "https://gregskril.com/"
+              }
+            ]
           }
         }
       }
@@ -3393,11 +3453,11 @@
   "hello-world": {
     "data": {
       "account": {
-        "v2DomainsCount": {
-          "totalCount": 0
-        },
         "v1DomainsCount": {
           "totalCount": 514
+        },
+        "v2DomainsCount": {
+          "totalCount": 0
         },
         "resolve": {
           "primaryName": {

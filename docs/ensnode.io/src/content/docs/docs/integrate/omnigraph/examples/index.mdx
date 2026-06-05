@@ -7,17 +7,17 @@ sidebar:
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
-import { visibleOmnigraphExamples } from "@data/omnigraph-examples/examples";
+import { OMNIGRAPH_EXAMPLES_CATALOG_ITEMS } from "@data/omnigraph-examples/config";
 
 The **Omnigraph examples** are GraphQL queries with input variables, response examples, `curl` samples, and links to the ENSAdmin playground. Each example also includes ready-to-run **enssdk** (TypeScript) and **enskit** (React) code snippets.
 
 <CardGrid>
-  {visibleOmnigraphExamples.map((example) => (
+  {OMNIGRAPH_EXAMPLES_CATALOG_ITEMS.map((item) => (
     <LinkCard
-      key={example.id}
-      title={example.title}
-      description={example.description}
-      href={example.href}
+      key={item.href}
+      title={item.title}
+      description={item.description}
+      href={item.href}
     />
   ))}
 </CardGrid>
