@@ -37,6 +37,14 @@ export const hasResolver = (
 export async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelHashPath) {
   if (path.length === 0) return [];
 
+  // Invariant: reject over-depth paths rather than silently truncating at MAX_SUPPORTED_NAME_DEPTH
+  // (the recursive CTE stops there), which would resolve against a truncated ancestor path.
+  if (path.length > MAX_SUPPORTED_NAME_DEPTH) {
+    throw new Error(
+      `Invariant(forwardWalkDisjointNamegraph): path length ${path.length} exceeds maximum depth ${MAX_SUPPORTED_NAME_DEPTH}.`,
+    );
+  }
+
   // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(path)}::text[]`;
 
