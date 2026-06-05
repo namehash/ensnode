@@ -16,7 +16,6 @@ import {
   type ForwardResolutionResult,
   getDatasourceContract,
   getENSv1RootRegistry,
-  maybeGetDatasourceContract,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
   toJson,
@@ -167,20 +166,12 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // plugin being configured — a namespace may be ENSv1-only even when the Unigraph plugin is
           // defined, and forward resolution must follow the ENSv1 path in that case.
           if (maybeGetDatasource(di.context.namespace, DatasourceNames.ENSv2Root)) {
-            const universalResolverV1 = getDatasourceContract(
+            const universalResolver = getDatasourceContract(
               di.context.namespace,
               DatasourceNames.ENSRoot,
               "UniversalResolver",
             );
 
-            const universalResolverV2 = maybeGetDatasourceContract(
-              di.context.namespace,
-              DatasourceNames.ENSRoot,
-              "UniversalResolverV2",
-            );
-
-            const UniversalResolverAddress =
-              universalResolverV2?.address ?? universalResolverV1.address;
             operations = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.ExecuteResolveCalls,
@@ -188,7 +179,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               () =>
                 executeOperations({
                   name,
-                  resolverAddress: UniversalResolverAddress,
+                  resolverAddress: universalResolver.address,
                   operations,
                   publicClient,
                   useENSIP10Resolve: true,
