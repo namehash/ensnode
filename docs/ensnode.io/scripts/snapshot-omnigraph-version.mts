@@ -49,10 +49,10 @@ const sdkExampleById = new Map(EXAMPLE_QUERIES_FROM_SDK.map((ex) => [ex.id, ex])
 const examples: SnapshotExample[] = OMNIGRAPH_EXAMPLES_CONFIG.flatMap((config) => {
   const ex = sdkExampleById.get(config.id);
   if (!ex) {
-    console.warn(
-      `[omnigraph:snapshot] Skipping config id "${config.id}" — not in SDK example queries`,
+    console.error(
+      `[omnigraph:snapshot] Missing SDK example query ID for config entry: ${config.id}`,
     );
-    return [];
+    process.exit(1);
   }
   return [
     {
@@ -90,5 +90,5 @@ writeFileSync(
 
 console.log(`Snapshotted ${examples.length} examples + schema for ${version} (commit ${commit}).`);
 console.log(
-  `Next: pnpm omnigraph-examples:refresh-responses  # fetches per-example namespace endpoints`,
+  `Next: pnpm omnigraph-examples:refresh-responses  # once ${version} is live in production`,
 );

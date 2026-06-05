@@ -119,7 +119,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-resolver",
     title: "Domain Resolver",
-    description: "Assigned resolver, stored records, resolver permissions, and events.",
+    description: "Assigned resolver contract address and recent resolver events.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,

@@ -915,41 +915,36 @@ Variables:
 
 ```graphql
 query Namegraph {
-  root {
-    id
-    domains {
+  domain(by: { name: "eth" }) {
+    registry {
+      id
+      contract {
+        chainId
+        address
+      }
+    }
+    parent {
+      id
+    }
+    subregistry {
+      domains {
+        edges {
+          node {
+            canonical {
+              name {
+                beautified
+              }
+            }
+          }
+        }
+      }
+    }
+    subdomains {
       edges {
         node {
           canonical {
             name {
-              interpreted
               beautified
-            }
-          }
-
-          subdomains {
-            edges {
-              node {
-                canonical {
-                  name {
-                    interpreted
-                    beautified
-                  }
-                }
-
-                subdomains {
-                  edges {
-                    node {
-                      canonical {
-                        name {
-                          interpreted
-                          beautified
-                        }
-                      }
-                    }
-                  }
-                }
-              }
             }
           }
         }
@@ -997,6 +992,33 @@ query GetEthDomains {
       node {
         __typename
         id
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{}
+```
+
+### accelerate-resolve
+
+```graphql
+query AccelerateResolve {
+  domain(by: { name: "eth" }) {
+    resolve(accelerate: true) {
+      trace
+      acceleration {
+        requested
+        attempted
+      }
+      records {
+        addresses(coinTypes: [60]) {
+          address
+        }
       }
     }
   }

@@ -719,8 +719,8 @@ query AccelerateResolve {
     }
   }
 }`,
-    variables: { default: { } },
-  }
+    variables: { default: {} },
+  },
 ];
 
 const graphqlApiExampleQueryById = new Map(
