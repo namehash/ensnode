@@ -16,6 +16,7 @@ const SEPOLIA_V2_ONLY_IDS = new Set([
   "account-resolver-permissions",
   "account-migrated-names",
   "eth-by-version",
+  "domain-subdomains-recently-registered",
 ]);
 
 describe("OMNIGRAPH_EXAMPLES_CONFIG", () => {
