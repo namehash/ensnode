@@ -20,67 +20,46 @@ FROM "ensindexer_0".domains d
 JOIN parent p ON d.registry_id = p.subregistry_id
 WHERE d.canonical = true
 ORDER BY d.canonical_name
-LIMIT 10;
+LIMIT 5;
 `,
     result: [
       {
         type: "ENSv1Domain",
-        canonical_name: "[52602a50858115661619fb28cf543ee766c182e0be6743c72d5bd674b3d12686].eth",
-        canonical_node: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
+        canonical_name: "$2442.eth",
+        canonical_node: "0x89c28481de9640822dd25f821e341b0304640b9363d419e10b9d6b99f049fc8c",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x89c28481de9640822dd25f821e341b0304640b9363d419e10b9d6b99f049fc8c",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "[d90db363b8bc1371f7d738d264ff7294bfc5636f907c467adf68321a3c6d8188].eth",
-        canonical_node: "0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "katrenpadu.eth",
-        canonical_node: "0xf8ae81127bcd7ff99828b3dbd982a943d6dd961ee3f1a6ca707aa0eea913328e",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-112554048520345018269255786667391470421317806528110367240542760381540064034816",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "roppp.eth",
-        canonical_node: "0x39095c3dfb872d6441c95547f88591e7fb97014eef30cabe3df12a9b2a64dbe8",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-88275407146030613359050872632052369891139576190404928761656352489271755538432",
+        canonical_name: "$bless.eth",
+        canonical_node: "0xfca869315283e0747c929ff17f57d6712cf76b372395eef8b770595d393902ea",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xfca869315283e0747c929ff17f57d6712cf76b372395eef8b770595d393902ea",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "sfmpfv44d0mig.eth",
-        canonical_node: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
+        canonical_name: "$pauly.eth",
+        canonical_node: "0x8254e524ac45f21ce3a3483e52dbedf1aa7bc5d5cff69d4a189df5e369f6eacf",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x8254e524ac45f21ce3a3483e52dbedf1aa7bc5d5cff69d4a189df5e369f6eacf",
       },
       {
-        type: "ENSv2Domain",
-        canonical_name: "sfmpfv44d0mig.eth",
-        canonical_node: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480",
+        type: "ENSv1Domain",
+        canonical_name: "$vince.eth",
+        canonical_node: "0x1630be8a50ed7d79c1a5510ca7aaf3d6a483596affcc81c2dbaad17262619dcc",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x1630be8a50ed7d79c1a5510ca7aaf3d6a483596affcc81c2dbaad17262619dcc",
       },
       {
-        type: "ENSv2Domain",
-        canonical_name: "sfmpfv44d0res.eth",
-        canonical_node: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-37259562946248504018379781627254217478007643438678910837598068740925220192256",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "sfmpfvtoicv2ok.eth",
-        canonical_node: "0x7d0c27336cf9d51c3fc8f29ef4ef69df9cd4a8ec983e3e17d457a8de6013f3c5",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-49509597771493908415463190501045916291230588437784211605615168713991762477056",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "wrapnation.eth",
-        canonical_node: "0xc7da9e9ef214b62959a64ba9967cb33a2545a5c0f217d2716474ad1e85fa51fd",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
+        type: "ENSv1Domain",
+        canonical_name: "0000000000000000000000000000000000000000.eth",
+        canonical_node: "0xc13733debbac0dd0143dddcbfe8fcede7c3405033357f034d8b0779ad85802e1",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xc13733debbac0dd0143dddcbfe8fcede7c3405033357f034d8b0779ad85802e1",
       },
     ],
   },
   sdk: {
     codeSnippet: `import { and, eq, asc } from "drizzle-orm";
+
+const name = "eth";
+const limit = 5;
 
 // Two-step:
 // 1) find parent domain,
@@ -90,7 +69,7 @@ const [parentDomain] = await ensDb
   .from(ensIndexerSchema.domain)
   .where(
     and(
-      eq(ensIndexerSchema.domain.canonicalName, "eth"),
+      eq(ensIndexerSchema.domain.canonicalName, name),
       eq(ensIndexerSchema.domain.canonical, true),
     )
 );
@@ -118,57 +97,33 @@ if (parentDomain?.subregistryId) {
     result: [
       {
         type: "ENSv1Domain",
-        canonicalName: "[52602a50858115661619fb28cf543ee766c182e0be6743c72d5bd674b3d12686].eth",
-        canonicalNode: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
+        canonicalName: "$2442.eth",
+        canonicalNode: "0x89c28481de9640822dd25f821e341b0304640b9363d419e10b9d6b99f049fc8c",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x89c28481de9640822dd25f821e341b0304640b9363d419e10b9d6b99f049fc8c",
       },
       {
         type: "ENSv1Domain",
-        canonicalName: "[d90db363b8bc1371f7d738d264ff7294bfc5636f907c467adf68321a3c6d8188].eth",
-        canonicalNode: "0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "katrenpadu.eth",
-        canonicalNode: "0xf8ae81127bcd7ff99828b3dbd982a943d6dd961ee3f1a6ca707aa0eea913328e",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-112554048520345018269255786667391470421317806528110367240542760381540064034816",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "roppp.eth",
-        canonicalNode: "0x39095c3dfb872d6441c95547f88591e7fb97014eef30cabe3df12a9b2a64dbe8",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-88275407146030613359050872632052369891139576190404928761656352489271755538432",
+        canonicalName: "$bless.eth",
+        canonicalNode: "0xfca869315283e0747c929ff17f57d6712cf76b372395eef8b770595d393902ea",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xfca869315283e0747c929ff17f57d6712cf76b372395eef8b770595d393902ea",
       },
       {
         type: "ENSv1Domain",
-        canonicalName: "sfmpfv44d0mig.eth",
-        canonicalNode: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
+        canonicalName: "$pauly.eth",
+        canonicalNode: "0x8254e524ac45f21ce3a3483e52dbedf1aa7bc5d5cff69d4a189df5e369f6eacf",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x8254e524ac45f21ce3a3483e52dbedf1aa7bc5d5cff69d4a189df5e369f6eacf",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "sfmpfv44d0mig.eth",
-        canonicalNode: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480",
+        type: "ENSv1Domain",
+        canonicalName: "$vince.eth",
+        canonicalNode: "0x1630be8a50ed7d79c1a5510ca7aaf3d6a483596affcc81c2dbaad17262619dcc",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x1630be8a50ed7d79c1a5510ca7aaf3d6a483596affcc81c2dbaad17262619dcc",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "sfmpfv44d0res.eth",
-        canonicalNode: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-37259562946248504018379781627254217478007643438678910837598068740925220192256",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "sfmpfvtoicv2ok.eth",
-        canonicalNode: "0x7d0c27336cf9d51c3fc8f29ef4ef69df9cd4a8ec983e3e17d457a8de6013f3c5",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-49509597771493908415463190501045916291230588437784211605615168713991762477056",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "wrapnation.eth",
-        canonicalNode: "0xc7da9e9ef214b62959a64ba9967cb33a2545a5c0f217d2716474ad1e85fa51fd",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464",
+        type: "ENSv1Domain",
+        canonicalName: "0000000000000000000000000000000000000000.eth",
+        canonicalNode: "0xc13733debbac0dd0143dddcbfe8fcede7c3405033357f034d8b0779ad85802e1",
+        id: "11155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xc13733debbac0dd0143dddcbfe8fcede7c3405033357f034d8b0779ad85802e1",
       },
     ],
   },

@@ -8,47 +8,17 @@ sidebar:
 import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
 import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
-
-export const resultJson = [
-  {
-    type: "ENSv1Domain",
-    count: 2
-  },
-  {
-    type: "ENSv2Domain",
-    count: 14
-  }
-];
-
-export const sqlExampleSnippet = `SELECT type, count(*) FROM ensindexer_0.domains
-WHERE owner_id = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
-GROUP BY type;
-`;
-
-export const tsExampleSnippet = `import { count, eq } from "drizzle-orm";
-
-const counts = await ensDb
-\t.select({ type: ensIndexerSchema.domain.type, count: count() })
-\t.from(ensIndexerSchema.domain)
-\t.where(eq(ensIndexerSchema.domain.ownerId, "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"))
-\t.groupBy(ensIndexerSchema.domain.type);
-`
+import { exampleDomainsFuzzySearchByName } from "@data/unigraph-examples/domains-fuzzy-search-by-name";
 
 :::caution[`unigraph` plugin required]
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
 :::
 
-Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
+Fetch Domains with names similar to a query string, ranked by similarity. This example uses PostgreSQL's `pg_trgm` extension, which provides the `%` operator for fuzzy matching and the `similarity()` function for ranking results. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample
- sql={{
-  codeSnippet: sqlExampleSnippet,
-  result: resultJson,
- }}
- ensDbSdk={{
-  codeSnippet: tsExampleSnippet,
-  result: resultJson,
- }}
+ sql={exampleDomainsFuzzySearchByName.sql}
+ ensDbSdk={exampleDomainsFuzzySearchByName.sdk}
 >
   <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
   <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>

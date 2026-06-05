@@ -13,8 +13,9 @@ export const exampleDomainByName = {
 	canonical_name,
 	canonical_node,
 	owner_id
-FROM ensindexer_0.domains
-WHERE canonical_name = 'vitalik.eth';
+FROM "ensindexer_0".domains
+WHERE canonical_name = 'vitalik.eth'
+AND canonical = true;
 `,
     result: [
       {
@@ -27,7 +28,7 @@ WHERE canonical_name = 'vitalik.eth';
     ],
   },
   sdk: {
-    codeSnippet: `import { eq } from "drizzle-orm";
+    codeSnippet: `import { and, eq } from "drizzle-orm";
 
 const [vitalik] = await ensDb
   .select({
@@ -39,7 +40,10 @@ const [vitalik] = await ensDb
   })
   .from(ensIndexerSchema.domain)
   .where(
-    eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth")
+    and(
+      eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"),
+      eq(ensIndexerSchema.domain.canonical, true)
+    )
   );
 
 console.log(vitalik);`,

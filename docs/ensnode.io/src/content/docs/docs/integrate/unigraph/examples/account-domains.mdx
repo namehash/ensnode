@@ -8,37 +8,7 @@ sidebar:
 import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
 import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
-
-export const resultJson = [
-  {
-    type: "ENSv1Domain",
-    count: 2
-  },
-  {
-    type: "ENSv2Domain",
-    count: 14
-  }
-];
-
-export const sqlExample = {
-  codeSnippet: `SELECT type, count(*) FROM ensindexer_0.domains
-WHERE owner_id = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
-GROUP BY type;
-`,
-  result: resultJson,
-};
-
-export const tsExample = {
-  codeSnippet: `import { count, eq } from "drizzle-orm";
-
-const counts = await ensDb
-.select({ type: ensIndexerSchema.domain.type, count: count() })
-.from(ensIndexerSchema.domain)
-.where(eq(ensIndexerSchema.domain.ownerId, "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"))
-.groupBy(ensIndexerSchema.domain.type);
-`,
-result: resultJson,
-};
+import { exampleAccountDomains } from "@data/unigraph-examples/account-domains";
 
 :::caution[`unigraph` plugin required]
 Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
@@ -47,8 +17,8 @@ Performing SQL queries on the ENS Unigraph requires that you have the `unigraph`
 Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample
- sql={sqlExample}
- ensDbSdk={tsExample}
+ sql={exampleAccountDomains.sql}
+ ensDbSdk={exampleAccountDomains.sdk}
 >
   <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
   <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>

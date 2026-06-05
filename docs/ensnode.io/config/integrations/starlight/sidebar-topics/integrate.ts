@@ -199,10 +199,6 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/unigraph/examples/account-domains",
             },
             {
-              label: "Account Permissions",
-              link: "/docs/integrate/unigraph/examples/account-permissions",
-            },
-            {
               label: "Latest Registrations",
               link: "/docs/integrate/unigraph/examples/latest-registrations",
             },
