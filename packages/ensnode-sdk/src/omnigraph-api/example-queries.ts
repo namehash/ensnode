@@ -77,19 +77,23 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   {
     id: "hello-world",
     query: `query HelloWorld($address: Address!) {
-  # Load an Account by address
+  # Lookup an Account by address.
   account(by: { address: $address }) {
     resolve {
-      # Resolve the primary name for the account
+      # Reverse resolve the ENS primary name of the account
+      # using a convenient ETHEREUM alias for mainnet.
       primaryName(by: { chainName: ETHEREUM }) {
+        # Get the regular interpreted variant of the primary name 
+        # and also the special beautified variant that optimizes names 
+        # containing special characters such as emojis for proper display in interfaces.
         name { interpreted beautified }
         resolve {
-          # Resolve the profile (resolver records) 
-          # for the primary name in the same query
+          # If the account has a primary name on Ethereum (mainnet),
+          # forward resolve the interpreted ENS profile of that name in the same query!.
           profile {
             description
             avatar { httpUrl }
-            addresses { ethereum }
+            addresses { ethereum bitcoin }
             socials {
               twitter { handle httpUrl }
               github { handle httpUrl }
@@ -99,7 +103,8 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
       }
     }
 
-    # Load the ENSv1 and ENSv2 domains owned by the account
+    # Also load the count of ENSv1 and ENSv2 domains owned by the account
+    # to see if they have domains they should upgrade to ENSv2
     v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
     v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
   }
@@ -724,23 +729,36 @@ query GetEthDomains {
   {
     id: "accelerate-resolve",
     query: `
-query AccelerateResolve {
-  domain(by: { name: "eth" }) {
+query AccelerateResolve($address: Address!) {
+  account(by: { address: $address }) {
+    address
     resolve(accelerate: true) {
       trace
       acceleration {
         requested
         attempted
       }
-      records {
-        addresses(coinTypes: [60]) {
-          address
+      primaryName(by: { chainName: ETHEREUM }) {
+        name { interpreted beautified }
+        resolve {
+          trace
+          acceleration {
+            requested
+            attempted
+          }
+          profile {
+            description
+          }
         }
       }
     }
   }
 }`,
-    variables: { default: {} },
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 },
+    },
   },
 ];
 

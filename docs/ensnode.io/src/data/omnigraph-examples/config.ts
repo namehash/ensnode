@@ -22,14 +22,6 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     hostSeparatePage: false,
   },
   {
-    id: "domain-by-name",
-    title: "Domain By Name",
-    description: "Load a domain by interpreted name, including profile information.",
-    category: "Resolution",
-    namespace: ENSNamespaceIds.Mainnet,
-    hostSeparatePage: true,
-  },
-  {
     id: "domain-profile",
     title: "Domain Profile",
     description: "Load a domain's high-level profile (avatar, socials, addresses, and more).",
@@ -41,6 +33,14 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "domain-records",
     title: "Domain Records",
     description: "For given name resolve raw records like `addresses`, `texts`, `contenthash` etc.",
+    category: "Resolution",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: true,
+  },
+  {
+    id: "domain-by-name",
+    title: "Domain By Name",
+    description: "Load a domain by interpreted name, including profile information.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -161,9 +161,9 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   },
   {
     id: "accelerate-resolve",
-    title: "Resolve domain records and tracking protocol acceleration",
+    title: "Resolve primary name and records, and track protocol acceleration",
     description:
-      "Resolve domain records and track protocol acceleration with `trace` and `accelerate` arguments.",
+      "Resolve primary name and records, and track protocol acceleration with `trace` and `accelerate` arguments.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: false,

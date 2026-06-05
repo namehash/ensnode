@@ -1007,17 +1007,29 @@ Variables:
 ### accelerate-resolve
 
 ```graphql
-query AccelerateResolve {
-  domain(by: { name: "eth" }) {
+query AccelerateResolve($address: Address!) {
+  account(by: { address: $address }) {
+    address
     resolve(accelerate: true) {
       trace
       acceleration {
         requested
         attempted
       }
-      records {
-        addresses(coinTypes: [60]) {
-          address
+      primaryName(by: { chainName: ETHEREUM }) {
+        name {
+          interpreted
+          beautified
+        }
+        resolve {
+          trace
+          acceleration {
+            requested
+            attempted
+          }
+          profile {
+            description
+          }
         }
       }
     }
@@ -1028,7 +1040,9 @@ query AccelerateResolve {
 Variables:
 
 ```json
-{}
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+}
 ```
 
 <!-- AUTOGEN:EXAMPLES end -->

@@ -1,16 +1,9 @@
 [
   {
     "id": "hello-world",
-    "query": "query HelloWorld($address: Address!) {\n  # Load an Account by address\n  account(by: { address: $address }) {\n    resolve {\n      # Resolve the primary name for the account\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          # Resolve the profile (resolver records) \n          # for the primary name in the same query\n          profile {\n            description\n            avatar { httpUrl }\n            addresses { ethereum }\n            socials {\n              twitter { handle httpUrl }\n              github { handle httpUrl }\n            }\n          }\n        }\n      }\n    }\n\n    # Load the ENSv1 and ENSv2 domains owned by the account\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
+    "query": "query HelloWorld($address: Address!) {\n  # Lookup an Account by address.\n  account(by: { address: $address }) {\n    resolve {\n      # Reverse resolve the ENS primary name of the account\n      # using a convenient ETHEREUM alias for mainnet.\n      primaryName(by: { chainName: ETHEREUM }) {\n        # Get the regular interpreted variant of the primary name \n        # and also the special beautified variant that optimizes names \n        # containing special characters such as emojis for proper display in interfaces.\n        name { interpreted beautified }\n        resolve {\n          # If the account has a primary name on Ethereum (mainnet),\n          # forward resolve the interpreted ENS profile of that name in the same query!.\n          profile {\n            description\n            avatar { httpUrl }\n            addresses { ethereum bitcoin }\n            socials {\n              twitter { handle httpUrl }\n              github { handle httpUrl }\n            }\n          }\n        }\n      }\n    }\n\n    # Also load the count of ENSv1 and ENSv2 domains owned by the account\n    # to see if they have domains they should upgrade to ENSv2\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
-    }
-  },
-  {
-    "id": "domain-by-name",
-    "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { beautified } }\n    owner { address }\n    resolve {\n      profile {\n        description\n        addresses {\n          ethereum\n        }\n      }\n    }\n  }\n}",
-    "variables": {
-      "name": "vitalik.eth"
     }
   },
   {
@@ -25,6 +18,13 @@
     "query": "query DomainRecords($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical {\n      name {\n        interpreted\n      }\n    }\n    resolve {\n      records {\n        addresses(coinTypes: [60, 2147483658, 501]) {\n          coinType\n          address\n        }\n        texts(keys: [\"description\", \"avatar\", \"url\", \"com.github\", \"com.twitter\"]) {\n          key\n          value\n        }\n        contenthash\n      }\n    }\n  }\n}",
     "variables": {
       "name": "gregskril.eth"
+    }
+  },
+  {
+    "id": "domain-by-name",
+    "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { beautified } }\n    owner { address }\n    resolve {\n      profile {\n        description\n        addresses {\n          ethereum\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "vitalik.eth"
     }
   },
   {
@@ -135,7 +135,9 @@
   },
   {
     "id": "accelerate-resolve",
-    "query": "query AccelerateResolve {\n  domain(by: { name: \"eth\" }) {\n    resolve(accelerate: true) {\n      trace\n      acceleration {\n        requested\n        attempted\n      }\n      records {\n        addresses(coinTypes: [60]) {\n          address\n        }\n      }\n    }\n  }\n}",
-    "variables": {}
+    "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve(accelerate: true) {\n      trace\n      acceleration {\n        requested\n        attempted\n      }\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          trace\n          acceleration {\n            requested\n            attempted\n          }\n          profile {\n            description\n          }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+    }
   }
 ]
