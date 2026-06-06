@@ -40,6 +40,9 @@ With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to
 Start from a wallet address, reverse-resolve its Ethereum primary name, then forward-resolve the profile on that name:
 
 ```ts title="example.ts"
+import { createEnsNodeClient } from "enssdk/core";
+import { graphql, omnigraph } from "enssdk/omnigraph";
+
 // create and extend an EnsNodeClient with Omnigraph API support
 const client = createEnsNodeClient({
         url: process.env.ENSNODE_URL!
@@ -103,6 +106,9 @@ With `enskit`, leverage ENSNode and the Omnigraph to power your React components
 The same `address -> primary name -> forward profile` pattern in a React component:
 
 ```tsx title="example.tsx"
+import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
+import type { Address } from "enssdk";
+
 // this query is fully typechecked and supports editor autocomplete!
 const AccountPrimaryProfileQuery = graphql(`
   query AccountPrimaryProfile($address: Address!) {
@@ -142,7 +148,7 @@ export function AccountProfileCard({ address }: { address: Address }) {
   return (
     <div>
       <p>Address: {account.address}</p>
-      <p>Primary name: {primaryName?.name.beautified ?? "None set"}</p>
+      <p>Primary name: {primaryName?.name?.beautified ?? "None set"}</p>
       <p>Bitcoin address: {addresses?.bitcoin ?? "Not set"}</p>
       <p>Description: {primaryName?.resolve?.profile?.description}</p>
     </div>
