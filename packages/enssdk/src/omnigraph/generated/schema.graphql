@@ -1907,6 +1907,64 @@ type ThreeDNSRegistration implements Registration {
 }
 
 """
+A valid ENS name that is not currently indexed (e.g. an off-chain or CCIP-Read name). Indexed-data fields are absent; `resolve` performs full forward resolution via the UniversalResolver.
+"""
+type VirtualDomain implements Domain {
+  """
+  Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
+  """
+  canonical: DomainCanonical
+
+  """All Events associated with this Domain."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+
+  """A unique and stable reference to this Domain."""
+  id: DomainId!
+
+  """The Label associated with this Domain in the ENS Namegraph."""
+  label: Label!
+
+  """
+  If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  """
+  owner: Account
+
+  """
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  """
+  parent: Domain
+
+  """The latest Registration for this Domain, if exists."""
+  registration: Registration
+
+  """All Registrations for a Domain, including the latest Registration."""
+  registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
+
+  """The Registry under which this Domain exists."""
+  registry: Registry!
+
+  """Resolve protocol-level data for this Domain."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ForwardResolve!
+
+  """Resolver relationship metadata for this Domain."""
+  resolver: DomainResolver!
+
+  """
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
+  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+
+  """The Registry this Domain declares as its Subregistry, if exists."""
+  subregistry: Registry
+}
+
+"""
 Additional metadata for BaseRegistrar Registrations wrapped by the NameWrapper (i.e. in the case of a wrapped .eth name)
 """
 type WrappedBaseRegistrarRegistration {

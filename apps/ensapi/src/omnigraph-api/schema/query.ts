@@ -7,12 +7,15 @@ import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
+import {
+  getDomainIdByInterpretedName,
+  nameHasResolver,
+} from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
+import { DomainInterfaceRef, makeVirtualDomain } from "@/omnigraph-api/schema/domain";
 import {
   DOMAINS_ORDERING_DESCRIPTION,
   DomainIdInput,
@@ -125,9 +128,15 @@ builder.queryType({
       type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
-      resolve: (parent, args, ctx, info) => {
+      resolve: async (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
-        return getDomainIdByInterpretedName(args.by.name);
+        const domainId = await getDomainIdByInterpretedName(args.by.name);
+        if (domainId !== null) return domainId;
+        // Name is not indexed. Verify it actually has a resolver on-chain (via UniversalResolver)
+        // before returning a VirtualDomain — prevents surfacing a VirtualDomain for names that
+        // don't exist (e.g. random-string.eth with no resolver).
+        if (!(await nameHasResolver(args.by.name))) return null;
+        return makeVirtualDomain(args.by.name);
       },
     }),
 

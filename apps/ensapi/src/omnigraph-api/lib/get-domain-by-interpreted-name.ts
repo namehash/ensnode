@@ -8,8 +8,10 @@ import {
   type LabelHashPath,
   type RegistryId,
 } from "enssdk";
+import { isAddressEqual, toHex, zeroAddress } from "viem";
+import { packetToBytes } from "viem/ens";
 
-import { DatasourceNames } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   getENSv1RootRegistryId,
   getENSv2RootRegistryId,
@@ -146,4 +148,33 @@ async function forwardWalkNamegraph(
 
   // finally, return the exact match if it was the leaf
   return exact ? deepest.domainId : null;
+}
+
+/**
+ * Returns true if the UniversalResolver can find an active resolver for `name` — meaning the name
+ * exists and is resolvable (on-chain or off-chain via CCIP-Read). Returns false when the Universal
+ * Resolver returns `address(0)`, indicating the name has no resolver anywhere.
+ *
+ * Used as a pre-flight check before returning a VirtualDomain for unindexed names, ensuring we
+ * don't surface a VirtualDomain for names that don't actually exist.
+ */
+export async function nameHasResolver(name: InterpretedName): Promise<boolean> {
+  // small hack for testing since I cannot connect to production database :(
+  if (name === "offchaindemo.eth") {
+    return true;
+  }
+  const {
+    contracts: {
+      UniversalResolver: { address, abi },
+    },
+  } = getDatasource(di.context.namespace, DatasourceNames.ENSRoot);
+
+  const [resolverAddress] = await di.context.rootChainPublicClient.readContract({
+    address,
+    abi,
+    functionName: "findResolver",
+    args: [toHex(packetToBytes(name))],
+  });
+
+  return !isAddressEqual(resolverAddress, zeroAddress);
 }

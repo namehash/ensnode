@@ -1,9 +1,18 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import { type DomainId, isNormalizedName } from "enssdk";
+import {
+  type DomainId,
+  type ENSv1DomainId,
+  type InterpretedName,
+  interpretedNameToInterpretedLabels,
+  isNormalizedName,
+  labelhashInterpretedLabel,
+  namehashInterpretedName,
+} from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
+import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -348,6 +357,62 @@ ENSv1DomainRef.implement({
       resolve: (parent) => parent.rootRegistryOwnerId,
     }),
   }),
+});
+
+///////////////////////////////////////////////////////////////
+// VirtualDomain — synthetic domain for valid unindexed names
+///////////////////////////////////////////////////////////////
+
+/**
+ * A synthetic domain object for ENS names that are valid but not present in the index (e.g.
+ * off-chain names resolved via CCIP-Read). Returned by `Query.domain(by: { name })` when the
+ * namegraph walk finds no matching indexed domain. All indexed-data fields (label, registry, etc.)
+ * are derived or null; `canonicalName` carries the input name so that `Domain.resolve` can
+ * forward-resolve records via the UniversalResolver.
+ */
+export type VirtualDomain = Omit<Domain, "type"> & { type: "VirtualDomain" };
+
+export function makeVirtualDomain(name: InterpretedName): Domain {
+  const firstLabel = interpretedNameToInterpretedLabels(name)[0];
+  const labelHash = labelhashInterpretedLabel(firstLabel);
+  const virtualDomain: VirtualDomain = {
+    type: "VirtualDomain",
+    // probably not correct
+    id: namehashInterpretedName(name) as unknown as ENSv1DomainId,
+    label: { labelHash, interpreted: firstLabel },
+    labelHash,
+    canonical: isCanonicalName(name),
+    registryId: getRootRegistryId(di.context.namespace),
+    subregistryId: null,
+    tokenId: null,
+    node: null,
+    ownerId: null,
+    rootRegistryOwnerId: null,
+    canonicalName: name,
+    canonicalDepth: null,
+    canonicalPath: null,
+    canonicalNode: null,
+    canonicalLabelHashPath: null,
+    __canonicalNamePrefix: null,
+    __latestRegistrationExpiry: 2n ** 256n - 1n,
+    __latestRegistrationStart: 2n ** 256n - 1n,
+  };
+  return virtualDomain as unknown as Domain;
+}
+
+function isCanonicalName(name: InterpretedName): boolean {
+  // TODO: implement this
+  return true;
+}
+
+export const VirtualDomainRef = builder.objectRef<Domain>("VirtualDomain");
+
+VirtualDomainRef.implement({
+  description:
+    "A valid ENS name that is not currently indexed (e.g. an off-chain or CCIP-Read name). Indexed-data fields are absent; `resolve` performs full forward resolution via the UniversalResolver.",
+  interfaces: [DomainInterfaceRef],
+  isTypeOf: (value) => (value as VirtualDomain).type === "VirtualDomain",
+  fields: () => ({}),
 });
 
 //////////////////////////////

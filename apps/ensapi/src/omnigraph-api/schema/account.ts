@@ -33,11 +33,15 @@ import {
 } from "@/omnigraph-api/schema/reverse-resolve";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
-  load: (ids: Address[]) => {
+  load: async (ids: Address[]) => {
     const { ensDb } = di.context;
-    return ensDb.query.account.findMany({
+    const found = await ensDb.query.account.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     });
+    const foundSet = new Set(found.map((a) => a.id));
+    // Synthesize stubs for addresses not in the index so that Account.resolve
+    // (reverse resolution) always fires — it only needs account.id (the address).
+    return [...found, ...ids.filter((id) => !foundSet.has(id)).map((id) => ({ id }))];
   },
   toKey: getModelId,
   cacheResolved: true,
