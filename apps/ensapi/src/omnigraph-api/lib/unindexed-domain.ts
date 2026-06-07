@@ -5,10 +5,12 @@ import {
   interpretedNameToInterpretedLabels,
   isResolvableName,
   labelhashInterpretedLabel,
+  makeResolverId,
   makeUnindexedDomainId,
   type Node,
   namehashInterpretedName,
   type RegistryId,
+  type ResolverId,
   type UnindexedDomainId,
 } from "enssdk";
 
@@ -45,6 +47,14 @@ export interface UnindexedDomain {
   canonicalName: InterpretedName;
   canonicalDepth: number;
   canonicalNode: Node;
+
+  /**
+   * This Domain's effective Resolver — the wildcard (`extended`) Resolver borne by the deepest
+   * ancestor in its namegraph path, which is what makes it resolvable. A virtual Domain has no
+   * Resolver assigned directly to it (so `DomainResolver.assigned` is null), but it always has this
+   * effective Resolver (so `DomainResolver.effective` is non-null).
+   */
+  effectiveResolverId: ResolverId;
 
   /**
    * The namegraph walk `rows` for {@link canonicalName} that minted this Domain, retained so
@@ -96,6 +106,7 @@ export function makeUnindexedDomain(
     canonicalName: name,
     canonicalDepth: labels.length,
     canonicalNode: node,
+    effectiveResolverId: makeResolverId({ chainId: effective.chainId, address: effective.address }),
     rows,
   } satisfies UnindexedDomain;
 }

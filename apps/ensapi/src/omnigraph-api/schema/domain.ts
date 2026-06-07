@@ -187,7 +187,7 @@ DomainInterfaceRef.implement({
       description: "Resolver relationship metadata for this Domain.",
       type: DomainResolverRef,
       nullable: false,
-      resolve: (parent) => parent.id,
+      resolve: (parent) => parent,
     }),
 
     //////////////////

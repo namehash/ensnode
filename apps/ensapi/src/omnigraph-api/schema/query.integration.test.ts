@@ -359,6 +359,43 @@ describe("Query.domain (UnindexedDomain)", () => {
     expect(path[3]).toMatchObject({ __typename: "UnindexedDomain", id: result.domain?.id });
   });
 
+  it("exposes the wildcard ancestor's Resolver as the effective Resolver (assigned is null)", async () => {
+    const UnindexedDomainResolver = gql`
+      query UnindexedDomainResolver($name: InterpretedName!) {
+        domain(by: { name: $name }) {
+          __typename
+          resolver {
+            assigned { contract { chainId address } }
+            effective { contract { chainId address } }
+          }
+        }
+      }
+    `;
+
+    type ResolverContract = { contract: { chainId: number; address: string } } | null;
+    type Result = {
+      domain: {
+        __typename: string;
+        resolver: { assigned: ResolverContract; effective: ResolverContract };
+      } | null;
+    };
+
+    const name = `unregistered-wildcard.${effectiveResolverFallback.parentName}`;
+    const result = await request<Result>(UnindexedDomainResolver, { name });
+
+    expect(result.domain?.__typename).toBe("UnindexedDomain");
+    // a virtual Domain has no Resolver assigned directly to it
+    expect(result.domain?.resolver.assigned).toBeNull();
+    // but its effective Resolver is the wildcard ancestor's (parent.eth's) Resolver
+    const { domain: parent } = await request<Result>(UnindexedDomainResolver, {
+      name: effectiveResolverFallback.parentName,
+    });
+    expect(parent?.resolver.assigned?.contract.address).toBeTruthy();
+    expect(result.domain?.resolver.effective?.contract).toEqual(
+      parent?.resolver.assigned?.contract,
+    );
+  });
+
   it("returns null for an unregistered subname under a Resolver-less name (no wildcard Resolver)", async () => {
     await expect(
       request(DomainDetail, {
