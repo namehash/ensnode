@@ -4,4 +4,4 @@
 "ensapi": patch
 ---
 
-The `resolvers` table's `extended` column is renamed to `is_extended` (Drizzle property `isExtended`). The Omnigraph API now exposes this as a new `Resolver.extended: Boolean!` field — whether the Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`).
+The `resolvers` table gains an `is_extended` column — whether the Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`) — populated at index time via a single cached `supportsInterface` RPC. The Omnigraph API exposes it as a new `Resolver.extended: Boolean!` field.
