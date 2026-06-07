@@ -59,7 +59,7 @@ export const walkResultRowHasResolver = (
  * Walks a disjoint namegraph from `registryId` through `path` to identify each ancestor Domain,
  * then LEFT JOINs each Domain to its Resolver (via DRR, joined onward to the Resolver entity for
  * its `extended` flag) and returns the full path ordered by depth DESC (deepest first).
- * Resolver-less Domains are kept in the result with `address`/`chainId` NULL and `extended` false.
+ * Resolver-less Domains are kept in the result with `address`/`chainId`/`extended` NULL.
  * Recursion terminates when the path is exhausted.
  */
 export async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelHashPath) {

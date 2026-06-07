@@ -114,16 +114,18 @@ export function computeUnindexedDomainCanonicalPath(
 ): (DomainId | UnindexedDomain)[] {
   const { canonicalName: name, rows } = domain;
 
-  // the deepest indexed ancestor (rows are ordered depth DESC) anchors the indexed canonical prefix
-  const deepest = rows[0];
-  const indexedPrefix = deepest?.canonicalPath ?? [];
-  const deepestIndexedDepth = deepest?.depth ?? 0;
+  // the deepest indexed ancestor (rows are ordered depth DESC) anchors the indexed canonical prefix.
+  // Its materialized canonicalPath is root→leaf inclusive, so its length is that ancestor's canonical
+  // depth — the count of leading labels already covered by indexed Domains. We slice by this length
+  // (NOT the walk-frame `depth`, which is relative to the post-bridge sub-path and undercounts for
+  // bridged names, over-minting and duplicating the indexed ancestors).
+  const indexedPrefix = rows[0]?.canonicalPath ?? [];
 
-  // mint an UnindexedDomain for each label below the deepest indexed ancestor, in root→leaf order:
-  // getNameHierarchy is leaf-first, so reverse to root→leaf and drop the indexed-ancestor depths
+  // mint an UnindexedDomain for each label below the indexed prefix, in root→leaf order:
+  // getNameHierarchy is leaf-first, so reverse to root→leaf and drop the indexed-ancestor labels
   const virtualNodes = getNameHierarchy(name)
     .toReversed()
-    .slice(deepestIndexedDepth)
+    .slice(indexedPrefix.length)
     .map((suffix) => makeUnindexedDomain(suffix, rows))
     .filter((node) => node !== null);
 

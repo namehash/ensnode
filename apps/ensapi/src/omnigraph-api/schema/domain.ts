@@ -141,7 +141,7 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.",
+        "The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.",
       type: DomainInterfaceRef,
       nullable: true,
       resolve: (domain, _args, context) =>
@@ -163,7 +163,8 @@ DomainInterfaceRef.implement({
     // Domain.registry
     ///////////////////
     registry: t.field({
-      description: "The Registry under which this Domain exists.",
+      description:
+        "The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).",
       type: RegistryInterfaceRef,
       nullable: false,
       resolve: (parent) => parent.registryId,

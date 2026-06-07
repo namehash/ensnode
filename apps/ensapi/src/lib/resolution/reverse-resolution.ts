@@ -84,7 +84,7 @@ export async function resolveReverse(
           // TODO: additional error types for this possibility
           const name =
             nameRecord && isInterpretedName(nameRecord) && isResolvableName(nameRecord)
-              ? asResolvableName(nameRecord)
+              ? nameRecord
               : null;
 
           // Step 4 — Determine if name record exists
