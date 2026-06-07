@@ -5,7 +5,6 @@ import {
   asResolvableName,
   ENS_ROOT_NAME,
   isResolvableName,
-  type Node,
   namehashInterpretedName,
   type ResolvableName,
 } from "enssdk";
