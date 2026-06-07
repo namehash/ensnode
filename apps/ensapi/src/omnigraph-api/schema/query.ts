@@ -7,9 +7,10 @@ import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
+import { forwardWalkNamegraph } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { makeUnindexedDomain } from "@/omnigraph-api/lib/unindexed-domain";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -125,9 +126,18 @@ builder.queryType({
       type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
-      resolve: (parent, args, ctx, info) => {
+      resolve: async (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
-        return getDomainIdByInterpretedName(args.by.name);
+        const name = args.by.name;
+
+        const { rows, exact } = await forwardWalkNamegraph(name);
+        if (rows.length === 0) return null;
+
+        // if exact, the leaf (rows[0]) is the indexed Domain
+        if (exact) return rows[0].domainId;
+
+        // otherwise the name may be resolvable-but-unindexed (an UnindexedDomain), or null
+        return makeUnindexedDomain(name, rows);
       },
     }),
 

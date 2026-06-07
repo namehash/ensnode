@@ -1,7 +1,7 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import { type DomainId, isNormalizedName } from "enssdk";
+import { type DomainId, isResolvableName } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
@@ -28,6 +28,7 @@ import {
   buildRecordsSelectionFromResolveContainerInfo,
   mergeRecordsSelections,
 } from "@/omnigraph-api/lib/resolution/records-selection";
+import { isUnindexedDomain, type UnindexedDomain } from "@/omnigraph-api/lib/unindexed-domain";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
@@ -60,31 +61,38 @@ const tracer = trace.getTracer("schema/Domain");
 // Loadable Interface (Domain)
 ///////////////////////////////
 
-export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
-  load: (ids: DomainId[]) =>
-    withSpanAsync(tracer, "Domain.load", { count: ids.length }, () => {
-      const { ensDb } = di.context;
-      return ensDb.query.domain.findMany({
-        where: (t, { inArray }) => inArray(t.id, ids),
-        with: { label: true },
-      });
+const loadDomains = (ids: DomainId[]) =>
+  withSpanAsync(tracer, "Domain.load", { count: ids.length }, () =>
+    di.context.ensDb.query.domain.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+      with: { label: true },
     }),
+  );
+
+/** The shape of an indexed Domain row (with its Label joined), as loaded for the Domain interface. */
+export type IndexedDomain = Awaited<ReturnType<typeof loadDomains>>[number];
+
+export const DomainInterfaceRef = builder.loadableInterfaceRef<
+  IndexedDomain | UnindexedDomain,
+  DomainId
+>("Domain", {
+  load: loadDomains,
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
 });
 
-export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
-export type DomainInterface = Omit<Domain, "tokenId" | "node" | "rootRegistryOwnerId">;
-export type ENSv1Domain = RequiredAndNotNull<Domain, "node"> &
-  RequiredAndNull<Domain, "tokenId"> & { type: "ENSv1Domain" };
-export type ENSv2Domain = RequiredAndNotNull<Domain, "tokenId"> &
-  RequiredAndNull<Domain, "node" | "rootRegistryOwnerId"> & { type: "ENSv2Domain" };
+export type Domain = IndexedDomain | UnindexedDomain;
+export type DomainInterface = Omit<IndexedDomain, "tokenId" | "node" | "rootRegistryOwnerId">;
+export type ENSv1Domain = RequiredAndNotNull<IndexedDomain, "node"> &
+  RequiredAndNull<IndexedDomain, "tokenId"> & { type: "ENSv1Domain" };
+export type ENSv2Domain = RequiredAndNotNull<IndexedDomain, "tokenId"> &
+  RequiredAndNull<IndexedDomain, "node" | "rootRegistryOwnerId"> & { type: "ENSv2Domain" };
 
-export const isENSv1Domain = (domain: DomainInterface): domain is ENSv1Domain =>
+export const isENSv1Domain = (domain: { type: string }): domain is ENSv1Domain =>
   domain.type === "ENSv1Domain";
 
-export const isENSv2Domain = (domain: DomainInterface): domain is ENSv2Domain =>
+export const isENSv2Domain = (domain: { type: string }): domain is ENSv2Domain =>
   domain.type === "ENSv2Domain";
 
 export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
@@ -136,7 +144,7 @@ DomainInterfaceRef.implement({
         "The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.",
       type: DomainInterfaceRef,
       nullable: true,
-      resolve: async (domain, _args, context) =>
+      resolve: (domain, _args, context) =>
         context.loaders.registryParentDomain.load(domain.registryId),
     }),
 
@@ -201,7 +209,7 @@ DomainInterfaceRef.implement({
         const { canAccelerate } = context;
         const name = domain.canonicalName;
 
-        if (!name || !isNormalizedName(name)) {
+        if (!name || !isResolvableName(name)) {
           return { accelerate, canAccelerate, trace: null, result: null };
         }
 
@@ -430,4 +438,17 @@ ENSv2DomainRef.implement({
       },
     }),
   }),
+});
+
+////////////////////////////////////
+// UnindexedDomain Implementation
+////////////////////////////////////
+
+export const UnindexedDomainRef = builder.objectRef<UnindexedDomain>("UnindexedDomain");
+
+UnindexedDomainRef.implement({
+  description:
+    "A resolvable-but-unindexed Domain: not present in the index, but resolvable because an ancestor in its namegraph path has an ENSIP-10 wildcard Resolver (e.g. off-chain / CCIP-Read names, unindexed 3DNS names, wildcard subnames).",
+  interfaces: [DomainInterfaceRef],
+  isTypeOf: (domain) => isUnindexedDomain(domain as { type: string }),
 });

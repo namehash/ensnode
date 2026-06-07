@@ -48,9 +48,26 @@ export type ENSv1DomainId = string & { __brand: "ENSv1DomainId" };
 export type ENSv2DomainId = string & { __brand: "ENSv2DomainId" };
 
 /**
- * A DomainId is one of ENSv1DomainId or ENSv2DomainId.
+ * An ID that uniquely identifies a resolvable-but-unindexed Domain — one that the indexer has no
+ * row for, but which is nonetheless resolvable because an ancestor in its namegraph path has an
+ * ENSIP-10 wildcard (`IExtendedResolver`) Resolver (e.g. off-chain / CCIP-Read names, unindexed
+ * 3DNS names, wildcard subnames).
+ *
+ * Keyed by (registryId, node) — the Registry that manages the ancestor Domain bearing the wildcard
+ * Resolver, and the namehash of the (unindexed) name. This is globally unique by construction: were
+ * an indexed Domain to exist for this (registry, node), the namegraph walk would have matched it
+ * exactly and never minted an UnindexedDomainId.
+ *
+ * @dev formatted with an `unindexed-` prefix (see `makeUnindexedDomainId`) to unambiguously
+ * disambiguate from an {@link ENSv1DomainId}, which shares the same `${registryId}-${node}` tail.
+ * @dev see packages/enssdk/src/lib/ids.ts for context
  */
-export type DomainId = ENSv1DomainId | ENSv2DomainId;
+export type UnindexedDomainId = string & { __brand: "UnindexedDomainId" };
+
+/**
+ * A DomainId is one of ENSv1DomainId, ENSv2DomainId, or UnindexedDomainId.
+ */
+export type DomainId = ENSv1DomainId | ENSv2DomainId | UnindexedDomainId;
 
 /**
  * An ID that uniquely identifies a Permissions entity.

@@ -664,3 +664,31 @@ describe("Account.primaryName and Account.primaryNames", () => {
     });
   });
 });
+
+describe("Query.account (unindexed)", () => {
+  const AccountByAddress = gql`
+    query AccountByAddress($address: Address!) {
+      account(by: { address: $address }) {
+        id
+        address
+        domains { edges { node { id } } }
+      }
+    }
+  `;
+
+  it("returns a virtualized Account for an unindexed Address", async () => {
+    // an Address the indexer has never seen — Reverse Resolution is keyed by address and works
+    // regardless of whether the Account is indexed, so Query.account must not null-propagate.
+    const address = "0x00000000000000000000000000000000deadbeef";
+
+    const result = await request<{
+      account: { id: string; address: string; domains: GraphQLConnection<{ id: string }> } | null;
+    }>(AccountByAddress, { address });
+
+    expect(result.account).not.toBeNull();
+    expect(result.account?.id).toBe(address);
+    expect(result.account?.address).toBe(address);
+    // a synthesized Account owns no indexed Domains
+    expect(flattenConnection(result.account!.domains)).toHaveLength(0);
+  });
+});

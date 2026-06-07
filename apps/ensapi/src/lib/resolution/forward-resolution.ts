@@ -2,11 +2,12 @@ import { trace } from "@opentelemetry/api";
 import {
   type AccountId,
   asInterpretedName,
+  asResolvableName,
   ENS_ROOT_NAME,
-  type InterpretedName,
-  isNormalizedName,
+  isResolvableName,
   type Node,
   namehashInterpretedName,
+  type ResolvableName,
 } from "enssdk";
 import type { PublicClient } from "viem";
 
@@ -56,7 +57,7 @@ const tracer = trace.getTracer("forward-resolution");
  * is the protocol-faithful path whenever ENSApi is not accelerating from indexed data.
  */
 async function resolveViaUniversalResolver(
-  name: InterpretedName,
+  name: ResolvableName,
   operations: Operation[],
   publicClient: PublicClient,
 ): Promise<Operation[]> {
@@ -115,12 +116,14 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: Omit<Parameters<typeof _resolveForward>[2], "registry">,
 ): Promise<ForwardResolutionResult<SELECTION>> {
-  // Invariant: Name must be an InterpretedName
-  const interpretedName = asInterpretedName(name);
+  // we want users to be able to provide unbranded arguments, so we need to enforce our branded
+  // invariants here
+  // Invariant: the input name must be Resolvable (and therefore Interpreted) to be resolved
+  const resolvableName = asResolvableName(asInterpretedName(name));
 
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
   // initially be ENS Root Registry: see `_resolveForward` for additional context.
-  return _resolveForward(interpretedName, selection, {
+  return _resolveForward(resolvableName, selection, {
     ...options,
     registry: getENSv1RootRegistry(di.context.namespace),
   });
@@ -131,10 +134,26 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: InterpretedName,
+  name: ResolvableName,
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
+  //////////////////////////////////////////////////
+  // Validate Input
+  //////////////////////////////////////////////////
+
+  // Invariant: name must conform to ResolvableName
+  if (!isResolvableName(name)) {
+    throw new Error(`'${name}' must be resolvable.`);
+  }
+
+  // TODO: technically we could support resolving records for the root node, but because there
+  // are so many edge cases, this is something we should explicitly declare support for
+  // after we have test cases
+  if (name === ENS_ROOT_NAME) {
+    throw new Error(`Resolving records for the ENS Root Node ('') is not currently supported.`);
+  }
+
   const {
     registry: { chainId },
     accelerate = false,
@@ -143,6 +162,8 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
 
   // `selection` may contain bigints (e.g. `abi: ContentType`); stringify safely for tracing.
   const selectionString = toJson(selection);
+
+  const publicClient = di.context.rootChainPublicClient;
 
   // trace for external consumers
   return withEnsProtocolStep(
@@ -161,38 +182,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           accelerate,
         },
         async (span) => {
-          //////////////////////////////////////////////////
-          // Validate Input
-          //////////////////////////////////////////////////
-
-          // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
-          // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
-          // must be fully normalized (and therefore not contain encoded labelhash segments)
-          // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
-          if (!isNormalizedName(name)) {
-            throw new Error(`'${name}' must be normalized to be resolvable.`);
-          }
-
-          // TODO: technically we could support resolving records for the root node, but because there
-          // are so many edge cases, this is something we should explicitly declare support for
-          // after we have test cases
-          if (name === ENS_ROOT_NAME) {
-            throw new Error(
-              `Resolving records for the ENS Root Node ('') is not currently supported.`,
-            );
-          }
-
-          const node: Node = namehashInterpretedName(name);
-          span.setAttribute("node", node);
-
           // construct the set of resolve() operations indicated by node/selection
+          const node = namehashInterpretedName(name);
           let operations = makeOperations(node, selection);
+          span.setAttribute("node", node);
           span.setAttribute("operations", toJson(operations));
 
           // if no operations were generated, this was an empty selection; give them what they asked for
           if (operations.length === 0) return makeRecordsResponse<SELECTION>(operations);
-
-          const publicClient = di.context.rootChainPublicClient;
 
           ////////////////////////////////////////////////////////////////
           /// 0 Non-Accelerated Resolution: delegate to UniversalResolver

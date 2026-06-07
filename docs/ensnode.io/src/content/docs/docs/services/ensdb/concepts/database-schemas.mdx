@@ -108,13 +108,14 @@ It is keyed by `(chain_id, address, domain_id)` to match the on-chain data model
 
 #### resolvers
 
-Represents an individual `IResolver` contract that has emitted at least one event. Note that Resolver contracts can exist on-chain but not emit any events and still function properly, so checks against a Resolver's existence and metadata must be done at runtime.
+Represents an individual `IResolver` contract observed by the indexer — either by emitting at least one event, or by being assigned as a Domain's Resolver (via a `domain_resolver_relations` row). Note that Resolver contracts can exist on-chain but not emit any events and still function properly, so checks against a Resolver's existence and metadata must be done at runtime.
 
-| Column     | Type     | Nullable | Description                                  |
-| ---------- | -------- | -------- | -------------------------------------------- |
-| `id`       | `text`   | no       | Keyed by `(chain_id, address)`. Primary key. |
-| `chain_id` | `bigint` | no       | Chain the resolver contract is deployed on.  |
-| `address`  | `text`   | no       | Address of the resolver contract.            |
+| Column     | Type      | Nullable | Description                                                                                                                                                                                                                        |
+| ---------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`       | `text`    | no       | Keyed by `(chain_id, address)`. Primary key.                                                                                                                                                                                       |
+| `chain_id` | `bigint`  | no       | Chain the resolver contract is deployed on.                                                                                                                                                                                        |
+| `address`  | `text`    | no       | Address of the resolver contract.                                                                                                                                                                                                  |
+| `extended` | `boolean` | no       | Whether the Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed. Defaults to `false`. |
 
 **Indexes:** unique on `(chain_id, address)`.
 

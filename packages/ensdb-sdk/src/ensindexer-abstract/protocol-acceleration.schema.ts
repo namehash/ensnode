@@ -93,6 +93,13 @@ export const resolver = onchainTable(
 
     chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
+
+    /**
+     * Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`,
+     * interfaceId `0x9061b923`), determined via a single `supportsInterface` RPC the first
+     * time the Resolver is observed (see `upsertResolver`).
+     */
+    extended: t.boolean().notNull().default(false),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),
