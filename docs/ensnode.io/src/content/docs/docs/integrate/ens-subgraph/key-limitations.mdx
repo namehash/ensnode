@@ -177,9 +177,21 @@ The [Omnigraph API](/docs/integrate/omnigraph) will support automatic avatar url
 The Subgraph (and any data-level-compatible indexer) contains a large volume of unhealed names — names whose labels are only known as labelhashes (e.g. `[abcd…].eth`). These complicate both the developer experience and the UX of every app built on top, which must decide how to display and handle them.
 :::
 
+**What the heck is a `[428…b0b]`?** These are encoded labelhashes used to represent an unknown label in an ENS name. Without name healing, millions of names in the ENS manager app (and other ENS apps) don't appear properly. See the problem for yourself: [Example 1](https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5) and [Example 2](<https://app.ens.domains/%5B4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b%5D.makoto.eth>).
+
+![An ENS profile listing names where an unknown label is shown as an encoded labelhash instead of a readable name](@assets/ens-profile-unhealed.svg)
+
 :::tip[~94% healed, and climbing]
-The [Omnigraph API](/docs/integrate/omnigraph) already heals **~94%** of these labels, compared to roughly **10%** with the label set bundled in the traditional ENS Subgraph — and climbing toward a **99%** target.
+ENSNode already heals **~94%** of these labels with [ENSRainbow](/docs/services/ensrainbow), compared to **~11%** with the label set bundled into the traditional ENS Subgraph. [ENSRainbow](ensrainbow.io) has data for healing **259,053,605** unknown labels as of May 2026, and coverage is climbing toward a **99%** target.
 :::
+
+![Name Healing Coverage chart: ENS Subgraph heals 11% of labels, ENSRainbow + ENSNode (current) heals 94%, and ENSRainbowBeam + ENSNode (target) reaches 99%, as of 26 May, 2026](@assets/healing-coverage.png)
+
+Healing turns these encoded labelhashes back into the readable labels they represent, so a name like `[428…b0b].makoto.eth` is displayed as the actual name a user expects.
+
+![A split view of an ENS name card: on the left, the healed, readable name; on the right, the same name still showing an encoded labelhash](@assets/healed-name-split.png)
+
+See [ENSRainbow](/docs/services/ensrainbow) for how ENSNode uses this service to heal labels at request time.
 
 ## Thick-client lock-in
 
