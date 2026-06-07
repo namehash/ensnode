@@ -38,6 +38,12 @@ async function supportsInterface<
       functionName: "supportsInterface";
       address: Address;
       args: readonly [InterfaceId];
+      // A `0x` ("returned no data") response to an eip-165 probe means "interface not
+      // supported" — it is never transient. Ponder's `context.client` otherwise retries
+      // empty-data responses 9× with exponential backoff (~64s each), which makes
+      // index-time resolver classification pathologically slow. Opt out so it fails fast.
+      // Plain viem clients ignore this field.
+      retryEmptyResponse?: boolean;
     }) => Promise<boolean>;
   },
 >({
@@ -55,6 +61,7 @@ async function supportsInterface<
       functionName: "supportsInterface",
       address,
       args: [selector],
+      retryEmptyResponse: false,
     });
   } catch {
     // this call reverted for whatever reason — this contract does not support the interface
