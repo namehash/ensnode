@@ -111,7 +111,7 @@ export async function forwardWalkDisjointNamegraph(registryId: RegistryId, path:
       path.registry_id        AS "registryId",
       drr.resolver            AS "address",
       drr.chain_id            AS "chainId",
-      r.extended              AS "extended",
+      r.is_extended           AS "extended",
       path.canonical_path     AS "canonicalPath",
       path.depth
     FROM path

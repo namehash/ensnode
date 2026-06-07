@@ -36,7 +36,7 @@ type ResolverRecordsCompositeKey = Pick<
  * Ensures a Resolver entity exists for `resolver`, capturing additional metadata.
  *
  * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`) to determine
- * `extended` support.
+ * `isExtended` support.
  */
 export async function upsertResolver(
   context: IndexingEngineContext,
@@ -47,12 +47,12 @@ export async function upsertResolver(
   const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
   if (existing) return existing;
 
-  const extended = await isExtendedResolver({
+  const isExtended = await isExtendedResolver({
     publicClient: context.client,
     address: resolver.address,
   });
 
-  const row = { id, ...resolver, extended };
+  const row = { id, ...resolver, isExtended };
   await context.ensDb.insert(ensIndexerSchema.resolver).values(row).onConflictDoNothing();
   return row;
 }

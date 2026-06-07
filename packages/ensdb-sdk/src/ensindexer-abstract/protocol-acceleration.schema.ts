@@ -99,7 +99,7 @@ export const resolver = onchainTable(
      * interfaceId `0x9061b923`), determined via a single `supportsInterface` RPC the first
      * time the Resolver is observed (see `upsertResolver`).
      */
-    extended: t.boolean().notNull().default(false),
+    isExtended: t.boolean().notNull().default(false),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),

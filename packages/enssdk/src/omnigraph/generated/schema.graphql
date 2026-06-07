@@ -1734,6 +1734,11 @@ type Resolver {
   """All Events associated with this Resolver."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): ResolverEventsConnection
 
+  """
+  Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed.
+  """
+  extended: Boolean!
+
   """A unique reference to this Resolver."""
   id: ResolverId!
 
