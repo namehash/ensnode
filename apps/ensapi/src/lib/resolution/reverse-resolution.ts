@@ -82,11 +82,10 @@ export async function resolveReverse(
 
           // Invariant: the name record must be Interpreted and Resolvable
           // TODO: additional error types for this possibility
-          const name = nameRecord
-            ? isInterpretedName(nameRecord) && isResolvableName(nameRecord)
+          const name =
+            nameRecord && isInterpretedName(nameRecord) && isResolvableName(nameRecord)
               ? asResolvableName(nameRecord)
-              : null
-            : null;
+              : null;
 
           // Step 4 — Determine if name record exists
           addProtocolStepEvent(

@@ -1,10 +1,10 @@
 import {
   type DomainId,
+  getNameHierarchy,
   type InterpretedName,
-  interpretedLabelsToInterpretedName,
-  interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
   isResolvableName,
+  labelhashInterpretedLabel,
   makeUnindexedDomainId,
   type Node,
   namehashInterpretedName,
@@ -17,7 +17,6 @@ import {
   type WalkResultRow,
   walkResultRowHasResolver,
 } from "@/lib/protocol-acceleration/forward-walk-disjoint-namegraph";
-import { forwardWalkNamegraph } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 
 /**
  * A resolvable-but-unindexed Domain: the indexer has no row for it, but it is resolvable because the
@@ -46,6 +45,12 @@ export interface UnindexedDomain {
   canonicalName: InterpretedName;
   canonicalDepth: number;
   canonicalNode: Node;
+
+  /**
+   * The namegraph walk `rows` for {@link canonicalName} that minted this Domain, retained so
+   * {@link computeUnindexedDomainCanonicalPath} can build the Canonical Path without re-walking.
+   */
+  rows: WalkResultRow[];
 }
 
 export const isUnindexedDomain = (domain: { type: string }): domain is UnindexedDomain =>
@@ -79,52 +84,48 @@ export function makeUnindexedDomain(
   if (!effective?.extended) return null;
 
   const node = namehashInterpretedName(name);
-  const path = interpretedLabelsToLabelHashPath(labels);
 
   return {
     type: "UnindexedDomain",
     id: makeUnindexedDomainId(effective.registryId, node),
     registryId: effective.registryId,
-    label: { labelHash: path[path.length - 1], interpreted: labels[0] },
+    label: { labelHash: labelhashInterpretedLabel(labels[0]), interpreted: labels[0] },
     ownerId: null,
     subregistryId: null,
     canonical: true,
     canonicalName: name,
     canonicalDepth: labels.length,
     canonicalNode: node,
+    rows,
   } satisfies UnindexedDomain;
 }
 
 /**
- * Lazily builds the Canonical Path (root→leaf inclusive) of a resolvable-but-unindexed Domain: the
- * deepest indexed ancestor's materialized canonical path (loaded by id), followed by an
+ * Builds the Canonical Path (root→leaf inclusive) of a resolvable-but-unindexed Domain: the deepest
+ * indexed ancestor's materialized canonical path (loaded by id), followed by an
  * {@link UnindexedDomain} for each label below it down to the leaf (passed through as resolved
  * values, since virtual nodes cannot be loaded by id). Used by `DomainCanonical.path`.
  *
- * @dev all suffixes of `name` below the deepest indexed ancestor share the same indexed-ancestor
- * `rows`, so a single walk is reused to mint every virtual node.
+ * @dev all suffixes of `domain.canonicalName` below the deepest indexed ancestor share its walk
+ * `rows`, so the Domain's own `rows` mint every virtual node — no additional namegraph walk.
  */
-export async function computeUnindexedDomainCanonicalPath(
+export function computeUnindexedDomainCanonicalPath(
   domain: UnindexedDomain,
-): Promise<(DomainId | UnindexedDomain)[]> {
-  const name = domain.canonicalName;
-  const { rows } = await forwardWalkNamegraph(name);
+): (DomainId | UnindexedDomain)[] {
+  const { canonicalName: name, rows } = domain;
 
   // the deepest indexed ancestor (rows are ordered depth DESC) anchors the indexed canonical prefix
   const deepest = rows[0];
   const indexedPrefix = deepest?.canonicalPath ?? [];
   const deepestIndexedDepth = deepest?.depth ?? 0;
 
-  // mint an UnindexedDomain for each label below the deepest indexed ancestor, in root→leaf order
-  const labels = interpretedNameToInterpretedLabels(name); // leaf-first
-  const leafDepth = labels.length;
-  const virtualNodes = Array.from({ length: leafDepth - deepestIndexedDepth }, (_, i) => {
-    const depth = deepestIndexedDepth + 1 + i;
-    return makeUnindexedDomain(
-      interpretedLabelsToInterpretedName(labels.slice(leafDepth - depth)),
-      rows,
-    );
-  });
+  // mint an UnindexedDomain for each label below the deepest indexed ancestor, in root→leaf order:
+  // getNameHierarchy is leaf-first, so reverse to root→leaf and drop the indexed-ancestor depths
+  const virtualNodes = getNameHierarchy(name)
+    .toReversed()
+    .slice(deepestIndexedDepth)
+    .map((suffix) => makeUnindexedDomain(suffix, rows))
+    .filter((node) => node !== null);
 
-  return [...indexedPrefix, ...virtualNodes.filter((node) => node !== null)];
+  return [...indexedPrefix, ...virtualNodes];
 }

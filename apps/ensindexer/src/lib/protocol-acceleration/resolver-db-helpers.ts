@@ -33,7 +33,7 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
- * Ensures a Resolver entity exists for `resolver`, capturing additional  metadata.
+ * Ensures a Resolver entity exists for `resolver`, capturing additional metadata.
  *
  * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`) to determine
  * `extended` support.
