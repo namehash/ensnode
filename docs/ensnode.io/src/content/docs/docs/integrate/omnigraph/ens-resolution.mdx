@@ -26,6 +26,13 @@ What you get in `resolve.profile`:
 - **Avatar and header images** — `httpUrl` values you can use directly in `<img src="…" />`, including derivation from NFT references per [ENSIP-12](https://docs.ens.domains/ensip/12).
 - **Missing or invalid records** — `null`, so you can render without extra guards.
 
+The same predictable shape works well for AI agents — structured fields and `null` for anything missing or invalid, without decoding resolver data in the prompt.
+
+<LinkCard
+  title="AI/LLM Tooling 🤖"
+  href="/docs/integrate/ai-llm"
+/>
+
 ## Raw records — full protocol surface
 
 `resolve.records` returns protocol-accurate resolver data: numeric coin types, arbitrary text keys, and unparsed bytes. This is the shape you would work with if you decoded resolver storage yourself — or if you need records that `profile` does not model.
@@ -46,12 +53,3 @@ Breaking down the example above:
 - **Pick a chain** — primary names are per-chain (e.g. Ethereum mainnet). Use friendly chain names like `ETHEREUM` or `BASE` instead of raw coin types.
 - **Display the name** — `beautified` is ready for UI rendering; `interpreted` is the stable form for lookups and links. See [Beautified Name](/docs/reference/terminology#beautified-name).
 - **Load the profile in the same request** — avatar, bio, and social links are forward-resolved from the primary name without a second API call.
-
-## AI and agent integration
-
-For AI agents, clean structured inputs matter most. `resolve.profile` delivers addresses keyed by chain name rather than coin types, social links as `{ handle, httpUrl }` pairs, and invalid or unset records normalized to `null` — filtering out noise before it reaches your prompt.
-
-<LinkCard
-  title="AI/LLM Tooling 🤖"
-  href="/docs/integrate/ai-llm"
-/>
