@@ -16,7 +16,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "hello-world",
     title: "Hello World",
     description:
-      "From a wallet address: Ethereum primary name and interpreted profile, plus ENSv1 and ENSv2 ownership counts.",
+      "This query below loads, from a wallet address, the Ethereum primary name and interpreted profile, plus ENSv1 and ENSv2 ownership counts.",
     category: "Introduction",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: false,
@@ -24,7 +24,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-profile",
     title: "Domain Profile",
-    description: "Load a domain's high-level profile (avatar, socials, addresses, and more).",
+    description:
+      "This query below loads a domain's high-level profile (<code>avatar</code>, <code>socials</code>, <code>addresses</code>, and more).",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -32,15 +33,26 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-records",
     title: "Domain Records",
-    description: "For given name resolve raw records like `addresses`, `texts`, `contenthash` etc.",
+    description:
+      "This query below resolves raw records for a given name, such as <code>addresses</code>, <code>texts</code>, and <code>contenthash</code>.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
   },
   {
+    id: "domain-profile-and-records",
+    title: "Profile And Records",
+    description:
+      "This query below resolves interpreted profile and raw records in one query to compare shapes side by side.",
+    category: "Resolution",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: false,
+  },
+  {
     id: "domain-by-name",
     title: "Domain By Name",
-    description: "Load a domain by interpreted name, including profile information.",
+    description:
+      "This query below loads a domain by interpreted name, including profile information.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -48,7 +60,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "find-domains",
     title: "Find Domains",
-    description: "List domains matching a name prefix with ordering and registration metadata.",
+    description:
+      "This query below lists domains matching a name prefix with ordering and registration metadata.",
     category: "Search",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -56,7 +69,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-subdomains",
     title: "Domain Subdomains",
-    description: "Paginate direct child names under a parent domain.",
+    description: "This query below paginates direct child names under a parent domain.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -64,7 +77,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-subdomains-recently-registered",
     title: "Recently Registered Subdomains",
-    description: "List a parent domain's subdomains ordered by most recent registration first.",
+    description:
+      "This query below lists a parent domain's subdomains ordered by most recent registration first.",
     category: "Resolution",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -72,7 +86,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-events",
     title: "Domain Events",
-    description: "Raw contract events associated with a domain's registry records.",
+    description:
+      "This query below loads raw contract events associated with a domain's registry records.",
     category: "History",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -80,7 +95,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domains-by-address",
     title: "Account Domains",
-    description: "Load domains owned by an address via the Omnigraph `account` root field.",
+    description:
+      "This query below loads domains owned by an address via the Omnigraph `account` root field.",
     category: "Accounts",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -88,7 +104,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "account-primary-name",
     title: "Account Primary Name",
-    description: "Load a primary name for an account on Ethereum, including profile information.",
+    description:
+      "This query below loads a primary name for an account on Ethereum, including profile information.",
     category: "Accounts",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -96,7 +113,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "account-events",
     title: "Account Events",
-    description: "Events touching an account across indexed ENS contracts.",
+    description: "This query below loads events touching an account across indexed ENS contracts.",
     category: "History",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -104,7 +121,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "registry-domains",
     title: "Registry Domains",
-    description: "Enumerate domains under a specific v2 ETH registry contract.",
+    description: "This query below enumerates domains under a specific v2 ETH registry contract.",
     category: "Registry",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -112,7 +129,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "permissions-by-contract",
     title: "Permissions By Contract",
-    description: "Roles and users granted on resources for a registrar or registry contract.",
+    description:
+      "This query below loads roles and users granted on resources for a registrar or registry contract.",
     category: "Permissions",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -120,7 +138,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "permissions-by-user",
     title: "Permissions By User",
-    description: "Resources and roles for an address in the permissions graph.",
+    description:
+      "This query below loads resources and roles for an address in the permissions graph.",
     category: "Permissions",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -128,7 +147,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "account-resolver-permissions",
     title: "Account Resolver Permissions",
-    description: "Resolver contracts where an account has been granted resolver ACLs.",
+    description:
+      "This query below loads resolver contracts where an account has been granted resolver ACLs.",
     category: "Permissions",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -136,7 +156,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-resolver",
     title: "Domain Resolver",
-    description: "Assigned resolver contract address and recent resolver events.",
+    description:
+      "This query below loads the assigned resolver contract address and recent resolver events.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -145,7 +166,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "namegraph",
     title: "Namegraph",
     description:
-      "Walk a domain's registry, parent, subregistry, and direct subdomains (as in Core Concepts).",
+      "This query below walks a domain's registry, parent, subregistry, and direct subdomains (as in Core Concepts).",
     category: "Exploration",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -153,7 +174,8 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "account-migrated-names",
     title: "Account Migration Counts",
-    description: "Count an account's ENSv1 vs ENSv2 domains to gauge its migration progress.",
+    description:
+      "This query below counts an account's ENSv1 vs ENSv2 domains to gauge its migration progress.",
     category: "Migration",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -162,7 +184,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "eth-by-version",
     title: "ETH TLD By Version",
     description:
-      "Load the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).",
+      "This query below loads the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).",
     category: "Migration",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -171,7 +193,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "accelerate-resolve",
     title: "Resolve primary name and records, and track protocol acceleration",
     description:
-      "Resolve primary name and records, and track protocol acceleration with `trace` and `accelerate` arguments.",
+      "This query below resolves primary name and records, and tracks protocol acceleration with `trace` and `accelerate` arguments.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: false,

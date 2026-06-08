@@ -21,6 +21,13 @@
     }
   },
   {
+    "id": "domain-profile-and-records",
+    "query": "query DomainProfileAndRecords($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolve {\n      profile {\n        avatar {\n          httpUrl\n        }\n        addresses {\n          ethereum\n          solana\n        }\n        socials {\n          github {\n            handle\n            httpUrl\n          }\n          twitter {\n            handle\n            httpUrl\n          }\n        }\n        website {\n          httpUrl\n        }\n      }\n      records {\n        addresses(coinTypes: [60, 501]) {\n          coinType\n          address\n        }\n        texts(keys: [\"avatar\", \"com.twitter\", \"com.github\", \"url\"]) {\n          key\n          value\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "gregskril.eth"
+    }
+  },
+  {
     "id": "domain-by-name",
     "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { beautified } }\n    owner { address }\n    resolve {\n      profile {\n        description\n        addresses {\n          ethereum\n        }\n      }\n    }\n  }\n}",
     "variables": {

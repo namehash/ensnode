@@ -7,11 +7,11 @@
           "trace": [
             {
               "scope": "protocol-tracing",
-              "id": "span-28795-1780677847832",
-              "traceId": "trace-1780677847832-ia7yzkaya",
+              "id": "span-97621-1780917556873",
+              "traceId": "trace-1780917556873-fmecwksuf",
               "name": "reverse-resolution:reverse-resolution",
-              "timestamp": 1780677847832000,
-              "duration": 248000,
+              "timestamp": 1780917556873000,
+              "duration": 50000,
               "attributes": {
                 "ens.protocol": "reverse-resolution",
                 "ens.protocol.step": "reverse-resolution",
@@ -30,7 +30,7 @@
                     "ens.protocol.step": "name-record-exists-check",
                     "ens.protocol.step.result": true
                   },
-                  "time": 1780677848074000
+                  "time": 1780917556911000
                 },
                 {
                   "name": "reverse-resolution:verify-resolved-address-matches-address (true)",
@@ -39,21 +39,21 @@
                     "ens.protocol.step": "verify-resolved-address-matches-address",
                     "ens.protocol.step.result": true
                   },
-                  "time": 1780677848080000
+                  "time": 1780917556923000
                 }
               ],
               "children": [
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-28796-1780677847832",
-                  "traceId": "trace-1780677847832-ia7yzkaya",
+                  "id": "span-97622-1780917556873",
+                  "traceId": "trace-1780917556873-fmecwksuf",
                   "parentSpanContext": {
-                    "traceId": "trace-1780677847832-ia7yzkaya",
-                    "spanId": "span-28795-1780677847832"
+                    "traceId": "trace-1780917556873-fmecwksuf",
+                    "spanId": "span-97621-1780917556873"
                   },
                   "name": "reverse-resolution:resolve-reverse-name",
-                  "timestamp": 1780677847832000,
-                  "duration": 242000,
+                  "timestamp": 1780917556873000,
+                  "duration": 38000,
                   "attributes": {
                     "ens.protocol": "reverse-resolution",
                     "ens.protocol.step": "resolve-reverse-name",
@@ -66,15 +66,15 @@
                   "children": [
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28797-1780677847832",
-                      "traceId": "trace-1780677847832-ia7yzkaya",
+                      "id": "span-97623-1780917556874",
+                      "traceId": "trace-1780917556873-fmecwksuf",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677847832-ia7yzkaya",
-                        "spanId": "span-28796-1780677847832"
+                        "traceId": "trace-1780917556873-fmecwksuf",
+                        "spanId": "span-97622-1780917556873"
                       },
                       "name": "forward-resolution:forward-resolution",
-                      "timestamp": 1780677847832000,
-                      "duration": 242000,
+                      "timestamp": 1780917556874000,
+                      "duration": 37000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
                         "ens.protocol.step": "forward-resolution",
@@ -94,7 +94,7 @@
                             "ens.protocol.step": "active-resolver-exists",
                             "ens.protocol.step.result": true
                           },
-                          "time": 1780677847835000
+                          "time": 1780917556877000
                         },
                         {
                           "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -103,7 +103,7 @@
                             "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                             "ens.protocol.step.result": false
                           },
-                          "time": 1780677847835000
+                          "time": 1780917556877000
                         },
                         {
                           "name": "forward-resolution:accelerate-known-onchain-static-resolver (false)",
@@ -112,20 +112,20 @@
                             "ens.protocol.step": "accelerate-known-onchain-static-resolver",
                             "ens.protocol.step.result": false
                           },
-                          "time": 1780677847836000
+                          "time": 1780917556877000
                         }
                       ],
                       "children": [
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28798-1780677847832",
-                          "traceId": "trace-1780677847832-ia7yzkaya",
+                          "id": "span-97624-1780917556874",
+                          "traceId": "trace-1780917556873-fmecwksuf",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677847832-ia7yzkaya",
-                            "spanId": "span-28797-1780677847832"
+                            "traceId": "trace-1780917556873-fmecwksuf",
+                            "spanId": "span-97623-1780917556874"
                           },
                           "name": "forward-resolution:find-resolver",
-                          "timestamp": 1780677847832000,
+                          "timestamp": 1780917556874000,
                           "duration": 3000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
@@ -141,15 +141,15 @@
                         },
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28799-1780677847836",
-                          "traceId": "trace-1780677847832-ia7yzkaya",
+                          "id": "span-97625-1780917556877",
+                          "traceId": "trace-1780917556873-fmecwksuf",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677847832-ia7yzkaya",
-                            "spanId": "span-28797-1780677847832"
+                            "traceId": "trace-1780917556873-fmecwksuf",
+                            "spanId": "span-97623-1780917556874"
                           },
                           "name": "forward-resolution:require-resolver",
-                          "timestamp": 1780677847836000,
-                          "duration": 228000,
+                          "timestamp": 1780917556877000,
+                          "duration": 25000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "require-resolver",
@@ -166,15 +166,15 @@
                         },
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28800-1780677848064",
-                          "traceId": "trace-1780677847832-ia7yzkaya",
+                          "id": "span-97626-1780917556902",
+                          "traceId": "trace-1780917556873-fmecwksuf",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677847832-ia7yzkaya",
-                            "spanId": "span-28797-1780677847832"
+                            "traceId": "trace-1780917556873-fmecwksuf",
+                            "spanId": "span-97623-1780917556874"
                           },
                           "name": "forward-resolution:execute-resolve-calls",
-                          "timestamp": 1780677848064000,
-                          "duration": 10000,
+                          "timestamp": 1780917556902000,
+                          "duration": 9000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "execute-resolve-calls"
@@ -191,15 +191,15 @@
                 },
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-28801-1780677848074",
-                  "traceId": "trace-1780677847832-ia7yzkaya",
+                  "id": "span-97627-1780917556911",
+                  "traceId": "trace-1780917556873-fmecwksuf",
                   "parentSpanContext": {
-                    "traceId": "trace-1780677847832-ia7yzkaya",
-                    "spanId": "span-28795-1780677847832"
+                    "traceId": "trace-1780917556873-fmecwksuf",
+                    "spanId": "span-97621-1780917556873"
                   },
                   "name": "reverse-resolution:forward-resolve-address-record",
-                  "timestamp": 1780677848074000,
-                  "duration": 6000,
+                  "timestamp": 1780917556911000,
+                  "duration": 12000,
                   "attributes": {
                     "ens.protocol": "reverse-resolution",
                     "ens.protocol.step": "forward-resolve-address-record",
@@ -212,15 +212,15 @@
                   "children": [
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28802-1780677848074",
-                      "traceId": "trace-1780677847832-ia7yzkaya",
+                      "id": "span-97628-1780917556911",
+                      "traceId": "trace-1780917556873-fmecwksuf",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677847832-ia7yzkaya",
-                        "spanId": "span-28801-1780677848074"
+                        "traceId": "trace-1780917556873-fmecwksuf",
+                        "spanId": "span-97627-1780917556911"
                       },
                       "name": "forward-resolution:forward-resolution",
-                      "timestamp": 1780677848074000,
-                      "duration": 6000,
+                      "timestamp": 1780917556911000,
+                      "duration": 12000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
                         "ens.protocol.step": "forward-resolution",
@@ -240,7 +240,7 @@
                             "ens.protocol.step": "active-resolver-exists",
                             "ens.protocol.step.result": true
                           },
-                          "time": 1780677848076000
+                          "time": 1780917556920000
                         },
                         {
                           "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -249,21 +249,21 @@
                             "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                             "ens.protocol.step.result": false
                           },
-                          "time": 1780677848076000
+                          "time": 1780917556920000
                         }
                       ],
                       "children": [
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28803-1780677848074",
-                          "traceId": "trace-1780677847832-ia7yzkaya",
+                          "id": "span-97629-1780917556911",
+                          "traceId": "trace-1780917556873-fmecwksuf",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677847832-ia7yzkaya",
-                            "spanId": "span-28802-1780677848074"
+                            "traceId": "trace-1780917556873-fmecwksuf",
+                            "spanId": "span-97628-1780917556911"
                           },
                           "name": "forward-resolution:find-resolver",
-                          "timestamp": 1780677848074000,
-                          "duration": 2000,
+                          "timestamp": 1780917556911000,
+                          "duration": 9000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "find-resolver",
@@ -278,15 +278,15 @@
                         },
                         {
                           "scope": "protocol-tracing",
-                          "id": "span-28804-1780677848076",
-                          "traceId": "trace-1780677847832-ia7yzkaya",
+                          "id": "span-97630-1780917556920",
+                          "traceId": "trace-1780917556873-fmecwksuf",
                           "parentSpanContext": {
-                            "traceId": "trace-1780677847832-ia7yzkaya",
-                            "spanId": "span-28802-1780677848074"
+                            "traceId": "trace-1780917556873-fmecwksuf",
+                            "spanId": "span-97628-1780917556911"
                           },
                           "name": "forward-resolution:accelerate-known-onchain-static-resolver",
-                          "timestamp": 1780677848076000,
-                          "duration": 4000,
+                          "timestamp": 1780917556920000,
+                          "duration": 3000,
                           "attributes": {
                             "ens.protocol": "forward-resolution",
                             "ens.protocol.step": "accelerate-known-onchain-static-resolver"
@@ -317,10 +317,10 @@
               "trace": [
                 {
                   "scope": "protocol-tracing",
-                  "id": "span-28805-1780677848081",
-                  "traceId": "trace-1780677848081-yhbkxoiix",
+                  "id": "span-97631-1780917556924",
+                  "traceId": "trace-1780917556924-gwu94ascb",
                   "name": "forward-resolution:forward-resolution",
-                  "timestamp": 1780677848081000,
+                  "timestamp": 1780917556924000,
                   "duration": 4000,
                   "attributes": {
                     "ens.protocol": "forward-resolution",
@@ -341,7 +341,7 @@
                         "ens.protocol.step": "active-resolver-exists",
                         "ens.protocol.step.result": true
                       },
-                      "time": 1780677848083000
+                      "time": 1780917556926000
                     },
                     {
                       "name": "forward-resolution:accelerate-known-offchain-lookup-resolver (false)",
@@ -350,20 +350,20 @@
                         "ens.protocol.step": "accelerate-known-offchain-lookup-resolver",
                         "ens.protocol.step.result": false
                       },
-                      "time": 1780677848083000
+                      "time": 1780917556926000
                     }
                   ],
                   "children": [
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28806-1780677848081",
-                      "traceId": "trace-1780677848081-yhbkxoiix",
+                      "id": "span-97632-1780917556924",
+                      "traceId": "trace-1780917556924-gwu94ascb",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677848081-yhbkxoiix",
-                        "spanId": "span-28805-1780677848081"
+                        "traceId": "trace-1780917556924-gwu94ascb",
+                        "spanId": "span-97631-1780917556924"
                       },
                       "name": "forward-resolution:find-resolver",
-                      "timestamp": 1780677848081000,
+                      "timestamp": 1780917556924000,
                       "duration": 2000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
@@ -379,14 +379,14 @@
                     },
                     {
                       "scope": "protocol-tracing",
-                      "id": "span-28807-1780677848083",
-                      "traceId": "trace-1780677848081-yhbkxoiix",
+                      "id": "span-97633-1780917556926",
+                      "traceId": "trace-1780917556924-gwu94ascb",
                       "parentSpanContext": {
-                        "traceId": "trace-1780677848081-yhbkxoiix",
-                        "spanId": "span-28805-1780677848081"
+                        "traceId": "trace-1780917556924-gwu94ascb",
+                        "spanId": "span-97631-1780917556924"
                       },
                       "name": "forward-resolution:accelerate-known-onchain-static-resolver",
-                      "timestamp": 1780677848083000,
+                      "timestamp": 1780917556926000,
                       "duration": 2000,
                       "attributes": {
                         "ens.protocol": "forward-resolution",
@@ -418,7 +418,6 @@
     "data": {
       "account": {
         "events": {
-          "totalCount": 168,
           "edges": [
             {
               "node": {
@@ -1438,7 +1437,8 @@
                 "timestamp": "1724237399"
               }
             }
-          ]
+          ],
+          "totalCount": 168
         }
       }
     }
@@ -1657,6 +1657,66 @@
             "header": {
               "httpUrl": "https://files.gregskril.com/cdn/QmfGaXqmqasCrKktBgD4AvvJb3DLndiKXdz457uBGLTFGK"
             }
+          }
+        }
+      }
+    }
+  },
+  "domain-profile-and-records": {
+    "data": {
+      "domain": {
+        "resolve": {
+          "profile": {
+            "avatar": {
+              "httpUrl": "https://gregskril.com/img/profile.jpg"
+            },
+            "addresses": {
+              "ethereum": "0x179a862703a4adfb29896552df9e307980d19285",
+              "solana": "2JQANQn1kccapb7GT8XScf9qBy59uMo9vh9WwVQhwStJ"
+            },
+            "socials": {
+              "github": {
+                "handle": "gskril",
+                "httpUrl": "https://github.com/gskril"
+              },
+              "twitter": {
+                "handle": "gregskril",
+                "httpUrl": "https://x.com/gregskril"
+              }
+            },
+            "website": {
+              "httpUrl": "https://gregskril.com/"
+            }
+          },
+          "records": {
+            "addresses": [
+              {
+                "coinType": 60,
+                "address": "0x179a862703a4adfb29896552df9e307980d19285"
+              },
+              {
+                "coinType": 501,
+                "address": "0x1350bfe02357c8bc583d7514f44ba2c31821d8739160e7b79a0a94bc113a4f73"
+              }
+            ],
+            "texts": [
+              {
+                "key": "avatar",
+                "value": "https://gregskril.com/img/profile.jpg"
+              },
+              {
+                "key": "com.twitter",
+                "value": "gregskril"
+              },
+              {
+                "key": "com.github",
+                "value": "gskril"
+              },
+              {
+                "key": "url",
+                "value": "https://gregskril.com/"
+              }
+            ]
           }
         }
       }
@@ -5610,6 +5670,145 @@
   "permissions-by-contract": {
     "data": {
       "permissions": {
+        "resources": {
+          "edges": [
+            {
+              "node": {
+                "resource": "0",
+                "users": {
+                  "edges": [
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
+                        "roles": "65537",
+                        "user": {
+                          "address": "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af"
+                        }
+                      }
+                    },
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xc8283ef6e8b596d28f0fab1d77a2b6d5c11a56cc",
+                        "roles": "16",
+                        "user": {
+                          "address": "0xc8283ef6e8b596d28f0fab1d77a2b6d5c11a56cc"
+                        }
+                      }
+                    },
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xde85e6b9928062fd2347d78a5bcac6266078f381",
+                        "roles": "16",
+                        "user": {
+                          "address": "0xde85e6b9928062fd2347d78a5bcac6266078f381"
+                        }
+                      }
+                    },
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xffffffffff52d316b7bd028358089bc8066b8f80",
+                        "roles": "23384048590936731391298299384680068791797867872512",
+                        "user": {
+                          "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "node": {
+                "resource": "112554048520345018269255786667391470421317806528110367240542760381540064034816",
+                "users": {
+                  "edges": [
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-112554048520345018269255786667391470421317806528110367240542760381540064034816-0x801d2e48d378f161dba7ad7ad002ad557714c191",
+                        "roles": "97409655027181761882228017414928043058140282880",
+                        "user": {
+                          "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "node": {
+                "resource": "30078755955643454526763071980293195785165410039216352470119925106082295316480",
+                "users": {
+                  "edges": [
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480-0xffffffffff52d316b7bd028358089bc8066b8f80",
+                        "roles": "97409655027181761882228017414928043062435250176",
+                        "user": {
+                          "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "node": {
+                "resource": "49509597771493908415463190501045916291230588437784211605615168713991762477056",
+                "users": {
+                  "edges": [
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-49509597771493908415463190501045916291230588437784211605615168713991762477056-0xffffffffff52d316b7bd028358089bc8066b8f80",
+                        "roles": "97409655027181761882228017414928043058140282880",
+                        "user": {
+                          "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "node": {
+                "resource": "68387108911874305622019956908914347119991166106996198835225265868637904830464",
+                "users": {
+                  "edges": [
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464-0x801d2e48d378f161dba7ad7ad002ad557714c191",
+                        "roles": "97409655027181761882228017414928043058140282880",
+                        "user": {
+                          "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "node": {
+                "resource": "88275407146030613359050872632052369891139576190404928761656352489271755538432",
+                "users": {
+                  "edges": [
+                    {
+                      "node": {
+                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-88275407146030613359050872632052369891139576190404928761656352489271755538432-0x801d2e48d378f161dba7ad7ad002ad557714c191",
+                        "roles": "97409655027181761882228017414928043058140282880",
+                        "user": {
+                          "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
         "events": {
           "totalCount": 13,
           "edges": [
@@ -5754,145 +5953,6 @@
                 ],
                 "data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000001110000000000000000000000000000001100000",
                 "timestamp": "1779708084"
-              }
-            }
-          ]
-        },
-        "resources": {
-          "edges": [
-            {
-              "node": {
-                "resource": "0",
-                "users": {
-                  "edges": [
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
-                        "roles": "65537",
-                        "user": {
-                          "address": "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af"
-                        }
-                      }
-                    },
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xc8283ef6e8b596d28f0fab1d77a2b6d5c11a56cc",
-                        "roles": "16",
-                        "user": {
-                          "address": "0xc8283ef6e8b596d28f0fab1d77a2b6d5c11a56cc"
-                        }
-                      }
-                    },
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xde85e6b9928062fd2347d78a5bcac6266078f381",
-                        "roles": "16",
-                        "user": {
-                          "address": "0xde85e6b9928062fd2347d78a5bcac6266078f381"
-                        }
-                      }
-                    },
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-0-0xffffffffff52d316b7bd028358089bc8066b8f80",
-                        "roles": "23384048590936731391298299384680068791797867872512",
-                        "user": {
-                          "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "node": {
-                "resource": "112554048520345018269255786667391470421317806528110367240542760381540064034816",
-                "users": {
-                  "edges": [
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-112554048520345018269255786667391470421317806528110367240542760381540064034816-0x801d2e48d378f161dba7ad7ad002ad557714c191",
-                        "roles": "97409655027181761882228017414928043058140282880",
-                        "user": {
-                          "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "node": {
-                "resource": "30078755955643454526763071980293195785165410039216352470119925106082295316480",
-                "users": {
-                  "edges": [
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480-0xffffffffff52d316b7bd028358089bc8066b8f80",
-                        "roles": "97409655027181761882228017414928043062435250176",
-                        "user": {
-                          "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "node": {
-                "resource": "49509597771493908415463190501045916291230588437784211605615168713991762477056",
-                "users": {
-                  "edges": [
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-49509597771493908415463190501045916291230588437784211605615168713991762477056-0xffffffffff52d316b7bd028358089bc8066b8f80",
-                        "roles": "97409655027181761882228017414928043058140282880",
-                        "user": {
-                          "address": "0xffffffffff52d316b7bd028358089bc8066b8f80"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "node": {
-                "resource": "68387108911874305622019956908914347119991166106996198835225265868637904830464",
-                "users": {
-                  "edges": [
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-68387108911874305622019956908914347119991166106996198835225265868637904830464-0x801d2e48d378f161dba7ad7ad002ad557714c191",
-                        "roles": "97409655027181761882228017414928043058140282880",
-                        "user": {
-                          "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "node": {
-                "resource": "88275407146030613359050872632052369891139576190404928761656352489271755538432",
-                "users": {
-                  "edges": [
-                    {
-                      "node": {
-                        "id": "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-88275407146030613359050872632052369891139576190404928761656352489271755538432-0x801d2e48d378f161dba7ad7ad002ad557714c191",
-                        "roles": "97409655027181761882228017414928043058140282880",
-                        "user": {
-                          "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
-                        }
-                      }
-                    }
-                  ]
-                }
               }
             }
           ]
@@ -6070,7 +6130,7 @@
             {
               "node": {
                 "resource": "0",
-                "roles": "7719472615821079694904732333912527190217998977709370935963838933860875309073"
+                "roles": "7719472615821079694904732333912527190217998977709370935963838933860875309329"
               }
             },
             {

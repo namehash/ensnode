@@ -493,6 +493,57 @@ Variables:
 }
 ```
 
+### domain-profile-and-records
+
+```graphql
+query DomainProfileAndRecords($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          solana
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+      }
+      records {
+        addresses(coinTypes: [60, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "com.github", "url"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "gregskril.eth"
+}
+```
+
 ### domain-subdomains
 
 ```graphql

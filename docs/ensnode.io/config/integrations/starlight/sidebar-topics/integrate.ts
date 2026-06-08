@@ -93,6 +93,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/concepts",
         },
         {
+          label: "ENS Resolution",
+          link: "/docs/integrate/omnigraph/ens-resolution",
+        },
+        {
           label: "Protocol Acceleration",
           link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
