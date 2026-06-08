@@ -1,4 +1,5 @@
 import {
+  type AccountId,
   type Address,
   type CoinType,
   type Hex,
@@ -16,6 +17,7 @@ import {
   interpretPubkeyValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
+  isExtendedResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -31,6 +33,31 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
+ * Ensures a Resolver entity exists for `resolver`, capturing additional metadata.
+ *
+ * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`) to determine
+ * `isExtended` support.
+ */
+export async function upsertResolver(
+  context: IndexingEngineContext,
+  resolver: AccountId,
+): Promise<typeof ensIndexerSchema.resolver.$inferSelect> {
+  const id = makeResolverId(resolver);
+
+  const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
+  if (existing) return existing;
+
+  const isExtended = await isExtendedResolver({
+    publicClient: context.client,
+    address: resolver.address,
+  });
+
+  const row = { id, ...resolver, isExtended };
+  await context.ensDb.insert(ensIndexerSchema.resolver).values(row).onConflictDoNothing();
+  return row;
+}
+
+/**
  * Ensures the Resolver + ResolverRecords entities exist for the given Resolver event, and returns
  * the ResolverRecords key for further per-record updates.
  */
@@ -41,10 +68,7 @@ export async function ensureResolverAndRecords(
   const resolver = getThisAccountId(context, event);
   const key: ResolverRecordsCompositeKey = { ...resolver, node: event.args.node };
 
-  await context.ensDb
-    .insert(ensIndexerSchema.resolver)
-    .values({ id: makeResolverId(resolver), ...resolver })
-    .onConflictDoNothing();
+  await upsertResolver(context, resolver);
 
   await context.ensDb
     .insert(ensIndexerSchema.resolverRecords)

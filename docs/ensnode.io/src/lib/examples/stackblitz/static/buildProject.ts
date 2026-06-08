@@ -1,4 +1,4 @@
-import { ENSNODE_URL } from "@lib/examples/omnigraph/constants";
+import { DEFAULT_ENSNODE_URL } from "@lib/examples/omnigraph/constants";
 
 import { assemblePlaygroundProject } from "../core/assemblePlaygroundProject";
 import {
@@ -27,7 +27,7 @@ function buildEnssdkStaticStackBlitzProject(params: {
     entryFileName: "src/index.ts",
     transformed: {
       files: {
-        ".env": `ENSNODE_URL=${ENSNODE_URL}\n`,
+        ".env": `ENSNODE_URL=${DEFAULT_ENSNODE_URL}\n`,
         "src/index.ts": params.snippet,
       },
     },
@@ -54,7 +54,7 @@ function buildEnskitStaticStackBlitzProject(params: {
     transformed: {
       files: {
         ...ENSKIT_STACKBLITZ_SCAFFOLD_FILES,
-        ".env": `VITE_ENSNODE_URL=${ENSNODE_URL}\n`,
+        ".env": `VITE_ENSNODE_URL=${DEFAULT_ENSNODE_URL}\n`,
         "src/App.tsx": params.snippet,
       },
     },

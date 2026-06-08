@@ -1,15 +1,38 @@
 [
   {
     "id": "hello-world",
-    "query": "#\n# Welcome to this interactive playground for\n# ENSNode's GraphQL API!\n#\n# You can get started by typing your query here or by using\n# the Explorer on the left to select the data you want to query.\n#\n# There are also example queries in the tabs above ☝️\nquery HelloWorld {\n  domain(by: { name: \"eth\" }) { canonical { name { interpreted beautified } } owner { address } }\n}",
-    "variables": {}
+    "query": "query HelloWorld($address: Address!) {\n  # Lookup an Account by address.\n  account(by: { address: $address }) {\n    resolve {\n      # Reverse resolve the ENS primary name of the account\n      # using a convenient ETHEREUM alias for mainnet.\n      primaryName(by: { chainName: ETHEREUM }) {\n        # Get the regular interpreted variant of the primary name \n        # and also the special beautified variant that optimizes names \n        # containing special characters such as emojis for proper display in interfaces.\n        name { interpreted beautified }\n        resolve {\n          # If the account has a primary name on Ethereum (mainnet),\n          # forward resolve the interpreted ENS profile of that name in the same query!.\n          profile {\n            description\n            avatar { httpUrl }\n            addresses { ethereum bitcoin }\n            socials {\n              twitter { handle httpUrl }\n              github { handle httpUrl }\n            }\n          }\n        }\n      }\n    }\n\n    # Also load the count of ENSv1 and ENSv2 domains owned by the account\n    # to see if they have domains they should upgrade to ENSv2\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
+    "variables": {
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+    }
+  },
+  {
+    "id": "domain-profile",
+    "query": "query DomainProfile($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    resolve {\n      profile {\n        description\n        avatar {\n          httpUrl\n        }\n        addresses {\n          ethereum\n          base\n          solana\n          bitcoin\n          rootstock\n        }\n        socials {\n          github {\n            handle\n            httpUrl\n          }\n          twitter {\n            handle\n            httpUrl\n          }\n        }\n        website {\n          httpUrl\n        }\n        header {\n          httpUrl\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "gregskril.eth"
+    }
+  },
+  {
+    "id": "domain-records",
+    "query": "query DomainRecords($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical {\n      name {\n        interpreted\n      }\n    }\n    resolve {\n      records {\n        addresses(coinTypes: [60, 2147483658, 501]) {\n          coinType\n          address\n        }\n        texts(keys: [\"description\", \"avatar\", \"url\", \"com.github\", \"com.twitter\"]) {\n          key\n          value\n        }\n        contenthash\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "gregskril.eth"
+    }
+  },
+  {
+    "id": "domain-by-name",
+    "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { beautified } }\n    owner { address }\n    resolve {\n      profile {\n        description\n        addresses {\n          ethereum\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "vitalik.eth"
+    }
   },
   {
     "id": "find-domains",
     "query": "query FindDomains(\n  $name: DomainsNameFilter!\n  $order: DomainsOrderInput\n) {\n  domains(\n    where: { name: $name }\n    order: $order\n    first: 20\n  ) {\n    edges {\n      node {\n        __typename\n        id\n        label { interpreted hash }\n        canonical { name { interpreted beautified } }\n\n        registration { expiry event { timestamp } }\n      }\n    }\n  }\n}",
     "variables": {
       "name": {
-        "starts_with": "sf"
+        "starts_with": "vitalik"
       },
       "order": {
         "by": "NAME",
@@ -18,31 +41,10 @@
     }
   },
   {
-    "id": "domain-by-name",
-    "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    __typename\n    id\n    label { interpreted hash }\n    canonical { name { interpreted } node path { id } }\n    owner { address }\n    subregistry { contract { chainId address } }\n\n    ... on ENSv1Domain {\n      rootRegistryOwner { address }\n    }\n  }\n}",
-    "variables": {
-      "name": "roppp.eth"
-    }
-  },
-  {
-    "id": "domain-registration",
-    "query": "query DomainRegistration($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { interpreted } }\n\n    registration {\n      __typename\n      id\n      start\n      expiry\n      expired\n      referrer\n      registrar { chainId address }\n      registrant { address }\n      renewals(first: 5) {\n        totalCount\n        edges { node { duration base premium referrer } }\n      }\n\n      # ENSv1 .eth registrations (also Basenames & Lineanames)\n      ... on BaseRegistrarRegistration {\n        baseCost\n        premium\n        isInGracePeriod\n        # present when the .eth name is wrapped by the NameWrapper\n        wrapped { fuses tokenId }\n      }\n\n      # names held natively in the NameWrapper\n      ... on NameWrapperRegistration {\n        fuses\n      }\n    }\n  }\n}",
-    "variables": {
-      "name": "roppp.eth"
-    }
-  },
-  {
-    "id": "domain-records",
-    "query": "query DomainRecords(\n  $name: InterpretedName!\n) {\n  domain(by: { name: $name }) {\n    canonical { name { interpreted } }\n    resolve {\n      records {\n        addresses(coinTypes: [60]) { coinType address }\n        texts(keys: [\"description\"]) { key value }\n      }\n    }\n  }\n}",
-    "variables": {
-      "name": "roppp.eth"
-    }
-  },
-  {
     "id": "domain-subdomains",
-    "query": "query DomainSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted beautified } }\n    subdomains(first: 10) {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
+    "query": "query DomainSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted beautified } }\n    subdomains(first: 10, order: {\n       by: NAME,\n       dir: ASC\n    }) {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
     "variables": {
-      "name": "eth"
+      "name": "base.eth"
     }
   },
   {
@@ -53,39 +55,31 @@
     }
   },
   {
-    "id": "subdomains-pagination",
-    "query": "query SubdomainsPagination($first: Int!, $after: String) {\n  domain(by: { name: \"eth\" }) {\n    canonical { name { interpreted } }\n\n    # paginate child names: pass pageInfo.endCursor back as $after for the next page\n    subdomains(first: $first, after: $after) {\n      totalCount\n      pageInfo { hasNextPage endCursor }\n      edges {\n        cursor\n        node {\n          canonical { name { interpreted } }\n        }\n      }\n    }\n  }\n}",
-    "variables": {
-      "first": 10,
-      "after": null
-    }
-  },
-  {
     "id": "domain-events",
     "query": "query DomainEvents($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    events {\n      totalCount\n      edges {\n        node {\n          from\n          to\n          topics\n          data\n          timestamp\n          transactionHash\n        }\n      }\n    }\n  }\n}",
     "variables": {
-      "name": "roppp.eth"
+      "name": "newowner.eth"
     }
   },
   {
     "id": "domains-by-address",
     "query": "query AccountDomains(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    domains {\n      edges {\n        node {\n          label { interpreted }\n          canonical { name { interpreted beautified } }\n        }\n      }\n    }\n  }\n}",
     "variables": {
-      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
   },
   {
-    "id": "account-primary-names",
-    "query": "query AccountPrimaryNames($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {\n        coinType\n        chainName\n        name { interpreted beautified }\n        resolve {\n          records {\n            addresses(coinTypes: [60]) {\n              coinType\n              address\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "id": "account-primary-name",
+    "query": "query AccountPrimaryName($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          profile {\n            description\n            socials {\n              twitter {\n                httpUrl\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
     "variables": {
-      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
   },
   {
     "id": "account-events",
     "query": "query AccountEvents(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
     "variables": {
-      "address": "0x801d2e48d378f161dba7ad7ad002ad557714c191"
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
   },
   {
@@ -124,24 +118,14 @@
   },
   {
     "id": "domain-resolver",
-    "query": "query DomainResolver($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolver {\n      assigned {\n        records { edges { node { node keys coinTypes } } }\n        permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }\n        events { totalCount edges { node { topics data timestamp } } }\n      }\n    }\n  }\n}",
+    "query": "query DomainResolver($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolver {\n      assigned {\n        contract {\n          address\n        }\n        events(first: 5) {\n          edges { node { topics data timestamp } }\n        }\n      }\n    }\n  }\n}",
     "variables": {
-      "name": "roppp.eth"
-    }
-  },
-  {
-    "id": "resolver-by-address",
-    "query": "query ResolverByAddress($contract: AccountIdInput!) {\n  resolver(by: { contract: $contract }) {\n    id\n    contract { chainId address }\n\n    # records this resolver stores, keyed by node\n    records(first: 5) {\n      totalCount\n      edges {\n        node {\n          node\n          name\n          keys\n          coinTypes\n        }\n      }\n    }\n\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
-    "variables": {
-      "contract": {
-        "chainId": 11155111,
-        "address": "0x8fade66b79cc9f707ab26799354482eb93a5b7dd"
-      }
+      "name": "vitalik.eth"
     }
   },
   {
     "id": "namegraph",
-    "query": "query Namegraph {\n  root {\n    id\n    domains {\n      edges {\n        node {\n          canonical { name { interpreted beautified } }\n\n          subdomains {\n            edges {\n              node {\n                canonical { name { interpreted beautified } }\n\n                subdomains {\n                  edges {\n                    node {\n                      canonical { name { interpreted beautified } }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "query": "query Namegraph {\n  domain(by: { name: \"eth\" }) {\n    registry { id contract { chainId address } }\n    parent { id }\n    subregistry {\n      domains {\n        edges {\n          node {\n            canonical { name { beautified } }\n          }\n        }\n      }\n    }\n    subdomains { edges { node { canonical { name { beautified } } } } }\n  }\n}",
     "variables": {}
   },
   {
@@ -157,10 +141,10 @@
     "variables": {}
   },
   {
-    "id": "domain-profile",
-    "query": "query DomainProfile($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolve {\n      profile {\n        description\n        avatar { httpUrl }\n        addresses { ethereum }\n        socials { github { handle httpUrl } }\n        website { httpUrl }\n        email\n      }\n    }\n  }\n}",
+    "id": "accelerate-resolve",
+    "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve(accelerate: true) {\n      trace\n      acceleration {\n        requested\n        attempted\n      }\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          trace\n          acceleration {\n            requested\n            attempted\n          }\n          profile {\n            description\n          }\n        }\n      }\n    }\n  }\n}",
     "variables": {
-      "name": "vitalik.eth"
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
   }
 ]

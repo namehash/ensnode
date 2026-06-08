@@ -2,17 +2,27 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
+import {
+  getOmnigraphExampleConfigById,
+  OMNIGRAPH_EXAMPLES_CONFIG,
+} from "../src/data/omnigraph-examples/config.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
-import { ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
+import { getDocsOmnigraphNamespaceConfig } from "../src/lib/examples/omnigraph/constants.ts";
 
 function logStep(message: string, id?: string) {
   console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
 }
 
+function logWarn(message: string, id?: string) {
+  console.warn(`[omnigraph-examples] WARN: ${message} ${id ? `for example '${id}'` : ""}`);
+}
+
 function logError(message: string, id?: string) {
   console.error(`[omnigraph-examples] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
 }
+
+const TIMEOUT_MS = 120_000;
+const WARN_THRESHOLD_MS = 5_000;
 
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../src/data/omnigraph-examples");
 const examplesPath = join(dataDir, "examples.json");
@@ -27,8 +37,8 @@ const snapshotById = new Map(
   (JSON.parse(readFileSync(examplesPath, "utf8")) as SnapshotExample[]).map((e) => [e.id, e]),
 );
 
-// Only fetch responses for the rendered set: meta entries supported by the vendored snapshot.
-const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[])
+// Only fetch responses for the rendered set: config entries supported by the vendored snapshot.
+const allExampleIds = OMNIGRAPH_EXAMPLES_CONFIG.map((config) => config.id)
   .filter((id) => snapshotById.has(id))
   .sort();
 
@@ -49,14 +59,10 @@ if (argIds.length > 0) {
 
 const exampleIds = argIds.length > 0 ? argIds : allExampleIds;
 
-// Endpoint defaults to the production v2 Sepolia URL; override to fill responses from a
-// staged deployment (e.g. blue/green) before that version is promoted to the prod URL.
-const url = new URL("/api/omnigraph", process.env.OMNIGRAPH_ENDPOINT ?? ENSNODE_URL).toString();
-
 logStep(
   argIds.length > 0
-    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples from ${url}: ${exampleIds.join(", ")}`
-    : `Fetching all ${exampleIds.length} Omnigraph examples from ${url}`,
+    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples: ${exampleIds.join(", ")}`
+    : `Fetching all ${exampleIds.length} Omnigraph examples (per-example namespace endpoints)`,
 );
 
 // When refreshing a subset, load the existing responses so unaffected entries are preserved.
@@ -69,14 +75,27 @@ for (const id of exampleIds) {
   logStep("Getting example query", id);
 
   const example = snapshotById.get(id)!;
+  const config = getOmnigraphExampleConfigById(id);
+  if (!config) {
+    logError(`No OMNIGRAPH_EXAMPLES_CONFIG entry for id`, id);
+    process.exit(1);
+  }
+
+  const endpointOverride = process.env.OMNIGRAPH_ENDPOINT;
+  const baseUrl = endpointOverride ?? getDocsOmnigraphNamespaceConfig(config.namespace).ensnodeUrl;
+  const url = new URL("/api/omnigraph", baseUrl).toString();
+
   const query = example.query.trim();
   const variables = example.variables;
 
+  logStep(`POST ${url}`, id);
+
+  const started = performance.now();
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -85,21 +104,23 @@ for (const id of exampleIds) {
     process.exit(1);
   }
 
-  const body = await response.json();
+  const body = (await response.json()) as Record<string, unknown>;
+  const durationMs = Math.round(performance.now() - started);
 
-  if (
-    typeof body === "object" &&
-    body !== null &&
-    "errors" in body &&
-    Array.isArray((body as { errors: unknown }).errors) &&
-    (body as { errors: unknown[] }).errors.length > 0
-  ) {
+  if ("errors" in body && Array.isArray(body.errors) && body.errors.length > 0) {
     logError(`GraphQL errors: ${JSON.stringify(body, null, 2)}`, id);
     process.exit(1);
   }
 
+  if (durationMs > WARN_THRESHOLD_MS) {
+    logWarn(
+      `Took ${durationMs}ms (threshold ${WARN_THRESHOLD_MS}ms). Omnigraph examples should stay fast. Consider changing input variables or simplifying the example query.`,
+      id,
+    );
+  }
+
   out[id] = body;
-  logStep("Success", id);
+  logStep(`Success in ${durationMs}ms`, id);
 }
 
 logStep(`Writing responses to ${outputPath}`);

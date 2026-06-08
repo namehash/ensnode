@@ -1,4 +1,4 @@
-import { type Address, type CoinType, type InterpretedName, isNormalizedName } from "enssdk";
+import { type Address, type CoinType, type InterpretedName, isResolvableName } from "enssdk";
 
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
@@ -62,7 +62,7 @@ PrimaryNameRecordRef.implement({
         const { name, accelerate } = parent;
         const { canAccelerate } = context;
 
-        if (!name || !isNormalizedName(name)) {
+        if (!name || !isResolvableName(name)) {
           return { accelerate, canAccelerate, trace: null, result: null };
         }
 

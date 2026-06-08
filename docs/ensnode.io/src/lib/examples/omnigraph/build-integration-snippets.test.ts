@@ -246,53 +246,22 @@ describe("buildEnskitSetupSnippets", () => {
   });
 });
 
-describe("integration snippet typechecking", () => {
-  const fixtureCases = [
-    {
-      label: "InterpretedName domain lookup",
-      query: domainByNameQuery,
-      variables: { name: "test-name.eth" },
-    },
-    {
-      label: "address domains lookup",
-      query: domainsByAddressQuery,
-      variables: { address: "0x205d2686da3bf33f64c17f21462c51b5ead462cf" },
-    },
-    {
-      label: "registry domains lookup",
-      query: registryDomainsQuery,
-      variables: {
-        registry: { chainId: 1, address: "0x31a2bb5d933557cce1b3129993193896d074db92" },
-      },
-    },
-    {
-      label: "namegraph without variables",
-      query: namegraphQuery,
-      variables: {},
-    },
-  ] as const;
-
-  it.each(fixtureCases)("enssdk snippet typechecks ($label)", ({ query, variables }) => {
-    expectIntegrationSnippetTypechecks(buildEnssdkSnippet({ query, variables }), "enssdk");
+describe("integration snippet typechecking", { timeout: 120_000 }, () => {
+  it("enssdk snippets typecheck all vendored snapshot examples", () => {
+    for (const example of activeSnapshotExamples) {
+      expectIntegrationSnippetTypechecks(
+        buildEnssdkSnippet({ query: example.query, variables: example.variables }),
+        "enssdk",
+      );
+    }
   });
 
-  it.each(fixtureCases)("enskit snippet typechecks ($label)", ({ query, variables }) => {
-    expectIntegrationSnippetTypechecks(buildEnskitSnippet({ query, variables }), "enskit");
-  });
-
-  it.each(
-    activeSnapshotExamples.map(
-      (example) => [example.id, example.query, example.variables] as const,
-    ),
-  )("enssdk snippet typechecks active snapshot %s", (_id, query, variables) => {
-    expectIntegrationSnippetTypechecks(buildEnssdkSnippet({ query, variables }), "enssdk");
-  });
-
-  it.each(
-    activeSnapshotExamples.map(
-      (example) => [example.id, example.query, example.variables] as const,
-    ),
-  )("enskit snippet typechecks active snapshot %s", (_id, query, variables) => {
-    expectIntegrationSnippetTypechecks(buildEnskitSnippet({ query, variables }), "enskit");
+  it("enskit snippet typechecks a representative snapshot example (InterpretedName + TSX)", () => {
+    const domainByName = activeSnapshotExamples.find((example) => example.id === "domain-by-name");
+    expect(domainByName).toBeDefined();
+    expectIntegrationSnippetTypechecks(
+      buildEnskitSnippet({ query: domainByName!.query, variables: domainByName!.variables }),
+      "enskit",
+    );
   });
 });

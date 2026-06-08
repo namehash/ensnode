@@ -17,6 +17,6 @@ export const staticExampleOutputMaxHeight = "min(50vh,28rem)";
 export const staticExampleMutedTextClass =
   "text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)]";
 
-/** Shown under illustrative JSON output snapshots in static Omnigraph examples. */
-export const staticExampleOutputSnapshotNote =
-  "Output matches a GraphQL Response snapshot; live output depends on your ENSNode instance.";
+/** Hosted ENSNode instance link in playground hints and output footnotes. */
+export const staticExampleHostedInstanceLinkClass =
+  "font-semibold text-[var(--sl-color-accent)] underline underline-offset-3 hover:underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)] transition-[text-underline-offset] duration-200";

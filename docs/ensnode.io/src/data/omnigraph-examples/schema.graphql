@@ -23,7 +23,7 @@ type Account {
   address: Address!
 
   """
-  The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(
     after: String
@@ -456,7 +456,7 @@ interface Domain {
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(
     after: String
@@ -634,7 +634,7 @@ input DomainsNameFilter @oneOf {
   in: [InterpretedName!]
 
   """
-  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).
+  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized). Matched against the first 64 code points of the name; prefixes longer than 64 code points never match.
   """
   starts_with: String
 }
@@ -777,7 +777,7 @@ type ENSv1Domain implements Domain {
   rootRegistryOwner: Account
 
   """
-  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(
     after: String
@@ -809,7 +809,7 @@ type ENSv1Registry implements Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(
     after: String
@@ -851,7 +851,7 @@ type ENSv1VirtualRegistry implements Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(
     after: String
@@ -966,7 +966,7 @@ type ENSv2Domain implements Domain {
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(
     after: String
@@ -1014,7 +1014,7 @@ type ENSv2Registry implements Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(
     after: String
@@ -1888,7 +1888,7 @@ type Query {
   domain(by: DomainIdInput!): Domain
 
   """
-  Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(
     after: String
@@ -2022,7 +2022,7 @@ interface Registry {
   contract: AccountId!
 
   """
-  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value (no Registration, or a never-expiring Registration treated as +∞) sort last when `dir: ASC` and first when `dir: DESC`.
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(
     after: String

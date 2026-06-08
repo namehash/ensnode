@@ -1,13 +1,12 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
-import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
 import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
@@ -32,19 +31,15 @@ import {
   ReverseResolveRef,
 } from "@/omnigraph-api/schema/reverse-resolve";
 
-export const AccountRef = builder.loadableObjectRef("Account", {
-  load: (ids: Address[]) => {
-    const { ensDb } = di.context;
-    return ensDb.query.account.findMany({
-      where: (t, { inArray }) => inArray(t.id, ids),
-    });
-  },
-  toKey: getModelId,
-  cacheResolved: true,
-  sort: true,
-});
-
-export type Account = Exclude<typeof AccountRef.$inferType, Address>;
+/**
+ * An Account is modeled purely by its {@link NormalizedAddress} — the `account` table holds only an
+ * id, so there is nothing to load. Resolving `Query.account` to an address directly (rather than via
+ * a dataloader) means resolvable-but-unindexed Accounts (e.g. those with only an off-chain primary
+ * name) are supported automatically: Reverse Resolution (`Account.resolve`) is keyed by address and
+ * works independent of indexing, while indexed-only relations (`domains`, `events`, `permissions`)
+ * naturally return empty for an unindexed address.
+ */
+export const AccountRef = builder.objectRef<NormalizedAddress>("Account");
 
 ///////////
 // Account
@@ -59,7 +54,7 @@ AccountRef.implement({
       description: "A unique reference to this Account.",
       type: "Address",
       nullable: false,
-      resolve: (parent) => parent.id,
+      resolve: (parent) => parent,
     }),
 
     ///////////////////
@@ -69,7 +64,7 @@ AccountRef.implement({
       description: "An EVM Address that uniquely identifies this Account on-chain.",
       type: "Address",
       nullable: false,
-      resolve: (parent) => parent.id,
+      resolve: (parent) => parent,
     }),
 
     //////////////////
@@ -97,7 +92,7 @@ AccountRef.implement({
         // null-propagate the entire Account.
         if (coinTypes === null) {
           return {
-            address: account.id,
+            address: account,
             coinTypes: [],
             accelerate,
             canAccelerate,
@@ -106,12 +101,12 @@ AccountRef.implement({
           };
         }
 
-        const { trace, records } = await resolvePrimaryNameRecords(account.id, coinTypes, {
+        const { trace, records } = await resolvePrimaryNameRecords(account, coinTypes, {
           accelerate,
           canAccelerate,
         });
 
-        return { address: account.id, coinTypes, accelerate, canAccelerate, trace, records };
+        return { address: account, coinTypes, accelerate, canAccelerate, trace, records };
       },
     }),
 
@@ -127,7 +122,7 @@ AccountRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }) =>
         resolveFindDomains({
-          where: { ...where, ownerId: parent.id },
+          where: { ...where, ownerId: parent },
           order,
           ...connectionArgs,
         }),
@@ -146,7 +141,7 @@ AccountRef.implement({
       resolve: (parent, args) =>
         resolveFindEvents({
           ...args,
-          where: { ...args.where, sender: { eq: parent.id } },
+          where: { ...args.where, sender: { eq: parent } },
         }),
     }),
 
@@ -165,7 +160,7 @@ AccountRef.implement({
         const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           // this user's permissions
-          eq(ensIndexerSchema.permissionsUser.user, parent.id),
+          eq(ensIndexerSchema.permissionsUser.user, parent),
           // optionally filtered by contract
           contract
             ? and(
@@ -200,7 +195,7 @@ AccountRef.implement({
       type: RegistryPermissionsUserRef,
       resolve: (parent, args) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
+        const scope = eq(ensIndexerSchema.permissionsUser.user, parent);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.registry.chainId),
           eq(ensIndexerSchema.permissionsUser.address, ensIndexerSchema.registry.address),
@@ -238,7 +233,7 @@ AccountRef.implement({
       type: ResolverPermissionsUserRef,
       resolve: (parent, args) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
+        const scope = eq(ensIndexerSchema.permissionsUser.user, parent);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.resolver.chainId),
           eq(ensIndexerSchema.permissionsUser.address, ensIndexerSchema.resolver.address),

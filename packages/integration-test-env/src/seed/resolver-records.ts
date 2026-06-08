@@ -49,7 +49,7 @@ async function seedResolverRecordsForName(
 
 async function findResolver(client: DevnetWalletClient, name: string): Promise<Address> {
   const [resolver] = await client.readContract({
-    address: contracts.UniversalResolverV2,
+    address: contracts.UpgradableUniversalResolverProxy,
     abi: UniversalResolverABI,
     functionName: "findResolver",
     args: [toHex(packetToBytes(name))],

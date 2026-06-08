@@ -37,22 +37,45 @@ Here's a summary of some popular integration strategies:
 
 With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
 
+Start from a wallet address, reverse-resolve its Ethereum primary name, then forward-resolve the profile on that name:
+
 ```ts title="example.ts"
+import { createEnsNodeClient } from "enssdk/core";
+import { graphql, omnigraph } from "enssdk/omnigraph";
+
 // create and extend an EnsNodeClient with Omnigraph API support
-const client = createEnsNodeClient({ url: process.env.ENSNODE_URL! }).extend(omnigraph);
+const client = createEnsNodeClient({
+        url: process.env.ENSNODE_URL!
+    })
+    .extend(omnigraph);
 
 // this is fully typechecked and supports editor autocomplete!
 const HelloWorldQuery = graphql(`
-  query HelloWorld {
-    domain(by: { name: "eth" }) {
-      canonical { name { beautified } }
-      owner { address }
+  query HelloWorld($address: Address!) {
+    account(by: { address: $address }) {
+      address
+      resolve {
+        primaryName(by: { chainName: ETHEREUM }) {
+          name { beautified }
+          resolve {
+            profile {
+              description
+              addresses { ethereum bitcoin }
+            }
+          }
+        }
+      }
     }
   }
 `);
 
 // `result` is fully typed!
-const result = await client.omnigraph.query({ query: HelloWorldQuery });
+const result = await client.omnigraph.query({
+    query: HelloWorldQuery,
+    variables: {
+        address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    },
+});
 ```
 
 <Aside type="note" title="BeautifiedName">
@@ -80,32 +103,54 @@ const result = await client.omnigraph.query({ query: HelloWorldQuery });
 
 With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
 
+The same `address -> primary name -> forward profile` pattern in a React component:
+
 ```tsx title="example.tsx"
+import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
+import type { Address } from "enssdk";
+
 // this query is fully typechecked and supports editor autocomplete!
-const DomainByNameQuery = graphql(`
-  query DomainByNameQuery($name: InterpretedName!) {
-    domain(by: { name: $name }) {
-      canonical { name { beautified } }
-      owner { address }
+const AccountPrimaryProfileQuery = graphql(`
+  query AccountPrimaryProfile($address: Address!) {
+    account(by: { address: $address }) {
+      address
+      resolve {
+        primaryName(by: { chainName: ETHEREUM }) {
+          name { beautified }
+          resolve {
+            profile {
+              description
+              addresses { ethereum bitcoin }
+            }
+          }
+        }
+      }
     }
   }
 `);
 
-export function DomainCard({ name }: { name: InterpretedName }) {
+export function AccountProfileCard({ address }: { address: Address }) {
   // `result` is fully typed!
-  const [result] = useOmnigraphQuery({ query: DomainByNameQuery, variables: { name } });
+  const [result] = useOmnigraphQuery({
+    query: AccountPrimaryProfileQuery,
+    variables: { address },
+  });
   const { data, fetching, error } = result;
 
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!data?.domain) return <p>No domain found for '{name}'.</p>;
+  if (!data?.account) return <p>No account found for '{address}'.</p>;
 
-  const { domain } = data;
+  const { account } = data;
+  const primaryName = account.resolve?.primaryName;
+  const addresses = primaryName?.resolve?.profile?.addresses;
 
   return (
     <div>
-      <p>Name: {domain.canonical?.name.beautified ?? "Unnamed Domain"}</p>
-      <p>Owner: {domain.owner?.address ?? "Unowned"}</p>
+      <p>Address: {account.address}</p>
+      <p>Primary name: {primaryName?.name?.beautified ?? "None set"}</p>
+      <p>Bitcoin address: {addresses?.bitcoin ?? "Not set"}</p>
+      <p>Description: {primaryName?.resolve?.profile?.description}</p>
     </div>
   );
 }
@@ -132,8 +177,10 @@ export function DomainCard({ name }: { name: InterpretedName }) {
 
 The ENS Omnigraph API is a GraphQL API following the Relay specification, so you get built-in support for efficient infinite pagination and idiomatic access to all of the ENS protocol within a _unified_ ENSv1 + ENSv2 datamodel.
 
+Same query: `address -> primary name -> forward profile` — via raw GraphQL with example response below:
+
 <OmnigraphStaticExampleSet
-  id="domains-by-address"
+  id="hello-world"
   integrations={["omnigraph", "curl"]}
   hideDescription
   hideBackToExamples

@@ -23,7 +23,7 @@ import di from "@/di";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import {
   forwardWalkDisjointNamegraph,
-  hasResolver,
+  walkResultRowHasResolver,
 } from "@/lib/protocol-acceleration/forward-walk-disjoint-namegraph";
 
 type FindResolverResult =
@@ -309,7 +309,7 @@ async function findResolverWithIndexENSv2(
       const rows = await forwardWalkDisjointNamegraph(makeConcreteRegistryId(registry), path);
 
       // the deepest Domain with an assigned Resolver is the active Resolver (ENSIP-10)
-      const active = rows.find(hasResolver);
+      const active = rows.find(walkResultRowHasResolver);
       if (!active) return NULL_RESULT;
 
       // map `active.depth` back to its name: getNameHierarchy is ordered leaf-first, while `depth`

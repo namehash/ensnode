@@ -1,6 +1,4 @@
 ---
-import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
-
 import ENSAdminCTAButton from "@components/atoms/ENSAdminCTAButton.astro";
 import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
 
@@ -10,11 +8,11 @@ interface Props {
   variant: "ensadmin" | "stackblitz";
   adminUrl?: string;
   hostedInstanceDocUrl: string;
-  hostedInstanceNamespace: ENSNamespaceId;
+  hostedInstanceLabel: string;
   staticExampleId?: string;
 }
 
-const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceNamespace, staticExampleId } =
+const { variant, adminUrl, hostedInstanceDocUrl, hostedInstanceLabel, staticExampleId } =
   Astro.props;
 
 const actionBarClass =
@@ -37,6 +35,6 @@ const actionButtonClass =
   <StaticExamplePlaygroundHint
     variant={variant}
     hostedInstanceDocUrl={hostedInstanceDocUrl}
-    hostedInstanceNamespace={hostedInstanceNamespace}
+    hostedInstanceLabel={hostedInstanceLabel}
   />
 </div>
