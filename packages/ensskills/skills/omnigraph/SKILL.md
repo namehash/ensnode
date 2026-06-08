@@ -718,10 +718,37 @@ Variables:
 }
 ```
 
-### account-primary-name
+### account-primary-names
 
 ```graphql
 query AccountPrimaryName($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    resolve {
+      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+        chainName
+        name {
+          interpreted
+          beautified
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "address": "0x179a862703a4adfb29896552df9e307980d19285"
+}
+```
+
+### account-primary-name-records
+
+```graphql
+query AccountPrimaryNameRecords($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {

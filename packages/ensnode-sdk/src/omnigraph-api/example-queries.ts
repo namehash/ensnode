@@ -44,6 +44,8 @@ const VITALIK_NAME = asInterpretedName("vitalik.eth");
 
 const GREG_NAME = asInterpretedName("gregskril.eth");
 
+const GREG_ADDRESS = toNormalizedAddress("0x179a862703a4adfb29896552df9e307980d19285");
+
 const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ReverseResolverRoot,
@@ -511,9 +513,29 @@ query AccountDomains(
   // Account Primary Names
   /////////////////////////
   {
-    id: "account-primary-name",
+    id: "account-primary-names",
     query: `
 query AccountPrimaryName($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    resolve {
+      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+        chainName
+        name { interpreted beautified }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: GREG_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
+    },
+  },
+  {
+    id: "account-primary-name-records",
+    query: `
+query AccountPrimaryNameRecords($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {

@@ -76,8 +76,15 @@
     }
   },
   {
-    "id": "account-primary-name",
-    "query": "query AccountPrimaryName($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          profile {\n            description\n            socials {\n              twitter {\n                httpUrl\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "id": "account-primary-names",
+    "query": "query AccountPrimaryName($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {\n        chainName\n        name { interpreted beautified }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x179a862703a4adfb29896552df9e307980d19285"
+    }
+  },
+  {
+    "id": "account-primary-name-records",
+    "query": "query AccountPrimaryNameRecords($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          profile {\n            description\n            socials {\n              twitter {\n                httpUrl\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }

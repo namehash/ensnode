@@ -102,10 +102,18 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     hostSeparatePage: true,
   },
   {
-    id: "account-primary-name",
-    title: "Account Primary Name",
+    id: "account-primary-names",
+    title: "Account Primary Names",
+    description: "This query loads the primary names for an account on Ethereum and Base.",
+    category: "Accounts",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: true,
+  },
+  {
+    id: "account-primary-name-records",
+    title: "Account Primary Name Records",
     description:
-      "This query below loads a primary name for an account on Ethereum, including profile information.",
+      "This query loads the primary name for an account on Ethereum and forward-resolves its profile in the same request.",
     category: "Accounts",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
