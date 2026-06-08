@@ -129,6 +129,7 @@ _A Resolver represents a Resolver contract on-chain._
 - bridged: Registry — If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
 - contract: AccountId! — Contract metadata for this Resolver.
 - events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): ResolverEventsConnection — All Events associated with this Resolver.
+- extended: Boolean! — Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed.
 - id: ResolverId! — A unique reference to this Resolver.
 - permissions: Permissions — Permissions granted by this Resolver.
 - records(after: String, before: String, first: Int, last: Int): ResolverRecordsConnection — ResolverRecords issued by this Resolver.
