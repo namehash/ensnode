@@ -22,7 +22,7 @@ SELECT
 FROM "ensindexer_0".domains d
 JOIN parent p ON d.registry_id = p.subregistry_id
 WHERE d.canonical = true
-ORDER BY d.canonical_name
+ORDER BY d.__canonical_name_prefix ASC
 LIMIT 5;
 `,
     result: [

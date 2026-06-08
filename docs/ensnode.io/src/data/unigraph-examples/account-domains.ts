@@ -19,7 +19,7 @@ export const exampleAccountDomains = {
 FROM "ensindexer_0".domains d
 WHERE d.canonical = true
 AND d.owner_id = '0xffffffffff52d316b7bd028358089bc8066b8f80'
-ORDER BY d.canonical_name
+ORDER BY d.__canonical_name_prefix ASC
 LIMIT 10;`,
     result: [
       {
@@ -119,7 +119,7 @@ const accountDomains = await ensDb
       eq(ensIndexerSchema.domain.canonical, true),
     ),
   )
-  .orderBy(asc(ensIndexerSchema.domain.canonicalName))
+  .orderBy(asc(ensIndexerSchema.domain.__canonicalNamePrefix))
   .limit(limit);
 
 console.log(accountDomains);`,

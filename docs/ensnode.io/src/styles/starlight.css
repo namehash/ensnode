@@ -928,3 +928,14 @@ starlight-tabs ul[role="tablist"] {
   padding: 0.125rem 0.375rem;
   font-size: var(--sl-text-code-sm);
 }
+
+.static-example p a {
+  color: var(--sl-color-text-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: text-underline-offset 0.2s ease-in-out;
+
+  &:hover {
+    text-underline-offset: 2px;
+  }
+}

@@ -16,7 +16,7 @@ export const exampleDomainsFuzzySearchByName = {
     similarity(canonical_name, 'reverse') as name_similarity,
     id
 FROM "ensindexer_0".domains
-WHERE __canonicalNamePrefix % 'reverse'
+WHERE __canonical_name_prefix % 'reverse'
 AND canonical = true
 ORDER BY name_similarity DESC
 LIMIT 5;
@@ -52,7 +52,7 @@ LIMIT 5;
   sdk: {
     codeSnippet: `import { and, eq, sql } from "drizzle-orm";
 
-const q = "vitalik";
+const q = "reverse";
 const limit = 5;
 
 const domains = await ensDb
