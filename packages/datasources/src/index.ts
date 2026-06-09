@@ -4,6 +4,7 @@ export { Registry as RegistryABI } from "./abis/ensv2/Registry";
 export { L2ReverseRegistrar as L2ReverseRegistrarABI } from "./abis/root/L2ReverseRegistrar";
 export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
 export { UniversalResolverABI } from "./abis/shared/UniversalResolver";
+export { UpgradeableProxy as UpgradeableProxyABI } from "./abis/shared/UpgradeableProxy";
 export { ThreeDNSToken as ThreeDNSTokenABI } from "./abis/threedns/ThreeDNSToken";
 export * from "./identify-contracts";
 export { AnyRegistrarABI } from "./lib/AnyRegistrarABI";

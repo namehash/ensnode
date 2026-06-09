@@ -23,6 +23,7 @@ import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { UniversalResolverABI } from "./abis/shared/UniversalResolver";
+import { UpgradeableProxy } from "./abis/shared/UpgradeableProxy";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
@@ -54,6 +55,16 @@ export default {
       Resolver: {
         abi: ResolverABI,
         startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld on Mainnet
+      },
+
+      // The 3DNS protocol-wide Resolver, an EIP-1967 upgradeable proxy that resolves 3DNS TLDs
+      // (e.g. `.box`) on Mainnet via ENSIP-10 + CCIP-Read. It activated `IExtendedResolver` support
+      // via an `Upgraded` ~1.3h after assignment, so its first-visibility classification is stale
+      // `false`; we watch its `Upgraded` events to re-classify `Resolver.extended`. See issue #2275.
+      ThreeDNSResolver: {
+        abi: UpgradeableProxy,
+        address: "0xf97aac6c8dbaebcb54ff166d79706e3af7a813c8",
+        startBlock: 19128555, // proxy deploy + assignment as `box`'s resolver
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,

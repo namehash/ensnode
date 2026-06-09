@@ -58,6 +58,36 @@ export async function upsertResolver(
 }
 
 /**
+ * Re-classifies a Resolver's `supportsInterface`-derived metadata (currently `isExtended`) by
+ * re-running the eip-165 probe and overwriting the stored row.
+ *
+ * The initial `isExtended` classification in {@link upsertResolver} is computed once, at the block
+ * the Resolver is first seen. For EIP-1967 proxy Resolvers that activate `IExtendedResolver` via an
+ * `Upgraded` _after_ assignment (e.g. the 3DNS Resolver behind `.box`), that snapshot is stale
+ * `false` forever. Call this from the proxy's `Upgraded` handler so the probe re-runs against the
+ * new implementation (at the upgrade block) and `Resolver.extended` reflects current support.
+ *
+ * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`). Upserts so
+ * an `Upgraded` observed before the Resolver has emitted any other event still creates the row.
+ */
+export async function reclassifyResolverExtendedSupport(
+  context: IndexingEngineContext,
+  resolver: AccountId,
+): Promise<void> {
+  const id = makeResolverId(resolver);
+
+  const isExtended = await isExtendedResolver({
+    publicClient: context.client,
+    address: resolver.address,
+  });
+
+  await context.ensDb
+    .insert(ensIndexerSchema.resolver)
+    .values({ id, ...resolver, isExtended })
+    .onConflictDoUpdate({ isExtended });
+}
+
+/**
  * Ensures the Resolver + ResolverRecords entities exist for the given Resolver event, and returns
  * the ResolverRecords key for further per-record updates.
  */
