@@ -33,7 +33,7 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
- * Ensures a Resolver entity exists for `resolver`, updating its Supported Interfaces.
+ * Ensures a Resolver entity exists for `resolver`, deriving its Supported Interfaces on first insert.
  */
 export async function upsertResolver(context: IndexingEngineContext, resolver: AccountId) {
   const id = makeResolverId(resolver);
