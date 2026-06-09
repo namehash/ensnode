@@ -11,9 +11,9 @@ The ENS protocol defines two forms of resolution:
 - **Forward resolution** — given a name (`vitalik.eth`), resolve its records: avatar, bio, links, multichain addresses, and more.
 - **Reverse resolution** — given an address, resolve its **primary name** on a chain ([ENSIP-19](https://docs.ens.domains/ensip/19)).
 
-One of the most common patterns when building on ENS is to combine both: given an address, first perform **reverse resolution** to get the primary name, then perform **forward resolution** on that name to fetch its avatar, social handles, and other display details. Because this pattern is so common, the Omnigraph provides first-class support for it as **complete resolution** — reverse and forward in a single query with no extra round trip.
+One of the most common patterns when building on ENS is to combine both: given an address, first perform **reverse resolution** to get the primary name, then perform **forward resolution** on that name to fetch its avatar, social handles, and other display details. Because this pattern is so common, the Omnigraph provides support for it as **complete resolution** — reverse and forward in a single query with no extra round trip.
 
-Moreover, the Omnigraph handles the underlying protocol complexity for you — resolver contracts, coin-type encoding, inconsistent text-record keys, and avatar formats that may be URLs, IPFS paths, or NFT references — and returns clean, structured results for all three patterns.
+Moreover, the Omnigraph handles the underlying protocol complexity for you — resolver contracts, coin-type encoding, inconsistent text-record keys, and avatar formats that may be URLs, IPFS paths, or NFT references — and **returns clean, structured results** for all three patterns.
 
 ## Forward resolution — interpreted `profile`
 
@@ -45,9 +45,9 @@ The same predictable shape works well for AI agents — structured fields and `n
 
 Given an address, reverse resolution answers: _what name does this address want to be known by?_ If the address has not set a primary name, the result is `null` — safe to render like any other missing field.
 
-Primary names are per-chain. Use friendly chain names like `ETHEREUM` or `BASE` rather than raw coin types. `beautified` is ready for UI rendering; `interpreted` is the stable form for lookups and links. See [Beautified Name](/docs/reference/terminology#beautified-name).
+Primary names are stored linked to coin-types, but Omnigraph allows using friendly chain names like `ETHEREUM` or `BASE`. `beautified` is ready for UI rendering; `interpreted` is the stable form for lookups and links. See [Beautified Name](/docs/reference/terminology#beautified-name).
 
-<OmnigraphStaticExampleSet id="account-primary-name" hideBackToExamples />
+<OmnigraphStaticExampleSet id="account-primary-names" hideBackToExamples />
 
 ## Complete resolution
 

@@ -515,11 +515,16 @@ query AccountDomains(
   {
     id: "account-primary-names",
     query: `
-query AccountPrimaryName($address: Address!) {
+query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
-      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+      onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
+        chainName
+        name { interpreted beautified }
+      }
+
+      twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         chainName
         name { interpreted beautified }
       }

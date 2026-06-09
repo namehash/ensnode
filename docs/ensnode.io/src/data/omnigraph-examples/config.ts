@@ -107,7 +107,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     description: "This query loads the primary names for an account on Ethereum and Base.",
     category: "Accounts",
     namespace: ENSNamespaceIds.Mainnet,
-    hostSeparatePage: true,
+    hostSeparatePage: false,
   },
   {
     id: "account-primary-name-records",
