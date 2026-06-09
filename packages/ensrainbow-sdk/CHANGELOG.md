@@ -1,5 +1,14 @@
 # @ensnode/ensrainbow-sdk
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2186](https://github.com/namehash/ensnode/pull/2186) [`04388d2`](https://github.com/namehash/ensnode/commit/04388d2193f422a95898eb0ee23e7555397b3ab6) Thanks [@djstrong](https://github.com/djstrong)! - Labelhash verification for heal responses now runs in `ensrainbow` (server) instead of `@ensnode/ensrainbow-sdk` (client). Malformed rainbow records — where the stored label does not hash back to the requested `labelHash` — are rejected as `NotFound`.
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - enssdk@1.15.2
+
 ## 1.15.1
 
 ### Patch Changes
