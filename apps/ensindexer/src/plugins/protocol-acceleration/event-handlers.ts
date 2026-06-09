@@ -3,13 +3,13 @@ import attach_ENSv2RegistryHandlers from "./handlers/ENSv2Registry";
 import attach_ResolverHandlers from "./handlers/Resolver";
 import attach_StandaloneReverseRegistrarHandlers from "./handlers/StandaloneReverseRegistrar";
 import attach_ThreeDNSTokenHandlers from "./handlers/ThreeDNSToken";
-import attach_UpgradableProxyResolverHandlers from "./handlers/UpgradableProxyResolver";
+import attach_UpgradeableProxyResolverHandlers from "./handlers/UpgradeableProxyResolver";
 
 export default function () {
   attach_ENSv1RegistryHandlers();
   attach_ENSv2RegistryHandlers();
   attach_ResolverHandlers();
   attach_StandaloneReverseRegistrarHandlers();
-  attach_UpgradableProxyResolverHandlers();
+  attach_UpgradeableProxyResolverHandlers();
   attach_ThreeDNSTokenHandlers();
 }

@@ -8,11 +8,11 @@ import { handleResolverImplementationChange } from "@/lib/protocol-acceleration/
 const pluginName = PluginName.ProtocolAcceleration;
 
 /**
- * Handlers for any Resolvers that are UpgradableProxies, necessary for tracking implementation updates.
+ * Handlers for any Resolvers that are UpgradeableProxies, necessary for tracking implementation updates.
  */
 export default function () {
   addOnchainEventListener(
-    namespaceContract(pluginName, "UpgradableProxyResolver:Upgraded"),
+    namespaceContract(pluginName, "UpgradeableProxyResolver:Upgraded"),
     async ({ context, event }) => {
       const resolver = getThisAccountId(context, event);
       await handleResolverImplementationChange(context, resolver);

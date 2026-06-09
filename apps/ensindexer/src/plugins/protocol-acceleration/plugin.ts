@@ -103,12 +103,12 @@ export default createPlugin({
         },
 
         ////////////////////////////
-        // UpgradableProxyResolver
+        // UpgradeableProxyResolver
         ////////////////////////////
-        [namespaceContract(pluginName, "UpgradableProxyResolver")]: {
+        [namespaceContract(pluginName, "UpgradeableProxyResolver")]: {
           abi: UpgradeableProxyABI,
           chain: {
-            // the DotBoxL1Resolver is an UpgradableProxy
+            // the DotBoxL1Resolver is an UpgradeableProxy
             ...("DotBoxL1Resolver" in ensroot.contracts &&
               chainConfigForContract(
                 config.globalBlockrange,
