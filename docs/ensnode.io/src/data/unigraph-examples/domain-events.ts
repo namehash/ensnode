@@ -17,7 +17,7 @@ export const exampleDomainEvents = {
   e.sender,
   e.from,
   e.to,
-  e.selector
+  e.selector,
   e.topics,
   e.data,
   d.id as domain_id

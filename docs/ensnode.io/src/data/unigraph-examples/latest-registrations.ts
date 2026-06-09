@@ -13,8 +13,6 @@ export const exampleLatestRegistrations = {
   r.start,
   r.expiry,
   r.grace_period,
-  r.base,
-  r.premium,
   r.type as registration_type,
   d.owner_id,
   d.id as domain_id
@@ -94,8 +92,6 @@ const recentRegistrations = await ensDb
     start: ensIndexerSchema.registration.start,
     expiry: ensIndexerSchema.registration.expiry,
     gracePeriod: ensIndexerSchema.registration.gracePeriod,
-    base: ensIndexerSchema.registration.base,
-    premium: ensIndexerSchema.registration.premium,
     registrationType: ensIndexerSchema.registration.type,
     ownerId: ensIndexerSchema.domain.ownerId,
     domainId: ensIndexerSchema.domain.id,
