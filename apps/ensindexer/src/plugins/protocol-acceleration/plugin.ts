@@ -1,7 +1,6 @@
 import { createConfig } from "ponder";
 
 import {
-  type ContractConfig,
   DatasourceNames,
   RegistryABI,
   ResolverABI,
@@ -76,11 +75,6 @@ export default createPlugin({
       rrScroll,
     } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
 
-    // The 3DNS Resolver is defined only on the Mainnet ENS namespace's ENSRoot Datasource; access
-    // it loosely since ENSRoot's contract set is otherwise uniform across namespaces.
-    const threeDNSResolver = (ensroot.contracts as Record<string, ContractConfig | undefined>)
-      .ThreeDNSResolver;
-
     return createConfig({
       chains: chainsConnectionConfigForDatasources(
         config.namespace,
@@ -108,20 +102,24 @@ export default createPlugin({
           ),
         },
 
-        ///////////////////////////////////
-        // Upgradeable (proxy) Resolvers
-        ///////////////////////////////////
-        // Watch known EIP-1967 proxy Resolvers for `Upgraded` events to re-classify their
-        // `supportsInterface`-derived metadata (currently `Resolver.extended`), which is otherwise
-        // fixed at first-visibility and goes stale when a proxy activates an interface post-assignment.
-        // Scoped to the 3DNS Resolver (fixes `.box`); see issue #2275.
-        [namespaceContract(pluginName, "ThreeDNSResolver")]: {
+        ////////////////////
+        // UpgradeableProxy
+        ////////////////////
+        [namespaceContract(pluginName, "UpgradeableProxy")]: {
           abi: UpgradeableProxyABI,
-          chain: {
-            // only the Mainnet ENS namespace defines the 3DNS Resolver (resolves `.box`)
-            ...(threeDNSResolver &&
-              chainConfigForContract(config.globalBlockrange, ensroot.chain.id, threeDNSResolver)),
-          },
+          chain: getDatasourcesWithResolvers(config.namespace).reduce(
+            (memo, datasource) => ({
+              ...memo,
+              [datasource.chain.id.toString()]: constrainBlockrange(
+                config.globalBlockrange,
+                buildBlockNumberRange(
+                  datasource.contracts.Resolver.startBlock,
+                  datasource.contracts.Resolver.endBlock,
+                ),
+              ),
+            }),
+            {},
+          ),
         },
 
         /////////////////////

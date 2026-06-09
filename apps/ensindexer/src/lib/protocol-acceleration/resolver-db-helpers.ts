@@ -33,58 +33,54 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
- * Ensures a Resolver entity exists for `resolver`, capturing additional metadata.
- *
- * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`) to determine
- * `isExtended` support.
+ * Ensures a Resolver entity exists for `resolver`, updating its Supported Interfaces.
  */
-export async function upsertResolver(
-  context: IndexingEngineContext,
-  resolver: AccountId,
-): Promise<typeof ensIndexerSchema.resolver.$inferSelect> {
+export async function upsertResolver(context: IndexingEngineContext, resolver: AccountId) {
   const id = makeResolverId(resolver);
 
   const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
+
+  // if already exists, no-op
   if (existing) return existing;
 
-  const isExtended = await isExtendedResolver({
-    publicClient: context.client,
-    address: resolver.address,
-  });
+  // insert the new Resolver record
+  await context.ensDb.insert(ensIndexerSchema.resolver).values({ id, ...resolver });
 
-  const row = { id, ...resolver, isExtended };
-  await context.ensDb.insert(ensIndexerSchema.resolver).values(row).onConflictDoNothing();
-  return row;
+  // update its Supported Interfaces
+  await updateResolverInterfaces(context, resolver);
 }
 
 /**
- * Re-classifies a Resolver's `supportsInterface`-derived metadata (currently `isExtended`) by
- * re-running the eip-165 probe and overwriting the stored row.
- *
- * The initial `isExtended` classification in {@link upsertResolver} is computed once, at the block
- * the Resolver is first seen. For EIP-1967 proxy Resolvers that activate `IExtendedResolver` via an
- * `Upgraded` _after_ assignment (e.g. the 3DNS Resolver behind `.box`), that snapshot is stale
- * `false` forever. Call this from the proxy's `Upgraded` handler so the probe re-runs against the
- * new implementation (at the upgrade block) and `Resolver.extended` reflects current support.
- *
- * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`). Upserts so
- * an `Upgraded` observed before the Resolver has emitted any other event still creates the row.
+ * Updates a Resolver's Supported Interfaces.
  */
-export async function reclassifyResolverExtendedSupport(
-  context: IndexingEngineContext,
-  resolver: AccountId,
-): Promise<void> {
+async function updateResolverInterfaces(context: IndexingEngineContext, resolver: AccountId) {
   const id = makeResolverId(resolver);
 
   const isExtended = await isExtendedResolver({
-    publicClient: context.client,
     address: resolver.address,
+    publicClient: context.client,
   });
 
-  await context.ensDb
-    .insert(ensIndexerSchema.resolver)
-    .values({ id, ...resolver, isExtended })
-    .onConflictDoUpdate({ isExtended });
+  await context.ensDb.update(ensIndexerSchema.resolver, { id }).set({ isExtended });
+}
+
+/**
+ * Handles a Resolver's implementation changing by updating its Supported Interfaces, if the Resolver
+ * is already indexed.
+ *
+ * @dev intentionally avoids upserting a Resolver entity for contracts not already an indexed Resolver.
+ * If a contract were to emit Upgraded and then emit a Resolver event, `upsertResolver` above would
+ * ensure that the Supported Interfaces are correctly indexed.
+ */
+export async function handleResolverImplementationChange(
+  context: IndexingEngineContext,
+  resolver: AccountId,
+) {
+  const id = makeResolverId(resolver);
+  const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
+  if (!existing) return;
+
+  await updateResolverInterfaces(context, resolver);
 }
 
 /**
