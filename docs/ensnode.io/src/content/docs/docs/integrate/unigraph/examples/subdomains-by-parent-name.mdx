@@ -10,10 +10,6 @@ import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import { exampleSubdomainsByParentName } from "@data/unigraph-examples/subdomains-by-parent-name";
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
-
 Get a list of subdomains for the `eth` domain, including their Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample

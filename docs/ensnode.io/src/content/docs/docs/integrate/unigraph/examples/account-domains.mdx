@@ -10,10 +10,6 @@ import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import { exampleAccountDomains } from "@data/unigraph-examples/account-domains";
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
-
 Fetch the Domains owned by an address (across both ENSv1 and ENSv2), including each Domain's `type` (`ENSv1Domain` vs `ENSv2Domain`). See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample

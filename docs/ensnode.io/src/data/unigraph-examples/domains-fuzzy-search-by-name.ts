@@ -1,7 +1,7 @@
 import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
 
-const resultNote = outputSource("V2 Sepolia");
+const resultNote = outputSource("Alpha");
 
 /**
  * Example query for fetching Domains by a fuzzy search on their canonical name.
@@ -13,46 +13,62 @@ export const exampleDomainsFuzzySearchByName = {
     canonical_name,
     canonical_node,
     owner_id,
-    similarity(canonical_name, 'reverse') as name_similarity,
+    similarity(canonical_name, 'vitalik') as name_similarity,
     id
 FROM "ensindexer_0".domains
-WHERE __canonical_name_prefix % 'reverse'
+WHERE __canonical_name_prefix % 'vitalik'
 AND canonical = true
-ORDER BY name_similarity DESC
+ORDER BY name_similarity DESC, LENGTH(canonical_name) ASC
 LIMIT 5;
 `,
     result: [
       {
         type: "ENSv1Domain",
-        canonical_name: "reverse",
-        canonical_node: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-        name_similarity: 1,
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "reverse",
-        canonical_node: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-        name_similarity: 1,
-        id: "11155111-0x835f0b284e78cd3f358bcf6cba3b53809f09b79e-100753657518907091865523951670693454610893379027273088370152078482136467767296",
+        canonical_name: "vitalik.id",
+        canonical_node: "0xaf3232eb15e694ef5b9107cd2659c9ea75e7c74b59db776ce6be7df6d1131287",
+        owner_id: "0x62f4706c61a7b3bf6db74faff7e5e48ac1e004a5",
+        name_similarity: 0.72727275,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xaf3232eb15e694ef5b9107cd2659c9ea75e7c74b59db776ce6be7df6d1131287",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "addr.reverse",
-        canonical_node: "0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2",
-        owner_id: "0x26e5e80e8f36607ef401443fb34eea363c86e8f7",
-        name_similarity: 0.61538464,
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2",
+        canonical_name: "vitalik.eth",
+        canonical_node: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+        owner_id: "0x220866b1a2219f40e72f5c628b65d54268ca3a9d",
+        name_similarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "🚀vitalik.eth",
+        canonical_node: "0x2eaf5dba5efa24eb33e59cfeb1ada63bce28966d82896f8358a5b7e0cd33c0fb",
+        owner_id: "0x7dcb9d6e9ecfb03a275dc4864c812dd09a1768a2",
+        name_similarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x2eaf5dba5efa24eb33e59cfeb1ada63bce28966d82896f8358a5b7e0cd33c0fb",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "❤vitalik.eth",
+        canonical_node: "0xedad39bf146ed24b42e93f8579ae318df3bc925a38d66aef6af87ae91cb1b064",
+        owner_id: "0x8cd59e8486a0d57bd95ce467f561f0d13293a0be",
+        name_similarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xedad39bf146ed24b42e93f8579ae318df3bc925a38d66aef6af87ae91cb1b064",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "vitalik😂.eth",
+        canonical_node: "0x4771060c6bcc732384b8a5969ef56d1b085d47f93bb67af828a1bfcacf00c79a",
+        owner_id: "0x4c54c8c65789ed2d77b948f9aa9482daa6b4a582",
+        name_similarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x4771060c6bcc732384b8a5969ef56d1b085d47f93bb67af828a1bfcacf00c79a",
       },
     ],
     resultNote,
   },
   sdk: {
-    codeSnippet: `import { and, eq, sql } from "drizzle-orm";
+    codeSnippet: `import { and, eq, sql, asc, desc } from "drizzle-orm";
 
-const q = "reverse";
+const q = "vitalik";
 const limit = 5;
 
 const domains = await ensDb
@@ -73,34 +89,53 @@ const domains = await ensDb
         eq(ensIndexerSchema.domain.canonical, true),
       ),
     )
-    .orderBy(sql\`name_similarity DESC\`)
+    .orderBy(
+      desc(sql\`name_similarity\`),
+      asc(sql\`LENGTH(\${ensIndexerSchema.domain.canonicalName})\`),
+    )
     .limit(limit);
 
 console.log(domains);`,
     result: [
       {
         type: "ENSv1Domain",
-        canonicalName: "reverse",
-        canonicalNode: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-        nameSimilarity: 1,
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "reverse",
-        canonicalNode: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-        nameSimilarity: 1,
-        id: "11155111-0x835f0b284e78cd3f358bcf6cba3b53809f09b79e-100753657518907091865523951670693454610893379027273088370152078482136467767296",
+        canonicalName: "vitalik.id",
+        canonicalNode: "0xaf3232eb15e694ef5b9107cd2659c9ea75e7c74b59db776ce6be7df6d1131287",
+        ownerId: "0x62f4706c61a7b3bf6db74faff7e5e48ac1e004a5",
+        nameSimilarity: 0.72727275,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xaf3232eb15e694ef5b9107cd2659c9ea75e7c74b59db776ce6be7df6d1131287",
       },
       {
         type: "ENSv1Domain",
-        canonicalName: "addr.reverse",
-        canonicalNode: "0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2",
-        ownerId: "0x26e5e80e8f36607ef401443fb34eea363c86e8f7",
-        nameSimilarity: 0.61538464,
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2",
+        canonicalName: "vitalik.eth",
+        canonicalNode: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+        ownerId: "0x220866b1a2219f40e72f5c628b65d54268ca3a9d",
+        nameSimilarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "🚀vitalik.eth",
+        canonicalNode: "0x2eaf5dba5efa24eb33e59cfeb1ada63bce28966d82896f8358a5b7e0cd33c0fb",
+        ownerId: "0x7dcb9d6e9ecfb03a275dc4864c812dd09a1768a2",
+        nameSimilarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x2eaf5dba5efa24eb33e59cfeb1ada63bce28966d82896f8358a5b7e0cd33c0fb",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "❤vitalik.eth",
+        canonicalNode: "0xedad39bf146ed24b42e93f8579ae318df3bc925a38d66aef6af87ae91cb1b064",
+        ownerId: "0x8cd59e8486a0d57bd95ce467f561f0d13293a0be",
+        nameSimilarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xedad39bf146ed24b42e93f8579ae318df3bc925a38d66aef6af87ae91cb1b064",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "vitalik😂.eth",
+        canonicalNode: "0x4771060c6bcc732384b8a5969ef56d1b085d47f93bb67af828a1bfcacf00c79a",
+        ownerId: "0x4c54c8c65789ed2d77b948f9aa9482daa6b4a582",
+        nameSimilarity: 0.6666667,
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x4771060c6bcc732384b8a5969ef56d1b085d47f93bb67af828a1bfcacf00c79a",
       },
     ],
     resultNote,

@@ -10,10 +10,6 @@ import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import { exampleLatestRegistrations } from "@data/unigraph-examples/latest-registrations";
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
-
 Fetch the latest registrations and their associated Domains. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample

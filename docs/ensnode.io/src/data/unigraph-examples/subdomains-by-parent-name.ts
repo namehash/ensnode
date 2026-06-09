@@ -1,7 +1,7 @@
 import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
 
-const resultNote = outputSource("V2 Sepolia");
+const resultNote = outputSource("Alpha");
 
 /**
  * Example query for fetching subdomains by their canonical name of the parent domain.
@@ -11,50 +11,101 @@ export const exampleSubdomainsByParentName = {
     codeSnippet: `WITH parent AS (
   SELECT subregistry_id
   FROM "ensindexer_0".domains
-  WHERE canonical_name = 'eth'
+  WHERE canonical_name = 'ens.eth'
   AND canonical = true
 )
 SELECT
   d.type,
   d.canonical_name,
   d.canonical_node,
-  d.id
+  d.owner_id,
+  d.id as domain_id
 FROM "ensindexer_0".domains d
 JOIN parent p ON d.registry_id = p.subregistry_id
 WHERE d.canonical = true
 ORDER BY d.__canonical_name_prefix ASC
-LIMIT 5;
+LIMIT 10;
 `,
     result: [
       {
         type: "ENSv1Domain",
-        canonical_name: "[52602a50858115661619fb28cf543ee766c182e0be6743c72d5bd674b3d12686].eth",
-        canonical_node: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
+        canonical_name: "app.ens.eth",
+        canonical_node: "0x50a74dcf107973068dfc00db69ecf98b49d52f5361cb4db5feb740fc9f4f74d1",
+        owner_id: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x50a74dcf107973068dfc00db69ecf98b49d52f5361cb4db5feb740fc9f4f74d1",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "[d90db363b8bc1371f7d738d264ff7294bfc5636f907c467adf68321a3c6d8188].eth",
-        canonical_node: "0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "katrenpadu.eth",
-        canonical_node: "0xf8ae81127bcd7ff99828b3dbd982a943d6dd961ee3f1a6ca707aa0eea913328e",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-112554048520345018269255786667391470421317806528110367240542760381540064034816",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "roppp.eth",
-        canonical_node: "0x39095c3dfb872d6441c95547f88591e7fb97014eef30cabe3df12a9b2a64dbe8",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-88275407146030613359050872632052369891139576190404928761656352489271755538432",
+        canonical_name: "attestations.ens.eth",
+        canonical_node: "0x9e5c7a2f2ab8b565c6d2c4851a73decb53d1f6a23c97a2b5b66f21d8ace1bbd5",
+        owner_id: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x9e5c7a2f2ab8b565c6d2c4851a73decb53d1f6a23c97a2b5b66f21d8ace1bbd5",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "sfmpfv44d0mig.eth",
-        canonical_node: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
+        canonical_name: "coldwallet.ens.eth",
+        canonical_node: "0xc867d2bd24b8a88c7d5d416dfab28fec6858b5a86f3a1c94faeab450c34023f6",
+        owner_id: "0x690f0581ececcf8389c223170778cd9d029606f2",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xc867d2bd24b8a88c7d5d416dfab28fec6858b5a86f3a1c94faeab450c34023f6",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "controller.ens.eth",
+        canonical_node: "0xceecb75ad42a60ea38b777bf842c14af3303219e2722a192ddeac19faa7fbb1c",
+        owner_id: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xceecb75ad42a60ea38b777bf842c14af3303219e2722a192ddeac19faa7fbb1c",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "design.ens.eth",
+        canonical_node: "0xe55e79685b24c7b16542f3c613a8899986ace5e2e08b3c9444ce70d81d49bcd2",
+        owner_id: "0x690f0581ececcf8389c223170778cd9d029606f2",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xe55e79685b24c7b16542f3c613a8899986ace5e2e08b3c9444ce70d81d49bcd2",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "dnsname.ens.eth",
+        canonical_node: "0x250712f87e86832e8bed775a563920aed01b926d9d21950e363a042af40ad2b5",
+        owner_id: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x250712f87e86832e8bed775a563920aed01b926d9d21950e363a042af40ad2b5",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "dnsregistrar.ens.eth",
+        canonical_node: "0x3124e45545d17d9fda8e24a7a09f111a0802ea26ce6b1f14c75c832442deb65d",
+        owner_id: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x3124e45545d17d9fda8e24a7a09f111a0802ea26ce6b1f14c75c832442deb65d",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "dnssec.ens.eth",
+        canonical_node: "0x287e74fe5b4463a7e8b8d4c4cccae51a8ab397df053bc829c6a4e26963c7ce2b",
+        owner_id: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x287e74fe5b4463a7e8b8d4c4cccae51a8ab397df053bc829c6a4e26963c7ce2b",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "docs.ens.eth",
+        canonical_node: "0x08625bbdd59ae52e6a0e3f8f2bd6213e60ad35276510c83d117c7a2a68bc65c0",
+        owner_id: "0xee9eeaab0bb7d9b969d701f6f8212609edea252e",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x08625bbdd59ae52e6a0e3f8f2bd6213e60ad35276510c83d117c7a2a68bc65c0",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "ecosystem.ens.eth",
+        canonical_node: "0x44ea949951a1e21fe141e9979ef9af0cef3df0ac50004c19309df97fef6c9023",
+        owner_id: "0x690f0581ececcf8389c223170778cd9d029606f2",
+        domain_id:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x44ea949951a1e21fe141e9979ef9af0cef3df0ac50004c19309df97fef6c9023",
       },
     ],
     resultNote,
@@ -62,8 +113,8 @@ LIMIT 5;
   sdk: {
     codeSnippet: `import { and, eq, inArray, asc } from "drizzle-orm";
 
-const name = "eth";
-const limit = 5;
+const name = "ens.eth";
+const limit = 10;
 
 // Two-step:
 // 1) find parent domains
@@ -84,7 +135,8 @@ if (parentDomains.length > 0) {
       type: ensIndexerSchema.domain.type,
       canonicalName: ensIndexerSchema.domain.canonicalName,
       canonicalNode: ensIndexerSchema.domain.canonicalNode,
-      id: ensIndexerSchema.domain.id,
+      ownerId: ensIndexerSchema.domain.ownerId,
+      domainId: ensIndexerSchema.domain.id,
     })
     .from(ensIndexerSchema.domain)
     .where(
@@ -104,33 +156,83 @@ if (parentDomains.length > 0) {
     result: [
       {
         type: "ENSv1Domain",
-        canonicalName: "[52602a50858115661619fb28cf543ee766c182e0be6743c72d5bd674b3d12686].eth",
-        canonicalNode: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
+        canonicalName: "app.ens.eth",
+        canonicalNode: "0x50a74dcf107973068dfc00db69ecf98b49d52f5361cb4db5feb740fc9f4f74d1",
+        ownerId: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x50a74dcf107973068dfc00db69ecf98b49d52f5361cb4db5feb740fc9f4f74d1",
       },
       {
         type: "ENSv1Domain",
-        canonicalName: "[d90db363b8bc1371f7d738d264ff7294bfc5636f907c467adf68321a3c6d8188].eth",
-        canonicalNode: "0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
+        canonicalName: "attestations.ens.eth",
+        canonicalNode: "0x9e5c7a2f2ab8b565c6d2c4851a73decb53d1f6a23c97a2b5b66f21d8ace1bbd5",
+        ownerId: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x9e5c7a2f2ab8b565c6d2c4851a73decb53d1f6a23c97a2b5b66f21d8ace1bbd5",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "katrenpadu.eth",
-        canonicalNode: "0xf8ae81127bcd7ff99828b3dbd982a943d6dd961ee3f1a6ca707aa0eea913328e",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-112554048520345018269255786667391470421317806528110367240542760381540064034816",
+        type: "ENSv1Domain",
+        canonicalName: "coldwallet.ens.eth",
+        canonicalNode: "0xc867d2bd24b8a88c7d5d416dfab28fec6858b5a86f3a1c94faeab450c34023f6",
+        ownerId: "0x690f0581ececcf8389c223170778cd9d029606f2",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xc867d2bd24b8a88c7d5d416dfab28fec6858b5a86f3a1c94faeab450c34023f6",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "roppp.eth",
-        canonicalNode: "0x39095c3dfb872d6441c95547f88591e7fb97014eef30cabe3df12a9b2a64dbe8",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-88275407146030613359050872632052369891139576190404928761656352489271755538432",
+        type: "ENSv1Domain",
+        canonicalName: "controller.ens.eth",
+        canonicalNode: "0xceecb75ad42a60ea38b777bf842c14af3303219e2722a192ddeac19faa7fbb1c",
+        ownerId: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xceecb75ad42a60ea38b777bf842c14af3303219e2722a192ddeac19faa7fbb1c",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "sfmpfv44d0mig.eth",
-        canonicalNode: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480",
+        type: "ENSv1Domain",
+        canonicalName: "design.ens.eth",
+        canonicalNode: "0xe55e79685b24c7b16542f3c613a8899986ace5e2e08b3c9444ce70d81d49bcd2",
+        ownerId: "0x690f0581ececcf8389c223170778cd9d029606f2",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xe55e79685b24c7b16542f3c613a8899986ace5e2e08b3c9444ce70d81d49bcd2",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "dnsname.ens.eth",
+        canonicalNode: "0x250712f87e86832e8bed775a563920aed01b926d9d21950e363a042af40ad2b5",
+        ownerId: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x250712f87e86832e8bed775a563920aed01b926d9d21950e363a042af40ad2b5",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "dnsregistrar.ens.eth",
+        canonicalNode: "0x3124e45545d17d9fda8e24a7a09f111a0802ea26ce6b1f14c75c832442deb65d",
+        ownerId: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x3124e45545d17d9fda8e24a7a09f111a0802ea26ce6b1f14c75c832442deb65d",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "dnssec.ens.eth",
+        canonicalNode: "0x287e74fe5b4463a7e8b8d4c4cccae51a8ab397df053bc829c6a4e26963c7ce2b",
+        ownerId: "0xb6e040c9ecaae172a89bd561c5f73e1c48d28cd9",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x287e74fe5b4463a7e8b8d4c4cccae51a8ab397df053bc829c6a4e26963c7ce2b",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "docs.ens.eth",
+        canonicalNode: "0x08625bbdd59ae52e6a0e3f8f2bd6213e60ad35276510c83d117c7a2a68bc65c0",
+        ownerId: "0xee9eeaab0bb7d9b969d701f6f8212609edea252e",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x08625bbdd59ae52e6a0e3f8f2bd6213e60ad35276510c83d117c7a2a68bc65c0",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "ecosystem.ens.eth",
+        canonicalNode: "0x44ea949951a1e21fe141e9979ef9af0cef3df0ac50004c19309df97fef6c9023",
+        ownerId: "0x690f0581ececcf8389c223170778cd9d029606f2",
+        domainId:
+          "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x44ea949951a1e21fe141e9979ef9af0cef3df0ac50004c19309df97fef6c9023",
       },
     ],
     resultNote,

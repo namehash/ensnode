@@ -10,10 +10,6 @@ import EnsNodeSchemaIntro from "@components/molecules/EnsNodeSchemaIntro.astro";
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import { exampleIndexingStatus } from "@data/unigraph-examples/indexing-status";
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
-
 Read the indexing status snapshot for an ENSDb Writer instance from the shared `ensnode.metadata` table. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample

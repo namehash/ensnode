@@ -120,6 +120,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/unigraph",
         },
         {
+          label: "Core Concepts",
+          link: "/docs/integrate/unigraph/concepts",
+        },
+        {
           label: "Examples",
           collapsed: true,
           items: [

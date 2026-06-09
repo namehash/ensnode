@@ -10,14 +10,12 @@ import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import { exampleDomainEvents } from "@data/unigraph-examples/domain-events";
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
+Fetch recent events for a Domain by its canonical name. This example joins the `events`, `domain_events`, and `domains` tables to retrieve domain events associated with the `vitalik.eth` name. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
-Fetch recent events for a Domain by its canonical name. This example joins the `events`, `domain_events`, and `domains` tables to retrieve domain events associated with the `wrapnation.eth` name. See [Connect](/docs/integrate/unigraph/examples) for setup.
+:::caution[Raw event data]
+The `events` table contains low-level onchain event data, which may require additional processing to interpret. For example, the `data` field is a JSON blob containing event-specific information that may need to be parsed based on the event type (see `selector` field) to extract meaningful details about the event.
 
-:::note[Canonical fields]
-Canonical fields are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`. In SQL, these columns are `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth`; in `ensdb-sdk`, the corresponding fields are `canonicalName`, `canonicalPath`, `canonicalNode`, and `canonicalDepth`.
+In the future, the ENS Unigraph may include data referencing higher-level event types (e.g., `DomainRegistered`, `DomainTransferred`, etc.) to simplify querying for common events without needing to parse raw event data. For now, use `selector`, `topics`, and `data` fields in the `events` table to filter and interpret events based on your app's needs.
 :::
 
 <UnigraphStaticExample

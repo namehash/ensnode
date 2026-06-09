@@ -1,7 +1,7 @@
 import { outputSource } from "./utils";
 import type { QueryExample } from "./types";
 
-const resultNote = outputSource("V2 Sepolia");
+const resultNote = outputSource("Alpha");
 
 /**
  * Example query for fetching Domains by their owner's address,
@@ -18,82 +18,80 @@ export const exampleAccountDomains = {
   d.owner_id
 FROM "ensindexer_0".domains d
 WHERE d.canonical = true
-AND d.owner_id = '0xffffffffff52d316b7bd028358089bc8066b8f80'
+AND d.owner_id = '0x179a862703a4adfb29896552df9e307980d19285'
 ORDER BY d.__canonical_name_prefix ASC
 LIMIT 10;`,
     result: [
       {
         type: "ENSv1Domain",
-        canonical_name:
-          "[3ad05e2a5922916840bc1e5e6039f00b27cbabf8d0428abce062aa2011307374].addr.reverse",
-        canonical_node: "0xd3947f90d04d7f41f973f09ad7dbdb34cb7463359369e6cf1663bbf928d66e53",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xd3947f90d04d7f41f973f09ad7dbdb34cb7463359369e6cf1663bbf928d66e53",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-      },
-      {
-        type: "ENSv1Domain",
-        canonical_name: "[52602a50858115661619fb28cf543ee766c182e0be6743c72d5bd674b3d12686].eth",
-        canonical_node: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonical_name: "179a862703a4adfb29896552df9e307980d19285.addr.reverse",
+        canonical_node: "0xf7bb5852f23c4f92e78491e28d1e5897718c1eefb6c6fdd2224fddcdd09214de",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xf7bb5852f23c4f92e78491e28d1e5897718c1eefb6c6fdd2224fddcdd09214de",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
         canonical_name:
-          "[8268685e13ae6bbfa54901f2954f9fcf80839ffa102fe7146b930623ce9bd7f0].addr.reverse",
-        canonical_node: "0x21c356e778799bfddf59a5683c04f6b08710d7c198fef466cc697563b2210785",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x21c356e778799bfddf59a5683c04f6b08710d7c198fef466cc697563b2210785",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+          "[57af2a1afc4eeb2d190972d23b65ffbd77a900d7b5ba894214aec651eb8cdb99].mrgreg.eth",
+        canonical_node: "0x2c4c3a3e03f46fd80907cc2a9e7da72e7fbd098f85c59321a7fb7174a289bb85",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x2c4c3a3e03f46fd80907cc2a9e7da72e7fbd098f85c59321a7fb7174a289bb85",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "[d90db363b8bc1371f7d738d264ff7294bfc5636f907c467adf68321a3c6d8188].eth",
-        canonical_node: "0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonical_name: "89bd55f729c552da9e88102f5044bb0a770fe512.addr.reverse",
+        canonical_node: "0xdf1447a9b5d1728977edc04658a38c770097a3b66291d9b5cf913f0892aecf0c",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xdf1447a9b5d1728977edc04658a38c770097a3b66291d9b5cf913f0892aecf0c",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
-        canonical_name:
-          "[d99fc3d8237200c7122431276a337421cf793f51276873df5a54cc482fdbe685].addr.reverse",
-        canonical_node: "0x4fc87044c0adc4a0c996b9dafe3a4889e72fe0745fc76f18151b81ed73582218",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x4fc87044c0adc4a0c996b9dafe3a4889e72fe0745fc76f18151b81ed73582218",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "eth",
-        canonical_node: "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
-        id: "11155111-0x835f0b284e78cd3f358bcf6cba3b53809f09b79e-35894389512221139346028120028875095598761990588366713962827482865183915769856",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-      },
-      {
-        type: "ENSv2Domain",
-        canonical_name: "reverse",
-        canonical_node: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        id: "11155111-0x835f0b284e78cd3f358bcf6cba3b53809f09b79e-100753657518907091865523951670693454610893379027273088370152078482136467767296",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonical_name: "breadbygreg.eth",
+        canonical_node: "0x0e09603eaf9854179bf6b83db80dc5f9bab46c629ea87e4dcabf9a43eab0cf97",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x0e09603eaf9854179bf6b83db80dc5f9bab46c629ea87e4dcabf9a43eab0cf97",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
-        canonical_name: "reverse",
-        canonical_node: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonical_name: "cae0d70e3601d45ca70c20d26f8b440b27d89a1d.addr.reverse",
+        canonical_node: "0x412ccdc26a20bfe0e97f37026a2bfdd9e92dc470bde4cf810ffd77a4069a2bed",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x412ccdc26a20bfe0e97f37026a2bfdd9e92dc470bde4cf810ffd77a4069a2bed",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
-        type: "ENSv2Domain",
-        canonical_name: "sfmpfv44d0mig.eth",
-        canonical_node: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        type: "ENSv1Domain",
+        canonical_name: "contract.gtest.eth",
+        canonical_node: "0x3d831d932784bc862d38e8e8872f06209e41030680f8fcf7c97be30494346654",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x3d831d932784bc862d38e8e8872f06209e41030680f8fcf7c97be30494346654",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
-        type: "ENSv2Domain",
-        canonical_name: "sfmpfvtoicv2ok.eth",
-        canonical_node: "0x7d0c27336cf9d51c3fc8f29ef4ef69df9cd4a8ec983e3e17d457a8de6013f3c5",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-49509597771493908415463190501045916291230588437784211605615168713991762477056",
-        owner_id: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        type: "ENSv1Domain",
+        canonical_name: "devtools.eth",
+        canonical_node: "0xfb17155dd713fe4143c2011b392167ea09f6958c5f1b14ffa7eacf1a21badfab",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xfb17155dd713fe4143c2011b392167ea09f6958c5f1b14ffa7eacf1a21badfab",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "ens.gregskril.eth",
+        canonical_node: "0x4fedc4305d84a415763cffb1b55a88dcea3dfde44b8787a6bd98223aac01b58e",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x4fedc4305d84a415763cffb1b55a88dcea3dfde44b8787a6bd98223aac01b58e",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "enswidgets.eth",
+        canonical_node: "0x2aff6e58dd1a29ed067afd547694b14b9389bda8285c0fc5f944c64b78ff7858",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x2aff6e58dd1a29ed067afd547694b14b9389bda8285c0fc5f944c64b78ff7858",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
+      },
+      {
+        type: "ENSv1Domain",
+        canonical_name: "ethtoolkit.eth",
+        canonical_node: "0x3c78cc3bb454bb4cd8f6c3dc39a567d29c4b812207a3935bd1fddcc924f3fcd4",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x3c78cc3bb454bb4cd8f6c3dc39a567d29c4b812207a3935bd1fddcc924f3fcd4",
+        owner_id: "0x179a862703a4adfb29896552df9e307980d19285",
       },
     ],
     resultNote,
@@ -101,7 +99,7 @@ LIMIT 10;`,
   sdk: {
     codeSnippet: `import { and, eq, asc } from "drizzle-orm";
 
-const owner = "0xffffffffff52d316b7bd028358089bc8066b8f80";
+const owner = "0x179a862703a4adfb29896552df9e307980d19285";
 const limit = 10;
   
 const accountDomains = await ensDb
@@ -126,76 +124,74 @@ console.log(accountDomains);`,
     result: [
       {
         type: "ENSv1Domain",
-        canonicalName:
-          "[3ad05e2a5922916840bc1e5e6039f00b27cbabf8d0428abce062aa2011307374].addr.reverse",
-        canonicalNode: "0xd3947f90d04d7f41f973f09ad7dbdb34cb7463359369e6cf1663bbf928d66e53",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xd3947f90d04d7f41f973f09ad7dbdb34cb7463359369e6cf1663bbf928d66e53",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-      },
-      {
-        type: "ENSv1Domain",
-        canonicalName: "[52602a50858115661619fb28cf543ee766c182e0be6743c72d5bd674b3d12686].eth",
-        canonicalNode: "0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xe91ce3506cd47457c2b3f04c2736875ca1d17ed74bf1a328a7e64cca5ae8c94b",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonicalName: "179a862703a4adfb29896552df9e307980d19285.addr.reverse",
+        canonicalNode: "0xf7bb5852f23c4f92e78491e28d1e5897718c1eefb6c6fdd2224fddcdd09214de",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xf7bb5852f23c4f92e78491e28d1e5897718c1eefb6c6fdd2224fddcdd09214de",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
         canonicalName:
-          "[8268685e13ae6bbfa54901f2954f9fcf80839ffa102fe7146b930623ce9bd7f0].addr.reverse",
-        canonicalNode: "0x21c356e778799bfddf59a5683c04f6b08710d7c198fef466cc697563b2210785",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x21c356e778799bfddf59a5683c04f6b08710d7c198fef466cc697563b2210785",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+          "[57af2a1afc4eeb2d190972d23b65ffbd77a900d7b5ba894214aec651eb8cdb99].mrgreg.eth",
+        canonicalNode: "0x2c4c3a3e03f46fd80907cc2a9e7da72e7fbd098f85c59321a7fb7174a289bb85",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x2c4c3a3e03f46fd80907cc2a9e7da72e7fbd098f85c59321a7fb7174a289bb85",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
-        canonicalName: "[d90db363b8bc1371f7d738d264ff7294bfc5636f907c467adf68321a3c6d8188].eth",
-        canonicalNode: "0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x08c0f01c419a8971af6b3eefe2a8bba1556cccf1163df60b1cdbcab632c8ab48",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonicalName: "89bd55f729c552da9e88102f5044bb0a770fe512.addr.reverse",
+        canonicalNode: "0xdf1447a9b5d1728977edc04658a38c770097a3b66291d9b5cf913f0892aecf0c",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xdf1447a9b5d1728977edc04658a38c770097a3b66291d9b5cf913f0892aecf0c",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
-        canonicalName:
-          "[d99fc3d8237200c7122431276a337421cf793f51276873df5a54cc482fdbe685].addr.reverse",
-        canonicalNode: "0x4fc87044c0adc4a0c996b9dafe3a4889e72fe0745fc76f18151b81ed73582218",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0x4fc87044c0adc4a0c996b9dafe3a4889e72fe0745fc76f18151b81ed73582218",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "eth",
-        canonicalNode: "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
-        id: "11155111-0x835f0b284e78cd3f358bcf6cba3b53809f09b79e-35894389512221139346028120028875095598761990588366713962827482865183915769856",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
-      },
-      {
-        type: "ENSv2Domain",
-        canonicalName: "reverse",
-        canonicalNode: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        id: "11155111-0x835f0b284e78cd3f358bcf6cba3b53809f09b79e-100753657518907091865523951670693454610893379027273088370152078482136467767296",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonicalName: "breadbygreg.eth",
+        canonicalNode: "0x0e09603eaf9854179bf6b83db80dc5f9bab46c629ea87e4dcabf9a43eab0cf97",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x0e09603eaf9854179bf6b83db80dc5f9bab46c629ea87e4dcabf9a43eab0cf97",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
         type: "ENSv1Domain",
-        canonicalName: "reverse",
-        canonicalNode: "0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        id: "11155111-0xb6fb46e1458915dd828633d91e1df8e4c3f2d4dd-0xa097f6721ce401e757d1223a763fef49b8b5f90bb18567ddb86fd205dff71d34",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        canonicalName: "cae0d70e3601d45ca70c20d26f8b440b27d89a1d.addr.reverse",
+        canonicalNode: "0x412ccdc26a20bfe0e97f37026a2bfdd9e92dc470bde4cf810ffd77a4069a2bed",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x412ccdc26a20bfe0e97f37026a2bfdd9e92dc470bde4cf810ffd77a4069a2bed",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "sfmpfv44d0mig.eth",
-        canonicalNode: "0x9b365136312d7ee6e232e3c98e459bc8667ec818c47fbbc55bb5e23d0a21e8cc",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-30078755955643454526763071980293195785165410039216352470119925106082295316480",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        type: "ENSv1Domain",
+        canonicalName: "contract.gtest.eth",
+        canonicalNode: "0x3d831d932784bc862d38e8e8872f06209e41030680f8fcf7c97be30494346654",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x3d831d932784bc862d38e8e8872f06209e41030680f8fcf7c97be30494346654",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
       {
-        type: "ENSv2Domain",
-        canonicalName: "sfmpfvtoicv2ok.eth",
-        canonicalNode: "0x7d0c27336cf9d51c3fc8f29ef4ef69df9cd4a8ec983e3e17d457a8de6013f3c5",
-        id: "11155111-0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1-49509597771493908415463190501045916291230588437784211605615168713991762477056",
-        ownerId: "0xffffffffff52d316b7bd028358089bc8066b8f80",
+        type: "ENSv1Domain",
+        canonicalName: "devtools.eth",
+        canonicalNode: "0xfb17155dd713fe4143c2011b392167ea09f6958c5f1b14ffa7eacf1a21badfab",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xfb17155dd713fe4143c2011b392167ea09f6958c5f1b14ffa7eacf1a21badfab",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "ens.gregskril.eth",
+        canonicalNode: "0x4fedc4305d84a415763cffb1b55a88dcea3dfde44b8787a6bd98223aac01b58e",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x4fedc4305d84a415763cffb1b55a88dcea3dfde44b8787a6bd98223aac01b58e",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "enswidgets.eth",
+        canonicalNode: "0x2aff6e58dd1a29ed067afd547694b14b9389bda8285c0fc5f944c64b78ff7858",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x2aff6e58dd1a29ed067afd547694b14b9389bda8285c0fc5f944c64b78ff7858",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
+      },
+      {
+        type: "ENSv1Domain",
+        canonicalName: "ethtoolkit.eth",
+        canonicalNode: "0x3c78cc3bb454bb4cd8f6c3dc39a567d29c4b812207a3935bd1fddcc924f3fcd4",
+        id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x3c78cc3bb454bb4cd8f6c3dc39a567d29c4b812207a3935bd1fddcc924f3fcd4",
+        ownerId: "0x179a862703a4adfb29896552df9e307980d19285",
       },
     ],
     resultNote,

@@ -10,10 +10,6 @@ import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
 import { exampleDomainsFuzzySearchByName } from "@data/unigraph-examples/domains-fuzzy-search-by-name";
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
-
 Fetch Domains with names similar to a query string, ranked by similarity. This example uses PostgreSQL's `pg_trgm` extension, which provides the `%` operator for fuzzy matching and the `similarity()` function for ranking results. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
 <UnigraphStaticExample
