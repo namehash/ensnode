@@ -348,7 +348,7 @@ query OffchainName($name: InterpretedName!) {
     id
     canonical { name { interpreted } }
     resolver {
-      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) uses
+      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on
       effective {
         extended
         contract { chainId address }
