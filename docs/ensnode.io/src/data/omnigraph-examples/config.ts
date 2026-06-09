@@ -96,7 +96,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "domains-by-address",
     title: "Account Domains",
     description:
-      "This query below loads domains owned by an address via the Omnigraph `account` root field.",
+      "This query below loads domains owned by an address via the Omnigraph <code>account</code> root field.",
     category: "Accounts",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -192,7 +192,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "eth-by-version",
     title: "ETH TLD By Version",
     description:
-      "This query below loads the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).",
+      "This query below loads the .eth TLD across protocol versions: one Domain per version, discriminated by <code>__typename</code> (<code>ENSv1Domain</code> / <code>ENSv2Domain</code>).",
     category: "Migration",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
@@ -201,7 +201,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "accelerate-resolve",
     title: "Resolve primary name and records, and track protocol acceleration",
     description:
-      "This query below resolves primary name and records, and tracks protocol acceleration with `trace` and `accelerate` arguments.",
+      "This query below resolves primary name and records, and tracks protocol acceleration with <code>trace</code> and <code>accelerate</code> arguments.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: false,

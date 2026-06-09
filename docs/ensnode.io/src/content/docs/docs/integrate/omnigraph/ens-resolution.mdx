@@ -1,18 +1,19 @@
 ---
 title: ENS Resolution
-description: Forward, reverse, and identity resolution in the Omnigraph — interpreted profiles, raw protocol records, and address-to-identity lookup in a single GraphQL query.
+description: Forward, reverse, and complete resolution in the Omnigraph — interpreted profiles, raw protocol records, and address-to-profile lookup in a single GraphQL query.
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
 import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
-Most apps need ENS resolution in three modes:
+The ENS protocol defines two forms of resolution:
 
-- **Forward** — given a name (`vitalik.eth`), resolve records like avatar, bio, links, and multichain addresses.
-- **Reverse** — given an address, find its **primary name** on a chain.
-- **Identity** — given an address, resolve the primary name and its records in one query.
+- **Forward resolution** — given a name (`vitalik.eth`), resolve its records: avatar, bio, links, multichain addresses, and more.
+- **Reverse resolution** — given an address, resolve its **primary name** on a chain ([ENSIP-19](https://docs.ens.domains/ensip/19)).
 
-Behind every mode sits the same protocol complexity: resolver contracts, coin-type encoding, inconsistent text-record keys, and avatar formats that may be URLs, IPFS paths, or NFT references. The Omnigraph handles that complexity for you and returns clean, structured results in one request.
+One of the most common patterns when building on ENS is to combine both: given an address, first perform **reverse resolution** to get the primary name, then perform **forward resolution** on that name to fetch its avatar, social handles, and other display details. Because this pattern is so common, the Omnigraph provides first-class support for it as **complete resolution** — reverse and forward in a single query with no extra round trip.
+
+Moreover, the Omnigraph handles the underlying protocol complexity for you — resolver contracts, coin-type encoding, inconsistent text-record keys, and avatar formats that may be URLs, IPFS paths, or NFT references — and returns clean, structured results for all three patterns.
 
 ## Forward resolution — interpreted `profile`
 
@@ -42,23 +43,21 @@ The same predictable shape works well for AI agents — structured fields and `n
 
 ## Reverse resolution — `primaryName`
 
-**Reverse resolution** answers a simple question: _what name does this address want to be known by?_ On a given chain, that is its **primary name** ([ENSIP-19](https://docs.ens.domains/ensip/19)). If the address has not set one, the result is `null` — safe to render like any other missing field.
+Given an address, reverse resolution answers: _what name does this address want to be known by?_ If the address has not set a primary name, the result is `null` — safe to render like any other missing field.
 
 Primary names are per-chain. Use friendly chain names like `ETHEREUM` or `BASE` rather than raw coin types. `beautified` is ready for UI rendering; `interpreted` is the stable form for lookups and links. See [Beautified Name](/docs/reference/terminology#beautified-name).
 
-<OmnigraphStaticExampleSet id="account-primary-names" hideBackToExamples />
+<OmnigraphStaticExampleSet id="account-primary-name" hideBackToExamples />
 
-If you need the display data that goes with that name — not just the name itself — see **Identity resolution** below.
+## Complete resolution
 
-## Identity resolution — full address resolve
-
-**Identity resolution** is the pattern most wallets and explorers actually use: start from an address, get the primary name, and load its full display data — all in one request. It is reverse resolution followed immediately by forward resolution, with no extra round trip.
+Complete resolution is the pattern most wallets and explorers actually implement: given an address, resolve its primary name and then immediately forward-resolve the records on that name.
 
 <OmnigraphStaticExampleSet id="account-primary-name-records" hideBackToExamples />
 
 Breaking down the example above:
 
-- **Start from an address** — pass any wallet address; the query looks up that account's ENS identity.
+- **Start from an address** — pass any wallet address; the query looks up that account's primary name.
 - **Pick a chain** — primary names are per-chain (e.g. Ethereum mainnet). Use friendly chain names like `ETHEREUM` or `BASE` instead of raw coin types.
 - **Display the name** — `beautified` is ready for UI rendering; `interpreted` is the stable form for lookups and links.
-- **Load the display data in the same request** — avatar, bio, and social links are forward-resolved from the primary name. The response shape is the same `resolve.profile` structure covered in the forward resolution section above.
+- **Load the records in the same request** — avatar, bio, and social links are forward-resolved from the primary name. The response shape is the same `resolve.profile` structure from the forward resolution section above.
