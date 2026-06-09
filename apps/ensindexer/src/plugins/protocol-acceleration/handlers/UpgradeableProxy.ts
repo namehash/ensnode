@@ -12,7 +12,7 @@ const pluginName = PluginName.ProtocolAcceleration;
  */
 export default function () {
   addOnchainEventListener(
-    namespaceContract(pluginName, "ThreeDNSResolver:Upgraded"),
+    namespaceContract(pluginName, "UpgradeableProxy:Upgraded"),
     async ({ context, event }) => {
       const resolver = getThisAccountId(context, event);
       await handleResolverImplementationChange(context, resolver);

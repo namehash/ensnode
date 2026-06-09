@@ -41,7 +41,7 @@ export async function upsertResolver(context: IndexingEngineContext, resolver: A
   const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
 
   // if already exists, no-op
-  if (existing) return existing;
+  if (existing) return;
 
   // insert the new Resolver record
   await context.ensDb.insert(ensIndexerSchema.resolver).values({ id, ...resolver });
