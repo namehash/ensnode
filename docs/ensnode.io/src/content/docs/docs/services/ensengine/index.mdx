@@ -49,7 +49,7 @@ The internal pipeline is intentionally simple to describe:
 - **Enrich** - attach ENS-level context to raw changes so consumers don't have to.
 - **Filter** - apply subscription rules so each sink only sees events it cares about.
 - **Transform** - shape events into the right payload for each sink type.
-- **Dispatch** - deliver to webhooks, cache-invalidation hooks, database sync targets, notification systems, and more.
+- **Route** - deliver to webhooks, cache-invalidation hooks, database sync targets, notification systems, and more.
 
 Implementation details behind the watch layer are intentionally not part of this teaser. Those will land in dedicated docs when the service ships.
 
