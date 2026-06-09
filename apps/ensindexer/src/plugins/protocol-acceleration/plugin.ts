@@ -102,24 +102,20 @@ export default createPlugin({
           ),
         },
 
-        ////////////////////
-        // UpgradeableProxy
-        ////////////////////
-        [namespaceContract(pluginName, "UpgradeableProxy")]: {
+        ////////////////////////////
+        // UpgradableProxyResolver
+        ////////////////////////////
+        [namespaceContract(pluginName, "UpgradableProxyResolver")]: {
           abi: UpgradeableProxyABI,
-          chain: getDatasourcesWithResolvers(config.namespace).reduce(
-            (memo, datasource) => ({
-              ...memo,
-              [datasource.chain.id.toString()]: constrainBlockrange(
+          chain: {
+            // the DotBoxL1Resolver is an UpgradableProxy
+            ...("DotBoxL1Resolver" in ensroot.contracts &&
+              chainConfigForContract(
                 config.globalBlockrange,
-                buildBlockNumberRange(
-                  datasource.contracts.Resolver.startBlock,
-                  datasource.contracts.Resolver.endBlock,
-                ),
-              ),
-            }),
-            {},
-          ),
+                ensroot.chain.id,
+                ensroot.contracts.DotBoxL1Resolver,
+              )),
+          },
         },
 
         /////////////////////
