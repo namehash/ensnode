@@ -1,6 +1,6 @@
 ---
 title: ENSEngine
-description: Coming soon - the ENSNode service for push-based, reactive ENS functionality. Watches your ENSDb for changes and turns them into ENS-aware webhooks.
+description: Coming soon - the ENSNode service for push-based, reactive ENS functionality. Watches your ENSDb for changes and turns them into ENS-aware push notifications.
 sidebar:
   label: Overview
   order: 1
@@ -20,7 +20,7 @@ Today, building an app that reacts to ENS - when an avatar changes, when a name 
 
 ## What it is
 
-ENSEngine is the part of ENSNode that **watches your ENSDb for changes in real time and delivers ENS-aware events** - including webhooks - to any sink you configure.
+ENSEngine is the part of ENSNode that **watches your ENSDb for changes in real time and delivers ENS-aware events** to any sink you configure.
 
 It sits alongside [ENSIndexer](/docs/services/ensindexer), [ENSDb](/docs/services/ensdb), [ENSRainbow](/docs/services/ensrainbow), [ENSApi](/docs/services/ensapi), and [ENSAdmin](/docs/services/ensadmin) as the home for reactive / event-based functionality across the ENSNode stack.
 
@@ -49,7 +49,7 @@ The internal pipeline is intentionally simple to describe:
 - **Enrich** - attach ENS-level context to raw changes so consumers don't have to.
 - **Filter** - apply subscription rules so each sink only sees events it cares about.
 - **Transform** - shape events into the right payload for each sink type.
-- **Route** - deliver to webhooks, cache-invalidation hooks, database sync targets, notification systems, and more.
+- **Dispatch** - deliver to webhooks, cache-invalidation hooks, database sync targets, notification systems, and more.
 
 Implementation details behind the watch layer are intentionally not part of this teaser. Those will land in dedicated docs when the service ships.
 

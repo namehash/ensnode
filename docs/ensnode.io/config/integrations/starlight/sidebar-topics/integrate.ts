@@ -196,7 +196,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
-          label: "ENSEngine (Webhooks)",
+          label: "ENSEngine (Push notifications)",
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],
