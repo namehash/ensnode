@@ -94,7 +94,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
         name { interpreted beautified }
         resolve {
           # If the account has a primary name on Ethereum (mainnet),
-          # forward resolve the interpreted ENS profile of that name in the same query!.
+          # forward resolve the interpreted ENS profile of that name in the same query!
           profile {
             description
             avatar { httpUrl }
