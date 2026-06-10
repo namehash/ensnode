@@ -33,28 +33,54 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
- * Ensures a Resolver entity exists for `resolver`, capturing additional metadata.
- *
- * @dev performs a single `supportsInterface` RPC (via Ponder's cached `context.client`) to determine
- * `isExtended` support.
+ * Ensures a Resolver entity exists for `resolver`, deriving its Supported Interfaces on first insert.
  */
-export async function upsertResolver(
-  context: IndexingEngineContext,
-  resolver: AccountId,
-): Promise<typeof ensIndexerSchema.resolver.$inferSelect> {
+export async function upsertResolver(context: IndexingEngineContext, resolver: AccountId) {
   const id = makeResolverId(resolver);
 
   const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
-  if (existing) return existing;
+
+  // if already exists, no-op
+  if (existing) return;
+
+  // insert the new Resolver record
+  await context.ensDb.insert(ensIndexerSchema.resolver).values({ id, ...resolver });
+
+  // update its Supported Interfaces
+  await updateResolverInterfaces(context, resolver);
+}
+
+/**
+ * Updates a Resolver's Supported Interfaces.
+ */
+async function updateResolverInterfaces(context: IndexingEngineContext, resolver: AccountId) {
+  const id = makeResolverId(resolver);
 
   const isExtended = await isExtendedResolver({
-    publicClient: context.client,
     address: resolver.address,
+    publicClient: context.client,
   });
 
-  const row = { id, ...resolver, isExtended };
-  await context.ensDb.insert(ensIndexerSchema.resolver).values(row).onConflictDoNothing();
-  return row;
+  await context.ensDb.update(ensIndexerSchema.resolver, { id }).set({ isExtended });
+}
+
+/**
+ * Handles a Resolver's implementation changing by updating its Supported Interfaces, if the Resolver
+ * is already indexed.
+ *
+ * @dev intentionally avoids upserting a Resolver entity for contracts not already an indexed Resolver.
+ * If a contract were to emit Upgraded and then emit a Resolver event, `upsertResolver` above would
+ * ensure that the Supported Interfaces are correctly indexed.
+ */
+export async function handleResolverImplementationChange(
+  context: IndexingEngineContext,
+  resolver: AccountId,
+) {
+  const id = makeResolverId(resolver);
+  const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
+  if (!existing) return;
+
+  await updateResolverInterfaces(context, resolver);
 }
 
 /**
