@@ -51,8 +51,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "domain-by-name",
     title: "Domain By Name",
-    description:
-      "This query loads a domain by interpreted name, including profile information.",
+    description: "This query loads a domain by interpreted name, including profile information.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
@@ -155,8 +154,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
   {
     id: "permissions-by-user",
     title: "Permissions By User",
-    description:
-      "This query loads resources and roles for an address in the permissions graph.",
+    description: "This query loads resources and roles for an address in the permissions graph.",
     category: "Permissions",
     namespace: ENSNamespaceIds.SepoliaV2,
     hostSeparatePage: true,
