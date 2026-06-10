@@ -2,9 +2,6 @@
 import { Aside } from "@astrojs/starlight/components";
 
 import snapshot from "@data/omnigraph-examples/snapshot.json";
-// TEMP prerelease: enscli/ensskills aren't published at `snapshot.sdkVersion` yet — remove at the
-// first official release (see @data/enscli-ensskills-prerelease).
-import { ENSCLI_ENSSKILLS_NPM_SPEC } from "@data/enscli-ensskills-prerelease";
 
 // The ENSNode suite is version-locked to the production-deployed Omnigraph (see the vendored
 // `@data/omnigraph-examples/snapshot.json`). The SDK bundles the Omnigraph schema (consumed by the
@@ -39,15 +36,9 @@ npm install enskit@${VERSION} enssdk@${VERSION}`}</pre>
     ) : (
       <Fragment>
         <code>ensskills</code> is version-locked to the ENSNode suite—the Omnigraph schema and
-        example queries the skills teach are bundled at a specific version—so you pin{" "}
-        <code>ensskills</code> and the matching <code>enscli</code> to keep your agent's ENS
-        knowledge and queries matched to the deployed API.{" "}
-        {/* TEMP prerelease: revert to pinning both at <code>{VERSION}</code> at the first official release */}
-        These two packages are newer than the deployed <code>{VERSION}</code> release, so until
-        their first official release install them from the prerelease snapshot—
-        <code>ensskills@{ENSCLI_ENSSKILLS_NPM_SPEC}</code> and{" "}
-        <code>enscli@{ENSCLI_ENSSKILLS_NPM_SPEC}</code>. These prerelease refs are functional
-        against our hosted instances running <code>{VERSION}</code>.
+        example queries the skills teach are bundled at a specific version—so pin{" "}
+        <code>ensskills@{VERSION}</code> and the matching <code>enscli@{VERSION}</code> to keep your
+        agent's ENS knowledge and queries matched to the deployed API.
       </Fragment>
     )
   }
