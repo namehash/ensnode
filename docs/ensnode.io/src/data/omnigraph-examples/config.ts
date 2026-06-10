@@ -60,7 +60,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "offchain-name",
     title: "Offchain Name",
     description:
-      "Resolve an offchain (CCIP-Read) name. Resolvable-but-unindexed names surface as an `UnindexedDomain` instead of returning `null`.",
+      "Resolve an offchain (CCIP-Read) name. Resolvable-but-unindexed names surface as an <code>UnindexedDomain</code> instead of returning <code>null</code>.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,
