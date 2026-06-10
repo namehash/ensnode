@@ -857,20 +857,10 @@ query GetEthDomains {
 query AccelerateResolve($address: Address!) {
   account(by: { address: $address }) {
     address
-    resolve(accelerate: true) {
-      trace
-      acceleration {
-        requested
-        attempted
-      }
+    resolve {
       primaryName(by: { chainName: ETHEREUM }) {
         name { interpreted beautified }
         resolve {
-          trace
-          acceleration {
-            requested
-            attempted
-          }
           profile {
             description
           }
