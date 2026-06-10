@@ -544,6 +544,53 @@ Variables:
 }
 ```
 
+### offchain-name
+
+```graphql
+query OffchainName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain
+    __typename
+    id
+    canonical {
+      name {
+        interpreted
+      }
+    }
+    resolver {
+      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on
+      effective {
+        extended
+        contract {
+          chainId
+          address
+        }
+      }
+    }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "description"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "patricio.onpoap.eth"
+}
+```
+
 ### domain-subdomains
 
 ```graphql
@@ -721,11 +768,19 @@ Variables:
 ### account-primary-names
 
 ```graphql
-query AccountPrimaryName($address: Address!) {
+query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
-      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+      onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
+        chainName
+        name {
+          interpreted
+          beautified
+        }
+      }
+
+      twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         chainName
         name {
           interpreted

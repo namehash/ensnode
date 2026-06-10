@@ -1,5 +1,13 @@
 # @ensnode/enskit-react-example
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - enssdk@1.15.2
+  - enskit@1.15.2
+
 ## 0.0.9
 
 ### Patch Changes

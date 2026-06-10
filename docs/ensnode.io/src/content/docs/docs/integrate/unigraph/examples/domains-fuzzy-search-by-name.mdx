@@ -1,0 +1,21 @@
+---
+title: Fuzzy Search for ENS Names
+description: Perform a fuzzy search for ENS names.
+sidebar:
+  label: Fuzzy Search
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleDomainsFuzzySearchByName } from "@data/unigraph-examples/domains-fuzzy-search-by-name";
+
+Fetch Domains with names similar to a query string, ranked by similarity. This example uses PostgreSQL's `pg_trgm` extension, which provides the `%` operator for fuzzy matching and the `similarity()` function for ranking results. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<UnigraphStaticExample
+ sql={exampleDomainsFuzzySearchByName.sql}
+ ensDbSdk={exampleDomainsFuzzySearchByName.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

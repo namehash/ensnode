@@ -30,37 +30,26 @@ The Unigraph models both protocol versions with the **same polymorphic entities*
 - **Label** — the `labelHash` → label mapping that heals hashed labels into human-readable names.
 - **Permissions** — the ENSv2 roles model for who can do what in a specific contract.
 
-## The Canonical Nametree
-
-:::note[The Canonical Nametree]
-The **Canonical Nametree** is the set of all Domains that have an inferrable **Canonical Name** — materialized from the namegraph. For every Domain in it, the canonical fields are populated — `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth` — across both ENSv1 and ENSv2. That means you can look a name up by `canonical_name = 'vitalik.eth'`, order by `canonical_depth`, or walk a name's path **without branching on protocol version** and without traversing the namegraph yourself.
-:::
-
-Multichain coverage is part of the same model: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are materialized into the same Unigraph as mainnet `.eth`, so a single query spans every indexable name.
-
-<Aside type="danger" title="Not a substitute for ENS Resolution">
-  The Unigraph mirrors onchain state; ENS's resolution-time behavior is applied _on top_ of it by
-  [ENSApi](/docs/services/ensapi). A direct SQL read of resolver records is therefore **not**
-  ENSIP-10 / CCIP-Read compliant and **cannot** be used as a source of truth for name resolution.
-  For correct resolution, use the [ENS Omnigraph API](/docs/integrate/omnigraph) (which adds ENS
-  Protocol Acceleration on top of the Unigraph). Use Unigraph SQL for analytics, discovery, and
-  custom indexing.
-</Aside>
-
 ## Get started
 
 <CardGrid>
+  <LinkCard
+    title="Core Concepts"
+    description="What the Canonical Nametree is, and how to query data regardless of ENS protocol version it comes from."
+    href="/docs/integrate/unigraph/concepts"
+  />
+
   <LinkCard
     title="Examples"
     description="Domain by name, account domains, and indexing status — in raw SQL and with the ensdb-sdk."
     href="/docs/integrate/unigraph/examples"
   />
 
-<LinkCard
-  title="Schema Reference"
-  description="Every table, column, and index in the Unigraph data model."
-  href="/docs/integrate/unigraph/schema-reference"
-/>
+  <LinkCard
+    title="Schema Reference"
+    description="Every table, column, and index in the Unigraph data model."
+    href="/docs/integrate/unigraph/schema-reference"
+  />
 
   <LinkCard
     title="ENSDb (service)"

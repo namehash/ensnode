@@ -46,6 +46,9 @@ const GREG_NAME = asInterpretedName("gregskril.eth");
 
 const GREG_ADDRESS = toNormalizedAddress("0x179a862703a4adfb29896552df9e307980d19285");
 
+// an offchain (CCIP-Read) name: resolvable but unindexed, so it surfaces as an UnindexedDomain
+const OFFCHAIN_NAME = asInterpretedName("patricio.onpoap.eth");
+
 const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ReverseResolverRoot,
@@ -85,8 +88,8 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
       # Reverse resolve the ENS primary name of the account
       # using a convenient ETHEREUM alias for mainnet.
       primaryName(by: { chainName: ETHEREUM }) {
-        # Get the regular interpreted variant of the primary name 
-        # and also the special beautified variant that optimizes names 
+        # Get the regular interpreted variant of the primary name
+        # and also the special beautified variant that optimizes names
         # containing special characters such as emojis for proper display in interfaces.
         name { interpreted beautified }
         resolve {
@@ -376,6 +379,36 @@ query DomainProfileAndRecords($name: InterpretedName!) {
   }
 }`,
     variables: { default: { name: GREG_NAME } },
+  },
+
+  ////////////////////////////////////
+  // Offchain Name (UnindexedDomain)
+  ////////////////////////////////////
+  {
+    id: "offchain-name",
+    query: `
+query OffchainName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain
+    __typename
+    id
+    canonical { name { interpreted } }
+    resolver {
+      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on
+      effective {
+        extended
+        contract { chainId address }
+      }
+    }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) { coinType address }
+        texts(keys: ["avatar", "com.twitter", "description"]) { key value }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: OFFCHAIN_NAME } },
   },
 
   //////////////////////

@@ -35,6 +35,13 @@
     }
   },
   {
+    "id": "offchain-name",
+    "query": "query OffchainName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain\n    __typename\n    id\n    canonical { name { interpreted } }\n    resolver {\n      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on\n      effective {\n        extended\n        contract { chainId address }\n      }\n    }\n    resolve {\n      records {\n        addresses(coinTypes: [60]) { coinType address }\n        texts(keys: [\"avatar\", \"com.twitter\", \"description\"]) { key value }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "patricio.onpoap.eth"
+    }
+  },
+  {
     "id": "find-domains",
     "query": "query FindDomains(\n  $name: DomainsNameFilter!\n  $order: DomainsOrderInput\n) {\n  domains(\n    where: { name: $name }\n    order: $order\n    first: 20\n  ) {\n    edges {\n      node {\n        __typename\n        id\n        label { interpreted hash }\n        canonical { name { interpreted beautified } }\n\n        registration { expiry event { timestamp } }\n      }\n    }\n  }\n}",
     "variables": {
