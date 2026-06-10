@@ -857,13 +857,14 @@ query GetEthDomains {
 query AccelerateResolve($address: Address!) {
   account(by: { address: $address }) {
     address
+    # resolve is automatically accelerated. To disable, resolve(accelerate: false)
     resolve {
+      acceleration { requested attempted }
       primaryName(by: { chainName: ETHEREUM }) {
         name { interpreted beautified }
         resolve {
-          profile {
-            description
-          }
+          acceleration { requested attempted }
+          profile { description }
         }
       }
     }

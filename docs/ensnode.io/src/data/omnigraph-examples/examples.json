@@ -163,7 +163,7 @@
   },
   {
     "id": "accelerate-resolve",
-    "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          profile {\n            description\n          }\n        }\n      }\n    }\n  }\n}",
+    "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    # resolve is automatically accelerated. To disable, resolve(accelerate: false)\n    resolve {\n      acceleration { requested attempted }\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          acceleration { requested attempted }\n          profile { description }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }

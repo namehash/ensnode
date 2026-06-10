@@ -4,12 +4,20 @@
       "account": {
         "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
         "resolve": {
+          "acceleration": {
+            "requested": true,
+            "attempted": true
+          },
           "primaryName": {
             "name": {
               "interpreted": "vitalik.eth",
               "beautified": "vitalik.eth"
             },
             "resolve": {
+              "acceleration": {
+                "requested": true,
+                "attempted": true
+              },
               "profile": {
                 "description": "mi pinxe lo crino tcati"
               }
