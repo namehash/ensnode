@@ -132,8 +132,9 @@ EfpQueryRef.implement({
         const { ensDb, ensIndexerSchema } = di.context;
         // Look up by (address, key) — the row's primary key also includes the AccountMetadata
         // contract's chainId, which the API doesn't carry, so query the indexed columns instead.
+        // Return the full row so the loadable ref resolves it directly, with no second fetch by id.
         const [row] = await ensDb
-          .select({ id: ensIndexerSchema.efpAccountMetadata.id })
+          .select()
           .from(ensIndexerSchema.efpAccountMetadata)
           .where(
             and(
@@ -142,7 +143,7 @@ EfpQueryRef.implement({
             ),
           )
           .limit(1);
-        return row?.id ?? null;
+        return row ?? null;
       },
     }),
 

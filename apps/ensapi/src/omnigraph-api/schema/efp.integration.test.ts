@@ -204,7 +204,7 @@ describe("EFP handler edge cases (seeded)", () => {
     expect(records[0].tags).toEqual(["block"]);
     // `account` always resolves (an Account exists for any address), even for this synthetic target
     // with no indexed ENS presence; it resolves to the record's `recordData` address.
-    expect(records[0].account && eq(records[0].account.id, efpSeedTargets.dedup)).toBe(true);
+    expect(eq(records[0].account.id, efpSeedTargets.dedup)).toBe(true);
     // The owning list's `user` was set to a malformed (non-20-byte) value, clearing it to null.
     expect(records[0].list?.user).toBeNull();
   });

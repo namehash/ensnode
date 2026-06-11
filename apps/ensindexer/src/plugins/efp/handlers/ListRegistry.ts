@@ -171,22 +171,13 @@ export default function () {
         updatedAt: ts,
       });
 
-      // Claim this slot's reverse mapping for the list — but only if the slot is unclaimed, or
-      // already claimed by this same list. The slot is attacker-settable, so a different list may
-      // already own this mapping; first writer wins, so we must not overwrite it (see
-      // `deleteStorageLocationIfOwnedBy`).
-      const claimedBy = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
-        id: newLocationId,
-      });
-      if (!claimedBy) {
-        await context.ensDb
-          .insert(ensIndexerSchema.efpListStorageLocations)
-          .values({ id: newLocationId, chainId, contractAddress, slot, tokenId, updatedAt: ts });
-      } else if (claimedBy.tokenId === tokenId) {
-        await context.ensDb
-          .update(ensIndexerSchema.efpListStorageLocations, { id: newLocationId })
-          .set({ updatedAt: ts });
-      }
+      // Claim this slot's reverse mapping for the list. The slot is attacker-settable, so a
+      // different list may already own this mapping; `onConflictDoNothing` keeps first-writer-wins —
+      // an existing mapping is never overwritten — matching `deleteStorageLocationIfOwnedBy`.
+      await context.ensDb
+        .insert(ensIndexerSchema.efpListStorageLocations)
+        .values({ id: newLocationId, chainId, contractAddress, slot, tokenId, updatedAt: ts })
+        .onConflictDoNothing();
 
       // (Re-)apply this storage location's durable user/manager metadata to the list. Keyed by
       // location, so it restores roles whenever a list points at (or re-points to) a slot whose
