@@ -12,8 +12,8 @@ For more information, visit [ensnode.io](https://ensnode.io).
 npm install enskit enssdk
 ```
 
-> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you **must** use `enskit@1.13.1` and `enssdk@1.13.1`. The latest published versions (`1.14.0+`) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. This notice will be removed once the hosted instances are upgraded.
+> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.15. If you are querying them from your own app, pin `enskit` and `enssdk` to the matching version — the Omnigraph API data model can change between versions.
 >
 > ```bash
-> npm install enskit@1.13.1 enssdk@1.13.1
+> npm install enskit@1.15.2 enssdk@1.15.2
 > ```
