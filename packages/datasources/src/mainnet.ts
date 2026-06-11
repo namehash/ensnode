@@ -520,11 +520,11 @@ export default {
   [DatasourceNames.EFPBase]: {
     chain: base,
     contracts: {
-      // EFPListRegistry, Base.
+      // EFPListRegistry, Base. (All three Base EFP contracts deployed in block 20197231.)
       ListRegistry: {
         abi: efp_ListRegistry,
         address: "0x0e688f5dca4a0a4729946acbc44c792341714e08",
-        startBlock: 20180000,
+        startBlock: 20197231,
       },
       // EFPAccountMetadata, Base. NOTE: this is the SAME address as EFPListRecords on Ethereum
       // mainnet (see EFPEthereum below). EFP deploys via CREATE2, so one address can map to a
@@ -532,13 +532,13 @@ export default {
       AccountMetadata: {
         abi: efp_AccountMetadata,
         address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
-        startBlock: 20180000,
+        startBlock: 20197231,
       },
       // EFPListRecords, Base.
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33",
-        startBlock: 20180000,
+        startBlock: 20197231,
       },
     },
   },
@@ -553,7 +553,7 @@ export default {
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x4ca00413d850dcfa3516e14d21dae2772f2acb85",
-        startBlock: 125792000,
+        startBlock: 125792735,
       },
     },
   },
@@ -572,7 +572,7 @@ export default {
       ListRecords: {
         abi: efp_ListRecords,
         address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
-        startBlock: 20820000,
+        startBlock: 20820743,
       },
     },
   },
