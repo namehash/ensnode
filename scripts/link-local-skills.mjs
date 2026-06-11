@@ -32,6 +32,8 @@ for (const name of localSkills) {
     // missing or not a symlink: a real directory here is a personal skill — leave it
     try {
       if (lstatSync(path).isDirectory()) continue;
+      // a regular file here would make symlinkSync throw EEXIST — remove it first
+      unlinkSync(path);
     } catch {}
   }
   symlinkSync(desired, path);

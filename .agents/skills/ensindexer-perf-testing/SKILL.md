@@ -192,8 +192,9 @@ q 'ponder_indexing_function_duration_sum / ponder_indexing_function_duration_cou
 q 'ponder_indexing_function_duration_sum'                               # total ms wallclock
 q 'ponder_indexing_function_duration_count'                             # invocation count
 q 'histogram_quantile(0.95, sum by (event, le) (rate(ponder_indexing_function_duration_bucket[5m])))'
-q 'sum by (method) (rate(ponder_postgres_query_total[5m]))'             # PG QPS by method
-q 'sum by (chain_id) (rate(ponder_rpc_request_cache_hits[5m]))'         # RPC cache hits/s
+q 'sum by (method) (rate(ponder_indexing_store_queries_total[5m]))'     # store QPS by method
+q 'sum by (chain_id) (rate(ponder_indexing_rpc_requests_total[5m]))'    # RPC requests/s by chain
+q 'sum by (chain_id) (rate(ponder_indexing_rpc_prefetch_total[5m]))'    # RPC prefetch/s by chain
 ```
 
 Save each to `/tmp/perf-test/main-<label>-<thing>.json`. Wallclock is `end_epoch -
