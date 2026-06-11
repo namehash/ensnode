@@ -99,3 +99,89 @@ export const fixtures = {
   rawAddresses: rawAddresses,
   textRecords: testEthTextRecords,
 } as const;
+
+/**
+ * Real contenthash values for each supported codec, encoded as per ENSIP-7.
+ * Values are taken from https://github.com/ensdomains/content-hash test vectors.
+ *
+ * @see https://github.com/ensdomains/content-hash/blob/master/src/index.test.ts
+ */
+export const contenthashFixtures = {
+  ipfs: "0xe3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f",
+  swarm: "0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162",
+  ipns: "0xe50101720024080112205cbd1cc86ac20d6640795809c2a185bb2504538a2de8076da5a6971b8acb4715",
+  onion: "0xbc037a716b746c776934666563766f367269",
+  onion3:
+    "0xbd037035336c663537716f7679757677736336786e72707079706c79337674716d376c3670636f626b6d797173696f6679657a6e667535757164",
+  skynet: "0x90b2c60508004007fd43b74149b31aacbbf2784e874d09b086bed15fd54cacff7120cce95372",
+  arweave: "0x90b2ca05cacdf63edf2e0bb4eb5711dd38b0723aca5f3c4ab62ceeb7c1110740833d4894",
+} as const satisfies Record<string, Hex>;
+
+export type NameRecords = {
+  contenthash?: Hex;
+};
+
+export type RegisteredName = {
+  name: string;
+  label: string;
+  records?: NameRecords;
+  subnames?: RegisteredSubname[];
+};
+
+export type RegisteredSubname = {
+  label: string;
+  name: string;
+  records?: NameRecords;
+};
+
+/**
+ * Names registered at seed time via the ETHRegistrar (2LDs) or UserRegistry (subnames),
+ * together with the resolver records to seed on them.
+ *
+ * To add more names: append entries here. Seeding, DEVNET_NAMES, and tests pick them up
+ * automatically — no other files need changing.
+ */
+export const registeredNames = [
+  {
+    name: "contenthash.eth",
+    label: "contenthash",
+    records: {},
+    subnames: [
+      {
+        label: "ipfs",
+        name: "ipfs.contenthash.eth",
+        records: { contenthash: contenthashFixtures.ipfs },
+      },
+      {
+        label: "swarm",
+        name: "swarm.contenthash.eth",
+        records: { contenthash: contenthashFixtures.swarm },
+      },
+      {
+        label: "ipns",
+        name: "ipns.contenthash.eth",
+        records: { contenthash: contenthashFixtures.ipns },
+      },
+      {
+        label: "onion",
+        name: "onion.contenthash.eth",
+        records: { contenthash: contenthashFixtures.onion },
+      },
+      {
+        label: "onion3",
+        name: "onion3.contenthash.eth",
+        records: { contenthash: contenthashFixtures.onion3 },
+      },
+      {
+        label: "skynet",
+        name: "skynet.contenthash.eth",
+        records: { contenthash: contenthashFixtures.skynet },
+      },
+      {
+        label: "arweave",
+        name: "arweave.contenthash.eth",
+        records: { contenthash: contenthashFixtures.arweave },
+      },
+    ],
+  },
+] as const satisfies RegisteredName[];

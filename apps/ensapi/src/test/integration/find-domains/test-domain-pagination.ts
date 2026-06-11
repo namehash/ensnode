@@ -94,14 +94,21 @@ function assertOrdering(
     if (by === "NAME") {
       const av = a as string;
       const bv = b as string;
+      // Use localeCompare with ignorePunctuation to match Postgres ICU collation, which treats
+      // punctuation (including ".") as variable/ignorable at the primary level. Without this,
+      // JS bytewise ordering disagrees with the DB for names like "onion3.x" vs "onion.x":
+      // Postgres sorts "onion3" before "onion." (digits < letters after stripping dots), while
+      // JS places "." (code 46) before "3" (code 51).
       if (dir === "ASC") {
-        expect(av <= bv, `expected "${av}" <= "${bv}" at indices ${i},${i + 1} (NAME ASC)`).toBe(
-          true,
-        );
+        expect(
+          av.localeCompare(bv, undefined, { ignorePunctuation: true }) <= 0,
+          `expected "${av}" <= "${bv}" at indices ${i},${i + 1} (NAME ASC)`,
+        ).toBe(true);
       } else {
-        expect(av >= bv, `expected "${av}" >= "${bv}" at indices ${i},${i + 1} (NAME DESC)`).toBe(
-          true,
-        );
+        expect(
+          av.localeCompare(bv, undefined, { ignorePunctuation: true }) >= 0,
+          `expected "${av}" >= "${bv}" at indices ${i},${i + 1} (NAME DESC)`,
+        ).toBe(true);
       }
     } else if (by === "DEPTH") {
       const av = a as number;

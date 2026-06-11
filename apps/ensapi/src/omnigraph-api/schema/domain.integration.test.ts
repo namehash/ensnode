@@ -26,6 +26,7 @@ import {
   accounts,
   addresses,
   fixtures,
+  registeredNames,
   testEthTextRecords,
 } from "@ensnode/integration-test-env/devnet";
 
@@ -640,6 +641,23 @@ describe("Domain.records", () => {
       },
     });
   });
+
+  it.each(registeredNames.flatMap((entry) => [...entry.subnames]))(
+    "resolves the seeded records for subname '$name'",
+    async ({ name, records }) => {
+      await expect(
+        request<DomainAllRecordsResult>(DomainRecordsAll, {
+          name,
+          addresses: [],
+          texts: [],
+          contentTypeMask: "0",
+          interfaceIds: [],
+        }),
+      ).resolves.toMatchObject({
+        domain: { resolve: { records } },
+      });
+    },
+  );
 
   it("returns null for an unnormalized canonical name (e.g. with labelhash)", async () => {
     // A name with a label that is an encoded labelhash is an InterpretedName but not a normalized name.

@@ -1,4 +1,6 @@
-export const DEVNET_NAMES = [
+import { registeredNames } from "@ensnode/integration-test-env/devnet";
+
+const staticDevnetNames = [
   { name: "test.eth", canonical: "test.eth" },
   { name: "example.eth", canonical: "example.eth" },
   { name: "demo.eth", canonical: "demo.eth" },
@@ -22,7 +24,15 @@ export const DEVNET_NAMES = [
   // so their subnames aren't addressable
   // { name: "sub.alias.eth", canonical: "sub.alias.eth" },
   // { name: "sub.test.eth", canonical: "sub.alias.eth" },
-];
+] as const;
+
+// Derived from `registeredNames` fixture — expands automatically when new names are added there.
+const seededDevnetNames = registeredNames.flatMap((entry) => [
+  { name: entry.name, canonical: entry.name },
+  ...entry.subnames.map((sub) => ({ name: sub.name, canonical: sub.name })),
+]);
+
+export const DEVNET_NAMES = [...staticDevnetNames, ...seededDevnetNames];
 
 // labels that are direct children of 'eth'
 export const DEVNET_ETH_LABELS = DEVNET_NAMES.map(({ name, canonical }) => {

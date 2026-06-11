@@ -1,6 +1,9 @@
 export { EnhancedAccessControl as EnhancedAccessControlABI } from "./abis/ensv2/EnhancedAccessControl";
 export { ETHRegistrar as ETHRegistrarABI } from "./abis/ensv2/ETHRegistrar";
+export { MockToken as MockTokenABI } from "./abis/ensv2/MockToken";
 export { Registry as RegistryABI } from "./abis/ensv2/Registry";
+export { UserRegistry as UserRegistryABI } from "./abis/ensv2/UserRegistry";
+export { VerifiableFactory as VerifiableFactoryABI } from "./abis/ensv2/VerifiableFactory";
 export { L2ReverseRegistrar as L2ReverseRegistrarABI } from "./abis/root/L2ReverseRegistrar";
 export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
 export { UniversalResolverABI } from "./abis/shared/UniversalResolver";
