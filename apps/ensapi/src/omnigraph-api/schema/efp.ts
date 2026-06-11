@@ -13,7 +13,6 @@ import {
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { EfpAccountMetadataRef } from "@/omnigraph-api/schema/efp-account-metadata";
-import { efpAccountMetadataId } from "@/omnigraph-api/schema/efp-ids";
 import {
   EfpAccountMetadatasWhereInput,
   EfpListRecordsWhereInput,
@@ -129,7 +128,22 @@ EfpQueryRef.implement({
         address: t.arg({ type: "Address", required: true }),
         key: t.arg({ type: "String", required: true }),
       },
-      resolve: (_parent, args) => efpAccountMetadataId(args.address, args.key),
+      resolve: async (_parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        // Look up by (address, key) — the row's primary key also includes the AccountMetadata
+        // contract's chainId, which the API doesn't carry, so query the indexed columns instead.
+        const [row] = await ensDb
+          .select({ id: ensIndexerSchema.efpAccountMetadata.id })
+          .from(ensIndexerSchema.efpAccountMetadata)
+          .where(
+            and(
+              eq(ensIndexerSchema.efpAccountMetadata.address, args.address as Hex),
+              eq(ensIndexerSchema.efpAccountMetadata.key, args.key),
+            ),
+          )
+          .limit(1);
+        return row?.id ?? null;
+      },
     }),
 
     //////////////////////////

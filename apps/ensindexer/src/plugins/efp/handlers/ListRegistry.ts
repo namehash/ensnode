@@ -2,7 +2,11 @@ import { type Hex, isAddressEqual, zeroAddress } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
@@ -12,6 +16,30 @@ import { metadataValueToAddress } from "../lib/list-metadata";
 import { parseListStorageLocation } from "../lib/parse-list-storage-location";
 
 const pluginName = PluginName.EFP;
+
+/**
+ * Delete a storage-location reverse-index row only if it still points at `tokenId`.
+ *
+ * The reverse index (`efp_list_storage_locations`) records one list NFT per `(chainId, contract,
+ * slot)` — its primary key. But a list's storage-location slot is arbitrary, attacker-settable bytes,
+ * so two list NFTs can point at the same slot. To prevent one list clobbering or orphaning another's
+ * mapping, the FIRST list to claim a slot owns its reverse row (see the upsert in
+ * `UpdateListStorageLocation` below); a later list does not overwrite it. Every mutation of a reverse
+ * row is therefore gated on ownership — this delete is a no-op unless the row still belongs to
+ * `tokenId`.
+ */
+async function deleteStorageLocationIfOwnedBy(
+  context: IndexingEngineContext,
+  locationId: string,
+  tokenId: string,
+): Promise<void> {
+  const mapping = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
+    id: locationId,
+  });
+  if (mapping?.tokenId === tokenId) {
+    await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, { id: locationId });
+  }
+}
 
 /**
  * Registers the EFP `ListRegistry` event handlers (Transfer, UpdateListStorageLocation).
@@ -34,13 +62,15 @@ export default function () {
           existing.listStorageLocationContractAddress != null &&
           existing.listStorageLocationSlot != null
         ) {
-          await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, {
-            id: storageLocationId(
+          await deleteStorageLocationIfOwnedBy(
+            context,
+            storageLocationId(
               existing.listStorageLocationChainId,
               existing.listStorageLocationContractAddress,
               existing.listStorageLocationSlot,
             ),
-          });
+            tokenId,
+          );
         }
         await context.ensDb.delete(ensIndexerSchema.efpLists, { tokenId });
         // The list's `efp_list_records` rows are intentionally left in place: they mirror the
@@ -103,9 +133,7 @@ export default function () {
           msg: `EFP UpdateListStorageLocation(tokenId=${tokenId}) has an undecodable payload; clearing the list's location`,
         });
         if (oldLocationId !== null) {
-          await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, {
-            id: oldLocationId,
-          });
+          await deleteStorageLocationIfOwnedBy(context, oldLocationId, tokenId);
         }
         await context.ensDb.update(ensIndexerSchema.efpLists, { tokenId }).set({
           listStorageLocation: event.args.listStorageLocation,
@@ -128,7 +156,7 @@ export default function () {
       let moved = false;
       if (oldLocationId !== null && oldLocationId !== newLocationId) {
         moved = true;
-        await context.ensDb.delete(ensIndexerSchema.efpListStorageLocations, { id: oldLocationId });
+        await deleteStorageLocationIfOwnedBy(context, oldLocationId, tokenId);
       }
 
       await context.ensDb.update(ensIndexerSchema.efpLists, { tokenId }).set({
@@ -143,10 +171,22 @@ export default function () {
         updatedAt: ts,
       });
 
-      await context.ensDb
-        .insert(ensIndexerSchema.efpListStorageLocations)
-        .values({ id: newLocationId, chainId, contractAddress, slot, tokenId, updatedAt: ts })
-        .onConflictDoUpdate({ tokenId, updatedAt: ts });
+      // Claim this slot's reverse mapping for the list — but only if the slot is unclaimed, or
+      // already claimed by this same list. The slot is attacker-settable, so a different list may
+      // already own this mapping; first writer wins, so we must not overwrite it (see
+      // `deleteStorageLocationIfOwnedBy`).
+      const claimedBy = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
+        id: newLocationId,
+      });
+      if (!claimedBy) {
+        await context.ensDb
+          .insert(ensIndexerSchema.efpListStorageLocations)
+          .values({ id: newLocationId, chainId, contractAddress, slot, tokenId, updatedAt: ts });
+      } else if (claimedBy.tokenId === tokenId) {
+        await context.ensDb
+          .update(ensIndexerSchema.efpListStorageLocations, { id: newLocationId })
+          .set({ updatedAt: ts });
+      }
 
       // (Re-)apply this storage location's durable user/manager metadata to the list. Keyed by
       // location, so it restores roles whenever a list points at (or re-points to) a slot whose

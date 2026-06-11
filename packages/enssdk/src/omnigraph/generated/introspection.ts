@@ -3641,10 +3641,6 @@ const introspection = {
         ]
       },
       {
-        "kind": "SCALAR",
-        "name": "Email"
-      },
-      {
         "kind": "OBJECT",
         "name": "EfpAccountMetadata",
         "fields": [
@@ -4648,6 +4644,10 @@ const introspection = {
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Email"
       },
       {
         "kind": "OBJECT",

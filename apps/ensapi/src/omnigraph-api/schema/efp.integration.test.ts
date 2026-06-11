@@ -124,7 +124,7 @@ describe("Account.efp deep walk (demoGraph)", () => {
           tokenId: string;
           records: GraphQLConnection<{
             recordData: string;
-            account: { id: string; efp: { primaryList: { tokenId: string } | null } } | null;
+            account: { id: string; efp: { primaryList: { tokenId: string } | null } };
           }>;
         } | null;
       };
@@ -158,8 +158,8 @@ describe("Account.efp deep walk (demoGraph)", () => {
     expect(primaryList?.tokenId).toBe("0");
 
     const records = flattenConnection(primaryList!.records);
-    // Every followed peer is an indexed ENS account, so each record links to an Account
-    // (the `EfpListRecord.account` row-gating, positive direction).
+    // A record's `account` always resolves — an Account exists for any address — so every followed
+    // peer links to an Account regardless of whether it has any indexed ENS presence.
     expect(records.every((r) => r.account !== null)).toBe(true);
 
     // The deep walk resolves end to end: alice's list follows bob, and bob's own validated
@@ -176,7 +176,7 @@ describe("EFP handler edge cases (seeded)", () => {
       listRecords: GraphQLConnection<{
         recordData: string;
         tags: string[];
-        account: { id: string } | null;
+        account: { id: string };
         list: { user: string | null } | null;
       }>;
     };
@@ -202,8 +202,9 @@ describe("EFP handler edge cases (seeded)", () => {
     expect(records).toHaveLength(1);
     // The tag was added twice; the embedded-tags set must hold it once.
     expect(records[0].tags).toEqual(["block"]);
-    // The synthetic target is not an indexed account, so `account` is null.
-    expect(records[0].account).toBeNull();
+    // `account` always resolves (an Account exists for any address), even for this synthetic target
+    // with no indexed ENS presence; it resolves to the record's `recordData` address.
+    expect(records[0].account && eq(records[0].account.id, efpSeedTargets.dedup)).toBe(true);
     // The owning list's `user` was set to a malformed (non-20-byte) value, clearing it to null.
     expect(records[0].list?.user).toBeNull();
   });

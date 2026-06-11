@@ -1,9 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { NormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
 
 import di from "@/di";
-import { efpAccountMetadataId } from "@/omnigraph-api/schema/efp-ids";
 
 /** The EFP AccountMetadata key whose value is an account's primary-list token id. */
 export const EFP_PRIMARY_LIST_KEY = "primary-list";
@@ -42,9 +41,9 @@ export async function resolveValidatedPrimaryListTokenId(
     .select({ value: ensIndexerSchema.efpAccountMetadata.value })
     .from(ensIndexerSchema.efpAccountMetadata)
     .where(
-      eq(
-        ensIndexerSchema.efpAccountMetadata.id,
-        efpAccountMetadataId(address, EFP_PRIMARY_LIST_KEY),
+      and(
+        eq(ensIndexerSchema.efpAccountMetadata.address, address as Hex),
+        eq(ensIndexerSchema.efpAccountMetadata.key, EFP_PRIMARY_LIST_KEY),
       ),
     )
     .limit(1);

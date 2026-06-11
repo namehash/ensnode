@@ -103,7 +103,8 @@ export const fixtures = {
 /**
  * Synthetic EFP follow targets used by the integration EFP seeder (`seed/efp.ts`) and the EFP
  * integration tests. Each anchors a distinct seeded record so tests can look it up by `recordData`;
- * none is an indexed ENS account, so they also exercise `EfpListRecord.account`'s null path.
+ * none has any indexed ENS presence, so they exercise that `EfpListRecord.account` still resolves to
+ * an Account for an arbitrary address.
  */
 export const efpSeedTargets = {
   /** ADD + ADD_TAG("block") + ADD_TAG("block") -> tags === ["block"] (dedup). */

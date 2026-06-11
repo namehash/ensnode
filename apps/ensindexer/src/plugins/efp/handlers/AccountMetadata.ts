@@ -27,7 +27,7 @@ export default function () {
       await context.ensDb
         .insert(ensIndexerSchema.efpAccountMetadata)
         .values({
-          id: accountMetadataId(address, key),
+          id: accountMetadataId(context.chain.id, address, key),
           chainId: context.chain.id,
           contractAddress: event.log.address.toLowerCase() as Hex,
           address,

@@ -10,8 +10,8 @@
  * Everything is driven onto one freshly-minted list (a dedicated Anvil account that `demoGraph`
  * never touches, so it does not perturb the demoGraph assertions), and each record is anchored by a
  * unique synthetic target address so tests can look records up by `recordData` without depending on
- * a token id. The synthetic targets are not indexed ENS accounts, so they also exercise the
- * `EfpListRecord.account` null path.
+ * a token id. The synthetic targets have no indexed ENS presence, so they also exercise that
+ * `EfpListRecord.account` still resolves to an Account for an arbitrary address.
  */
 
 import {

@@ -155,9 +155,9 @@ EfpListRecordRef.implement({
     ///////////////////////////
     account: t.field({
       description:
-        "The account this record points to (its `recordData`). Null if that address is not an indexed account.",
+        "The Account this record points to (its `recordData`). Always resolvable: an Account exists for any address (see `query.account`), so a record's target can always be walked into its ENS names and own EFP presence.",
       type: AccountRef,
-      nullable: true,
+      nullable: false,
       resolve: (record) => record.recordData as NormalizedAddress,
     }),
   }),

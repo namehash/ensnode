@@ -1,4 +1,3 @@
-import type { NormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
 
 /**
@@ -6,15 +5,6 @@ import type { Hex } from "viem";
  * `apps/ensindexer/src/plugins/efp/lib/ids.ts`. ENSApi reads ENSDb rows by these ids, so these
  * formats MUST stay in sync with the indexer.
  */
-
-/**
- * `efp_account_metadata` key: `${address}-${key}`. Mirrors the indexer's `accountMetadataId`: the
- * address is lowercase (a NormalizedAddress) and NUL bytes are stripped from the free-form `key`
- * (the indexer strips them before writing, so a lookup must strip them too to match the stored id).
- */
-export function efpAccountMetadataId(address: NormalizedAddress, key: string): string {
-  return `${address.toLowerCase()}-${key.replace(/\0/g, "")}`;
-}
 
 /** `efp_list_storage_locations` key: `${chainId}-${contractAddress}-${slot}` (lowercased hex). */
 export function efpStorageLocationId(chainId: number, contractAddress: Hex, slot: Hex): string {

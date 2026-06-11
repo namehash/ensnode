@@ -898,9 +898,6 @@ type ENSv2RegistryReservation implements Registration {
   unregistrant: Account
 }
 
-"""Email represents a validated contact email address."""
-scalar Email
-
 """
 An EFP `(address, key) -> value` account-metadata entry (e.g. "primary-list").
 """
@@ -973,9 +970,9 @@ A single record within an EFP list (an address it follows), with its tags.
 """
 type EfpListRecord {
   """
-  The account this record points to (its `recordData`). Null if that address is not an indexed account.
+  The Account this record points to (its `recordData`). Always resolvable: an Account exists for any address (see `query.account`), so a record's target can always be walked into its ENS names and own EFP presence.
   """
-  account: Account
+  account: Account!
 
   """Chain id of the ListRecords contract holding this record."""
   chainId: ChainId!
@@ -1097,6 +1094,9 @@ type EfpQueryListsConnectionEdge {
   cursor: String!
   node: EfpList!
 }
+
+"""Email represents a validated contact email address."""
+scalar Email
 
 """
 An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.

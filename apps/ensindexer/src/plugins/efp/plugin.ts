@@ -5,8 +5,9 @@
  * - account metadata (`AccountMetadata` on Base).
  *
  * EFP does not consume ENS protocol data; it indexes its own contracts, sourced from the EFP
- * datasources, which exist only on the `mainnet` ENS namespace — so the plugin can only be
- * activated there (datasource-presence validation enforces this).
+ * datasources. The plugin can be activated on any ENS namespace that provides those datasources
+ * (mainnet and ens-test-env today); declaring them in `requiredDatasourceNames` makes config
+ * validation reject enabling the plugin on a namespace that does not.
  */
 
 import * as ponder from "ponder";

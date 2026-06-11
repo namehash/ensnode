@@ -20,9 +20,9 @@ export function listRecordId(
   return `${chainId}-${contractAddress.toLowerCase()}-${slot.toLowerCase()}-${record.toLowerCase()}`;
 }
 
-/** `efp_account_metadata` key: an `(address, key)` pair (lowercased address; NUL bytes stripped from the key). */
-export function accountMetadataId(address: Hex, key: string): string {
-  return `${address.toLowerCase()}-${key.replace(/\0/g, "")}`;
+/** `efp_account_metadata` key: a `(chainId, address, key)` tuple (lowercased address; NUL bytes stripped from the key). */
+export function accountMetadataId(chainId: number, address: Hex, key: string): string {
+  return `${chainId}-${address.toLowerCase()}-${key.replace(/\0/g, "")}`;
 }
 
 /** `efp_list_metadata` key: per-location metadata `(storage location, key)`. */
