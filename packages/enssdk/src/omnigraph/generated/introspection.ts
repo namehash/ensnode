@@ -1694,6 +1694,15 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "contenthash",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileContenthash"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "description",
             "type": {
               "kind": "SCALAR",
@@ -5112,6 +5121,58 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileContenthash",
+        "fields": [
+          {
+            "name": "decoded",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "httpUrl",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "protocolType",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "uri",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
             },
             "args": [],
             "isDeprecated": false

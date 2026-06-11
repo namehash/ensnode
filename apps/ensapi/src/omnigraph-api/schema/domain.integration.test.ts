@@ -710,6 +710,12 @@ describe("Domain.profile", () => {
           avatar: { httpUrl: UrlString | null } | null;
           addresses: { ethereum: NormalizedAddress | null } | null;
           socials: { github: { handle: string; httpUrl: UrlString } | null } | null;
+          contenthash: {
+            protocolType: string;
+            decoded: string;
+            uri: string;
+            httpUrl: string | null;
+          } | null;
         } | null;
       };
     };
@@ -725,6 +731,7 @@ describe("Domain.profile", () => {
             header { httpUrl }
             website { httpUrl }
             email
+            contenthash { protocolType decoded uri httpUrl }
             addresses { ethereum bitcoin litecoin solana }
             socials {
               github { httpUrl handle }
@@ -754,6 +761,13 @@ describe("Domain.profile", () => {
               bitcoin: fixtures.rawAddresses.bitcoin.address,
               litecoin: fixtures.rawAddresses.litecoin.address,
               solana: fixtures.rawAddresses.solana.address,
+            },
+            contenthash: {
+              protocolType: "ipfs",
+              decoded: "bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4",
+              uri: "ipfs://bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4",
+              httpUrl:
+                "https://ipfs.io/ipfs/bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4",
             },
             socials: {
               github: {

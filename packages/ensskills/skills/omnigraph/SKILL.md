@@ -208,7 +208,7 @@ _An ENSIP-19 primary name for an Account on a specific coin type._
 
 Run `npx enscli ensnode omnigraph schema <Type>` for fields of:
 
-`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
+`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileContenthash`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
 
 <!-- AUTOGEN:SCHEMA end -->
 

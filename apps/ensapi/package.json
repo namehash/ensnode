@@ -22,6 +22,7 @@
     "version:current": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
+    "@ensdomains/content-hash": "^3.0.0",
     "@ensdomains/ensjs": "^4.0.2",
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",

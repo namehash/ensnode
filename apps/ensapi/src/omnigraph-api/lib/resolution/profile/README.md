@@ -13,6 +13,7 @@ profile/
     images.ts                  # avatar / header → httpUrl (direct HTTP + metadata service)
     social.ts                  # Service keys → { handle, httpUrl }
     addresses.ts               # Multicoin addresses → typed address strings
+    contenthash.ts             # ENSIP-7 contenthash → { protocolType, decoded, uri, httpUrl }
   README.md
 ```
 
@@ -59,7 +60,7 @@ Record names use a `texts.<key>` prefix for ENS text records and `addresses.<coi
 | `texts.vnd.github`                                | ✅     | [5](https://docs.ens.domains/ensip/5)                                            | Legacy GitHub key (renamed to `com.github`). Fallback when `com.github` is unset. Interpreter: `SocialGithubInterpreter`.                                                                       |
 | `texts.vnd.twitter`                               | ✅     | [5](https://docs.ens.domains/ensip/5)                                            | Legacy Twitter key (renamed to `com.twitter`). Fallback when `com.x` and `com.twitter` are unset. Interpreter: `SocialTwitterInterpreter`.                                                      |
 | `texts.vnd.peepeth`                               | 📋     | [5](https://docs.ens.domains/ensip/5)                                            | Legacy Peepeth key (renamed to `com.peepeth`). Planned as fallback when `com.peepeth` is unset.                                                                                                 |
-| `contenthash`                                     | 📋     | [7](https://docs.ens.domains/ensip/7)                                            | IPFS / Swarm content address. Resolved on `records.contenthash` today; not yet exposed on `profile`.                                                                                            |
+| `contenthash`                                     | ✅     | [7](https://docs.ens.domains/ensip/7)                                            | ENSIP-7 content address (IPFS, IPNS, Swarm, Arweave, Onion, Skynet). GraphQL: `profile.contenthash` (`{ protocolType, decoded, uri, httpUrl }`). Interpreter: `ProfileContenthashInterpreter`.  |
 | `texts.agent-registration[<registry>][<agentId>]` | 📋     | [25](https://docs.ens.domains/ensip/25)                                          | Non-empty attestation linking an ENS name to an on-chain AI agent registry entry.                                                                                                               |
 | `texts.agent-context`                             | 📋     | [26](https://docs.ens.domains/ensip/26)                                          | Agent description and discovery entry point (plain text, Markdown, YAML, JSON, …).                                                                                                              |
 | `texts.agent-endpoint[mcp]`                       | 📋     | [26](https://docs.ens.domains/ensip/26)                                          | Model Context Protocol endpoint URL.                                                                                                                                                            |

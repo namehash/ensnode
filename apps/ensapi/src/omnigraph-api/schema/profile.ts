@@ -1,7 +1,9 @@
 import { builder } from "@/omnigraph-api/builder";
+import type { ProfileContenthashModel } from "@/omnigraph-api/lib/resolution/profile/interpreters";
 import {
   ADDRESS_INTERPRETERS,
   ProfileAvatarInterpreter,
+  ProfileContenthashInterpreter,
   ProfileDescriptionInterpreter,
   ProfileEmailInterpreter,
   ProfileHeaderInterpreter,
@@ -11,12 +13,43 @@ import {
 import {
   profileAddressesContainerDescription,
   profileAddressFieldDescription,
+  profileContenthashDescription,
   profileImageHttpUrlFieldDescription,
   profileSocialFieldDescription,
   profileSocialsContainerDescription,
   profileWebsiteFieldDescription,
 } from "@/omnigraph-api/lib/resolution/profile/profile-descriptions";
 import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
+
+export type { ProfileContenthashModel };
+
+export const ProfileContenthashRef =
+  builder.objectRef<ProfileContenthashModel>("ProfileContenthash");
+
+ProfileContenthashRef.implement({
+  description: "The interpreted ENSIP-7 contenthash on the profile of an ENS name.",
+  fields: (t) => ({
+    protocolType: t.exposeString("protocolType", {
+      description: 'The protocol type identifier (e.g. "ipfs", "ipns", "swarm", "arweave").',
+      nullable: false,
+    }),
+    decoded: t.exposeString("decoded", {
+      description:
+        "The decoded, human-readable content identifier (e.g. a CID for IPFS, transaction ID for Arweave).",
+      nullable: false,
+    }),
+    uri: t.exposeString("uri", {
+      description:
+        'The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").',
+      nullable: false,
+    }),
+    httpUrl: t.exposeString("httpUrl", {
+      description:
+        "The default public HTTP gateway URL for fetching this content in a browser (e.g. https://ipfs.io/ipfs/…). Null for protocols with no well-known public gateway (onion, skynet).",
+      nullable: true,
+    }),
+  }),
+});
 
 export type ProfileSocialAccountModel = { handle: string; httpUrl: string };
 export type ProfileImageModel = { httpUrl: string | null };
@@ -224,6 +257,12 @@ DomainProfileRef.implement({
       type: "Email",
       nullable: true,
       resolve: (model) => ProfileEmailInterpreter.interpret(model),
+    }),
+    contenthash: t.field({
+      description: profileContenthashDescription,
+      type: ProfileContenthashRef,
+      nullable: true,
+      resolve: (model) => ProfileContenthashInterpreter.interpret(model),
     }),
     addresses: t.field({
       description: profileAddressesContainerDescription,

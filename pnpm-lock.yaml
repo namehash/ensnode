@@ -357,6 +357,9 @@ importers:
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
+      '@ensdomains/content-hash':
+        specifier: ^3.0.0
+        version: 3.0.0
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
@@ -2149,6 +2152,9 @@ packages:
   '@ensdomains/address-encoder@1.1.4':
     resolution: {integrity: sha512-hBY6VxVw9A1cMPOKDIvPB2nlmgaw2dvrrj/p/9tkGWmD+qdfKYZTdZuSdFcUGxhhzEB4HeLG/a98ytlTq84KcA==}
 
+  '@ensdomains/content-hash@3.0.0':
+    resolution: {integrity: sha512-5ongDPX9qDkemcYZ2rPXsRzCRDneoR2xujm2Tq3u0ZefQa49ZAURVKGqbJdjoL0VIZDfceLkBXekYKqkfrR5Ww==}
+
   '@ensdomains/content-hash@3.1.0-rc.1':
     resolution: {integrity: sha512-OzdkXgdFmduzcJKU4KRkkJkQHnm5p7m7FkX8k+bHOEoOIzc0ueGT/Jay4nnb60wNk1wSHRmzY+hHBMpFDiGReg==}
 
@@ -3436,6 +3442,9 @@ packages:
 
   '@mermaid-js/parser@1.1.1':
     resolution: {integrity: sha512-VuHdsYMK1bT6X2JbcAaWAhugTRvRBRyuZgd+c22swUeI9g/ntaxF7CY7dYarhZovofCbUNO0G7JesfmNtjYOCw==}
+
+  '@multiformats/sha3@2.0.17':
+    resolution: {integrity: sha512-7ik6pk178qLO2cpNucgf48UnAOBMkq/2H92DP4SprZOJqM9zqbVaKS7XyYW6UvhRsDJ3wi921fYv1ihTtQHLtA==}
 
   '@n1ru4l/push-pull-async-iterable-iterator@3.2.0':
     resolution: {integrity: sha512-3fkKj25kEjsfObL6IlKPAlHYPq/oYwUkkQ03zsTTiDjD7vg/RxjdiLeCydqtxHZP0JgsXL3D/X5oAkMGzuUp/Q==}
@@ -7636,6 +7645,9 @@ packages:
   js-base64@3.7.8:
     resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
+  js-sha3@0.8.0:
+    resolution: {integrity: sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==}
+
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -8335,6 +8347,13 @@ packages:
 
   muggle-string@0.4.1:
     resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
+
+  multiformats@12.1.3:
+    resolution: {integrity: sha512-eajQ/ZH7qXZQR2AgtfpmSMizQzmyYVmCql7pdhldPuYQi4atACekbJaQplk6dWyIi10jCaFnd6pqvcEFXjbaJw==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+
+  multiformats@9.9.0:
+    resolution: {integrity: sha512-HoMUjhH9T8DDBNT+6xzkrd9ga/XiBI4xLr58LJACwK6G3HTOPeMz4nB4KJs33L2BelrIJa7P0VuNaVF3hMYfjg==}
 
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
@@ -11792,6 +11811,11 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
+  '@ensdomains/content-hash@3.0.0':
+    dependencies:
+      '@multiformats/sha3': 2.0.17
+      multiformats: 12.1.3
+
   '@ensdomains/content-hash@3.1.0-rc.1':
     dependencies:
       '@ensdomains/address-encoder': 1.0.0-rc.3
@@ -12910,6 +12934,11 @@ snapshots:
   '@mermaid-js/parser@1.1.1':
     dependencies:
       '@chevrotain/types': 11.1.2
+
+  '@multiformats/sha3@2.0.17':
+    dependencies:
+      js-sha3: 0.8.0
+      multiformats: 9.9.0
 
   '@n1ru4l/push-pull-async-iterable-iterator@3.2.0': {}
 
@@ -17872,6 +17901,8 @@ snapshots:
 
   js-base64@3.7.8: {}
 
+  js-sha3@0.8.0: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@3.14.2:
@@ -18794,6 +18825,10 @@ snapshots:
   ms@2.1.3: {}
 
   muggle-string@0.4.1: {}
+
+  multiformats@12.1.3: {}
+
+  multiformats@9.9.0: {}
 
   mz@2.7.0:
     dependencies:
