@@ -3,8 +3,7 @@
 A minimal Node project for dogfooding the [`ensskills`](../../packages/ensskills) package — the
 versioned agent skills that teach AI coding agents the ENS Omnigraph.
 
-Unlike the published quickstart (which pins `ensskills` to an exact version), this example installs
-it from the workspace (`ensskills: workspace:*`) so you exercise whatever is on your current branch.
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.2`). If you query a different ENSNode version, you must match its ENSNode version with the same `enskit`/`enssdk` version.
 
 Refer to the [ensskills integration guide](https://ensnode.io/docs/integrate/integration-options/ensskills) to use `ensskills` in your own project.
 
@@ -18,7 +17,7 @@ Refer to the [ensskills integration guide](https://ensnode.io/docs/integrate/int
 - `--cwd .` (in `package.json`) keeps skills-npm from walking up to the monorepo root — without it,
   skills-npm detects `pnpm-workspace.yaml` and would symlink into the repo root's agent dirs.
 - `agents: ["claude-code"]` targets Claude Code. Drop it to auto-detect every agent you have installed.
-- `include: ["ensskills"]` pulls skills only from the workspace package.
+- `include: ["ensskills"]` pulls skills only from the `ensskills` package.
 
 ## Usage
 
