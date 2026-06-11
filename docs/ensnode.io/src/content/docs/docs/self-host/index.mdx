@@ -6,15 +6,15 @@ description: Decide whether to self-host ENSNode and understand the architecture
 import { LinkCard } from "@astrojs/starlight/components";
 import EnsDbSnapshotsTeaser from "@components/molecules/EnsDbSnapshotsTeaser.astro";
 
-Get extra benefits compared to using one of the publicly [Hosted Instances](/docs/hosted-instances). Having your own ENSNode instance allows you to:
+Self-hosting provides extra benefits compared to using one of the publicly [Hosted Instances](/docs/hosted-instances). Having your own ENSNode instance allows you to:
 
 - **Select [ENS Namespace](/docs/hosted-instances#ens-namespaces)**: choose which ENS protocol deployment ENSNode will provide data for (ex: `mainnet` or `sepolia`). Great for testing and development.
 - **Select [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins)**: activate only the plugins you need for your use cases, reducing resource usage and improving performance.
-- **Tailor "name healing" coverage**: apply selected [label set](/docs/services/ensrainbow/usage/available-label-sets#available-label-sets) that fits your needs for [ENSRainbow to perform "name healing"](/docs/services/ensrainbow#how-ensrainbow-helps).
+- **Tailor "name healing" coverage**: apply a [label set](/docs/services/ensrainbow/usage/available-label-sets#available-label-sets) that fits your needs for [ENSRainbow to perform "name healing"](/docs/services/ensrainbow#how-ensrainbow-helps).
 - **Index ENS data the way you want**: customize indexing logic and indexed data model stored in your own [ENSDb instance](/docs/integrate/integration-options/ensdb) by implementing an [ENSDb Writer](/docs/integrate/integration-options/ensdb-writers).
 - **Build custom APIs and data pipelines**: implement an [ENSDb Reader](/docs/integrate/integration-options/ensdb-readers) to build apps using your own ENSDb instance as a source of truth for ENS live data.
 - **Control versioning and updates**: choose when to update your ENSNode instance to new versions, giving you control over when to adopt new features or breaking changes.
-- **Manage uptime**: apply your own strategies for ensuring high availability and uptime guarantees.
+- **Manage uptime**: apply strategies for ensuring high availability and uptime guarantees.
 
 ### Bootstrap from a snapshot (coming soon)
 
