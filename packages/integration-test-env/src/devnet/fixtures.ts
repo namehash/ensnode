@@ -94,7 +94,8 @@ export const fixtures = {
   fourBytesInterface: "0x11100111",
   publicKeyX: `0x${"02".repeat(32)}`,
   publicKeyY: `0x${"03".repeat(32)}`,
-  // IPFS CID for QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4
+  // decoded to CIDv0 `QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4`
+  // CIDv1 is `bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4`
   // taken from @see https://github.com/ensdomains/content-hash#-usage
   contenthash: "0xe3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f",
 

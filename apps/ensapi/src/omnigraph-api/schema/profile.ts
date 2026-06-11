@@ -39,8 +39,7 @@ ProfileContenthashRef.implement({
       nullable: false,
     }),
     uri: t.exposeString("uri", {
-      description:
-        'The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").',
+      description: 'The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").',
       nullable: false,
     }),
     httpUrl: t.exposeString("httpUrl", {
