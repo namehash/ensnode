@@ -916,11 +916,11 @@ importers:
   examples/ensskills-example:
     devDependencies:
       enscli:
-        specifier: workspace:*
-        version: link:../../packages/enscli
+        specifier: 1.15.2
+        version: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
       ensskills:
-        specifier: workspace:*
-        version: link:../../packages/ensskills
+        specifier: 1.15.2
+        version: 1.15.2
       skills-npm:
         specifier: ^1
         version: 1.1.1
@@ -2149,6 +2149,21 @@ packages:
     resolution: {integrity: sha512-4vDIZEFAa1doNA3H9MppUHxflSDYYPVNyaDbdHLksTa4taq3y4dGpletX67Xea8nxI+cMfjEi4nOzLJmPzRE/g==}
     peerDependencies:
       viem: ^2.9.2
+
+  '@ensnode/datasources@1.15.2':
+    resolution: {integrity: sha512-UHFHCAVysKRzR7sY5LOedwYuxZgCuNNAKFvtcqQopYJZ4Cxs5pOzGpXLFGKo0uRtFDaZmoBn53ZaAmPsZiAFMA==}
+    peerDependencies:
+      viem: ^2.50.3
+
+  '@ensnode/ensnode-sdk@1.15.2':
+    resolution: {integrity: sha512-GHFrTfxqpPDycfr/XTVDZCzqFl5kD/uoEUOO+7vuvac6od2Dv2IriPw7TQmm33Ov0VkDKBALe8txfmhUESrWrw==}
+    peerDependencies:
+      viem: ^2.50.3
+
+  '@ensnode/ensrainbow-sdk@1.15.2':
+    resolution: {integrity: sha512-yWiwxS60In7xXqh5h+6RNLpEBqYTJWSxRto12MUMNksM6+gxat04q3Rta6+CmJJLmn8N55AZ+eQ9aQ3dAYLc6w==}
+    peerDependencies:
+      viem: ^2.50.3
 
   '@envelop/core@5.3.2':
     resolution: {integrity: sha512-06Mu7fmyKzk09P2i2kHpGfItqLLgCq7uO5/nX4fc/iHMplWPNuAx4iYR+WXUQoFHDnP6EUbceQNQ5iyeMz9f3g==}
@@ -6777,6 +6792,10 @@ packages:
     resolution: {integrity: sha512-rRqJg/6gd538VHvR3PSrdRBb/1Vy2YfzHqzvbhGIQpDRKIa4FgV/54b5Q1xYSxOOwKvjXweS26E0Q+nAMwp2pQ==}
     engines: {node: '>=8.6'}
 
+  enscli@1.15.2:
+    resolution: {integrity: sha512-FoYQOqqIFhf+G/mZz1JNFSPxsUVPBhZz1BsjBFxyB+bCJGS/e6V0JVreBuASt7dxHuZRZh+sF/30/qxQxYQHVg==}
+    hasBin: true
+
   enskit@1.15.2:
     resolution: {integrity: sha512-61obMt+dpce/zqRfpSHlkwFrAi43PJhgZmsjRM7ZI42qccQKjDF+sDOjmdbvf7at1fmPJUATNJscHfb62jX6Xw==}
     peerDependencies:
@@ -6791,6 +6810,9 @@ packages:
       gql.tada: ^1.8.10
       graphql: ^16
       viem: ^2
+
+  ensskills@1.15.2:
+    resolution: {integrity: sha512-NwBl3vUOg/5hv/HGPe5GIW1yqXl5uFQ3wA6uAgkvh9FLFTdlMk5sixhuynep24LupE8nOPbMeAqWCdBattqcmw==}
 
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
@@ -11811,6 +11833,38 @@ snapshots:
       - typescript
       - zod
 
+  '@ensnode/datasources@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      '@ponder/utils': 0.2.18(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+    transitivePeerDependencies:
+      - gql.tada
+      - graphql
+      - typescript
+
+  '@ensnode/ensnode-sdk@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      '@ensdomains/address-encoder': 1.1.4
+      '@ensnode/datasources': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      caip: 1.1.1
+      date-fns: 4.1.0
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - gql.tada
+      - graphql
+      - typescript
+
+  '@ensnode/ensrainbow-sdk@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+    transitivePeerDependencies:
+      - gql.tada
+      - graphql
+
   '@envelop/core@5.3.2':
     dependencies:
       '@envelop/instrumentation': 1.0.0
@@ -16783,6 +16837,19 @@ snapshots:
       ansi-colors: 4.1.3
       strip-ansi: 6.0.1
 
+  enscli@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
+    dependencies:
+      '@ensnode/datasources': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      '@ensnode/ensnode-sdk': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      '@ensnode/ensrainbow-sdk': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      citty: 0.1.6
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      graphql: 16.11.0
+    transitivePeerDependencies:
+      - gql.tada
+      - typescript
+      - viem
+
   enskit@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(react@19.2.1)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       '@urql/core': 6.0.1(graphql@16.11.0)
@@ -16802,6 +16869,8 @@ snapshots:
       gql.tada: 1.9.1(graphql@16.11.0)(typescript@5.9.3)
       graphql: 16.11.0
       viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+
+  ensskills@1.15.2: {}
 
   entities@4.5.0: {}
 
