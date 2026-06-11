@@ -6,6 +6,7 @@ import {
   ResolverABI,
   StandaloneReverseRegistrarABI,
   ThreeDNSTokenABI,
+  UpgradeableProxyABI,
 } from "@ensnode/datasources";
 import { buildBlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
 import {
@@ -99,6 +100,22 @@ export default createPlugin({
             }),
             {},
           ),
+        },
+
+        ////////////////////////////
+        // UpgradeableProxyResolver
+        ////////////////////////////
+        [namespaceContract(pluginName, "UpgradeableProxyResolver")]: {
+          abi: UpgradeableProxyABI,
+          chain: {
+            // the DotBoxL1Resolver is an UpgradeableProxy
+            ...("DotBoxL1Resolver" in ensroot.contracts &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                ensroot.chain.id,
+                ensroot.contracts.DotBoxL1Resolver,
+              )),
+          },
         },
 
         /////////////////////

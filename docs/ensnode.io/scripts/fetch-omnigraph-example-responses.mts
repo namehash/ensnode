@@ -24,12 +24,27 @@ function logError(message: string, id?: string) {
 const TIMEOUT_MS = 120_000;
 const WARN_THRESHOLD_MS = 5_000;
 
-const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../src/data/omnigraph-examples");
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const dataDir = join(scriptDir, "../src/data/omnigraph-examples");
 const examplesPath = join(dataDir, "examples.json");
 const outputPath = join(dataDir, "responses.json");
+const contentExamplesDir = join(scriptDir, "../src/content/docs/docs/integrate/omnigraph/examples");
 
 if (!existsSync(examplesPath)) {
   logError(`No examples snapshot at ${examplesPath}. Run pnpm omnigraph:snapshot <version> first.`);
+  process.exit(1);
+}
+
+// Every separate-page example must have a content page, or its sidebar/index link 404s.
+const missingPages = OMNIGRAPH_EXAMPLES_CONFIG.filter((config) => config.hostSeparatePage)
+  .map((config) => config.id)
+  .filter((id) => !existsSync(join(contentExamplesDir, `${id}.mdx`)));
+
+if (missingPages.length > 0) {
+  logError(
+    `Missing content page(s) for separate-page example(s): ${missingPages.join(", ")}. ` +
+      `Create src/content/docs/docs/integrate/omnigraph/examples/<id>.mdx for each.`,
+  );
   process.exit(1);
 }
 

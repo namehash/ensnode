@@ -493,6 +493,104 @@ Variables:
 }
 ```
 
+### domain-profile-and-records
+
+```graphql
+query DomainProfileAndRecords($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          solana
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+      }
+      records {
+        addresses(coinTypes: [60, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "com.github", "url"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "gregskril.eth"
+}
+```
+
+### offchain-name
+
+```graphql
+query OffchainName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain
+    __typename
+    id
+    canonical {
+      name {
+        interpreted
+      }
+    }
+    resolver {
+      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on
+      effective {
+        extended
+        contract {
+          chainId
+          address
+        }
+      }
+    }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "description"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "name": "patricio.onpoap.eth"
+}
+```
+
 ### domain-subdomains
 
 ```graphql
@@ -667,10 +765,45 @@ Variables:
 }
 ```
 
-### account-primary-name
+### account-primary-names
 
 ```graphql
-query AccountPrimaryName($address: Address!) {
+query AccountPrimaryNames($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    resolve {
+      onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
+        chainName
+        name {
+          interpreted
+          beautified
+        }
+      }
+
+      twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+        chainName
+        name {
+          interpreted
+          beautified
+        }
+      }
+    }
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "address": "0x179a862703a4adfb29896552df9e307980d19285"
+}
+```
+
+### account-primary-name-records
+
+```graphql
+query AccountPrimaryNameRecords($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
@@ -1047,8 +1180,8 @@ Variables:
 query AccelerateResolve($address: Address!) {
   account(by: { address: $address }) {
     address
-    resolve(accelerate: true) {
-      trace
+    # resolve is automatically accelerated. To disable, resolve(accelerate: false)
+    resolve {
       acceleration {
         requested
         attempted
@@ -1059,7 +1192,6 @@ query AccelerateResolve($address: Address!) {
           beautified
         }
         resolve {
-          trace
           acceleration {
             requested
             attempted

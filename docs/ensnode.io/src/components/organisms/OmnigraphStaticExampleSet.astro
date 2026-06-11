@@ -37,7 +37,13 @@ const { description } = getOmnigraphExampleById(id);
 const data = resolveOmnigraphStaticExample(id);
 ---
 
-{!hideDescription && <p>{description}</p>}
+{
+  !hideDescription && (
+    <div class="sl-markdown-content">
+      <p set:html={description} />
+    </div>
+  )
+}
 
 <StaticExampleCard uid={data.uid}>
   <div

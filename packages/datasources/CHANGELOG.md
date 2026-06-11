@@ -1,5 +1,18 @@
 # @ensnode/ens-deployments
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2242](https://github.com/namehash/ensnode/pull/2242) [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54) Thanks [@shrugs](https://github.com/shrugs)! - Add contract identification by address. `@ensnode/datasources` exports `identifyDatasourceContracts(namespaceId, query)`, which finds every well-known contract in a namespace's datasources whose address matches a given address, optionally scoped to a chain.
+
+- [#2191](https://github.com/namehash/ensnode/pull/2191) [`39cb445`](https://github.com/namehash/ensnode/commit/39cb445b8d8790aa9d6fe2ee904e60bdb158efbd) Thanks [@tk-o](https://github.com/tk-o)! - Updates the `sepolia-v2` ENS Namespace to support the latest ENSv1+ENSv2 test deployment on Sepolia.
+
+- [#2267](https://github.com/namehash/ensnode/pull/2267) [`6165f50`](https://github.com/namehash/ensnode/commit/6165f50e26729c6d740c7424034057642f5175b5) Thanks [@shrugs](https://github.com/shrugs)! - Consolidate UniversalResolver onto the `IUniversalResolver` proxy. Each ENSRoot Datasource now exposes a single `UniversalResolver` contract pointing at the proxy address (`0xeeeeeeee14d718c2b47d9923deab1335e144eeee` on mainnet/sepolia), replacing the separate `UniversalResolver` (V1) and `UniversalResolverV2` contracts. The exported `UniversalResolverABI` is now `IUniversalResolver` merged with `IMulticallable`.
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - enssdk@1.15.2
+
 ## 1.15.1
 
 ### Patch Changes

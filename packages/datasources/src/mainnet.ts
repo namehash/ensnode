@@ -100,6 +100,11 @@ export default {
         address: "0x1507ce9421232fdbd302f5ebe4590f8d77febbff",
         startBlock: 24640923,
       },
+      DotBoxL1Resolver: {
+        abi: ResolverABI,
+        address: "0xf97aac6c8dbaebcb54ff166d79706e3af7a813c8",
+        startBlock: 19128555,
+      },
 
       // the Resolver for *.argent.xyz names
       ArgentResolver: {

@@ -44,6 +44,11 @@ const VITALIK_NAME = asInterpretedName("vitalik.eth");
 
 const GREG_NAME = asInterpretedName("gregskril.eth");
 
+const GREG_ADDRESS = toNormalizedAddress("0x179a862703a4adfb29896552df9e307980d19285");
+
+// an offchain (CCIP-Read) name: resolvable but unindexed, so it surfaces as an UnindexedDomain
+const OFFCHAIN_NAME = asInterpretedName("patricio.onpoap.eth");
+
 const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ReverseResolverRoot,
@@ -83,13 +88,13 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
       # Reverse resolve the ENS primary name of the account
       # using a convenient ETHEREUM alias for mainnet.
       primaryName(by: { chainName: ETHEREUM }) {
-        # Get the regular interpreted variant of the primary name 
-        # and also the special beautified variant that optimizes names 
+        # Get the regular interpreted variant of the primary name
+        # and also the special beautified variant that optimizes names
         # containing special characters such as emojis for proper display in interfaces.
         name { interpreted beautified }
         resolve {
           # If the account has a primary name on Ethereum (mainnet),
-          # forward resolve the interpreted ENS profile of that name in the same query!.
+          # forward resolve the interpreted ENS profile of that name in the same query!
           profile {
             description
             avatar { httpUrl }
@@ -332,6 +337,80 @@ query DomainProfile($name: InterpretedName!) {
     variables: { default: { name: GREG_NAME } },
   },
 
+  {
+    id: "domain-profile-and-records",
+    query: `
+query DomainProfileAndRecords($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          solana
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+      }
+      records {
+        addresses(coinTypes: [60, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "com.github", "url"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: GREG_NAME } },
+  },
+
+  ////////////////////////////////////
+  // Offchain Name (UnindexedDomain)
+  ////////////////////////////////////
+  {
+    id: "offchain-name",
+    query: `
+query OffchainName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain
+    __typename
+    id
+    canonical { name { interpreted } }
+    resolver {
+      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on
+      effective {
+        extended
+        contract { chainId address }
+      }
+    }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) { coinType address }
+        texts(keys: ["avatar", "com.twitter", "description"]) { key value }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: OFFCHAIN_NAME } },
+  },
+
   //////////////////////
   // Domain Subdomains
   //////////////////////
@@ -467,9 +546,34 @@ query AccountDomains(
   // Account Primary Names
   /////////////////////////
   {
-    id: "account-primary-name",
+    id: "account-primary-names",
     query: `
-query AccountPrimaryName($address: Address!) {
+query AccountPrimaryNames($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    resolve {
+      onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
+        chainName
+        name { interpreted beautified }
+      }
+
+      twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+        chainName
+        name { interpreted beautified }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: GREG_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
+    },
+  },
+  {
+    id: "account-primary-name-records",
+    query: `
+query AccountPrimaryNameRecords($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
@@ -753,23 +857,14 @@ query GetEthDomains {
 query AccelerateResolve($address: Address!) {
   account(by: { address: $address }) {
     address
-    resolve(accelerate: true) {
-      trace
-      acceleration {
-        requested
-        attempted
-      }
+    # resolve is automatically accelerated. To disable, resolve(accelerate: false)
+    resolve {
+      acceleration { requested attempted }
       primaryName(by: { chainName: ETHEREUM }) {
         name { interpreted beautified }
         resolve {
-          trace
-          acceleration {
-            requested
-            attempted
-          }
-          profile {
-            description
-          }
+          acceleration { requested attempted }
+          profile { description }
         }
       }
     }

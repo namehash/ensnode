@@ -1,5 +1,13 @@
 # @namehash/ens-referrals
 
+## 1.15.2
+
+### Patch Changes
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - @ensnode/ensnode-sdk@1.15.2
+  - enssdk@1.15.2
+
 ## 1.15.1
 
 ### Patch Changes

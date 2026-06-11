@@ -1,7 +1,7 @@
 [
   {
     "id": "hello-world",
-    "query": "query HelloWorld($address: Address!) {\n  # Lookup an Account by address.\n  account(by: { address: $address }) {\n    resolve {\n      # Reverse resolve the ENS primary name of the account\n      # using a convenient ETHEREUM alias for mainnet.\n      primaryName(by: { chainName: ETHEREUM }) {\n        # Get the regular interpreted variant of the primary name \n        # and also the special beautified variant that optimizes names \n        # containing special characters such as emojis for proper display in interfaces.\n        name { interpreted beautified }\n        resolve {\n          # If the account has a primary name on Ethereum (mainnet),\n          # forward resolve the interpreted ENS profile of that name in the same query!.\n          profile {\n            description\n            avatar { httpUrl }\n            addresses { ethereum bitcoin }\n            socials {\n              twitter { handle httpUrl }\n              github { handle httpUrl }\n            }\n          }\n        }\n      }\n    }\n\n    # Also load the count of ENSv1 and ENSv2 domains owned by the account\n    # to see if they have domains they should upgrade to ENSv2\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
+    "query": "query HelloWorld($address: Address!) {\n  # Lookup an Account by address.\n  account(by: { address: $address }) {\n    resolve {\n      # Reverse resolve the ENS primary name of the account\n      # using a convenient ETHEREUM alias for mainnet.\n      primaryName(by: { chainName: ETHEREUM }) {\n        # Get the regular interpreted variant of the primary name\n        # and also the special beautified variant that optimizes names\n        # containing special characters such as emojis for proper display in interfaces.\n        name { interpreted beautified }\n        resolve {\n          # If the account has a primary name on Ethereum (mainnet),\n          # forward resolve the interpreted ENS profile of that name in the same query!\n          profile {\n            description\n            avatar { httpUrl }\n            addresses { ethereum bitcoin }\n            socials {\n              twitter { handle httpUrl }\n              github { handle httpUrl }\n            }\n          }\n        }\n      }\n    }\n\n    # Also load the count of ENSv1 and ENSv2 domains owned by the account\n    # to see if they have domains they should upgrade to ENSv2\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
@@ -21,10 +21,24 @@
     }
   },
   {
+    "id": "domain-profile-and-records",
+    "query": "query DomainProfileAndRecords($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolve {\n      profile {\n        avatar {\n          httpUrl\n        }\n        addresses {\n          ethereum\n          solana\n        }\n        socials {\n          github {\n            handle\n            httpUrl\n          }\n          twitter {\n            handle\n            httpUrl\n          }\n        }\n        website {\n          httpUrl\n        }\n      }\n      records {\n        addresses(coinTypes: [60, 501]) {\n          coinType\n          address\n        }\n        texts(keys: [\"avatar\", \"com.twitter\", \"com.github\", \"url\"]) {\n          key\n          value\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "gregskril.eth"
+    }
+  },
+  {
     "id": "domain-by-name",
     "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    canonical { name { beautified } }\n    owner { address }\n    resolve {\n      profile {\n        description\n        addresses {\n          ethereum\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "name": "vitalik.eth"
+    }
+  },
+  {
+    "id": "offchain-name",
+    "query": "query OffchainName($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain\n    __typename\n    id\n    canonical { name { interpreted } }\n    resolver {\n      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on\n      effective {\n        extended\n        contract { chainId address }\n      }\n    }\n    resolve {\n      records {\n        addresses(coinTypes: [60]) { coinType address }\n        texts(keys: [\"avatar\", \"com.twitter\", \"description\"]) { key value }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "patricio.onpoap.eth"
     }
   },
   {
@@ -69,8 +83,15 @@
     }
   },
   {
-    "id": "account-primary-name",
-    "query": "query AccountPrimaryName($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          profile {\n            description\n            socials {\n              twitter {\n                httpUrl\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "id": "account-primary-names",
+    "query": "query AccountPrimaryNames($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {\n        chainName\n        name { interpreted beautified }\n      }\n\n      twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {\n        chainName\n        name { interpreted beautified }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x179a862703a4adfb29896552df9e307980d19285"
+    }
+  },
+  {
+    "id": "account-primary-name-records",
+    "query": "query AccountPrimaryNameRecords($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve {\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          profile {\n            description\n            socials {\n              twitter {\n                httpUrl\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
@@ -142,7 +163,7 @@
   },
   {
     "id": "accelerate-resolve",
-    "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    resolve(accelerate: true) {\n      trace\n      acceleration {\n        requested\n        attempted\n      }\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          trace\n          acceleration {\n            requested\n            attempted\n          }\n          profile {\n            description\n          }\n        }\n      }\n    }\n  }\n}",
+    "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    # resolve is automatically accelerated. To disable, resolve(accelerate: false)\n    resolve {\n      acceleration { requested attempted }\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          acceleration { requested attempted }\n          profile { description }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }
