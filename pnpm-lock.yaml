@@ -112,40 +112,19 @@ catalogs:
 overrides:
   '@adraffy/ens-normalize': 1.11.1
   esbuild@<=0.24.2: '>=0.25.0'
-  lodash@>=4.0.0 <=4.17.23: ^4.18.0
-  lodash-es@>=4.0.0 <=4.17.23: ^4.18.0
-  markdown-it@>=14.0.0 <14.1.1: '>=14.1.1'
   tar@<=7.5.10: ^7.5.11
   ajv@<8.18.0: '>=8.18.0'
   minimatch@<10.2.3: '>=10.2.3'
-  rollup@>=4.0.0 <4.59.0: '>=4.59.0'
-  svgo@>=3.0.0 <3.3.3: ^3.3.3
   ponder>@hono/node-server@<1.19.13: ^1.19.13
-  devalue@<5.8.1: ^5.8.1
-  undici@>=7.0.0 <7.24.0: ^7.24.0
-  undici@>=6.0.0 <6.24.0: ^6.24.0
   yauzl@<3.2.1: ^3.2.1
   fast-xml-parser@>=5.0.0 <5.7.0: '>=5.7.0'
   kysely@>=0.26.0 <0.28.17: 0.28.17
-  h3@<1.15.9: '>=1.15.9'
   yaml@>=2.0.0 <2.8.3: '>=2.8.3'
-  picomatch@<2.3.2: ^2.3.2
-  picomatch@>=4.0.0 <4.0.4: '>=4.0.4'
-  smol-toml@<1.6.1: '>=1.6.1'
-  brace-expansion@>=4.0.0 <5.0.6: '>=5.0.6'
-  defu@<=6.1.4: ^6.1.5
-  vite@>=5.0.0 <=6.4.1: ^6.4.2
-  axios@<1.15.2: ^1.15.2
-  follow-redirects@<1.16.0: ^1.16.0
+  ponder>vite: ^6.4.2
+  vite-node>vite: ^6.4.2
   dompurify@<3.4.0: ^3.4.0
-  protobufjs@>=7.0.0 <7.5.8: 7.5.8
   protobufjs@>=8.0.0 <8.3.0: 8.3.0
   postcss@>=8.0.0 <8.5.12: ^8.5.12
-  uuid@>=10.0.0 <11.1.1: ^11.1.1
-  fast-uri@<3.1.2: ^3.1.2
-  fast-xml-builder@<1.1.7: ^1.1.7
-  ws@<8.20.1: ^8.20.1
-  shell-quote@<1.8.4: ^1.8.4
 
 patchedDependencies:
   '@changesets/assemble-release-plan@6.0.9':
@@ -4380,7 +4359,7 @@ packages:
     resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
-      rollup: '>=4.59.0'
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
     peerDependenciesMeta:
       rollup:
         optional: true
@@ -5060,7 +5039,7 @@ packages:
   '@tailwindcss/vite@4.3.0':
     resolution: {integrity: sha512-t6J3OrB5Fc0ExuhohouH0fWUGMYL6PTLhW+E7zIk/pdbnJARZDCwjBznFnkh5ynRnIRSI4YjtTH0t6USjJISrw==}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^5.2.0 || ^6 || ^7 || ^8
 
   '@tanstack/query-core@5.90.5':
     resolution: {integrity: sha512-wLamYp7FaDq6ZnNehypKI5fNvxHPfTYylE0m/ZpuuzJfJqhR5Pxg9gvGBHZx4n7J+V5Rg5mZxHHTlv25Zt5u+w==}
@@ -5399,13 +5378,13 @@ packages:
     resolution: {integrity: sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
 
   '@vitejs/plugin-react@5.2.0':
     resolution: {integrity: sha512-YmKkfhOAi3wsB1PhJq5Scj3GXMn3WvtQ/JC0xoopuHoXSdmtdStOpFrYaT1kie2YgFBcIe64ROzMYRjCrYOdYw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
   '@vitest/expect@4.1.8':
     resolution: {integrity: sha512-h3nDO677RDLEGlBxyQ5CW8RlMThSKSRLUePLOx09gNIWRL40edgA1GCZSZgf1W55MFAG6/Sw14KeaAnqv0NKdQ==}
@@ -5414,7 +5393,7 @@ packages:
     resolution: {integrity: sha512-LEiN/xe4OSIbKe9HQIp5OC24agGD9J5CnmMgsLohVVoOPWL9a2sBoR6VBx43jQZb7Kr1l4RCuyCJzcAa0+dojw==}
     peerDependencies:
       msw: ^2.4.9
-      vite: ^6.4.2
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       msw:
         optional: true
@@ -5521,7 +5500,7 @@ packages:
     resolution: {integrity: sha512-SDobKBbPIOe0cVL7QxMzGkuUGHvWTdihi9zOrrWaWUgFKe15cwEcwfWmgrcNzjT6kHnNmWuTajPHoIzUjYNYYQ==}
     peerDependencies:
       async-validator: ^4
-      axios: ^1.15.2
+      axios: ^1
       change-case: ^5
       drauu: ^0.4
       focus-trap: ^7
@@ -7029,7 +7008,7 @@ packages:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
-      picomatch: '>=4.0.4'
+      picomatch: ^3 || ^4
     peerDependenciesMeta:
       picomatch:
         optional: true
@@ -7630,7 +7609,7 @@ packages:
   isows@1.0.7:
     resolution: {integrity: sha512-I1fSfDCZL5P0v33sVqeTDSpcstAg/N+wF5HS033mogOVIp4B+oHC7oOCsA3axAbBSGTJ8QubbNmnIRN/h8U7hg==}
     peerDependencies:
-      ws: ^8.20.1
+      ws: '*'
 
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
@@ -10127,7 +10106,7 @@ packages:
   vite-tsconfig-paths@4.3.1:
     resolution: {integrity: sha512-cfgJwcGOsIxXOLU/nELPny2/LUD/lcf1IbfyeKTv2bsupVbTH/xpFtdQlBmIP1GEK2CjjLxYhFfB+QODFAx5aw==}
     peerDependencies:
-      vite: ^6.4.2
+      vite: '*'
     peerDependenciesMeta:
       vite:
         optional: true
@@ -10215,7 +10194,7 @@ packages:
   vitefu@1.1.3:
     resolution: {integrity: sha512-ub4okH7Z5KLjb6hDyjqrGXqWtWvoYdU3IGm/NorpgHncKoLTCfRIbvlhBm7r0YstIaQRYlp4yEbFqDcKSzXSSg==}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       vite:
         optional: true
@@ -10236,7 +10215,7 @@ packages:
       '@vitest/ui': 4.1.8
       happy-dom: '*'
       jsdom: '*'
-      vite: ^6.4.2
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
