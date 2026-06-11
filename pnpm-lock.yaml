@@ -177,6 +177,12 @@ importers:
       '@typescript/native-preview':
         specifier: 7.0.0-dev.20260128.1
         version: 7.0.0-dev.20260128.1
+      enscli:
+        specifier: workspace:*
+        version: link:packages/enscli
+      ensskills:
+        specifier: workspace:*
+        version: link:packages/ensskills
       jsdom:
         specifier: ^27.0.1
         version: 27.0.1(postcss@8.5.12)
@@ -186,6 +192,9 @@ importers:
       prettier-plugin-astro:
         specifier: 'catalog:'
         version: 0.14.1
+      skills-npm:
+        specifier: ^1
+        version: 1.1.1
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.22.3)(typescript@5.9.3)(yaml@2.8.3)
