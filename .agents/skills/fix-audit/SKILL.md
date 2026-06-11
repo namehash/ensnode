@@ -93,7 +93,7 @@ was still doing work; re-check.
 - Genuinely unmet peers that work in practice (e.g. an unmaintained package peering
   on an old major): acknowledge in `pnpm.peerDependencyRules.allowedVersions`, scoped
   as `"parent>peer": "^N"`.
-- Verify suppressions under a *fresh* resolution (warnings only print when resolution
+- Verify suppressions under a _fresh_ resolution (warnings only print when resolution
   runs): back up the lockfile, delete it, `pnpm install --lockfile-only`, read the
   output, restore the lockfile.
 

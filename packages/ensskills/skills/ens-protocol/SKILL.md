@@ -85,6 +85,8 @@ ENS is not "just mainnet." Names and subdomains live across L1, L2s, and offchai
 - Some names resolve only through CCIP-Read (their data isn't on mainnet at all).
 - Reconciling registries, wrappers, resolvers, and chains by hand is exactly what an indexer like ENSNode (and the omnigraph skill) does for you — prefer that over first-principles chain queries.
 
+An **ENS Namespace** is a single, logically-isolated set of ENS names defined by its own root Registry — and it **spans many chains**, not just one. The canonical `mainnet` namespace, for example, roots on Ethereum mainnet but reaches across Base (Basenames), Linea (Lineanames), Optimism (3DNS), and offchain issuers. A namespace is therefore _not_ 1:1 with an L1 chain: separate namespaces (`mainnet`, `sepolia`, testing's `ens-test-env`) are fully independent — a name in one says nothing about the same string in another, and each has its own deployments of `.eth`, Basenames, etc. This is what "ENS Namespace `mainnet`" means above (under Records) when defining coinType `60`. See [references/ensv1-and-ensv2.md](references/ensv1-and-ensv2.md).
+
 ## ENSv1 and ENSv2
 
 **ENSv2 does not replace ENSv1 — the two coexist onchain at the same time.** Building correctly means reading a _unified_ view of both, not one or the other.
@@ -100,13 +102,13 @@ The fundamentals in this skill — names, normalization, hashing, the resolver/r
 
 Pull these only when a task needs the depth:
 
-| Topic                                                                               | File                                                               |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Names, labels, normalization, namehash/labelhash, unknown labels                    | [references/names-and-hashing.md](references/names-and-hashing.md) |
-| Registry / resolver / registrar, NFTs, NameWrapper, subdomains, subregistries       | [references/architecture.md](references/architecture.md)           |
-| Forward/reverse resolution, primary names, Universal Resolver, CCIP-Read, coinTypes | [references/resolution.md](references/resolution.md)               |
-| All record types — address/text/avatar/contenthash/ABI/pubkey/interface/DNS/name    | [references/records.md](references/records.md)                     |
-| ENSv1 vs ENSv2 — coexistence, Namegraph, two-domains, resolving across both         | [references/ensv1-and-ensv2.md](references/ensv1-and-ensv2.md)     |
+| Topic                                                                                | File                                                               |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Names, labels, normalization, namehash/labelhash, unknown labels                     | [references/names-and-hashing.md](references/names-and-hashing.md) |
+| Registry / resolver / registrar, NFTs, NameWrapper, subdomains, subregistries        | [references/architecture.md](references/architecture.md)           |
+| Forward/reverse resolution, primary names, Universal Resolver, CCIP-Read, coinTypes  | [references/resolution.md](references/resolution.md)               |
+| All record types — address/text/avatar/contenthash/ABI/pubkey/interface/DNS/name     | [references/records.md](references/records.md)                     |
+| ENS Namespaces, ENSv1 vs ENSv2 — coexistence, Namegraph, two-domains, resolving both | [references/ensv1-and-ensv2.md](references/ensv1-and-ensv2.md)     |
 
 Terminology: [ENSNode Terminology](https://ensnode.io/docs/reference/terminology) · Specs: [ENSIPs](https://docs.ens.domains/ensips)
 

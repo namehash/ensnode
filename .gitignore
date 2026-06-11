@@ -32,7 +32,7 @@ generated
 .terraform*
 terraform.tfstate*
 
-# Claude
+# Claude — use .agents for committed skills
 .claude
 
 # ENSRainbow data
