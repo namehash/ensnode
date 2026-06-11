@@ -13,7 +13,7 @@ mkdirSync(target, { recursive: true });
 const isLocalSkill = (name) => !name.startsWith("npm-") && !name.startsWith(".");
 const localSkills = readdirSync(source).filter(isLocalSkill);
 
-// drop symlinks into .agents/skills whose canonical skill no longer exists
+// drop symlinks in .claude/skills that point into .agents/skills whose canonical skill no longer exists
 for (const name of readdirSync(target)) {
   if (!isLocalSkill(name)) continue;
   const path = join(target, name);
@@ -30,11 +30,16 @@ for (const name of localSkills) {
     unlinkSync(path);
   } catch {
     // missing or not a symlink: a real directory here is a personal skill — leave it
+    let stat;
     try {
-      if (lstatSync(path).isDirectory()) continue;
-      // a regular file here would make symlinkSync throw EEXIST — remove it first
-      unlinkSync(path);
-    } catch {}
+      stat = lstatSync(path);
+    } catch {
+      stat = null; // nothing here; symlinkSync below will create it
+    }
+    if (stat?.isDirectory()) continue;
+    // a regular file here would make symlinkSync throw EEXIST — remove it first
+    // (let an unlink failure escape rather than mask it as a downstream EEXIST)
+    if (stat) unlinkSync(path);
   }
   symlinkSync(desired, path);
   console.log(`linked .claude/skills/${name} -> ${desired}`);

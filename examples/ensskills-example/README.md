@@ -3,7 +3,7 @@
 A minimal Node project for dogfooding the [`ensskills`](../../packages/ensskills) package — the
 versioned agent skills that teach AI coding agents the ENS Omnigraph.
 
-> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.2`). If you query a different ENSNode version, you must match its ENSNode version with the same `enskit`/`enssdk` version.
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.2`). If you query a different ENSNode version, install the matching `ensskills` version.
 
 Refer to the [ensskills integration guide](https://ensnode.io/docs/integrate/integration-options/ensskills) to use `ensskills` in your own project.
 
