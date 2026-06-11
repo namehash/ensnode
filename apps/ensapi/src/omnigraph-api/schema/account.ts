@@ -154,7 +154,7 @@ AccountRef.implement({
         "This Account's Ethereum Follow Protocol (EFP) presence: its lists and validated primary list.",
       type: AccountEfpRef,
       nullable: false,
-      resolve: (parent) => parent.id,
+      resolve: (parent) => parent,
     }),
 
     ///////////////////////
