@@ -1,11 +1,11 @@
-import { ENSNODE_URL } from "@lib/examples/omnigraph/constants";
+import { getDocsOmnigraphNamespaceConfig } from "@lib/examples/omnigraph/constants";
 import {
   OmnigraphExampleQuerySchema,
   type OmnigraphExampleQuery,
 } from "@lib/examples/omnigraph/example-query";
 
+import { getOmnigraphExamplePageHref, OMNIGRAPH_EXAMPLES_CONFIG } from "./config";
 import exampleSnapshots from "./examples.json";
-import { OMNIGRAPH_EXAMPLES_META } from "./meta";
 import responses from "./responses.json";
 import type { SnapshotExample } from "./types";
 
@@ -14,30 +14,43 @@ const snapshotById = new Map(
 );
 const responsesById = responses as Record<string, Record<string, unknown>>;
 
-// Render the curated prose set, gated on what the vendored snapshot supports: a meta entry
-// whose id is absent from the snapshot (e.g. a query authored for a not-yet-deployed schema)
-// is simply skipped until the snapshot is refreshed.
-export const graphqlApiOmnigraphExamples: OmnigraphExampleQuery[] = Object.entries(
-  OMNIGRAPH_EXAMPLES_META,
-).flatMap(([id, meta]) => {
-  const example = snapshotById.get(id);
-  if (!example) return [];
-  const response = responsesById[id];
-  return [
-    OmnigraphExampleQuerySchema.parse({
-      id,
-      name: meta.name,
-      description: meta.description,
-      category: meta.category,
+// Render the curated set in config order, gated on vendored snapshot + responses.
+export const omnigraphExamples: OmnigraphExampleQuery[] = OMNIGRAPH_EXAMPLES_CONFIG.map(
+  (config) => {
+    const example = snapshotById.get(config.id);
+    if (!example) {
+      throw new Error(
+        `Omnigraph example with id='${config.id}' not found in snapshot. Make sure to run 'pnpm omnigraph:snapshot <version>' first.`,
+      );
+    }
+    const response = responsesById[config.id];
+    if (!response) {
+      throw new Error(
+        `Omnigraph example with id='${config.id}' not found in responses. Make sure to run 'pnpm omnigraph-examples:refresh-responses' first.`,
+      );
+    }
+    const { ensnodeUrl } = getDocsOmnigraphNamespaceConfig(config.namespace);
+    const href = getOmnigraphExamplePageHref(config);
+    return OmnigraphExampleQuerySchema.parse({
+      id: config.id,
+      title: config.title,
+      description: config.description,
+      category: config.category,
+      namespace: config.namespace,
       query: example.query.trim(),
       variables: example.variables,
-      ...(response ? { response } : {}),
-      connection: ENSNODE_URL,
-    }),
-  ];
-});
+      response,
+      connection: ensnodeUrl,
+      href,
+    });
+  },
+);
 
-const byId = new Map(graphqlApiOmnigraphExamples.map((e) => [e.id, e]));
+export const visibleOmnigraphExamples: OmnigraphExampleQuery[] = omnigraphExamples.filter(
+  (example) => example.href,
+);
+
+const byId = new Map(omnigraphExamples.map((e) => [e.id, e]));
 
 export function getOmnigraphExampleById(id: string): OmnigraphExampleQuery {
   const found = byId.get(id);

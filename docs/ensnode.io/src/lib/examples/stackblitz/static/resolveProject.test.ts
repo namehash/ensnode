@@ -7,7 +7,7 @@ describe("resolveStaticExampleStackBlitzProject", () => {
     const project = resolveStaticExampleStackBlitzProject("domain-by-name", "enssdk");
 
     expect(project.title).toBe("Domain By Name using enssdk");
-    expect(project.description).toContain("Load a domain by interpreted name");
+    expect(project.description).toContain("loads a domain by interpreted name");
     expect(project.runtime).toBe("node-tsx");
     expect(project.files["src/index.ts"]).toContain("query DomainByName");
     expect(project.files["src/index.ts"]).toContain("asInterpretedName");
@@ -17,7 +17,7 @@ describe("resolveStaticExampleStackBlitzProject", () => {
     const project = resolveStaticExampleStackBlitzProject("domain-by-name", "enskit");
 
     expect(project.title).toBe("Domain By Name using enskit");
-    expect(project.description).toContain("Load a domain by interpreted name");
+    expect(project.description).toContain("loads a domain by interpreted name");
     expect(project.runtime).toBe("node-vite");
     expect(project.files["src/App.tsx"]).toContain("useOmnigraphQuery");
     expect(project.files["index.html"]).toContain('id="root"');

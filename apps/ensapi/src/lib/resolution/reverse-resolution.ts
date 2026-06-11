@@ -1,10 +1,14 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,
+  asInterpretedName,
+  asResolvableName,
   type CoinType,
   coinTypeReverseLabel,
   type DefaultableChainId,
   evmChainIdToCoinType,
+  isInterpretedName,
+  isResolvableName,
   reverseName,
 } from "enssdk";
 import { isAddress, isAddressEqual } from "viem";
@@ -68,13 +72,20 @@ export async function resolveReverse(
           /////////////////////////////////////////////////////////
 
           // Steps 1-3 — Resolve coinType-specific name record
-          const _reverseName = reverseName(address, coinType);
-          const { name } = await withProtocolStep(
+          const _reverseName = asResolvableName(asInterpretedName(reverseName(address, coinType)));
+          const { name: nameRecord } = await withProtocolStep(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ResolveReverseName,
             { name: _reverseName },
             () => resolveForward(_reverseName, REVERSE_RESOLUTION_SELECTION, options),
           );
+
+          // Invariant: the name record must be Interpreted and Resolvable
+          // TODO: additional error types for this possibility
+          const name =
+            nameRecord && isInterpretedName(nameRecord) && isResolvableName(nameRecord)
+              ? nameRecord
+              : null;
 
           // Step 4 — Determine if name record exists
           addProtocolStepEvent(

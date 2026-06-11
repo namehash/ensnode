@@ -1,5 +1,4 @@
 ---
-import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import type { SetupPackageManager } from "@lib/examples/omnigraph/build-integration-snippets";
 
 import StaticExampleActionBar from "./StaticExampleActionBar.astro";
@@ -46,7 +45,8 @@ interface Props {
   setupSnippets: Record<SetupPackageManager, string>;
   responseJson: string | null;
   hostedInstanceDocUrl: string;
-  hostedInstanceNamespace: ENSNamespaceId;
+  hostedInstanceLabel: string;
+  responseSourceLabel: string;
 }
 
 const {
@@ -57,7 +57,8 @@ const {
   setupSnippets,
   responseJson,
   hostedInstanceDocUrl,
-  hostedInstanceNamespace,
+  hostedInstanceLabel,
+  responseSourceLabel,
 } = Astro.props;
 
 const config = SDK_PANEL_CONFIG[integration];
@@ -74,7 +75,7 @@ const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-t
 <StaticExampleActionBar
   variant="stackblitz"
   hostedInstanceDocUrl={hostedInstanceDocUrl}
-  hostedInstanceNamespace={hostedInstanceNamespace}
+  hostedInstanceLabel={hostedInstanceLabel}
   staticExampleId={exampleId}
 />
 
@@ -85,6 +86,8 @@ const docsLinkClass = "underline underline-offset-2 hover:text-[var(--sl-color-t
     <StaticExampleOutputSection
       uid={`${uid}-${integration}`}
       responseJson={responseJson}
+      responseSourceLabel={responseSourceLabel}
+      responseSourceDocUrl={hostedInstanceDocUrl}
       heading="Output"
     />
   ) : null

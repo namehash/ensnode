@@ -5,56 +5,17 @@ sidebar:
   label: Account Domains
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
-import ResultDetails from "@components/molecules/ResultDetails.astro";
-import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleAccountDomains } from "@data/unigraph-examples/account-domains";
 
-export const resultJson = [
-  {
-    type: "ENSv1Domain",
-    count: 2
-  },
-  {
-    type: "ENSv2Domain",
-    count: 14
-  }
-];
+Fetch the Domains owned by an address (across both ENSv1 and ENSv2), including each Domain's `type` (`ENSv1Domain` vs `ENSv2Domain`). See [Connect](/docs/integrate/unigraph/examples) for setup.
 
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
-
-Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
-
-<Tabs syncKey="unigraph-client">
-  <TabItem label="SQL">
-    <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
-
-```sql
-SELECT type, count(*) FROM ensindexer_0.domains
-WHERE owner_id = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8'
-GROUP BY type;
-```
-
-    <ResultDetails value={resultJson} />
-
-  </TabItem>
-
-  <TabItem label="ensdb-sdk (TypeScript)">
-    <EnsDbReaderIntro />
-
-```typescript
-import { count, eq } from "drizzle-orm";
-
-const counts = await ensDb
-  .select({ type: ensIndexerSchema.domain.type, count: count() })
-  .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.ownerId, "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"))
-  .groupBy(ensIndexerSchema.domain.type);
-```
-
-    <ResultDetails value={resultJson} />
-
-  </TabItem>
-</Tabs>
+<UnigraphStaticExample
+ sql={exampleAccountDomains.sql}
+ ensDbSdk={exampleAccountDomains.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

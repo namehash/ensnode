@@ -28,6 +28,9 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
 
         const v2Key = cache.keyOfEntity({ __typename: "ENSv2Domain", id: by.id });
         if (v2Key && cache.resolve(v2Key, "id")) return v2Key;
+
+        const unindexedKey = cache.keyOfEntity({ __typename: "UnindexedDomain", id: by.id });
+        if (unindexedKey && cache.resolve(unindexedKey, "id")) return unindexedKey;
       }
 
       return passthrough(args, cache, info);

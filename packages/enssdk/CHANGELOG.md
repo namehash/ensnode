@@ -1,5 +1,11 @@
 # enssdk
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - Adds the `ResolvableName` branded type with `isResolvableName`/`asResolvableName` guards — an `InterpretedName` that can be DNS-encoded and resolved (no Encoded LabelHash segments, every label under 256 bytes). Also adds the `UnindexedDomainId` type and `makeUnindexedDomainId`; `DomainId` now includes `UnindexedDomainId`.
+
 ## 1.15.1
 
 ## 1.15.0

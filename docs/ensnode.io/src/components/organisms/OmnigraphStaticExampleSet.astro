@@ -37,7 +37,13 @@ const { description } = getOmnigraphExampleById(id);
 const data = resolveOmnigraphStaticExample(id);
 ---
 
-{!hideDescription && description}
+{
+  !hideDescription && (
+    <div class="sl-markdown-content">
+      <p set:html={description} />
+    </div>
+  )
+}
 
 <StaticExampleCard uid={data.uid}>
   <div
@@ -82,7 +88,8 @@ const data = resolveOmnigraphStaticExample(id);
             responseJson={data.responseJson}
             adminUrl={data.adminUrl}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
-            hostedInstanceNamespace={data.hostedInstanceNamespace}
+            hostedInstanceLabel={data.hostedInstanceLabel}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
         {panel === "enssdk" ? (
@@ -94,7 +101,8 @@ const data = resolveOmnigraphStaticExample(id);
             setupSnippets={data.enssdkSetupSnippets}
             responseJson={data.responseJson}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
-            hostedInstanceNamespace={data.hostedInstanceNamespace}
+            hostedInstanceLabel={data.hostedInstanceLabel}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
         {panel === "enskit" ? (
@@ -106,7 +114,8 @@ const data = resolveOmnigraphStaticExample(id);
             setupSnippets={data.enskitSetupSnippets}
             responseJson={data.responseJson}
             hostedInstanceDocUrl={data.hostedInstanceDocUrl}
-            hostedInstanceNamespace={data.hostedInstanceNamespace}
+            hostedInstanceLabel={data.hostedInstanceLabel}
+            responseSourceLabel={data.responseSourceLabel}
           />
         ) : null}
         {panel === "curl" ? (
@@ -114,6 +123,8 @@ const data = resolveOmnigraphStaticExample(id);
             uid={data.uid}
             curlExample={data.curlExample}
             responseJson={data.responseJson}
+            responseSourceLabel={data.responseSourceLabel}
+            responseSourceDocUrl={data.hostedInstanceDocUrl}
           />
         ) : null}
       </div>

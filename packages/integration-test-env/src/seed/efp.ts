@@ -30,8 +30,9 @@ import {
 import { mnemonicToAccount } from "viem/accounts";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import { efpContracts, efpSeedRoleUser, efpSeedTargets } from "@ensnode/datasources/devnet";
+import { efpContracts } from "@ensnode/datasources/devnet";
 
+import { efpSeedRoleUser, efpSeedTargets } from "../devnet/fixtures";
 import { seedReceiptWaitOptions } from "./index";
 
 /** The canonical Anvil mnemonic; the EFP devnet seeds funded accounts from it (indices 0-9). */

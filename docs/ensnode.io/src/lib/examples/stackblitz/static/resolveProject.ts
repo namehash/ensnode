@@ -21,7 +21,7 @@ export function resolveStaticExampleStackBlitzProject(
       : buildEnskitSnippet({ query: example.query, variables: example.variables });
 
   return buildStaticExampleStackBlitzProject(integration, {
-    title: `${example.name} using ${integration}`,
+    title: `${example.title} using ${integration}`,
     description: example.description,
     snippet,
   });

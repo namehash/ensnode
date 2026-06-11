@@ -6,9 +6,11 @@ interface Props {
   uid: string;
   curlExample: string;
   responseJson: string | null;
+  responseSourceLabel: string;
+  responseSourceDocUrl: string;
 }
 
-const { uid, curlExample, responseJson } = Astro.props;
+const { uid, curlExample, responseJson, responseSourceLabel, responseSourceDocUrl } = Astro.props;
 ---
 
 <StaticExampleCodeSection
@@ -23,6 +25,8 @@ const { uid, curlExample, responseJson } = Astro.props;
     <StaticExampleOutputSection
       uid={`${uid}-curl`}
       responseJson={responseJson}
+      responseSourceLabel={responseSourceLabel}
+      responseSourceDocUrl={responseSourceDocUrl}
       heading="Response"
     />
   ) : null

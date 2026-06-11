@@ -1,8 +1,14 @@
-import { ETH_COIN_TYPE, evmChainIdToCoinType, type Hex, type InterpretedName } from "enssdk";
+import {
+  ETH_COIN_TYPE,
+  evmChainIdToCoinType,
+  type Hex,
+  type InterpretedName,
+  type UrlString,
+} from "enssdk";
 import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts, testEthTextRecords } from "@ensnode/integration-test-env/devnet";
 
 import {
   AccountDomainsPaginated,
@@ -328,6 +334,10 @@ describe("Account.primaryName and Account.primaryNames", () => {
     name: CanonicalNameResult;
     resolve?: {
       records?: { addresses: Array<{ coinType: number; address: Hex | null }> } | null;
+      profile?: {
+        description: string | null;
+        avatar: { httpUrl: UrlString | null } | null;
+      } | null;
     } | null;
   };
 
@@ -436,6 +446,24 @@ describe("Account.primaryName and Account.primaryNames", () => {
             resolve {
               records {
                 addresses(coinTypes: [60]) { coinType address }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedProfile = gql`
+    query AccountPrimaryNameChainedProfile($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              profile {
+                description
+                avatar { httpUrl }
               }
             }
           }
@@ -565,6 +593,28 @@ describe("Account.primaryName and Account.primaryNames", () => {
     });
   });
 
+  it("chains forward resolution through primaryName.profile", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedProfile, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              profile: {
+                description: testEthTextRecords.description.value,
+                avatar: { httpUrl: testEthTextRecords.avatar.value },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("rejects empty coinTypes at GraphQL validation", async () => {
     await expect(
       request(AccountPrimaryNamesByCoinTypes, {
@@ -612,5 +662,33 @@ describe("Account.primaryName and Account.primaryNames", () => {
         resolve: { acceleration: { requested: true } },
       },
     });
+  });
+});
+
+describe("Query.account (unindexed)", () => {
+  const AccountByAddress = gql`
+    query AccountByAddress($address: Address!) {
+      account(by: { address: $address }) {
+        id
+        address
+        domains { edges { node { id } } }
+      }
+    }
+  `;
+
+  it("returns a virtualized Account for an unindexed Address", async () => {
+    // an Address the indexer has never seen — Reverse Resolution is keyed by address and works
+    // regardless of whether the Account is indexed, so Query.account must not null-propagate.
+    const address = "0x00000000000000000000000000000000deadbeef";
+
+    const result = await request<{
+      account: { id: string; address: string; domains: GraphQLConnection<{ id: string }> } | null;
+    }>(AccountByAddress, { address });
+
+    expect(result.account).not.toBeNull();
+    expect(result.account?.id).toBe(address);
+    expect(result.account?.address).toBe(address);
+    // a synthesized Account owns no indexed Domains
+    expect(flattenConnection(result.account!.domains)).toHaveLength(0);
   });
 });

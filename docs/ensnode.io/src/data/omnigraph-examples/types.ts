@@ -1,4 +1,4 @@
-/** A frozen example query (matches the vendored `examples.json`). Variables are pre-resolved for the docs namespace. */
+/** A frozen example query (matches the vendored `examples.json`). Variables are pre-resolved for that example's config namespace. */
 export interface SnapshotExample {
   id: string;
   query: string;

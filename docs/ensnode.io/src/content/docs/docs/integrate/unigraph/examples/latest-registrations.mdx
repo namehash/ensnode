@@ -1,0 +1,21 @@
+---
+title: Latest ENS Registrations
+description: Fetch the latest ENS registrations.
+sidebar:
+  label: Latest Registrations
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleLatestRegistrations } from "@data/unigraph-examples/latest-registrations";
+
+Fetch the latest registrations and their associated Domains. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<UnigraphStaticExample
+ sql={exampleLatestRegistrations.sql}
+ ensDbSdk={exampleLatestRegistrations.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

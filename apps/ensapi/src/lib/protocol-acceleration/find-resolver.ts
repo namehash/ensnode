@@ -7,17 +7,24 @@ import {
   type DomainId,
   getNameHierarchy,
   type InterpretedName,
+  interpretedLabelsToLabelHashPath,
+  interpretedNameToInterpretedLabels,
+  makeConcreteRegistryId,
   makeENSv1DomainId,
   namehashInterpretedName,
 } from "enssdk";
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 import { accountIdEqual, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
+import {
+  forwardWalkDisjointNamegraph,
+  walkResultRowHasResolver,
+} from "@/lib/protocol-acceleration/forward-walk-disjoint-namegraph";
 
 type FindResolverResult =
   | {
@@ -154,37 +161,53 @@ async function findResolverWithUniversalResolver(
  * Identifies the active resolver for a given ENS name, using indexed data, following ENSIP-10.
  * This function parallels UniversalResolver#findResolver.
  *
- * @param registry — the AccountId of the Registry / Shadow Registry to use
- * @param name - The ENS name to find the Resolver for
- * @returns The resolver ID if found, null otherwise
+ * Forks by namespace data model:
+ * - ENSv1-only namespaces depend solely on Protocol Acceleration data
+ * - ENSv2 must walk the namegraph, so it has a dependency on the unigraph plugin
  *
- * @example
- * ```ts
- * const resolverId = await identifyActiveResolver("sub.example.eth")
- * // Returns: "0x123..." or null if no resolver found
- * ```
+ * @param registry — the AccountId of the Registry / Shadow Registry to begin from
+ * @param name - The ENS name to find the active Resolver for
  */
-async function findResolverWithIndex(
+export async function findResolverWithIndex(
+  registry: AccountId,
+  name: InterpretedName,
+): Promise<FindResolverResult> {
+  // TODO(fold-protocol-acceleration): once the Protocol Acceleration plugin is folded into the
+  // Unigraph plugin, the `domain` table is guaranteed wherever Domain-Resolver Relations exist, so
+  // this ENSv1/ENSv2 fork collapses — delete findResolverWithIndexENSv1 and always walk the namegraph
+  // (findResolverWithIndexENSv2), which handles both data models.
+  return maybeGetDatasource(di.context.namespace, DatasourceNames.ENSv2Root)
+    ? findResolverWithIndexENSv2(registry, name)
+    : findResolverWithIndexENSv1(registry, name);
+}
+
+/**
+ * ENSv1 active-resolver identification: computes the namehash-keyed DomainId of each ancestor and
+ * reads the Domain-Resolver Relations directly. Depends only on Protocol Acceleration data.
+ *
+ * TODO(fold-protocol-acceleration): remove this function once Protocol Acceleration is folded into
+ * Unigraph — the namegraph walk (findResolverWithIndexENSv2) then handles ENSv1 too.
+ */
+async function findResolverWithIndexENSv1(
   registry: AccountId,
   name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
-    "findResolverWithIndex",
+    "findResolverWithIndexENSv1",
     { chainId: registry.chainId, registry: registry.address, name },
     async () => {
-      // TODO: all of this logic needs to be updated for ENSv2 Datamodel, need to reference new UR
-
       // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
       const names = getNameHierarchy(name);
 
       // Invariant: there is at least 1 name in the hierarchy
       if (names.length === 0) {
-        throw new Error(`Invariant(findResolverWithIndex): received an invalid name: '${name}'`);
+        throw new Error(
+          `Invariant(findResolverWithIndexENSv1): received an invalid name: '${name}'`,
+        );
       }
 
-      // 2. compute domainId of each node
-      // NOTE: this is currently ENSv1-specific
+      // 2. compute the namehash-keyed domainId of each node in the hierarchy
       const domainIds = names.map(
         (name) => makeENSv1DomainId(registry, namehashInterpretedName(name)) as DomainId,
       );
@@ -234,7 +257,7 @@ async function findResolverWithIndex(
       // should never be zeroAddress.
       if (isAddressEqual(resolver, zeroAddress)) {
         throw new Error(
-          `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for ${domainId}, which should be impossible: check ProtocolAcceleration Domain-Resolver Relation indexing logic.`,
+          `Invariant(findResolverWithIndexENSv1): Encountered a zeroAddress resolverAddress for ${domainId}, which should be impossible: check ProtocolAcceleration Domain-Resolver Relation indexing logic.`,
         );
       }
 
@@ -242,10 +265,10 @@ async function findResolverWithIndex(
       const indexInHierarchy = domainIds.indexOf(domainId);
       const activeName = names[indexInHierarchy];
 
-      // will never occur, exlusively for typechecking
+      // will never occur, exclusively for typechecking
       if (!activeName) {
         throw new Error(
-          `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} domains = ${JSON.stringify(domainIds)} active resolver's domainId: ${domainId}.`,
+          `Invariant(findResolverWithIndexENSv1): activeName could not be determined. names = ${JSON.stringify(names)} domains = ${JSON.stringify(domainIds)} active resolver's domainId: ${domainId}.`,
         );
       }
 
@@ -254,6 +277,57 @@ async function findResolverWithIndex(
         activeResolver: resolver,
         // this resolver must have wildcard support if it was not for the first domain in our hierarchy
         requiresWildcardSupport: indexInHierarchy > 0,
+      };
+    },
+  );
+}
+
+/**
+ * ENSv2 active-resolver identification: walks the namegraph by labelHash from `registry` and returns
+ * the deepest ancestor Domain that has an assigned Resolver. Reads the `domain` table (the Registry
+ * hierarchy), maintained by the Unigraph plugin.
+ */
+async function findResolverWithIndexENSv2(
+  registry: AccountId,
+  name: InterpretedName,
+): Promise<FindResolverResult> {
+  return withActiveSpanAsync(
+    tracer,
+    "findResolverWithIndexENSv2",
+    { chainId: registry.chainId, registry: registry.address, name },
+    async () => {
+      const path = interpretedLabelsToLabelHashPath(interpretedNameToInterpretedLabels(name));
+
+      // Invariant: there is at least 1 labelhash in the path
+      if (path.length === 0) {
+        throw new Error(
+          `Invariant(findResolverWithIndexENSv2): received an invalid name: '${name}'`,
+        );
+      }
+
+      // walk the namegraph from `registry`, joining each ancestor Domain to its Resolver
+      const rows = await forwardWalkDisjointNamegraph(makeConcreteRegistryId(registry), path);
+
+      // the deepest Domain with an assigned Resolver is the active Resolver (ENSIP-10)
+      const active = rows.find(walkResultRowHasResolver);
+      if (!active) return NULL_RESULT;
+
+      // map `active.depth` back to its name: getNameHierarchy is ordered leaf-first, while `depth`
+      // counts from the Root (depth 1 = TLD, depth = path.length = leaf)
+      const activeName = getNameHierarchy(name)[path.length - active.depth];
+
+      // will never occur, exclusively for typechecking
+      if (!activeName) {
+        throw new Error(
+          `Invariant(findResolverWithIndexENSv2): activeName could not be determined for '${name}' at depth ${active.depth}.`,
+        );
+      }
+
+      return {
+        activeName,
+        activeResolver: active.address,
+        // this resolver requires wildcard support if it was set above the leaf Domain
+        requiresWildcardSupport: active.depth < path.length,
       };
     },
   );

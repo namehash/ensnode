@@ -1,7 +1,7 @@
 import { ETH_COIN_TYPE } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts } from "@ensnode/integration-test-env/devnet";
 
 import { request } from "@/test/integration/graphql-utils";
 import { gql } from "@/test/integration/omnigraph-api-client";

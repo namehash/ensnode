@@ -1,109 +1,21 @@
 ---
 title: Domain by Name
-description: Fetch a Domain from the Unigraph by its canonical name.
+description: Fetch a Domain from the ENS Unigraph by its canonical name.
 sidebar:
   label: Domain by Name
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
-import ResultDetails from "@components/molecules/ResultDetails.astro";
-import EnsIndexerSchemaIntro from "@components/molecules/EnsIndexerSchemaIntro.astro";
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
 import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
-
-export const unigraphSqlResultJson = [
-  {
-    id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    type: "ENSv1Domain",
-    registry_id:
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
-    subregistry_id:
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    token_id: null,
-    node: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    label_hash: "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
-    owner_id: "0x220866b1a2219f40e72f5c628b65d54268ca3a9d",
-    root_registry_owner_id: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-    canonical: true,
-    canonical_name: "vitalik.eth",
-    canonical_label_hash_path: [
-      "0x4f5b812789fc606be1b3b16908db13fc7a9adf7ca72641f84d75b47069d3d7f0",
-      "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
-    ],
-    canonical_path: [
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    ],
-    canonical_depth: 2,
-    canonical_node: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-  },
-];
-
-export const ensDbSdkResultJson = [
-  {
-    id: "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    type: "ENSv1Domain",
-    registryId:
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
-    subregistryId:
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    tokenId: null,
-    node: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    labelHash: "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
-    ownerId: "0x220866b1a2219f40e72f5c628b65d54268ca3a9d",
-    rootRegistryOwnerId: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-    canonical: true,
-    canonicalName: "vitalik.eth",
-    canonicalLabelHashPath: [
-      "0x4f5b812789fc606be1b3b16908db13fc7a9adf7ca72641f84d75b47069d3d7f0",
-      "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
-    ],
-    canonicalPath: [
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
-      "1-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-    ],
-    canonicalDepth: 2,
-    canonicalNode: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
-  },
-];
-
-:::caution[`unigraph` plugin required]
-Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration)
-:::
+import { exampleDomainByName } from "@data/unigraph-examples/domain-by-name";
 
 Fetch a Domain by its canonical name. Because `canonical_name` is materialized across both ENSv1 and ENSv2, the same lookup works regardless of protocol version. See [Connect](/docs/integrate/unigraph/examples) for setup.
 
-:::note[Canonical fields]
-Canonical fields are populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query them uniformly without branching by `type`. In SQL, these columns are `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth`; in `ensdb-sdk`, the corresponding fields are `canonicalName`, `canonicalPath`, `canonicalNode`, and `canonicalDepth`.
-:::
-
-<Tabs syncKey="unigraph-client">
-  <TabItem label="SQL">
-    <EnsIndexerSchemaIntro ensIndexerSchemaName="ensindexer_0" />
-
-```sql
-SELECT * FROM ensindexer_0.domains
-WHERE canonical_name = 'vitalik.eth';
-```
-
-    <ResultDetails value={unigraphSqlResultJson} />
-
-  </TabItem>
-
-  <TabItem label="ensdb-sdk (TypeScript)">
-    <EnsDbReaderIntro />
-
-```typescript
-import { eq } from "drizzle-orm";
-
-const [vitalik] = await ensDb
-  .select()
-  .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
-
-console.log(vitalik);
-```
-
-    <ResultDetails value={ensDbSdkResultJson} />
-
-  </TabItem>
-</Tabs>
+<UnigraphStaticExample
+  sql={exampleDomainByName.sql}
+  ensDbSdk={exampleDomainByName.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

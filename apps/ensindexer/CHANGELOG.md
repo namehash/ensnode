@@ -1,5 +1,27 @@
 # ensindexer
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - The EIP-165 `supportsInterface` probe (used to classify a Resolver's ENSIP-10 `extended` support at index time) now opts out of Ponder's empty-response retry. A `0x` ("returned no data") response from a pre-EIP-165 Resolver is a definitive "not supported", never transient — but Ponder's `context.client` previously retried it 9× with exponential backoff (~64s each), making a full index pathologically slow. The probe now fails fast (still resolving to `extended = false`).
+
+- [#2191](https://github.com/namehash/ensnode/pull/2191) [`39cb445`](https://github.com/namehash/ensnode/commit/39cb445b8d8790aa9d6fe2ee904e60bdb158efbd) Thanks [@tk-o](https://github.com/tk-o)! - Updates the `sepolia-v2` ENS Namespace to support the latest ENSv1+ENSv2 test deployment on Sepolia.
+
+- [#2259](https://github.com/namehash/ensnode/pull/2259) [`5f929d8`](https://github.com/namehash/ensnode/commit/5f929d858a21e935b4b62ce6f2cbccc273623f96) Thanks [@shrugs](https://github.com/shrugs)! - Index-accelerate `REGISTRATION_TIMESTAMP` / `REGISTRATION_EXPIRY`-ordered domain queries (e.g. `Domain.subdomains(order: { by: REGISTRATION_TIMESTAMP, dir: DESC })`). Previously these joined `domains → latest_registration_indexes → registrations` and sorted the full registry partition — ~55s for `.eth`'s subdomains. The latest registration's start/expiry is now mirrored onto the Domain row (`__latestRegistrationStart` / `__latestRegistrationExpiry`) with composite indexes `(registry_id, <col>, id)`, turning the query into an index-ordered scan. The sort columns are NOT NULL — an absent value (no registration, or a never-expiring registration) is materialized as a `+∞` sentinel — so a single plain composite per column serves both directions with a plain keyset tuple, and the sentinel sorts last for ASC and first for DESC.
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - The `resolvers` table gains an `is_extended` column — whether the Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`) — populated at index time via a single cached `supportsInterface` RPC. The Omnigraph API exposes it as a new `Resolver.extended: Boolean!` field.
+
+- [#2255](https://github.com/namehash/ensnode/pull/2255) [`c8267e4`](https://github.com/namehash/ensnode/commit/c8267e45099efd62e5690f19437c8aa242f77601) Thanks [@shrugs](https://github.com/shrugs)! - Add a materialized `domains.__canonical_name_prefix` column — the first 64 code points of `canonical_name` — to back left-anchored / substring search and NAME ordering. Direct-SQL consumers can now `WHERE __canonical_name_prefix LIKE 'vit%' ORDER BY __canonical_name_prefix` instead of replicating the previous `left(canonical_name, 256)` expression index. `canonical_name` is unchanged and remains the column for exact (`=` / `IN`) matches and display; the Omnigraph `name.starts_with` filter now targets the prefix column while continuing to return `canonical_name`.
+
+- Updated dependencies [[`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`39cb445`](https://github.com/namehash/ensnode/commit/39cb445b8d8790aa9d6fe2ee904e60bdb158efbd), [`5f929d8`](https://github.com/namehash/ensnode/commit/5f929d858a21e935b4b62ce6f2cbccc273623f96), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`c8267e4`](https://github.com/namehash/ensnode/commit/c8267e45099efd62e5690f19437c8aa242f77601), [`04388d2`](https://github.com/namehash/ensnode/commit/04388d2193f422a95898eb0ee23e7555397b3ab6), [`6165f50`](https://github.com/namehash/ensnode/commit/6165f50e26729c6d740c7424034057642f5175b5)]:
+  - @ensnode/datasources@1.15.2
+  - @ensnode/ensnode-sdk@1.15.2
+  - enssdk@1.15.2
+  - @ensnode/ensdb-sdk@1.15.2
+  - @ensnode/ensrainbow-sdk@1.15.2
+  - @ensnode/ponder-sdk@1.15.2
+
 ## 1.15.1
 
 ### Patch Changes

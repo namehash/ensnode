@@ -1,7 +1,4 @@
 import type { NormalizedAddress } from "enssdk";
-import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
-import type { Hex } from "viem";
-import { mnemonicToAccount } from "viem/accounts";
 
 /**
  * Deterministic contract addresses for the ENS contracts-v2 devnet used by ens-test-env.
@@ -115,78 +112,3 @@ export const efpContracts = {
   EFPListRecords: "0xc0f115a19107322cfbf1cdbc7ea011c19ebdb4f8",
   EFPListMinter: "0xc96304e3c037f81da488ed9dea1d8f2a48278a75",
 } as const satisfies Record<string, NormalizedAddress>;
-
-/**
- * Must match the devnet mnemonic in contracts-v2 (Anvil named accounts).
- * @see https://github.com/ensdomains/contracts-v2/blob/69bde1b345c47caf3d55a105b9f922280ba55f00/contracts/script/setup.ts#L56
- */
-const mnemonic = "test test test test test test test test test test test junk";
-
-function createAccount(addressIndex: number, resolver: NormalizedAddress) {
-  const account = mnemonicToAccount(mnemonic, { addressIndex });
-  return {
-    ...account,
-    address: toNormalizedAddress(account.address),
-    resolver,
-  };
-}
-
-/**
- * Named accounts from the ens-test-env devnet.
- * They are NOT real Ethereum Mainnet or testnet addresses.
- * You can use `pnpm devnet` to see actual data in devnet
- *
- * @see https://github.com/ensdomains/ens-test-env
- */
-export const accounts = {
-  deployer: createAccount(0, asNormalizedAddress("0x9c97ec2d79944fa55aa2eb6385bc8711cacf18d2")),
-  owner: createAccount(1, asNormalizedAddress("0x8550d35164e7f86bb6adf4cedb3f012913c9d563")),
-  user: createAccount(2, asNormalizedAddress("0x98a84b915ffe27241033ac8f29c6b7849a0fb6e4")),
-  user2: createAccount(3, asNormalizedAddress("0xd04f8f3726a417cfadeea604fc94cf66112b9af6")),
-} as const;
-
-/**
- * Fixtures for seeding the devnet with test data.
- */
-export const addresses = {
-  one: asNormalizedAddress(`0x${"1".repeat(40)}`),
-} as const satisfies Record<string, NormalizedAddress>;
-
-/**
- * Synthetic EFP follow targets used by the integration EFP seeder (`integration-test-env`) and the
- * EFP integration tests. Each anchors a distinct seeded record so tests can look it up by
- * `recordData`; none is an indexed ENS account, so they also exercise `EfpListRecord.account`'s null
- * path.
- */
-export const efpSeedTargets = {
-  /** ADD + ADD_TAG("block") + ADD_TAG("block") -> tags === ["block"] (dedup). */
-  dedup: asNormalizedAddress(`0x${"d1".repeat(20)}`),
-  /** ADD + ADD_TAG("vip") + REMOVE + ADD -> record present, tags === [] (embed cascade + fresh). */
-  cascade: asNormalizedAddress(`0x${"ca".repeat(20)}`),
-  /** ADD + REMOVE(target + junk) -> record gone (canonical 22-byte keying). */
-  junk: asNormalizedAddress(`0x${"1c".repeat(20)}`),
-  /** Anchors a list whose `user` role must survive a storage-location re-point away and back. */
-  durable: asNormalizedAddress(`0x${"d0".repeat(20)}`),
-} as const satisfies Record<string, NormalizedAddress>;
-
-/** The `user` role set on the {@link efpSeedTargets.durable} list, re-derived after the re-point. */
-export const efpSeedRoleUser = asNormalizedAddress(`0x${"ab".repeat(20)}`);
-
-/**
- * The Anvil account (mnemonic index 6) the EFP seeder mints its lists from. It has `primary-list`
- * metadata (set by easyMintTo) but its lists' `user` is never itself, so it exercises the
- * `primaryList` two-step validation's mismatch (rejection) branch.
- */
-export const efpSeedActorAddress = asNormalizedAddress(
-  "0x976ea74026e726554db657fa54763abd0c3a0aa9",
-);
-
-export const fixtures = {
-  abiBytes: `0x${"01".repeat(32)}`,
-  fourBytesInterface: "0x11100111",
-  publicKeyX: `0x${"02".repeat(32)}`,
-  publicKeyY: `0x${"03".repeat(32)}`,
-  contenthash: `0x${"04".repeat(32)}`,
-  bitcoinAddress: `0x${"05".repeat(25)}`,
-  litecoinAddress: `0x${"06".repeat(25)}`,
-} as const satisfies Record<string, Hex>;

@@ -8,12 +8,9 @@ sidebar:
 import { LinkCard } from "@astrojs/starlight/components";
 import FasterLookupImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/FasterLookupImage.astro";
 import ENSAdminImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/ENSAdminImage.astro";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
 The ENS Omnigraph API can resolve ENS records against ENSNode's indexed data instead of live RPC using **ENS Protocol Acceleration**. The Omnigraph effectively implements the ENS Universal Resolver on top of the indexed ENS data model in [ENSDb](/docs/services/ensdb), so most resolutions complete in a single API call — no RPC round trips and no CCIP-Read gateways for your app to orchestrate — while still returning results that follow the ENS resolution protocol exactly.
-
-:::note[Omnigraph Resolution Coming Soon 🚧]
-Protocol Accelerated Resolution is currently available via the [ENSApi Resolution API](/docs/services/ensapi/reference/api-reference#tag/resolution) but will be moved to the Omnigraph in an upcoming release. The following document describes how Protocol Acceleration _currently_ works (via ENSApi's HTTP API), as well as how it will eventually work within the Omnigraph API.
-:::
 
 <FasterLookupImage styles="w-full h-auto" />
 
@@ -48,6 +45,13 @@ For every record a resolution touches, ENSNode uses its indexed data to accelera
 When a particular record can't be accelerated from indexed data — for example a resolver with behaviour ENSNode can't reproduce from its index — ENSNode transparently falls back to RPC-based resolution, performing the lookup according to the ENS Forward Resolution protocol. That includes carrying out any CCIP-Read operations on your behalf for offchain names, so your app never has to orchestrate CCIP-Read itself. The result is identical to what a fully protocol-compliant resolution would return; acceleration only changes how fast you get there, never what you get.
 
 In general, a fully accelerated request can return in _~10ms_ rather than the standard _~100ms_ from an RPC.
+
+<OmnigraphStaticExampleSet
+  id="accelerate-resolve"
+  integrations={["omnigraph", "curl"]}
+  hideDescription
+  hideBackToExamples
+/>
 
 ## Strengthen the decentralization and "unstoppability" of ENS
 

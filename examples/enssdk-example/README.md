@@ -25,3 +25,9 @@ pnpm install
 
 ENSNODE_URL=http://localhost:4334 pnpm -F enssdk-example start
 ```
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

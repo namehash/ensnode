@@ -5,7 +5,7 @@ import {
   efpSeedActorAddress,
   efpSeedRoleUser,
   efpSeedTargets,
-} from "@ensnode/datasources/devnet";
+} from "@ensnode/integration-test-env/devnet";
 
 import {
   flattenConnection,

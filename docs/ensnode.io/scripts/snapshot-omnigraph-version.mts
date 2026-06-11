@@ -6,10 +6,10 @@ import { fileURLToPath } from "node:url";
 import { buildSchema, parse, validate } from "graphql";
 
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
-import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
+import { GRAPHQL_API_EXAMPLE_QUERIES as EXAMPLE_QUERIES_FROM_SDK } from "@ensnode/ensnode-sdk/internal";
 
+import { OMNIGRAPH_EXAMPLES_CONFIG } from "../src/data/omnigraph-examples/config.ts";
 import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
-import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/examples/omnigraph/constants.ts";
 
 // Freeze the CURRENT workspace SDK omnigraph bundle (examples + schema) into the single
 // vendored snapshot the docs render. Run this on the release commit of <version>, where the
@@ -44,11 +44,24 @@ const sdkVersion = (
   }
 ).version;
 
-const examples: SnapshotExample[] = GRAPHQL_API_EXAMPLE_QUERIES.map((ex) => ({
-  id: ex.id,
-  query: ex.query.trim(),
-  variables: getNamespaceSpecificValue(DOCS_OMNIGRAPH_NAMESPACE, ex.variables),
-}));
+const sdkExampleById = new Map(EXAMPLE_QUERIES_FROM_SDK.map((ex) => [ex.id, ex]));
+
+const examples: SnapshotExample[] = OMNIGRAPH_EXAMPLES_CONFIG.flatMap((config) => {
+  const ex = sdkExampleById.get(config.id);
+  if (!ex) {
+    console.error(
+      `[omnigraph:snapshot] Missing SDK example query ID for config entry: ${config.id}`,
+    );
+    process.exit(1);
+  }
+  return [
+    {
+      id: config.id,
+      query: ex.query.trim(),
+      variables: getNamespaceSpecificValue(config.namespace, ex.variables),
+    },
+  ];
+});
 
 // Fail fast if any example is invalid against this version's schema.
 const invalid = examples.flatMap((ex) => {
@@ -71,7 +84,7 @@ writeFileSync(join(dataDir, "schema.graphql"), sdl, "utf8");
 writeFileSync(join(dataDir, "examples.json"), `${JSON.stringify(examples, null, 2)}\n`, "utf8");
 writeFileSync(
   join(dataDir, "snapshot.json"),
-  `${JSON.stringify({ version, commit, sdkVersion, schemaTag: version, endpoint: ENSNODE_URL, snapshottedAt: new Date().toISOString().slice(0, 10) }, null, 2)}\n`,
+  `${JSON.stringify({ version, commit, sdkVersion, schemaTag: version, snapshottedAt: new Date().toISOString().slice(0, 10) }, null, 2)}\n`,
   "utf8",
 );
 

@@ -75,6 +75,17 @@ ResolverRef.implement({
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
+    /////////////////////
+    // Resolver.extended
+    /////////////////////
+    extended: t.field({
+      description:
+        "Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed.",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent) => parent.isExtended,
+    }),
+
     ////////////////////
     // Resolver.records
     ////////////////////

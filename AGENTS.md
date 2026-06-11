@@ -43,7 +43,9 @@ Runnable commands for validating changes; lint and format with Biome.
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
 - Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
   - Always use `pnpm -F <package-name> typecheck`, never call `tsc` or `tsgo` directly
-- Omnigraph example sample responses (docs): after changing SDK Omnigraph example queries/variables in `packages/ensnode-sdk` or when refreshing live JSON shown in the docs Omnigraph examples, run `pnpm -F @docs/ensnode omnigraph-examples:refresh-responses` (requires `curl`, network). Updates `docs/ensnode.io/src/data/omnigraph-examples/responses.json`.
+- Omnigraph examples (docs) are a two-step pipeline. The docs do NOT read SDK example queries directly — they render a vendored snapshot in `docs/ensnode.io/src/data/omnigraph-examples/` (`examples.json` + `schema.graphql` + `snapshot.json`):
+  1. `pnpm -F @docs/ensnode omnigraph:snapshot <version>` (e.g. `v1.15.2`) — vendors the workspace SDK's example queries and schema into the snapshot. Required after changing SDK Omnigraph example queries/variables in `packages/ensnode-sdk`; skipping it means step 2 POSTs the stale vendored queries.
+  2. `pnpm -F @docs/ensnode omnigraph-examples:refresh-responses [<id>,<id>]` (requires network) — POSTs the vendored queries to the hosted instances and updates `responses.json`. Scope to specific example IDs to leave the rest untouched.
 
 ## Testing
 

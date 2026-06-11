@@ -1253,6 +1253,18 @@ const introspection = {
       },
       {
         "kind": "SCALAR",
+        "name": "BinanceAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "BitcoinAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "BitcoinCashAddress"
+      },
+      {
+        "kind": "SCALAR",
         "name": "Boolean"
       },
       {
@@ -1323,6 +1335,10 @@ const introspection = {
       {
         "kind": "SCALAR",
         "name": "CoinType"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "DogecoinAddress"
       },
       {
         "kind": "INTERFACE",
@@ -1587,6 +1603,10 @@ const introspection = {
           {
             "kind": "OBJECT",
             "name": "ENSv2Domain"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "UnindexedDomain"
           }
         ]
       },
@@ -1820,19 +1840,28 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "banner",
+            "name": "description",
             "type": {
-              "kind": "OBJECT",
-              "name": "ProfileBanner"
+              "kind": "SCALAR",
+              "name": "String"
             },
             "args": [],
             "isDeprecated": false
           },
           {
-            "name": "description",
+            "name": "email",
             "type": {
               "kind": "SCALAR",
-              "name": "String"
+              "name": "Email"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "header",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileHeader"
             },
             "args": [],
             "isDeprecated": false
@@ -1944,6 +1973,15 @@ const introspection = {
         "fields": [
           {
             "name": "assigned",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Resolver"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "effective",
             "type": {
               "kind": "OBJECT",
               "name": "Resolver"
@@ -3603,6 +3641,10 @@ const introspection = {
         ]
       },
       {
+        "kind": "SCALAR",
+        "name": "Email"
+      },
+      {
         "kind": "OBJECT",
         "name": "EfpAccountMetadata",
         "fields": [
@@ -4953,6 +4995,15 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "profile",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainProfile"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "records",
             "type": {
               "kind": "OBJECT",
@@ -5043,6 +5094,14 @@ const introspection = {
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "SCALAR",
+        "name": "LitecoinAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "MonacoinAddress"
       },
       {
         "kind": "INPUT_OBJECT",
@@ -6103,10 +6162,37 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "binance",
+            "type": {
+              "kind": "SCALAR",
+              "name": "BinanceAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "bitcoin",
             "type": {
               "kind": "SCALAR",
-              "name": "String"
+              "name": "BitcoinAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "bitcoincash",
+            "type": {
+              "kind": "SCALAR",
+              "name": "BitcoinCashAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "dogecoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DogecoinAddress"
             },
             "args": [],
             "isDeprecated": false
@@ -6121,10 +6207,46 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "litecoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "LitecoinAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "monacoin",
+            "type": {
+              "kind": "SCALAR",
+              "name": "MonacoinAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "ripple",
+            "type": {
+              "kind": "SCALAR",
+              "name": "RippleAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "rootstock",
+            "type": {
+              "kind": "SCALAR",
+              "name": "RootstockAddress"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "solana",
             "type": {
               "kind": "SCALAR",
-              "name": "String"
+              "name": "SolanaAddress"
             },
             "args": [],
             "isDeprecated": false
@@ -6137,7 +6259,7 @@ const introspection = {
         "name": "ProfileAvatar",
         "fields": [
           {
-            "name": "url",
+            "name": "httpUrl",
             "type": {
               "kind": "SCALAR",
               "name": "String"
@@ -6150,10 +6272,10 @@ const introspection = {
       },
       {
         "kind": "OBJECT",
-        "name": "ProfileBanner",
+        "name": "ProfileHeader",
         "fields": [
           {
-            "name": "url",
+            "name": "httpUrl",
             "type": {
               "kind": "SCALAR",
               "name": "String"
@@ -6171,17 +6293,23 @@ const introspection = {
           {
             "name": "handle",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
             },
             "args": [],
             "isDeprecated": false
           },
           {
-            "name": "url",
+            "name": "httpUrl",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -6195,6 +6323,24 @@ const introspection = {
         "fields": [
           {
             "name": "github",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "keybase",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileSocialAccount"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "linkedin",
             "type": {
               "kind": "OBJECT",
               "name": "ProfileSocialAccount"
@@ -6228,7 +6374,7 @@ const introspection = {
         "name": "ProfileWebsite",
         "fields": [
           {
-            "name": "url",
+            "name": "httpUrl",
             "type": {
               "kind": "SCALAR",
               "name": "String"
@@ -7484,18 +7630,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "InterpretedName"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "interfaces",
             "type": {
               "kind": "NON_NULL",
@@ -7663,6 +7797,18 @@ const introspection = {
                 }
               }
             ],
+            "isDeprecated": false
+          },
+          {
+            "name": "extended",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
             "isDeprecated": false
           },
           {
@@ -8164,6 +8310,18 @@ const introspection = {
       },
       {
         "kind": "SCALAR",
+        "name": "RippleAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "RootstockAddress"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "SolanaAddress"
+      },
+      {
+        "kind": "SCALAR",
         "name": "String"
       },
       {
@@ -8335,6 +8493,267 @@ const introspection = {
           {
             "kind": "INTERFACE",
             "name": "Registration"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UnindexedDomain",
+        "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainCanonical"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "events",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainEventsConnection"
+            },
+            "args": [
+              {
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "before",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "first",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "last",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "where",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "EventsWhereInput"
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DomainId"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "label",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Label"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "owner",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Account"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "parent",
+            "type": {
+              "kind": "INTERFACE",
+              "name": "Domain"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "registration",
+            "type": {
+              "kind": "INTERFACE",
+              "name": "Registration"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "registrations",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainRegistrationsConnection"
+            },
+            "args": [
+              {
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "before",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "first",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "last",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "registry",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "INTERFACE",
+                "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ForwardResolve"
+              }
+            },
+            "args": [
+              {
+                "name": "accelerate",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "true"
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "subdomains",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DomainSubdomainsConnection"
+            },
+            "args": [
+              {
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "before",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "first",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "last",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "order",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "DomainsOrderInput"
+                }
+              },
+              {
+                "name": "where",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SubdomainsWhereInput"
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "subregistry",
+            "type": {
+              "kind": "INTERFACE",
+              "name": "Registry"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Domain"
           }
         ]
       },

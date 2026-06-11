@@ -16,14 +16,19 @@ import {
   makeENSv2RegistryId,
   makeStorageId,
   type NormalizedAddress,
+  type UrlString,
 } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
+import {
+  accounts,
+  addresses,
+  fixtures,
+  testEthTextRecords,
+} from "@ensnode/integration-test-env/devnet";
 
-import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
@@ -561,9 +566,6 @@ describe("Domain.records", () => {
     }
   `;
 
-  const BITCOIN_COIN_TYPE = 0;
-  const LITECOIN_COIN_TYPE = 2;
-
   it("resolves address and text records for example.eth", async () => {
     await expect(
       request<DomainRecordsResult>(DomainRecords, {
@@ -588,7 +590,16 @@ describe("Domain.records", () => {
       request<DomainAllRecordsResult>(DomainRecordsAll, {
         name: "test.eth",
         addresses: [ETH_COIN_TYPE, 0, 2],
-        texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
+        texts: [
+          testEthTextRecords.avatar.key,
+          testEthTextRecords.description.key,
+          testEthTextRecords.url.key,
+          testEthTextRecords.email.key,
+          testEthTextRecords.twitter.key,
+          testEthTextRecords.github.key,
+          testEthTextRecords.x.key,
+          testEthTextRecords.telegram.key,
+        ],
         // BigInt GraphQL vars must be strings here — JSON.stringify (used by the test client) cannot serialize bigint
         contentTypeMask: "1",
         interfaceIds: [fixtures.fourBytesInterface],
@@ -605,16 +616,24 @@ describe("Domain.records", () => {
             interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
             addresses: [
               { coinType: ETH_COIN_TYPE, address: accounts.owner.address },
-              { coinType: BITCOIN_COIN_TYPE, address: fixtures.bitcoinAddress },
-              { coinType: LITECOIN_COIN_TYPE, address: fixtures.litecoinAddress },
+              {
+                coinType: fixtures.rawAddresses.bitcoin.coinType,
+                address: fixtures.rawAddresses.bitcoin.raw,
+              },
+              {
+                coinType: fixtures.rawAddresses.litecoin.coinType,
+                address: fixtures.rawAddresses.litecoin.raw,
+              },
             ],
             texts: [
-              { key: "avatar", value: "https://example.com/avatar.png" },
-              { key: "description", value: "test.eth" },
-              { key: "url", value: "https://ens.domains" },
-              { key: "email", value: "test@ens.domains" },
-              { key: "com.twitter", value: "ensdomains" },
-              { key: "com.github", value: "ensdomains" },
+              testEthTextRecords.avatar,
+              testEthTextRecords.description,
+              testEthTextRecords.url,
+              testEthTextRecords.email,
+              testEthTextRecords.twitter,
+              testEthTextRecords.github,
+              testEthTextRecords.x,
+              testEthTextRecords.telegram,
             ],
           },
         },
@@ -682,16 +701,15 @@ describe("Domain.records", () => {
   });
 });
 
-(INCLUDE_DEV_METHODS ? describe : describe.skip)("Domain.profile", () => {
+describe("Domain.profile", () => {
   type DomainProfileResult = {
     domain: {
       resolve: {
         profile: {
           description: string | null;
-          avatar: { url: string | null } | null;
-          // ethereum address is a checksummed EVM address, so NormalizedAddress is the narrowed type
+          avatar: { httpUrl: UrlString | null } | null;
           addresses: { ethereum: NormalizedAddress | null } | null;
-          socials: { github: { handle: string | null; url: string | null } | null } | null;
+          socials: { github: { handle: string; httpUrl: UrlString } | null } | null;
         } | null;
       };
     };
@@ -703,27 +721,80 @@ describe("Domain.records", () => {
         resolve {
           profile {
             description
-            avatar { url }
-            addresses { ethereum }
-            socials { github { handle url } }
+            avatar { httpUrl }
+            header { httpUrl }
+            website { httpUrl }
+            email
+            addresses { ethereum bitcoin litecoin solana }
+            socials {
+              github { httpUrl handle }
+              twitter { httpUrl handle }
+              telegram { httpUrl handle }
+            }
           }
         }
       }
     }
   `;
 
-  it("returns the preview null shape for a canonical domain", async () => {
+  it("interprets profile fields for test.eth", async () => {
     await expect(
       request<DomainProfileResult>(DomainProfile, { name: "test.eth" }),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       domain: {
         resolve: {
           profile: {
-            description: null,
-            avatar: { url: null },
-            addresses: { ethereum: null },
-            socials: { github: { handle: null, url: null } },
+            description: testEthTextRecords.description.value,
+            avatar: { httpUrl: testEthTextRecords.avatar.value },
+            header: { httpUrl: testEthTextRecords.header.value },
+            website: { httpUrl: testEthTextRecords.url.value },
+            email: testEthTextRecords.email.value,
+            addresses: {
+              ethereum: accounts.owner.address,
+              bitcoin: fixtures.rawAddresses.bitcoin.address,
+              litecoin: fixtures.rawAddresses.litecoin.address,
+              solana: fixtures.rawAddresses.solana.address,
+            },
+            socials: {
+              github: {
+                handle: "ensdomains",
+                httpUrl: "https://github.com/ensdomains",
+              },
+              telegram: {
+                handle: "ensdomains",
+                httpUrl: "https://t.me/ensdomains",
+              },
+              twitter: {
+                handle: "this_is_real_ensdomains_not_twitter_but_x_haha",
+                httpUrl: "https://x.com/this_is_real_ensdomains_not_twitter_but_x_haha",
+              },
+            },
           },
+        },
+      },
+    });
+  });
+
+  it("returns null when profile is not selected for resolution", async () => {
+    const DomainResolveWithoutProfile = gql`
+      query DomainResolveWithoutProfile($name: InterpretedName!) {
+        domain(by: { name: $name }) {
+          resolve {
+            acceleration { requested attempted }
+          }
+        }
+      }
+    `;
+
+    await expect(
+      request<{ domain: { resolve: { acceleration: { requested: boolean } } } }>(
+        DomainResolveWithoutProfile,
+        { name: "test.eth" },
+      ),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          acceleration: { requested: true },
         },
       },
     });

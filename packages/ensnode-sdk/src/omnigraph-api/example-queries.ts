@@ -1,7 +1,7 @@
 import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts } from "@ensnode/integration-test-env/devnet";
 
 import { getDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
@@ -40,6 +40,15 @@ const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 const SEPOLIA_V2_NAME = asInterpretedName("roppp.eth");
 
+const VITALIK_NAME = asInterpretedName("vitalik.eth");
+
+const GREG_NAME = asInterpretedName("gregskril.eth");
+
+const GREG_ADDRESS = toNormalizedAddress("0x179a862703a4adfb29896552df9e307980d19285");
+
+// an offchain (CCIP-Read) name: resolvable but unindexed, so it surfaces as an UnindexedDomain
+const OFFCHAIN_NAME = asInterpretedName("patricio.onpoap.eth");
+
 const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ReverseResolverRoot,
@@ -72,18 +81,44 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   ////////////////
   {
     id: "hello-world",
-    query: `#
-# Welcome to this interactive playground for
-# ENSNode's GraphQL API!
-#
-# You can get started by typing your query here or by using
-# the Explorer on the left to select the data you want to query.
-#
-# There are also example queries in the tabs above ☝️
-query HelloWorld {
-  domain(by: { name: "eth" }) { canonical { name { interpreted beautified } } owner { address } }
+    query: `query HelloWorld($address: Address!) {
+  # Lookup an Account by address.
+  account(by: { address: $address }) {
+    resolve {
+      # Reverse resolve the ENS primary name of the account
+      # using a convenient ETHEREUM alias for mainnet.
+      primaryName(by: { chainName: ETHEREUM }) {
+        # Get the regular interpreted variant of the primary name
+        # and also the special beautified variant that optimizes names
+        # containing special characters such as emojis for proper display in interfaces.
+        name { interpreted beautified }
+        resolve {
+          # If the account has a primary name on Ethereum (mainnet),
+          # forward resolve the interpreted ENS profile of that name in the same query!
+          profile {
+            description
+            avatar { httpUrl }
+            addresses { ethereum bitcoin }
+            socials {
+              twitter { handle httpUrl }
+              github { handle httpUrl }
+            }
+          }
+        }
+      }
+    }
+
+    # Also load the count of ENSv1 and ENSv2 domains owned by the account
+    # to see if they have domains they should upgrade to ENSv2
+    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
+    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
+  }
 }`,
-    variables: { default: {} },
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 },
+    },
   },
 
   /////////////////
@@ -126,11 +161,35 @@ query FindDomains(
     },
   },
 
-  ///////////////////
-  // Domain By Name
-  ///////////////////
   {
     id: "domain-by-name",
+    query: `
+query DomainByName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    canonical { name { beautified } }
+    owner { address }
+    resolve {
+      profile {
+        description
+        addresses {
+          ethereum
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
+      [ENSNamespaceIds.Mainnet]: { name: VITALIK_NAME },
+    },
+  },
+
+  ////////////////////////////////
+  // Domain By Name Type Condition
+  ////////////////////////////////
+  {
+    id: "domain-by-name-type-condition",
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -193,7 +252,7 @@ query DomainRegistration($name: InterpretedName!) {
   }
 }`,
     variables: {
-      default: { name: "vitalik.eth" },
+      default: { name: VITALIK_NAME },
       [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
   },
@@ -204,21 +263,30 @@ query DomainRegistration($name: InterpretedName!) {
   {
     id: "domain-records",
     query: `
-query DomainRecords(
-  $name: InterpretedName!
-) {
-  domain(by: { name: $name }) {
-    canonical { name { interpreted } }
+query DomainRecords($name: InterpretedName!) {
+  domain(by: {name: $name}) {
+    canonical {
+      name {
+        interpreted
+      }
+    }
     resolve {
       records {
-        addresses(coinTypes: [60]) { coinType address }
-        texts(keys: ["description"]) { key value }
+        addresses(coinTypes: [60, 2147483658, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["description", "avatar", "url", "com.github", "com.twitter"]) {
+          key
+          value
+        }
+        contenthash
       }
     }
   }
 }`,
     variables: {
-      default: { name: "vitalik.eth" },
+      default: { name: GREG_NAME },
       [ENSNamespaceIds.EnsTestEnv]: {
         name: DEVNET_NAME_WITH_OWNED_RESOLVER,
       },
@@ -226,6 +294,121 @@ query DomainRecords(
         name: SEPOLIA_V2_NAME,
       },
     },
+  },
+
+  {
+    id: "domain-profile",
+    query: `
+query DomainProfile($name: InterpretedName!) {
+  domain(by: {name: $name}) {
+    resolve {
+      profile {
+        description
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          base
+          solana
+          bitcoin
+          rootstock
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+        header {
+          httpUrl
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: GREG_NAME } },
+  },
+
+  {
+    id: "domain-profile-and-records",
+    query: `
+query DomainProfileAndRecords($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    resolve {
+      profile {
+        avatar {
+          httpUrl
+        }
+        addresses {
+          ethereum
+          solana
+        }
+        socials {
+          github {
+            handle
+            httpUrl
+          }
+          twitter {
+            handle
+            httpUrl
+          }
+        }
+        website {
+          httpUrl
+        }
+      }
+      records {
+        addresses(coinTypes: [60, 501]) {
+          coinType
+          address
+        }
+        texts(keys: ["avatar", "com.twitter", "com.github", "url"]) {
+          key
+          value
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: GREG_NAME } },
+  },
+
+  ////////////////////////////////////
+  // Offchain Name (UnindexedDomain)
+  ////////////////////////////////////
+  {
+    id: "offchain-name",
+    query: `
+query OffchainName($name: InterpretedName!) {
+  domain(by: { name: $name }) {
+    # Resolvable-but-unindexed names (offchain / CCIP-Read) surface as UnindexedDomain
+    __typename
+    id
+    canonical { name { interpreted } }
+    resolver {
+      # the wildcard Resolver that ENS Forward Resolution (ENSIP-10) lands on
+      effective {
+        extended
+        contract { chainId address }
+      }
+    }
+    resolve {
+      records {
+        addresses(coinTypes: [60]) { coinType address }
+        texts(keys: ["avatar", "com.twitter", "description"]) { key value }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: OFFCHAIN_NAME } },
   },
 
   //////////////////////
@@ -237,7 +420,35 @@ query DomainRecords(
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
     canonical { name { interpreted beautified } }
-    subdomains(first: 10) {
+    subdomains(first: 10, order: {
+       by: NAME,
+       dir: ASC
+    }) {
+      edges {
+        node {
+          canonical { name { interpreted beautified } }
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "eth" },
+      // in mainnet there is too many subdomains of eth
+      [ENSNamespaceIds.Mainnet]: { name: "base.eth" },
+    },
+  },
+
+  ////////////////////////////////////
+  // Most Recently Registered Subdomains
+  ////////////////////////////////////
+  {
+    id: "domain-subdomains-recently-registered",
+    query: `
+query RecentlyRegisteredSubdomains($name: InterpretedName!) {
+  domain(by: {name: $name}) {
+    canonical { name { interpreted beautified } }
+    subdomains(first: 10, order: {by: REGISTRATION_TIMESTAMP, dir: DESC}) {
       edges {
         node {
           canonical { name { interpreted beautified } }
@@ -341,15 +552,40 @@ query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
-      primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
-        coinType
+      onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
         chainName
         name { interpreted beautified }
+      }
+
+      twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+        chainName
+        name { interpreted beautified }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: GREG_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT },
+    },
+  },
+  {
+    id: "account-primary-name-records",
+    query: `
+query AccountPrimaryNameRecords($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    resolve {
+      primaryName(by: { chainName: ETHEREUM }) {
+        name { interpreted beautified }
         resolve {
-          records {
-            addresses(coinTypes: [60]) {
-              coinType
-              address
+          profile {
+            description
+            socials {
+              twitter {
+                httpUrl
+              }
             }
           }
         }
@@ -508,15 +744,18 @@ query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
       assigned {
-        records { edges { node { node keys coinTypes } } }
-        permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
-        events { totalCount edges { node { topics data timestamp } } }
+        contract {
+          address
+        }
+        events(first: 5) {
+          edges { node { topics data timestamp } }
+        }
       }
     }
   }
 }`,
     variables: {
-      default: { name: "vitalik.eth" },
+      default: { name: VITALIK_NAME },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
       [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
@@ -562,31 +801,19 @@ query ResolverByAddress($contract: AccountIdInput!) {
     id: "namegraph",
     query: `
 query Namegraph {
-  root {
-    id
-    domains {
-      edges {
-        node {
-          canonical { name { interpreted beautified } }
-
-          subdomains {
-            edges {
-              node {
-                canonical { name { interpreted beautified } }
-
-                subdomains {
-                  edges {
-                    node {
-                      canonical { name { interpreted beautified } }
-                    }
-                  }
-                }
-              }
-            }
+  domain(by: { name: "eth" }) {
+    registry { id contract { chainId address } }
+    parent { id }
+    subregistry {
+      domains {
+        edges {
+          node {
+            canonical { name { beautified } }
           }
         }
       }
     }
+    subdomains { edges { node { canonical { name { beautified } } } } }
   }
 }`,
     variables: { default: {} },
@@ -623,6 +850,31 @@ query GetEthDomains {
   }
 }`,
     variables: { default: {} },
+  },
+  {
+    id: "accelerate-resolve",
+    query: `
+query AccelerateResolve($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    # resolve is automatically accelerated. To disable, resolve(accelerate: false)
+    resolve {
+      acceleration { requested attempted }
+      primaryName(by: { chainName: ETHEREUM }) {
+        name { interpreted beautified }
+        resolve {
+          acceleration { requested attempted }
+          profile { description }
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 },
+    },
   },
 ];
 

@@ -1,11 +1,11 @@
 import BoringAvatar from "boring-avatars";
 import type { Name } from "enssdk";
+import { getEnsMetadataServiceImageUrl } from "enssdk";
 import * as React from "react";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
 import { cn } from "../../utils/cn";
-import { getEnsMetadataServiceAvatarUrl } from "../../utils/ensMetadata";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
 interface EnsAvatarProps {
@@ -21,7 +21,7 @@ type ImageLoadingStatus = Parameters<
 
 export const EnsAvatar = ({ name, namespaceId, className, isSquare = false }: EnsAvatarProps) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
-  const avatarUrl = getEnsMetadataServiceAvatarUrl(name, namespaceId);
+  const avatarUrl = getEnsMetadataServiceImageUrl(name, namespaceId, "avatar");
 
   if (avatarUrl === null) {
     return (

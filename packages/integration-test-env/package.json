@@ -1,20 +1,25 @@
 {
   "name": "@ensnode/integration-test-env",
-  "version": "1.15.1",
+  "version": "1.15.2",
   "private": true,
   "license": "MIT",
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
+  "exports": {
+    "./devnet": "./src/devnet/index.ts"
+  },
   "scripts": {
     "start": "tsx src/start.ts",
     "start:ci": "CI=1 tsx src/ci.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ensnode/shared-configs": "workspace:*",
+    "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
+    "@ensnode/shared-configs": "workspace:*",
+    "enssdk": "workspace:*",
     "execa": "^9.6.1",
     "testcontainers": "^12.0.1",
     "tsx": "^4.7.1",

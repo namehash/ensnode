@@ -3,11 +3,56 @@ title: AI / LLM Tooling
 description: AI and LLM tooling for building on ENSv2.
 ---
 
-import { LinkCard } from "@astrojs/starlight/components";
+import { Code, LinkCard } from "@astrojs/starlight/components";
+import snapshot from "@data/omnigraph-examples/snapshot.json";
+import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVersionWarning.astro";
 
-AI and LLM tooling is a key priority for ENSNode, and we're building the infrastructure to make ENS a first-class citizen in the world of AI coding assistants and chat-based interfaces.
+We're building the infrastructure to make ENS a first-class citizen for AI agents.
 
-Next on the roadmap for this space are [`enscli`](/docs/integrate/integration-options/enscli) and [`ensskills`](/docs/integrate/integration-options/ensskills) — the foundation for how developers and their AI agents will reach for ENS.
+The foundation for how developers and their AI agents reach for ENS is [`ensskills`](/docs/integrate/integration-options/ensskills), that teach your AI assistant about ENS, ENSNode, the ENS Omnigraph, and how to drive [`enscli`](/docs/integrate/integration-options/enscli) — an agent- and human-friendly CLI — on your behalf.
+
+<HostedInstanceVersionWarning variant="skills" />
+
+## Quickstart (`npm`/`pnpm`/`yarn`/`bun`)
+
+Add `ensskills` and [`skills-npm`](https://github.com/antfu/skills-npm) to your project and wire a `prepare` script so the pinned skills re-sync into your agent directories (`.claude/skills`, `.cursor/skills`, …) on every install:
+
+<Code
+  lang="jsonc"
+  code={`// package.json
+  {
+    "devDependencies": {
+      "ensskills": "${snapshot.sdkVersion}",
+      "skills-npm": "^1"
+    },
+    "scripts": {
+      "prepare": "skills-npm"
+    }
+  }
+`}
+/>
+
+```bash
+npm install   # symlinks the skills for your detected agents
+```
+
+## Quickstart (`npx skills`)
+
+Not in a Node project? [`skills`](https://github.com/vercel-labs/skills) installs every ENS skill straight from the repo, pinned to the matching `v…` release tag:
+
+<Code
+  lang="bash"
+  code={`npx skills add https://github.com/namehash/ensnode/tree/v${snapshot.sdkVersion}/packages/ensskills/skills --skill '*'`}
+/>
+
+## Next Steps
+
+That's it — your AI agent now has all of [`ensskills`](/docs/integrate/integration-options/ensskills) at its disposal.
+
+```md title=prompt.md
+Which address currently owns vitalik.eth
+and how many other domains do they own?
+```
 
 <LinkCard
   title="enscli"
@@ -21,4 +66,15 @@ Next on the roadmap for this space are [`enscli`](/docs/integrate/integration-op
   href="/docs/integrate/integration-options/ensskills"
 />
 
-Check back soon for more detail on our AI / LLM tooling roadmap.
+## Documentation as `llms.txt`
+
+If you aren't using `ensskills`, the entire documentation site is also published in the [`llms.txt`](https://llmstxt.org/) format so any agent or LLM can load it directly as context:
+
+- [`/llms.txt`](https://ensnode.io/llms.txt) — a structured index of the documentation with links to every page.
+- [`/llms-full.txt`](https://ensnode.io/llms-full.txt) — the entire documentation concatenated into a single file, ready to drop into a model's context window.
+
+Paste this at the top of a prompt to point your agent at the full documentation before asking your question:
+
+```md title="prompt.md"
+Load the ENSNode documentation from https://ensnode.io/llms-full.txt to answer the following question:
+```
