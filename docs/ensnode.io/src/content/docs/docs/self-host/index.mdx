@@ -1,6 +1,8 @@
 ---
 title: Self-host ENSNode
 description: Decide whether to self-host ENSNode and understand the architecture.
+sidebar:
+  label: Overview
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
@@ -39,5 +41,7 @@ Self-hosting today means standing up a fresh ENSNode instance from zero and wait
 ### Deployment options
 
 <LinkCard title="Deploy with Docker" description="The Docker deployment option provides the easiest way to run the full ENSNode suite of services both locally and in the cloud." href="/docs/self-host/docker" />
+
+<LinkCard title="Deploy to Railway" description="A guide for deploying the ENSNode Alpha instance on Railway using the Railway Templates approach." href="/docs/self-host/railway" />
 
 <LinkCard title="Deploy with Terraform" description="An example Terraform deployment reference is available, showing an example of deploying the full ENSNode suite on Render with AWS managed domain names." href="/docs/self-host/terraform" />

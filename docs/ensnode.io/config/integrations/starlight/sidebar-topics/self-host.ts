@@ -8,12 +8,21 @@ export const selfHostSidebarTopic = {
       link: "/docs/self-host",
     },
     {
-      label: "Docker",
-      link: "/docs/self-host/docker",
-    },
-    {
-      label: "Terraform",
-      link: "/docs/self-host/terraform",
+      label: "Deployment options",
+      items: [
+        {
+          label: "Docker",
+          link: "/docs/self-host/docker",
+        },
+        {
+          label: "Railway",
+          link: "/docs/self-host/railway",
+        },
+        {
+          label: "Terraform",
+          link: "/docs/self-host/terraform",
+        },
+      ],
     },
     {
       label: "Scalability",
