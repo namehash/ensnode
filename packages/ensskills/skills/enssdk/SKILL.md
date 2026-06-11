@@ -128,7 +128,7 @@ const result = await client.omnigraph.query({
 });
 ```
 
-The query result is `{ data?, errors? }` — see [Error handling](#error-handling--gotchas). `data` is typed exactly to your selection set.
+The query result is `{ data?, errors? }` — see "Error handling & gotchas" below. `data` is typed exactly to your selection set.
 
 ### Variables & the response shape
 

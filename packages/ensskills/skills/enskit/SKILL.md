@@ -43,7 +43,7 @@ import { omnigraph } from "enssdk/omnigraph";
 // Pick the ENSNode instance / namespace by URL. Use a NameHash-hosted instance
 // (https://ensnode.io/docs/hosted-instances) or your own.
 const client = createEnsNodeClient({
-  url: "https://api.v2-sepolia.ensnode.io",
+  url: "https://api.alpha.ensnode.io",
 }).extend(omnigraph);
 
 export function App() {
