@@ -1,14 +1,9 @@
 import {
   asInterpretedLabel,
-  asInterpretedName,
-  asLiteralLabel,
   type DomainId,
   ETH_NODE,
-  encodeLabelHash,
   type InterpretedLabel,
-  type InterpretedName,
   labelhashInterpretedLabel,
-  labelhashLiteralLabel,
   makeENSv1DomainId,
   makeENSv1RegistryId,
   makeENSv2DomainId,
@@ -17,7 +12,6 @@ import {
   type Node,
   type NormalizedAddress,
 } from "enssdk";
-import { namehash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
@@ -48,6 +42,7 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
 
 const V1_ROOT_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
 
+const V2_ETH_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSv2Root, "ETHRegistry");
 const V1_ETH_DOMAIN_ID = makeENSv1DomainId(V1_ROOT_REGISTRY, ETH_NODE);
 const V2_ETH_STORAGE_ID = makeStorageId(labelhashInterpretedLabel(asInterpretedLabel("eth")));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_STORAGE_ID);
@@ -304,39 +299,25 @@ describe("Query.domain", () => {
     }
   `;
 
-  const ensv1RootRegistry = () =>
-    getDatasourceContract("ens-test-env", DatasourceNames.ENSRoot, "ENSv1Registry");
-
-  const unhealedCanonicalEthName = (label: string): InterpretedName =>
-    asInterpretedName(
-      `${asInterpretedLabel(encodeLabelHash(labelhashLiteralLabel(asLiteralLabel(label))))}.eth`,
-    );
-
   it.each(DEVNET_NAMES)("resolves $name", async ({ name, canonical }) => {
     await expect(request(DomainByName, { name })).resolves.toMatchObject({
       domain: { canonical: { name: { interpreted: canonical } } },
     });
   });
 
-  it.each(DEVNET_ENSV1_NAMES.filter((entry) => entry.wrapped))(
-    "resolves healed ENSv1 name $name via domain(by: name)",
-    async ({ name, canonical }) => {
-      const id = makeENSv1DomainId(ensv1RootRegistry(), namehash(name));
+  // ENSv1-only names are reserved in the ENSv2 ETHRegistry (resolver = ENSV1Resolver), mirroring the
+  // migration. The walk prefers the ENSv2 Domain, and the ENSv2 registration emits the literal label,
+  // so each name resolves to an ENSv2 Domain whose canonical is the full literal name — including the
+  // legacy-unwrapped name whose ENSv1 canonical is an Encoded LabelHash.
+  it.each(DEVNET_ENSV1_NAMES)(
+    "resolves ENSv1-only name $name to its reserved ENSv2 Domain via domain(by: name)",
+    async ({ name, label, canonical }) => {
+      const id = makeENSv2DomainId(
+        V2_ETH_REGISTRY,
+        makeStorageId(labelhashInterpretedLabel(asInterpretedLabel(label))),
+      );
       await expect(request(DomainByName, { name })).resolves.toMatchObject({
         domain: { id, canonical: { name: { interpreted: canonical } } },
-      });
-    },
-  );
-
-  it.each(DEVNET_ENSV1_NAMES.filter((entry) => !entry.wrapped))(
-    "resolves unhealed ENSv1 name $name via domain(by: name)",
-    async ({ name, label }) => {
-      const id = makeENSv1DomainId(ensv1RootRegistry(), namehash(name));
-      await expect(request(DomainByName, { name })).resolves.toMatchObject({
-        domain: {
-          id,
-          canonical: { name: { interpreted: unhealedCanonicalEthName(label) } },
-        },
       });
     },
   );

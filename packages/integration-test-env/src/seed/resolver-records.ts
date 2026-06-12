@@ -4,7 +4,7 @@ import { packetToBytes } from "viem/ens";
 import { ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
 import { contracts } from "@ensnode/datasources/devnet";
 
-import { addresses, fixtures } from "../devnet/fixtures";
+import { addresses, contenthashFixtures, fixtures } from "../devnet/fixtures";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 import { waitForTransactionReceipt } from "./index";
 
@@ -35,7 +35,7 @@ async function seedResolverRecordsForName(
   }
 
   // Scalar resolver records
-  await setContenthash(clients.owner, resolver, node, fixtures.contenthash as Hex);
+  await setContenthash(clients.owner, resolver, node, contenthashFixtures.ipfs.raw);
   await setPubkey(clients.owner, resolver, node, fixtures.publicKeyX, fixtures.publicKeyY);
   await setAbi(clients.owner, resolver, node, 1n, fixtures.abiBytes);
   await setInterfaceImplementer(

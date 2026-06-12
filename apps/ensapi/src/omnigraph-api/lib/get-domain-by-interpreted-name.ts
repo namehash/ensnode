@@ -14,7 +14,6 @@ import {
   getENSv2RootRegistryId,
   getRootRegistryId,
   makeContractMatcher,
-  maybeGetENSv2RootRegistryId,
 } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
@@ -57,10 +56,8 @@ export interface NamegraphWalkResult {
  * Walks the namegraph for an Interpreted Name and returns the {@link NamegraphWalkResult}.
  *
  * Walks resolution from the primary Root Registry (ENSv2 Root when defined, otherwise the ENSv1 Root),
- * following Bridged Resolvers as necessary. When ENSv2 is defined but the initial walk does not
- * exact-match (e.g. a name registered only in ENSv1, not reserved in ENSv2), falls back to the ENSv1
- * disjoint namegraph unless an ancestor already has an ENSIP-10 wildcard Resolver. We only operate over
- * indexed data which is fully available for the ENS Root Chain.
+ * following Bridged Resolvers as necessary. We only operate over indexed data which is fully available
+ * for the ENS Root Chain.
  *
  * Unlike Forward Resolution, this walk does not check registration expiry, so callers can address
  * Domains regardless of expiry status. This means that a Domain identified by this walk may not be
@@ -168,23 +165,6 @@ async function walkNamegraphFromRegistry(
         depth + 1,
       );
     }
-  }
-
-  // ENSv1-only fallback: when the preferred ENSv2 Root walk does not exact-match and no ENSv1Resolver
-  // hop applied (e.g. a .eth 2LD registered only in ENSv1, not reserved in ENSv2), walk the ENSv1
-  // disjoint namegraph. Skip when an ancestor already has an ENSIP-10 wildcard Resolver — resolution
-  // stays in the ENSv2 path (UnindexedDomain), not vestigial ENSv1 state.
-  const ensv2RootId = maybeGetENSv2RootRegistryId(di.context.namespace);
-  const triedOnlyENSv2Registry = ensv2RootId && registryId === ensv2RootId;
-  const deepestResolverIsExtended = deepestResolver?.extended ?? false;
-  const firstHop = depth === 0;
-  if (!exact && triedOnlyENSv2Registry && firstHop && !deepestResolverIsExtended) {
-    const v1Result = await walkNamegraphFromRegistry(
-      getENSv1RootRegistryId(di.context.namespace),
-      path,
-      depth + 1,
-    );
-    if (v1Result.exact) return v1Result;
   }
 
   // finally, return the terminal path; the caller interprets `exact` (indexed leaf) vs a deepest

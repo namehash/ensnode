@@ -1472,6 +1472,40 @@ const introspection = {
         "name": "CoinType"
       },
       {
+        "kind": "ENUM",
+        "name": "ContenthashProtocol",
+        "enumValues": [
+          {
+            "name": "ARWEAVE",
+            "isDeprecated": false
+          },
+          {
+            "name": "IPFS",
+            "isDeprecated": false
+          },
+          {
+            "name": "IPNS",
+            "isDeprecated": false
+          },
+          {
+            "name": "ONION",
+            "isDeprecated": false
+          },
+          {
+            "name": "ONION3",
+            "isDeprecated": false
+          },
+          {
+            "name": "SKYNET",
+            "isDeprecated": false
+          },
+          {
+            "name": "SWARM",
+            "isDeprecated": false
+          }
+        ]
+      },
+      {
         "kind": "SCALAR",
         "name": "DogecoinAddress"
       },
@@ -1970,6 +2004,15 @@ const introspection = {
             "type": {
               "kind": "OBJECT",
               "name": "ProfileAvatar"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "contenthash",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProfileContenthash"
             },
             "args": [],
             "isDeprecated": false
@@ -6223,6 +6266,58 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProfileContenthash",
+        "fields": [
+          {
+            "name": "decoded",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "httpUrl",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "protocolType",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ContenthashProtocol"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "uri",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
             },
             "args": [],
             "isDeprecated": false

@@ -346,6 +346,9 @@ importers:
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
+      '@ensdomains/content-hash':
+        specifier: ^3.1.0-rc.1
+        version: 3.1.0-rc.1
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
@@ -1258,6 +1261,9 @@ importers:
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
+      '@ensdomains/content-hash':
+        specifier: ^3.1.0-rc.1
+        version: 3.1.0-rc.1
       '@ensnode/datasources':
         specifier: workspace:*
         version: link:../datasources

@@ -10,6 +10,7 @@ import {
 import {
   ADDRESS_INTERPRETERS,
   ProfileAvatarInterpreter,
+  ProfileContenthashInterpreter,
   ProfileDescriptionInterpreter,
   ProfileEmailInterpreter,
   ProfileHeaderInterpreter,
@@ -95,6 +96,9 @@ export function buildProfileSelectionFromResolveContainerInfo(
   }
   if (topLevelFields.has("email")) {
     merged = mergeRecordsSelections(merged, ProfileEmailInterpreter.selection);
+  }
+  if (topLevelFields.has("contenthash")) {
+    merged = mergeRecordsSelections(merged, ProfileContenthashInterpreter.selection);
   }
 
   // 3. Walk socials sub-fields

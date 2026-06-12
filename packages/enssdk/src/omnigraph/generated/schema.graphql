@@ -339,6 +339,19 @@ enum ChainName {
 scalar CoinType
 
 """
+The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+"""
+enum ContenthashProtocol {
+  ARWEAVE
+  IPFS
+  IPNS
+  ONION
+  ONION3
+  SKYNET
+  SWARM
+}
+
+"""
 DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
 """
 scalar DogecoinAddress
@@ -474,6 +487,11 @@ type DomainProfile {
   Interpreted avatar metadata. Returns null when the raw avatar record is unset or empty.
   """
   avatar: ProfileAvatar
+
+  """
+  The interpreted ENSIP-7 contenthash on the profile of an ENS name. Returns null when the raw contenthash record is unset, empty, or cannot be decoded (unknown codec or malformed bytes). See https://docs.ens.domains/ensip/7.
+  """
+  contenthash: ProfileContenthash
 
   """
   The interpreted description on the profile of an ENS name, or null when unset.
@@ -1592,6 +1610,29 @@ type ProfileAvatar {
   HTTP-compatible URL for fetching the avatar image in web browsers. Abstraction over the raw avatar record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
   """
   httpUrl: String
+}
+
+"""The interpreted ENSIP-7 contenthash on the profile of an ENS name."""
+type ProfileContenthash {
+  """
+  The decoded, human-readable content identifier (e.g. a CID for IPFS, transaction ID for Arweave).
+  """
+  decoded: String!
+
+  """
+  The default public HTTP gateway URL for fetching this content in a browser (e.g. https://ipfs.io/ipfs/…). Null for protocols with no well-known public gateway (onion, skynet).
+  """
+  httpUrl: String
+
+  """
+  The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+  """
+  protocolType: ContenthashProtocol!
+
+  """
+  The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").
+  """
+  uri: String!
 }
 
 """The interpreted header image on the profile of an ENS name."""
