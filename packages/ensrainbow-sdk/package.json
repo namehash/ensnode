@@ -21,7 +21,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
-    "./consts": "./src/consts.ts"
+    "./consts": "./src/consts.ts",
+    "./ensrainbowbeam-client": "./src/ensrainbowbeam-client.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -37,6 +38,10 @@
       "./consts": {
         "types": "./dist/consts.d.ts",
         "default": "./dist/consts.js"
+      },
+      "./ensrainbowbeam-client": {
+        "types": "./dist/ensrainbowbeam-client.d.ts",
+        "default": "./dist/ensrainbowbeam-client.js"
       }
     },
     "main": "./dist/index.js",

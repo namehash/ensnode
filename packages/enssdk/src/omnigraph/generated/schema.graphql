@@ -1074,13 +1074,26 @@ type Label {
   The Label's LabelHash
   (@see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function)
   """
-  hash: Hex!
+  hash: LabelHash!
 
   """
   The Label represented as an Interpreted Label. This is either a normalized Literal Label or an Encoded LabelHash. 
   (@see https://ensnode.io/docs/reference/terminology#interpreted-label)
   """
   interpreted: InterpretedLabel!
+}
+
+"""
+LabelHash represents enssdk#LabelHash: a 32-byte (64 hex digit) value, `0x`-prefixed and lowercased.
+"""
+scalar LabelHash
+
+"""Look up Labels by a batch of LabelHashes."""
+input LabelsByLabelHashesInput {
+  """
+  LabelHashes to look up. After deduplication, at most 100 distinct LabelHashes per request (each normalized to lowercase at parse time). LabelHashes absent from the index are omitted from the result.
+  """
+  labelHashes: [LabelHash!]!
 }
 
 """
@@ -1476,6 +1489,11 @@ type Query {
   Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
+
+  """
+  Look up Labels in the index by a batch of LabelHashes. Each returned Label exposes its `hash` and `interpreted` representation, where `interpreted` is the Encoded LabelHash for unhealed/unknown labels and a normalized literal for healed labels. LabelHashes that are not present in the index are simply omitted from the result.
+  """
+  labels(by: LabelsByLabelHashesInput!): [Label!]!
 
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions

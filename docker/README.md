@@ -15,6 +15,8 @@ All commands are run from the **monorepo root**.
 | `docker/envs/.env.docker.example`        | Example for user-specific config. Copy to `.env.docker.local` for mainnet/sepolia.     |
 | `docker/envs/.env.docker.local`          | User config (gitignored). Required for base stack, optional for devnet overrides.      |
 
+EnsRainbowBeam (`docker/services/ensrainbowbeam.yml`) is optional: extend that file when you want label-discovery HTTP alongside ENSApi (`ENSNODE_URL` must reach the Omnigraph-capable ENSApi URL).
+
 > To inspect the fully resolved config for any compose file (resolves all `extends`):
 >
 > ```
@@ -78,6 +80,7 @@ pnpm docker:build:ensnode
 pnpm docker:build:ensindexer
 pnpm docker:build:ensapi
 pnpm docker:build:ensrainbow
+pnpm docker:build:ensrainbowbeam
 pnpm docker:build:ensadmin
 ```
 

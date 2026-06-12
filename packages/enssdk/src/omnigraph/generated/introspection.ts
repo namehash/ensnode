@@ -3966,7 +3966,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Hex"
+                "name": "LabelHash"
               }
             },
             "args": [],
@@ -3986,6 +3986,33 @@ const introspection = {
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "SCALAR",
+        "name": "LabelHash"
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "LabelsByLabelHashesInput",
+        "inputFields": [
+          {
+            "name": "labelHashes",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "LabelHash"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": false
       },
       {
         "kind": "SCALAR",
@@ -5422,6 +5449,35 @@ const introspection = {
                   "ofType": {
                     "kind": "INPUT_OBJECT",
                     "name": "DomainsWhereInput"
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "labels",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Label"
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "by",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "LabelsByLabelHashesInput"
                   }
                 }
               }

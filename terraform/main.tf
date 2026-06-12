@@ -193,3 +193,15 @@ module "ensindexer" {
   # the specific ENSRainbow module instance and extract its URL output.
   ensrainbow_url = module.ensrainbow[each.value.ensindexer_label_set_id].ensrainbow_url
 }
+
+module "ensrainbowbeam" {
+  source = "./modules/ensrainbowbeam"
+
+  render_region         = local.render_region
+  render_environment_id = render_project.ensnode.environments["default"].id
+  ensnode_version       = var.ensnode_version
+
+  # Beam uses the Omnigraph-capable ENSApi endpoint for label classification.
+  # Default to the Alpha API hostname for this Render environment.
+  ensnode_url = "https://api.alpha.${var.render_environment}.${local.hosted_zone_name}"
+}

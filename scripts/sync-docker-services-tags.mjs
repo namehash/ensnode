@@ -16,6 +16,7 @@ const serviceFiles = [
   "docker/services/ensapi.yml",
   "docker/services/ensindexer.yml",
   "docker/services/ensrainbow.yml",
+  "docker/services/ensrainbowbeam.yml",
 ];
 
 const semverRegex = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;

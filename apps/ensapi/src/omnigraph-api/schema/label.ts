@@ -1,4 +1,4 @@
-import { beautifyInterpretedLabel } from "enssdk";
+import { beautifyInterpretedLabel, OMNIGRAPH_LABELS_BY_LABELHASH_MAX } from "enssdk";
 
 import type di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
@@ -14,7 +14,7 @@ LabelRef.implement({
     hash: t.field({
       description:
         "The Label's LabelHash\n(@see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function)",
-      type: "Hex",
+      type: "LabelHash",
       nullable: false,
       resolve: (parent) => parent.labelHash,
     }),
@@ -39,6 +39,29 @@ LabelRef.implement({
       type: "BeautifiedLabel",
       nullable: false,
       resolve: (parent) => beautifyInterpretedLabel(parent.interpreted),
+    }),
+  }),
+});
+
+//////////
+// Inputs
+//////////
+
+/**
+ * Maximum number of LabelHashes accepted per `Query.labels` request.
+ *
+ * Caps the resolver's `inArray` query so a single GraphQL request cannot enumerate
+ * the entire `label` table.
+ */
+export const LABELS_BY_LABELHASH_MAX = OMNIGRAPH_LABELS_BY_LABELHASH_MAX;
+
+export const LabelsByLabelHashesInput = builder.inputType("LabelsByLabelHashesInput", {
+  description: "Look up Labels by a batch of LabelHashes.",
+  fields: (t) => ({
+    labelHashes: t.field({
+      type: ["LabelHash"],
+      required: true,
+      description: `LabelHashes to look up. After deduplication, at most ${LABELS_BY_LABELHASH_MAX} distinct LabelHashes per request (each normalized to lowercase at parse time). LabelHashes absent from the index are omitted from the result.`,
     }),
   }),
 });

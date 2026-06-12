@@ -16,6 +16,7 @@ import type {
   InterpretedLabel,
   InterpretedName,
   JsonValue,
+  LabelHash,
   LitecoinAddress,
   MonacoinAddress,
   Node,
@@ -43,7 +44,8 @@ export { introspection } from "./generated/introspection";
  * Scalar type mappings for the Omnigraph schema, representing the type of the serialized response
  * from the Omnigraph API.
  *
- * Keep in sync with the scalars in apps/ensapi/src/omnigraph-api/builder.ts.
+ * Keep in sync with the scalars registered in `apps/ensapi/src/omnigraph-api/schema/scalars.ts`
+ * and the `BuilderScalars` map in `apps/ensapi/src/omnigraph-api/builder.ts`.
  */
 export type OmnigraphScalars = {
   ID: string;
@@ -63,6 +65,7 @@ export type OmnigraphScalars = {
   BinanceAddress: BinanceAddress;
   SolanaAddress: SolanaAddress;
   Hex: Hex;
+  LabelHash: LabelHash;
   ChainId: ChainId;
   CoinType: CoinType;
   InterfaceId: InterfaceId;

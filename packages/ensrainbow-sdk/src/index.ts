@@ -10,3 +10,4 @@ export { buildEnsRainbowClientLabelSet } from "@ensnode/ensnode-sdk";
 
 export * from "./client";
 export * from "./consts";
+export * from "./ensrainbowbeam-client";
