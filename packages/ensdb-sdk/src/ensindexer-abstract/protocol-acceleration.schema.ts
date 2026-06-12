@@ -213,6 +213,9 @@ export const resolverAddressRecord = onchainTable(
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
+    // supports the reverse lookup powering `Account.nameReferences`:
+    // `WHERE value = <address> [AND coin_type = <coinType>]`
+    byValueAndCoinType: index().on(t.value, t.coinType),
   }),
 );
 

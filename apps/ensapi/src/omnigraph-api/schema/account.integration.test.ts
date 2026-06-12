@@ -8,7 +8,7 @@ import {
 import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { accounts, testEthTextRecords } from "@ensnode/integration-test-env/devnet";
+import { accounts, fixtures, testEthTextRecords } from "@ensnode/integration-test-env/devnet";
 
 import {
   AccountDomainsPaginated,
@@ -690,5 +690,84 @@ describe("Query.account (unindexed)", () => {
     expect(result.account?.address).toBe(address);
     // a synthesized Account owns no indexed Domains
     expect(flattenConnection(result.account!.domains)).toHaveLength(0);
+  });
+});
+
+describe("Account.nameReferences", () => {
+  // `test.eth` (owned by `owner`) is seeded with a `rootstock` (rbtc) addr() record pointing at an
+  // EVM-shaped address — see `seedResolverRecords` / `fixtures.rawAddresses.rootstock`.
+  const { rootstock } = fixtures.rawAddresses;
+
+  type NameReferenceNode = {
+    domain: { canonical: { name: { interpreted: InterpretedName } } | null };
+    coinType: number;
+    resolver: { contract: { chainId: number; address: Hex } };
+    match: boolean;
+  };
+  type NameReferencesResult = {
+    account: { nameReferences: GraphQLConnection<NameReferenceNode> };
+  };
+
+  const NameReferences = gql`
+    query NameReferences($address: Address!, $coinType: CoinType) {
+      account(by: { address: $address }) {
+        nameReferences(where: { coinType: $coinType }) {
+          edges {
+            node {
+              domain { canonical { name { interpreted } } }
+              coinType
+              resolver { contract { chainId address } }
+              match
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  it("returns names whose addr() record points at the address, scoped to a coinType", async () => {
+    const result = await request<NameReferencesResult>(NameReferences, {
+      address: rootstock.address,
+      coinType: rootstock.coinType,
+    });
+    const refs = flattenConnection(result.account.nameReferences);
+
+    const testEth = refs.find((r) => r.domain.canonical?.name.interpreted === "test.eth");
+    expect(testEth, "expected 'test.eth' to reference the rootstock address").toBeDefined();
+    expect(testEth?.coinType).toBe(rootstock.coinType);
+    expect(testEth?.resolver.contract.address).toBeDefined();
+    // no ENSIP-19 reverse record is seeded for the rootstock address, so it is not a `match`
+    expect(testEth?.match).toBe(false);
+  });
+
+  it("scopes matches to the requested coinType", async () => {
+    // `test.eth` has no ETH (coinType 60) addr() record pointing at the rootstock address
+    const result = await request<NameReferencesResult>(NameReferences, {
+      address: rootstock.address,
+      coinType: ETH_COIN_TYPE,
+    });
+    const names = flattenConnection(result.account.nameReferences).map(
+      (r) => r.domain.canonical?.name.interpreted,
+    );
+    expect(names).not.toContain("test.eth");
+  });
+
+  it("returns matches across all coinTypes when `where` is omitted", async () => {
+    const AllNameReferences = gql`
+      query AllNameReferences($address: Address!) {
+        account(by: { address: $address }) {
+          nameReferences {
+            edges { node { domain { canonical { name { interpreted } } } } }
+          }
+        }
+      }
+    `;
+    const result = await request<NameReferencesResult>(AllNameReferences, {
+      address: rootstock.address,
+    });
+    const names = flattenConnection(result.account.nameReferences).map(
+      (r) => r.domain.canonical?.name.interpreted,
+    );
+    expect(names).toContain("test.eth");
   });
 });

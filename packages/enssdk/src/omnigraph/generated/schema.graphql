@@ -26,6 +26,11 @@ type Account {
   id: Address!
 
   """
+  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, canonical Domains only: records whose node has no canonical Domain are omitted, and Forward Resolution / CCIP-Read and ENSIP-19 default-address-record expansion are not applied.
+  """
+  nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection
+
+  """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
   """
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
@@ -118,6 +123,25 @@ type AccountId {
 input AccountIdInput {
   address: Address!
   chainId: ChainId!
+}
+
+type AccountNameReferencesConnection {
+  edges: [AccountNameReferencesConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountNameReferencesConnectionEdge {
+  cursor: String!
+  node: NameReference!
+}
+
+"""Filter for Account.nameReferences."""
+input AccountNameReferencesWhereInput {
+  """
+  If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.
+  """
+  coinType: CoinType
 }
 
 type AccountPermissionsConnection {
@@ -1097,6 +1121,27 @@ scalar MonacoinAddress
 input NameOrNodeInput @oneOf {
   name: InterpretedName
   node: Node
+}
+
+"""
+A Name whose indexed `addr()` record points at an Account, surfaced by `Account.nameReferences`. Reflects literally-indexed records only: no Forward Resolution / CCIP-Read and no ENSIP-19 default-address-record expansion.
+"""
+type NameReference {
+  """The CoinType of the matching `addr()` record."""
+  coinType: CoinType!
+
+  """
+  The canonical Domain whose `addr(coinType)` record points at this Account.
+  """
+  domain: Domain!
+
+  """
+  Whether the indexed ENSIP-19 reverse lookup `reverse(address, coinType)` resolves to this exact name. Uses the indexed StandaloneReverseRegistrar shortcut (`default.reverse` / `[coinType].reverse`); it does NOT perform a full `*.addr.reverse` ENSIP-19 reverse walk.
+  """
+  match: Boolean!
+
+  """The Resolver holding the matching `addr()` record."""
+  resolver: Resolver!
 }
 
 """
