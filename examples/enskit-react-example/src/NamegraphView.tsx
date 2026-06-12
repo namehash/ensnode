@@ -412,7 +412,12 @@ export function NamegraphView({ registryId }: { registryId: string }) {
       // "load more" sentinel reaching here means it scrolled into view: kick off
       // the next page. Deferred to a microtask so we never mutate the tree mid-render.
       if (meta.kind === "loadMore") {
-        queueMicrotask(() => triggerLoadMoreRef.current(meta));
+        // Skip scheduling while this page is already in flight — the sentinel
+        // stays in the virtualized window and re-renders, but triggerLoadMore
+        // would just dedupe it anyway.
+        if (!loadingMoreRef.current.has(meta.path)) {
+          queueMicrotask(() => triggerLoadMoreRef.current(meta));
+        }
         return null;
       }
       if (meta.kind !== "domain") return null;
@@ -640,9 +645,14 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         anchorRef.current = page.domains[0]?.parentCanonicalName ?? "";
 
         const ops: FileTreeBatchOperation[] = [];
-        for (const domain of page.domains) addDomain(ops, "", domain);
-        if (page.hasNextPage && page.endCursor) {
-          addLoadMore(ops, "", registryId, page.endCursor);
+        if (page.domains.length === 0) {
+          metaRef.current.set(EMPTY_SEG, { kind: "empty", path: EMPTY_SEG });
+          ops.push({ type: "add", path: EMPTY_SEG });
+        } else {
+          for (const domain of page.domains) addDomain(ops, "", domain);
+          if (page.hasNextPage && page.endCursor) {
+            addLoadMore(ops, "", registryId, page.endCursor);
+          }
         }
         model.batch(ops);
         setStatus("ready");
