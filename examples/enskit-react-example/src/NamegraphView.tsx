@@ -184,10 +184,10 @@ type Resolve = NonNullable<ResultOf<typeof ResolveQuery>["domain"]>["resolve"];
  */
 function traceDurationMicros(trace: unknown): number | null {
   if (!Array.isArray(trace) || trace.length === 0) return null;
-  const durations = trace.map((span) =>
-    span && typeof span.duration === "number" ? span.duration : 0,
-  );
-  return Math.max(...durations, 0);
+  const durations = trace
+    .map((span) => (span && typeof span.duration === "number" ? span.duration : null))
+    .filter((d): d is number => d !== null);
+  return durations.length > 0 ? Math.max(...durations) : null;
 }
 
 function renderMicros(micros: number): string {
@@ -568,8 +568,10 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         if (page.hasNextPage && page.endCursor) {
           addLoadMore(ops, meta.parentPath, meta.registryId, page.endCursor);
         }
-      } catch (error) {
-        setErrorMessage(String((error as Error).message));
+      } catch {
+        const errorPath = `${meta.parentPath}${ERROR_SEG}`;
+        metaRef.current.set(errorPath, { kind: "error", path: errorPath });
+        ops.push({ type: "add", path: errorPath });
       }
       model.batch(ops);
     },
@@ -852,8 +854,8 @@ function KeyValueGrid({ rows }: { rows: Array<[string, React.ReactNode]> }) {
         margin: 0,
       }}
     >
-      {rows.map(([label, value]) => (
-        <Fragment key={label}>
+      {rows.map(([label, value], index) => (
+        <Fragment key={index}>
           <dt style={{ color: "#777" }}>{label}</dt>
           <dd style={{ margin: 0, wordBreak: "break-word" }}>{value}</dd>
         </Fragment>
@@ -870,8 +872,11 @@ function ExternalLink({
   children: React.ReactNode;
 }) {
   if (!url) return <>{children}</>;
+  // ENS record URLs are untrusted; only render http(s) as links so javascript:
+  // and other schemes can't reach the href.
+  if (!/^https?:\/\//i.test(url)) return <>{children}</>;
   return (
-    <a href={url} target="_blank" rel="noreferrer">
+    <a href={url} target="_blank" rel="noopener noreferrer">
       {children}
     </a>
   );
