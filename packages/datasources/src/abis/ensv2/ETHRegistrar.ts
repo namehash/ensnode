@@ -218,6 +218,21 @@ export const ETHRegistrar = [
     type: "function",
   },
   {
+    inputs: [
+      { internalType: "string", name: "label", type: "string" },
+      { internalType: "address", name: "owner", type: "address" },
+      { internalType: "uint64", name: "duration", type: "uint64" },
+      { internalType: "contract IERC20", name: "paymentToken", type: "address" },
+    ],
+    name: "rentPrice",
+    outputs: [
+      { internalType: "uint256", name: "base", type: "uint256" },
+      { internalType: "uint256", name: "premium", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [{ internalType: "string", name: "label", type: "string" }],
     name: "getRemainingGracePeriod",
     outputs: [{ internalType: "uint64", name: "", type: "uint64" }],

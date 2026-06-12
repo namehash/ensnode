@@ -18,7 +18,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract, getENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 import { effectiveResolverFallback } from "@ensnode/integration-test-env/devnet";
 
-import { DEVNET_NAMES } from "@/test/integration/devnet-names";
+import { DEVNET_ENSV1_NAMES, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   type PaginatedDomainResult,
   QueryDomainsPaginated,
@@ -42,6 +42,7 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
 
 const V1_ROOT_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
 
+const V2_ETH_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSv2Root, "ETHRegistry");
 const V1_ETH_DOMAIN_ID = makeENSv1DomainId(V1_ROOT_REGISTRY, ETH_NODE);
 const V2_ETH_STORAGE_ID = makeStorageId(labelhashInterpretedLabel(asInterpretedLabel("eth")));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_STORAGE_ID);
@@ -127,6 +128,24 @@ describe("Query.domains", () => {
       'argument "where" of type "DomainsWhereInput!" is required, but it was not provided',
     );
   });
+
+  it.each(DEVNET_ENSV1_NAMES.filter((entry) => entry.wrapped))(
+    "finds wrapped ENSv1-only name $name via domains(where: { name: { eq } })",
+    async ({ name, canonical }) => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: { eq: name },
+      });
+
+      await expect(flattenConnection(result.domains)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            __typename: "ENSv1Domain",
+            canonical: { name: { interpreted: canonical } },
+          }),
+        ]),
+      );
+    },
+  );
 
   it("sees .eth domain", async () => {
     const result = await request<QueryDomainsResult>(QueryDomains, {
@@ -274,6 +293,7 @@ describe("Query.domain", () => {
   const DomainByName = gql`
     query DomainByName($name: InterpretedName!) {
       domain(by: { name: $name }) {
+        id
         canonical { name { interpreted } }
       }
     }
@@ -284,6 +304,23 @@ describe("Query.domain", () => {
       domain: { canonical: { name: { interpreted: canonical } } },
     });
   });
+
+  // ENSv1-only names are reserved in the ENSv2 ETHRegistry (resolver = ENSV1Resolver), mirroring the
+  // migration. The walk prefers the ENSv2 Domain, and the ENSv2 registration emits the literal label,
+  // so each name resolves to an ENSv2 Domain whose canonical is the full literal name — including the
+  // legacy-unwrapped name whose ENSv1 canonical is an Encoded LabelHash.
+  it.each(DEVNET_ENSV1_NAMES)(
+    "resolves ENSv1-only name $name to its reserved ENSv2 Domain via domain(by: name)",
+    async ({ name, label, canonical }) => {
+      const id = makeENSv2DomainId(
+        V2_ETH_REGISTRY,
+        makeStorageId(labelhashInterpretedLabel(asInterpretedLabel(label))),
+      );
+      await expect(request(DomainByName, { name })).resolves.toMatchObject({
+        domain: { id, canonical: { name: { interpreted: canonical } } },
+      });
+    },
+  );
 
   it("returns null for a nonexistent name", async () => {
     await expect(

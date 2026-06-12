@@ -1,13 +1,11 @@
-import type { Hex } from "viem";
+import type { Hex, TransactionReceipt } from "viem";
 import {
   type Account,
-  type Chain,
   createWalletClient,
   http,
-  type PublicActions,
   publicActions,
   type Transport,
-  type WalletClient,
+  testActions,
 } from "viem";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
@@ -15,6 +13,7 @@ import { ensTestEnvChain } from "@ensnode/datasources";
 import { accounts } from "../devnet/fixtures";
 import { seedEffectiveResolverFallback } from "./effective-resolver-fallback";
 import { seedPrimaryNameRecords } from "./primary-names";
+import { seedRegisteredNames } from "./registered-names";
 import { seedResolverRecords } from "./resolver-records";
 
 function createDevnetWalletClient(transport: Transport, account: Account) {
@@ -22,10 +21,12 @@ function createDevnetWalletClient(transport: Transport, account: Account) {
     chain: ensTestEnvChain,
     transport,
     account,
-  }).extend(publicActions);
+  })
+    .extend(publicActions)
+    .extend(testActions({ mode: "anvil" }));
 }
 
-export type DevnetWalletClient = WalletClient<Transport, Chain, Account> & PublicActions;
+export type DevnetWalletClient = ReturnType<typeof createDevnetWalletClient>;
 
 export type DevnetWalletClients = {
   deployer: DevnetWalletClient; // index 0
@@ -55,8 +56,8 @@ export const seedReceiptWaitOptions = {
 export async function waitForTransactionReceipt(
   client: DevnetWalletClient,
   hash: Hex,
-): Promise<void> {
-  await client.waitForTransactionReceipt({
+): Promise<TransactionReceipt> {
+  return client.waitForTransactionReceipt({
     hash,
     ...seedReceiptWaitOptions,
   });
@@ -67,4 +68,5 @@ export async function seedDevnet(rpcUrl: string): Promise<void> {
   await seedPrimaryNameRecords(clients);
   await seedResolverRecords(clients);
   await seedEffectiveResolverFallback(clients);
+  await seedRegisteredNames(clients);
 }
