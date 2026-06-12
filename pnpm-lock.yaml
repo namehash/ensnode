@@ -657,7 +657,7 @@ importers:
         version: link:../../packages/ensnode-sdk
       '@hono/node-server':
         specifier: 'catalog:'
-        version: 1.19.14(hono@4.12.18)
+        version: 1.19.14(hono@4.12.23)
       enssdk:
         specifier: workspace:*
         version: link:../../packages/enssdk
@@ -666,10 +666,10 @@ importers:
         version: 16.11.0
       hono:
         specifier: 'catalog:'
-        version: 4.12.18
+        version: 4.12.23
       viem:
         specifier: 'catalog:'
-        version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
+        version: 2.50.3(typescript@5.9.3)(zod@4.3.6)
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -688,7 +688,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
+        version: 4.1.8(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(jsdom@27.0.1(postcss@8.5.12))(vite@7.3.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
 
   apps/fallback-ensapi:
     dependencies:
