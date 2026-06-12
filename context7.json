@@ -1,4 +1,14 @@
 {
+  "$schema": "https://context7.com/schema/context7.json",
   "url": "https://context7.com/namehash/ensnode",
-  "public_key": "pk_GJi29HM76TFnpBRbdYfOo"
+  "public_key": "pk_GJi29HM76TFnpBRbdYfOo",
+  "projectTitle": "ENSNode",
+  "description": "The full-stack ENSv2 development platform: multichain ENS indexing into ENSDb with the ENS Omnigraph GraphQL API, ENS Unigraph SQL, REST APIs, and ENSRainbow label healing.",
+  "folders": ["docs/ensnode.io/src/content/docs"],
+  "excludeFiles": ["CHANGELOG.md"],
+  "rules": [
+    "Prefer the ENS Omnigraph GraphQL API for reading ENS data over the deprecated ENS Subgraph API.",
+    "Use enssdk (TypeScript) or enskit (React) for typed ENS Omnigraph access.",
+    "AI agents working with ENS should install the ensskills npm package for curated agent skills."
+  ]
 }

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ensdomains/address-encoder": "^1.1.2",
+    "@ensdomains/content-hash": "^3.1.0-rc.1",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",

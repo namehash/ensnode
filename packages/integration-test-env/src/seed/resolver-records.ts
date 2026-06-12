@@ -4,7 +4,7 @@ import { packetToBytes } from "viem/ens";
 import { ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
 import { contracts } from "@ensnode/datasources/devnet";
 
-import { addresses, fixtures } from "../devnet/fixtures";
+import { addresses, contenthashFixtures, fixtures } from "../devnet/fixtures";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 import { waitForTransactionReceipt } from "./index";
 
@@ -35,7 +35,7 @@ async function seedResolverRecordsForName(
   }
 
   // Scalar resolver records
-  await setContenthash(clients.owner, resolver, node, fixtures.contenthash);
+  await setContenthash(clients.owner, resolver, node, contenthashFixtures.ipfs.raw);
   await setPubkey(clients.owner, resolver, node, fixtures.publicKeyX, fixtures.publicKeyY);
   await setAbi(clients.owner, resolver, node, 1n, fixtures.abiBytes);
   await setInterfaceImplementer(
@@ -57,7 +57,7 @@ async function findResolver(client: DevnetWalletClient, name: string): Promise<A
   return resolver;
 }
 
-async function setTextRecord(
+export async function setTextRecord(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -74,7 +74,7 @@ async function setTextRecord(
   console.log(`[seed] setText("${key}", "${value}") tx: ${hash}`);
 }
 
-async function setMulticoinAddress(
+export async function setMulticoinAddress(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -91,7 +91,7 @@ async function setMulticoinAddress(
   console.log(`[seed] setAddr(coinType=${coinType}) tx: ${hash}`);
 }
 
-async function setContenthash(
+export async function setContenthash(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -104,7 +104,7 @@ async function setContenthash(
     args: [node, hashValue],
   });
   await waitForTransactionReceipt(walletClient, hash);
-  console.log(`[seed] setContenthash() tx: ${hash}`);
+  console.log(`[seed] setContenthash(${node}) tx: ${hash}`);
 }
 
 async function setPubkey(
@@ -124,7 +124,7 @@ async function setPubkey(
   console.log(`[seed] setPubkey() tx: ${hash}`);
 }
 
-async function setAbi(
+export async function setAbi(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -141,7 +141,7 @@ async function setAbi(
   console.log(`[seed] setABI(contentType=${contentType}) tx: ${hash}`);
 }
 
-async function setInterfaceImplementer(
+export async function setInterfaceImplementer(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,

@@ -62,6 +62,14 @@ A condensed reference is also inlined below.
 - **Relay pagination** — connections expose `edges { node }`, `pageInfo { hasNextPage endCursor }`, and `totalCount`. Paginate with `first` + `after: <endCursor>`. (No offset pagination.)
 - **Field selection is the budget.** GraphQL returns exactly the fields you select — request only what you need to keep responses (and your context) small.
 
+## Protocol Acceleration
+
+`resolve` (on `Domain` and `Account`) is **accelerated by default**: the server implements the ENS Universal Resolver's forward/reverse resolution logic over its indexed data, serving each record straight from the index wherever possible (~10ms vs ~100–1000ms for RPC + CCIP-Read paths). Any record it can't accelerate transparently falls back to protocol-compliant RPC resolution — including performing CCIP-Read for offchain names on your behalf. **Results are identical either way**; acceleration changes latency, never correctness. There is normally no reason to disable it (`resolve(accelerate: false)` exists for debugging/comparison). Select `acceleration { requested attempted }` on a resolution to observe whether acceleration was attempted.
+
+## Indexing status & 503s
+
+The Omnigraph serves indexed state. An instance responds **503 Service Unavailable** (with a `reason`) when it can't serve a request faithfully — e.g. its indexer isn't sufficiently caught up to realtime, its indexing status is unavailable, or the instance isn't running the plugins a given API requires. Treat 503 as "temporarily unavailable or unsupported by this instance" (retry or switch instances), not as a malformed query. Check an instance's indexing progress with `npx enscli ensnode indexing-status [--namespace <ns> | --ensnode-url <url>]`.
+
 ## When the Omnigraph can't express it
 
 If a question genuinely isn't expressible in the Omnigraph schema, the underlying ENS state is also queryable via Unigraph SQL over ENSDb (the `unigraph-sql` skill). Prefer the Omnigraph first; escalate to SQL only for shapes the GraphQL surface doesn't support.
@@ -208,7 +216,7 @@ _An ENSIP-19 primary name for an Account on a specific coin type._
 
 Run `npx enscli ensnode omnigraph schema <Type>` for fields of:
 
-`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
+`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileContenthash`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
 
 <!-- AUTOGEN:SCHEMA end -->
 
