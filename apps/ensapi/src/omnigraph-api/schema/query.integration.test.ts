@@ -1,9 +1,14 @@
 import {
   asInterpretedLabel,
+  asInterpretedName,
+  asLiteralLabel,
   type DomainId,
   ETH_NODE,
+  encodeLabelHash,
   type InterpretedLabel,
+  type InterpretedName,
   labelhashInterpretedLabel,
+  labelhashLiteralLabel,
   makeENSv1DomainId,
   makeENSv1RegistryId,
   makeENSv2DomainId,
@@ -12,13 +17,14 @@ import {
   type Node,
   type NormalizedAddress,
 } from "enssdk";
+import { namehash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract, getENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 import { effectiveResolverFallback } from "@ensnode/integration-test-env/devnet";
 
-import { DEVNET_NAMES } from "@/test/integration/devnet-names";
+import { DEVNET_ENSV1_NAMES, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   type PaginatedDomainResult,
   QueryDomainsPaginated,
@@ -127,6 +133,24 @@ describe("Query.domains", () => {
       'argument "where" of type "DomainsWhereInput!" is required, but it was not provided',
     );
   });
+
+  it.each(DEVNET_ENSV1_NAMES.filter((entry) => entry.wrapped))(
+    "finds wrapped ENSv1-only name $name via domains(where: { name: { eq } })",
+    async ({ name, canonical }) => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: { eq: name },
+      });
+
+      await expect(flattenConnection(result.domains)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            __typename: "ENSv1Domain",
+            canonical: { name: { interpreted: canonical } },
+          }),
+        ]),
+      );
+    },
+  );
 
   it("sees .eth domain", async () => {
     const result = await request<QueryDomainsResult>(QueryDomains, {
@@ -274,16 +298,48 @@ describe("Query.domain", () => {
   const DomainByName = gql`
     query DomainByName($name: InterpretedName!) {
       domain(by: { name: $name }) {
+        id
         canonical { name { interpreted } }
       }
     }
   `;
+
+  const ensv1RootRegistry = () =>
+    getDatasourceContract("ens-test-env", DatasourceNames.ENSRoot, "ENSv1Registry");
+
+  const unhealedCanonicalEthName = (label: string): InterpretedName =>
+    asInterpretedName(
+      `${asInterpretedLabel(encodeLabelHash(labelhashLiteralLabel(asLiteralLabel(label))))}.eth`,
+    );
 
   it.each(DEVNET_NAMES)("resolves $name", async ({ name, canonical }) => {
     await expect(request(DomainByName, { name })).resolves.toMatchObject({
       domain: { canonical: { name: { interpreted: canonical } } },
     });
   });
+
+  it.each(DEVNET_ENSV1_NAMES.filter((entry) => entry.wrapped))(
+    "resolves healed ENSv1 name $name via domain(by: name)",
+    async ({ name, canonical }) => {
+      const id = makeENSv1DomainId(ensv1RootRegistry(), namehash(name));
+      await expect(request(DomainByName, { name })).resolves.toMatchObject({
+        domain: { id, canonical: { name: { interpreted: canonical } } },
+      });
+    },
+  );
+
+  it.each(DEVNET_ENSV1_NAMES.filter((entry) => !entry.wrapped))(
+    "resolves unhealed ENSv1 name $name via domain(by: name)",
+    async ({ name, label }) => {
+      const id = makeENSv1DomainId(ensv1RootRegistry(), namehash(name));
+      await expect(request(DomainByName, { name })).resolves.toMatchObject({
+        domain: {
+          id,
+          canonical: { name: { interpreted: unhealedCanonicalEthName(label) } },
+        },
+      });
+    },
+  );
 
   it("returns null for a nonexistent name", async () => {
     await expect(
