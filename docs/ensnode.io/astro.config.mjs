@@ -90,6 +90,9 @@ export default defineConfig({
     "/docs/reference/roadmap": "/docs/integrate/why-ensnode/ensv2-readiness",
     "/docs/reference/what-is-ensnode": "/docs/integrate/why-ensnode",
     "/docs/integrate/ensv2-readiness": "/docs/integrate/why-ensnode/ensv2-readiness",
+    "/docs/self-host/docker": "/docs/self-host/deployment-options/docker",
+    "/docs/self-host/terraform": "/docs/self-host/deployment-options/terraform",
+    "/docs/self-host/scalability": "/docs/self-host/operations/scalability",
   },
   env: {
     schema: {

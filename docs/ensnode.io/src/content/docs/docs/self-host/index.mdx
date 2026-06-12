@@ -1,56 +1,38 @@
 ---
 title: Self-host ENSNode
 description: Decide whether to self-host ENSNode and understand the architecture.
+sidebar:
+  label: Overview
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
-import EnsDbSnapshotsTeaser from "@components/molecules/EnsDbSnapshotsTeaser.astro";
 
-This page will help you decide whether to self-host ENSNode or use the hosted instances. Includes architecture overview of the ENSNode stack (ENSIndexer, ENSDb, ENSRainbow, ENSApi).
+Self-hosting provides extra benefits compared to using one of the publicly [Hosted Instances](/docs/hosted-instances). Having your own ENSNode instance allows you to:
 
-:::note
-Follow these guides to deploy an ENSNode instance to the cloud.
-:::
+- **Select [ENS Namespace](/docs/hosted-instances#ens-namespaces)**: choose which ENS protocol deployment ENSNode will provide data for (ex: `mainnet` or `sepolia`). Great for testing and development.
+- **Select [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins)**: activate only the plugins you need for your use cases, reducing resource usage and improving performance.
+- **Tailor "name healing" coverage**: apply a [label set](/docs/services/ensrainbow/usage/available-label-sets#available-label-sets) that fits your needs for [ENSRainbow to perform "name healing"](/docs/services/ensrainbow#how-ensrainbow-helps).
+- **Index ENS data the way you want**: customize indexing logic and indexed data model stored in your own [ENSDb instance](/docs/integrate/integration-options/ensdb) by implementing an [ENSDb Writer](/docs/integrate/integration-options/ensdb-writers).
+- **Build custom APIs and data pipelines**: implement an [ENSDb Reader](/docs/integrate/integration-options/ensdb-readers) to build apps using your own ENSDb instance as a source of truth for ENS live data.
+- **Control versioning and updates**: choose when to update your ENSNode instance to new versions, giving you control over when to adopt new features or breaking changes.
+- **Manage uptime**: apply strategies for ensuring high availability and uptime guarantees.
 
-Running your own ENSNode instance is helpful for those that wish to:
+## High-level architecture
 
-- Maintain control over their own infrastructure
-- Ensure control over their own availability and uptime guarantees
-- Customize ENSNode's behavior
-- Own the resulting Postgres index for custom queries or `JOIN`s
+Before diving into the details of self-hosting, it's important to understand the high-level architecture of ENSNode. This will give you a better understanding of how the different components of ENSNode work together and what infrastructure requirements you may need to consider when self-hosting.
 
-:::caution[Private Networking]
-Note that because ENSNode makes many label healing requests to ENSRainbow while indexing, it's _imperative_ that they be on the same local network to minimize request time.
-:::
+[![ENSNode High-Level Architecture](/ensnode-high-level-architecture.svg)](/ensnode-high-level-architecture.svg)
 
-### Bootstrap from a snapshot (coming soon)
-
-Self-hosting today means standing up a fresh ENSNode instance from zero and waiting on an initial backfill - including the RPC bill that comes with it. **[ENSDb snapshots and `ensdb-cli`](/docs/integrate/integration-options/ensdb-cli)** will make it cheap and easy to begin working with indexed ENS data.
-
-<EnsDbSnapshotsTeaser />
+## Next steps
 
 <LinkCard
-  title="More about ENSDb Snapshots and ensdb-cli"
-  description="Roadmap for ENSDb Snapshots and ensdb-cli"
-  href="/docs/integrate/integration-options/ensdb-cli"
+  title="ENSNode Operations"
+  description="Understand how to operate and manage ENSNode deployments."
+  href="/docs/self-host/operations"
 />
-
-### Massive scalability
 
 <LinkCard
-  title="Learn about ENSNode scalability"
-  description="Architecture overview of how to scale ENSNode to handle a massive volume of requests."
-  href="/docs/self-host/scalability"
+  title="ENSNode Deployment options"
+  description="Learn about different deployment options for self-hosting ENSNode, including Docker, Railway, and Terraform."
+  href="/docs/self-host/deployment-options"
 />
-
-### Deploying with Docker
-
-The Docker deployment option provides the easiest way to run the full ENSNode suite of services both locally and in the cloud.
-
-<LinkCard title="Deploy with Docker" href="/docs/self-host/docker" />
-
-### Deploying with Terraform
-
-An example Terraform deployment reference is available, showing an example of deploying the full ENSNode suite on Render with AWS managed domain names.
-
-<LinkCard title="Deploy with Terraform" href="/docs/self-host/terraform" />

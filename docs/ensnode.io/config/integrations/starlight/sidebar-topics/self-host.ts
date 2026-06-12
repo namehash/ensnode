@@ -4,20 +4,50 @@ export const selfHostSidebarTopic = {
   icon: "seti:docker",
   items: [
     {
-      label: "Overview",
+      label: "Getting started",
       link: "/docs/self-host",
     },
     {
-      label: "Docker",
-      link: "/docs/self-host/docker",
+      label: "Operations",
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/self-host/operations",
+        },
+        {
+          label: "Critical workloads 🚨",
+          link: "/docs/self-host/operations/critical-workloads",
+        },
+        {
+          label: "Scalability",
+          link: "/docs/self-host/operations/scalability",
+        },
+        {
+          label: "Monitoring",
+          link: "/docs/self-host/operations/monitoring",
+        },
+      ],
     },
     {
-      label: "Terraform",
-      link: "/docs/self-host/terraform",
-    },
-    {
-      label: "Scalability",
-      link: "/docs/self-host/scalability",
+      label: "Deployment options",
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/self-host/deployment-options",
+        },
+        {
+          label: "Docker",
+          link: "/docs/self-host/deployment-options/docker",
+        },
+        {
+          label: "Railway",
+          link: "/docs/self-host/deployment-options/railway",
+        },
+        {
+          label: "Terraform",
+          link: "/docs/self-host/deployment-options/terraform",
+        },
+      ],
     },
   ],
 };
