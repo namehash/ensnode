@@ -3,7 +3,7 @@ import { getUnixTime } from "date-fns";
 import { inArray } from "drizzle-orm";
 import type { CoinType, DomainId, NormalizedAddress, RegistryId } from "enssdk";
 
-import type { ReverseResolutionResult } from "@ensnode/ensnode-sdk";
+import type { ReverseResolutionResult, TracingTrace } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
@@ -35,19 +35,18 @@ const createRegistryParentDomainLoader = () =>
 const createReverseResolutionLoader = (canAccelerate: boolean) =>
   new DataLoader<
     { account: NormalizedAddress; coinType: CoinType },
-    ReverseResolutionResult,
+    { trace: TracingTrace; result: ReverseResolutionResult },
     string
   >(
     (keys) =>
       Promise.all(
-        keys.map(async ({ account, coinType }) => {
-          // runWithTrace establishes the tracing context the reverse-resolution protocol steps
-          // require; the captured trace is discarded here (match only needs the resolved name).
-          const { result } = await runWithTrace(() =>
+        // runWithTrace establishes the tracing context the reverse-resolution protocol steps
+        // require; the trace is passed through and discarded at the callsite.
+        keys.map(({ account, coinType }) =>
+          runWithTrace(() =>
             resolveReverse(account, coinType, { accelerate: true, canAccelerate }),
-          );
-          return result;
-        }),
+          ),
+        ),
       ),
     { cacheKeyFn: ({ account, coinType }) => `${account}:${coinType}` },
   );

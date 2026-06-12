@@ -740,6 +740,22 @@ describe("Account.nameReferences", () => {
     expect(testEth?.match).toBe(false);
   });
 
+  it("reports match: true when the name is the account's ENSIP-19 Primary Name", async () => {
+    // `owner` set their Primary Name to `test.eth` (ETHReverseRegistrar), and `test.eth` has an
+    // indexed addr(60) record pointing back at `owner` — so reverse resolution of `(owner, ETH)`
+    // resolves to `test.eth` (forward-verified), making this NameReference a `match`.
+    const result = await request<NameReferencesResult>(NameReferences, {
+      address: accounts.owner.address,
+      coinType: ETH_COIN_TYPE,
+    });
+    const refs = flattenConnection(result.account.nameReferences);
+
+    const testEth = refs.find((r) => r.domain.canonical?.name.interpreted === "test.eth");
+    expect(testEth, "expected 'test.eth' to reference owner's address via addr(60)").toBeDefined();
+    expect(testEth?.coinType).toBe(ETH_COIN_TYPE);
+    expect(testEth?.match).toBe(true);
+  });
+
   it("scopes matches to the requested coinType", async () => {
     // `test.eth` has no ETH (coinType 60) addr() record pointing at the rootstock address
     const result = await request<NameReferencesResult>(NameReferences, {

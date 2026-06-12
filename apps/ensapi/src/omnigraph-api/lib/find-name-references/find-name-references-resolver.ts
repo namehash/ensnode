@@ -74,9 +74,10 @@ export function resolveAccountNameReferences({
   before?: string | null;
   after?: string | null;
 }) {
-  const { ensDb, ensIndexerSchema } = di.context;
-  const rar = ensIndexerSchema.resolverAddressRecord;
-  const domain = ensIndexerSchema.domain;
+  const {
+    ensDb,
+    ensIndexerSchema: { domain, resolverAddressRecord: rar },
+  } = di.context;
 
   const scope = and(
     eq(rar.value, account),

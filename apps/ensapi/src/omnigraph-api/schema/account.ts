@@ -152,7 +152,7 @@ AccountRef.implement({
     //////////////////////////
     nameReferences: t.connection({
       description:
-        "The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, canonical Domains only: records whose node has no canonical Domain are omitted, and Forward Resolution / CCIP-Read and ENSIP-19 address record defaulting are not applied.",
+        "The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.",
       type: NameReferenceRef,
       args: {
         where: t.arg({ type: AccountNameReferencesWhereInput }),
