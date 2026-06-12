@@ -26,7 +26,7 @@ async function seedNameRecords(
   node: Hex,
   records: NameRecords,
 ): Promise<void> {
-  if (records.contenthash !== undefined) {
+  if (records.contenthash) {
     await setContenthash(client, resolver, node, records.contenthash);
   }
 }
