@@ -1,6 +1,6 @@
 import { makeResolverId } from "enssdk";
 
-import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
+import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { builder } from "@/omnigraph-api/builder";
 import type { NameReferenceModel } from "@/omnigraph-api/lib/find-name-references/find-name-references-resolver";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -13,7 +13,7 @@ export const NameReferenceRef = builder.objectRef<NameReferenceModel>("NameRefer
 /////////////////
 NameReferenceRef.implement({
   description:
-    "A Name whose indexed `addr()` record points at an Account, surfaced by `Account.nameReferences`. Reflects literally-indexed records only: no Forward Resolution / CCIP-Read and no ENSIP-19 default-address-record expansion.",
+    "A Name whose indexed `addr()` record points at an Account, surfaced by `Account.nameReferences`. Reflects literally-indexed records only: no Forward Resolution / CCIP-Read and no ENSIP-19 address record defaulting.",
   fields: (t) => ({
     ////////////////////////
     // NameReference.domain
@@ -51,15 +51,15 @@ NameReferenceRef.implement({
     ///////////////////////
     match: t.field({
       description:
-        "Whether the indexed ENSIP-19 reverse lookup for `(address, coinType)` resolves to this exact name. Uses the indexed StandaloneReverseRegistrar shortcut (`default.reverse` / `[coinType].reverse`) — NOT the full ENSIP-19 reverse walk — to stay consistent with the literally-indexed nature of `nameReferences`. Consequently it performs no forward verification or CCIP-Read, and Primary Names set via the legacy L1 `addr.reverse` registrar are not reflected (`match` may be `false` for such names).",
+        "Whether this name is the ENSIP-19 Primary Name of this Account for this `coinType` — i.e. the full reverse walk `reverse(address, coinType)` resolves to this exact name (including forward verification), covering both the legacy `addr.reverse` and StandaloneReverseRegistrar (`default.reverse` / `[coinType].reverse`) mechanisms. Resolved from the index (always accelerated; no RPC).",
       type: "Boolean",
       nullable: false,
       resolve: async (parent) => {
-        const reverseName = await getENSIP19ReverseNameRecordFromIndex(
-          parent.account,
-          parent.coinType,
-        );
-        return reverseName === parent.canonicalName;
+        const primaryName = await resolveReverse(parent.account, parent.coinType, {
+          accelerate: true,
+          canAccelerate: true,
+        });
+        return primaryName === parent.canonicalName;
       },
     }),
   }),

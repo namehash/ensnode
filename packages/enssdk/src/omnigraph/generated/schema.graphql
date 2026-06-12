@@ -26,7 +26,7 @@ type Account {
   id: Address!
 
   """
-  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, canonical Domains only: records whose node has no canonical Domain are omitted, and Forward Resolution / CCIP-Read and ENSIP-19 default-address-record expansion are not applied.
+  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, canonical Domains only: records whose node has no canonical Domain are omitted, and Forward Resolution / CCIP-Read and ENSIP-19 address record defaulting are not applied.
   """
   nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection
 
@@ -1124,7 +1124,7 @@ input NameOrNodeInput @oneOf {
 }
 
 """
-A Name whose indexed `addr()` record points at an Account, surfaced by `Account.nameReferences`. Reflects literally-indexed records only: no Forward Resolution / CCIP-Read and no ENSIP-19 default-address-record expansion.
+A Name whose indexed `addr()` record points at an Account, surfaced by `Account.nameReferences`. Reflects literally-indexed records only: no Forward Resolution / CCIP-Read and no ENSIP-19 address record defaulting.
 """
 type NameReference {
   """The CoinType of the matching `addr()` record."""
@@ -1136,7 +1136,7 @@ type NameReference {
   domain: Domain!
 
   """
-  Whether the indexed ENSIP-19 reverse lookup for `(address, coinType)` resolves to this exact name. Uses the indexed StandaloneReverseRegistrar shortcut (`default.reverse` / `[coinType].reverse`) — NOT the full ENSIP-19 reverse walk — to stay consistent with the literally-indexed nature of `nameReferences`. Consequently it performs no forward verification or CCIP-Read, and Primary Names set via the legacy L1 `addr.reverse` registrar are not reflected (`match` may be `false` for such names).
+  Whether this name is the ENSIP-19 Primary Name of this Account for this `coinType` — i.e. the full reverse walk `reverse(address, coinType)` resolves to this exact name (including forward verification), covering both the legacy `addr.reverse` and StandaloneReverseRegistrar (`default.reverse` / `[coinType].reverse`) mechanisms. Resolved from the index (always accelerated; no RPC).
   """
   match: Boolean!
 

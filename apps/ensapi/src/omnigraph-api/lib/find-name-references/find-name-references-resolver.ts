@@ -39,8 +39,9 @@ export interface NameReferenceModel {
 }
 
 /**
- * Opaque keyset cursor over the `resolver_address_records` primary key. `value` is constant for a
- * given query (it is the filtered Account address) so it is omitted from the cursor.
+ * Opaque keyset cursor built from the `resolver_address_records` primary key columns
+ * (`chainId`, `address`, `node`, `coinType`), in the order used for pagination. `value` is not a key
+ * column — it is the constant `value = account` filter — so it is not part of the cursor.
  */
 interface NameReferenceCursor {
   node: Node;
@@ -84,7 +85,8 @@ export function resolveAccountNameReferences({
   );
   const joinOn = eq(domain.canonicalNode, rar.node);
 
-  // deterministic keyset order over the rar primary key (value is constant, so excluded)
+  // deterministic keyset order over the rar primary key columns (a permutation of the PK; `value`
+  // is not a key column — it is the constant `value = account` filter)
   const keysetTuple = sql`(${rar.node}, ${rar.coinType}, ${rar.chainId}, ${rar.address})`;
   const cursorTuple = (c: NameReferenceCursor) =>
     sql`(${c.node}, ${c.coinType}, ${c.chainId}, ${c.address})`;
