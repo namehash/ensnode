@@ -51,7 +51,7 @@ NameReferenceRef.implement({
     ///////////////////////
     match: t.field({
       description:
-        "Whether the indexed ENSIP-19 reverse lookup `reverse(address, coinType)` resolves to this exact name. Uses the indexed StandaloneReverseRegistrar shortcut (`default.reverse` / `[coinType].reverse`); it does NOT perform a full `*.addr.reverse` ENSIP-19 reverse walk.",
+        "Whether the indexed ENSIP-19 reverse lookup for `(address, coinType)` resolves to this exact name. Uses the indexed StandaloneReverseRegistrar shortcut (`default.reverse` / `[coinType].reverse`) — NOT the full ENSIP-19 reverse walk — to stay consistent with the literally-indexed nature of `nameReferences`. Consequently it performs no forward verification or CCIP-Read, and Primary Names set via the legacy L1 `addr.reverse` registrar are not reflected (`match` may be `false` for such names).",
       type: "Boolean",
       nullable: false,
       resolve: async (parent) => {

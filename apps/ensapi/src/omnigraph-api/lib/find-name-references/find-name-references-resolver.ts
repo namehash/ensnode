@@ -79,6 +79,7 @@ export function resolveAccountNameReferences({
 
   const scope = and(
     eq(rar.value, account),
+    // @TODO(cointype-bigint): drop `BigInt(...)` once resolverAddressRecord.coinType is CoinType. See #2293.
     coinType !== undefined && coinType !== null ? eq(rar.coinType, BigInt(coinType)) : undefined,
   );
   const joinOn = eq(domain.canonicalNode, rar.node);
@@ -142,6 +143,7 @@ export function resolveAccountNameReferences({
               domainId: row.domainId,
               // non-null: the INNER JOIN matches only canonical Domains, which have a canonicalName
               canonicalName: row.canonicalName as InterpretedName,
+              // @TODO(cointype-bigint): drop `bigintToCoinType` once resolverAddressRecord.coinType is CoinType. See #2293.
               coinType: bigintToCoinType(row.coinType),
               resolverChainId: row.resolverChainId,
               resolverAddress: row.resolverAddress,

@@ -112,6 +112,7 @@ Fail fast and loudly on invalid inputs.
 
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
   - ENSNode uses non-standard semver: breaking changes are `minor`, not `major`.
+  - Prefer a separate changeset per affected service/package when the changes are logically isolated, each describing that package's own change — rather than one changeset bumping several packages with a shared message. A single multi-package changeset is appropriate only when the change is genuinely one indivisible unit (e.g. a wire-format contract shared across packages).
 - Before declaring work complete, run validation in the affected project(s):
   1. If OpenAPI Defs or the Omnigraph GraphQL Schema was affected, run `pnpm generate`
      - always run `pnpm generate` from the monorepo root, do NOT scope to a specific package
