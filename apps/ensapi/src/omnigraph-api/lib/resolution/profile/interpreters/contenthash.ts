@@ -1,6 +1,11 @@
 import { type Codec, decode, getCodec } from "@ensdomains/content-hash";
+import type { UrlString } from "enssdk";
+
+import { serializeUrl } from "@ensnode/ensnode-sdk";
 
 import type { ProfileFieldInterpreter } from "./types";
+
+const toHttpUrl = (href: string): UrlString => serializeUrl(new URL(href));
 
 export const CODEC_TO_CONTENTHASH_PROTOCOL = {
   ipfs: "IPFS",
@@ -23,7 +28,7 @@ export type ProfileContenthashModel = {
   protocolType: ContenthashProtocolValue;
   decoded: string;
   uri: string;
-  httpUrl: string | null;
+  httpUrl: UrlString | null;
 };
 
 /**
@@ -32,23 +37,23 @@ export type ProfileContenthashModel = {
  */
 const PROTOCOL_CONFIG: Record<
   Codec,
-  { uriPrefix: string; httpUrl: ((decoded: string) => string) | null }
+  { uriPrefix: string; httpUrl: ((decoded: string) => UrlString) | null }
 > = {
   ipfs: {
     uriPrefix: "ipfs://",
-    httpUrl: (decoded) => `https://ipfs.io/ipfs/${decoded}`,
+    httpUrl: (decoded) => toHttpUrl(`https://ipfs.io/ipfs/${decoded}`),
   },
   ipns: {
     uriPrefix: "ipns://",
-    httpUrl: (decoded) => `https://ipfs.io/ipns/${decoded}`,
+    httpUrl: (decoded) => toHttpUrl(`https://ipfs.io/ipns/${decoded}`),
   },
   swarm: {
     uriPrefix: "bzz://",
-    httpUrl: (decoded) => `https://gateway.ethswarm.org/bzz/${decoded}`,
+    httpUrl: (decoded) => toHttpUrl(`https://gateway.ethswarm.org/bzz/${decoded}`),
   },
   arweave: {
     uriPrefix: "ar://",
-    httpUrl: (decoded) => `https://arweave.net/${decoded}`,
+    httpUrl: (decoded) => toHttpUrl(`https://arweave.net/${decoded}`),
   },
   onion: {
     uriPrefix: "onion://",

@@ -741,7 +741,7 @@ describe("Domain.profile", () => {
         protocolType: string;
         decoded: string;
         uri: string;
-        httpUrl: string | null;
+        httpUrl: UrlString | null;
       } | null;
     } | null;
   };
