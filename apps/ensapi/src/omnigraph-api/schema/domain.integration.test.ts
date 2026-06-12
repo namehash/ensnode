@@ -781,7 +781,7 @@ describe("Domain.profile", () => {
               solana: fixtures.rawAddresses.solana.address,
             },
             contenthash: {
-              protocolType: "ipfs",
+              protocolType: "IPFS",
               decoded: "bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4",
               uri: "ipfs://bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4",
               httpUrl:

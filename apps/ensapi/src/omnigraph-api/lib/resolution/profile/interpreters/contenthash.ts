@@ -2,8 +2,25 @@ import { type Codec, decode, getCodec } from "@ensdomains/content-hash";
 
 import type { ProfileFieldInterpreter } from "./types";
 
+export const CODEC_TO_CONTENTHASH_PROTOCOL = {
+  ipfs: "IPFS",
+  ipns: "IPNS",
+  swarm: "SWARM",
+  arweave: "ARWEAVE",
+  onion: "ONION",
+  onion3: "ONION3",
+  skynet: "SKYNET",
+} as const satisfies Record<Codec, string>;
+
+export const CONTENTHASH_PROTOCOL_VALUES = Object.values(
+  CODEC_TO_CONTENTHASH_PROTOCOL,
+) as ContenthashProtocolValue[];
+
+export type ContenthashProtocolValue =
+  (typeof CODEC_TO_CONTENTHASH_PROTOCOL)[keyof typeof CODEC_TO_CONTENTHASH_PROTOCOL];
+
 export type ProfileContenthashModel = {
-  protocolType: string;
+  protocolType: ContenthashProtocolValue;
   decoded: string;
   uri: string;
   httpUrl: string | null;
@@ -57,16 +74,21 @@ export const ProfileContenthashInterpreter: ProfileFieldInterpreter<ProfileConte
       const hex = raw.startsWith("0x") ? raw.slice(2) : raw;
       if (hex.length === 0) return null;
 
-      const protocolType = getCodec(hex);
-      if (!protocolType) return null;
+      const codec = getCodec(hex);
+      if (!codec) return null;
 
       const decoded = decode(hex);
-      const config = PROTOCOL_CONFIG[protocolType];
-      const prefix = config ? config.uriPrefix : `${protocolType}://`;
+      const config = PROTOCOL_CONFIG[codec];
+      const prefix = config ? config.uriPrefix : `${codec}://`;
       const uri = `${prefix}${decoded}`;
-      const httpUrl = config?.httpUrl ? config.httpUrl(decoded) : null;
+      const httpUrl = config?.httpUrl?.(decoded) ?? null;
 
-      return { protocolType, decoded, uri, httpUrl };
+      return {
+        protocolType: CODEC_TO_CONTENTHASH_PROTOCOL[codec],
+        decoded,
+        uri,
+        httpUrl,
+      };
     } catch {
       return null;
     }

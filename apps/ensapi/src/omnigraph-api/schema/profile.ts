@@ -21,7 +21,14 @@ import {
 } from "@/omnigraph-api/lib/resolution/profile/profile-descriptions";
 import type { ResolvedRecordsModel } from "@/omnigraph-api/lib/resolution/records-profile-model";
 
+import { CONTENTHASH_PROTOCOL_VALUES } from "../lib/resolution/profile/interpreters/contenthash";
+
 export type { ProfileContenthashModel };
+
+export const ContenthashProtocol = builder.enumType("ContenthashProtocol", {
+  description: "The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).",
+  values: CONTENTHASH_PROTOCOL_VALUES,
+});
 
 export const ProfileContenthashRef =
   builder.objectRef<ProfileContenthashModel>("ProfileContenthash");
@@ -29,8 +36,9 @@ export const ProfileContenthashRef =
 ProfileContenthashRef.implement({
   description: "The interpreted ENSIP-7 contenthash on the profile of an ENS name.",
   fields: (t) => ({
-    protocolType: t.exposeString("protocolType", {
-      description: 'The protocol type identifier (e.g. "ipfs", "ipns", "swarm", "arweave").',
+    protocolType: t.expose("protocolType", {
+      type: ContenthashProtocol,
+      description: "The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).",
       nullable: false,
     }),
     decoded: t.exposeString("decoded", {

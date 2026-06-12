@@ -1191,6 +1191,40 @@ const introspection = {
         "name": "CoinType"
       },
       {
+        "kind": "ENUM",
+        "name": "ContenthashProtocol",
+        "enumValues": [
+          {
+            "name": "ARWEAVE",
+            "isDeprecated": false
+          },
+          {
+            "name": "IPFS",
+            "isDeprecated": false
+          },
+          {
+            "name": "IPNS",
+            "isDeprecated": false
+          },
+          {
+            "name": "ONION",
+            "isDeprecated": false
+          },
+          {
+            "name": "ONION3",
+            "isDeprecated": false
+          },
+          {
+            "name": "SKYNET",
+            "isDeprecated": false
+          },
+          {
+            "name": "SWARM",
+            "isDeprecated": false
+          }
+        ]
+      },
+      {
         "kind": "SCALAR",
         "name": "DogecoinAddress"
       },
@@ -5158,8 +5192,8 @@ const introspection = {
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
+                "kind": "ENUM",
+                "name": "ContenthashProtocol"
               }
             },
             "args": [],

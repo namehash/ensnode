@@ -291,6 +291,19 @@ enum ChainName {
 scalar CoinType
 
 """
+The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+"""
+enum ContenthashProtocol {
+  ARWEAVE
+  IPFS
+  IPNS
+  ONION
+  ONION3
+  SKYNET
+  SWARM
+}
+
+"""
 DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
 """
 scalar DogecoinAddress
@@ -1389,9 +1402,9 @@ type ProfileContenthash {
   httpUrl: String
 
   """
-  The protocol type identifier (e.g. "ipfs", "ipns", "swarm", "arweave").
+  The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
   """
-  protocolType: String!
+  protocolType: ContenthashProtocol!
 
   """
   The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").
