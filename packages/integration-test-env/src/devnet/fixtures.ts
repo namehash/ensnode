@@ -124,6 +124,10 @@ export const efpSeedTargets = {
   junk: asNormalizedAddress(`0x${"1c".repeat(20)}`),
   /** Anchors a list whose `user` role must survive a storage-location re-point away and back. */
   durable: asNormalizedAddress(`0x${"d0".repeat(20)}`),
+  /** Followed plainly by the validated {@link efpFollowActorAddress} list — a real follow. */
+  followPlain: asNormalizedAddress(`0x${"f0".repeat(20)}`),
+  /** Followed but `block`-tagged by that list — excluded from `following` / `followers`. */
+  followBlocked: asNormalizedAddress(`0x${"fb".repeat(20)}`),
 } as const satisfies Record<string, NormalizedAddress>;
 
 /** The `user` role set on the {@link efpSeedTargets.durable} list, re-derived after the re-point. */
@@ -136,6 +140,16 @@ export const efpSeedRoleUser = asNormalizedAddress(`0x${"ab".repeat(20)}`);
  */
 export const efpSeedActorAddress = asNormalizedAddress(
   "0x976ea74026e726554db657fa54763abd0c3a0aa9",
+);
+
+/**
+ * The Anvil account (mnemonic index 7) the EFP seeder mints a *validated* primary list from (via
+ * easyMintTo, which sets its `primary-list` + `user`). That list follows
+ * {@link efpSeedTargets.followPlain} plainly and `block`-tags {@link efpSeedTargets.followBlocked},
+ * exercising `Account.efp.following` / `followers` and their `block`/`mute` exclusion.
+ */
+export const efpFollowActorAddress = asNormalizedAddress(
+  "0x14dc79964da2c08b23698b3d3cc7ca32193d9955",
 );
 
 /**

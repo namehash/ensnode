@@ -11,8 +11,15 @@ import {
   paginateByBigInt,
 } from "@/omnigraph-api/lib/connection-helpers";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { EfpAccountMetadataRef } from "@/omnigraph-api/schema/efp-account-metadata";
+import {
+  ADDRESS_PAGINATED_CONNECTION_ARGS,
+  buildFollowingScope,
+  countValidatedFollowers,
+  fetchValidatedFollowers,
+} from "@/omnigraph-api/schema/efp-follows";
 import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
 import { resolveValidatedPrimaryListTokenId } from "@/omnigraph-api/schema/efp-primary-list";
 
@@ -36,6 +43,68 @@ AccountEfpRef.implement({
       type: EfpListRef,
       nullable: true,
       resolve: (address) => resolveValidatedPrimaryListTokenId(address),
+    }),
+
+    ////////////////////////
+    // AccountEfp.following
+    ////////////////////////
+    following: t.connection({
+      description:
+        "The accounts this account follows: the address records in its validated primary EFP list, excluding `block`/`mute`-tagged records. Empty when the account has no validated primary list.",
+      type: AccountRef,
+      resolve: (address, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
+        // `following` derives from the account's primary list; resolve that scope once and share it
+        // between `totalCount` and the page query.
+        let scope: ReturnType<typeof buildFollowingScope> | null = null;
+        const followingScope = () => {
+          if (scope === null) scope = buildFollowingScope(address);
+          return scope;
+        };
+
+        return lazyConnection({
+          totalCount: async () =>
+            ensDb.$count(ensIndexerSchema.efpListRecords, await followingScope()),
+          connection: async () => {
+            const where = await followingScope();
+            return resolveCursorConnection(
+              { ...ADDRESS_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                ensDb
+                  .select({ recordData: ensIndexerSchema.efpListRecords.recordData })
+                  .from(ensIndexerSchema.efpListRecords)
+                  .where(
+                    and(
+                      where,
+                      paginateBy(ensIndexerSchema.efpListRecords.recordData, before, after),
+                    ),
+                  )
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpListRecords.recordData, inverted))
+                  .limit(limit)
+                  .then((rows) => rows.map((row) => row.recordData as NormalizedAddress)),
+            );
+          },
+        });
+      },
+    }),
+
+    ////////////////////////
+    // AccountEfp.followers
+    ////////////////////////
+    followers: t.connection({
+      description:
+        "The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record. `totalCount` enumerates every follower and can be expensive for highly-followed accounts.",
+      type: AccountRef,
+      resolve: (address, args) =>
+        lazyConnection({
+          totalCount: () => countValidatedFollowers(address),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ADDRESS_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                fetchValidatedFollowers(address, { before, after, limit, inverted }),
+            ),
+        }),
     }),
 
     ////////////////////////

@@ -87,6 +87,16 @@ input AccountDomainsWhereInput {
 """An account's Ethereum Follow Protocol (EFP) presence."""
 type AccountEfp {
   """
+  The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record. `totalCount` enumerates every follower and can be expensive for highly-followed accounts.
+  """
+  followers(after: String, before: String, first: Int, last: Int): AccountEfpFollowersConnection
+
+  """
+  The accounts this account follows: the address records in its validated primary EFP list, excluding `block`/`mute`-tagged records. Empty when the account has no validated primary list.
+  """
+  following(after: String, before: String, first: Int, last: Int): AccountEfpFollowingConnection
+
+  """
   The EFP lists this account is the `user` of (the lists representing it).
   """
   lists(after: String, before: String, first: Int, last: Int): AccountEfpListsConnection
@@ -103,6 +113,28 @@ type AccountEfp {
   The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.
   """
   primaryList: EfpList
+}
+
+type AccountEfpFollowersConnection {
+  edges: [AccountEfpFollowersConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpFollowersConnectionEdge {
+  cursor: String!
+  node: Account!
+}
+
+type AccountEfpFollowingConnection {
+  edges: [AccountEfpFollowingConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpFollowingConnectionEdge {
+  cursor: String!
+  node: Account!
 }
 
 type AccountEfpListsConnection {

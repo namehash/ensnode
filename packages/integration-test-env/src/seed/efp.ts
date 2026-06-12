@@ -279,6 +279,47 @@ export async function seedEfpDevnet(rpcUrl: string): Promise<void> {
     );
   }
 
+  // A *validated* follow graph for `Account.efp.following` / `followers`: mint a list from a fresh
+  // actor via easyMintTo (which sets that actor's `primary-list` + `user`, so the list validates),
+  // then follow one target plainly and `block`-tag another. The blocked target must be excluded from
+  // both `following` and `followers`, and the unvalidated lists above must never surface as followers.
+  const followActor = mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 7 });
+  await testClient.setBalance({ address: followActor.address, value: parseEther("100") });
+  const followClient = createWalletClient({
+    chain: ensTestEnvChain,
+    transport: http(rpcUrl),
+    account: followActor,
+  }).extend(publicActions);
+
+  const followSlot = await client.readContract({
+    address: efpContracts.EFPListRegistry as Address,
+    abi: registryAbi,
+    functionName: "totalSupply",
+  });
+  await send(
+    await followClient.writeContract({
+      address: efpContracts.EFPListMinter as Address,
+      abi: minterAbi,
+      functionName: "easyMintTo",
+      args: [followActor.address, lsl(followSlot)],
+    }),
+  );
+  await send(
+    await followClient.writeContract({
+      address: recordsAddress,
+      abi: recordsAbi,
+      functionName: "applyListOps",
+      args: [
+        followSlot,
+        [
+          addRecordOp(efpSeedTargets.followPlain),
+          addRecordOp(efpSeedTargets.followBlocked),
+          addTagOp(efpSeedTargets.followBlocked, "block"),
+        ],
+      ],
+    }),
+  );
+
   // Mint extra (bare) lists so the devnet holds more than 9 (token ids reach double digits). This
   // makes `efp.lists` / `Account.efp.lists` pagination exercise numeric ordering — a regression
   // guard: a double-digit token id surfaces any accidental lexicographic sort ("10" before "2").

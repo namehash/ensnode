@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   accounts,
+  efpFollowActorAddress,
   efpSeedActorAddress,
   efpSeedRoleUser,
   efpSeedTargets,
@@ -171,6 +172,99 @@ describe("Account.efp deep walk (demoGraph)", () => {
     const toBob = records.find((r) => eq(r.recordData, bob));
     expect(toBob?.account && eq(toBob.account.id, bob)).toBe(true);
     expect(toBob?.account?.efp.primaryList?.tokenId).toBe("1");
+  });
+});
+
+describe("Account.efp.following (validated)", () => {
+  type FollowingResult = {
+    account: { efp: { following: GraphQLConnection<{ id: string }> } | null } | null;
+  };
+
+  const Following = gql`
+    query Following($address: Address!) {
+      account(by: { address: $address }) {
+        efp {
+          following {
+            edges { node { id } }
+          }
+        }
+      }
+    }
+  `;
+
+  const followingOf = async (address: string) =>
+    flattenConnection(
+      (await request<FollowingResult>(Following, { address })).account!.efp!.following,
+    ).map((node) => node.id);
+
+  it("returns the accounts alice follows (bob and carol) from her validated primary list", async () => {
+    const followed = await followingOf(alice);
+    expect(followed.some((a) => eq(a, bob))).toBe(true);
+    expect(followed.some((a) => eq(a, carol))).toBe(true);
+    // alice follows exactly her two peers, and never herself.
+    expect(followed.some((a) => eq(a, alice))).toBe(false);
+    expect(followed).toHaveLength(2);
+  });
+
+  it("excludes `block`-tagged follows", async () => {
+    const followed = await followingOf(efpFollowActorAddress);
+    expect(followed.some((a) => eq(a, efpSeedTargets.followPlain))).toBe(true);
+    expect(followed.some((a) => eq(a, efpSeedTargets.followBlocked))).toBe(false);
+    expect(followed).toHaveLength(1);
+  });
+
+  it("is empty for an account with no validated primary list", async () => {
+    // The seed actor's primary-list metadata points at a list whose `user` is not itself.
+    const followed = await followingOf(efpSeedActorAddress);
+    expect(followed).toHaveLength(0);
+  });
+});
+
+describe("Account.efp.followers (validated)", () => {
+  type FollowersResult = {
+    account: { efp: { followers: GraphQLConnection<{ id: string }> } | null } | null;
+  };
+
+  const Followers = gql`
+    query Followers($address: Address!) {
+      account(by: { address: $address }) {
+        efp {
+          followers {
+            edges { node { id } }
+          }
+        }
+      }
+    }
+  `;
+
+  const followersOf = async (address: string) =>
+    flattenConnection(
+      (await request<FollowersResult>(Followers, { address })).account!.efp!.followers,
+    ).map((node) => node.id);
+
+  it("returns the accounts that follow alice (bob and carol)", async () => {
+    const followers = await followersOf(alice);
+    expect(followers.some((a) => eq(a, bob))).toBe(true);
+    expect(followers.some((a) => eq(a, carol))).toBe(true);
+    expect(followers).toHaveLength(2);
+  });
+
+  it("includes a follower via its validated primary list", async () => {
+    const followers = await followersOf(efpSeedTargets.followPlain);
+    expect(followers.some((a) => eq(a, efpFollowActorAddress))).toBe(true);
+  });
+
+  it("excludes a follower whose follow is `block`-tagged", async () => {
+    const followers = await followersOf(efpSeedTargets.followBlocked);
+    expect(followers.some((a) => eq(a, efpFollowActorAddress))).toBe(false);
+    expect(followers).toHaveLength(0);
+  });
+
+  it("excludes a record held only by a list that is not its user's validated primary list", async () => {
+    // `cascade` is held only by the seed actor's list, whose `user` was cleared, so the follow does
+    // not live in any validated primary list — there are no validated followers.
+    const followers = await followersOf(efpSeedTargets.cascade);
+    expect(followers).toHaveLength(0);
   });
 });
 
