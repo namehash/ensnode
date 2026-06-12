@@ -7,10 +7,22 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-Operating an ENSNode deployment requires understanding the architecture and components of ENSNode, how to monitor and maintain your deployment, and how to scale as your needs grow. This section provides an overview of ENSNode operations, including best practices for deployment, monitoring, and scaling.
+Operating an ENSNode deployment requires understanding the critical workloads that ENSNode is responsible for, as well as the best practices for managing and optimizing these workloads, including monitoring, scaling, and resource management. This section provides an overview of the key operational considerations for running your own ENSNode instance effectively.
 
-## Deployment Options
+<LinkCard
+  title="Critical ENSNode workloads"
+  description="Learn about the most important considerations when choosing infrastructure for a self-hosted ENSNode."
+  href="/docs/self-host/operations/critical-workloads"
+/>
 
-<LinkCard title="Docker" href="/docs/self-host/deployment-options/docker" />
-<LinkCard title="Railway" href="/docs/self-host/deployment-options/railway" />
-<LinkCard title="Terraform" href="/docs/self-host/deployment-options/terraform" />
+<LinkCard
+  title="ENSNode monitoring"
+  description="Learn about monitoring strategies for ENSNode deployments."
+  href="/docs/self-host/operations/monitoring"
+/>
+
+<LinkCard
+  title="ENSNode scalability"
+  description="Architecture overview of how to scale ENSNode to handle a massive volume of requests."
+  href="/docs/self-host/operations/scalability"
+/>

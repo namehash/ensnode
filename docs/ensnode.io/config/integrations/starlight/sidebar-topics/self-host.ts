@@ -43,6 +43,10 @@ export const selfHostSidebarTopic = {
           label: "Scalability",
           link: "/docs/self-host/operations/scalability",
         },
+        {
+          label: "Monitoring",
+          link: "/docs/self-host/operations/monitoring",
+        },
       ],
     },
   ],
