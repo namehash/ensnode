@@ -1,6 +1,6 @@
-import { registeredNames } from "@ensnode/integration-test-env/devnet";
+import { additionallyRegisteredNames } from "@ensnode/integration-test-env/devnet";
 
-const staticDevnetNames = [
+const STATIC_DEVNET_NAMES = [
   { name: "test.eth", canonical: "test.eth" },
   { name: "example.eth", canonical: "example.eth" },
   { name: "demo.eth", canonical: "demo.eth" },
@@ -26,13 +26,28 @@ const staticDevnetNames = [
   // { name: "sub.test.eth", canonical: "sub.alias.eth" },
 ] as const;
 
-// Derived from `registeredNames` fixture — expands automatically when new names are added there.
-const seededDevnetNames = registeredNames.flatMap((entry) => [
-  { name: entry.name, canonical: entry.name },
-  ...entry.subnames.map((sub) => ({ name: sub.name, canonical: sub.name })),
-]);
+// ENSv2 names from the seed fixture — auto-included in generic devnet test lists below.
+const SEEDED_ENSV2_NAMES = additionallyRegisteredNames
+  .filter((entry) => entry.type === "ENSv2")
+  .flatMap((entry) => [
+    { name: entry.name, canonical: entry.name },
+    ...("subnames" in entry ? entry.subnames : []).map((sub) => ({
+      name: sub.name,
+      canonical: sub.name,
+    })),
+  ]);
 
-export const DEVNET_NAMES = [...staticDevnetNames, ...seededDevnetNames];
+// ENSv1 names are seeded on-chain but live outside the ENSv2 nametree; use for targeted ENSv1 tests.
+export const DEVNET_ENSV1_NAMES = additionallyRegisteredNames
+  .filter((entry) => entry.type === "ENSv1")
+  .map((entry) => ({
+    name: entry.name,
+    label: entry.label,
+    canonical: entry.name,
+    wrapped: entry.wrapped,
+  }));
+
+export const DEVNET_NAMES = [...STATIC_DEVNET_NAMES, ...SEEDED_ENSV2_NAMES];
 
 // labels that are direct children of 'eth'
 export const DEVNET_ETH_LABELS = DEVNET_NAMES.map(({ name, canonical }) => {

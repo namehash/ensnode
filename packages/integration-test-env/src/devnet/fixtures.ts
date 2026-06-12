@@ -121,12 +121,28 @@ export type NameRecords = {
   contenthash?: Hex;
 };
 
-export type RegisteredName = {
+type ENSv1RegisteredName = {
+  type: "ENSv1";
+  name: string;
+  label: string;
+  /**
+   * When true, register via LegacyETHRegistrarController then NameWrapper.wrapETH2LD so
+   * NameWrapped heals the label. When false, legacy registration only — unhealed
+   * (`[labelhash].eth` canonical name).
+   */
+  wrapped: boolean;
+  records?: NameRecords;
+};
+
+type ENSv2RegisteredName = {
+  type: "ENSv2";
   name: string;
   label: string;
   records?: NameRecords;
   subnames?: RegisteredSubname[];
 };
+
+export type RegisteredName = ENSv1RegisteredName | ENSv2RegisteredName;
 
 export type RegisteredSubname = {
   label: string;
@@ -141,8 +157,9 @@ export type RegisteredSubname = {
  * To add more names: append entries here. Seeding, DEVNET_NAMES, and tests pick them up
  * automatically — no other files need changing.
  */
-export const registeredNames = [
+export const additionallyRegisteredNames = [
   {
+    type: "ENSv2",
     name: "contenthash.eth",
     label: "contenthash",
     records: {},
@@ -183,5 +200,23 @@ export const registeredNames = [
         records: { contenthash: contenthashFixtures.arweave },
       },
     ],
+  },
+  {
+    type: "ENSv1",
+    name: "legacy-v1-wrapped.eth",
+    label: "legacy-v1-wrapped",
+    wrapped: true,
+  },
+  {
+    type: "ENSv1",
+    name: "legacy-v1-unwrapped.eth",
+    label: "legacy-v1-unwrapped",
+    wrapped: false,
+  },
+  {
+    type: "ENSv2",
+    name: "emptyrecords.eth",
+    label: "emptyrecords",
+    records: { contenthash: "0x" },
   },
 ] as const satisfies RegisteredName[];

@@ -12,6 +12,7 @@ import {
   labelhashInterpretedLabel,
   makeENSv1DomainId,
   makeENSv1RegistryId,
+  makeENSv1VirtualRegistryId,
   makeENSv2DomainId,
   makeENSv2RegistryId,
   makeStorageId,
@@ -24,9 +25,9 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 import {
   accounts,
+  additionallyRegisteredNames,
   addresses,
   fixtures,
-  registeredNames,
   testEthTextRecords,
 } from "@ensnode/integration-test-env/devnet";
 
@@ -183,12 +184,10 @@ describe("Domain.registry and Domain.subregistry", () => {
           __typename: "ENSv1Registry",
           id: makeENSv1RegistryId(v1RootRegistry),
         },
-        subregistry: null,
-        // TODO: The DevNet should in the future have some ENSv1 domains that are then migrated, and then the .eth ENSv1 domain will have a subregistry.
-        // subregistry: {
-        //   __typename: "ENSv1VirtualRegistry",
-        //   id: makeENSv1VirtualRegistryId(v1RootRegistry, ETH_NODE),
-        // },
+        subregistry: {
+          __typename: "ENSv1VirtualRegistry",
+          id: makeENSv1VirtualRegistryId(v1RootRegistry, ETH_NODE),
+        },
       },
     });
   });
@@ -642,22 +641,23 @@ describe("Domain.records", () => {
     });
   });
 
-  it.each(registeredNames.flatMap((entry) => [...entry.subnames]))(
-    "resolves the seeded records for subname '$name'",
-    async ({ name, records }) => {
-      await expect(
-        request<DomainAllRecordsResult>(DomainRecordsAll, {
-          name,
-          addresses: [],
-          texts: [],
-          contentTypeMask: "0",
-          interfaceIds: [],
-        }),
-      ).resolves.toMatchObject({
-        domain: { resolve: { records } },
-      });
-    },
-  );
+  it.each(
+    additionallyRegisteredNames.flatMap((entry) =>
+      "subnames" in entry ? [...entry.subnames] : [],
+    ),
+  )("resolves the seeded records for subname '$name'", async ({ name, records }) => {
+    await expect(
+      request<DomainAllRecordsResult>(DomainRecordsAll, {
+        name,
+        addresses: [],
+        texts: [],
+        contentTypeMask: "0",
+        interfaceIds: [],
+      }),
+    ).resolves.toMatchObject({
+      domain: { resolve: { records } },
+    });
+  });
 
   it("returns null for an unnormalized canonical name (e.g. with labelhash)", async () => {
     // A name with a label that is an encoded labelhash is an InterpretedName but not a normalized name.
