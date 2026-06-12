@@ -2,6 +2,7 @@ import type {
   FileTreeBatchOperation,
   FileTreeRowDecoration,
   FileTreeRowDecorationContext,
+  FileTreeSortComparator,
 } from "@pierre/trees";
 import { FileTree, useFileTree, useFileTreeSelection } from "@pierre/trees/react";
 import { graphql, type ResultOf, type VariablesOf } from "enssdk/omnigraph";
@@ -17,7 +18,22 @@ const PAGE_SIZE = 50;
 const PLACEHOLDER_SEG = "…"; // makes a not-yet-loaded subregistry expandable
 const EMPTY_SEG = "(empty subregistry)";
 const ERROR_SEG = "⚠ failed to load";
-const LOAD_MORE_SEG = "⤓ load more…";
+const LOAD_MORE_SEG = "⏳ loading more…"; // auto-loads the next page when scrolled into view
+
+/**
+ * Orders sibling rows by name only, ascending — deliberately NOT folder-first
+ * (the library's default). The Registry API paginates Domains by name ascending,
+ * so name-only ordering makes each new page append below the rows already loaded;
+ * folder-first would instead sort a later page's subregistry-bearing Domains up
+ * into the directory group, inserting rows above the viewport and making the tree
+ * jump on load. The auto-load sentinel is pinned last so it stays at the bottom.
+ */
+const sortByName: FileTreeSortComparator = (a, b) => {
+  const aSentinel = a.basename === LOAD_MORE_SEG;
+  const bSentinel = b.basename === LOAD_MORE_SEG;
+  if (aSentinel !== bSentinel) return aSentinel ? 1 : -1;
+  return a.basename < b.basename ? -1 : a.basename > b.basename ? 1 : 0;
+};
 
 /**
  * One page of a Registry's Domains, traversing the namegraph forward.
@@ -339,6 +355,12 @@ export function NamegraphView({ registryId }: { registryId: string }) {
   // Expandable Domains whose subregistry has not been loaded yet.
   const pendingDirsRef = useRef<Set<string>>(new Set());
   const loadedDirsRef = useRef<Set<string>>(new Set());
+  // Sentinel paths whose next page is currently being fetched, so the auto-load
+  // observer doesn't re-fire for an in-flight "load more" row.
+  const loadingMoreRef = useRef<Set<string>>(new Set());
+  // Latest auto-load trigger. `renderRowDecoration` is captured once at model
+  // construction, so it calls through this ref to reach the current closure.
+  const triggerLoadMoreRef = useRef<(meta: LoadMoreMeta) => void>(() => {});
 
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -357,7 +379,16 @@ export function NamegraphView({ registryId }: { registryId: string }) {
   const renderRowDecoration = useCallback(
     (context: FileTreeRowDecorationContext): FileTreeRowDecoration | null => {
       const meta = getMeta(context.item.path);
-      if (!meta || meta.kind !== "domain") return null;
+      if (!meta) return null;
+
+      // The library calls this for every row in the virtualized window, so a
+      // "load more" sentinel reaching here means it scrolled into view: kick off
+      // the next page. Deferred to a microtask so we never mutate the tree mid-render.
+      if (meta.kind === "loadMore") {
+        queueMicrotask(() => triggerLoadMoreRef.current(meta));
+        return null;
+      }
+      if (meta.kind !== "domain") return null;
 
       const glyphs: string[] = [];
       if (meta.isAlias) glyphs.push("⚠");
@@ -391,6 +422,9 @@ export function NamegraphView({ registryId }: { registryId: string }) {
   const { model } = useFileTree({
     paths: [],
     initialExpansion: "closed",
+    // Mirror the Registry API's name-ascending pagination so new pages append
+    // below; see {@link sortByName}.
+    sort: sortByName,
     // Keep every Domain as its own directory row; do not compact single-child
     // chains (the file tree's "compact folders" behavior) into one combined line.
     flattenEmptyDirectories: false,
@@ -542,6 +576,18 @@ export function NamegraphView({ registryId }: { registryId: string }) {
     [model, addDomain, addLoadMore],
   );
 
+  // Auto-load wrapper: dedupes concurrent triggers for the same sentinel while
+  // its page is in flight. Re-fires once a fresh sentinel (next cursor) appears.
+  const triggerLoadMore = useCallback(
+    (meta: LoadMoreMeta) => {
+      if (loadingMoreRef.current.has(meta.path)) return;
+      loadingMoreRef.current.add(meta.path);
+      void loadMore(meta).finally(() => loadingMoreRef.current.delete(meta.path));
+    },
+    [loadMore],
+  );
+  triggerLoadMoreRef.current = triggerLoadMore;
+
   // Load the entry Registry's first page of Domains.
   useEffect(() => {
     let cancelled = false;
@@ -589,12 +635,6 @@ export function NamegraphView({ registryId }: { registryId: string }) {
   const selectedPaths = useFileTreeSelection(model);
   const selectedPath = selectedPaths[0] ?? null;
   const selectedMeta = selectedPath ? getMeta(selectedPath) : null;
-
-  // Selecting a "load more…" node fetches the next page.
-  useEffect(() => {
-    if (selectedMeta?.kind === "loadMore") void loadMore(selectedMeta);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPath]);
 
   // Size the tree/panels row to reach exactly the bottom of the viewport so the
   // page itself never scrolls, regardless of the header height above it.
@@ -692,7 +732,7 @@ function DetailPanel({ meta }: { meta: NodeMeta | null }) {
   if (meta.kind !== "domain") {
     const label =
       meta.kind === "loadMore"
-        ? "Loading the next page…"
+        ? "Loading the next page…" // auto-loads when scrolled into view
         : meta.kind === "placeholder"
           ? "Loading subregistry…"
           : meta.kind === "empty"
