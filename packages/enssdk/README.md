@@ -10,10 +10,10 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 npm install enssdk
 ```
 
-> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you **must** use `enssdk@1.13.1`. The latest published version (`1.14.0+`) contains breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. This notice will be removed once the hosted instances are upgraded.
+> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.15. If you are querying them from your own app, pin `enssdk` to the matching version — the Omnigraph API data model can change between versions.
 >
 > ```bash
-> npm install enssdk@1.13.1
+> npm install enssdk@1.15.2
 > ```
 
 ## Usage

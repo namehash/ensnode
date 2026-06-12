@@ -8,7 +8,7 @@ Companion to the [ENS Omnigraph GraphQL API integration guide](https://ensnode.i
 
 ## Usage (with NameHash Hosted Instance)
 
-> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.x`). If you query a different ENSNode version, you may need to adjust the query format.
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.2`). If you query a different ENSNode version, you may need to adjust the query format.
 
 ```sh
 # from the ENSNode monorepo root
