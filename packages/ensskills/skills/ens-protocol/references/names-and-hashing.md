@@ -38,3 +38,7 @@ Because only hashes are registered, the human-readable label behind a node is so
 In `enssdk`: `encodeLabelHash` produces the `[…]` form, `isEncodedLabelHash` detects it, and `parseLabelHashOrEncodedLabelHash` accepts either a bare labelhash or the encoded form — handy when a label may or may not be known.
 
 ENSNode further distinguishes _Literal_ / _Interpreted_ / _Beautified_ forms of labels and names for indexing and display; see the [terminology reference](https://ensnode.io/docs/reference/terminology) if you need that precision.
+
+### Subgraph-Interpreted (legacy)
+
+The legacy ENS Subgraph treats some labels as **subgraph-unindexable**: Unknown Labels, plus any literal containing `\0`, `.`, `[`, or `]`. A **Subgraph Interpreted Label** renders those as an Encoded LabelHash _even when the literal is actually known_. Practical consequence: a subgraph-compatible API may return `[hash…]` where the ENS Omnigraph returns the literal label — expect this divergence when comparing results across the two APIs or migrating off the Subgraph.

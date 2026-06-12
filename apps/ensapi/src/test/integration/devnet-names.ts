@@ -37,7 +37,8 @@ const SEEDED_ENSV2_NAMES = additionallyRegisteredNames
     })),
   ]);
 
-// ENSv1 names are seeded on-chain but live outside the ENSv2 nametree; use for targeted ENSv1 tests.
+// ENSv1 names: registered in ENSv1 and reserved in the ENSv2 ETHRegistry (resolver = ENSV1Resolver),
+// mirroring migration. Used for targeted ENSv1 tests and the reserved-entry walk tests.
 export const DEVNET_ENSV1_NAMES = additionallyRegisteredNames
   .filter((entry) => entry.type === "ENSv1")
   .map((entry) => ({

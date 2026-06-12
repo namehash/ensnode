@@ -18,6 +18,10 @@ export const profileImageHttpUrlFieldDescription = (recordLabel: "avatar" | "hea
     "the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace)",
   )} See https://docs.ens.domains/ensip/12.`;
 
+export const profileContenthashDescription = `The interpreted ENSIP-7 contenthash on the profile of an ENS name. ${nullWhenUninterpretable(
+  "the raw contenthash record is unset, empty, or cannot be decoded (unknown codec or malformed bytes)",
+)} See https://docs.ens.domains/ensip/7.`;
+
 export const profileAddressesContainerDescription =
   "The interpreted addresses on the profile of an ENS name.";
 

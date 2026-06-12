@@ -27,7 +27,10 @@ import {
   accounts,
   additionallyRegisteredNames,
   addresses,
+  contenthashFixtures,
+  contenthashSubnames,
   fixtures,
+  type NameRecords,
   testEthTextRecords,
 } from "@ensnode/integration-test-env/devnet";
 
@@ -608,7 +611,7 @@ describe("Domain.records", () => {
       domain: {
         resolve: {
           records: {
-            contenthash: fixtures.contenthash,
+            contenthash: contenthashFixtures.ipfs.raw,
             pubkey: { x: fixtures.publicKeyX, y: fixtures.publicKeyY },
             dnszonehash: null,
             version: expect.any(String),
@@ -646,6 +649,14 @@ describe("Domain.records", () => {
       "subnames" in entry ? [...entry.subnames] : [],
     ),
   )("resolves the seeded records for subname '$name'", async ({ name, records }) => {
+    let expectedRecords: NameRecords = records;
+
+    // TODO: this is temp fix for empty contenthash records
+    // since right now we still perform small parsing in resolve.records
+    // and consider empty bytes as null
+    if (records.contenthash === "0x") {
+      expectedRecords = { ...records, contenthash: null };
+    }
     await expect(
       request<DomainAllRecordsResult>(DomainRecordsAll, {
         name,
@@ -655,7 +666,7 @@ describe("Domain.records", () => {
         interfaceIds: [],
       }),
     ).resolves.toMatchObject({
-      domain: { resolve: { records } },
+      domain: { resolve: { records: expectedRecords } },
     });
   });
 
@@ -720,16 +731,23 @@ describe("Domain.records", () => {
 });
 
 describe("Domain.profile", () => {
+  type ResolveProfileResult = {
+    profile: {
+      description: string | null;
+      avatar: { httpUrl: UrlString | null } | null;
+      addresses: { ethereum: NormalizedAddress | null } | null;
+      socials: { github: { handle: string; httpUrl: UrlString } | null } | null;
+      contenthash: {
+        protocolType: string;
+        decoded: string;
+        uri: string;
+        httpUrl: UrlString | null;
+      } | null;
+    } | null;
+  };
   type DomainProfileResult = {
     domain: {
-      resolve: {
-        profile: {
-          description: string | null;
-          avatar: { httpUrl: UrlString | null } | null;
-          addresses: { ethereum: NormalizedAddress | null } | null;
-          socials: { github: { handle: string; httpUrl: UrlString } | null } | null;
-        } | null;
-      };
+      resolve: ResolveProfileResult;
     };
   };
 
@@ -743,6 +761,7 @@ describe("Domain.profile", () => {
             header { httpUrl }
             website { httpUrl }
             email
+            contenthash { protocolType decoded uri httpUrl }
             addresses { ethereum bitcoin litecoin solana }
             socials {
               github { httpUrl handle }
@@ -754,6 +773,66 @@ describe("Domain.profile", () => {
       }
     }
   `;
+
+  type DomainProfilesResult = {
+    edges: {
+      node: {
+        resolve: ResolveProfileResult;
+      };
+    }[];
+  };
+
+  const DomainProfiles = gql`
+    query DomainProfiles($names: [InterpretedName!]!) {
+      domains(where: {name: {in: $names}}, order: {by: NAME, dir: ASC}) {
+        edges {
+          node {
+            resolve {
+              profile {
+                description
+                avatar {
+                  httpUrl
+                }
+                header {
+                  httpUrl
+                }
+                website {
+                  httpUrl
+                }
+                email
+                contenthash {
+                  protocolType
+                  decoded
+                  uri
+                  httpUrl
+                }
+                addresses {
+                  ethereum
+                  bitcoin
+                  litecoin
+                  solana
+                }
+                socials {
+                  github {
+                    httpUrl
+                    handle
+                  }
+                  twitter {
+                    httpUrl
+                    handle
+                  }
+                  telegram {
+                    httpUrl
+                    handle
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+`;
 
   it("interprets profile fields for test.eth", async () => {
     await expect(
@@ -773,6 +852,12 @@ describe("Domain.profile", () => {
               litecoin: fixtures.rawAddresses.litecoin.address,
               solana: fixtures.rawAddresses.solana.address,
             },
+            contenthash: {
+              protocolType: "IPFS",
+              decoded: contenthashFixtures.ipfs.decoded,
+              uri: `ipfs://${contenthashFixtures.ipfs.decoded}`,
+              httpUrl: `https://ipfs.io/ipfs/${contenthashFixtures.ipfs.decoded}`,
+            },
             socials: {
               github: {
                 handle: "ensdomains",
@@ -787,6 +872,73 @@ describe("Domain.profile", () => {
                 httpUrl: "https://x.com/this_is_real_ensdomains_not_twitter_but_x_haha",
               },
             },
+          },
+        },
+      },
+    });
+  });
+
+  it("interprets contenthash for all contenthash fixtures", async () => {
+    const uriPrefixByLabel = {
+      ipfs: "ipfs://",
+      ipns: "ipns://",
+      swarm: "bzz://",
+      arweave: "ar://",
+      onion: "onion://",
+      onion3: "onion3://",
+      skynet: "sia://",
+    } as const satisfies Record<string, string>;
+
+    const httpUrlByLabel: Record<string, ((decoded: string) => string) | undefined> = {
+      ipfs: (decoded) => `https://ipfs.io/ipfs/${decoded}`,
+      ipns: (decoded) => `https://ipfs.io/ipns/${decoded}`,
+      swarm: (decoded) => `https://gateway.ethswarm.org/bzz/${decoded}`,
+      arweave: (decoded) => `https://arweave.net/${decoded}`,
+    };
+
+    const cases = contenthashSubnames.map(({ label, name }) => {
+      const fixture = contenthashFixtures[label as keyof typeof contenthashFixtures];
+
+      if (!fixture.decoded) return { name, expectedContenthash: null };
+
+      const decoded = fixture.decoded;
+      const httpUrlBuilder = httpUrlByLabel[label];
+
+      return {
+        name,
+        expectedContenthash: {
+          protocolType: label.toUpperCase(),
+          decoded,
+          uri: `${uriPrefixByLabel[label as keyof typeof uriPrefixByLabel]}${decoded}`,
+          httpUrl: httpUrlBuilder ? httpUrlBuilder(decoded) : null,
+        },
+      };
+    });
+
+    const inputNames = cases.map(({ name }) => name);
+    const edges = [...cases]
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { ignorePunctuation: true }))
+      .map(({ expectedContenthash }) => ({
+        node: {
+          resolve: { profile: { contenthash: expectedContenthash } },
+        },
+      }));
+
+    await expect(
+      request<{ domains: DomainProfilesResult }>(DomainProfiles, { names: inputNames }),
+    ).resolves.toMatchObject({
+      domains: { edges },
+    });
+  });
+
+  it("returns null contenthash when record is empty", async () => {
+    await expect(
+      request<DomainProfileResult>(DomainProfile, { name: "emptyrecords.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          profile: {
+            contenthash: null,
           },
         },
       },

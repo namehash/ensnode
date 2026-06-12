@@ -1,5 +1,6 @@
 import { type CoinName, getCoderByCoinName } from "@ensdomains/address-encoder";
 import { bytesToHex } from "@ensdomains/address-encoder/utils";
+import { type Codec, decode, encode } from "@ensdomains/content-hash";
 import type { CoinType, NormalizedAddress } from "enssdk";
 import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
@@ -50,6 +51,15 @@ const getRawAddress = (coinName: CoinName, address: string) => {
   };
 };
 
+const getRawContenthash = (codec: Codec, input: string) => {
+  const encoded = encode(codec, input);
+  return {
+    raw: `0x${encoded}` as Hex,
+    // decode normalizes values (e.g. IPFS CIDv0 input → CIDv1 decoded, IPNS peer id → base36 CID)
+    decoded: decode(encoded),
+  };
+};
+
 /**
  * Text records seeded on `test.eth` (PermissionedResolver) in the ens-test-env devnet.
  * @see packages/integration-test-env/src/seed/resolver-records.ts
@@ -94,7 +104,6 @@ export const fixtures = {
   fourBytesInterface: "0x11100111",
   publicKeyX: `0x${"02".repeat(32)}`,
   publicKeyY: `0x${"03".repeat(32)}`,
-  contenthash: `0x${"04".repeat(32)}`,
 
   rawAddresses: rawAddresses,
   textRecords: testEthTextRecords,
@@ -102,23 +111,33 @@ export const fixtures = {
 
 /**
  * Real contenthash values for each supported codec, encoded as per ENSIP-7.
- * Values are taken from https://github.com/ensdomains/content-hash test vectors.
+ * Input values are taken from https://github.com/ensdomains/content-hash test vectors.
+ * The `raw` field is the ENSIP-7 encoded hex; `decoded` is the human-readable value.
  *
  * @see https://github.com/ensdomains/content-hash/blob/master/src/index.test.ts
  */
 export const contenthashFixtures = {
-  ipfs: "0xe3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f",
-  swarm: "0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162",
-  ipns: "0xe50101720024080112205cbd1cc86ac20d6640795809c2a185bb2504538a2de8076da5a6971b8acb4715",
-  onion: "0xbc037a716b746c776934666563766f367269",
-  onion3:
-    "0xbd037035336c663537716f7679757677736336786e72707079706c79337674716d376c3670636f626b6d797173696f6679657a6e667535757164",
-  skynet: "0x90b2c60508004007fd43b74149b31aacbbf2784e874d09b086bed15fd54cacff7120cce95372",
-  arweave: "0x90b2ca05cacdf63edf2e0bb4eb5711dd38b0723aca5f3c4ab62ceeb7c1110740833d4894",
-} as const satisfies Record<string, Hex>;
+  // CIDv0 input — decodes back to CIDv1
+  ipfs: getRawContenthash("ipfs", "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4"),
+  swarm: getRawContenthash(
+    "swarm",
+    "d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162",
+  ),
+  ipns: getRawContenthash("ipns", "12D3KooWG4NvqQVczTrWY1H2tvsJmbQf5bbA3xGYXC4FM3wWCfE4"),
+  onion: getRawContenthash("onion", "zqktlwi4fecvo6ri"),
+  onion3: getRawContenthash("onion3", "p53lf57qovyuvwsc6xnrppyply3vtqm7l6pcobkmyqsiofyeznfu5uqd"),
+  skynet: getRawContenthash("skynet", "CABAB_1Dt0FJsxqsu_J4TodNCbCGvtFf1Uys_3EgzOlTcg"),
+  arweave: getRawContenthash("arweave", "ys32Pt8uC7TrVxHdOLByOspfPEq2LO63wREHQIM9SJQ"),
+  empty: { raw: "0x", decoded: null },
+  invalid: { raw: "0xdeadbeef", decoded: null },
+  zero: {
+    raw: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    decoded: null,
+  },
+} as const;
 
 export type NameRecords = {
-  contenthash?: Hex;
+  contenthash: Hex | null;
 };
 
 type ENSv1RegisteredName = {
@@ -150,6 +169,12 @@ export type RegisteredSubname = {
   records?: NameRecords;
 };
 
+export const contenthashSubnames = Object.entries(contenthashFixtures).map(([label, fixture]) => ({
+  label: label,
+  name: `${label}.contenthash.eth`,
+  records: { contenthash: fixture.raw },
+})) satisfies RegisteredSubname[];
+
 /**
  * Names registered at seed time via the ETHRegistrar (2LDs) or UserRegistry (subnames),
  * together with the resolver records to seed on them.
@@ -162,44 +187,8 @@ export const additionallyRegisteredNames = [
     type: "ENSv2",
     name: "contenthash.eth",
     label: "contenthash",
-    records: {},
-    subnames: [
-      {
-        label: "ipfs",
-        name: "ipfs.contenthash.eth",
-        records: { contenthash: contenthashFixtures.ipfs },
-      },
-      {
-        label: "swarm",
-        name: "swarm.contenthash.eth",
-        records: { contenthash: contenthashFixtures.swarm },
-      },
-      {
-        label: "ipns",
-        name: "ipns.contenthash.eth",
-        records: { contenthash: contenthashFixtures.ipns },
-      },
-      {
-        label: "onion",
-        name: "onion.contenthash.eth",
-        records: { contenthash: contenthashFixtures.onion },
-      },
-      {
-        label: "onion3",
-        name: "onion3.contenthash.eth",
-        records: { contenthash: contenthashFixtures.onion3 },
-      },
-      {
-        label: "skynet",
-        name: "skynet.contenthash.eth",
-        records: { contenthash: contenthashFixtures.skynet },
-      },
-      {
-        label: "arweave",
-        name: "arweave.contenthash.eth",
-        records: { contenthash: contenthashFixtures.arweave },
-      },
-    ],
+    records: { contenthash: null },
+    subnames: contenthashSubnames,
   },
   {
     type: "ENSv1",

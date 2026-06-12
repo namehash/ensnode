@@ -39,6 +39,10 @@ import { logger } from "@/lib/logger";
  *   are exhausted.
  */
 export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLabel | null> {
+  // escape hatch for benchmarking to skip healing entirely (every label is treated as unhealable)
+  // never set in production, use for performance testing only
+  if (process.env.DISABLE_ENSRAINBOW_HEAL === "true") return null;
+
   // Reset at the start of each attempt so that after p-retry exhaustion we can distinguish
   // "last failure was HealServerError" (set) from "last failure was a network throw" (undefined).
   let lastServerError: EnsRainbow.HealServerError | undefined;

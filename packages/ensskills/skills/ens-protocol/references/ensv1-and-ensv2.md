@@ -4,6 +4,10 @@ Definitions follow the [ENSNode Terminology Reference](https://ensnode.io/docs/r
 
 ENSv2 does not replace ENSv1 — both are live onchain at once, with substantially different data models, so an integration must read a **unified** view of both. This page details how they differ and what that means for your code.
 
+## ENS Namespaces (the outer boundary)
+
+Everything below happens _within an_ **ENS Namespace**: a single, logically-isolated set of ENS names defined by its own root Registry. A namespace **spans many chains** (and offchain systems) — the canonical `mainnet` namespace roots on Ethereum mainnet and reaches across Base, Linea, Optimism, and offchain issuers — so it is **not** 1:1 with an L1 chain. Distinct namespaces (`mainnet`, `sepolia`, the testing-only `ens-test-env`) are fully independent: each has its own root Registry and its own deployments of `.eth`, Basenames, Lineanames, etc., and a name in one namespace says nothing about the same string in another. ENSv1 and ENSv2 are two data models _inside_ a namespace, not two namespaces.
+
 ## ENSv1 (live today)
 
 - A name maps to state via a flat **`namehash → state`** table (a Nametable): the Registry stores each node's owner and resolver, resolvers store records.
