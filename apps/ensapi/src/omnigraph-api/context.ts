@@ -1,9 +1,12 @@
 import DataLoader from "dataloader";
 import { getUnixTime } from "date-fns";
 import { inArray } from "drizzle-orm";
-import type { DomainId, RegistryId } from "enssdk";
+import type { CoinType, DomainId, NormalizedAddress, RegistryId } from "enssdk";
+
+import type { ReverseResolutionResult } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
+import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelerate.middleware";
 
 /** Server context passed from Hono into GraphQL Yoga via `yoga.fetch(request, serverContext)`. */
@@ -24,6 +27,26 @@ const createRegistryParentDomainLoader = () =>
   });
 
 /**
+ * Loads the ENSIP-19 Primary Name for an `(account, coinType)` via reverse resolution, deduplicating
+ * identical pairs within a request. Backs `NameReference.match`, where a page of NameReferences
+ * sharing one `(account, coinType)` would otherwise each run an independent reverse resolution.
+ */
+const createReverseResolutionLoader = () =>
+  new DataLoader<
+    { account: NormalizedAddress; coinType: CoinType },
+    ReverseResolutionResult,
+    string
+  >(
+    (keys) =>
+      Promise.all(
+        keys.map(({ account, coinType }) =>
+          resolveReverse(account, coinType, { accelerate: true, canAccelerate: true }),
+        ),
+      ),
+    { cacheKeyFn: ({ account, coinType }) => `${account}:${coinType}` },
+  );
+
+/**
  * Constructs a new GraphQL Context per-request.
  *
  * @dev make sure that anything that is per-request (like dataloaders) are newly created in this fn
@@ -32,6 +55,7 @@ export const createOmnigraphContext = (serverContext: OmnigraphYogaServerContext
   now: BigInt(getUnixTime(new Date())),
   loaders: {
     registryParentDomain: createRegistryParentDomainLoader(),
+    reverseResolution: createReverseResolutionLoader(),
   },
   canAccelerate: serverContext.canAccelerate,
 });
