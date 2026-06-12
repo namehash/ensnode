@@ -16,6 +16,7 @@ All commands are run from the **monorepo root**.
 | `docker/envs/.env.docker.local`          | User config (gitignored). Required for base stack, optional for devnet overrides.      |
 
 EnsRainbowBeam (`docker/services/ensrainbowbeam.yml`) is optional: extend that file when you want label-discovery HTTP alongside ENSApi (`ENSNODE_URL` must reach the Omnigraph-capable ENSApi URL).
+
 > To inspect the fully resolved config for any compose file (resolves all `extends`):
 >
 > ```

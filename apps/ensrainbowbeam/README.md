@@ -36,10 +36,10 @@ For each submitted raw label EnsRainbowBeam:
 
 ## Configuration
 
-| Env var | Required | Description |
-|---------|----------|-------------|
-| `PORT` | no (default `4444`) | HTTP listen port. |
-| `ENSNODE_URL` | yes | Base URL of an ENSNode (ENSApi) instance with Omnigraph at `/api/omnigraph`. |
+| Env var       | Required            | Description                                                                  |
+| ------------- | ------------------- | ---------------------------------------------------------------------------- |
+| `PORT`        | no (default `4444`) | HTTP listen port.                                                            |
+| `ENSNODE_URL` | yes                 | Base URL of an ENSNode (ENSApi) instance with Omnigraph at `/api/omnigraph`. |
 
 See `.env.local.example` for a local-development template.
 
