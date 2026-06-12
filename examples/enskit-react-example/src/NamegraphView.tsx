@@ -259,7 +259,11 @@ async function fetchRegistryPage(registryId: string, after: string | null): Prom
     throw new Error(result.errors.map((e) => e.message).join("; "));
   }
 
-  const connection = result.data?.registry?.domains;
+  if (!result.data?.registry) {
+    throw new Error(`Registry not found: ${registryId}`);
+  }
+
+  const connection = result.data.registry.domains;
 
   const domains: RawDomain[] = (connection?.edges ?? []).map((edge) => {
     const node = edge.node;
@@ -518,10 +522,10 @@ export function NamegraphView({ registryId }: { registryId: string }) {
   const loadChildren = useCallback(
     async (dirPath: string) => {
       if (loadedDirsRef.current.has(dirPath)) return;
-      loadedDirsRef.current.add(dirPath);
 
       const meta = metaRef.current.get(dirPath);
       if (!meta || meta.kind !== "domain" || !meta.subregistryId) return;
+      loadedDirsRef.current.add(dirPath);
 
       const ops: FileTreeBatchOperation[] = [];
       const placeholderPath = `${dirPath}${PLACEHOLDER_SEG}`;
@@ -882,7 +886,7 @@ function ExternalLink({
   );
 }
 
-const prettyUrl = (url: string) => url.replace(/^https?:\/\//, "");
+const prettyUrl = (url: string) => url.replace(/^https?:\/\//i, "");
 
 /** The "Resolution" panel in its idle / loading / error states. */
 function ResolutionStatus({ children, error }: { children: React.ReactNode; error?: boolean }) {
