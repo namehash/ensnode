@@ -11,7 +11,7 @@ describe("parseListStorageLocation", () => {
 
     expect(parseListStorageLocation(payload)).toEqual({
       version: 1,
-      chainId: 8453n,
+      chainId: 8453,
       contractAddress: `0x${addressHex}` as `0x${string}`,
       slot: `0x${slotHex}` as `0x${string}`,
     });
@@ -23,7 +23,7 @@ describe("parseListStorageLocation", () => {
 
     expect(parseListStorageLocation(payload)).toEqual({
       version: 1,
-      chainId: 1n,
+      chainId: 1,
       contractAddress: `0x${"ab".repeat(20)}` as `0x${string}`,
       slot: `0x${"cd".repeat(32)}` as `0x${string}`,
     });

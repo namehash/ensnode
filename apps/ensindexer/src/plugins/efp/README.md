@@ -2,7 +2,7 @@
 
 Indexes the [Ethereum Follow Protocol](https://docs.efp.app) (EFP) — onchain "follow lists" — into
 ENSDb, so a single ENSNode process serves both ENS and EFP data. Activate it by including `efp` in
-the `PLUGINS` environment variable (mainnet ENS namespace only).
+the `PLUGINS` environment variable (on the `mainnet` ENS namespace, or the `ens-test-env` devnet).
 
 ## Contracts indexed
 
@@ -35,5 +35,6 @@ Contract coordinates live in the `EFPBase` / `EFPOptimism` / `EFPEthereum` datas
 - The canonical association of an Ethereum account with an EFP list is its **primary list**: the
   `primary-list` account-metadata value, valid only when the named list's `user` role matches the
   account (see [Account Metadata](https://docs.efp.app/design/account-metadata/)). ENSApi's Omnigraph
-  `efp.primaryList(address)` resolves and validates it.
-- Byte decoders for list ops and storage locations live in `lib/` with unit tests.
+  `Account.efp.primaryList` resolves and validates it.
+- Byte decoders for list ops and storage locations live in `apps/ensindexer/src/lib/efp/` with unit
+  tests.

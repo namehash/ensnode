@@ -18,9 +18,9 @@ type Account {
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection
 
   """
-  This Account's Ethereum Follow Protocol (EFP) presence: its lists and validated primary list.
+  This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
   """
-  efp: AccountEfp!
+  efp: AccountEfp
 
   """
   All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
@@ -92,6 +92,14 @@ type AccountEfp {
   lists(after: String, before: String, first: Int, last: Int): AccountEfpListsConnection
 
   """
+  Get one of this account's EFP account-metadata values by key (e.g. "primary-list").
+  """
+  metadata(key: String!): EfpAccountMetadata
+
+  """All of this account's EFP account-metadata entries."""
+  metadatas(after: String, before: String, first: Int, last: Int): AccountEfpMetadatasConnection
+
+  """
   The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.
   """
   primaryList: EfpList
@@ -106,6 +114,17 @@ type AccountEfpListsConnection {
 type AccountEfpListsConnectionEdge {
   cursor: String!
   node: EfpList!
+}
+
+type AccountEfpMetadatasConnection {
+  edges: [AccountEfpMetadatasConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpMetadatasConnectionEdge {
+  cursor: String!
+  node: EfpAccountMetadata!
 }
 
 type AccountEventsConnection {
@@ -921,12 +940,6 @@ type EfpAccountMetadata {
   value: Hex!
 }
 
-"""Filter EFP account metadata."""
-input EfpAccountMetadatasWhereInput {
-  """The account address."""
-  address: Address!
-}
-
 """An EFP list NFT (a ListRegistry token) and the records it holds."""
 type EfpList {
   createdAt: BigInt!
@@ -957,12 +970,18 @@ type EfpList {
   """The records currently in this list (the addresses it follows)."""
   records(after: String, before: String, first: Int, last: Int): EfpListRecordsConnection
 
-  """The ERC-721 token id of the list NFT (decimal string)."""
-  tokenId: String!
+  """The ERC-721 token id of the list NFT."""
+  tokenId: TokenId!
   updatedAt: BigInt!
 
   """The address allowed to post records to this list."""
   user: Address
+}
+
+"""Identify an EFP list by its NFT token id."""
+input EfpListByInput {
+  """The ERC-721 token id of the list NFT."""
+  tokenId: TokenId!
 }
 
 """
@@ -1039,14 +1058,8 @@ input EfpListsWhereInput {
 
 """Queries for Ethereum Follow Protocol (EFP) data."""
 type EfpQuery {
-  """Get an EFP account-metadata value by address and key."""
-  accountMetadata(address: Address!, key: String!): EfpAccountMetadata
-
-  """Find all EFP account-metadata entries for an address."""
-  accountMetadatas(after: String, before: String, first: Int, last: Int, where: EfpAccountMetadatasWhereInput!): EfpQueryAccountMetadatasConnection
-
   """Get an EFP list by its NFT token id."""
-  list(tokenId: String!): EfpList
+  list(by: EfpListByInput!): EfpList
 
   """
   Find EFP list records. Filter by `recordData` to answer 'which lists follow this address?'.
@@ -1055,22 +1068,6 @@ type EfpQuery {
 
   """Find EFP lists, optionally filtered by owner / user / manager."""
   lists(after: String, before: String, first: Int, last: Int, where: EfpListsWhereInput): EfpQueryListsConnection
-
-  """
-  The account's validated primary EFP list: the list named by the account's `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.
-  """
-  primaryList(address: Address!): EfpList
-}
-
-type EfpQueryAccountMetadatasConnection {
-  edges: [EfpQueryAccountMetadatasConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type EfpQueryAccountMetadatasConnectionEdge {
-  cursor: String!
-  node: EfpAccountMetadata!
 }
 
 type EfpQueryListRecordsConnection {
@@ -1662,8 +1659,10 @@ type Query {
   """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
-  """Ethereum Follow Protocol (EFP) queries."""
-  efp: EfpQuery!
+  """
+  Ethereum Follow Protocol (EFP) queries. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
+  """
+  efp: EfpQuery
 
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions
@@ -2145,6 +2144,11 @@ type ThreeDNSRegistration implements Registration {
   """
   unregistrant: Account
 }
+
+"""
+TokenId represents an enssdk#TokenId: an ERC-721 token id (a uint256), serialized as a decimal string.
+"""
+scalar TokenId
 
 """
 A resolvable-but-unindexed Domain: not present in the index, but resolvable because an ancestor in its namegraph path has an ENSIP-10 wildcard Resolver (e.g. off-chain / CCIP-Read names, unindexed 3DNS names, wildcard subnames).

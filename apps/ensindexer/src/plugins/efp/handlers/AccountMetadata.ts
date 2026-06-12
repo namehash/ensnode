@@ -1,11 +1,10 @@
+import { accountMetadataId } from "enssdk/efp";
 import type { Hex } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
-
-import { accountMetadataId } from "../lib/ids";
 
 const pluginName = PluginName.EFP;
 

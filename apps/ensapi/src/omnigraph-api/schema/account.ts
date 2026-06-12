@@ -22,6 +22,7 @@ import {
   DOMAINS_ORDERING_DESCRIPTION,
   DomainsOrderInput,
 } from "@/omnigraph-api/schema/domain-inputs";
+import { isEfpPluginEnabled } from "@/omnigraph-api/schema/efp-plugin";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
@@ -151,10 +152,10 @@ AccountRef.implement({
     ///////////////
     efp: t.field({
       description:
-        "This Account's Ethereum Follow Protocol (EFP) presence: its lists and validated primary list.",
+        "This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.",
       type: AccountEfpRef,
-      nullable: false,
-      resolve: (parent) => parent,
+      nullable: true,
+      resolve: (parent) => (isEfpPluginEnabled() ? parent : null),
     }),
 
     ///////////////////////

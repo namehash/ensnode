@@ -34,6 +34,7 @@ import {
   type RippleAddress,
   type RootstockAddress,
   type SolanaAddress,
+  type TokenId,
 } from "enssdk";
 import { isHex, size } from "viem";
 import { z } from "zod/v4";
@@ -165,6 +166,13 @@ builder.scalarType("ChainId", {
   description: "ChainId represents an enssdk#ChainId.",
   serialize: (value: ChainId) => value,
   parseValue: (value) => makeChainIdSchema("ChainId").parse(value),
+});
+
+builder.scalarType("TokenId", {
+  description:
+    "TokenId represents an enssdk#TokenId: an ERC-721 token id (a uint256), serialized as a decimal string.",
+  serialize: (value: TokenId) => value.toString(),
+  parseValue: (value) => z.coerce.bigint().parse(value) as TokenId,
 });
 
 builder.scalarType("CoinType", {

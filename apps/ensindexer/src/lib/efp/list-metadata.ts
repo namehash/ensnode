@@ -1,3 +1,4 @@
+import { type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
 
 /**
@@ -6,8 +7,10 @@ import type { Hex } from "viem";
  * other length is malformed and returns `null` to clear the role rather than store a truncated or
  * empty address (which would later surface through a GraphQL `Address`).
  */
-export function metadataValueToAddress(value: Hex): Hex | null {
-  // Exactly 20 bytes: "0x" + 40 hex chars.
-  if (value.length !== 42) return null;
-  return value.toLowerCase() as Hex;
+export function metadataValueToAddress(value: Hex): NormalizedAddress | null {
+  try {
+    return toNormalizedAddress(value);
+  } catch {
+    return null;
+  }
 }

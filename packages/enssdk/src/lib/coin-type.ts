@@ -66,3 +66,19 @@ export const bigintToCoinType = (value: bigint): CoinType => {
 
   return Number(value) as CoinType;
 };
+
+/**
+ * Converts a bigint value representing a Chain Id into a valid ChainId.
+ *
+ * This is useful when onchain events emit chain ids as bigint but we want to constrain them to
+ * the ChainId type.
+ *
+ * @throws if `value` is too large to fit in Number.MAX_SAFE_INTEGER
+ */
+export const bigintToChainId = (value: bigint): ChainId => {
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`'${value}' cannot represent as ChainId, it is too large.`);
+  }
+
+  return Number(value) as ChainId;
+};

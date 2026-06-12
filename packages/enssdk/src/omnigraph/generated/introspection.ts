@@ -132,11 +132,8 @@ const introspection = {
           {
             "name": "efp",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "AccountEfp"
-              }
+              "kind": "OBJECT",
+              "name": "AccountEfp"
             },
             "args": [],
             "isDeprecated": false
@@ -515,6 +512,64 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "metadata",
+            "type": {
+              "kind": "OBJECT",
+              "name": "EfpAccountMetadata"
+            },
+            "args": [
+              {
+                "name": "key",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "metadatas",
+            "type": {
+              "kind": "OBJECT",
+              "name": "AccountEfpMetadatasConnection"
+            },
+            "args": [
+              {
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "before",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "first",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "last",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
             "name": "primaryList",
             "type": {
               "kind": "OBJECT",
@@ -598,6 +653,86 @@ const introspection = {
               "ofType": {
                 "kind": "OBJECT",
                 "name": "EfpList"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AccountEfpMetadatasConnection",
+        "fields": [
+          {
+            "name": "edges",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AccountEfpMetadatasConnectionEdge"
+                  }
+                }
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "totalCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AccountEfpMetadatasConnectionEdge",
+        "fields": [
+          {
+            "name": "cursor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "node",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "EfpAccountMetadata"
               }
             },
             "args": [],
@@ -3744,23 +3879,6 @@ const introspection = {
         "interfaces": []
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "EfpAccountMetadatasWhereInput",
-        "inputFields": [
-          {
-            "name": "address",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Address"
-              }
-            }
-          }
-        ],
-        "isOneOf": false
-      },
-      {
         "kind": "OBJECT",
         "name": "EfpList",
         "fields": [
@@ -3892,7 +4010,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String"
+                "name": "TokenId"
               }
             },
             "args": [],
@@ -3923,14 +4041,34 @@ const introspection = {
         "interfaces": []
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "EfpListByInput",
+        "inputFields": [
+          {
+            "name": "tokenId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "TokenId"
+              }
+            }
+          }
+        ],
+        "isOneOf": false
+      },
+      {
         "kind": "OBJECT",
         "name": "EfpListRecord",
         "fields": [
           {
             "name": "account",
             "type": {
-              "kind": "OBJECT",
-              "name": "Account"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Account"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -4195,84 +4333,6 @@ const introspection = {
         "name": "EfpQuery",
         "fields": [
           {
-            "name": "accountMetadata",
-            "type": {
-              "kind": "OBJECT",
-              "name": "EfpAccountMetadata"
-            },
-            "args": [
-              {
-                "name": "address",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Address"
-                  }
-                }
-              },
-              {
-                "name": "key",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String"
-                  }
-                }
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
-            "name": "accountMetadatas",
-            "type": {
-              "kind": "OBJECT",
-              "name": "EfpQueryAccountMetadatasConnection"
-            },
-            "args": [
-              {
-                "name": "after",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "before",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String"
-                }
-              },
-              {
-                "name": "first",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "last",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int"
-                }
-              },
-              {
-                "name": "where",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "EfpAccountMetadatasWhereInput"
-                  }
-                }
-              }
-            ],
-            "isDeprecated": false
-          },
-          {
             "name": "list",
             "type": {
               "kind": "OBJECT",
@@ -4280,12 +4340,12 @@ const introspection = {
             },
             "args": [
               {
-                "name": "tokenId",
+                "name": "by",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String"
+                    "kind": "INPUT_OBJECT",
+                    "name": "EfpListByInput"
                   }
                 }
               }
@@ -4380,106 +4440,6 @@ const introspection = {
                 }
               }
             ],
-            "isDeprecated": false
-          },
-          {
-            "name": "primaryList",
-            "type": {
-              "kind": "OBJECT",
-              "name": "EfpList"
-            },
-            "args": [
-              {
-                "name": "address",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Address"
-                  }
-                }
-              }
-            ],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "EfpQueryAccountMetadatasConnection",
-        "fields": [
-          {
-            "name": "edges",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "EfpQueryAccountMetadatasConnectionEdge"
-                  }
-                }
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "pageInfo",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "totalCount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "EfpQueryAccountMetadatasConnectionEdge",
-        "fields": [
-          {
-            "name": "cursor",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "node",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "EfpAccountMetadata"
-              }
-            },
-            "args": [],
             "isDeprecated": false
           }
         ],
@@ -6487,11 +6447,8 @@ const introspection = {
           {
             "name": "efp",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "EfpQuery"
-              }
+              "kind": "OBJECT",
+              "name": "EfpQuery"
             },
             "args": [],
             "isDeprecated": false
@@ -8495,6 +8452,10 @@ const introspection = {
             "name": "Registration"
           }
         ]
+      },
+      {
+        "kind": "SCALAR",
+        "name": "TokenId"
       },
       {
         "kind": "OBJECT",

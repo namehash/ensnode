@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { decodePrimaryListTokenId } from "./efp-primary-list";
 
 describe("decodePrimaryListTokenId", () => {
-  it("decodes a well-formed 32-byte uint256 value to a decimal token id", () => {
+  it("decodes a well-formed 32-byte uint256 value to a token id", () => {
     // abi.encodePacked(uint256 1)
-    expect(decodePrimaryListTokenId(`0x${"0".repeat(63)}1` as `0x${string}`)).toBe("1");
+    expect(decodePrimaryListTokenId(`0x${"0".repeat(63)}1` as `0x${string}`)).toBe(1n);
     // max uint256
     expect(decodePrimaryListTokenId(`0x${"f".repeat(64)}` as `0x${string}`)).toBe(
-      ((1n << 256n) - 1n).toString(),
+      (1n << 256n) - 1n,
     );
   });
 

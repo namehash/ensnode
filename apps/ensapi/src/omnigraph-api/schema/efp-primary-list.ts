@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import type { NormalizedAddress } from "enssdk";
+import type { NormalizedAddress, TokenId } from "enssdk";
 import type { Hex } from "viem";
 
 import di from "@/di";
@@ -12,14 +12,14 @@ const PRIMARY_LIST_VALUE_HEX_LENGTH = 2 + 32 * 2;
 
 /**
  * Decode a `primary-list` account-metadata value (`abi.encodePacked(uint256 tokenId)`) into a
- * decimal token-id string, or `null` if it isn't well-formed. EFP defines the value as exactly a
- * 32-byte uint256, so reject any other length rather than let `BigInt` coerce a malformed value
- * (e.g. `0x01`) into a real token id.
+ * token id, or `null` if it isn't well-formed. EFP defines the value as exactly a 32-byte uint256,
+ * so reject any other length rather than let `BigInt` coerce a malformed value (e.g. `0x01`) into a
+ * real token id.
  */
-export function decodePrimaryListTokenId(value: Hex): string | null {
+export function decodePrimaryListTokenId(value: Hex): TokenId | null {
   if (value.length !== PRIMARY_LIST_VALUE_HEX_LENGTH) return null;
   try {
-    return BigInt(value).toString();
+    return BigInt(value) as TokenId;
   } catch {
     return null;
   }
@@ -30,11 +30,11 @@ export function decodePrimaryListTokenId(value: Hex): string | null {
  * `primary-list` metadata, returned only when that list's `user` role matches the account (the EFP
  * two-step Primary List validation). `null` if unset, not indexed, or unvalidated.
  *
- * Shared by `efp.primaryList(address)` and `Account.efp.primaryList`.
+ * Used by `Account.efp.primaryList`.
  */
 export async function resolveValidatedPrimaryListTokenId(
   address: NormalizedAddress,
-): Promise<string | null> {
+): Promise<TokenId | null> {
   const { ensDb, ensIndexerSchema } = di.context;
 
   const [metadata] = await ensDb

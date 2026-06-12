@@ -3,11 +3,6 @@
  * - list NFTs (`ListRegistry` on Base),
  * - list records & tags (`ListRecords` on Base, Optimism, and Ethereum mainnet), and
  * - account metadata (`AccountMetadata` on Base).
- *
- * EFP does not consume ENS protocol data; it indexes its own contracts, sourced from the EFP
- * datasources. The plugin can be activated on any ENS namespace that provides those datasources
- * (mainnet and ens-test-env today); declaring them in `requiredDatasourceNames` makes config
- * validation reject enabling the plugin on a namespace that does not.
  */
 
 import * as ponder from "ponder";

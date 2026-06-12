@@ -1,6 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq, inArray } from "drizzle-orm";
-import type { ChainId, NormalizedAddress } from "enssdk";
+import type { ChainId, NormalizedAddress, TokenId } from "enssdk";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
@@ -19,7 +19,7 @@ import {
 import { EfpListRecordRef } from "@/omnigraph-api/schema/efp-list-record";
 
 export const EfpListRef = builder.loadableObjectRef("EfpList", {
-  load: (tokenIds: string[]) => {
+  load: (tokenIds: TokenId[]) => {
     const { ensDb, ensIndexerSchema } = di.context;
     return ensDb
       .select()
@@ -38,7 +38,7 @@ export type EfpList = Exclude<typeof EfpListRef.$inferType, string>;
  * Connection args paginated by a list NFT's `tokenId` (efp_lists has no synthetic `id` column).
  */
 export const TOKEN_ID_PAGINATED_CONNECTION_ARGS = {
-  toCursor: (list: { tokenId: string }) => cursors.encode(list.tokenId),
+  toCursor: (list: { tokenId: TokenId }) => cursors.encode(list.tokenId),
   defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
   maxSize: PAGINATION_DEFAULT_MAX_SIZE,
 } as const;
@@ -53,8 +53,8 @@ EfpListRef.implement({
     // EfpList.tokenId
     //////////////////
     tokenId: t.field({
-      description: "The ERC-721 token id of the list NFT (decimal string).",
-      type: "String",
+      description: "The ERC-721 token id of the list NFT.",
+      type: "TokenId",
       nullable: false,
       resolve: (list) => list.tokenId,
     }),

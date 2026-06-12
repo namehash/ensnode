@@ -35,25 +35,29 @@ const deployer = accounts.deployer.address; // Anvil idx 0; mints no list in dem
 
 const eq = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
-describe("efp.primaryList (demoGraph)", () => {
+describe("Account.efp.primaryList (demoGraph)", () => {
   type PrimaryListResult = {
-    efp: {
-      primaryList: {
-        tokenId: string;
-        user: string | null;
-        records: GraphQLConnection<{ recordData: string }>;
+    account: {
+      efp: {
+        primaryList: {
+          tokenId: string;
+          user: string | null;
+          records: GraphQLConnection<{ recordData: string }>;
+        } | null;
       } | null;
-    };
+    } | null;
   };
 
   const EfpPrimaryList = gql`
     query EfpPrimaryList($address: Address!) {
-      efp {
-        primaryList(address: $address) {
-          tokenId
-          user
-          records {
-            edges { node { recordData } }
+      account(by: { address: $address }) {
+        efp {
+          primaryList {
+            tokenId
+            user
+            records {
+              edges { node { recordData } }
+            }
           }
         }
       }
@@ -63,7 +67,7 @@ describe("efp.primaryList (demoGraph)", () => {
   it("resolves alice's validated primary list, following bob and carol", async () => {
     const result = await request<PrimaryListResult>(EfpPrimaryList, { address: alice });
 
-    const list = result.efp.primaryList;
+    const list = result.account?.efp?.primaryList;
     expect(list, "alice should have an indexed, validated primary list").not.toBeNull();
     // Two-step Primary List validation: the named list's `user` role must match the queried account.
     expect(list?.user && eq(list.user, alice)).toBe(true);
@@ -78,7 +82,7 @@ describe("efp.primaryList (demoGraph)", () => {
   it("returns null for an account with no primary-list metadata", async () => {
     // The deployer opens minting but never mints a list, so it has no primary-list metadata.
     const result = await request<PrimaryListResult>(EfpPrimaryList, { address: deployer });
-    expect(result.efp.primaryList).toBeNull();
+    expect(result.account?.efp?.primaryList).toBeNull();
   });
 });
 
@@ -225,31 +229,37 @@ describe("EFP handler edge cases (seeded)", () => {
     // The seed actor has `primary-list` metadata (set by easyMintTo), but the referenced list's
     // `user` is never the actor, so the two-step validation must reject it (return null) rather than
     // resolve the list. This exercises the mismatch branch distinctly from the unset-metadata case.
-    type MetaResult = { efp: { accountMetadata: { value: string } | null } };
-    type PrimaryListByIdResult = { efp: { primaryList: { tokenId: string } | null } };
+    type MetaResult = { account: { efp: { metadata: { value: string } | null } | null } | null };
+    type PrimaryListResult = {
+      account: { efp: { primaryList: { tokenId: string } | null } | null } | null;
+    };
 
     const meta = await request<MetaResult>(
       gql`
         query EfpActorMetadata($address: Address!) {
-          efp { accountMetadata(address: $address, key: "primary-list") { value } }
+          account(by: { address: $address }) {
+            efp { metadata(key: "primary-list") { value } }
+          }
         }
       `,
       { address: efpSeedActorAddress },
     );
     expect(
-      meta.efp.accountMetadata,
+      meta.account?.efp?.metadata,
       "the seed actor should have primary-list metadata",
     ).not.toBeNull();
 
-    const result = await request<PrimaryListByIdResult>(
+    const result = await request<PrimaryListResult>(
       gql`
         query EfpActorPrimaryList($address: Address!) {
-          efp { primaryList(address: $address) { tokenId } }
+          account(by: { address: $address }) {
+            efp { primaryList { tokenId } }
+          }
         }
       `,
       { address: efpSeedActorAddress },
     );
-    expect(result.efp.primaryList, "validation must reject a user mismatch").toBeNull();
+    expect(result.account?.efp?.primaryList, "validation must reject a user mismatch").toBeNull();
   });
 
   it("recovers a list's user role after a storage-location re-point (durable metadata)", async () => {

@@ -280,9 +280,10 @@ export async function seedEfpDevnet(rpcUrl: string): Promise<void> {
   }
 
   // Mint extra (bare) lists so the devnet holds more than 9 (token ids reach double digits). This
-  // makes `efp.lists` / `Account.efp.lists` pagination exercise numeric-vs-lexicographic ordering:
-  // a text tokenId would otherwise sort "10" before "2" and break the cursor. Use a plain `mint`
-  // (not easyMintTo) so these fillers do not reset the actor's primary-list/user fixtures above.
+  // makes `efp.lists` / `Account.efp.lists` pagination exercise numeric ordering — a regression
+  // guard: a double-digit token id surfaces any accidental lexicographic sort ("10" before "2").
+  // Use a plain `mint` (not easyMintTo) so these fillers do not reset the actor's primary-list/user
+  // fixtures above.
   let nextTokenId = await client.readContract({
     address: efpContracts.EFPListRegistry as Address,
     abi: registryAbi,

@@ -8,12 +8,10 @@
  * NFT by primary key (rather than scanning `efp_lists` by storage location), and a record's tags
  * are embedded as an array on `efp_list_records` (rather than a separate join table) so removing a
  * record is a single primary-key delete instead of a non-PK cascade.
- *
- * Timestamps are Unix-seconds `bigint`s (the block timestamp), matching ENSNode convention.
  */
 
-import type { Address, ChainId } from "enssdk";
-import { index, onchainTable, sql } from "ponder";
+import type { ChainId, DurationBigInt, NormalizedAddress, TokenId } from "enssdk";
+import { index, onchainTable } from "ponder";
 
 /**
  * One row per minted `ListRegistry` NFT (a "list"). EFP separates the NFT `owner`, the
@@ -24,28 +22,28 @@ import { index, onchainTable, sql } from "ponder";
 export const efpLists = onchainTable(
   "efp_lists",
   (t) => ({
-    /** ERC-721 token id of the list NFT, as a decimal string. */
-    tokenId: t.text().primaryKey(),
+    /** ERC-721 token id of the list NFT (a uint256). */
+    tokenId: t.bigint().primaryKey().$type<TokenId>(),
     /** Current ERC-721 owner of the list NFT. */
-    owner: t.hex().notNull().$type<Address>(),
+    owner: t.hex().notNull().$type<NormalizedAddress>(),
     /** Chain id of the `ListRegistry` NFT (Base / 8453 on mainnet; the active namespace's EFP deployment chain otherwise). */
     nftChainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     /** `ListRegistry` contract address on `nftChainId`. */
-    nftContractAddress: t.hex().notNull().$type<Address>(),
+    nftContractAddress: t.hex().notNull().$type<NormalizedAddress>(),
     /** Raw `UpdateListStorageLocation` payload. */
     listStorageLocation: t.hex(),
     /** Decoded list storage location: target chain id. */
     listStorageLocationChainId: t.int8({ mode: "number" }).$type<ChainId>(),
     /** Decoded list storage location: target contract address. */
-    listStorageLocationContractAddress: t.hex().$type<Address>(),
+    listStorageLocationContractAddress: t.hex().$type<NormalizedAddress>(),
     /** Decoded list storage location: target slot (bytes32). */
     listStorageLocationSlot: t.hex(),
     /** Address allowed to post records to this list (the EFP "user"). */
-    user: t.hex().$type<Address>(),
+    user: t.hex().$type<NormalizedAddress>(),
     /** Address allowed to administer this list (the EFP "manager"). */
-    manager: t.hex().$type<Address>(),
-    createdAt: t.bigint().notNull(),
-    updatedAt: t.bigint().notNull(),
+    manager: t.hex().$type<NormalizedAddress>(),
+    createdAt: t.bigint().notNull().$type<DurationBigInt>(),
+    updatedAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),
   (t) => ({
     idx_owner: index().on(t.owner),
@@ -56,11 +54,8 @@ export const efpLists = onchainTable(
       t.listStorageLocationContractAddress,
       t.listStorageLocationSlot,
     ),
-    // Numeric (not lexicographic) ordering of the text `tokenId` (a uint256, too large for an
-    // integer column) is index-backed via this expression index, so `efp.lists` /
-    // `Account.efp.lists` pagination — which compares and orders by `tokenId::numeric` — stays
-    // index-backed at mainnet-scale list counts instead of falling back to a sort.
-    idx_tokenId_numeric: index("efp_lists_token_id_numeric").on(sql`(${t.tokenId}::numeric)`),
+    // `tokenId` is a `bigint` (Postgres `numeric`) primary key, so its implicit unique index already
+    // orders numerically — `efp.lists` / `Account.efp.lists` pagination needs no extra index.
   }),
 );
 
@@ -76,7 +71,7 @@ export const efpListStorageLocations = onchainTable(
     /** Composite key "chainId-contractAddress-slot". */
     id: t.text().primaryKey(),
     chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
-    contractAddress: t.hex().notNull().$type<Address>(),
+    contractAddress: t.hex().notNull().$type<NormalizedAddress>(),
     slot: t.hex().notNull(),
     /**
      * Token id of the list NFT that owns this storage location's reverse mapping. The slot is
@@ -86,8 +81,8 @@ export const efpListStorageLocations = onchainTable(
      * A consequence: when lists share a slot, only the owner's `EfpListRecord.list` back-ref and
      * `user`/`manager` role routing track that slot.
      */
-    tokenId: t.text().notNull(),
-    updatedAt: t.bigint().notNull(),
+    tokenId: t.bigint().notNull().$type<TokenId>(),
+    updatedAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),
   (t) => ({
     idx_tokenId: index().on(t.tokenId),
@@ -106,7 +101,7 @@ export const efpListRecords = onchainTable(
     /** Composite key "chainId-contractAddress-slot-record". */
     id: t.text().primaryKey(),
     chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
-    contractAddress: t.hex().notNull().$type<Address>(),
+    contractAddress: t.hex().notNull().$type<NormalizedAddress>(),
     slot: t.hex().notNull(),
     /** Canonical record prefix `version | type | address` (22 bytes). */
     record: t.hex().notNull(),
@@ -115,10 +110,10 @@ export const efpListRecords = onchainTable(
     /** Decoded record header — type byte. */
     recordType: t.integer().notNull(),
     /** Decoded record data. Only address records (type 1) are indexed, so exactly a 20-byte address. */
-    recordData: t.hex().notNull().$type<Address>(),
+    recordData: t.hex().notNull().$type<NormalizedAddress>(),
     /** UTF-8 tags attached to this record (a set; NUL bytes stripped). */
     tags: t.text().array().notNull().default([]),
-    createdAt: t.bigint().notNull(),
+    createdAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),
   (t) => ({
     idx_slot: index().on(t.chainId, t.contractAddress, t.slot),
@@ -135,15 +130,15 @@ export const efpAccountMetadata = onchainTable(
     /** Composite key "chainId-address-key". */
     id: t.text().primaryKey(),
     chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
-    contractAddress: t.hex().notNull().$type<Address>(),
+    contractAddress: t.hex().notNull().$type<NormalizedAddress>(),
     /** Account whose metadata this is. */
-    address: t.hex().notNull().$type<Address>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
     /** Metadata key (UTF-8 string). */
     key: t.text().notNull(),
     /** Metadata value (raw bytes). */
     value: t.hex().notNull(),
-    createdAt: t.bigint().notNull(),
-    updatedAt: t.bigint().notNull(),
+    createdAt: t.bigint().notNull().$type<DurationBigInt>(),
+    updatedAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),
   (t) => ({
     idx_address: index().on(t.address),
@@ -166,11 +161,11 @@ export const efpListMetadata = onchainTable(
     /** Composite key "chainId-contractAddress-slot-key". */
     id: t.text().primaryKey(),
     chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
-    contractAddress: t.hex().notNull().$type<Address>(),
+    contractAddress: t.hex().notNull().$type<NormalizedAddress>(),
     slot: t.hex().notNull(),
     key: t.text().notNull(),
     value: t.hex().notNull(),
-    createdAt: t.bigint().notNull(),
+    createdAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),
   (t) => ({
     idx_slot: index().on(t.chainId, t.contractAddress, t.slot),

@@ -1,15 +1,14 @@
+import { listMetadataId, listRecordId, storageLocationId } from "enssdk/efp";
 import type { Hex } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { EFP_LIST_METADATA_KEYS, EFP_OPCODE } from "@/lib/efp/constants";
+import { metadataValueToAddress } from "@/lib/efp/list-metadata";
+import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "@/lib/efp/parse-list-op";
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
-
-import { EFP_LIST_METADATA_KEYS, EFP_OPCODE } from "../constants";
-import { listMetadataId, listRecordId, storageLocationId } from "../lib/ids";
-import { metadataValueToAddress } from "../lib/list-metadata";
-import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "../lib/parse-list-op";
 
 const pluginName = PluginName.EFP;
 

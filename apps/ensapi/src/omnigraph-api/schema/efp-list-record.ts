@@ -1,11 +1,11 @@
 import { inArray } from "drizzle-orm";
 import type { ChainId, NormalizedAddress } from "enssdk";
+import { storageLocationId } from "enssdk/efp";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { AccountRef } from "@/omnigraph-api/schema/account";
-import { efpStorageLocationId } from "@/omnigraph-api/schema/efp-ids";
 import { EfpListRef } from "@/omnigraph-api/schema/efp-list";
 
 export const EfpListRecordRef = builder.loadableObjectRef("EfpListRecord", {
@@ -120,8 +120,7 @@ EfpListRecordRef.implement({
       // Resolve each record to its storage-location id, then batch the location -> list lookup in
       // `load` so a page of records resolves all `list` back-refs in two queries rather than one per
       // node (avoids an N+1 on `efp.listRecords { node { list } }`).
-      resolve: (record) =>
-        efpStorageLocationId(record.chainId, record.contractAddress, record.slot),
+      resolve: (record) => storageLocationId(record.chainId, record.contractAddress, record.slot),
       load: async (locationIds: string[]) => {
         const { ensDb, ensIndexerSchema } = di.context;
 

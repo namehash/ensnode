@@ -14,9 +14,9 @@
  * @see https://docs.efp.app/design/list-ops/
  */
 
-import { type Hex, isHex } from "viem";
+import { type Hex, hexToString, isHex, numberToHex } from "viem";
 
-import { EFP_LIST_OP_VERSION, EFP_RECORD_TYPE_ADDRESS, EFP_RECORD_VERSION } from "../constants";
+import { EFP_LIST_OP_VERSION, EFP_RECORD_TYPE_ADDRESS, EFP_RECORD_VERSION } from "./constants";
 
 export interface ParsedListOp {
   /** Top-level list-op version. Always 1 today. */
@@ -132,7 +132,7 @@ export function parseTagOp(data: Hex | string | null | undefined): ParsedTagOp |
   if (tagHex.length % 2 !== 0) return null;
 
   // Match api-v2: decode as UTF-8 and strip embedded NULs.
-  const tag = hexToUtf8(tagHex).replace(/\0/g, "");
+  const tag = hexToString(`0x${tagHex}`).replace(/\0/g, "");
 
   return { record: parsed.record, tag };
 }
@@ -142,14 +142,5 @@ export function parseTagOp(data: Hex | string | null | undefined): ParsedTagOp |
  * key lookups across the EFP data model.
  */
 export function slotToBytes32(slot: bigint): Hex {
-  return `0x${slot.toString(16).padStart(64, "0")}` as Hex;
-}
-
-/** Pure-JS hex → UTF-8 string (no Buffer dependency). */
-function hexToUtf8(hex: string): string {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  }
-  return new TextDecoder("utf-8").decode(bytes);
+  return numberToHex(slot, { size: 32 });
 }

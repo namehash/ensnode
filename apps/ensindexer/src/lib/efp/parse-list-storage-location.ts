@@ -16,14 +16,15 @@
  * @see https://docs.efp.app/design/list-storage-location/
  */
 
+import { bigintToChainId, type ChainId, type NormalizedAddress } from "enssdk";
 import { type Hex, isHex } from "viem";
 
-import { EFP_LSL_VERSION } from "../constants";
+import { EFP_LSL_VERSION } from "./constants";
 
 export interface ParsedListStorageLocation {
   version: number;
-  chainId: bigint;
-  contractAddress: Hex;
+  chainId: ChainId;
+  contractAddress: NormalizedAddress;
   slot: Hex;
 }
 
@@ -70,7 +71,7 @@ export function parseListStorageLocation(
 
   return {
     version,
-    chainId,
+    chainId: bigintToChainId(chainId),
     contractAddress: `0x${bytes.slice(CHAIN_ID_END, CONTRACT_END).toLowerCase()}` as Hex,
     slot: `0x${bytes.slice(CONTRACT_END, SLOT_END).toLowerCase()}` as Hex,
   };

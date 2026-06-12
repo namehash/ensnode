@@ -83,7 +83,7 @@ If a question genuinely isn't expressible in the Omnigraph schema, the underlyin
 - account(by: AccountByInput!): Account — Identify an Account by ID or Address.
 - domain(by: DomainIdInput!): Domain — Identify a Domain by Name or DomainId
 - domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection — Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
-- efp: EfpQuery! — Ethereum Follow Protocol (EFP) queries.
+- efp: EfpQuery — Ethereum Follow Protocol (EFP) queries. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
 - permissions(by: PermissionsIdInput!): Permissions — Identify Permissions by ID or AccountId.
 - registry(by: RegistryIdInput!): Registry — Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
 - resolver(by: ResolverIdInput!): Resolver — Identify a Resolver by ID or AccountId.
@@ -124,7 +124,7 @@ _Represents an individual Account, keyed by its Address._
 
 - address: Address! — An EVM Address that uniquely identifies this Account on-chain.
 - domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection — The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
-- efp: AccountEfp! — This Account's Ethereum Follow Protocol (EFP) presence: its lists and validated primary list.
+- efp: AccountEfp — This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
 - events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection — All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
 - id: Address! — A unique reference to this Account.
 - permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection — The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.

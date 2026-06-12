@@ -1,4 +1,4 @@
-import { and, asc, desc, gt, lt, sql } from "drizzle-orm";
+import { and, asc, desc, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
 
 import { cursors } from "@/omnigraph-api/lib/cursors";
@@ -36,34 +36,26 @@ export const paginateByInt = (
   );
 
 /**
- * Returns an order-by clause for cursor-based pagination.
- * Default order is ascending; when `inverted` is true, order is descending.
+ * Returns a SQL condition for cursor-based pagination on a `bigint` (Postgres `numeric`) column,
+ * such as an EFP `tokenId` — a uint256 that exceeds a JS-safe integer, so the cursor is decoded as
+ * a `bigint` (not a `number`) for exact numeric comparison.
  */
-export const orderPaginationBy = (column: Column, inverted: boolean) =>
-  inverted ? desc(column) : asc(column);
-
-/**
- * Cursor pagination condition for a numeric value stored in a `text` column (e.g. an EFP `tokenId`,
- * a sequential uint256 that does not fit a Postgres integer type). Compares with a `::numeric` cast
- * so ordering is numeric rather than lexicographic (otherwise `"10"` sorts before `"2"`, breaking
- * ordering and the `before`/`after` cursors once there are more than 9 rows).
- */
-export const paginateByNumericText = (
+export const paginateByBigInt = (
   column: Column,
   before: string | undefined,
   after: string | undefined,
 ) =>
   and(
-    before ? sql`${column}::numeric < ${cursors.decode<string>(before)}::numeric` : undefined,
-    after ? sql`${column}::numeric > ${cursors.decode<string>(after)}::numeric` : undefined,
+    before ? lt(column, cursors.decode<bigint>(before)) : undefined,
+    after ? gt(column, cursors.decode<bigint>(after)) : undefined,
   );
 
 /**
- * Order-by clause matching {@link paginateByNumericText}: orders a numeric value held in a `text`
- * column by its numeric value (ascending, or descending when `inverted`).
+ * Returns an order-by clause for cursor-based pagination.
+ * Default order is ascending; when `inverted` is true, order is descending.
  */
-export const orderByNumericText = (column: Column, inverted: boolean) =>
-  inverted ? desc(sql`${column}::numeric`) : asc(sql`${column}::numeric`);
+export const orderPaginationBy = (column: Column, inverted: boolean) =>
+  inverted ? desc(column) : asc(column);
 
 /**
  * An empty Relay Connection, used when short-circuiting connection resolvers.

@@ -1,7 +1,12 @@
+import type { TokenId } from "enssdk";
+import { listMetadataId, storageLocationId } from "enssdk/efp";
 import { type Hex, isAddressEqual, zeroAddress } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { EFP_LIST_METADATA_KEYS } from "@/lib/efp/constants";
+import { metadataValueToAddress } from "@/lib/efp/list-metadata";
+import { parseListStorageLocation } from "@/lib/efp/parse-list-storage-location";
 import {
   addOnchainEventListener,
   ensIndexerSchema,
@@ -9,11 +14,6 @@ import {
 } from "@/lib/indexing-engines/ponder";
 import { logger } from "@/lib/logger";
 import { namespaceContract } from "@/lib/plugin-helpers";
-
-import { EFP_LIST_METADATA_KEYS } from "../constants";
-import { listMetadataId, storageLocationId } from "../lib/ids";
-import { metadataValueToAddress } from "../lib/list-metadata";
-import { parseListStorageLocation } from "../lib/parse-list-storage-location";
 
 const pluginName = PluginName.EFP;
 
@@ -31,7 +31,7 @@ const pluginName = PluginName.EFP;
 async function deleteStorageLocationIfOwnedBy(
   context: IndexingEngineContext,
   locationId: string,
-  tokenId: string,
+  tokenId: TokenId,
 ): Promise<void> {
   const mapping = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
     id: locationId,
@@ -50,7 +50,7 @@ export default function () {
     namespaceContract(pluginName, "ListRegistry:Transfer"),
     async ({ context, event }) => {
       const ts = event.block.timestamp;
-      const tokenId = event.args.tokenId.toString();
+      const tokenId = event.args.tokenId;
 
       // ERC-721 mints are Transfer(from=0) and burns are Transfer(to=0). On a burn the list NFT no
       // longer exists, so drop the list row (and its storage-location reverse mapping) rather than
@@ -103,7 +103,7 @@ export default function () {
     namespaceContract(pluginName, "ListRegistry:UpdateListStorageLocation"),
     async ({ context, event }) => {
       const ts = event.block.timestamp;
-      const tokenId = event.args.tokenId.toString();
+      const tokenId = event.args.tokenId;
 
       // The mint Transfer always precedes this event (both fire on the ListRegistry on Base, in
       // order), so the list row exists. Guard anyway so an unexpected ordering skips rather than
@@ -147,8 +147,7 @@ export default function () {
         return;
       }
 
-      const chainId = Number(parsed.chainId);
-      const { contractAddress, slot } = parsed;
+      const { chainId, contractAddress, slot } = parsed;
       const newLocationId = storageLocationId(chainId, contractAddress, slot);
 
       // If this list previously pointed at a different storage location, drop the stale reverse
