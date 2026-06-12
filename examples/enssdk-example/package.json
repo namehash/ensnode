@@ -1,7 +1,7 @@
 {
   "name": "@ensnode/enssdk-example",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.4",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
-    "enssdk": "workspace:*"
+    "enssdk": "1.15.2"
   },
   "devDependencies": {
     "@types/node": "catalog:",

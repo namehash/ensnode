@@ -7,7 +7,6 @@ sidebar:
 ---
 
 import { LinkCard, Aside } from "@astrojs/starlight/components";
-import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
 
 ## Vision
 
@@ -22,14 +21,19 @@ ENSDb is an open standard for bi-directional ENS integration. It defines a caref
 The [ENSDb standard](/docs/services/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have options: implement your own [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) or [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) in any language, or use the initial reference implementations provided by ENSNode — [ENSIndexer](/docs/services/ensindexer/) as an ENSDb Writer and [ENSApi](/docs/services/ensapi/) as an ENSDb Reader.
 
 <Aside type="tip" title="Build in Any Language">
-Each ENSDb instance runs in a standard PostgreSQL database, so to interact with it, you can use _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby, Java, C# — the choice is yours.
+  Each ENSDb instance runs in a standard PostgreSQL database, so to interact with it, you can use
+  _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby,
+  Java, C# — the choice is yours.
 </Aside>
 
 ## What You Get
 
-### Complete ENS State
+### Indexed ENS State
 
-An **ENSDb instance** contains the **live onchain state of ENS**, including:
+An **ENSDb instance** contains the **live onchain state of ENS**.
+
+:::note[ENSNode plugins define indexed data]
+Depending on the [ENSNode plugins](/docs/integrate/integration-options/ensnode-plugins) activated for your [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) instance, data indexed in ENSDb may include:
 
 - Domains (ENSv1 and ENSv2)
 - Registrations and renewals
@@ -37,6 +41,8 @@ An **ENSDb instance** contains the **live onchain state of ENS**, including:
 - Events and ownership history
 - NFT/token data for names
 - … and more!
+
+:::
 
 ### PostgreSQL Benefits
 
@@ -48,27 +54,15 @@ By building on a PostgreSQL database, ENSDb inherits world-class capabilities:
 - Ecosystem — Mature tools, ORMs, dashboards, analytics platforms
 - Reliability — Decades of production-proven technology
 
-## What You Can Build
-
-ENSDb unlocks a new universe of ENS applications:
-
-<EnsDbUseCases />
-
 ## Quick Start
 
 <LinkCard
-  title="Use the ENSDb SDK"
-  description="Quick start with the TypeScript SDK for ENSDb, providing type-safe database access and utilities for working with ENSDb."
-  href="/docs/services/ensdb/usage/sdk"
+  title="Get inspired"
+  description="Discover the wide range of applications you can build with ENSDb, from analytics dashboards to custom APIs and more."
+  href="/docs/integrate/integration-options/ensdb#inspirations-for-what-you-can-build-with-ensdb"
 />
 
-<LinkCard
-  title="Use the SQL Interface"
-  description="Quick start with the SQL interface for ENSDb, allowing you to interact with your ENSDb instance using any PostgreSQL client and SQL queries."
-  href="/docs/services/ensdb/usage/sql"
-/>
-
-## Documentation Structure
+## Learn more
 
 <LinkCard
   title="Concepts"
@@ -77,16 +71,24 @@ ENSDb unlocks a new universe of ENS applications:
 />
 
 <LinkCard
-  title="Usage"
-  description="Learn how to use ENSDb with the SDK and SQL interface"
-  href="/docs/services/ensdb/usage"
+  title="Integrations"
+  description="Learn how to integrate ENSDb with other systems and tools"
+  href="/docs/services/ensdb/integrations"
 />
 
 <LinkCard
-  title="Integrations"
-  description="Learn how to integrate ENSDb with other systems and tools"
-  href="/docs/services/ensdb/integrations/ensnode"
+  title="Reference Implementation"
+  description="See how ENSDb standard is implemented in practice with ENSNode."
+  href="/docs/services/ensdb/reference-implementation"
 />
+
+## What's next
+
+<Aside type="tip" title="Coming soon: ensdb-cli & ENSDb snapshots">
+  We're building [**`ensdb-cli` & ENSDb snapshots**](/docs/integrate/integration-options/ensdb-cli)
+  so you can pull down a fresh ENSDb in minutes instead of paying for a full historical RPC backfill
+  among many other benefits.
+</Aside>
 
 ## Related Projects
 

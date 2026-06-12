@@ -1,10 +1,20 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { coinTypeReverseLabel, evmChainIdToCoinType, reverseName } from "enssdk";
+import {
+  type Address,
+  asInterpretedName,
+  asResolvableName,
+  type CoinType,
+  coinTypeReverseLabel,
+  type DefaultableChainId,
+  evmChainIdToCoinType,
+  isInterpretedName,
+  isResolvableName,
+  reverseName,
+} from "enssdk";
 import { isAddress, isAddressEqual } from "viem";
 
 import {
   type ResolverRecordsSelection,
-  type ReverseResolutionArgs,
   ReverseResolutionProtocolStep,
   type ReverseResolutionResult,
   TraceableENSProtocol,
@@ -24,23 +34,23 @@ export const REVERSE_RESOLUTION_SELECTION = {
 
 const tracer = trace.getTracer("reverse-resolution");
 
+type ReverseResolutionOptions = Parameters<typeof resolveForward>[2];
+
 /**
- * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
+ * Implements ENS Reverse Resolution for a specific coin type, including ENSIP-19 L2 Primary Names.
  *
  * @see https://docs.ens.domains/ensip/19/#algorithm
  *
- * The DEFAULT_EVM_CHAIN_ID (0) is a valid chainId in this context.
- *
  * @param address the adddress whose Primary Name to resolve
- * @param chainId the chainId within which to resolve the address' Primary Name
+ * @param coinType the coinType within which to resolve the address' Primary Name
  * @param options Optional settings
- * @param options.accelerate Whether to accelerate resolution (default: true)
+ * @param options.accelerate Whether to attempt accelerated resolution (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
 export async function resolveReverse(
-  address: ReverseResolutionArgs["address"],
-  chainId: ReverseResolutionArgs["chainId"],
-  options: Parameters<typeof resolveForward>[2],
+  address: Address,
+  coinType: CoinType,
+  options: ReverseResolutionOptions,
 ): Promise<ReverseResolutionResult> {
   const { accelerate = true } = options;
 
@@ -48,13 +58,13 @@ export async function resolveReverse(
   return withProtocolStep(
     TraceableENSProtocol.ReverseResolution,
     ReverseResolutionProtocolStep.Operation,
-    { address, chainId, accelerate },
+    { address, coinType, accelerate },
     (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
-        `resolveReverse(${address}, chainId: ${chainId})`,
-        { address, chainId, accelerate },
+        `resolveReverseByCoinType(${address}, coinType: ${coinType})`,
+        { address, coinType, accelerate },
         async (span) => {
           /////////////////////////////////////////////////////////
           // Reverse Resolution
@@ -62,14 +72,20 @@ export async function resolveReverse(
           /////////////////////////////////////////////////////////
 
           // Steps 1-3 — Resolve coinType-specific name record
-          const coinType = evmChainIdToCoinType(chainId);
-          const _reverseName = reverseName(address, coinType);
-          const { name } = await withProtocolStep(
+          const _reverseName = asResolvableName(asInterpretedName(reverseName(address, coinType)));
+          const { name: nameRecord } = await withProtocolStep(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ResolveReverseName,
             { name: _reverseName },
             () => resolveForward(_reverseName, REVERSE_RESOLUTION_SELECTION, options),
           );
+
+          // Invariant: the name record must be Interpreted and Resolvable
+          // TODO: additional error types for this possibility
+          const name =
+            nameRecord && isInterpretedName(nameRecord) && isResolvableName(nameRecord)
+              ? nameRecord
+              : null;
 
           // Step 4 — Determine if name record exists
           addProtocolStepEvent(
@@ -172,4 +188,19 @@ export async function resolveReverse(
         },
       ),
   );
+}
+
+/**
+ * Thin `chainId` wrapper around {@link resolveReverse} for callers at the REST API boundary.
+ *
+ * @param address The address whose primary name to resolve.
+ * @param chainId The EVM chain id for the reverse lookup. `0` is valid as the ENSIP-19 default chain id.
+ * @param options Optional resolution settings.
+ */
+export async function resolveReverseByChainId(
+  address: Address,
+  chainId: DefaultableChainId,
+  options: ReverseResolutionOptions,
+): Promise<ReverseResolutionResult> {
+  return resolveReverse(address, evmChainIdToCoinType(chainId), options);
 }

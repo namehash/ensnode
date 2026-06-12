@@ -3,8 +3,8 @@ import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/i
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import cc from "classcat";
 import { Balancer } from "react-wrap-balancer";
-import TelegramBanner from "../../assets/telegram_image.svg";
-import MobileTelegramBanner from "../../assets/telegram_mobile_image.svg";
+import TelegramBanner from "@assets/telegram_image.svg";
+import MobileTelegramBanner from "@assets/telegram_mobile_image.svg";
 import { ENSNodeLogoLight } from "../atoms/logos/ENSNodeLogoLight";
 
 const buttonStyles =
@@ -13,67 +13,79 @@ const headerStyles = "text-lg leading-8 font-semibold";
 const baseContainerStyles = "flex flex-col flex-nowrap justify-center items-center";
 ---
 
-<aside class={cc([baseContainerStyles,"gap-5"])}>
-    <div class={cc([baseContainerStyles, "gap-5 py-8 max-w-[270px] rounded-xl border px-4", "spread-the-word"])}>
-        <ENSNodeLogoLight className="w-[52px] h-auto"/>
-        <div class={cc([baseContainerStyles, "gap-2"])}>
-            <h3 class={headerStyles}>Spread the word</h3>
-            <Balancer as="p" className="text-center text-sm leading-6 font-normal">Your star helps us reach more developers and fuels our open-source mission</Balancer>
-        </div>
-        <a href="https://github.com/namehash/ensnode" target="_blank" rel="noopener noreferrer"><button class={buttonStyles} style={{fontSize: "14px", fontWeight: "500"}}><GithubIcon className="w-4 h-auto"/> Star on GitHub</button></a>
+<aside class={cc([baseContainerStyles, "gap-5"])}>
+  <div
+    class={cc([
+      baseContainerStyles,
+      "gap-5 py-8 max-w-[270px] rounded-xl border px-4",
+      "spread-the-word",
+    ])}>
+    <ENSNodeLogoLight className="w-[52px] h-auto" />
+    <div class={cc([baseContainerStyles, "gap-2"])}>
+      <h3 class={headerStyles}>Spread the word</h3>
+      <Balancer as="p" className="text-center text-sm leading-6 font-normal"
+        >Your star helps us reach more developers and fuels our open-source mission</Balancer
+      >
     </div>
-    <div class={cc(["telegram-container", "max-w-[270px] w-full h-fit flex flex-col justify-center items-center flex-nowrap gap-8 pt-8 rounded-xl overflow-hidden"])}>
-        <div class={cc([baseContainerStyles, "w-full h-fit gap-5 px-4" ])}>
-            <div class={cc([baseContainerStyles, "gap-2"])}>
-                <Balancer
-                        as="h3"
-                        className={cc([headerStyles, "self-stretch text-center"])}
-                >
-                    Become a part of our community in Telegram
-                </Balancer>
-                <Balancer
-                        as="p"
-                        className="text-sm leading-6 font-normal text-center"
-                >
-                    Get updates, technical support, and connect with our team building the multichain future.
-                </Balancer>
-            </div>
-            <a href="http://t.me/ensnode" target="_blank" rel="noopener noreferrer"><button class={buttonStyles} style={{fontSize: "14px", fontWeight: "500"}}><TelegramIcon className="w-4 h-auto"/> Join our Telegram</button></a>
-        </div>
-        <img
-                class="flex w-fit h-full shri0 object-contain bg-no-repeat"
-                src={MobileTelegramBanner.src}
-                alt="Telegram Banner"
-        />
+    <a href="https://github.com/namehash/ensnode" target="_blank" rel="noopener noreferrer"
+      ><button class={buttonStyles} style={{ fontSize: "14px", fontWeight: "500" }}
+        ><GithubIcon className="w-4 h-auto" /> Star on GitHub</button
+      ></a
+    >
+  </div>
+  <div
+    class={cc([
+      "telegram-container",
+      "max-w-[270px] w-full h-fit flex flex-col justify-center items-center flex-nowrap gap-8 pt-8 rounded-xl overflow-hidden",
+    ])}>
+    <div class={cc([baseContainerStyles, "w-full h-fit gap-5 px-4"])}>
+      <div class={cc([baseContainerStyles, "gap-2"])}>
+        <Balancer as="h3" className={cc([headerStyles, "self-stretch text-center"])}>
+          Become a part of our community in Telegram
+        </Balancer>
+        <Balancer as="p" className="text-sm leading-6 font-normal text-center">
+          Connect with our team to get technical support for making your app fully ENSv2 ready.
+        </Balancer>
+      </div>
+      <a href="https://t.me/ensnode" target="_blank" rel="noopener noreferrer"
+        ><button class={buttonStyles} style={{ fontSize: "14px", fontWeight: "500" }}
+          ><TelegramIcon className="w-4 h-auto" /> Join our Telegram</button
+        ></a
+      >
     </div>
+    <img
+      class="flex w-fit h-full shrink-0 object-contain bg-no-repeat"
+      src={MobileTelegramBanner.src}
+      alt="Telegram Banner"
+    />
+  </div>
 </aside>
 
 <style>
-    h3 {
-        color: var(--sl-color-white);
-    }
+  h3 {
+    color: var(--sl-color-white);
+  }
 
-    p {
-        color: var(--sl-color-gray-2);
-    }
+  p {
+    color: var(--sl-color-gray-2);
+  }
 
-    .spread-the-word {
-        background-color: var(--sl-color-black);
-        border-color: var(--sl-color-gray-6);
-    }
+  .spread-the-word {
+    background-color: var(--sl-color-black);
+    border-color: var(--sl-color-gray-6);
+  }
 
-    .telegram-container {
-        background-image: linear-gradient(90deg, #F9FAFB 0%, #F3F5F7 100%);
-    }
+  .telegram-container {
+    background-image: linear-gradient(90deg, #f9fafb 0%, #f3f5f7 100%);
+  }
 
-    button {
-        color: var(--sl-color-black);
-        background-color: var(--sl-color-white);
-        border-color: var(--sl-color-white);
-    }
+  button {
+    color: var(--sl-color-black);
+    background-color: var(--sl-color-white);
+    border-color: var(--sl-color-white);
+  }
 
-    button:hover{
-        background-color: #272727;
-    }
-
+  button:hover {
+    background-color: #272727;
+  }
 </style>

@@ -4,22 +4,20 @@ import { makePermissionsId, type RegistryId } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByName,
-  filterByRegistry,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
-import { DomainsOrderInput, RegistryDomainsWhereInput } from "@/omnigraph-api/schema/domain-inputs";
+import {
+  DOMAINS_ORDERING_DESCRIPTION,
+  DomainsOrderInput,
+  RegistryDomainsWhereInput,
+} from "@/omnigraph-api/schema/domain-inputs";
 import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
 
 ///////////////////////////////////
@@ -27,8 +25,10 @@ import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
 ///////////////////////////////////
 
 export const RegistryInterfaceRef = builder.loadableInterfaceRef("Registry", {
-  load: (ids: RegistryId[]) =>
-    ensDb.query.registry.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+  load: (ids: RegistryId[]) => {
+    const { ensDb } = di.context;
+    return ensDb.query.registry.findMany({ where: (t, { inArray }) => inArray(t.id, ids) });
+  },
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -101,6 +101,7 @@ RegistryInterfaceRef.implement({
       description: "The Domains for which this Registry is a Subregistry.",
       type: DomainInterfaceRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = eq(ensIndexerSchema.domain.subregistryId, parent.id);
 
         return lazyConnection({
@@ -124,18 +125,18 @@ RegistryInterfaceRef.implement({
     // Registry.domains
     //////////////////////
     domains: t.connection({
-      description: "The Domains managed by this Registry.",
+      description: `The Domains managed by this Registry. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: RegistryDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = filterByRegistry(domainsBase(), parent.id);
-        const { named, defaultOrder } = filterByName(base, where?.name ?? null);
-        const domains = withOrderingMetadata(named);
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (parent, { where, order, ...connectionArgs }) =>
+        resolveFindDomains({
+          where: { ...where, registryId: parent.id },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     ////////////////////////

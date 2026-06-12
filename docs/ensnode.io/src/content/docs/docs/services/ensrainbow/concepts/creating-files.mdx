@@ -14,12 +14,14 @@ ENSRainbow provides two methods for creating `.ensrainbow` files from different 
 Before creating `.ensrainbow` files, ensure you have:
 
 1. **ENSNode repository cloned**:
+
    ```bash
    git clone https://github.com/namehash/ensnode.git
    cd ensnode
    ```
 
 2. **Dependencies installed**:
+
    ```bash
    pnpm install
    ```
@@ -39,10 +41,10 @@ For detailed information about the file format structure, see the [Data Model](/
 
 ## Choosing Your Conversion Method
 
-| Method | Input Format | Use Case | Command |
-|--------|-------------|----------|---------|
-| **CSV Conversion** | Single-column CSV file (one label per line) | Building new ENS rainbow tables | `pnpm run convert` |
-| **SQL Conversion** | Gzipped SQL dump (`ens_names.sql.gz`) | Converting legacy ENS Subgraph data | `pnpm run convert-sql` |
+| Method             | Input Format                                | Use Case                            | Command                |
+| ------------------ | ------------------------------------------- | ----------------------------------- | ---------------------- |
+| **CSV Conversion** | Single-column CSV file (one label per line) | Building new ENS rainbow tables     | `pnpm run convert`     |
+| **SQL Conversion** | Gzipped SQL dump (`ens_names.sql.gz`)       | Converting legacy ENS Subgraph data | `pnpm run convert-sql` |
 
 ### When to Use CSV Conversion
 
@@ -98,6 +100,7 @@ The converter automatically computes labelhashes from labels using the `labelhas
 The CSV converter includes built-in filtering capabilities to prevent duplicate labels:
 
 #### Filtering Existing Labels
+
 Use `--existing-db-path` to filter out labels that already exist in an existing ENSRainbow database:
 
 ```bash
@@ -109,16 +112,20 @@ pnpm run convert \
 ```
 
 This will:
+
 - Check each label against the existing database
 - Skip labels that already exist (avoiding duplicates)
 - Only write new labels to the output file
 - Log filtering statistics in the conversion summary
 
 #### Filtering Duplicate Labels Within CSV
+
 The converter automatically filters duplicate labels within the same CSV file, keeping only the first occurrence of each label.
 
 #### Filtering Statistics
+
 The conversion process logs detailed statistics:
+
 ```
 === Conversion Summary ===
 Total lines processed: 1000
@@ -160,7 +167,7 @@ pnpm run convert \
 
 ## Method 2: Migrating from ENS Subgraph
 
-:::warning[Legacy Method]
+:::caution[Legacy Method]
 The `convert-sql` command processes gzipped SQL dump file from the legacy ENS Subgraph. This method exists for migrating away from legacy subgraph data. **For all new label sets, we strongly recommend using CSV conversion (Method 1) instead.**
 :::
 
@@ -199,7 +206,6 @@ pnpm run convert-sql \
   --label-set-version 0
 ```
 
-
 ### How It Works
 
 1. **Streams** the gzipped SQL file to avoid memory issues
@@ -218,7 +224,7 @@ pnpm run convert-sql \
 
 ### Workflow 1: Migrating from Legacy ENS Subgraph
 
-:::warning[Legacy Migration Only]
+:::caution[Legacy Migration Only]
 This workflow is for migrating away from legacy ENS Subgraph data. For creating new label sets, use CSV conversion (see Workflow 3) instead.
 :::
 
@@ -333,9 +339,11 @@ pnpm run serve --data-dir data-my-dataset --port 3223
 
 :::note[Script Output Locations]
 ENSRainbow download scripts save files to specific subdirectories:
+
 - **`.ensrainbow` files**: `labelsets/`
 - **Database archives**: `databases/{schema_version}/`
 - **Checksums and licenses**: Same directory as the downloaded file
+
 :::
 
 ## File Naming Conventions
@@ -343,6 +351,7 @@ ENSRainbow download scripts save files to specific subdirectories:
 Follow the naming convention: `{label-set-id}_{label-set-version}.ensrainbow`
 
 **Examples:**
+
 - `subgraph_0.ensrainbow` - Legacy ENS data, version 0
 - `discovery-a_0.ensrainbow` - Discovery dataset, version 0
 - `ens-test-env_0.ensrainbow` - Test environment data, version 0
@@ -399,11 +408,13 @@ pnpm run serve --data-dir data-my-dataset --port 3223
 ### 3. Publish Your File
 
 #### Option A: Direct File Sharing
+
 - Upload your `.ensrainbow` file to a web server or cloud storage
 - Provide a direct download URL
 - Share checksums for integrity verification
 
 #### Option B: Package as Database Archive
+
 For better performance, package your data as a pre-built database:
 
 ```bash
@@ -435,17 +446,19 @@ Create documentation for your custom label set including:
 ````markdown
 ## Custom Label Set: my-dataset
 
-**Label Set ID**: `my-dataset`  
-**Current Version**: `0`  
+**Label Set ID**: `my-dataset`
+**Current Version**: `0`
 **Description**: Custom ENS labels from [source description]
 
 ### Download
+
 - Database Archive: `https://example.com/my-dataset_0.tgz`
 - Checksum: `https://example.com/my-dataset_0.tgz.sha256sum`
 
 ### Usage
 
 # Using with Docker
+
 ```bash
 docker run -d \
   -e DB_SCHEMA_VERSION="3" \
@@ -493,6 +506,7 @@ my-label-set-server/
 ENSRainbow provides ready-to-use download scripts that users can configure to download from your label set server:
 
 #### Download .ensrainbow Files
+
 ```bash
 # Configure your label set server URL
 export ENSRAINBOW_LABELSET_SERVER_URL="https://my-label-set-server.com"
@@ -502,6 +516,7 @@ export ENSRAINBOW_LABELSET_SERVER_URL="https://my-label-set-server.com"
 ```
 
 #### Download Prebuilt Database Archives
+
 ```bash
 # Configure your label set server URL
 export ENSRAINBOW_LABELSET_SERVER_URL="https://my-label-set-server.com"
@@ -511,7 +526,9 @@ export ENSRAINBOW_LABELSET_SERVER_URL="https://my-label-set-server.com"
 ```
 
 #### Script Features
+
 The existing scripts automatically handle:
+
 - **Checksum verification** for data integrity
 - **Resume downloads** if files already exist and are valid
 - **License file downloads** (optional)
@@ -530,12 +547,14 @@ This server hosts custom ENS label sets for ENSRainbow.
 ## Available Label Sets
 
 ### my-dataset
+
 - **Description**: Custom ENS labels from [source]
 - **Versions**: 0, 1
 - **Schema Versions**: 3
 - **Base URL**: `https://my-label-set-server.com`
 
 ### another-dataset
+
 - **Description**: Additional labels from [source]
 - **Versions**: 0
 - **Schema Versions**: 3

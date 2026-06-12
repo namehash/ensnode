@@ -1,5 +1,37 @@
 # @namehash/ens-referrals
 
+## 1.15.2
+
+### Patch Changes
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - @ensnode/ensnode-sdk@1.15.2
+  - enssdk@1.15.2
+
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+
+## 1.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1), [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429)]:
+  - enssdk@1.15.0
+  - @ensnode/ensnode-sdk@1.15.0
+
+## 1.14.0
+
+### Patch Changes
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - enssdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

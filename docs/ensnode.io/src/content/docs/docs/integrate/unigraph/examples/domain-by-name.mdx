@@ -1,0 +1,21 @@
+---
+title: Domain by Name
+description: Fetch a Domain from the ENS Unigraph by its canonical name.
+sidebar:
+  label: Domain by Name
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleDomainByName } from "@data/unigraph-examples/domain-by-name";
+
+Fetch a Domain by its canonical name. Because `canonical_name` is materialized across both ENSv1 and ENSv2, the same lookup works regardless of protocol version. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<UnigraphStaticExample
+  sql={exampleDomainByName.sql}
+  ensDbSdk={exampleDomainByName.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

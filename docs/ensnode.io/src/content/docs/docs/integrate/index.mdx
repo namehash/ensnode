@@ -6,194 +6,212 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
 ## What is ENSv2?
 
-ENSv2 is the next generation of the Ethereum Name Service — a protocol upgrade that fundamentally changes the onchain data model of ENS.
+[ENSv2](https://ens.domains/ensv2) is the next generation of the [Ethereum Name Service](https://ens.domains) — a protocol upgrade that fundamentally changes how the ENS protocol works.
 
-:::tip[Prepare for ENSv2]
-The ENSv2 upgrade to the ENS protocol is coming **Summer 2026**! Your app, regardless of how it interacts with names, needs to be updated to avoid being left behind.
-
-<a href="/docs/integrate/ensv2-readiness">
-  Learn more about ENSv2 Readiness
-</a>
-:::
+<Aside type="tip" title="Prepare for ENSv2">
+The ENSv2 upgrade to the ENS protocol is coming **Summer 2026**! Your app, regardless of how it interacts with names, needs to be updated to avoid being left behind.<br/>[Learn more about ENSv2 Readiness](/docs/integrate/why-ensnode/ensv2-readiness)
+</Aside>
 
 ## What is the ENS Omnigraph?
 
-ENSNode fully supports ENSv2 via the [Omnigraph API](/docs/integrate/omnigraph), a _unified_ API over **both ENSv1 and ENSv2**. Note how when ENSv2 launches, ENSv1 continues to exist in parallel. ENSNode takes the guesswork out of building on ENS, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
+ENSNode fully supports ENSv2 via the [ENS Omnigraph API](/docs/integrate/omnigraph), the world's first and only _unified_ API over the full state of **both ENSv1 and ENSv2**. When ENSv2 launches in **Summer 2026**, ENSv1 continues to exist, and apps _must_ be updated to use the new protocol version. ENSNode takes the guesswork out of building on ENS, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
-ENS Omnigraph supports both ENSv1 and ENSv2 **concurrently**. This means you can integrate today (before ENSv2 launches) and continue with full ENSv2 support when it goes live with zero downtime!
+ENS Omnigraph supports both ENSv1 and ENSv2 **concurrently** within the **same unified data model**. This means you can integrate today (before ENSv2 launches) and continue with full ENSv2 support when it goes live, with zero downtime!
 
 ## ENSNode's Integration Options
 
-ENSNode supports a full range of different integration options across the stack, whether you're using React, any JavaScript runtime, raw GraphQL, or looking to go deep and build a new and fully custom service on ENS data.
+ENSNode supports a full range of different integration options across the stack, whether you're using React, any JavaScript runtime, raw GraphQL, or looking to go deep and build a fully custom service using indexed ENS data.
 
-<LinkCard
-  title='Catalog of Integration Options'
-  href="/docs/integrate/integration-options"
-/>
+<LinkCard title="Catalog of Integration Options" href="/docs/integrate/integration-options" />
 
 Here's a summary of some popular integration strategies:
 
-### 1. `enskit` + Omnigraph
+### 1. enssdk + Omnigraph
 
-With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
+With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
 
+Start from a wallet address, reverse-resolve its Ethereum primary name, then forward-resolve the profile on that name:
 
-```tsx
+```ts title="example.ts"
+import { createEnsNodeClient } from "enssdk/core";
+import { graphql, omnigraph } from "enssdk/omnigraph";
+
+// create and extend an EnsNodeClient with Omnigraph API support
+const client = createEnsNodeClient({
+        url: process.env.ENSNODE_URL!
+    })
+    .extend(omnigraph);
+
 // this is fully typechecked and supports editor autocomplete!
-const DomainFragment = graphql(`
-  fragment DomainFragment on Domain {
-    __typename
-    id
-    canonical { name }
-    owner { id address }
-  }
-`);
-
-// this is fully typechecked and supports editor autocomplete!
-const DomainByNameQuery = graphql(`
-  query DomainByNameQuery($name: InterpretedName!) {
-    domain(by: { name: $name }) {
-      ...DomainFragment
-      subdomains {
-        edges { node { ...DomainFragment } }
+const HelloWorldQuery = graphql(`
+  query HelloWorld($address: Address!) {
+    account(by: { address: $address }) {
+      address
+      resolve {
+        primaryName(by: { chainName: ETHEREUM }) {
+          name { beautified }
+          resolve {
+            profile {
+              description
+              addresses { ethereum bitcoin }
+            }
+          }
+        }
       }
     }
   }
-`,
-  [DomainFragment],
-);
+`);
 
-function RenderDomainFragment({ data }: { data: FragmentOf<typeof DomainFragment> }) {
-  // type-safe access to fragment data!
-  const domain = readFragment(DomainFragment, data);
+// `result` is fully typed!
+const result = await client.omnigraph.query({
+    query: HelloWorldQuery,
+    variables: {
+        address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    },
+});
+```
 
-  return (
-    <>
-      <span>Name: {domain.canonical ? beautifyInterpretedName(domain.canonical.name) : 'Unnamed Domain'}</span>
-      <span>Protocol Version: {domain.__typename === 'ENSv1Domain' ? 'ENSv1' : 'ENSv2'}</span>
-      <span>Owner: {domain.owner ? domain.owner.address : 'Unowned'}</span>
-    </>
-  );
-}
+<Aside type="note" title="BeautifiedName">
+  `beautified` is the display-ready form of the Canonical Name — its normalized labels rendered per [ENSIP-15](https://docs.ens.domains/ensip/15) (e.g. `♾.eth` → `♾️.eth`) — so you can render it directly with no normalization or emoji logic of your own. It's **display-only**: use `interpreted` (or the Domain `id`) as a lookup key or navigation target, never `beautified`. See [Beautified Name](/docs/reference/terminology#beautified-name).
+</Aside>
 
-export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
+<LinkCard
+  title="Full enssdk Integration Documentation"
+  href="/docs/integrate/integration-options/enssdk"
+/>
+
+<LinkCard
+  title="enssdk-example app"
+  description="Check out our enssdk-example for a full example app."
+  href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
+/>
+
+<LinkCard
+  title="Interactive enssdk example ⚡"
+  description="Edit and run the enssdk-example script in your browser."
+  href="/docs/integrate/integration-options/enssdk/example"
+/>
+
+### 2. enskit + Omnigraph
+
+With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
+
+The same `address -> primary name -> forward profile` pattern in a React component:
+
+```tsx title="example.tsx"
+import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
+import type { Address } from "enssdk";
+
+// this query is fully typechecked and supports editor autocomplete!
+const AccountPrimaryProfileQuery = graphql(`
+  query AccountPrimaryProfile($address: Address!) {
+    account(by: { address: $address }) {
+      address
+      resolve {
+        primaryName(by: { chainName: ETHEREUM }) {
+          name { beautified }
+          resolve {
+            profile {
+              description
+              addresses { ethereum bitcoin }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+export function AccountProfileCard({ address }: { address: Address }) {
   // `result` is fully typed!
-  const [result] = useOmnigraphQuery({ query: DomainByNameQuery, variables: { name } });
+  const [result] = useOmnigraphQuery({
+    query: AccountPrimaryProfileQuery,
+    variables: { address },
+  });
   const { data, fetching, error } = result;
 
-  // some loading/error handling
-  if (!data && fetching) return <p>Loading...</p>;
+  if (fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!data?.domain) return <p>No domain was found with name '{name}'.</p>;
+  if (!data?.account) return <p>No account found for '{address}'.</p>;
 
-  // now we have type-safe access to Domain!
-  const domain = readFragment(DomainFragment, data.domain);
-  const { subdomains } = data.domain;
+  const { account } = data;
+  const primaryName = account.resolve?.primaryName;
+  const addresses = primaryName?.resolve?.profile?.addresses;
 
   return (
     <div>
-      <RenderDomainFragment data={data.domain} />
-
-      <h2>Subdomains:</h2>
-      <ul>
-        {subdomains?.edges.map((edge) => {
-          const { id } = readFragment(DomainFragment, edge.node);
-          return (
-            <li key={id}>
-              <RenderDomainFragment data={edge.node} />
-            </li>
-          );
-        })}
-      </ul>
+      <p>Address: {account.address}</p>
+      <p>Primary name: {primaryName?.name?.beautified ?? "None set"}</p>
+      <p>Bitcoin address: {addresses?.bitcoin ?? "Not set"}</p>
+      <p>Description: {primaryName?.resolve?.profile?.description}</p>
     </div>
   );
 }
 ```
 
 <LinkCard
-  title='Full enskit Integration Documentation'
+  title="Full enskit Integration Documentation"
   href="/docs/integrate/integration-options/enskit"
 />
 
 <LinkCard
   title="enskit-react-example app"
-  description='Check out our enskit-react-example for a full example app.'
+  description="Check out our enskit-react-example for a full example app."
   href="https://github.com/namehash/ensnode/tree/main/examples/enskit-react-example"
 />
 
-### 2. `enssdk` + Omnigraph
-
-With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
-
-
-```ts
-// create and extend an EnsNodeClient with Omnigraph API support
-const client = createEnsNodeClient({ url: process.env.ENSNODE_URL! }).extend(omnigraph);
-
-// this is fully typechecked and supports editor autocomplete!
-const HelloWorldQuery = graphql(`
-  query HelloWorld {
-    domain(by: { name: "eth" }) {
-      id
-      canonical { name }
-      owner { address }
-    }
-  }
-`);
-
-// `result` is fully typed!
-const result = await client.omnigraph.query({ query: HelloWorldQuery });
-```
-
 <LinkCard
-  title='Full enssdk Integration Documentation'
-  href="/docs/integrate/integration-options/enssdk"
-/>
-
-<LinkCard
-  title="enssdk-example app"
-  description='Check out our enssdk-example for a full example app.'
-  href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
+  title="Interactive enskit example ⚡"
+  description="Edit and run the enskit-react-example app in your browser with a live preview."
+  href="/docs/integrate/integration-options/enskit/example"
 />
 
 ### 3. ENS Omnigraph GraphQL API
 
 The ENS Omnigraph API is a GraphQL API following the Relay specification, so you get built-in support for efficient infinite pagination and idiomatic access to all of the ENS protocol within a _unified_ ENSv1 + ENSv2 datamodel.
 
-```gql
-query MyDomains($address: Address!) {
-  account(by: { address: $address }) {
-    domains {
-      edges {
-        node {
-          label { interpreted }
-          canonical { name }
-        }
-      }
-    }
-  }
-}
-```
+Same query: `address -> primary name -> forward profile` — via raw GraphQL with example response below:
+
+<OmnigraphStaticExampleSet
+  id="hello-world"
+  integrations={["omnigraph", "curl"]}
+  hideDescription
+  hideBackToExamples
+/>
 
 <LinkCard
-  title='Full ENS Omnigraph GraphQL API Documentation'
+  title="Full ENS Omnigraph GraphQL API Documentation"
   href="/docs/integrate/integration-options/omnigraph-graphql-api"
 />
 
 <LinkCard
   title="omnigraph-graphql-example app"
-  description='Check out our omnigraph-graphql-example for a full example app.'
+  description="Check out our omnigraph-graphql-example for a full example app."
   href="https://github.com/namehash/ensnode/tree/main/examples/omnigraph-graphql-example"
 />
 
+### 4. Further Integration Options
+
+Beyond [`enssdk`](/docs/integrate/integration-options/enssdk), [`enskit`](/docs/integrate/integration-options/enskit), and the [Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api), ENSNode exposes a deeper set of integration surfaces for advanced use cases:
+
+- **[ENSDb (SQL)](/docs/integrate/integration-options/ensdb)** — query the indexed ENSv1 and ENSv2 datasets directly via SQL for custom analytics or your own service layer, from any language with a Postgres driver.
+- **[ENSDb Writers (Indexers)](/docs/integrate/integration-options/ensdb-writers)** — enable all other layers of the ENSNode stack to build on your custom indexing engine.
+- **[ENSDb Readers (Custom APIs)](/docs/integrate/integration-options/ensdb-readers)** — build your own custom APIs and services on top of ENSDb using any programming language or framework.
+- **[ENSNode Plugins (Indexed Data Models)](/docs/integrate/integration-options/ensnode-plugins)** — define how onchain data should be indexed into ENSDb.
+- **[enscli (CLI)](/docs/integrate/integration-options/enscli)** — resolve names, look up records, and run ad-hoc Omnigraph queries from the terminal — built for humans and AI agents alike.
+- **[ensskills (AI agents)](/docs/integrate/integration-options/ensskills)** — a curated set of skills that gives AI coding agents a well-defined contract for working with ENS.
+- **[ensdb-cli (ENSDb Snapshots)](/docs/integrate/integration-options/ensdb-cli)** — bootstrap a fresh ENSDb in minutes from portable, versioned snapshots instead of waiting days on a full historical backfill.
+- **[ENSEngine (Live push notifications)](/docs/integrate/integration-options/ensengine)** — subscribe to ENS-aware live notifications driven by changes in ENSDb, so your apps can stop polling and start reacting.
+
 <LinkCard
-  title='See all Integration Options'
-  description='Includes more advanced integration options not introduced in this quickstart guide'
+  title="See all Integration Options"
+  description="Includes more advanced integration options not introduced in this quickstart guide"
   href="/docs/integrate/integration-options"
 />

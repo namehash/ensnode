@@ -2,6 +2,7 @@ import type { AccountId, Address, DomainId } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { upsertResolver } from "@/lib/protocol-acceleration/resolver-db-helpers";
 
 /**
  * Ensures that the Domain-Resolver Relationship for the provided `domainId` in `registry` is set
@@ -17,6 +18,9 @@ export async function ensureDomainResolverRelation(
   if (isAddressEqual(zeroAddress, resolver)) {
     await context.ensDb.delete(ensIndexerSchema.domainResolverRelation, { ...registry, domainId });
   } else {
+    // ensures a resolver entity exists for all observed Resolver contracts
+    await upsertResolver(context, { chainId: registry.chainId, address: resolver });
+
     await context.ensDb
       .insert(ensIndexerSchema.domainResolverRelation)
       .values({ ...registry, domainId, resolver })

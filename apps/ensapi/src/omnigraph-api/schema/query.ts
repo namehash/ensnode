@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { inArray } from "drizzle-orm";
 import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
@@ -7,23 +5,19 @@ import { createGraphQLError } from "graphql-yoga";
 
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByCanonical,
-  filterByName,
-  filterByVersion,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
-import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
+import { forwardWalkNamegraph } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { makeUnindexedDomain } from "@/omnigraph-api/lib/unindexed-domain";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import {
+  DOMAINS_ORDERING_DESCRIPTION,
   DomainIdInput,
   DomainsOrderInput,
   DomainsWhereInput,
@@ -38,9 +32,6 @@ import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/omnigraph-api/schema/resolver";
 
-// don't want them to get familiar/accustomed to these methods until their necessity is certain
-const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
-
 builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
@@ -48,10 +39,11 @@ builder.queryType({
       // Query.allDomains (Testing)
       //////////////////////////////
       allDomains: t.connection({
-        description: "TODO",
+        description: "n/a, dev method",
         type: DomainInterfaceRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.domain),
             connection: () =>
               resolveCursorConnection(
@@ -64,17 +56,19 @@ builder.queryType({
                     with: { label: true },
                   }),
               ),
-          }),
+          });
+        },
       }),
 
       /////////////////////////////
       // Query.resolvers (Testing)
       /////////////////////////////
       resolvers: t.connection({
-        description: "TODO",
+        description: "n/a, dev method",
         type: ResolverRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.resolver),
             connection: () =>
               resolveCursorConnection(
@@ -87,17 +81,19 @@ builder.queryType({
                     .orderBy(orderPaginationBy(ensIndexerSchema.resolver.id, inverted))
                     .limit(limit),
               ),
-          }),
+          });
+        },
       }),
 
       /////////////////////////////////
       // Query.registrations (Testing)
       /////////////////////////////////
       registrations: t.connection({
-        description: "TODO",
+        description: "n/a, dev method",
         type: RegistrationInterfaceRef,
-        resolve: (parent, args) =>
-          lazyConnection({
+        resolve: (parent, args) => {
+          const { ensDb, ensIndexerSchema } = di.context;
+          return lazyConnection({
             totalCount: () => ensDb.$count(ensIndexerSchema.registration),
             connection: () =>
               resolveCursorConnection(
@@ -110,7 +106,8 @@ builder.queryType({
                     .orderBy(orderPaginationBy(ensIndexerSchema.registration.id, inverted))
                     .limit(limit),
               ),
-          }),
+          });
+        },
       }),
     }),
 
@@ -118,21 +115,14 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description: "Find Canonical Domains by Name.",
+      description: `Find Canonical Domains by Name. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (_, { where, order, ...connectionArgs }, context) => {
-        const base = domainsBase();
-        const { named, defaultOrder } = filterByName(base, where.name);
-        const canonical = filterByCanonical(named);
-        const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
-        const domains = withOrderingMetadata(versioned);
-
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (_, { where, order, ...connectionArgs }) =>
+        resolveFindDomains({ where, order, ...connectionArgs }),
     }),
 
     //////////////////////////////////
@@ -143,9 +133,18 @@ builder.queryType({
       type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
-      resolve: (parent, args, ctx, info) => {
+      resolve: async (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
-        return getDomainIdByInterpretedName(args.by.name);
+        const name = args.by.name;
+
+        const { rows, exact } = await forwardWalkNamegraph(name);
+        if (rows.length === 0) return null;
+
+        // if exact, the leaf (rows[0]) is the indexed Domain
+        if (exact) return rows[0].domainId;
+
+        // otherwise the name may be resolvable-but-unindexed (an UnindexedDomain), or null
+        return makeUnindexedDomain(name, rows);
       },
     }),
 
@@ -176,6 +175,8 @@ builder.queryType({
             { extensions: { code: "BAD_USER_INPUT" } },
           );
         }
+
+        const { ensDb, ensIndexerSchema } = di.context;
 
         return ensDb
           .select()
@@ -237,10 +238,10 @@ builder.queryType({
     /////////////////////
     root: t.field({
       description:
-        "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.",
+        "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: () => getRootRegistryId(config.namespace),
+      resolve: () => getRootRegistryId(di.context.namespace),
     }),
   }),
 });

@@ -12,7 +12,7 @@ import {
   literalNameToInterpretedName,
 } from "./interpreted-names-and-labels";
 import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
-import type { InterpretedLabel, InterpretedName, LiteralLabel, Name } from "./types";
+import type { InterpretedLabel, InterpretedName, LiteralLabel } from "./types";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 

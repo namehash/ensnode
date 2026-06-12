@@ -15,7 +15,7 @@ import { nodeIsMigrated } from "@/lib/protocol-acceleration/migrated-node-db-hel
  * - indexes Node-Resolver Relationships for all Registry contracts
  *
  * Note: ENS Root Chain Registry node-migration status is tracked separately in `node-migration.ts`,
- * registered before both this plugin and the ENSv2 plugin so its results are available to the
+ * registered before both this plugin and the 'unigraph' plugin so its results are available to the
  * Old-registry guards in either plugin.
  */
 export default function () {

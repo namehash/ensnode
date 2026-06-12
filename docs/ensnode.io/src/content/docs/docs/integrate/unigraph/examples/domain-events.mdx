@@ -1,0 +1,27 @@
+---
+title: Domain Events
+description: Fetch recent events for a Domain from the ENS Unigraph by its canonical name.
+sidebar:
+  label: Domain Events
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleDomainEvents } from "@data/unigraph-examples/domain-events";
+
+Fetch recent events for a Domain by its canonical name. This example joins the `events`, `domain_events`, and `domains` tables to retrieve domain events associated with the `vitalik.eth` name. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+:::caution[Raw event data]
+The `events` table contains low-level onchain event data, which may require additional processing to interpret. For example, the `data` field is a hex string of ABI-encoded event data that may need to be decoded based on the event type (see `selector` field) to extract meaningful details about the event.
+
+In the future, the ENS Unigraph may include data referencing higher-level event types (e.g., `DomainRegistered`, `DomainTransferred`, etc.) to simplify querying for common events without needing to parse raw event data. For now, use `selector`, `topics`, and `data` fields in the `events` table to filter and interpret events based on your app's needs.
+:::
+
+<UnigraphStaticExample
+  sql={exampleDomainEvents.sql}
+  ensDbSdk={exampleDomainEvents.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

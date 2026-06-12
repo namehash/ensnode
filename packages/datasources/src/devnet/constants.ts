@@ -1,7 +1,4 @@
 import type { NormalizedAddress } from "enssdk";
-import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
-import type { Hex } from "viem";
-import { mnemonicToAccount } from "viem/accounts";
 
 /**
  * Deterministic contract addresses for the ENS contracts-v2 devnet used by ens-test-env.
@@ -48,7 +45,7 @@ export const contracts = {
   ENSV1Resolver: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
   ENSV2Resolver: "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
   OwnedResolver: "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
-  PermissionedResolver: "0x5ea90acf6555276660760fe629d72932c91f4b8e",
+  PermissionedResolver: "0x8550d35164e7f86bb6adf4cedb3f012913c9d563",
   LegacyPublicResolver: "0xa4899d35897033b927acfcf422bc745916139776",
   PublicResolver: "0xf953b3a269d80e3eb0f2947630da976b896a8c5b",
   PermissionedResolverImpl: "0x809d550fca64d94bd9f66e60752a544199cfac3d",
@@ -66,7 +63,8 @@ export const contracts = {
   VerifiableFactory: "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
   NameWrapper: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
   UnlockedMigrationController: "0xdbc43ba45381e02825b14322cddd15ec4b3164e6",
-  WrapperRegistry: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+  ApprovedUpgradeGate: "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
+  WrapperRegistryImpl: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
   LockedMigrationController: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
   UserRegistryImpl: "0x7969c5ed335650692bc04293b07f5bf2e7a673c0",
   StaticMetadataService: "0xb0d4afd8879ed9f52b28595d31b441d079b2ca07",
@@ -91,49 +89,3 @@ export const contracts = {
   MockUSDC: "0xfd471836031dc5108809d173a067e8486b9047a3",
   MockDAI: "0xcbeaf3bde82155f56486fb5a1072cb8baaf547cc",
 } as const satisfies Record<string, NormalizedAddress>;
-
-/**
- * Must match the devnet mnemonic in contracts-v2 (Anvil named accounts).
- * @see https://github.com/ensdomains/contracts-v2/blob/69bde1b345c47caf3d55a105b9f922280ba55f00/contracts/script/setup.ts#L56
- */
-const mnemonic = "test test test test test test test test test test test junk";
-
-function createAccount(addressIndex: number, resolver: NormalizedAddress) {
-  const account = mnemonicToAccount(mnemonic, { addressIndex });
-  return {
-    ...account,
-    address: toNormalizedAddress(account.address),
-    resolver,
-  };
-}
-
-/**
- * Named accounts from the ens-test-env devnet.
- * They are NOT real Ethereum Mainnet or testnet addresses.
- * You can use `pnpm devnet` to see actual data in devnet
- *
- * @see https://github.com/ensdomains/ens-test-env
- */
-export const accounts = {
-  deployer: createAccount(0, asNormalizedAddress("0x1f2ce8886692b90f5754a7d428a2336800a5911b")),
-  owner: createAccount(1, asNormalizedAddress("0x5ea90acf6555276660760fe629d72932c91f4b8e")),
-  user: createAccount(2, asNormalizedAddress("0xb63ae54076c1c281ec9395b290add470e69140c6")),
-  user2: createAccount(3, asNormalizedAddress("0x5380066832977eb36353fd2b01fb92e751636b84")),
-} as const;
-
-/**
- * Fixtures for seeding the devnet with test data.
- */
-export const addresses = {
-  one: asNormalizedAddress(`0x${"1".repeat(40)}`),
-} as const satisfies Record<string, NormalizedAddress>;
-
-export const fixtures = {
-  abiBytes: `0x${"01".repeat(32)}`,
-  fourBytesInterface: "0x11100111",
-  publicKeyX: `0x${"02".repeat(32)}`,
-  publicKeyY: `0x${"03".repeat(32)}`,
-  contenthash: `0x${"04".repeat(32)}`,
-  bitcoinAddress: `0x${"05".repeat(25)}`,
-  litecoinAddress: `0x${"06".repeat(25)}`,
-} as const satisfies Record<string, Hex>;

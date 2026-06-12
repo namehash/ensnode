@@ -6,7 +6,7 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 This section covers everything you need to know about using ENSRainbow in your applications, from quick API calls to advanced client SDK integration.
 
@@ -49,6 +49,7 @@ This section covers everything you need to know about using ENSRainbow in your a
 ## Usage Patterns
 
 ### Quick API Integration
+
 If you just need to heal a few labelhashes occasionally, the HTTP API is perfect:
 
 ```bash
@@ -56,6 +57,7 @@ curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd14426
 ```
 
 ### Production Applications
+
 For production applications with consistent usage, consider:
 
 1. **Use the [Client SDK](/docs/services/ensrainbow/usage/client-sdk/)** for type safety and built-in retry logic
@@ -64,6 +66,7 @@ For production applications with consistent usage, consider:
 4. **Consider [self-hosting](/docs/services/ensrainbow/deploying/)** which is required when running your own ENSNode or for other high-volume use cases
 
 ### Enterprise Integration
+
 For enterprise or high-volume applications:
 
 1. **Deploy your own instance** using our [deployment guides](/docs/services/ensrainbow/deploying/)
@@ -74,6 +77,6 @@ For enterprise or high-volume applications:
 ## Next Steps
 
 - **New to ENSRainbow?** Start with the [API Reference](/docs/services/ensrainbow/usage/api/) to understand the basics
-- **Building an app?** Check out the [Client SDK](/docs/services/ensrainbow/usage/client-sdk/) for the best developer experience  
+- **Building an app?** Check out the [Client SDK](/docs/services/ensrainbow/usage/client-sdk/) for the best developer experience
 - **Need high availability?** Review our [deployment options](/docs/services/ensrainbow/deploying/)
-- **Want to contribute?** See our [contributing guide](/docs/services/ensrainbow/contributing/) 
+- **Want to contribute?** See our [contributing guide](/docs/services/ensrainbow/contributing/)

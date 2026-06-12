@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ENSApi APIs",
-    "version": "1.13.1",
+    "version": "1.15.2",
     "description": "REST APIs for the ENSNode stack as served by the ENSApi service"
   },
   "servers": [
@@ -26,7 +26,7 @@
         "operationId": "getIndexingStatus",
         "tags": ["Meta"],
         "summary": "Get Indexing Status and Stack Info",
-        "description": "Returns the latest indexing status snapshot and overall stack info about services in the ENSNode instance",
+        "description": "Monitor an ENSNode's indexing progress across multiple chains. This endpoint provides a realtime indexing projection at the given moment, and overall stack info about services in the ENSNode instance. The projection includes a cross-chain indexing status snapshot that collects chain status snapshots for each indexed chain. At the moment, the cross-chain indexing status snapshot can be represented as an omnichain indexing status snapshot. Perfect for building monitoring dashboards, health checks, or determining whether your ENSNode has caught up with recent onchain activity.",
         "responses": {
           "200": {
             "description": "Successfully retrieved indexing status",
@@ -764,10 +764,17 @@
                             "slowestChainIndexingCursor",
                             "snapshotTime",
                             "omnichainSnapshot"
-                          ]
+                          ],
+                          "description": "The cross-chain indexing status snapshot that this projection is based on."
                         },
-                        "projectedAt": { "type": "integer" },
-                        "worstCaseDistance": { "type": "number" }
+                        "projectedAt": {
+                          "type": "integer",
+                          "description": "The timestamp representing 'now' as of the time this projection was generated."
+                        },
+                        "worstCaseDistance": {
+                          "type": "number",
+                          "description": "The distance between `projectedAt` and `snapshot.slowestChainIndexingCursor` in seconds. This is a worst-case distance because it assumes no indexing progress has been made since `snapshot.snapshotTime` and that each indexed chain has added a new block as of `projectedAt`."
+                        }
                       },
                       "required": ["snapshot", "projectedAt", "worstCaseDistance"]
                     },
@@ -1051,26 +1058,68 @@
         "operationId": "getRealtime",
         "tags": ["Meta"],
         "summary": "Check realtime indexing status",
-        "description": "Checks if the indexing status is guaranteed to be within a requested worst-case distance of realtime. Note that this is a worst-case distance check. This operation uses the latest cached indexing status snapshot to determine worst-case distance. The true indexing status is generally ahead of the worst-case distance",
+        "description": "A simplified monitoring API for checking whether an ENSNode instance has indexed sufficient blocks to be within an acceptable distance from the current 'tip' of all indexed chains\nInstead of manually inspecting the `worstCaseDistance` field from the Indexing Status API, you can use this endpoint to request a specific maximum acceptable distance and receive an immediate HTTP status code indicating whether the instance is sufficiently synchronized.\n\nThe `maxWorstCaseDistance` parameter accepts a duration value in seconds, representing the max worst case distance from the current 'tip' of all indexed chains.\nNote that this is a worst-case distance check. This operation uses the latest cached indexing status snapshot to determine worst-case distance.\nThe true indexing status is generally ahead of the worst-case distance.",
         "parameters": [
           {
             "schema": {
               "type": "integer",
+              "description": "Maximum acceptable worst-case indexing distance in seconds. Defaults to one minute.",
               "minimum": 0,
-              "description": "Maximum acceptable worst-case indexing distance in seconds"
+              "default": 60
             },
             "required": false,
-            "description": "Maximum acceptable worst-case indexing distance in seconds",
+            "description": "Maximum acceptable worst-case indexing distance in seconds. Defaults to one minute.",
             "name": "maxWorstCaseDistance",
             "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Indexing progress is guaranteed to be within the requested distance of realtime"
+            "description": "The latest indexed block of each chain is guaranteed within the requested distance from realtime.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "maxWorstCaseDistance": {
+                      "type": "number",
+                      "description": "The requested maximum acceptable worst-case indexing distance in seconds."
+                    },
+                    "slowestChainIndexingCursor": {
+                      "type": "integer",
+                      "description": "The timestamp of the slowest chain's latest indexed block."
+                    },
+                    "worstCaseDistance": {
+                      "type": "number",
+                      "description": "The actual worst-case distance in seconds between 'now' and the slowest chain's indexing cursor. This allows your client to programmatically determine whether the ENSNode instance is sufficiently synchronized for your use case."
+                    }
+                  },
+                  "required": [
+                    "maxWorstCaseDistance",
+                    "slowestChainIndexingCursor",
+                    "worstCaseDistance"
+                  ]
+                }
+              }
+            }
           },
           "503": {
-            "description": "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable"
+            "description": "The latest indexed block of each chain is NOT guaranteed within the requested distance from realtime, or the indexing status is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
+                  "required": ["message"]
+                }
+              }
+            }
           }
         }
       }
@@ -1209,7 +1258,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
                   "required": ["message"],
                   "example": {
                     "message": "Invalid Input",
@@ -1234,7 +1289,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
                   "required": ["message"],
                   "example": { "message": "Internal Server Error" }
                 }
@@ -1323,7 +1384,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
                   "required": ["message"],
                   "example": {
                     "message": "Invalid Input",
@@ -1344,7 +1411,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
                   "required": ["message"],
                   "example": { "message": "Internal Server Error" }
                 }
@@ -1443,7 +1516,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
                   "required": ["message"],
                   "example": {
                     "message": "Invalid Input",
@@ -1464,7 +1543,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A description of the error that occurred."
+                    },
+                    "details": { "description": "Additional details about the error." }
+                  },
                   "required": ["message"],
                   "example": { "message": "Internal Server Error" }
                 }

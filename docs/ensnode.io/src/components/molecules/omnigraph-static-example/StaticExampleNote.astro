@@ -1,0 +1,14 @@
+---
+import { staticExampleMutedTextClass } from "./constants";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<!-- `<slot />` renders child content passed between this component's tags (Astro's equivalent of React children). -->
+<p class:list={[staticExampleMutedTextClass, className]}>
+  <slot />
+</p>

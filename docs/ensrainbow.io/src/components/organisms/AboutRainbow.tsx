@@ -16,7 +16,7 @@ export type AboutRainbowProps = {
 export default function AboutRainbow(props: AboutRainbowProps) {
   return (
     <section className="box-border h-fit w-full flex flex-col items-center justify-center py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
-      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 max-w-[1216px]">
+      <div className="w-full flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 max-w-[1216px]">
         {!props.isTextOnTheLeft && (
           <div
             className={cc([

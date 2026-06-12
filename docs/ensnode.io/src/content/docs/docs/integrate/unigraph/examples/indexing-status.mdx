@@ -1,0 +1,21 @@
+---
+title: Indexing Status
+description: Read the indexing status snapshot for an ENSDb Writer instance from ENSDb.
+sidebar:
+  label: Indexing Status
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsNodeSchemaIntro from "@components/molecules/EnsNodeSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleIndexingStatus } from "@data/unigraph-examples/indexing-status";
+
+Read the indexing status snapshot for an ENSDb Writer instance from the shared `ensnode.metadata` table. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<UnigraphStaticExample
+  sql={exampleIndexingStatus.sql}
+  ensDbSdk={exampleIndexingStatus.sdk}
+>
+  <EnsNodeSchemaIntro slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

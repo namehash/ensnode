@@ -1,5 +1,53 @@
 # @ensnode/ensnode-sdk
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - The EIP-165 `supportsInterface` probe (used to classify a Resolver's ENSIP-10 `extended` support at index time) now opts out of Ponder's empty-response retry. A `0x` ("returned no data") response from a pre-EIP-165 Resolver is a definitive "not supported", never transient — but Ponder's `context.client` previously retried it 9× with exponential backoff (~64s each), making a full index pathologically slow. The probe now fails fast (still resolving to `extended = false`).
+
+- [#2242](https://github.com/namehash/ensnode/pull/2242) [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54) Thanks [@shrugs](https://github.com/shrugs)! - `getDefaultEnsNodeUrl` now returns the hosted default for the `sepolia-v2` namespace (`https://api.v2-sepolia.ensnode.io`).
+
+- Updated dependencies [[`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`39cb445`](https://github.com/namehash/ensnode/commit/39cb445b8d8790aa9d6fe2ee904e60bdb158efbd), [`6165f50`](https://github.com/namehash/ensnode/commit/6165f50e26729c6d740c7424034057642f5175b5)]:
+  - @ensnode/datasources@1.15.2
+  - enssdk@1.15.2
+
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/datasources@1.15.1
+
+## 1.15.0
+
+### Minor Changes
+
+- [#2159](https://github.com/namehash/ensnode/pull/2159) [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429) Thanks [@tk-o](https://github.com/tk-o)! - Added `peek` method to `SWRCache` class.
+
+### Patch Changes
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1)]:
+  - enssdk@1.15.0
+  - @ensnode/datasources@1.15.0
+
+## 1.14.0
+
+### Minor Changes
+
+- [#2090](https://github.com/namehash/ensnode/pull/2090) [`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583) Thanks [@tk-o](https://github.com/tk-o)! - Added indexing status based functions for checking Omnigraph API and Subgraph API availability.
+
+- [#2102](https://github.com/namehash/ensnode/pull/2102) [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9) Thanks [@tk-o](https://github.com/tk-o)! - Added `globalBlockrangeEndBlock` param to `buildIndexedBlockranges`.
+
+- [#2128](https://github.com/namehash/ensnode/pull/2128) [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `ensv2` plugin to `unigraph`. It better conveys the idea of a single unified data model used for indexing both ENSv1 and ENSv2.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

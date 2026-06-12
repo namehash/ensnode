@@ -1,23 +1,41 @@
 import { asc, desc, type SQL, sql } from "drizzle-orm";
 
+import di from "@/di";
 import type { DomainCursor } from "@/omnigraph-api/lib/find-domains/domain-cursor";
-import type { DomainsWithOrderingMetadata } from "@/omnigraph-api/lib/find-domains/layers/with-ordering-metadata";
 import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
- * Get the order column for a given DomainsOrderBy value.
+ * The order column / expression for each `DomainsOrderBy` value.
+ *
+ * Computed lazily using sql template so importing this module doesn't access the lazyProxy-backed
+ * `ensIndexerSchema` at module load time (test harnesses import it without env-driven DB
+ * config wired up).
  */
-function getOrderColumn(
-  domains: DomainsWithOrderingMetadata,
-  orderBy: typeof DomainsOrderBy.$inferType,
-) {
-  return {
-    NAME: domains.canonicalName,
-    DEPTH: domains.canonicalDepth,
-    REGISTRATION_TIMESTAMP: domains.registrationTimestamp,
-    REGISTRATION_EXPIRY: domains.registrationExpiry,
-  }[orderBy];
+function getOrderColumn(orderBy: typeof DomainsOrderBy.$inferType): SQL {
+  const { ensIndexerSchema } = di.context;
+  switch (orderBy) {
+    case "NAME":
+      return sql`${ensIndexerSchema.domain.__canonicalNamePrefix}`;
+    case "DEPTH":
+      return sql`${ensIndexerSchema.domain.canonicalDepth}`;
+    case "REGISTRATION_TIMESTAMP":
+      return sql`${ensIndexerSchema.domain.__latestRegistrationStart}`;
+    case "REGISTRATION_EXPIRY":
+      return sql`${ensIndexerSchema.domain.__latestRegistrationExpiry}`;
+  }
+}
+
+/**
+ * Whether the ORDER BY for this column needs an explicit NULLS LAST clause.
+ *
+ * The registration sort columns (`Domain.__latestRegistration*`) materialize an infinity sentinel
+ * (see `REGISTRATION_SORT_SENTINEL`) in place of an absent value, so they're NOT NULL — there are no
+ * NULLs to sort last, and a plain `(registry_id, <col>, id)` composite serves both directions.
+ * NAME / DEPTH columns are nullable and keep NULLS LAST.
+ */
+export function shouldUseNullsLast(orderBy: typeof DomainsOrderBy.$inferType): boolean {
+  return orderBy === "NAME" || orderBy === "DEPTH";
 }
 
 /**
@@ -26,17 +44,14 @@ function getOrderColumn(
  * Uses tuple comparison for non-NULL cursor values, and explicit NULL handling
  * for NULL cursor values (since PostgreSQL tuple comparison with NULL yields NULL/unknown).
  *
- * @param domains - The domains CTE
  * @param cursor - The decoded DomainCursor
  * @param queryOrderBy - The order field for the current query (must match cursor.by)
  * @param queryOrderDir - The order direction for the current query (must match cursor.dir)
  * @param direction - "after" for forward pagination, "before" for backward
  * @throws if cursor.by does not match queryOrderBy
  * @throws if cursor.dir does not match queryOrderDir
- * @returns SQL expression for the cursor filter
  */
 export function cursorFilter(
-  domains: DomainsWithOrderingMetadata,
   cursor: DomainCursor,
   queryOrderBy: typeof DomainsOrderBy.$inferType,
   queryOrderDir: typeof OrderDirection.$inferType,
@@ -55,35 +70,26 @@ export function cursorFilter(
     );
   }
 
-  const orderColumn = getOrderColumn(domains, cursor.by);
+  const orderColumn = getOrderColumn(cursor.by);
 
-  // Determine comparison direction:
-  // - "after" with ASC = greater than cursor
-  // - "after" with DESC = less than cursor
-  // - "before" with ASC = less than cursor
-  // - "before" with DESC = greater than cursor
+  // "after" with ASC and "before" with DESC both step forward in cursor order (greater-than).
   const useGreaterThan = (direction === "after") !== (queryOrderDir === "DESC");
+  const op = sql.raw(useGreaterThan ? ">" : "<");
+  const { ensIndexerSchema } = di.context;
+  const idCmp = sql`${ensIndexerSchema.domain.id} ${op} ${cursor.id}`;
 
-  // Handle NULL cursor values explicitly (PostgreSQL tuple comparison with NULL yields NULL/unknown)
-  // With NULLS LAST ordering: non-NULL values come before NULL values
+  // NULL cursor values need explicit handling because Postgres tuple comparison with NULL yields
+  // NULL/unknown. Reached only for NAME/DEPTH (whose columns are nullable, NULLS LAST); registration
+  // sort columns are sentinel-backed NOT NULL, so their cursor value is never null. With NULLS LAST,
+  // non-NULL values come before NULL values.
   if (cursor.value === null) {
-    if (direction === "after") {
-      // "after" a NULL = other NULLs with appropriate id comparison
-      return useGreaterThan
-        ? sql`(${orderColumn} IS NULL AND ${domains.id} > ${cursor.id})`
-        : sql`(${orderColumn} IS NULL AND ${domains.id} < ${cursor.id})`;
-    } else {
-      // "before" a NULL = all non-NULLs (they come before NULLs) + NULLs with appropriate id
-      return useGreaterThan
-        ? sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${domains.id} > ${cursor.id}))`
-        : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${domains.id} < ${cursor.id}))`;
-    }
+    return direction === "after"
+      ? sql`(${orderColumn} IS NULL AND ${idCmp})`
+      : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${idCmp}))`;
   }
 
-  // Non-null cursor: use tuple comparison
-  // NOTE: Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL
-  // NOTE: explicit cast required — Postgres can't infer parameter types in tuple comparisons
-  const op = useGreaterThan ? ">" : "<";
+  // Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL.
+  // Explicit cast required — Postgres can't infer parameter types in tuple comparisons.
   const value = (() => {
     switch (cursor.by) {
       case "NAME":
@@ -92,10 +98,12 @@ export function cursorFilter(
         return sql`${cursor.value}::int`;
       case "REGISTRATION_TIMESTAMP":
       case "REGISTRATION_EXPIRY":
+        // ponder bigints are numeric(78,0)
         return sql`${cursor.value}::numeric(78,0)`;
     }
   })();
-  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${value}, ${cursor.id})`;
+
+  return sql`(${orderColumn}, ${ensIndexerSchema.domain.id}) ${op} (${value}, ${cursor.id})`;
 }
 
 /**
@@ -110,22 +118,26 @@ export function isEffectiveDesc(
 }
 
 export function orderFindDomains(
-  domains: DomainsWithOrderingMetadata,
   orderBy: typeof DomainsOrderBy.$inferType,
   orderDir: typeof OrderDirection.$inferType,
   inverted: boolean,
 ): SQL[] {
   const effectiveDesc = isEffectiveDesc(orderDir, inverted);
-  const orderColumn = getOrderColumn(domains, orderBy);
+  const orderColumn = getOrderColumn(orderBy);
 
-  // Always use NULLS LAST so unregistered domains (NULL registration fields)
-  // appear at the end regardless of sort direction
-  const primaryOrder = effectiveDesc
-    ? sql`${orderColumn} DESC NULLS LAST`
-    : sql`${orderColumn} ASC NULLS LAST`;
+  const primaryOrder = shouldUseNullsLast(orderBy)
+    ? effectiveDesc
+      ? sql`${orderColumn} DESC NULLS LAST`
+      : sql`${orderColumn} ASC NULLS LAST`
+    : effectiveDesc
+      ? sql`${orderColumn} DESC`
+      : sql`${orderColumn} ASC`;
 
+  const { ensIndexerSchema } = di.context;
   // Always include id as tiebreaker for stable ordering
-  const tiebreaker = effectiveDesc ? desc(domains.id) : asc(domains.id);
+  const tiebreaker = effectiveDesc
+    ? desc(ensIndexerSchema.domain.id)
+    : asc(ensIndexerSchema.domain.id);
 
   return [primaryOrder, tiebreaker];
 }

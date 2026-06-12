@@ -1,5 +1,33 @@
 # enskit
 
+## 1.15.2
+
+### Patch Changes
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - enssdk@1.15.2
+
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+
+## 1.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1)]:
+  - enssdk@1.15.0
+
+## 1.14.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

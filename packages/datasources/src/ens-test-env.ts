@@ -1,16 +1,15 @@
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
-import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 import { contracts } from "./devnet/constants";
 import { ensTestEnvChain } from "./lib/chains";
 // Shared ABIs
@@ -86,14 +85,8 @@ export default {
         startBlock: 0,
       },
       UniversalResolver: {
-        abi: UniversalResolverV1,
-        address: contracts.UniversalResolver,
-        startBlock: 0,
-      },
-      // NOTE: named UniversalResolverV2 in devnet
-      UniversalResolverV2: {
-        abi: UniversalResolverV2,
-        address: contracts.UniversalResolverV2,
+        abi: UniversalResolverABI,
+        address: contracts.UpgradableUniversalResolverProxy,
         startBlock: 0,
       },
     },

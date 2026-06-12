@@ -9,7 +9,7 @@ import {
   ROOT_RESOURCE,
 } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
@@ -18,11 +18,12 @@ import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
   load: (ids: PermissionsId[]) =>
-    ensDb.query.permissions.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+    di.context.ensDb.query.permissions.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -30,7 +31,9 @@ export const PermissionsRef = builder.loadableObjectRef("Permissions", {
 
 export const PermissionsResourceRef = builder.loadableObjectRef("PermissionsResource", {
   load: (ids: PermissionsResourceId[]) =>
-    ensDb.query.permissionsResource.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+    di.context.ensDb.query.permissionsResource.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+    }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -38,7 +41,9 @@ export const PermissionsResourceRef = builder.loadableObjectRef("PermissionsReso
 
 export const PermissionsUserRef = builder.loadableObjectRef("PermissionsUser", {
   load: (ids: PermissionsUserId[]) =>
-    ensDb.query.permissionsUser.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+    di.context.ensDb.query.permissionsUser.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+    }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -98,6 +103,7 @@ PermissionsRef.implement({
       description: "All PermissionResources managed by this contract.",
       type: PermissionsResourceRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           eq(ensIndexerSchema.permissionsResource.chainId, parent.chainId),
           eq(ensIndexerSchema.permissionsResource.address, parent.address),
@@ -131,13 +137,15 @@ PermissionsRef.implement({
       args: {
         where: t.arg({ type: EventsWhereInput }),
       },
-      resolve: (parent, args) =>
-        resolveFindEvents(args, {
+      resolve: (parent, args) => {
+        const { ensIndexerSchema } = di.context;
+        return resolveFindEvents(args, {
           through: {
             table: ensIndexerSchema.permissionsEvent,
             scope: eq(ensIndexerSchema.permissionsEvent.permissionsId, parent.id),
           },
-        }),
+        });
+      },
     }),
   }),
 });
@@ -195,6 +203,7 @@ PermissionsResourceRef.implement({
       description: "The PermissionUsers who have Roles within this Resource.",
       type: PermissionsUserRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           eq(ensIndexerSchema.permissionsUser.chainId, parent.chainId),
           eq(ensIndexerSchema.permissionsUser.address, parent.address),
@@ -286,13 +295,15 @@ PermissionsUserRef.implement({
       args: {
         where: t.arg({ type: EventsWhereInput }),
       },
-      resolve: (parent, args) =>
-        resolveFindEvents(args, {
+      resolve: (parent, args) => {
+        const { ensIndexerSchema } = di.context;
+        return resolveFindEvents(args, {
           through: {
             table: ensIndexerSchema.permissionsUserEvent,
             scope: eq(ensIndexerSchema.permissionsUserEvent.permissionsUserId, parent.id),
           },
-        }),
+        });
+      },
     }),
   }),
 });

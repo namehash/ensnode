@@ -1,5 +1,43 @@
 # ensrainbow
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2186](https://github.com/namehash/ensnode/pull/2186) [`04388d2`](https://github.com/namehash/ensnode/commit/04388d2193f422a95898eb0ee23e7555397b3ab6) Thanks [@djstrong](https://github.com/djstrong)! - Labelhash verification for heal responses now runs in `ensrainbow` (server) instead of `@ensnode/ensrainbow-sdk` (client). Malformed rainbow records — where the stored label does not hash back to the requested `labelHash` — are rejected as `NotFound`.
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`04388d2`](https://github.com/namehash/ensnode/commit/04388d2193f422a95898eb0ee23e7555397b3ab6)]:
+  - @ensnode/ensnode-sdk@1.15.2
+  - enssdk@1.15.2
+  - @ensnode/ensrainbow-sdk@1.15.2
+
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/ensrainbow-sdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+
+## 1.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1), [`55a6f23`](https://github.com/namehash/ensnode/commit/55a6f239cb6e1235f07160cb6faca58ca3f6d12d), [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429)]:
+  - enssdk@1.15.0
+  - @ensnode/ensrainbow-sdk@1.15.0
+  - @ensnode/ensnode-sdk@1.15.0
+
+## 1.14.0
+
+### Patch Changes
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @ensnode/ensrainbow-sdk@1.14.0
+  - enssdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

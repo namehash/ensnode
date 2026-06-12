@@ -1,5 +1,104 @@
 # ensapi
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2240](https://github.com/namehash/ensnode/pull/2240) [`7d23ee9`](https://github.com/namehash/ensnode/commit/7d23ee94d454c81561e5eedb4032377aab1aaedc) Thanks [@sevenzing](https://github.com/sevenzing)! - **Omnigraph API:** Introduces `Domain.resolve.profile` and `PrimaryNameRecord.resolve.profile` for resolving semantic record values.
+
+- [#2265](https://github.com/namehash/ensnode/pull/2265) [`c6f9643`](https://github.com/namehash/ensnode/commit/c6f9643d0855dff6a69b3055fee010a1bbb30342) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph API:** Adds `DomainResolver.effective`, the Resolver that ENS Forward Resolution (ENSIP-10) lands on for a Domain. Complements the existing `DomainResolver.assigned` (the Domain's directly-assigned Resolver).
+
+- [#2267](https://github.com/namehash/ensnode/pull/2267) [`6165f50`](https://github.com/namehash/ensnode/commit/6165f50e26729c6d740c7424034057642f5175b5) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API: Resolution now uses the ENSv2-ready stable UniversalResolver proxy address when not accelerated.
+
+- [#2268](https://github.com/namehash/ensnode/pull/2268) [`ff75f79`](https://github.com/namehash/ensnode/commit/ff75f795680490bf4f6d3c0518a6f3ae2460e6cd) Thanks [@shrugs](https://github.com/shrugs)! - Forward Resolution now fully delegates to the `UniversalResolver` whenever records cannot be accelerated, correctly implementing the [ENSv2-Readiness](https://docs.ens.domains/web/ensv2-readiness/) check for `ur.integration-test.eth`. Unaccelerated requests are always delegated to the `UniversalResolver`.
+
+- [#1974](https://github.com/namehash/ensnode/pull/1974) [`8a86fb4`](https://github.com/namehash/ensnode/commit/8a86fb4ac8b2651efa68b5c94e408f37093eca2d) Thanks [@sevenzing](https://github.com/sevenzing)! - Changes related to **Omnigraph**:
+  - add `Domain.resolve { records, trace, acceleration, profile? }` for forward resolution driven by the GraphQL selection set
+  - add `Account.resolve { primaryName(by: ...), primaryNames(where: ...) }` for reverse (ENSIP-19 primary name) resolution with `@oneOf` inputs (`coinType`/`chainName`, `coinTypes`/`chainNames`)
+  - add `PrimaryNameRecord.resolve { records, ... }` for forward resolution of the resolved primary name
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - The `resolvers` table gains an `is_extended` column — whether the Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`) — populated at index time via a single cached `supportsInterface` RPC. The Omnigraph API exposes it as a new `Resolver.extended: Boolean!` field.
+
+- [#2255](https://github.com/namehash/ensnode/pull/2255) [`c8267e4`](https://github.com/namehash/ensnode/commit/c8267e45099efd62e5690f19437c8aa242f77601) Thanks [@shrugs](https://github.com/shrugs)! - Add a materialized `domains.__canonical_name_prefix` column — the first 64 code points of `canonical_name` — to back left-anchored / substring search and NAME ordering. Direct-SQL consumers can now `WHERE __canonical_name_prefix LIKE 'vit%' ORDER BY __canonical_name_prefix` instead of replicating the previous `left(canonical_name, 256)` expression index. `canonical_name` is unchanged and remains the column for exact (`=` / `IN`) matches and display; the Omnigraph `name.starts_with` filter now targets the prefix column while continuing to return `canonical_name`.
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph API** — Resolvable-but-unindexed Domains & Accounts (off-chain / CCIP-Read names, unindexed 3DNS names, wildcard subnames) are now resolvable via `Query.domain(by: { name })` and `Query.account(by: { address })`, instead of returning `null`. This is supported by an additional concept, the `UnindexedDomain`, which expands the possible concrete types of the `Domain` interface.
+
+- Updated dependencies [[`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`39cb445`](https://github.com/namehash/ensnode/commit/39cb445b8d8790aa9d6fe2ee904e60bdb158efbd), [`5f929d8`](https://github.com/namehash/ensnode/commit/5f929d858a21e935b4b62ce6f2cbccc273623f96), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`c8267e4`](https://github.com/namehash/ensnode/commit/c8267e45099efd62e5690f19437c8aa242f77601), [`6165f50`](https://github.com/namehash/ensnode/commit/6165f50e26729c6d740c7424034057642f5175b5)]:
+  - @ensnode/datasources@1.15.2
+  - @ensnode/ensnode-sdk@1.15.2
+  - enssdk@1.15.2
+  - @ensnode/ensdb-sdk@1.15.2
+  - @namehash/ens-referrals@1.15.2
+  - @ensnode/ponder-subgraph@1.15.2
+
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/datasources@1.15.1
+  - @ensnode/ensdb-sdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+  - @ensnode/ponder-subgraph@1.15.1
+  - @namehash/ens-referrals@1.15.1
+
+## 1.15.0
+
+### Minor Changes
+
+- [#2161](https://github.com/namehash/ensnode/pull/2161) [`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: add `BeautifiedName` and `BeautifiedLabel` scalars, a `CanonicalName.beautified: BeautifiedName!` field, and a `Label.beautified: BeautifiedLabel!` field. These expose the Name/Label beautified per [ENSIP-15](https://docs.ens.domains/ensip/15) for display — continue using `interpreted` for navigation targets and lookup keys.
+
+### Patch Changes
+
+- [#2155](https://github.com/namehash/ensnode/pull/2155) [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: `AccountDomainsWhereInput.canonical` now filters on both `true` and `false` (previously `false` was a no-op). The `defaultValue: false` is dropped — clients omitting `canonical` will receive all Domains owned by the Account regardless of canonicality. Pass `canonical: true` for canonical-only or `canonical: false` for non-canonical-only. The underlying `DomainsWhere.canonical` in `resolveFindDomains` was generalized so `typeof === "boolean"` triggers the filter; `null`/`undefined` is "no filter".
+
+- Updated dependencies [[`bb0b244`](https://github.com/namehash/ensnode/commit/bb0b244e01b0ef7bba88c5ac5f9052fdddac4000), [`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1), [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71), [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429)]:
+  - @ensnode/ensdb-sdk@1.15.0
+  - enssdk@1.15.0
+  - @ensnode/ensnode-sdk@1.15.0
+  - @ensnode/datasources@1.15.0
+  - @namehash/ens-referrals@1.15.0
+  - @ensnode/ponder-subgraph@1.15.0
+
+## 1.14.0
+
+### Minor Changes
+
+- [#2101](https://github.com/namehash/ensnode/pull/2101) [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph (breaking)**: `Domain.resolver` is now a non-null `DomainResolver` wrapper exposing `Domain.resolver.assigned: Resolver` (replacing the previous flat `Domain.resolver: Resolver`). The wrapper leaves room for future fields (e.g. `effective`) describing the Domain's resolution graph. Semantics of `assigned` are unchanged — it remains the Domain's _assigned_ Resolver, not its _effective_ Resolver.
+
+  **Omnigraph (breaking)**: `DomainCanonical.name` is now a non-null `CanonicalName` wrapper exposing `DomainCanonical.name.interpreted: InterpretedName` (replacing the previous flat `DomainCanonical.name: InterpretedName`). The wrapper leaves room for additional representations (e.g. a future `beautified` field).
+
+- [#2125](https://github.com/namehash/ensnode/pull/2125) [`f6ef397`](https://github.com/namehash/ensnode/commit/f6ef3977931b68997a40fd47755e0fca8d262093) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph (breaking)**: `where: { name }` on `Query.domains`, `Account.domains`, `Registry.domains`, and `Domain.subdomains` now takes a `DomainsNameFilter` `@oneOf` input with three modes: `starts_with` (prefix autocomplete, the previous behavior), `eq` (exact InterpretedName match — sugar for `in: [eq]`), and `in` (exact match against a set of up to 100 InterpretedNames). The old shape `where: { name: "examp" }` becomes `where: { name: { starts_with: "examp" } }`; for exact lookups use `where: { name: { eq: "vitalik.eth" } }` or `where: { name: { in: ["alice.eth", "bob.eth"] } }`. Combine with `version` to disambiguate across ENS protocol versions (e.g. `{ name: { eq: "eth" }, version: ENSv1 }` returns a single Domain).
+
+- [#2125](https://github.com/namehash/ensnode/pull/2125) [`f6ef397`](https://github.com/namehash/ensnode/commit/f6ef3977931b68997a40fd47755e0fca8d262093) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: add `DEPTH` to the `DomainsOrderBy` enum, ordering by the materialized `Domain.canonicalDepth` (number of labels in the Canonical Name). Applies to `Query.domains`, `Account.domains`, `Registry.domains`, and `Domain.subdomains` via `order: { by: DEPTH }`. Also wired in as the default ordering for `where: { name: { starts_with } }` (typeahead).
+
+- [#2101](https://github.com/namehash/ensnode/pull/2101) [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph (breaking)**: restructure `Domain.canonical` into a nullable `DomainCanonical` object. Removes top-level `Domain.canonical: Boolean!`, `Domain.name: InterpretedName`, and `Domain.path: [DomainInterface]`; adds `Domain.canonical: DomainCanonical` (null when the Domain is not Canonical) with subfields `{ name: InterpretedName!, path: [Domain!]!, node: Node! }`.
+
+  **Omnigraph (semantic change)**: `Domain.parent` now follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement. Previously, `parent` was effectively null for non-canonical Domains and always pointed at a canonical Domain when non-null. With this change, a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Consumers that relied on `parent ⇒ canonical` should additionally check `domain.canonical`.
+
+- [#2126](https://github.com/namehash/ensnode/pull/2126) [`26dc2da`](https://github.com/namehash/ensnode/commit/26dc2da878d7a5979603cc204ccedcc7800e8af6) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph (breaking)**: filter args on `*.events` and `*.permissions` connections now use operator-based inputs. `EventsWhereInput`/`AccountEventsWhereInput`: `selector_in: [Hex]` → `selector: { eq | in }`, `timestamp_gte`/`timestamp_lte` → `timestamp: { gt?, gte?, lt?, lte? }`, `from`/`sender` → `{ eq | in }`. `DomainPermissionsWhereInput.user` → `{ eq | in }`. `Account.permissions(in: AccountIdInput)` → `Account.permissions(where: { contract: AccountIdInput })`. Set-membership `in` is capped at 10 items; timestamp ranges require ≥1 bound and reject `gt`+`gte` / `lt`+`lte` combinations and inverted bounds.
+
+- [#2102](https://github.com/namehash/ensnode/pull/2102) [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9) Thanks [@tk-o](https://github.com/tk-o)! - Continue to support protocol acceleration for data indexed from ENSv1 namespaces. Protocol acceleration for data indexed from ENSv2 namespaces will be supported in the near future.
+
+- [#2090](https://github.com/namehash/ensnode/pull/2090) [`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583) Thanks [@tk-o](https://github.com/tk-o)! - Added indexing status based guard for Omnigraph API and Subgraph API routes.
+
+### Patch Changes
+
+- [#2104](https://github.com/namehash/ensnode/pull/2104) [`89c022b`](https://github.com/namehash/ensnode/commit/89c022b85669a6703b688b0b304e6caa12f1221b) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: Protocol Accelerated records now correctly resolve instead of incorrectly always returning `null`.
+
+- [#2097](https://github.com/namehash/ensnode/pull/2097) [`1bc96f8`](https://github.com/namehash/ensnode/commit/1bc96f88c2e66f19fc4ab8bbda58753f5e414c6a) Thanks [@shrugs](https://github.com/shrugs)! - Forward Resolution is no longer disabled on ENSv1-only namespaces when the `unigraph` plugin is enabled. Forward Resolution is only (temporarily) disabled when a namespace has been upgraded to ENSv2. The Resolution API continues to operate in either case, just without Protocol Acceleration (temporarily) when ENSv2 is deployed.
+
+- [#2101](https://github.com/namehash/ensnode/pull/2101) [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph: The Domain interface now exposes `Domain.registry` and `Domain.subregistry` rather than being isolated to the concrete ENSv2 Domain entity, as in the unified model both ENSv1 and ENSv2 Domains have a parent and child Registry.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369), [`f6ef397`](https://github.com/namehash/ensnode/commit/f6ef3977931b68997a40fd47755e0fca8d262093), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461), [`75e8aac`](https://github.com/namehash/ensnode/commit/75e8aac2abb044ce55119daab98d20ebcbda8304)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @ensnode/ensdb-sdk@1.14.0
+  - @namehash/ens-referrals@1.14.0
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+  - @ensnode/ponder-subgraph@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

@@ -6,13 +6,24 @@ import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
 import ZodPlugin from "@pothos/plugin-zod";
 import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
+  BeautifiedLabel,
+  BeautifiedName,
+  BinanceAddress,
+  BitcoinAddress,
+  BitcoinCashAddress,
   ChainId,
   CoinType,
+  DogecoinAddress,
   DomainId,
+  Email,
   Hex,
+  InterfaceId,
   InterpretedLabel,
   InterpretedName,
+  JsonValue,
   LabelHash,
+  LitecoinAddress,
+  MonacoinAddress,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -23,11 +34,14 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
+  RippleAddress,
+  RootstockAddress,
+  SolanaAddress,
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
 
-import type { context } from "@/omnigraph-api/context";
+import type { Context } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
 const createSpan = createOpenTelemetryWrapper(tracer, {
@@ -60,14 +74,28 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
 export type BuilderScalars = {
   ID: { Input: string; Output: string };
   BigInt: { Input: bigint; Output: bigint };
+  JSON: { Input: JsonValue; Output: JsonValue };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
+  Email: { Input: Email; Output: Email };
+  BitcoinAddress: { Input: BitcoinAddress; Output: BitcoinAddress };
+  LitecoinAddress: { Input: LitecoinAddress; Output: LitecoinAddress };
+  DogecoinAddress: { Input: DogecoinAddress; Output: DogecoinAddress };
+  MonacoinAddress: { Input: MonacoinAddress; Output: MonacoinAddress };
+  RootstockAddress: { Input: RootstockAddress; Output: RootstockAddress };
+  RippleAddress: { Input: RippleAddress; Output: RippleAddress };
+  BitcoinCashAddress: { Input: BitcoinCashAddress; Output: BitcoinCashAddress };
+  BinanceAddress: { Input: BinanceAddress; Output: BinanceAddress };
+  SolanaAddress: { Input: SolanaAddress; Output: SolanaAddress };
   Hex: { Input: Hex; Output: Hex };
   LabelHash: { Input: LabelHash; Output: LabelHash };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };
+  InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };
   InterpretedName: { Input: InterpretedName; Output: InterpretedName };
   InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
+  BeautifiedName: { Input: BeautifiedName; Output: BeautifiedName };
+  BeautifiedLabel: { Input: BeautifiedLabel; Output: BeautifiedLabel };
   DomainId: { Input: DomainId; Output: DomainId };
   RegistryId: { Input: RegistryId; Output: RegistryId };
   ResolverId: { Input: ResolverId; Output: ResolverId };
@@ -80,7 +108,7 @@ export type BuilderScalars = {
 };
 
 export const builder = new SchemaBuilder<{
-  Context: ReturnType<typeof context>;
+  Context: Context;
   Scalars: BuilderScalars;
 
   // the following ensures via typechecker that every t.connection returns a totalCount field

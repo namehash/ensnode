@@ -1,4 +1,4 @@
-# Omnigraph GraphQL Example
+# ENS Omnigraph GraphQL Example
 
 A minimal TypeScript script demonstrating how to query the ENS Omnigraph API directly over HTTP — no SDK, just `fetch`.
 
@@ -8,11 +8,13 @@ Companion to the [ENS Omnigraph GraphQL API integration guide](https://ensnode.i
 
 ## Usage (with NameHash Hosted Instance)
 
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.x`). If you query a different ENSNode version, you may need to adjust the query format.
+
 ```sh
 # from the ENSNode monorepo root
 pnpm install
 
-ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F omnigraph-graphql-example start
+pnpm -F omnigraph-graphql-example start
 ```
 
 ## Usage (with Local ENSNode)
@@ -25,3 +27,9 @@ pnpm install
 
 ENSNODE_URL=http://localhost:4334 pnpm -F omnigraph-graphql-example start
 ```
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

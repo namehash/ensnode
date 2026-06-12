@@ -10,6 +10,12 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 npm install enssdk
 ```
 
+> **Version compatibility:** Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you **must** use `enssdk@1.13.1`. The latest published version (`1.14.0+`) contains breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. This notice will be removed once the hosted instances are upgraded.
+>
+> ```bash
+> npm install enssdk@1.13.1
+> ```
+
 ## Usage
 
 ### Core Client
@@ -26,14 +32,19 @@ const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" });
 import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph, graphql } from "enssdk/omnigraph";
 
-const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" })
-  .extend(omnigraph);
+const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" }).extend(omnigraph);
 
 const MyQuery = graphql(`
   query MyQuery($name: Name!) {
     domain(by: { name: $name }) {
-      canonical { name }
-      registration { expiry }
+      canonical {
+        name {
+          interpreted
+        }
+      }
+      registration {
+        expiry
+      }
     }
   }
 `);

@@ -14,7 +14,7 @@ const PageInfoFragment = gql`
 const PaginatedDomainFragment = gql`
   fragment PaginatedDomainFragment on Domain {
     id
-    canonical { name depth }
+    canonical { name { interpreted } depth }
     registration {
       expiry
       start
@@ -24,7 +24,7 @@ const PaginatedDomainFragment = gql`
 
 export type PaginatedDomainResult = {
   id: DomainId;
-  canonical: { name: InterpretedName; depth: number } | null;
+  canonical: { name: { interpreted: InterpretedName }; depth: number } | null;
   registration: {
     expiry: string | null;
     start: string;

@@ -9,7 +9,7 @@ import {
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateByInt } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
@@ -26,10 +26,12 @@ import { EventRef } from "@/omnigraph-api/schema/event";
 import { RenewalRef } from "@/omnigraph-api/schema/renewal";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
-  load: (ids: RegistrationId[]) =>
-    ensDb.query.registration.findMany({
+  load: (ids: RegistrationId[]) => {
+    const { ensDb } = di.context;
+    return ensDb.query.registration.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
-    }),
+    });
+  },
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -166,6 +168,7 @@ RegistrationInterfaceRef.implement({
         "Renewals that have occurred within this Registration's lifespan to extend its expiration.",
       type: RenewalRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           eq(ensIndexerSchema.renewal.domainId, parent.domainId),
           eq(ensIndexerSchema.renewal.registrationIndex, parent.registrationIndex),
@@ -243,6 +246,32 @@ BaseRegistrarRegistrationRef.implement({
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "BaseRegistrar",
   fields: (t) => ({
+    /////////////////////////////////////
+    // BaseRegistrarRegistration.tokenId
+    /////////////////////////////////////
+    tokenId: t.field({
+      description:
+        "The TokenId for this Domain in the BaseRegistrar. This is the bigint encoding of the Domain's LabelHash.",
+      type: "BigInt",
+      nullable: false,
+      resolve: async (parent, _args, ctx) => {
+        const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
+        if (!domain) {
+          throw new Error(
+            `Invariant(BaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
+          );
+        }
+
+        if (!isENSv1Domain(domain)) {
+          throw new Error(
+            `Invariant(BaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
+          );
+        }
+
+        return hexToBigInt(domain.labelHash);
+      },
+    }),
+
     //////////////////////////////////////
     // BaseRegistrarRegistration.baseCost
     //////////////////////////////////////
@@ -297,7 +326,7 @@ ThreeDNSRegistrationRef.implement({
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "ThreeDNS",
   fields: (t) => ({
-    //
+    // TODO: ThreeDNSRegistration.tokenId
   }),
 });
 
@@ -342,10 +371,10 @@ WrappedBaseRegistrarRegistrationRef.implement({
     // Wrapped.tokenId
     ///////////////////
     tokenId: t.field({
-      description: "The TokenID for this Domain in the NameWrapper.",
+      description:
+        "The TokenId for this Domain in the NameWrapper. This is the bigint encoding of the Domain's Node.",
       type: "BigInt",
       nullable: false,
-      // Only ENSv1 Domains can be wrapped; the NameWrapper's ERC1155 tokenId is the Domain's node.
       resolve: async (parent, _args, ctx) => {
         const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
         if (!domain) {
@@ -353,11 +382,13 @@ WrappedBaseRegistrarRegistrationRef.implement({
             `Invariant(WrappedBaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
           );
         }
+
         if (!isENSv1Domain(domain)) {
           throw new Error(
             `Invariant(WrappedBaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
           );
         }
+
         return hexToBigInt(domain.node);
       },
     }),

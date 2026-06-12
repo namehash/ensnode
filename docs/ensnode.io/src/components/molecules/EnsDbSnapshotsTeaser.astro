@@ -1,0 +1,32 @@
+---
+import { Card, CardGrid } from "@astrojs/starlight/components";
+---
+
+<CardGrid>
+  <Card title="Cut your RPC bill" icon="approve-check-circle">
+    Skip the historical RPC fanout entirely. Pull down a published ENSDb snapshot instead of
+    replaying 9+ years of ENS history through your own RPC provider - saving real money on every
+    bootstrap, every CI run, every fresh environment.
+  </Card>
+  <Card title="Spin up in minutes, not days" icon="rocket">
+    Skip the long historical backfill too. A nearly up-to-date ENS index is ready as fast as you can
+    download it - no specially configured Postgres required, no days of waiting. Perfect for
+    hackathons, demos, prototypes, and any other time you need a fresh ENSDb fast.
+  </Card>
+  <Card title="Repeatable CI environments" icon="seti:shell">
+    Use snapshots as deterministic fixtures for tests and CI pipelines. Every run starts from the
+    same well-known ENS state, with zero RPC dependency.
+  </Card>
+  <Card title="Confident release reviews" icon="approve-check">
+    Diff snapshots across ENSNode versions to catch unexpected changes in indexed data - a powerful
+    way to validate indexing-logic refactors before a release ships.
+  </Card>
+  <Card title="Easier self-hosting" icon="seti:db">
+    Bootstrap your own ENSNode instance from a recent snapshot, then catch up to realtime from
+    there. Less time waiting, more time building.
+  </Card>
+  <Card title="ensdb-cli: purpose-built ops tooling" icon="seti:config">
+    `ensdb-cli` surfaces the operations you actually need day-to-day: inspect indexer instances,
+    manage snapshots, clean up unused schemas, and more.
+  </Card>
+</CardGrid>

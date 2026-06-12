@@ -6,48 +6,6 @@ sidebar:
 
 New terminology (beyond the [official ENS glossary](https://docs.ens.domains/terminology)) has been needed in the course of building ENSNode. The following should be understood as a draft that is open to community feedback. Each definition below aims to maximize alignment with the official ENS glossary where possible, and reduce instances where a piece of terminology may have multiple meanings in the context of the protocol.
 
-## Core Protocol Extension Concepts
-
-The following concepts extend the core ENS protocol to handle multichain and off-chain scenarios that arise in modern ENS usage.
-
-### Subregistry
-
-A **Subregistry** is any data structure outside of the [Registry](https://docs.ens.domains/terminology#registry) that manages supplemental state for a set of [subnames](https://docs.ens.domains/terminology#subname-subdomain). Each [name](https://docs.ens.domains/terminology#name) has the potential for association with at least 1 subregistry (through the [Name Wrapper](https://docs.ens.domains/terminology#name-wrapper)) and may optionally be associated with multiple subregistries. When a name is associated with multiple subregistries, this means that the full state of a name must be combined across the Registry and each associated subregistry. For example, the state of all direct subnames of .eth is distributed across the Registry and two subregistries: the BaseRegistrar and the Name Wrapper. The ENS protocol does not currently define standards for subregistries: subregistries currently exist outside the scope of ENS protocol standards. For example, subregistries could live on L1, on L2s, or offchain (in a database or even in a Google Sheet). The ENS protocol currently provides no standardized mechanism to discover subregistries or to interact with subregistries.
-
-Some specific implementations of subregistries include:
-
-- The [BaseRegistrar](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/BaseRegistrarImplementation.sol) that holds supplemental state for direct subnames of .eth. This includes state for ERC721 NFTs and expiry times.
-- The [NameWrapper](https://docs.ens.domains/terminology#name-wrapper), which serves as a subregistry for the entire ENS root (all ENS names). This includes state for ERC1155 NFTs, expiry times, and fuses.
-  - Note how direct subnames of .eth are an example of multiple subregistries potentially holding supplemental state for a name outside the Registry.
-- The contracts on Base that manage supplemental state for direct subnames of [base.eth](https://www.base.org/names).
-- The contracts on Linea that manage supplemental state for direct subnames of [linea.eth](https://names.linea.build/).
-- The contracts on Base / Optimism that manage supplemental state for DNS names managed by [3DNS](https://3dns.box/).
-- The offchain databases that manage supplemental state for direct subnames of [uni.eth](https://blog.uniswap.org/introducing-uni-eth-your-unique-web3-username).
-- The offchain databases that manage supplemental state for direct subnames of [cb.id](https://help.coinbase.com/en/wallet/managing-account/coinbase-ens-support).
-- DNS nameservers for (essentially) all DNS names. Since ENS is a superset of DNS, (essentially) any DNS name is an ENS name. Therefore, whenever supplemental state associated with a DNS name is updated in a DNS nameserver, a subregistry is being updated.
-
-### Subregistrar
-
-A **Subregistrar** is any system that is a [Registrar](https://docs.ens.domains/terminology#registrar) or that writes to a subregistry.
-
-This definition expands the definition of Registrar to include cases such as:
-
-- The [ETHRegistrarController](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/ETHRegistrarController.sol) that writes to BaseRegistrar (the owner of the "eth" TLD). Note how the definition of "Registrar" in the official ENS glossary only includes contracts that are pointed to by the owner field of the Registry. Therefore, the BaseRegistrar is a Registrar (and a Subregistry), while the ETHRegistrarController is a Subregistrar.
-- The contracts on Base that write to the Subregistry for direct subnames of base.eth. These contracts live on Base, therefore they cannot meet the definition of Registrar because they can't be set as the owner in the Registry on Ethereum mainnet.
-- The offchain systems that write to the offchain databases associated with direct subnames of uni.eth and cb.id.
-- Any NFT marketplace that supports the exchange of an NFT representing ownership of an ENS name. Each time a NFT is exchanged, state about that NFT must be updated within a related subregistry. Therefore the marketplace enabling that trade is a Subregistrar.
-- Any DNS registrar, as ENS is a superset of DNS.
-
-### Shadow Registry
-
-A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
-
-1. Not the Registry;
-2. Implemented as a smart contract exposing the same interface as the Registry;
-3. Used as part of the source of truth for a CCIP-Read Gateway Server for ENSIP-10 (wildcard resolution) powered subnames.
-
-A specific implementation of a Shadow Registry can be found in [this contract](https://github.com/base-org/basenames/blob/v1.0.4/src/L2/Registry.sol) storing a subset of the state of base.eth subnames on Base.
-
 ## ENS Name Resolution Fundamentals
 
 Understanding how ENS names are processed and displayed requires precise terminology around name components and their various states. The following sections build from basic name resolution concepts to the specific classification and encoding systems used in ENSNode.
@@ -74,7 +32,7 @@ ENSNode must process labels from various onchain and offchain sources, each pote
 
 A **Label** is a human-readable string used as a segment of a **name** — i.e. `vitalik` and `eth` are the **Labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
 
-In the ENS `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ Labels or that those Labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **Labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **Labels** that make up a name can be made **known**: human-readable **Labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **Label** for a given **LabelHash** can be determined via rainbow table lookups and other strategies.
+In the ENSv1 `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ Labels or that those Labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **Labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **Labels** that make up a name can be made **known**: human-readable **Labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **Label** for a given **LabelHash** can be determined via rainbow table lookups (via [ENSRainbow](/docs/services/ensrainbow)) and other strategies.
 
 #### Rendering _Unknown_ Labels
 
@@ -94,7 +52,7 @@ In this terminology reference, we say that the **LabelHash** of a **Label** is t
 
 That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **LabelHash** of `vitalik`, which is the result of calling the **`labelhash` function** like so:
 
-```ts
+```ts title="example.ts"
 import { labelhashInterpretedLabel, asInterpretedLabel } from "enssdk";
 const labelHash = labelhashInterpretedLabel(asInterpretedLabel("vitalik"));
 ```
@@ -174,6 +132,15 @@ An **Interpreted Label** is a **Label** that is either:
 
 Apps building on ENSNode should take special note to align their implementation of **ENS Normalize** with the **ENS Normalize** used by the ENSNode they use. The **ENS Normalize** version used by each ENSNode can be referenced in the ENSIndexer Config API.
 
+### Beautified Label
+
+A **Beautified Label** is a **Label** produced from an **Interpreted Label** for presentation in a UI. It is either:
+
+- an **Encoded LabelHash**, preserved verbatim from the source **Interpreted Label**, or
+- a label produced by passing a normalized label through [ENSIP-15](https://docs.ens.domains/ensip/15) beautification, which is guaranteed to be normalizable back to the original normalized label but is itself NOT necessarily normalized (e.g. `"♾"` → `"♾️"`).
+
+Because the beautified form is not guaranteed to be normalized, a **Beautified Label** is NOT an **Interpreted Label** and MUST NOT be used as a lookup key, or anywhere else that expects an **Interpreted Label**.
+
 ### Literal Name
 
 A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels**.
@@ -181,6 +148,23 @@ A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels*
 ### Interpreted Name
 
 An **Interpreted Name** is a Name exclusively composed of 0 or more **Interpreted Labels**.
+
+### Beautified Name
+
+A **Beautified Name** is a Name produced from an **Interpreted Name** for presentation in a UI, where each label is either:
+
+- an **Encoded LabelHash**, preserved verbatim from the source **Interpreted Name**, or
+- a label produced by passing a normalized label through [ENSIP-15](https://docs.ens.domains/ensip/15) beautification, which is guaranteed to be normalizable back to the original normalized label but is itself NOT necessarily normalized (e.g. `"♾"` → `"♾️"`).
+
+Because the beautified form is not guaranteed to be normalized, a **Beautified Name** is NOT an **Interpreted Name** and MUST NOT be used as a navigation target, lookup key, or anywhere else that expects an **Interpreted Name**.
+
+### Resolvable Name
+
+A **Resolvable Name** is a Name that can be used as input to ENS Forward Resolution. It contains only literal label segments (normalized or unnormalized), and each label is at most 255 bytes due to the [DNS Encoding](https://docs.ens.domains/resolution/names/#dns-encoding) standard.
+
+:::danger[Interpreted Name !== Resolvable Name]
+Because Forward Resolution does not support **Encoded LabelHashes**, an **Interpreted Name** containing an **Encoded LabelHash** is NOT a **Resolvable Name**: it can be used to traverse the Namegraph, but the records for that name cannot be resolved.
+:::
 
 ## Subgraph Indexability & Label/Name Interpretation
 
@@ -212,3 +196,45 @@ A **Subgraph Interpreted Label** is a **Label** that is either:
 ### Subgraph Interpreted Name
 
 A **Subgraph Interpreted Name** is a name exclusively composed of 0 or more **Subgraph Interpreted Labels**.
+
+## Core Protocol Extension Concepts
+
+The following concepts extend the core ENS protocol to handle multichain and off-chain scenarios that arise in modern ENS usage.
+
+### Subregistry
+
+A **Subregistry** is any data structure outside of the [Registry](https://docs.ens.domains/terminology#registry) that manages supplemental state for a set of [subnames](https://docs.ens.domains/terminology#subname-subdomain). Each [name](https://docs.ens.domains/terminology#name) has the potential for association with at least 1 subregistry (through the [Name Wrapper](https://docs.ens.domains/terminology#name-wrapper)) and may optionally be associated with multiple subregistries. When a name is associated with multiple subregistries, this means that the full state of a name must be combined across the Registry and each associated subregistry. For example, the state of all direct subnames of .eth is distributed across the Registry and two subregistries: the BaseRegistrar and the Name Wrapper. The ENS protocol does not currently define standards for subregistries: subregistries currently exist outside the scope of ENS protocol standards. For example, subregistries could live on L1, on L2s, or offchain (in a database or even in a Google Sheet). The ENS protocol currently provides no standardized mechanism to discover subregistries or to interact with subregistries.
+
+Some specific implementations of subregistries include:
+
+- The [BaseRegistrar](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/BaseRegistrarImplementation.sol) that holds supplemental state for direct subnames of .eth. This includes state for ERC721 NFTs and expiry times.
+- The [NameWrapper](https://docs.ens.domains/terminology#name-wrapper), which serves as a subregistry for the entire ENS root (all ENS names). This includes state for ERC1155 NFTs, expiry times, and fuses.
+  - Note how direct subnames of .eth are an example of multiple subregistries potentially holding supplemental state for a name outside the Registry.
+- The contracts on Base that manage supplemental state for direct subnames of [base.eth](https://www.base.org/names).
+- The contracts on Linea that manage supplemental state for direct subnames of [linea.eth](https://names.linea.build/).
+- The contracts on Base / Optimism that manage supplemental state for DNS names managed by [3DNS](https://3dns.box/).
+- The offchain databases that manage supplemental state for direct subnames of [uni.eth](https://blog.uniswap.org/introducing-uni-eth-your-unique-web3-username).
+- The offchain databases that manage supplemental state for direct subnames of [cb.id](https://help.coinbase.com/en/wallet/managing-account/coinbase-ens-support).
+- DNS nameservers for (essentially) all DNS names. Since ENS is a superset of DNS, (essentially) any DNS name is an ENS name. Therefore, whenever supplemental state associated with a DNS name is updated in a DNS nameserver, a subregistry is being updated.
+
+### Subregistrar
+
+A **Subregistrar** is any system that is a [Registrar](https://docs.ens.domains/terminology#registrar) or that writes to a subregistry.
+
+This definition expands the definition of Registrar to include cases such as:
+
+- The [ETHRegistrarController](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/ETHRegistrarController.sol) that writes to BaseRegistrar (the owner of the "eth" TLD). Note how the definition of "Registrar" in the official ENS glossary only includes contracts that are pointed to by the owner field of the Registry. Therefore, the BaseRegistrar is a Registrar (and a Subregistry), while the ETHRegistrarController is a Subregistrar.
+- The contracts on Base that write to the Subregistry for direct subnames of base.eth. These contracts live on Base, therefore they cannot meet the definition of Registrar because they can't be set as the owner in the Registry on Ethereum mainnet.
+- The offchain systems that write to the offchain databases associated with direct subnames of uni.eth and cb.id.
+- Any NFT marketplace that supports the exchange of an NFT representing ownership of an ENS name. Each time a NFT is exchanged, state about that NFT must be updated within a related subregistry. Therefore the marketplace enabling that trade is a Subregistrar.
+- Any DNS registrar, as ENS is a superset of DNS.
+
+### Shadow Registry
+
+A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
+
+1. Not the Registry;
+2. Implemented as a smart contract exposing the same interface as the Registry;
+3. Used as part of the source of truth for a CCIP-Read Gateway Server for ENSIP-10 (wildcard resolution) powered subnames.
+
+A specific implementation of a Shadow Registry can be found in [this contract](https://github.com/base-org/basenames/blob/v1.0.4/src/L2/Registry.sol) storing a subset of the state of base.eth subnames on Base.

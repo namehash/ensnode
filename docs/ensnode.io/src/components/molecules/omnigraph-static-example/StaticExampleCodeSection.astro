@@ -1,0 +1,30 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+import { staticExampleCodeWrapClass, staticExampleSectionXClass } from "./constants";
+import Pill from "@components/atoms/Pill.astro";
+
+interface Props {
+  badge?: string;
+  headingId?: string;
+  code: string;
+  lang: string;
+}
+
+const { badge, headingId, code, lang } = Astro.props;
+
+const sectionClass = `border-b border-black/[0.05] pb-5 pt-3 dark:border-white/[0.06] ${staticExampleSectionXClass}`;
+---
+
+<section class={sectionClass} {...badge && headingId ? { "aria-labelledby": headingId } : {}}>
+  {
+    badge && (
+      <div class="mb-2.5">
+        <Pill id={headingId}>{badge}</Pill>
+      </div>
+    )
+  }
+  <div class={staticExampleCodeWrapClass}>
+    <Code code={code} lang={lang} />
+  </div>
+</section>

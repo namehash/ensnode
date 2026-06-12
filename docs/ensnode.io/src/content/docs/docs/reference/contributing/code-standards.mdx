@@ -1,0 +1,32 @@
+---
+title: Code Standards
+sidebar:
+  label: Code Standards
+  order: 6
+---
+
+## Formatting / Linting
+
+We use Biome to format most of the code in the ENSNode monorepo, and Prettier to cover the rest:
+
+- Biome handles JS, TS, JSON, CSS, and the frontmatter of `.astro` files.
+- Prettier handles Markdown (`.md` and `.mdx`) across the monorepo, and the template portion of `.astro` files in `docs/ensnode.io` and `docs/ensrainbow.io` via [`prettier-plugin-astro`](https://github.com/withastro/prettier-plugin-astro). The `astroSkipFrontmatter: true` option keeps the frontmatter under Biome's ownership.
+
+### Running the formatters
+
+From the monorepo root:
+
+```bash
+pnpm lint
+```
+
+CI runs `pnpm lint:ci` (check-only) on every PR.
+
+### Windows: line-ending diffs
+
+Git on Windows checks files out with CRLF (`\r\n`) line endings by default. Biome and Prettier write LF (`\n`). After `pnpm lint`, files may appear modified, but Git normalizes the endings back to LF when staging, so nothing changes in the resulting commit.
+
+To clear the noise from your working tree:
+
+- One-off: run `git add --all`. The index normalizes the endings and the files drop out of `git status`.
+- Permanent: run `git config --global core.autocrlf input`, then `git checkout -- .`. Your working tree converts to LF and future checkouts keep it that way.

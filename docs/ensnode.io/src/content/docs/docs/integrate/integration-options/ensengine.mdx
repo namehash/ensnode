@@ -1,0 +1,81 @@
+---
+title: ENSEngine (Live push notifications)
+description: Coming soon - ENS-native push-based events that fire when ENS state changes, so apps can stop polling and start reacting.
+---
+
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+
+<Aside type="caution" title="Coming soon">
+  ENS-native event-driven reactive development is coming soon with
+  [ENSEngine](/docs/services/ensengine) that builds on top of [ENSDb](/docs/services/ensdb).
+</Aside>
+
+## The problem
+
+Today, if you want your app to react to ENS state changes, you have two unappealing options:
+
+- **Poll constantly.** Hammer API endpoints or RPCs every few seconds and discard most responses. Wasteful, inefficient, and scales poorly.
+- **Build your own complex indexer and data pipeline.** Stand up infrastructure to listen to chain events, decode them, and turn them into the ENS-level signals you actually care about. Way too much work for what should be a primitive.
+
+## What we're building
+
+ENSEngine will be an **ENS-native event-driven reactive development service** (for live push notifications) so your app can subscribe to ENS state changes in ENSDb the same way you'd subscribe to updates from Stripe or GitHub - except the events speak the language of discrete meaningful ENS actions, not the language of bare-metal raw onchain event transaction logs.
+
+```json title="example-event.json"
+{
+  "type": "domain.transferred",
+  "name": "vitalik.eth"
+}
+```
+
+The shape above is illustrative only. Full details coming soon.
+
+## Example events
+
+Events will represent meaningful ENS events, such as:
+
+- `domain.registered`, `domain.renewed`, `domain.transferred`
+- `resolver.address_changed`, `resolver.text_changed`, `resolver.contenthash_changed`
+- `subname.created`
+- ... and many more.
+
+## What this unlocks
+
+### Cache invalidation
+
+Build aggressive, edge-friendly caches for ENS data. The goal is to make it practical to cache profiles, avatars, text records, and resolver responses for much longer than polling-based integrations allow, then invalidate them when relevant onchain state changes. That's the foundation for web2-grade UX on a web3 protocol - fast page loads, low RPC fanout, globally distributed reads - without giving up freshness.
+
+Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
+
+Where this matters:
+
+- Frontend apps caching ENS profiles
+- CDNs serving ENS-driven content
+- API gateways with ENS lookups
+- Any service that caches resolver records or other ENS data.
+
+### Additional key use cases
+
+Once a reliable change feed exists, a lot of follow-on use cases get dramatically easier to build:
+
+- **Notification services** - expiry reminders, watchlists, security alerts on unexpected transfers, activity bots in Discord/Telegram/Twitter.
+- **Sync to alternative databases** - want to store alternative representations of ENSDb in databases that provide specialized benefits that Postgres doesn't offer, such as Elasticsearch, Typesense, Meilisearch, Redis, Kafka, Google BigQuery, and more? ENSEngine will ensure 100% delivery of database changes to sinks with strict ordering and exactly-once processing.
+- **Realtime dashboards** - surface ENS analytics and activity data as it happens.
+
+## How it works (high level)
+
+ENSEngine builds on solid foundations:
+
+1. **[ENSIndexer](/docs/services/ensindexer)** keeps **[ENSDb](/docs/services/ensdb)** up to date with the live, onchain state of ENS - including automatic chain reorg healing.
+2. **[ENSEngine](/docs/services/ensengine)** watches that database for changes and turns them into enriched, filtered, ENS-aware events.
+3. Those events get delivered to **your sinks** - webhooks, cache invalidation hooks, database sync targets, notification systems, and more.
+
+For the architecture overview, see [ENSEngine Overview](/docs/services/ensengine).
+
+## Related
+
+<LinkCard
+  title="ENSEngine Overview"
+  description="Learn more about ENSEngine."
+  href="/docs/services/ensengine"
+/>

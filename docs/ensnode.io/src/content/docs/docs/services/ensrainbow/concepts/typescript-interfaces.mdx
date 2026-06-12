@@ -11,13 +11,13 @@ ENSRainbow's TypeScript APIs expose two companion interfaces that describe **whi
 
 ## Server Label Set
 
-### `EnsRainbowServerLabelSet`
+### EnsRainbowServerLabelSet
 
 Returned by `GET /version` and stored in database metadata:
 
-```ts
+```ts title="types.ts"
 interface EnsRainbowServerLabelSet {
-  labelSetId: string;          // active label set ID (e.g. "subgraph")
+  labelSetId: string; // active label set ID (e.g. "subgraph")
   highestLabelSetVersion: number; // highest label set version the server has ingested for the label set id
 }
 ```
@@ -29,13 +29,13 @@ interface EnsRainbowServerLabelSet {
 
 ## Client Label Set
 
-### `EnsRainbowClientLabelSet`
+### EnsRainbowClientLabelSet
 
 Provided when constructing `new EnsRainbowApiClient({ clientLabelSet: … })` to pin client expectations:
 
-```ts
+```ts title="types.ts"
 interface EnsRainbowClientLabelSet {
-  labelSetId?: string;    // optional – require a particular label set
+  labelSetId?: string; // optional – require a particular label set
   labelSetVersion?: number; // optional – maximum label set version accepted
 }
 ```
@@ -52,27 +52,27 @@ This handshake that occurs when **both fields** are set ensures both client and 
 
 ### Using the Client SDK
 
-```ts
-import { EnsRainbowApiClient } from '@ensnode/ensrainbow-sdk';
+```ts title="example.ts"
+import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
 // Default: use latest version of any labelset
 const client1 = new EnsRainbowApiClient({
-  endpointUrl: 'https://api.ensrainbow.io'
+  endpointUrl: "https://api.ensrainbow.io",
 });
 
 // Pin to subgraph labelset, use latest version
 const client2 = new EnsRainbowApiClient({
-  endpointUrl: 'https://api.ensrainbow.io',
-  clientLabelSet: { labelSetId: 'subgraph' }
+  endpointUrl: "https://api.ensrainbow.io",
+  clientLabelSet: { labelSetId: "subgraph" },
 });
 
 // Pin to exact labelset snapshot for deterministic results across time
 const client3 = new EnsRainbowApiClient({
-  endpointUrl: 'https://api.ensrainbow.io',
-  clientLabelSet: { 
-    labelSetId: 'subgraph', 
-    labelSetVersion: 0 
-  }
+  endpointUrl: "https://api.ensrainbow.io",
+  clientLabelSet: {
+    labelSetId: "subgraph",
+    labelSetVersion: 0,
+  },
 });
 ```
 
@@ -80,4 +80,4 @@ const client3 = new EnsRainbowApiClient({
 
 - **[Client SDK](/docs/services/ensrainbow/usage/client-sdk/)** - How to use these interfaces in practice
 - **[API Reference](/docs/services/ensrainbow/usage/api/)** - HTTP API endpoints that return these types
-- **[Label Sets & Versioning](/docs/services/ensrainbow/concepts/label-sets-and-versioning)** - Understanding the versioning concepts 
+- **[Label Sets & Versioning](/docs/services/ensrainbow/concepts/label-sets-and-versioning)** - Understanding the versioning concepts

@@ -1,10 +1,10 @@
-import { ensDb } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 
 export const EventRef = builder.loadableObjectRef("Event", {
   load: (ids: string[]) =>
-    ensDb.query.event.findMany({
+    di.context.ensDb.query.event.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,
@@ -161,70 +161,6 @@ EventRef.implement({
       type: "Hex",
       nullable: false,
       resolve: (parent) => parent.data,
-    }),
-  }),
-});
-
-//////////
-// Inputs
-//////////
-
-/**
- * Shared filter for events connections. Used by Domain.events, Resolver.events, Permissions.events,
- * and Account.events (which excludes `sender` since it's implied).
- */
-export const EventsWhereInput = builder.inputType("EventsWhereInput", {
-  description: "Filter conditions for an events connection.",
-  fields: (t) => ({
-    selector_in: t.field({
-      type: ["Hex"],
-      description:
-        "Filter to events whose selector (event signature) is one of the provided values.",
-    }),
-    timestamp_gte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or after this UnixTimestamp.",
-    }),
-    timestamp_lte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or before this UnixTimestamp.",
-    }),
-    from: t.field({
-      type: "Address",
-      description:
-        "Filter to events whose `tx.from` matches. Not HCA-aware — use `sender` to filter by the HCA account address.",
-    }),
-    sender: t.field({
-      type: "Address",
-      description:
-        "Filter to events whose `sender` matches: the HCA account address if used, otherwise Transaction.from.",
-    }),
-  }),
-});
-
-/**
- * Like EventsWhereInput but without `sender` (used where `sender` is implied, e.g. Account.events).
- */
-export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInput", {
-  description: "Filter conditions for Account.events (where `sender` is implied by the Account).",
-  fields: (t) => ({
-    selector_in: t.field({
-      type: ["Hex"],
-      description:
-        "Filter to events whose selector (event signature) is one of the provided values.",
-    }),
-    timestamp_gte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or after this UnixTimestamp.",
-    }),
-    timestamp_lte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or before this UnixTimestamp.",
-    }),
-    from: t.field({
-      type: "Address",
-      description:
-        "Filter to events whose `tx.from` matches. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.",
     }),
   }),
 });

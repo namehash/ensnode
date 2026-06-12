@@ -1,4 +1,5 @@
 import {
+  type AccountId,
   type Address,
   type CoinType,
   type Hex,
@@ -16,6 +17,7 @@ import {
   interpretPubkeyValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
+  isExtendedResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -31,6 +33,57 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
+ * Ensures a Resolver entity exists for `resolver`, deriving its Supported Interfaces on first insert.
+ */
+export async function upsertResolver(context: IndexingEngineContext, resolver: AccountId) {
+  const id = makeResolverId(resolver);
+
+  const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
+
+  // if already exists, no-op
+  if (existing) return;
+
+  // insert the new Resolver record
+  await context.ensDb.insert(ensIndexerSchema.resolver).values({ id, ...resolver });
+
+  // update its Supported Interfaces
+  await updateResolverInterfaces(context, resolver);
+}
+
+/**
+ * Updates a Resolver's Supported Interfaces.
+ */
+async function updateResolverInterfaces(context: IndexingEngineContext, resolver: AccountId) {
+  const id = makeResolverId(resolver);
+
+  const isExtended = await isExtendedResolver({
+    address: resolver.address,
+    publicClient: context.client,
+  });
+
+  await context.ensDb.update(ensIndexerSchema.resolver, { id }).set({ isExtended });
+}
+
+/**
+ * Handles a Resolver's implementation changing by updating its Supported Interfaces, if the Resolver
+ * is already indexed.
+ *
+ * @dev intentionally avoids upserting a Resolver entity for contracts not already an indexed Resolver.
+ * If a contract were to emit Upgraded and then emit a Resolver event, `upsertResolver` above would
+ * ensure that the Supported Interfaces are correctly indexed.
+ */
+export async function handleResolverImplementationChange(
+  context: IndexingEngineContext,
+  resolver: AccountId,
+) {
+  const id = makeResolverId(resolver);
+  const existing = await context.ensDb.find(ensIndexerSchema.resolver, { id });
+  if (!existing) return;
+
+  await updateResolverInterfaces(context, resolver);
+}
+
+/**
  * Ensures the Resolver + ResolverRecords entities exist for the given Resolver event, and returns
  * the ResolverRecords key for further per-record updates.
  */
@@ -41,10 +94,7 @@ export async function ensureResolverAndRecords(
   const resolver = getThisAccountId(context, event);
   const key: ResolverRecordsCompositeKey = { ...resolver, node: event.args.node };
 
-  await context.ensDb
-    .insert(ensIndexerSchema.resolver)
-    .values({ id: makeResolverId(resolver), ...resolver })
-    .onConflictDoNothing();
+  await upsertResolver(context, resolver);
 
   await context.ensDb
     .insert(ensIndexerSchema.resolverRecords)

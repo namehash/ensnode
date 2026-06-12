@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 import {
@@ -11,7 +9,7 @@ import {
 
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
@@ -19,7 +17,8 @@ import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { NameOrNodeInput } from "@/omnigraph-api/schema/name-or-node";
 import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
@@ -40,7 +39,7 @@ import { ResolverRecordsRef } from "@/omnigraph-api/schema/resolver-records";
 
 export const ResolverRef = builder.loadableObjectRef("Resolver", {
   load: (ids: ResolverId[]) =>
-    ensDb.query.resolver.findMany({
+    di.context.ensDb.query.resolver.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,
@@ -76,6 +75,17 @@ ResolverRef.implement({
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
+    /////////////////////
+    // Resolver.extended
+    /////////////////////
+    extended: t.field({
+      description:
+        "Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed.",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent) => parent.isExtended,
+    }),
+
     ////////////////////
     // Resolver.records
     ////////////////////
@@ -83,6 +93,7 @@ ResolverRef.implement({
       description: "ResolverRecords issued by this Resolver.",
       type: ResolverRecordsRef,
       resolve: (parent, args, context) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           eq(ensIndexerSchema.resolverRecords.chainId, parent.chainId),
           eq(ensIndexerSchema.resolverRecords.address, parent.address),
@@ -128,7 +139,7 @@ ResolverRef.implement({
       type: RegistryInterfaceRef,
       nullable: true,
       resolve: (parent) => {
-        const bridged = isBridgedResolver(config.namespace, parent);
+        const bridged = isBridgedResolver(di.context.namespace, parent);
         return bridged?.targetRegistryId ?? null;
       },
     }),
@@ -151,13 +162,15 @@ ResolverRef.implement({
       args: {
         where: t.arg({ type: EventsWhereInput }),
       },
-      resolve: (parent, args) =>
-        resolveFindEvents(args, {
+      resolve: (parent, args) => {
+        const { ensIndexerSchema } = di.context;
+        return resolveFindEvents(args, {
           through: {
             table: ensIndexerSchema.resolverEvent,
             scope: eq(ensIndexerSchema.resolverEvent.resolverId, parent.id),
           },
-        }),
+        });
+      },
     }),
   }),
 });

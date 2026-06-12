@@ -58,7 +58,7 @@ locals {
       ensnode_indexer_type         = "v2-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "v2SepoliaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,ensv2,protocol-acceleration"
+      plugins                      = "unigraph,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
@@ -80,7 +80,7 @@ locals {
       ensnode_indexer_type         = "alpha"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "alphaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
+      plugins                      = "subgraph,basenames,lineanames,threedns,unigraph,protocol-acceleration,registrars,tokenscope"
       namespace                    = "mainnet"
       referral_program_editions    = "https://ensawards.org/production-editions.json"
       render_instance_plan         = "standard"
@@ -93,7 +93,7 @@ locals {
       ensnode_indexer_type         = "alpha-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,basenames,lineanames,registrars,ensv2,protocol-acceleration"
+      plugins                      = "subgraph,basenames,lineanames,registrars,unigraph,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false

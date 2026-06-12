@@ -18,7 +18,7 @@ import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
  */
 type OperationMap = {
   name: { args: readonly [Node]; result: InterpretedName | null };
-  addr: { args: readonly [Node, bigint]; result: string | null };
+  addr: { args: readonly [Node, bigint]; result: Hex | null };
   text: { args: readonly [Node, string]; result: string | null };
   contenthash: { args: readonly [Node]; result: Hex | null };
   pubkey: { args: readonly [Node]; result: { x: Hex; y: Hex } | null };

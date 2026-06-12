@@ -1,0 +1,54 @@
+---
+title: ENSDb Readers (Custom APIs)
+description: How to build custom APIs and other services on top of ENSDb, using the ENSDb Reader standard.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+An [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) is any service that interacts with ENSDb to read ENS data. This can be anything from a custom GraphQL or REST API, to a data analytics pipeline, to a command-line interface, to a dashboard, and more.
+
+:::tip[Build your own ENSDb Reader]
+You can build your own ENSDb Reader in any language, using any framework, as long as you follow the [ENSDb Standard](/docs/services/ensdb/concepts/glossary#ensdb-standard). The ENSDb Standard defines rules and constraints for how an ENSDb Reader should read data from an ENSDb instance in a way that maintains the integrity of the data and supports interoperability with any ENSDb Writer.
+:::
+
+## Current ENSDb Readers
+
+### ENSApi
+
+ENSApi is a reference implementation of an [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) that includes the following APIs:
+
+- The new [ENS Omnigraph GraphQL API](/docs/integrate/integration-options/omnigraph-graphql-api) that's built on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `unigraph` and `protocol-acceleration`.
+- A backwards-compatible [ENS Subgraph GraphQL API](/docs/integrate/ens-subgraph) that's built on top of [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins) such as `subgraph`, `basenames`, `lineanames`, and `threedns`.
+- APIs for various queries related to the metadata stored in ENSDb, such as the indexing status from the [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) and [metadata](/docs/services/ensdb/concepts/glossary#indexing-metadata-context) about the overall [ENSNode stack of services](/docs/services) active in the ENSNode instance.
+
+<LinkCard
+  title="Learn more about ENSApi"
+  description="A reference implementation of ENSDb Reader, built by the NameHash team."
+  href="/docs/services/ensapi"
+/>
+
+### New ENSDb Readers Under Development
+
+Multiple new [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) services are planned by the NameHash team. Find out more about each of them below.
+
+<LinkCard
+  title="Learn more about ensdb-cli"
+  description="A command-line interface for interacting with ENSDb."
+  href="/docs/integrate/integration-options/ensdb-cli"
+/>
+
+<LinkCard
+  title="Learn more about ENSEngine"
+  description="A push-based web service allowing you to track ENS data changes as they occur."
+  href="/docs/integrate/integration-options/ensengine"
+/>
+
+<LinkCard
+  title="Learn more about ENSAnalytics (coming soon)"
+  description="A web service that provides analytics and insights on ENS data."
+  href="/docs/services"
+/>
+
+:::note[Build your own ENSDb Reader]
+Creating your own ENSDb Reader service enables you to build your own completely custom APIs and data pipeline services. See related inspiration on the [ENSDb integration options page](/docs/integrate/integration-options/ensdb). Use any programming language or framework you wish! If you'd like any help or guidance, feel welcome to reach out to the NameHash team on [Telegram](https://t.me/ensnode).
+:::

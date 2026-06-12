@@ -1,15 +1,14 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
 import {
   type AccountId,
   asInterpretedName,
+  asResolvableName,
   ENS_ROOT_NAME,
-  type InterpretedName,
-  isNormalizedName,
-  type Node,
+  isResolvableName,
   namehashInterpretedName,
+  type ResolvableName,
 } from "enssdk";
+import type { PublicClient } from "viem";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
@@ -18,29 +17,31 @@ import {
   type ForwardResolutionResult,
   getDatasourceContract,
   getENSv1RootRegistry,
-  maybeGetDatasourceContract,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
   toJson,
 } from "@ensnode/ensnode-sdk";
 import {
   isBridgedResolver,
-  isExtendedResolver,
   isKnownENSIP19ReverseResolver,
   isStaticResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
+import di from "@/di";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
-import { getPublicClient } from "@/lib/public-client";
 import { accelerateENSIP19ReverseResolver } from "@/lib/resolution/accelerate-ensip19-reverse-resolver";
 import { accelerateKnownOnchainStaticResolver } from "@/lib/resolution/accelerate-known-onchain-static-resolver";
 import { executeOperations } from "@/lib/resolution/execute-operations";
 import { makeRecordsResponse } from "@/lib/resolution/make-records-response";
-import { isOperationResolved, logOperations, makeOperations } from "@/lib/resolution/operations";
+import {
+  isOperationResolved,
+  logOperations,
+  makeOperations,
+  type Operation,
+} from "@/lib/resolution/operations";
 import {
   addEnsProtocolStepEvent,
   withEnsProtocolStep,
@@ -49,13 +50,36 @@ import {
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
 
-const getUniversalResolverV1 = lazy(() =>
-  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
-);
+/**
+ * Resolves `operations` by delegating wholesale to the UniversalResolver's ENSIP-10 `resolve()` on the
+ * ENS Root Chain. The UniversalResolver performs findResolver + ENSIP-10 + CCIP-Read on-chain, so this
+ * is the protocol-faithful path whenever ENSApi is not accelerating from indexed data.
+ */
+async function resolveViaUniversalResolver(
+  name: ResolvableName,
+  operations: Operation[],
+  publicClient: PublicClient,
+): Promise<Operation[]> {
+  const universalResolver = getDatasourceContract(
+    di.context.namespace,
+    DatasourceNames.ENSRoot,
+    "UniversalResolver",
+  );
 
-const getUniversalResolverV2 = lazy(() =>
-  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
-);
+  return withEnsProtocolStep(
+    TraceableENSProtocol.ForwardResolution,
+    ForwardResolutionProtocolStep.ExecuteResolveCalls,
+    {},
+    () =>
+      executeOperations({
+        name,
+        resolverAddress: universalResolver.address,
+        operations,
+        publicClient,
+        useENSIP10Resolve: true,
+      }),
+  );
+}
 
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
@@ -91,14 +115,16 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: Omit<Parameters<typeof _resolveForward>[2], "registry">,
 ): Promise<ForwardResolutionResult<SELECTION>> {
-  // Invariant: Name must be an InterpretedName
-  const interpretedName = asInterpretedName(name);
+  // we want users to be able to provide unbranded arguments, so we need to enforce our branded
+  // invariants here
+  // Invariant: the input name must be Resolvable (and therefore Interpreted) to be resolved
+  const resolvableName = asResolvableName(asInterpretedName(name));
 
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
   // initially be ENS Root Registry: see `_resolveForward` for additional context.
-  return _resolveForward(interpretedName, selection, {
+  return _resolveForward(resolvableName, selection, {
     ...options,
-    registry: getENSv1RootRegistry(config.namespace),
+    registry: getENSv1RootRegistry(di.context.namespace),
   });
 }
 
@@ -107,10 +133,26 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: InterpretedName,
+  name: ResolvableName,
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
+  //////////////////////////////////////////////////
+  // Validate Input
+  //////////////////////////////////////////////////
+
+  // Invariant: name must conform to ResolvableName
+  if (!isResolvableName(name)) {
+    throw new Error(`'${name}' must be resolvable.`);
+  }
+
+  // TODO: technically we could support resolving records for the root node, but because there
+  // are so many edge cases, this is something we should explicitly declare support for
+  // after we have test cases
+  if (name === ENS_ROOT_NAME) {
+    throw new Error(`Resolving records for the ENS Root Node ('') is not currently supported.`);
+  }
+
   const {
     registry: { chainId },
     accelerate = false,
@@ -119,6 +161,8 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
 
   // `selection` may contain bigints (e.g. `abi: ContentType`); stringify safely for tracing.
   const selectionString = toJson(selection);
+
+  const publicClient = di.context.rootChainPublicClient;
 
   // trace for external consumers
   return withEnsProtocolStep(
@@ -137,63 +181,31 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           accelerate,
         },
         async (span) => {
-          //////////////////////////////////////////////////
-          // Validate Input
-          //////////////////////////////////////////////////
-
-          // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
-          // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
-          // must be fully normalized (and therefore not contain encoded labelhash segments)
-          // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
-          if (!isNormalizedName(name)) {
-            throw new Error(`'${name}' must be normalized to be resolvable.`);
-          }
-
-          // TODO: technically we could support resolving records for the root node, but because there
-          // are so many edge cases, this is something we should explicitly declare support for
-          // after we have test cases
-          if (name === ENS_ROOT_NAME) {
-            throw new Error(
-              `Resolving records for the ENS Root Node ('') is not currently supported.`,
-            );
-          }
-
-          const node: Node = namehashInterpretedName(name);
-          span.setAttribute("node", node);
-
           // construct the set of resolve() operations indicated by node/selection
+          const node = namehashInterpretedName(name);
           let operations = makeOperations(node, selection);
+          span.setAttribute("node", node);
           span.setAttribute("operations", toJson(operations));
 
           // if no operations were generated, this was an empty selection; give them what they asked for
           if (operations.length === 0) return makeRecordsResponse<SELECTION>(operations);
 
-          const publicClient = getPublicClient(chainId);
+          ////////////////////////////////////////////////////////////////
+          /// 0 Non-Accelerated Resolution: delegate to UniversalResolver
+          ////////////////////////////////////////////////////////////////
 
-          ////////////////////////////
-          /// 0. Temporary ENSv2 Bailout
-          ////////////////////////////
+          // whether we can attempt to accelerate this resolution request
+          const canAttemptAcceleration = accelerate && canAccelerate;
+
           // TODO: re-enable protocol acceleration for ENSv2
-          // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
-          // plugin being configured — a namespace may be ENSv1-only even when the ENSv2 plugin is
-          // defined, and forward resolution must follow the ENSv1 path in that case.
-          if (maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root)) {
-            const UniversalResolverAddress =
-              getUniversalResolverV2()?.address ?? getUniversalResolverV1().address;
-            operations = await withEnsProtocolStep(
-              TraceableENSProtocol.ForwardResolution,
-              ForwardResolutionProtocolStep.ExecuteResolveCalls,
-              {},
-              () =>
-                executeOperations({
-                  name,
-                  resolverAddress: UniversalResolverAddress,
-                  operations,
-                  publicClient,
-                  useENSIP10Resolve: true,
-                }),
-            );
+          const isENSv2Namespace = !!maybeGetDatasource(
+            di.context.namespace,
+            DatasourceNames.ENSv2Root,
+          );
 
+          // when we cannot attempt acceleration or ENSv2 is deployed (temp), delegate to UniversalResolver
+          if (!canAttemptAcceleration || isENSv2Namespace) {
+            operations = await resolveViaUniversalResolver(name, operations, publicClient);
             logOperations(operations, logger);
             return makeRecordsResponse<SELECTION>(operations);
           }
@@ -241,7 +253,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /////////////////////////////////////
           if (accelerate && canAccelerate) {
             const resolver = { chainId, address: activeResolver };
-            const bridged = isBridgedResolver(config.namespace, resolver);
+            const bridged = isBridgedResolver(di.context.namespace, resolver);
             if (bridged) {
               return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
@@ -270,7 +282,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             const resolver = { chainId, address: activeResolver };
 
             // Pass: ENSIP-19 Reverse Resolver
-            if (isKnownENSIP19ReverseResolver(config.namespace, resolver)) {
+            if (isKnownENSIP19ReverseResolver(di.context.namespace, resolver)) {
               operations = await withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
@@ -282,10 +294,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             // Pass: Known On-Chain Static Resolver with indexed records
             const resolverRecordsAreIndexed =
               areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
-                config.namespace,
+                di.context.namespace,
                 chainId,
               );
-            if (resolverRecordsAreIndexed && isStaticResolver(config.namespace, resolver)) {
+            if (resolverRecordsAreIndexed && isStaticResolver(di.context.namespace, resolver)) {
               operations = await withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
@@ -310,52 +322,23 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           }
 
           ////////////////////////////////////////////////////////////////////////////
-          // 4. Determine Resolver ENSIP-10 support + requirement.
-          //    From here, we MUST execute EVM code to be compliant with ENS Protocol
+          // 4. Resolve remaining operations via RPC
           ////////////////////////////////////////////////////////////////////////////
-          const extended = await withEnsProtocolStep(
-            TraceableENSProtocol.ForwardResolution,
-            ForwardResolutionProtocolStep.RequireResolver,
-            { chainId, activeResolver, requiresWildcardSupport },
-            async (stepSpan) => {
-              const extended = await withSpanAsync(
-                tracer,
-                "isExtendedResolver",
-                { chainId, address: activeResolver },
-                () => isExtendedResolver({ address: activeResolver, publicClient }),
-              );
 
-              stepSpan.setAttribute("isExtendedResolver", extended);
-
-              return extended;
-            },
-          );
-
-          // if we require wildcard support and this is NOT an extended resolver, the resolver is
-          // not valid, i.e. there is no active resolver for the name
-          // https://docs.ens.domains/ensip/10/#specification
-          if (requiresWildcardSupport && !extended) {
-            return makeRecordsResponse<SELECTION>(operations);
-          }
-
-          ///////////////////////////////////////////
-          // 5. Resolve remaining operations via RPC
-          ///////////////////////////////////////////
-          operations = await withEnsProtocolStep(
-            TraceableENSProtocol.ForwardResolution,
-            ForwardResolutionProtocolStep.ExecuteResolveCalls,
-            {},
-            () =>
-              executeOperations({
-                name,
-                resolverAddress: activeResolver,
-                // NOTE: ENSIP-10 specifies that if a resolver supports IExtendedResolver,
-                // the client MUST use the ENSIP-10 resolve() method over the legacy methods.
-                useENSIP10Resolve: extended,
-                operations,
-                publicClient,
-              }),
-          );
+          // On the ENS Root Chain, we have access to the UniversalResolver, so delegate to it
+          // rather than calling the discovered resolver directly.
+          //
+          // The reason for this is that a resolver's on-chain behavior can depend on being
+          // called by the canonical UniversalResolver. for example the URTestResolver gates
+          // IExtendedResolver support on `msg.sender == UniversalResolver.implementation()` — which
+          // ENSApi cannot reproduce off-chain. Delegating keeps Root Chain resolution 1:1 with
+          // the on-chain UniversalResolver.
+          //
+          // Finally, if we are resolving on a shadow Registry chain (e.g. Basenames/Lineanames) for
+          // which we have recursed into _resolveForward AND the operations were not resolved above,
+          // then we need to execute EVM code, for which calling the UniversalResolver is also the
+          // correct approach.
+          operations = await resolveViaUniversalResolver(name, operations, publicClient);
 
           // Invariant: all operations must be resolved
           if (!operations.every(isOperationResolved)) {
@@ -364,7 +347,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
           }
 
-          // return record values
+          // return records response from operations
           logOperations(operations, logger);
           return makeRecordsResponse<SELECTION>(operations);
         },

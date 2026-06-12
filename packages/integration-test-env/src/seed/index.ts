@@ -11,8 +11,9 @@ import {
 } from "viem";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import { accounts } from "@ensnode/datasources/devnet";
 
+import { accounts } from "../devnet/fixtures";
+import { seedEffectiveResolverFallback } from "./effective-resolver-fallback";
 import { seedPrimaryNameRecords } from "./primary-names";
 import { seedResolverRecords } from "./resolver-records";
 
@@ -65,4 +66,5 @@ export async function seedDevnet(rpcUrl: string): Promise<void> {
   const clients = createDevnetWalletClients(rpcUrl);
   await seedPrimaryNameRecords(clients);
   await seedResolverRecords(clients);
+  await seedEffectiveResolverFallback(clients);
 }

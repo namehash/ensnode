@@ -1,10 +1,5 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import {
-  beautifyInterpretedName,
-  isNormalizedAddress,
-  type NormalizedAddress,
-  toNormalizedAddress,
-} from "enssdk";
+import { isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
@@ -15,7 +10,7 @@ const AccountDomainsQuery = graphql(`
       domains(first: $first, after: $after) {
         totalCount
         edges {
-          node { __typename id canonical { name } }
+          node { __typename id canonical { name { beautified } } }
         }
         pageInfo { hasNextPage endCursor }
       }
@@ -60,13 +55,9 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
           <ul>
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
-                {edge.node.canonical ? (
-                  <Link to={`/domain/${edge.node.canonical.name}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name)}
-                  </Link>
-                ) : (
-                  <em>non-canonical domain</em>
-                )}{" "}
+                <Link to={`/domain/id/${edge.node.id}`}>
+                  {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
+                </Link>{" "}
                 ({edge.node.__typename})
               </li>
             ))}

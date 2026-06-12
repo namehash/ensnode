@@ -7,11 +7,12 @@ Learn more about [ENSRainbow](https://ensrainbow.io) and [ENSNode](https://ensno
 ## API Reference
 
 ### Heal Label
+
 Attempt to heal a labelhash to its original label.
 
 ```typescript
 const response = await client.heal(
-  "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
+  "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
 );
 
 console.log(response);
@@ -24,6 +25,7 @@ console.log(response);
 ```
 
 ### Label Count
+
 Get Count of Healable Labels
 
 ```typescript
@@ -39,6 +41,7 @@ console.log(response);
 ```
 
 ### Health Check
+
 Simple verification that the service is running, either in your local setup or for the provided hosted instance
 
 ```typescript
@@ -52,13 +55,14 @@ console.log(response);
 ```
 
 ### Response Types & Error Handling
+
 Each API endpoint has a designated response type that includes a successful and an erroneous response to account for possible mishaps that could occur during a request.
 
 Below is an example of a failed `heal` operation, that shows the resulting error returned by the SDK
 
 ```typescript
 const notFoundResponse = await client.heal(
-  "0xf64dc17ae2e2b9b16dbcb8cb05f35a2e6080a5ff1dc53ac0bc48f0e79111f264"
+  "0xf64dc17ae2e2b9b16dbcb8cb05f35a2e6080a5ff1dc53ac0bc48f0e79111f264",
 );
 
 console.log(notFoundResponse);

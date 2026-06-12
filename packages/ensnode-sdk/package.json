@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "1.13.1",
+  "version": "1.15.2",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
@@ -34,6 +34,16 @@
           "types": "./dist/index.d.cts",
           "default": "./dist/index.cjs"
         }
+      },
+      "./internal": {
+        "import": {
+          "types": "./dist/internal.d.ts",
+          "default": "./dist/internal.js"
+        },
+        "require": {
+          "types": "./dist/internal.d.cts",
+          "default": "./dist/internal.cjs"
+        }
       }
     },
     "main": "./dist/index.cjs",
@@ -51,6 +61,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@ensnode/integration-test-env": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "tsup": "^8.3.6",

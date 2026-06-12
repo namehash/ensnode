@@ -1,20 +1,19 @@
 ---
 import { ENSADMIN_URL } from "astro:env/client";
-import ENSNodeSuite from "../components/organisms/ENSNodeSuite";
-import Header from "../components/organisms/Header.astro";
-import InfrastructureInnovations from "../components/organisms/InfrastructureInnovations";
-import Proposal from "../components/organisms/Proposal.astro";
-import Hero from "../components/overrides/Hero.astro";
+
+import Header from "@components/organisms/Header.astro";
+import Hero from "@components/overrides/Hero.astro";
 import Layout from "../layouts/Layout.astro";
-// Counter is temporarily commented out to prepare a better storytelling for it
+import JoinTelegram from "../components/molecules/JoinTelegram";
+import { FeaturedENSNodeIntegrators } from "../components/organisms/FeaturedENSNodeIntegrators/index.tsx";
 ---
 
 <Layout data-page="home">
-    <Header />
-    <Hero ensadminUrl={ENSADMIN_URL} />
-    <Proposal />
-    <!--<Counter />-->
-    <!--<SectionDivider />-->
-    <InfrastructureInnovations />
-    <ENSNodeSuite />
+  <Header />
+  <Hero ensadminUrl={ENSADMIN_URL} />
+  <FeaturedENSNodeIntegrators client:load />
+  <section
+    class="w-full h-fit box-border flex flex-col flex-nowrap justify-center items-center gap-10 sm:gap-20 p-5 sm:px-28 sm:py-[60px]">
+    <JoinTelegram />
+  </section>
 </Layout>

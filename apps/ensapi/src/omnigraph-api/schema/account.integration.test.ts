@@ -1,7 +1,14 @@
-import type { InterpretedName } from "enssdk";
+import {
+  ETH_COIN_TYPE,
+  evmChainIdToCoinType,
+  type Hex,
+  type InterpretedName,
+  type UrlString,
+} from "enssdk";
+import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts, testEthTextRecords } from "@ensnode/integration-test-env/devnet";
 
 import {
   AccountDomainsPaginated,
@@ -27,7 +34,7 @@ describe("Account.domains", () => {
     account: {
       domains: GraphQLConnection<{
         __typename: "ENSv1Domain" | "ENSv2Domain";
-        canonical: { name: InterpretedName } | null;
+        canonical: { name: { interpreted: InterpretedName } } | null;
       }>;
     };
   };
@@ -39,7 +46,7 @@ describe("Account.domains", () => {
           where: { version: $version },
           order: { by: NAME, dir: ASC }
         ) {
-          edges { node { __typename, canonical { name } } }
+          edges { node { __typename, canonical { name { interpreted } } } }
         }
       }
     }
@@ -50,7 +57,7 @@ describe("Account.domains", () => {
       address: accounts.owner.address,
     });
     const domains = flattenConnection(result.account.domains);
-    const names = domains.map((d) => d.canonical?.name);
+    const names = domains.map((d) => d.canonical?.name.interpreted);
 
     const expected = [
       "alias.eth",
@@ -77,7 +84,7 @@ describe("Account.domains", () => {
       address: accounts.user.address,
     });
     const domains = flattenConnection(result.account.domains);
-    const names = domains.map((d) => d.canonical?.name);
+    const names = domains.map((d) => d.canonical?.name.interpreted);
 
     expect(names, "expected 'newowner.eth' in new owner's domains").toContain("newowner.eth");
   });
@@ -179,12 +186,12 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by selector_in", async () => {
+  it("filters by selector eq", async () => {
     const targetSelector = allEvents[0].topics[0];
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { selector_in: [targetSelector] },
+      where: { selector: { eq: targetSelector } },
     });
     const events = flattenConnection(result.account.events);
 
@@ -194,32 +201,49 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     }
   });
 
-  it("filters by selector_in with unknown topic returns no results", async () => {
+  it("filters by selector in", async () => {
+    const targetSelector = allEvents[0].topics[0];
+
+    const result = await request<AccountEventsResult>(AccountEventsFiltered, {
+      address: accounts.deployer.address,
+      where: { selector: { in: [targetSelector] } },
+    });
+    const events = flattenConnection(result.account.events);
+
+    expect(events.length).toBeGreaterThan(0);
+    for (const event of events) {
+      expect(event.topics[0]).toBe(targetSelector);
+    }
+  });
+
+  it("filters by selector in with unknown topic returns no results", async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
       where: {
-        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector: {
+          in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        },
       },
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty selector_in returns no results", async () => {
+  it("filters by empty selector in returns no results", async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { selector_in: [] },
+      where: { selector: { in: [] } },
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by timestamp_gte", async () => {
+  it("filters by timestamp gte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { timestamp_gte: midTimestamp },
+      where: { timestamp: { gte: midTimestamp } },
     });
     const events = flattenConnection(result.account.events);
 
@@ -230,12 +254,12 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     }
   });
 
-  it("filters by timestamp_lte", async () => {
+  it("filters by timestamp lte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { timestamp_lte: midTimestamp },
+      where: { timestamp: { lte: midTimestamp } },
     });
     const events = flattenConnection(result.account.events);
 
@@ -252,14 +276,14 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      where: { timestamp: { gte: minTs, lte: maxTs } },
       first: 1000,
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(allEvents.length);
   });
 
-  it("combines selector_in and timestamp_gte", async () => {
+  it("combines selector and timestamp", async () => {
     // pick a seed event from the second half so its selector is guaranteed to
     // appear at or after midTimestamp, avoiding flaky empty-result failures
     const midIndex = Math.floor(allEvents.length / 2);
@@ -269,7 +293,10 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { selector_in: [targetSelector], timestamp_gte: midTimestamp },
+      where: {
+        selector: { eq: targetSelector },
+        timestamp: { gte: midTimestamp },
+      },
     });
     const events = flattenConnection(result.account.events);
 
@@ -286,9 +313,382 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
       address: accounts.deployer.address,
-      where: { timestamp_gte: (maxTimestamp + 1n).toString() },
+      where: { timestamp: { gte: (maxTimestamp + 1n).toString() } },
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);
+  });
+});
+
+describe("Account.primaryName and Account.primaryNames", () => {
+  const BASE_COIN_TYPE = evmChainIdToCoinType(base.id);
+
+  type CanonicalNameResult = {
+    interpreted: string;
+    beautified: string;
+  } | null;
+
+  type PrimaryNameRecordResult = {
+    coinType: number;
+    chainName: string | null;
+    name: CanonicalNameResult;
+    resolve?: {
+      records?: { addresses: Array<{ coinType: number; address: Hex | null }> } | null;
+      profile?: {
+        description: string | null;
+        avatar: { httpUrl: UrlString | null } | null;
+      } | null;
+    } | null;
+  };
+
+  const TEST_ETH_NAME: CanonicalNameResult = {
+    interpreted: "test.eth",
+    beautified: "test.eth",
+  };
+
+  type AccountPrimaryNameResult = {
+    account: {
+      resolve: {
+        primaryName: PrimaryNameRecordResult;
+      };
+    };
+  };
+
+  type AccountPrimaryNamesResult = {
+    account: {
+      resolve: {
+        primaryNames: PrimaryNameRecordResult[];
+      };
+    };
+  };
+
+  const AccountPrimaryNameByCoinType = gql`
+    query AccountPrimaryNameByCoinType($address: Address!, $coinType: CoinType!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: $coinType }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameByChain = gql`
+    query AccountPrimaryNameByChain($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { chainName: ETHEREUM }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByCoinTypes = gql`
+    query AccountPrimaryNamesByCoinTypes($address: Address!, $coinTypes: [CoinType!]!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryNames(where: { coinTypes: $coinTypes }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByChains = gql`
+    query AccountPrimaryNamesByChains($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameNonEnsip19 = gql`
+    query AccountPrimaryNameNonEnsip19($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 0 }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+            resolve {
+              records {
+                addresses(coinTypes: [60]) { address }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedRecords = gql`
+    query AccountPrimaryNameChainedRecords($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              records {
+                addresses(coinTypes: [60]) { coinType address }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedProfile = gql`
+    query AccountPrimaryNameChainedProfile($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              profile {
+                description
+                avatar { httpUrl }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  it("resolves primary name by coinType for owner on Ethereum", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
+        address: accounts.owner.address,
+        coinType: ETH_COIN_TYPE,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+        },
+      },
+    });
+  });
+
+  it("resolves the same primary name by chainName as by coinType", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByChain, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+        },
+      },
+    });
+  });
+
+  it("returns null for user without a primary name", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
+        address: accounts.user.address,
+        coinType: ETH_COIN_TYPE,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: null },
+        },
+      },
+    });
+  });
+
+  it("resolves primary names for requested coin types", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByCoinTypes, {
+        address: accounts.owner.address,
+        coinTypes: [ETH_COIN_TYPE, BASE_COIN_TYPE],
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryNames: [
+            { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+            { coinType: BASE_COIN_TYPE, chainName: "BASE", name: null },
+          ],
+        },
+      },
+    });
+  });
+
+  it("resolves primary names for requested chainNames", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByChains, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryNames: [
+            { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+            { coinType: BASE_COIN_TYPE, chainName: "BASE", name: null },
+          ],
+        },
+      },
+    });
+  });
+
+  it("returns null name and chainName for non-ENSIP-19 coin types", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameNonEnsip19, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: {
+            coinType: 0,
+            chainName: null,
+            name: null,
+            resolve: {
+              records: null,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("chains forward resolution through primaryName.records", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedRecords, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              records: {
+                addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("chains forward resolution through primaryName.profile", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedProfile, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              profile: {
+                description: testEthTextRecords.description.value,
+                avatar: { httpUrl: testEthTextRecords.avatar.value },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("rejects empty coinTypes at GraphQL validation", async () => {
+    await expect(
+      request(AccountPrimaryNamesByCoinTypes, {
+        address: accounts.owner.address,
+        coinTypes: [],
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects empty chainNames at GraphQL validation", async () => {
+    await expect(
+      request(
+        gql`
+          query AccountPrimaryNamesEmptyChainNames($address: Address!) {
+            account(by: { address: $address }) {
+              resolve {
+                primaryNames(where: { chainNames: [] }) { coinType }
+              }
+            }
+          }
+        `,
+        { address: accounts.owner.address },
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("does not null-propagate Account when only acceleration is queried (no primaryName selected)", async () => {
+    await expect(
+      request<{ account: { id: string; resolve: { acceleration: { requested: boolean } } } }>(
+        gql`
+          query AccountResolveAccelerationOnly($address: Address!) {
+            account(by: { address: $address }) {
+              id
+              resolve {
+                acceleration { requested }
+              }
+            }
+          }
+        `,
+        { address: accounts.owner.address },
+      ),
+    ).resolves.toMatchObject({
+      account: {
+        id: accounts.owner.address,
+        resolve: { acceleration: { requested: true } },
+      },
+    });
+  });
+});
+
+describe("Query.account (unindexed)", () => {
+  const AccountByAddress = gql`
+    query AccountByAddress($address: Address!) {
+      account(by: { address: $address }) {
+        id
+        address
+        domains { edges { node { id } } }
+      }
+    }
+  `;
+
+  it("returns a virtualized Account for an unindexed Address", async () => {
+    // an Address the indexer has never seen — Reverse Resolution is keyed by address and works
+    // regardless of whether the Account is indexed, so Query.account must not null-propagate.
+    const address = "0x00000000000000000000000000000000deadbeef";
+
+    const result = await request<{
+      account: { id: string; address: string; domains: GraphQLConnection<{ id: string }> } | null;
+    }>(AccountByAddress, { address });
+
+    expect(result.account).not.toBeNull();
+    expect(result.account?.id).toBe(address);
+    expect(result.account?.address).toBe(address);
+    // a synthesized Account owns no indexed Domains
+    expect(flattenConnection(result.account!.domains)).toHaveLength(0);
   });
 });

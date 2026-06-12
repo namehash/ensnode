@@ -11,8 +11,12 @@ import type {
   RegistryId,
 } from "enssdk";
 
+import {
+  CANONICAL_NAME_PREFIX_LENGTH,
+  truncateCanonicalNamePrefix,
+} from "@ensnode/ensdb-sdk/ensindexer-abstract";
 import { isRootRegistryId } from "@ensnode/ensnode-sdk";
-import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
+import { isBridgedResolver, isBridgedTargetRegistry } from "@ensnode/ensnode-sdk/internal";
 
 import { namehashLabelHashPath } from "@/lib/ensv2/namehash-label-hash-path";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -151,6 +155,7 @@ export async function ensureDomainInRegistry(
     await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({
       canonical: true,
       canonicalName,
+      __canonicalNamePrefix: truncateCanonicalNamePrefix(canonicalName),
       canonicalLabelHashPath,
       canonicalPath,
       canonicalDepth: canonicalLabelHashPath.length,
@@ -220,7 +225,7 @@ export async function handleSubregistryUpdated(
   const prevSubregistryId = domain.subregistryId;
   if (prevSubregistryId === nextSubregistryId) return;
 
-  // set/unset the Domain's Subregistry (uni-directional Domain → Registry link)
+  // update the Domain's Subregistry (uni-directional Domain → Registry link)
   await context.ensDb
     .update(ensIndexerSchema.domain, { id: domainId })
     .set({ subregistryId: nextSubregistryId });
@@ -236,22 +241,14 @@ export async function handleSubregistryUpdated(
  * Reconciles the canonical edge for a Domain whose Resolver just changed. Detaches any prior
  * bridged target and attaches the new one (when the new resolver is a known Bridged Resolver).
  *
- * Reads the previous resolver from the Domain-Resolver Relation. This requires that this helper
- * runs BEFORE Protocol Acceleration's NewResolver/ResolverUpdated handlers, which overwrite the
- * DRR row — see `apps/ensindexer/ponder/src/register-handlers.ts` for the ordering.
+ * Derives the previous bridged target from the Domain's own `subregistryId` (the field this helper
+ * owns) rather than the Domain-Resolver Relation. Protocol Acceleration's NewResolver/ResolverUpdated
+ * handlers overwrite the DRR row for the SAME event, so reading the DRR here would depend on
+ * cross-plugin handler ordering. Reading `subregistryId` keeps this helper order-independent.
  *
- * We allow any originating Domain to set the Bridged Resolver's target Registry as its Subregistry
- * (which is correct for aliased forward walks [i.e. domains are correctly addressable by
- * "example.fakebase.eth"]) but only set the target Registry's Canonical Domain iff this is the
- * expected originating Domain.
- *
- * Implied invariant: Bridged target Registry is indexed before its originating Domain's Bridged
- * Resolver event. `handleRegistryCanonicalDomainUpdated` throws when the registry row is missing,
- * so a Bridged Resolver event firing on the originating Domain before any subname on the
- * bridged target chain is indexed (which is what creates the bridged Registry row) would
- * crash the indexer. If a future Bridged Resolver violates this, we should mirror the logic
- * above and have two uni-directional pointer update helpers (one on ResolverChange [SubregistryUpdated]
- * and one on Bridged Registry creation [CanonicalDomainUpdated]).
+ * This helper manages only the originating Domain's `subregistryId` (pointing it at the Bridged
+ * Resolver's target Registry, or clearing it). The target Registry's `canonicalDomainId` is owned
+ * by the registry-creation path in `ENSv1Registry.ts`, not here.
  */
 export async function handleBridgedResolverChange(
   context: IndexingEngineContext,
@@ -259,47 +256,22 @@ export async function handleBridgedResolverChange(
   domainId: DomainId,
   nextResolver: NormalizedAddress | null,
 ): Promise<void> {
-  const prev = await context.ensDb.find(ensIndexerSchema.domainResolverRelation, {
-    chainId: registry.chainId,
-    address: registry.address,
-    domainId,
-  });
-
-  const prevResolver = prev?.resolver;
-
-  const prevBridged = prevResolver
-    ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: prevResolver })
-    : null;
-
   const nextBridged = nextResolver
     ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: nextResolver })
     : null;
 
-  // the previous and the next are identical, no-op
-  // NOTE: this also covers the "neither are bridged resolvers" case (null === null)
+  // the Domain's current bridged target, derived from its own `subregistryId` rather than the DRR
+  const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
+  const prevBridged = domain?.subregistryId
+    ? isBridgedTargetRegistry(config.namespace, domain.subregistryId)
+    : null;
+
+  // the previous and the next bridged targets are identical, no-op
+  // NOTE: this also covers the "neither is a bridged resolver" case (null === null)
   if (prevBridged?.targetRegistryId === nextBridged?.targetRegistryId) return;
 
-  // if the previous resolver was a Bridged Resolver, we need to disconnect both links
-  if (prevBridged) {
-    // update the domain's indicated subregistry
-    await handleSubregistryUpdated(context, domainId, null);
-
-    // only update the Registry's Canonical Domain iff this is the correct originating Domain
-    if (prevBridged.originDomainId === domainId) {
-      await handleRegistryCanonicalDomainUpdated(context, prevBridged.targetRegistryId, null);
-    }
-  }
-
-  // if the next resolver is a Bridged Resolver, we need to update the Domain's Subregistry
-  if (nextBridged) {
-    // update the domain's indicated subregistry
-    await handleSubregistryUpdated(context, domainId, nextBridged.targetRegistryId);
-
-    // only update the Registry's Canonical Domain iff this is the correct originating Domain
-    if (nextBridged.originDomainId === domainId) {
-      await handleRegistryCanonicalDomainUpdated(context, nextBridged.targetRegistryId, domainId);
-    }
-  }
+  // handle the domain's implicit SubregistryUpdated event
+  await handleSubregistryUpdated(context, domainId, nextBridged?.targetRegistryId ?? null);
 }
 
 /**
@@ -392,8 +364,9 @@ async function reconcileRegistryCanonicality(
 
 /**
  * Propagate a Label heal to every canonical Domain whose `canonicalLabelHashPath` contains
- * `labelHash`. Re-renders `canonical_name` by joining each path element to its current
- * `label.interpreted` value. `canonicalLabelHashPath` is head-first (root → leaf), but
+ * `labelHash`. Re-renders `canonical_name` (and its materialized `__canonical_name_prefix`) by
+ * joining each path element to its current `label.interpreted` value, computing the name once in a
+ * CTE so the `string_agg` isn't run twice. `canonicalLabelHashPath` is head-first (root → leaf), but
  * `canonicalName` is the standard leaf-first ENS string (e.g. "vitalik.eth"), so the
  * WITH ORDINALITY rows are joined in DESC ordinal order.
  *
@@ -409,14 +382,23 @@ export async function cascadeLabelHeal(
   labelHash: LabelHash,
 ): Promise<void> {
   await context.ensDb.sql.execute(sql`
-    UPDATE ${ensIndexerSchema.domain} AS d
-      SET canonical_name = (
-        SELECT string_agg(l.interpreted, '.' ORDER BY p.ord DESC)
-        FROM unnest(d.canonical_label_hash_path) WITH ORDINALITY AS p(lh, ord)
-        JOIN ${ensIndexerSchema.label} l ON l.label_hash = p.lh
-      )
+    WITH healed_names AS (
+      SELECT
+        d.id,
+        (
+          SELECT string_agg(l.interpreted, '.' ORDER BY p.ord DESC)
+          FROM unnest(d.canonical_label_hash_path) WITH ORDINALITY AS p(lh, ord)
+          JOIN ${ensIndexerSchema.label} l ON l.label_hash = p.lh
+        ) AS name
+      FROM ${ensIndexerSchema.domain} d
       WHERE d.canonical = true
-        AND d.canonical_label_hash_path @> ARRAY[${labelHash}]::text[];
+        AND d.canonical_label_hash_path @> ARRAY[${labelHash}]::text[]
+    )
+    UPDATE ${ensIndexerSchema.domain} AS d
+      SET canonical_name = healed_names.name,
+          __canonical_name_prefix = left(healed_names.name, ${CANONICAL_NAME_PREFIX_LENGTH})
+      FROM healed_names
+      WHERE d.id = healed_names.id;
   `);
 }
 
@@ -527,6 +509,7 @@ async function cascadeCanonicality(
     UPDATE ${ensIndexerSchema.domain} AS d
       SET canonical = ${nextCanonical},
           canonical_name = CASE WHEN ${nextCanonical} THEN dt.new_name ELSE NULL END,
+          __canonical_name_prefix = CASE WHEN ${nextCanonical} THEN left(dt.new_name, ${CANONICAL_NAME_PREFIX_LENGTH}) ELSE NULL END,
           canonical_label_hash_path = CASE WHEN ${nextCanonical} THEN dt.new_path ELSE NULL END,
           canonical_path = CASE WHEN ${nextCanonical} THEN dt.new_path_ids ELSE NULL END,
           canonical_depth = CASE WHEN ${nextCanonical} THEN array_length(dt.new_path, 1) ELSE NULL END,
@@ -556,7 +539,11 @@ async function cascadeCanonicality(
   // https://github.com/namehash/ensnode/issues/1962
   if (!nextCanonical) return;
 
-  const rows = changed.rows as { id: DomainId; canonical_label_hash_path: LabelHashPath }[];
+  // NOTE: Ponder types `db.sql` as a NodePg/Pglite Drizzle (whose `.execute()` resolves to a
+  // `{ rows }` result), but at runtime it's a pg-proxy Drizzle whose `.execute()` resolves to the
+  // rows array directly. The declared type lies (Ponder `@ts-expect-error`s the mismatch), so reading
+  // `changed.rows` is `undefined` at runtime — `changed` itself is the array.
+  const rows = changed as unknown as { id: DomainId; canonical_label_hash_path: LabelHashPath }[];
   for (let i = 0; i < rows.length; i += CANONICAL_NODE_UPDATE_BATCH_SIZE) {
     const batch = rows.slice(i, i + CANONICAL_NODE_UPDATE_BATCH_SIZE);
     const ids = batch.map((r) => r.id);
@@ -565,7 +552,7 @@ async function cascadeCanonicality(
     await context.ensDb.sql.execute(sql`
       UPDATE ${ensIndexerSchema.domain} AS d
         SET canonical_node = upd.canonical_node
-        FROM unnest(${ids}::text[], ${nodes}::text[]) AS upd(id, canonical_node)
+        FROM unnest(${sql.param(ids)}::text[], ${sql.param(nodes)}::text[]) AS upd(id, canonical_node)
         WHERE d.id = upd.id;
     `);
   }

@@ -1,0 +1,28 @@
+---
+import { staticExampleHostedInstanceLinkClass } from "./constants";
+
+interface Props {
+  variant: "ensadmin" | "stackblitz";
+  hostedInstanceDocUrl: string;
+  hostedInstanceLabel: string;
+}
+
+const { variant, hostedInstanceDocUrl, hostedInstanceLabel } = Astro.props;
+---
+
+<span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
+  {
+    variant === "ensadmin" ? (
+      <>
+        Open an interactive playground to execute this example on our{" "}
+        <a
+          href={hostedInstanceDocUrl}
+          class:list={["text-sm", staticExampleHostedInstanceLinkClass]}>
+          {hostedInstanceLabel} ENSNode instance.
+        </a>
+      </>
+    ) : (
+      <>Opens an editable StackBlitz project with this snippet.</>
+    )
+  }
+</span>
