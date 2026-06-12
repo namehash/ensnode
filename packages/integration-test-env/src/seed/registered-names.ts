@@ -34,7 +34,7 @@ async function seedNameRecords(
 async function seedEnsV1Name(
   client: DevnetWalletClient,
   resolver: Address,
-  entry: Extract<RegisteredName, { type: "ENSv1" }>,
+  entry: Extract<RegisteredName, { type: "ENSv1"; reserved: boolean }>,
 ): Promise<void> {
   const wrapped = entry.wrapped !== false;
 
@@ -48,15 +48,17 @@ async function seedEnsV1Name(
     await seedNameRecords(client, resolver, namehash(entry.name) as Hex, entry.records);
   }
 
-  // Mirror the ENSv2 migration's reserved-entry state: also register the name in the ENSv2
-  // ETHRegistry pointing at the ENSV1Resolver (the v1 mirror resolver). This is how a name that
-  // still lives in ENSv1 stays resolvable under UR2, and makes the preferred ENSv2 Domain the one
-  // returned by the namegraph walk — matching mainnet, where every v1 name is reserved in v2.
-  await registerEthName(client, {
-    label: entry.label,
-    resolver: contracts.ENSV1Resolver,
-    subregistry: zeroAddress,
-  });
+  if (entry.reserved) {
+    // Mirror the ENSv2 migration's reserved-entry state: also register the name in the ENSv2
+    // ETHRegistry pointing at the ENSV1Resolver (the v1 mirror resolver). This is how a name that
+    // still lives in ENSv1 stays resolvable under UR2, and makes the preferred ENSv2 Domain the one
+    // returned by the namegraph walk — matching mainnet, where every v1 name is reserved in v2.
+    await registerEthName(client, {
+      label: entry.label,
+      resolver: contracts.ENSV1Resolver,
+      subregistry: zeroAddress,
+    });
+  }
 }
 
 async function seedEnsV2Name(

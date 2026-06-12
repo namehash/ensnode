@@ -151,6 +151,7 @@ type ENSv1RegisteredName = {
    */
   wrapped: boolean;
   records?: NameRecords;
+  reserved: boolean;
 };
 
 type ENSv2RegisteredName = {
@@ -195,12 +196,21 @@ export const additionallyRegisteredNames = [
     name: "legacy-v1-wrapped.eth",
     label: "legacy-v1-wrapped",
     wrapped: true,
+    reserved: true,
   },
   {
     type: "ENSv1",
     name: "legacy-v1-unwrapped.eth",
     label: "legacy-v1-unwrapped",
     wrapped: false,
+    reserved: true,
+  },
+  {
+    type: "ENSv1",
+    name: "legacy-v1-wrapped-unreserved.eth",
+    label: "legacy-v1-wrapped-unreserved",
+    wrapped: true,
+    reserved: false,
   },
   {
     type: "ENSv2",

@@ -286,6 +286,17 @@ describe("Query.domains", () => {
         }),
       ).rejects.toThrow();
     });
+
+    it.each(DEVNET_ENSV1_NAMES.filter((entry) => !entry.reserved))(
+      "in returns empty for an unreserved ENSv1-only name",
+      async ({ name }) => {
+        const result = await request<QueryDomainsResult>(QueryDomains, {
+          name: { eq: name },
+        });
+        const domains = flattenConnection(result.domains);
+        expect(domains).toHaveLength(0);
+      },
+    );
   });
 });
 
@@ -309,7 +320,7 @@ describe("Query.domain", () => {
   // migration. The walk prefers the ENSv2 Domain, and the ENSv2 registration emits the literal label,
   // so each name resolves to an ENSv2 Domain whose canonical is the full literal name — including the
   // legacy-unwrapped name whose ENSv1 canonical is an Encoded LabelHash.
-  it.each(DEVNET_ENSV1_NAMES)(
+  it.each(DEVNET_ENSV1_NAMES.filter((entry) => !!entry.reserved))(
     "resolves ENSv1-only name $name to its reserved ENSv2 Domain via domain(by: name)",
     async ({ name, label, canonical }) => {
       const id = makeENSv2DomainId(
@@ -319,6 +330,13 @@ describe("Query.domain", () => {
       await expect(request(DomainByName, { name })).resolves.toMatchObject({
         domain: { id, canonical: { name: { interpreted: canonical } } },
       });
+    },
+  );
+
+  it.each(DEVNET_ENSV1_NAMES.filter((entry) => !entry.reserved))(
+    "unreserved ENSv1-only name is hidden in API",
+    async ({ name }) => {
+      await expect(request(DomainByName, { name })).resolves.toMatchObject({ domain: null });
     },
   );
 

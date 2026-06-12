@@ -46,6 +46,7 @@ export const DEVNET_ENSV1_NAMES = additionallyRegisteredNames
     label: entry.label,
     canonical: entry.name,
     wrapped: entry.wrapped,
+    reserved: entry.reserved,
   }));
 
 export const DEVNET_NAMES = [...STATIC_DEVNET_NAMES, ...SEEDED_ENSV2_NAMES];
