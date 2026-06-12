@@ -1,3 +1,26 @@
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  Namegraph Explorer — a vibe-coded demo
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ *  This whole page and its supporting modules (this file, plus `ensnode.ts`)
+ *  were vibe-coded: written largely by prompting an agent, not by hand-tuning
+ *  every line. They exist to show how far you can get building real ENS
+ *  experiences with off-the-shelf tooling alone:
+ *
+ *    • enskit        — the React hooks + `OmnigraphProvider` backing this UI
+ *    • the Omnigraph — one GraphQL API unifying ENSv1 + ENSv2 across all chains,
+ *                      which makes a lazy forward-traversal of the namegraph,
+ *                      canonical-vs-addressable comparison, and forward
+ *                      resolution-with-trace expressible as a handful of queries
+ *    • ensskills     — the agent skills that taught the model to wield the above
+ *
+ *  In other words: an agent with enskit, the Omnigraph, and ensskills can take
+ *  you from zero to an interactive, virtualized, paginated namegraph browser.
+ *  Treat this as a reference for what's reachable — not as production-grade,
+ *  line-by-line-audited code.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
 import type {
   FileTreeBatchOperation,
   FileTreeRowDecoration,
@@ -525,19 +548,22 @@ export function NamegraphView({ registryId }: { registryId: string }) {
 
       const meta = metaRef.current.get(dirPath);
       if (!meta || meta.kind !== "domain" || !meta.subregistryId) return;
-      loadedDirsRef.current.add(dirPath);
 
       const ops: FileTreeBatchOperation[] = [];
       const placeholderPath = `${dirPath}${PLACEHOLDER_SEG}`;
-      const dropPlaceholder = () => {
-        if (metaRef.current.delete(placeholderPath)) {
-          ops.push({ type: "remove", path: placeholderPath, recursive: true });
+      const errorPath = `${dirPath}${ERROR_SEG}`;
+      const dropSentinel = (path: string) => {
+        if (metaRef.current.delete(path)) {
+          ops.push({ type: "remove", path, recursive: true });
         }
       };
 
       try {
         const page = await fetchRegistryPage(meta.subregistryId, null);
-        dropPlaceholder();
+        // Mark loaded only on success so a failed fetch stays retryable.
+        loadedDirsRef.current.add(dirPath);
+        dropSentinel(placeholderPath);
+        dropSentinel(errorPath); // clear a sentinel left by a prior failed attempt
         if (page.domains.length === 0) {
           const emptyPath = `${dirPath}${EMPTY_SEG}`;
           metaRef.current.set(emptyPath, { kind: "empty", path: emptyPath });
@@ -548,14 +574,22 @@ export function NamegraphView({ registryId }: { registryId: string }) {
             addLoadMore(ops, dirPath, meta.subregistryId, page.endCursor);
           }
         }
+        model.batch(ops);
+        return;
       } catch {
-        dropPlaceholder();
-        const errorPath = `${dirPath}${ERROR_SEG}`;
-        metaRef.current.set(errorPath, { kind: "error", path: errorPath });
-        ops.push({ type: "add", path: errorPath });
+        dropSentinel(placeholderPath);
+        if (!metaRef.current.has(errorPath)) {
+          metaRef.current.set(errorPath, { kind: "error", path: errorPath });
+          ops.push({ type: "add", path: errorPath });
+        }
+        model.batch(ops);
+        // Re-enable retry: collapse the directory before re-queueing it, so the
+        // subscription doesn't re-fire while it's still expanded (which would
+        // loop on a persistent failure). The next manual expand tries again.
+        const item = model.getItem(dirPath);
+        if (item && "collapse" in item) item.collapse();
+        pendingDirsRef.current.add(dirPath);
       }
-
-      model.batch(ops);
     },
     [model, addDomain, addLoadMore],
   );
