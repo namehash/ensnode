@@ -8,6 +8,27 @@ export const selfHostSidebarTopic = {
       link: "/docs/self-host",
     },
     {
+      label: "Operations",
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/self-host/operations",
+        },
+        {
+          label: "Critical workloads 🚨",
+          link: "/docs/self-host/operations/critical-workloads",
+        },
+        {
+          label: "Scalability",
+          link: "/docs/self-host/operations/scalability",
+        },
+        {
+          label: "Monitoring",
+          link: "/docs/self-host/operations/monitoring",
+        },
+      ],
+    },
+    {
       label: "Deployment options",
       items: [
         {
@@ -25,27 +46,6 @@ export const selfHostSidebarTopic = {
         {
           label: "Terraform",
           link: "/docs/self-host/deployment-options/terraform",
-        },
-      ],
-    },
-    {
-      label: "Operations",
-      items: [
-        {
-          label: "Overview",
-          link: "/docs/self-host/operations/overview",
-        },
-        {
-          label: "Critical workloads 🚨",
-          link: "/docs/self-host/operations/critical-workloads",
-        },
-        {
-          label: "Scalability",
-          link: "/docs/self-host/operations/scalability",
-        },
-        {
-          label: "Monitoring",
-          link: "/docs/self-host/operations/monitoring",
         },
       ],
     },
