@@ -31,7 +31,7 @@ const createRegistryParentDomainLoader = () =>
  * identical pairs within a request. Backs `NameReference.match`, where a page of NameReferences
  * sharing one `(account, coinType)` would otherwise each run an independent reverse resolution.
  */
-const createReverseResolutionLoader = () =>
+const createReverseResolutionLoader = (canAccelerate: boolean) =>
   new DataLoader<
     { account: NormalizedAddress; coinType: CoinType },
     ReverseResolutionResult,
@@ -40,7 +40,7 @@ const createReverseResolutionLoader = () =>
     (keys) =>
       Promise.all(
         keys.map(({ account, coinType }) =>
-          resolveReverse(account, coinType, { accelerate: true, canAccelerate: true }),
+          resolveReverse(account, coinType, { accelerate: true, canAccelerate }),
         ),
       ),
     { cacheKeyFn: ({ account, coinType }) => `${account}:${coinType}` },
@@ -55,7 +55,7 @@ export const createOmnigraphContext = (serverContext: OmnigraphYogaServerContext
   now: BigInt(getUnixTime(new Date())),
   loaders: {
     registryParentDomain: createRegistryParentDomainLoader(),
-    reverseResolution: createReverseResolutionLoader(),
+    reverseResolution: createReverseResolutionLoader(serverContext.canAccelerate),
   },
   canAccelerate: serverContext.canAccelerate,
 });
