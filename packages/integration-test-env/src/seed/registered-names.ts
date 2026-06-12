@@ -41,7 +41,7 @@ async function seedEnsV1Name(
   if (wrapped) {
     await registerWrappedEthName(client, { label: entry.label, resolver });
   } else {
-    await registerLegacyEthName(client, { label: entry.label });
+    await registerLegacyEthName(client, { label: entry.label, resolver });
   }
 
   if (entry.records) {

@@ -14,6 +14,7 @@ import {
 
 import {
   BaseRegistrarABI,
+  ENSv1RegistryABI,
   ETHRegistrarABI,
   LegacyEthRegistrarControllerABI,
   MockTokenABI,
@@ -224,14 +225,18 @@ export async function registerLegacyEthName(
   {
     label,
     durationDays = DEFAULT_DURATION_DAYS,
+    resolver,
   }: {
     label: string;
     durationDays?: number;
+    resolver: Address;
   },
 ): Promise<void> {
   const duration = BigInt(durationDays * ONE_DAY_SECONDS);
   const owner = client.account.address;
   const secret = keccak256(stringToHex(`secret:${label}`)) as Hex;
+  const name = `${label}.eth`;
+  const node = namehash(name) as Hex;
 
   // Step 1: commit
   const commitment = await client.readContract({
@@ -276,6 +281,15 @@ export async function registerLegacyEthName(
   });
   await waitForTransactionReceipt(client, registerHash);
   console.log(`[seed] legacy register("${label}.eth") tx: ${registerHash}`);
+
+  const hash = await client.writeContract({
+    address: contracts.ENSRegistry,
+    abi: ENSv1RegistryABI,
+    functionName: "setResolver",
+    args: [node, resolver],
+  });
+  await waitForTransactionReceipt(client, hash);
+  console.log(`[seed] setResolver(${node}) → ${resolver} tx: ${hash}`);
 }
 
 /**
@@ -322,15 +336,15 @@ export async function registerWrappedEthName(
   client: DevnetWalletClient,
   {
     label,
-    resolver = zeroAddress,
+    resolver,
     durationDays = DEFAULT_DURATION_DAYS,
   }: {
     label: string;
-    resolver?: Address;
+    resolver: Address;
     durationDays?: number;
   },
 ): Promise<void> {
-  await registerLegacyEthName(client, { label, durationDays });
+  await registerLegacyEthName(client, { label, durationDays, resolver });
   await wrapEthName(client, { label, resolver });
 }
 

@@ -8,6 +8,7 @@ export { BaseRegistrar as BaseRegistrarABI } from "./abis/root/BaseRegistrar";
 export { L2ReverseRegistrar as L2ReverseRegistrarABI } from "./abis/root/L2ReverseRegistrar";
 export { LegacyEthRegistrarController as LegacyEthRegistrarControllerABI } from "./abis/root/LegacyEthRegistrarController";
 export { NameWrapper as NameWrapperABI } from "./abis/root/NameWrapper";
+export { Registry as ENSv1RegistryABI } from "./abis/root/Registry";
 export { WrappedEthRegistrarController as WrappedEthRegistrarControllerABI } from "./abis/root/WrappedEthRegistrarController";
 export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
 export { UniversalResolverABI } from "./abis/shared/UniversalResolver";
