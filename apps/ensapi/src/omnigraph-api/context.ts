@@ -7,6 +7,7 @@ import type { ReverseResolutionResult } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelerate.middleware";
 
 /** Server context passed from Hono into GraphQL Yoga via `yoga.fetch(request, serverContext)`. */
@@ -39,9 +40,14 @@ const createReverseResolutionLoader = (canAccelerate: boolean) =>
   >(
     (keys) =>
       Promise.all(
-        keys.map(({ account, coinType }) =>
-          resolveReverse(account, coinType, { accelerate: true, canAccelerate }),
-        ),
+        keys.map(async ({ account, coinType }) => {
+          // runWithTrace establishes the tracing context the reverse-resolution protocol steps
+          // require; the captured trace is discarded here (match only needs the resolved name).
+          const { result } = await runWithTrace(() =>
+            resolveReverse(account, coinType, { accelerate: true, canAccelerate }),
+          );
+          return result;
+        }),
       ),
     { cacheKeyFn: ({ account, coinType }) => `${account}:${coinType}` },
   );
