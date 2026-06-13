@@ -12,15 +12,14 @@ import {
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
-import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
@@ -89,14 +88,9 @@ export default {
         startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
       UniversalResolver: {
-        abi: UniversalResolverV1,
-        address: "0x988061f048e8ff0290dd88ec8afed6b163d7ea76",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
-      },
-      UniversalResolverV2: {
-        abi: UniversalResolverV2,
-        address: "0x8e4ae9c494a57f15ee19c723c87971c99e014b64",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        abi: UniversalResolverABI,
+        address: "0x651d670ce0d0f1ed0893f39d51fd0dbd4546c9ef",
+        startBlock: 10893223,
       },
     },
   },

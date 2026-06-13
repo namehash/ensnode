@@ -1,4 +1,8 @@
 import { builder } from "@/omnigraph-api/builder";
+import {
+  computeUnindexedDomainCanonicalPath,
+  isUnindexedDomain,
+} from "@/omnigraph-api/lib/unindexed-domain";
 import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
 import { type Domain, DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 
@@ -46,6 +50,10 @@ DomainCanonicalRef.implement({
       type: [DomainInterfaceRef],
       nullable: false,
       resolve: (domain) => {
+        // an UnindexedDomain's path leaf/intermediates are virtual (unloadable by id), so build it
+        // from resolved values rather than ids
+        if (isUnindexedDomain(domain)) return computeUnindexedDomainCanonicalPath(domain);
+
         if (!domain.canonicalPath) {
           throw new Error(
             `Invariant(DomainCanonical.path): canonical Domain '${domain.id}' is missing canonicalPath.`,

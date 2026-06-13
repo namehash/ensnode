@@ -12,6 +12,8 @@ export {
   ProfileAddressRootstockInterpreter,
   ProfileAddressSolanaInterpreter,
 } from "./addresses";
+export type { ProfileContenthashModel } from "./contenthash";
+export { ProfileContenthashInterpreter } from "./contenthash";
 export type { ProfileImageResult } from "./images";
 export {
   ProfileAvatarInterpreter,

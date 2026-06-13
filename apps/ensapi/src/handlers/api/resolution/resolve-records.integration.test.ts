@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   accounts,
   addresses,
+  contenthashFixtures,
   fixtures,
   testEthTextRecords,
 } from "@ensnode/integration-test-env/devnet";
@@ -237,7 +238,7 @@ describe("GET /api/resolve/records/:name", () => {
               [testEthTextRecords.x.key]: testEthTextRecords.x.value,
               [testEthTextRecords.telegram.key]: testEthTextRecords.telegram.value,
             },
-            contenthash: fixtures.contenthash,
+            contenthash: contenthashFixtures.ipfs.raw,
             pubkey: {
               x: fixtures.publicKeyX,
               y: fixtures.publicKeyY,

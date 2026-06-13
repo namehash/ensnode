@@ -1,5 +1,17 @@
 # @ensnode/ensnode-sdk
 
+## 1.15.2
+
+### Patch Changes
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - The EIP-165 `supportsInterface` probe (used to classify a Resolver's ENSIP-10 `extended` support at index time) now opts out of Ponder's empty-response retry. A `0x` ("returned no data") response from a pre-EIP-165 Resolver is a definitive "not supported", never transient — but Ponder's `context.client` previously retried it 9× with exponential backoff (~64s each), making a full index pathologically slow. The probe now fails fast (still resolving to `extended = false`).
+
+- [#2242](https://github.com/namehash/ensnode/pull/2242) [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54) Thanks [@shrugs](https://github.com/shrugs)! - `getDefaultEnsNodeUrl` now returns the hosted default for the `sepolia-v2` namespace (`https://api.v2-sepolia.ensnode.io`).
+
+- Updated dependencies [[`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`39cb445`](https://github.com/namehash/ensnode/commit/39cb445b8d8790aa9d6fe2ee904e60bdb158efbd), [`6165f50`](https://github.com/namehash/ensnode/commit/6165f50e26729c6d740c7424034057642f5175b5)]:
+  - @ensnode/datasources@1.15.2
+  - enssdk@1.15.2
+
 ## 1.15.1
 
 ### Patch Changes

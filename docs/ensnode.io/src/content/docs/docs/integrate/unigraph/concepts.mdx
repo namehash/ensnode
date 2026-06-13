@@ -1,0 +1,47 @@
+---
+title: ENS Unigraph Core Concepts
+description: The core concepts behind the ENS Unigraph indexed data model.
+---
+
+## Indexed Data Model
+
+The ENS Unigraph indexed data model is available only when the [`unigraph` plugin](/docs/integrate/integration-options/ensnode-plugins#existing-plugins) is activated in your ENSNode instance.
+
+:::caution[`unigraph` plugin required]
+Performing SQL queries on the ENS Unigraph requires that you have the `unigraph` plugin activated in your ENSNode instance. [Learn more](/docs/services/ensindexer/usage/configuration) about activating [ENSNode Plugins](/docs/integrate/integration-options/ensnode-plugins).
+:::
+
+## Canonical Nametree
+
+The **Canonical Nametree** is the set of all Domains that have an inferrable **Canonical Name** — materialized from the namegraph. For every Domain in it, the canonical fields are populated — `canonical_name`, `canonical_path`, `canonical_node`, and `canonical_depth` — across both ENSv1 and ENSv2. That means you can look a name up by `canonical_name = 'vitalik.eth'`, order by `canonical_depth`, or walk a name's path **without branching by `type` on protocol version** and without traversing the namegraph yourself.
+
+Multichain coverage is part of the same model: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are materialized into the same Unigraph as mainnet `.eth`, so a single query spans every indexable name.
+
+:::danger[Not a substitute for ENS Resolution]
+The Unigraph mirrors onchain state; ENS's resolution-time behavior is applied _on top_ of it by
+[ENSApi](/docs/services/ensapi). A direct SQL read of resolver records is therefore **not**
+ENSIP-10 / CCIP-Read compliant and **cannot** be used as a source of truth for name resolution.
+For correct resolution, use the [ENS Omnigraph API](/docs/integrate/omnigraph) (which adds ENS
+Protocol Acceleration on top of the Unigraph). Use Unigraph SQL for analytics, discovery, and
+custom indexing.
+:::
+
+## Query optimizations
+
+### Domains
+
+A `canonical_name` can be very long, as it's the full, correct name. Due to limitations in Postgres btree indexes, the `domains` table has the `canonical_name` column and also the `__canonical_name_prefix` column (the first 64 code points of `canonical_name`, backed by a GIN trigram index).
+
+:::tip[Searching vs. displaying]
+Always **select and display `canonical_name`**. When you need to **search** by prefix (`ILIKE 'vit%'`, case-insensitive to match the Omnigraph `starts_with` filter), match against the materialized `__canonical_name_prefix` column (the first 64 code points of `canonical_name`, backed by a GIN trigram index) so the `ILIKE` filter is index-backed:
+
+```sql
+SELECT id, type, canonical_name, canonical_node, owner_id
+FROM ensindexer_0.domains
+WHERE __canonical_name_prefix ILIKE 'vit%'
+ORDER BY __canonical_name_prefix
+LIMIT 10;
+```
+
+The `SELECT` still returns `canonical_name`; only the `ILIKE` / `ORDER BY` use the prefix. The GIN trigram index backs the `ILIKE` filter; the `ORDER BY` then sorts the matched set (cheap under a small `LIMIT`) — scope the query by `registry_id` to use the `(registry_id, __canonical_name_prefix, id)` btree for fully index-backed ordering. For exact matches, use `canonical_name` directly (`canonical_name = 'vitalik.eth'`).
+:::

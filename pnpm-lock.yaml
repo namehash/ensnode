@@ -112,39 +112,19 @@ catalogs:
 overrides:
   '@adraffy/ens-normalize': 1.11.1
   esbuild@<=0.24.2: '>=0.25.0'
-  lodash@>=4.0.0 <=4.17.23: ^4.18.0
-  lodash-es@>=4.0.0 <=4.17.23: ^4.18.0
-  markdown-it@>=14.0.0 <14.1.1: '>=14.1.1'
   tar@<=7.5.10: ^7.5.11
   ajv@<8.18.0: '>=8.18.0'
   minimatch@<10.2.3: '>=10.2.3'
-  rollup@>=4.0.0 <4.59.0: '>=4.59.0'
-  svgo@>=3.0.0 <3.3.3: ^3.3.3
   ponder>@hono/node-server@<1.19.13: ^1.19.13
-  devalue@<5.8.1: ^5.8.1
-  undici@>=7.0.0 <7.24.0: ^7.24.0
-  undici@>=6.0.0 <6.24.0: ^6.24.0
   yauzl@<3.2.1: ^3.2.1
   fast-xml-parser@>=5.0.0 <5.7.0: '>=5.7.0'
   kysely@>=0.26.0 <0.28.17: 0.28.17
-  h3@<1.15.9: '>=1.15.9'
   yaml@>=2.0.0 <2.8.3: '>=2.8.3'
-  picomatch@<2.3.2: ^2.3.2
-  picomatch@>=4.0.0 <4.0.4: '>=4.0.4'
-  smol-toml@<1.6.1: '>=1.6.1'
-  brace-expansion@>=4.0.0 <5.0.6: '>=5.0.6'
-  defu@<=6.1.4: ^6.1.5
-  vite@>=5.0.0 <=6.4.1: ^6.4.2
-  axios@<1.15.2: ^1.15.2
-  follow-redirects@<1.16.0: ^1.16.0
+  ponder>vite: ^6.4.2
+  vite-node>vite: ^6.4.2
   dompurify@<3.4.0: ^3.4.0
-  protobufjs@>=7.0.0 <7.5.8: 7.5.8
   protobufjs@>=8.0.0 <8.3.0: 8.3.0
   postcss@>=8.0.0 <8.5.12: ^8.5.12
-  uuid@>=10.0.0 <11.1.1: ^11.1.1
-  fast-uri@<3.1.2: ^3.1.2
-  fast-xml-builder@<1.1.7: ^1.1.7
-  ws@<8.20.1: ^8.20.1
 
 patchedDependencies:
   '@changesets/assemble-release-plan@6.0.9':
@@ -176,6 +156,12 @@ importers:
       '@typescript/native-preview':
         specifier: 7.0.0-dev.20260128.1
         version: 7.0.0-dev.20260128.1
+      enscli:
+        specifier: workspace:*
+        version: link:packages/enscli
+      ensskills:
+        specifier: workspace:*
+        version: link:packages/ensskills
       jsdom:
         specifier: ^27.0.1
         version: 27.0.1(postcss@8.5.12)
@@ -185,6 +171,9 @@ importers:
       prettier-plugin-astro:
         specifier: 'catalog:'
         version: 0.14.1
+      skills-npm:
+        specifier: ^1
+        version: 1.1.1
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.22.3)(typescript@5.9.3)(yaml@2.8.3)
@@ -357,6 +346,9 @@ importers:
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
+      '@ensdomains/content-hash':
+        specifier: ^3.1.0-rc.1
+        version: 3.1.0-rc.1
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
@@ -870,12 +862,15 @@ importers:
 
   examples/enskit-react-example:
     dependencies:
+      '@pierre/trees':
+        specifier: 1.0.0-beta.4
+        version: 1.0.0-beta.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       enskit:
-        specifier: 1.15.1
-        version: 1.15.1(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(react@19.2.1)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+        specifier: 1.15.2
+        version: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(react@19.2.1)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
       enssdk:
-        specifier: 1.15.1
-        version: 1.15.1(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+        specifier: 1.15.2
+        version: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
       react:
         specifier: 'catalog:'
         version: 19.2.1
@@ -908,8 +903,8 @@ importers:
   examples/enssdk-example:
     dependencies:
       enssdk:
-        specifier: 1.15.1
-        version: 1.15.1(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+        specifier: 1.15.2
+        version: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -927,11 +922,11 @@ importers:
   examples/ensskills-example:
     devDependencies:
       enscli:
-        specifier: workspace:*
-        version: link:../../packages/enscli
+        specifier: 1.15.2
+        version: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
       ensskills:
-        specifier: workspace:*
-        version: link:../../packages/ensskills
+        specifier: 1.15.2
+        version: 1.15.2
       skills-npm:
         specifier: ^1
         version: 1.1.1
@@ -1269,6 +1264,9 @@ importers:
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
+      '@ensdomains/content-hash':
+        specifier: ^3.1.0-rc.1
+        version: 3.1.0-rc.1
       '@ensnode/datasources':
         specifier: workspace:*
         version: link:../datasources
@@ -2160,6 +2158,21 @@ packages:
     resolution: {integrity: sha512-4vDIZEFAa1doNA3H9MppUHxflSDYYPVNyaDbdHLksTa4taq3y4dGpletX67Xea8nxI+cMfjEi4nOzLJmPzRE/g==}
     peerDependencies:
       viem: ^2.9.2
+
+  '@ensnode/datasources@1.15.2':
+    resolution: {integrity: sha512-UHFHCAVysKRzR7sY5LOedwYuxZgCuNNAKFvtcqQopYJZ4Cxs5pOzGpXLFGKo0uRtFDaZmoBn53ZaAmPsZiAFMA==}
+    peerDependencies:
+      viem: ^2.50.3
+
+  '@ensnode/ensnode-sdk@1.15.2':
+    resolution: {integrity: sha512-GHFrTfxqpPDycfr/XTVDZCzqFl5kD/uoEUOO+7vuvac6od2Dv2IriPw7TQmm33Ov0VkDKBALe8txfmhUESrWrw==}
+    peerDependencies:
+      viem: ^2.50.3
+
+  '@ensnode/ensrainbow-sdk@1.15.2':
+    resolution: {integrity: sha512-yWiwxS60In7xXqh5h+6RNLpEBqYTJWSxRto12MUMNksM6+gxat04q3Rta6+CmJJLmn8N55AZ+eQ9aQ3dAYLc6w==}
+    peerDependencies:
+      viem: ^2.50.3
 
   '@envelop/core@5.3.2':
     resolution: {integrity: sha512-06Mu7fmyKzk09P2i2kHpGfItqLLgCq7uO5/nX4fc/iHMplWPNuAx4iYR+WXUQoFHDnP6EUbceQNQ5iyeMz9f3g==}
@@ -3786,6 +3799,12 @@ packages:
   '@phosphor-icons/core@2.1.1':
     resolution: {integrity: sha512-v4ARvrip4qBCImOE5rmPUylOEK4iiED9ZyKjcvzuezqMaiRASCHKcRIuvvxL/twvLpkfnEODCOJp5dM4eZilxQ==}
 
+  '@pierre/trees@1.0.0-beta.4':
+    resolution: {integrity: sha512-OfT1yk9ne8Te5+GB5zUY8yqE6B8BqjBHQJleH4lu8ltwNpoocZl4vXt1AzlEExpxI/pp+AFX5QG+lR3JjtTEag==}
+    peerDependencies:
+      react: ^18.3.1 || ^19.0.0
+      react-dom: ^18.3.1 || ^19.0.0
+
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
 
@@ -4370,7 +4389,7 @@ packages:
     resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
-      rollup: '>=4.59.0'
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
     peerDependenciesMeta:
       rollup:
         optional: true
@@ -5050,7 +5069,7 @@ packages:
   '@tailwindcss/vite@4.3.0':
     resolution: {integrity: sha512-t6J3OrB5Fc0ExuhohouH0fWUGMYL6PTLhW+E7zIk/pdbnJARZDCwjBznFnkh5ynRnIRSI4YjtTH0t6USjJISrw==}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^5.2.0 || ^6 || ^7 || ^8
 
   '@tanstack/query-core@5.90.5':
     resolution: {integrity: sha512-wLamYp7FaDq6ZnNehypKI5fNvxHPfTYylE0m/ZpuuzJfJqhR5Pxg9gvGBHZx4n7J+V5Rg5mZxHHTlv25Zt5u+w==}
@@ -5389,13 +5408,13 @@ packages:
     resolution: {integrity: sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
 
   '@vitejs/plugin-react@5.2.0':
     resolution: {integrity: sha512-YmKkfhOAi3wsB1PhJq5Scj3GXMn3WvtQ/JC0xoopuHoXSdmtdStOpFrYaT1kie2YgFBcIe64ROzMYRjCrYOdYw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
   '@vitest/expect@4.1.8':
     resolution: {integrity: sha512-h3nDO677RDLEGlBxyQ5CW8RlMThSKSRLUePLOx09gNIWRL40edgA1GCZSZgf1W55MFAG6/Sw14KeaAnqv0NKdQ==}
@@ -5404,7 +5423,7 @@ packages:
     resolution: {integrity: sha512-LEiN/xe4OSIbKe9HQIp5OC24agGD9J5CnmMgsLohVVoOPWL9a2sBoR6VBx43jQZb7Kr1l4RCuyCJzcAa0+dojw==}
     peerDependencies:
       msw: ^2.4.9
-      vite: ^6.4.2
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       msw:
         optional: true
@@ -5511,7 +5530,7 @@ packages:
     resolution: {integrity: sha512-SDobKBbPIOe0cVL7QxMzGkuUGHvWTdihi9zOrrWaWUgFKe15cwEcwfWmgrcNzjT6kHnNmWuTajPHoIzUjYNYYQ==}
     peerDependencies:
       async-validator: ^4
-      axios: ^1.15.2
+      axios: ^1
       change-case: ^5
       drauu: ^0.4
       focus-trap: ^7
@@ -6788,20 +6807,27 @@ packages:
     resolution: {integrity: sha512-rRqJg/6gd538VHvR3PSrdRBb/1Vy2YfzHqzvbhGIQpDRKIa4FgV/54b5Q1xYSxOOwKvjXweS26E0Q+nAMwp2pQ==}
     engines: {node: '>=8.6'}
 
-  enskit@1.15.1:
-    resolution: {integrity: sha512-TqNKIhD1WwWenEOM7bwBunL0QDIEIiiIJ8K9ukyyC+OIWhDf0rGmDIlpAdYtHjG3edevgRw6jPyZ/wuIX3q/AQ==}
+  enscli@1.15.2:
+    resolution: {integrity: sha512-FoYQOqqIFhf+G/mZz1JNFSPxsUVPBhZz1BsjBFxyB+bCJGS/e6V0JVreBuASt7dxHuZRZh+sF/30/qxQxYQHVg==}
+    hasBin: true
+
+  enskit@1.15.2:
+    resolution: {integrity: sha512-61obMt+dpce/zqRfpSHlkwFrAi43PJhgZmsjRM7ZI42qccQKjDF+sDOjmdbvf7at1fmPJUATNJscHfb62jX6Xw==}
     peerDependencies:
       gql.tada: ^1.8.10
       graphql: ^16
       react: ^18.0.0 || ^19.0.0
       viem: ^2
 
-  enssdk@1.15.1:
-    resolution: {integrity: sha512-YTuG63PmXuLMr3lYqFRhqfAw8dO2YPklovsMrbVh3PSfkkwiq7tJj6BUneRSew4U5PDBCeO7BpqYsF3ETLKvnA==}
+  enssdk@1.15.2:
+    resolution: {integrity: sha512-QB/J5e6hKNd4CVz6K52HcVj5BXN+o3J58d7V/uf1UFq4obFA63YHuTKT6pvaOo8Byx/z1mo9WFEPo2EREsBkzg==}
     peerDependencies:
       gql.tada: ^1.8.10
       graphql: ^16
       viem: ^2
+
+  ensskills@1.15.2:
+    resolution: {integrity: sha512-NwBl3vUOg/5hv/HGPe5GIW1yqXl5uFQ3wA6uAgkvh9FLFTdlMk5sixhuynep24LupE8nOPbMeAqWCdBattqcmw==}
 
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
@@ -7019,7 +7045,7 @@ packages:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
-      picomatch: '>=4.0.4'
+      picomatch: ^3 || ^4
     peerDependenciesMeta:
       picomatch:
         optional: true
@@ -7620,7 +7646,7 @@ packages:
   isows@1.0.7:
     resolution: {integrity: sha512-I1fSfDCZL5P0v33sVqeTDSpcstAg/N+wF5HS033mogOVIp4B+oHC7oOCsA3axAbBSGTJ8QubbNmnIRN/h8U7hg==}
     peerDependencies:
-      ws: ^8.20.1
+      ws: '*'
 
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
@@ -8845,6 +8871,14 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
+  preact-render-to-string@6.6.5:
+    resolution: {integrity: sha512-O6MHzYNIKYaiSX3bOw0gGZfEbOmlIDtDfWwN1JJdc/T3ihzRT6tGGSEWE088dWrEDGa1u7101q+6fzQnO9XCPA==}
+    peerDependencies:
+      preact: '>=10 || >= 11.0.0-0'
+
+  preact@11.0.0-beta.0:
+    resolution: {integrity: sha512-IcODoASASYwJ9kxz7+MJeiJhvLriwSb4y4mHIyxdgaRZp6kPUud7xytrk/6GZw8U3y6EFJaRb5wi9SrEK+8+lg==}
+
   prettier-plugin-astro@0.14.1:
     resolution: {integrity: sha512-RiBETaaP9veVstE4vUwSIcdATj6dKmXljouXc/DDNwBSPTp8FRkLGDSGFClKsAFeeg+13SB0Z1JZvbD76bigJw==}
     engines: {node: ^14.15.0 || >=16.0.0}
@@ -9329,8 +9363,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shell-quote@1.8.3:
-    resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
+  shell-quote@1.8.4:
+    resolution: {integrity: sha512-VsC6n6vz1ihYYyZZwX7YZSF5l5x36ca17OC+a69h94YqB7X6XLwf+5MOgynYir2SLFUbl8gIYvBo8K8RoNQ6bQ==}
     engines: {node: '>= 0.4'}
 
   shiki@4.0.2:
@@ -10117,7 +10151,7 @@ packages:
   vite-tsconfig-paths@4.3.1:
     resolution: {integrity: sha512-cfgJwcGOsIxXOLU/nELPny2/LUD/lcf1IbfyeKTv2bsupVbTH/xpFtdQlBmIP1GEK2CjjLxYhFfB+QODFAx5aw==}
     peerDependencies:
-      vite: ^6.4.2
+      vite: '*'
     peerDependenciesMeta:
       vite:
         optional: true
@@ -10205,7 +10239,7 @@ packages:
   vitefu@1.1.3:
     resolution: {integrity: sha512-ub4okH7Z5KLjb6hDyjqrGXqWtWvoYdU3IGm/NorpgHncKoLTCfRIbvlhBm7r0YstIaQRYlp4yEbFqDcKSzXSSg==}
     peerDependencies:
-      vite: ^6.4.2
+      vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       vite:
         optional: true
@@ -10226,7 +10260,7 @@ packages:
       '@vitest/ui': 4.1.8
       happy-dom: '*'
       jsdom: '*'
-      vite: ^6.4.2
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
@@ -11822,6 +11856,38 @@ snapshots:
       - typescript
       - zod
 
+  '@ensnode/datasources@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      '@ponder/utils': 0.2.18(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+    transitivePeerDependencies:
+      - gql.tada
+      - graphql
+      - typescript
+
+  '@ensnode/ensnode-sdk@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      '@ensdomains/address-encoder': 1.1.4
+      '@ensnode/datasources': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      caip: 1.1.1
+      date-fns: 4.1.0
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - gql.tada
+      - graphql
+      - typescript
+
+  '@ensnode/ensrainbow-sdk@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))':
+    dependencies:
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+    transitivePeerDependencies:
+      - gql.tada
+      - graphql
+
   '@envelop/core@5.3.2':
     dependencies:
       '@envelop/instrumentation': 1.0.0
@@ -13290,6 +13356,13 @@ snapshots:
 
   '@phosphor-icons/core@2.1.1': {}
 
+  '@pierre/trees@1.0.0-beta.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+    dependencies:
+      preact: 11.0.0-beta.0
+      preact-render-to-string: 6.6.5(preact@11.0.0-beta.0)
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+
   '@pinojs/redact@0.4.0': {}
 
   '@pkgjs/parseargs@0.11.0':
@@ -14047,7 +14120,7 @@ snapshots:
       pretty-ms: 9.3.0
       radix-vue: 1.9.17(vue@3.5.32(typescript@5.9.3))
       set-cookie-parser: 3.1.0
-      shell-quote: 1.8.3
+      shell-quote: 1.8.4
       vite-plugin-monaco-editor: 1.1.0(monaco-editor@0.55.1)
       vue: 3.5.32(typescript@5.9.3)
       vue-router: 5.0.4(@vue/compiler-sfc@3.5.32)(vue@3.5.32(typescript@5.9.3))
@@ -16794,18 +16867,31 @@ snapshots:
       ansi-colors: 4.1.3
       strip-ansi: 6.0.1
 
-  enskit@1.15.1(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(react@19.2.1)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
+  enscli@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
+    dependencies:
+      '@ensnode/datasources': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      '@ensnode/ensnode-sdk': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      '@ensnode/ensrainbow-sdk': 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      citty: 0.1.6
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      graphql: 16.11.0
+    transitivePeerDependencies:
+      - gql.tada
+      - typescript
+      - viem
+
+  enskit@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(react@19.2.1)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       '@urql/core': 6.0.1(graphql@16.11.0)
       '@urql/exchange-graphcache': 9.0.0(@urql/core@6.0.1(graphql@16.11.0))(graphql@16.11.0)
-      enssdk: 1.15.1(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+      enssdk: 1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
       gql.tada: 1.9.1(graphql@16.11.0)(typescript@5.9.3)
       graphql: 16.11.0
       react: 19.2.1
       urql: 5.0.1(@urql/core@6.0.1(graphql@16.11.0))(react@19.2.1)
       viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
 
-  enssdk@1.15.1(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
+  enssdk@1.15.2(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6)):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@ensdomains/address-encoder': 1.1.4
@@ -16813,6 +16899,8 @@ snapshots:
       gql.tada: 1.9.1(graphql@16.11.0)(typescript@5.9.3)
       graphql: 16.11.0
       viem: 2.50.3(typescript@5.9.3)(zod@4.3.6)
+
+  ensskills@1.15.2: {}
 
   entities@4.5.0: {}
 
@@ -19375,6 +19463,12 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
+  preact-render-to-string@6.6.5(preact@11.0.0-beta.0):
+    dependencies:
+      preact: 11.0.0-beta.0
+
+  preact@11.0.0-beta.0: {}
+
   prettier-plugin-astro@0.14.1:
     dependencies:
       '@astrojs/compiler': 2.13.1
@@ -20033,7 +20127,7 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shell-quote@1.8.3: {}
+  shell-quote@1.8.4: {}
 
   shiki@4.0.2:
     dependencies:

@@ -1,6 +1,5 @@
 import { trace } from "@opentelemetry/api";
 import {
-  type DomainId,
   ENS_ROOT_NAME,
   type InterpretedName,
   interpretedLabelsToLabelHashPath,
@@ -22,7 +21,8 @@ import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import {
   forwardWalkDisjointNamegraph,
-  hasResolver,
+  type WalkResultRow,
+  walkResultRowHasResolver,
 } from "@/lib/protocol-acceleration/forward-walk-disjoint-namegraph";
 import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
@@ -35,24 +35,39 @@ const tracer = trace.getTracer("get-domain-by-interpreted-name");
 const MAX_HOP_DEPTH = 3;
 
 /**
- * Domain lookup by Interpreted Name by traversing the namegraph.
+ * The result of walking the namegraph for a Name: the terminal disjoint namegraph's path (after all
+ * Bridged Resolver / ENSv1Resolver / ENSv2Resolver hops resolve), plus whether the leaf was an
+ * exact match.
  *
- * Walks resolution from the primary Root Registry (ENSv2 Root when defined, otherwise the ENSv1
- * concrete Root), following Bridged Resolvers as necessary, returning the leaf Domain upon an exact
- * match. We only operate over indexed data with acceleration implicitly enabled; if the traversal
- * of the namegraph cannot be accelerated, this function won't be able to identify the Domain
- * indicated by `name`.
+ * Callers interpret this:
+ * - `exact` → the Name maps to an indexed leaf Domain (`rows[0].domainId`).
+ * - not `exact`, but the deepest Resolver in `rows` is an ENSIP-10 wildcard (`extended`) → the Name
+ *   is resolvable-but-unindexed (an UnindexedDomain).
+ * - otherwise → the Name is not resolvable (the deepest Resolver, if any, does not support ENSIP-10).
+ */
+export interface NamegraphWalkResult {
+  /** The terminal disjoint namegraph's path rows, ordered by depth DESC (deepest first). */
+  rows: WalkResultRow[];
+  /** Whether the deepest row exactly matches the full `path` (i.e. the leaf Domain is indexed). */
+  exact: boolean;
+}
+
+/**
+ * Walks the namegraph for an Interpreted Name and returns the {@link NamegraphWalkResult}.
  *
- * Unlike Forward Resolution, this function does not check registration expiry, so callers can
- * address Domains regardless of expiry status. This means that a Domain identified by this function
- * may not be accessible by Forward Resolution: an expired Domain in a PermissionedRegistry does not
- * exist in the context of Forward Resolution.
+ * Walks resolution from the primary Root Registry (ENSv2 Root when defined, otherwise the ENSv1 Root),
+ * following Bridged Resolvers as necessary. We only operate over indexed data which is fully available
+ * for the ENS Root Chain.
+ *
+ * Unlike Forward Resolution, this walk does not check registration expiry, so callers can address
+ * Domains regardless of expiry status. This means that a Domain identified by this walk may not be
+ * accessible by Forward Resolution: an expired Domain in a PermissionedRegistry does not exist in
+ * the context of Forward Resolution. The Domains returned by this function are Addressable but
+ * not necessarily Resolvable.
  *
  * @dev depends on the Protocol Acceleration plugin which is a hard requirement for the Omnigraph API usage.
  */
-export async function getDomainIdByInterpretedName(
-  name: InterpretedName,
-): Promise<DomainId | null> {
+export async function forwardWalkNamegraph(name: InterpretedName): Promise<NamegraphWalkResult> {
   if (name === ENS_ROOT_NAME) {
     throw new Error(`Invariant: the ENS Root Name ('') is not addressable.`);
   }
@@ -66,8 +81,8 @@ export async function getDomainIdByInterpretedName(
     throw new Error(`Invariant: Name '${name}' exceeds maximum depth ${MAX_SUPPORTED_NAME_DEPTH}.`);
   }
 
-  return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, () =>
-    forwardWalkNamegraph(getRootRegistryId(di.context.namespace), path),
+  return withActiveSpanAsync(tracer, "forwardWalkNamegraph", { name }, () =>
+    walkNamegraphFromRegistry(getRootRegistryId(di.context.namespace), path),
   );
 }
 
@@ -86,18 +101,18 @@ export async function getDomainIdByInterpretedName(
  * the ENS Root Chain's linea.eth instead of the Linea Chain's shadowed linea.eth (which, formally,
  * doesn't exist in the eyes of Resolution).
  */
-async function forwardWalkNamegraph(
+async function walkNamegraphFromRegistry(
   registryId: RegistryId,
   path: LabelHashPath,
   depth = 0,
-): Promise<DomainId | null> {
+): Promise<NamegraphWalkResult> {
   if (depth > MAX_HOP_DEPTH) {
-    throw new Error(`Invariant(forwardWalkNamegraph): Hop depth exceeded: ${depth}`);
+    throw new Error(`Invariant(walkNamegraphFromRegistry): Hop depth exceeded: ${depth}`);
   }
 
   // walk the disjoint namegraph by indicated by `registryId` through `path`
   const rows = await forwardWalkDisjointNamegraph(registryId, path);
-  if (rows.length === 0) return null;
+  if (rows.length === 0) return { rows, exact: false };
 
   // rows are ORDER BY depth DESC, so deepest element is rows[0]
   const deepest = rows[0];
@@ -107,10 +122,10 @@ async function forwardWalkNamegraph(
 
   // if the exact match has a Resolver set, we can return it outright
   // NOTE: this also encodes the "prefer linea.eth on the ENS Root Chain" behavior
-  if (exact && hasResolver(deepest)) return deepest.domainId;
+  if (exact && walkResultRowHasResolver(deepest)) return { rows, exact: true };
 
   // otherwise, identify the deepest element with a Resolver
-  const deepestResolver = rows.find(hasResolver);
+  const deepestResolver = rows.find(walkResultRowHasResolver);
   if (deepestResolver) {
     const resolverEq = makeContractMatcher(di.context.namespace, deepestResolver);
     // Bridged Resolvers
@@ -123,7 +138,7 @@ async function forwardWalkNamegraph(
       // NOTE: we blindly return after bridging, which correctly implements the Forward Resolution
       // behavior in that the origin Domain, even if there is one, is invisible to resolution
       // (due to the ancestor Bridged Resolver) and therefore not addressable
-      return forwardWalkNamegraph(
+      return walkNamegraphFromRegistry(
         bridged.targetRegistryId,
         path.slice(deepestResolver.depth),
         depth + 1,
@@ -134,16 +149,25 @@ async function forwardWalkNamegraph(
     // if the deepest Resolver is the ENSv1Resolver, fallback to ENSv1
     if (resolverEq(DatasourceNames.ENSv2Root, "ENSv1Resolver")) {
       // to implement the ENSv1Resolver, walk the ENSv1 disjoint namegraph with the full path
-      return forwardWalkNamegraph(getENSv1RootRegistryId(di.context.namespace), path, depth + 1);
+      return walkNamegraphFromRegistry(
+        getENSv1RootRegistryId(di.context.namespace),
+        path,
+        depth + 1,
+      );
     }
 
     // ENSv2Resolver (ENSv2 Fallback)
     if (resolverEq(DatasourceNames.ENSv2Root, "ENSv2Resolver")) {
       // to implement the ENSv2Resolver, walk the ENSv2 disjoint namegraph with the full path
-      return forwardWalkNamegraph(getENSv2RootRegistryId(di.context.namespace), path, depth + 1);
+      return walkNamegraphFromRegistry(
+        getENSv2RootRegistryId(di.context.namespace),
+        path,
+        depth + 1,
+      );
     }
   }
 
-  // finally, return the exact match if it was the leaf
-  return exact ? deepest.domainId : null;
+  // finally, return the terminal path; the caller interprets `exact` (indexed leaf) vs a deepest
+  // wildcard Resolver (resolvable-but-unindexed) vs neither (not resolvable)
+  return { rows, exact };
 }

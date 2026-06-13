@@ -1,8 +1,11 @@
+import { isEvmCoinType } from "@ensdomains/address-encoder/utils";
 import { trace } from "@opentelemetry/api";
 import {
   type Address,
   asLiteralName,
+  bigintToCoinType,
   type ContentType,
+  ETH_COIN_TYPE,
   type Hex,
   type Name,
   type RecordVersion,
@@ -90,10 +93,40 @@ export async function executeOperations({
 
                 if (size(value) === 0) return interpretOperationWithRawResult(op, null);
 
-                const results = decodeAbiParameters(
-                  getAbiItem({ abi: ResolverABI, name: op.functionName, args: op.args }).outputs,
-                  value,
-                );
+                const results = (() => {
+                  // resolve() may return a non-empty but malformed response, so catch the decoding error
+                  try {
+                    return decodeAbiParameters(
+                      getAbiItem({
+                        abi: ResolverABI,
+                        name: op.functionName,
+                        args: op.args,
+                      }).outputs,
+                      value,
+                    );
+                  } catch (error) {
+                    // record the exception for the trace
+                    if (error instanceof Error) span.recordException(error);
+
+                    // some resolvers (world.id) return raw results instead of encoding them correctly
+                    // so check for that and fix them
+                    if (op.functionName === "addr") {
+                      const coinType = bigintToCoinType(op.args[1]);
+                      const _isEvmCoinType = coinType === ETH_COIN_TYPE || isEvmCoinType(coinType);
+                      if (_isEvmCoinType && size(value) === 32) {
+                        try {
+                          return decodeAbiParameters([{ type: "address" }], value);
+                        } catch {}
+                      }
+                    }
+
+                    // if our special decoding logic above didn't help, we were unable to resolve this record
+                    return null;
+                  }
+                })();
+
+                // if we failed to decode anything, interpret as null
+                if (results === null) return interpretOperationWithRawResult(op, null);
 
                 // Some calls (ABI, pubkey) return a tuple; single-output calls unwrap.
                 const raw = results.length === 1 ? results[0] : results;

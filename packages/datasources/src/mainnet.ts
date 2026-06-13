@@ -17,12 +17,12 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
@@ -86,9 +86,9 @@ export default {
         startBlock: 16925608,
       },
       UniversalResolver: {
-        abi: UniversalResolverV1,
-        address: "0xabd80e8a13596feea40fd26fd6a24c3fe76f05fb",
-        startBlock: 22671701,
+        abi: UniversalResolverABI,
+        address: "0xeeeeeeee14d718c2b47d9923deab1335e144eeee",
+        startBlock: 23085558,
       },
       BasenamesL1Resolver: {
         abi: ResolverABI,
@@ -99,6 +99,11 @@ export default {
         abi: ResolverABI,
         address: "0x1507ce9421232fdbd302f5ebe4590f8d77febbff",
         startBlock: 24640923,
+      },
+      DotBoxL1Resolver: {
+        abi: ResolverABI,
+        address: "0xf97aac6c8dbaebcb54ff166d79706e3af7a813c8",
+        startBlock: 19128555,
       },
 
       // the Resolver for *.argent.xyz names

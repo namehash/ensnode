@@ -8,8 +8,8 @@
     "prepare": "skills-npm --cwd ."
   },
   "devDependencies": {
-    "enscli": "workspace:*",
-    "ensskills": "workspace:*",
+    "enscli": "1.15.2",
+    "ensskills": "1.15.2",
     "skills-npm": "^1"
   }
 }

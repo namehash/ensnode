@@ -46,10 +46,10 @@ const EXPECTED_DESCRIPTION = "example.eth";
 
 const publicClient = di.context.rootChainPublicClient;
 
-const UniversalResolverV2 = getDatasourceContract(
+const UniversalResolver = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
   DatasourceNames.ENSRoot,
-  "UniversalResolverV2",
+  "UniversalResolver",
 );
 
 describe("executeOperations against UniversalResolver", () => {
@@ -58,7 +58,7 @@ describe("executeOperations against UniversalResolver", () => {
     await expect(
       executeOperations({
         name: NAME,
-        resolverAddress: UniversalResolverV2.address,
+        resolverAddress: UniversalResolver.address,
         useENSIP10Resolve: true,
         operations: makeOperations(node, { texts: ["description"] }),
         publicClient,
@@ -82,7 +82,7 @@ describe("executeOperations against UniversalResolver", () => {
     await expect(
       executeOperations({
         name: NAME_WITH_ENCODED_LABELHASHES,
-        resolverAddress: UniversalResolverV2.address,
+        resolverAddress: UniversalResolver.address,
         useENSIP10Resolve: true,
         operations: makeOperations(node, { texts: ["description"] }),
         publicClient,

@@ -17,11 +17,13 @@ import type {
   PermissionsResourceId,
   PermissionsUserId,
   RegistrationId,
+  RegistryId,
   RenewalId,
   ResolverId,
   ResolverRecordsId,
   StorageId,
   TokenId,
+  UnindexedDomainId,
 } from "./types";
 
 /**
@@ -70,6 +72,17 @@ export const makeENSv1DomainId = (accountId: AccountId, node: Node) =>
 
 export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
   [_stringifyAccountId(registry), storageId.toString()].join("-") as ENSv2DomainId;
+
+/**
+ * Stringifies the id of a resolvable-but-unindexed Domain from the {@link RegistryId} of the
+ * Registry that manages the ancestor Domain bearing the wildcard Resolver, and the `node` (namehash)
+ * of the unindexed name. See {@link UnindexedDomainId}.
+ *
+ * @dev Prefixed with `unindexed-` to unambiguously disambiguate from an {@link ENSv1DomainId}, which
+ * shares the same `${registryId}-${node}` tail shape.
+ */
+export const makeUnindexedDomainId = (registryId: RegistryId, node: Node) =>
+  ["unindexed", registryId, node].join("-") as UnindexedDomainId;
 
 /**
  * Computes a Label's {@link StorageId} given its TokenId or LabelHash.

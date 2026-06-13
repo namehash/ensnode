@@ -1,0 +1,21 @@
+---
+title: Expiring ENS Registrations
+description: Fetch ENS registrations that are about to expire.
+sidebar:
+  label: Expiring Registrations
+---
+
+import UnigraphStaticExample from "@components/molecules/unigraph-static-example/UnigraphStaticExample.astro";
+import EnsDbWriterSchemaIntro from "@components/molecules/EnsDbWriterSchemaIntro.astro";
+import EnsDbReaderIntro from "@components/molecules/EnsDbReaderIntro.astro";
+import { exampleExpiringRegistrations } from "@data/unigraph-examples/expiring-registrations";
+
+Fetch Domains with registrations expiring within a certain timeframe. This example uses a simple `WHERE` clause to filter for Domains with `expiry` between the current time and a specified future time (e.g., 3 days from now). See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<UnigraphStaticExample
+ sql={exampleExpiringRegistrations.sql}
+ ensDbSdk={exampleExpiringRegistrations.sdk}
+>
+  <EnsDbWriterSchemaIntro ensDbWriterSchemaName="ensindexer_0" slot="sql-tab-note"/>
+  <EnsDbReaderIntro slot="ensdb-sdk-tab-note"/>
+</UnigraphStaticExample>

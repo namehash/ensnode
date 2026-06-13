@@ -1,24 +1,50 @@
 # ENSNode
 
-ENSNode is a multichain ENS indexer monorepo. It indexes ENS names across multiple chains (mainnet, Basenames, Lineanames, 3DNS) and exposes them via GraphQL and REST APIs.
+ENSNode is the full-stack ENSv2 development platform: a suite of services and libraries that index the full state of ENS — ENSv1 and ENSv2, across all chains (mainnet, Basenames, Lineanames, 3DNS) — into a unified data model and expose it for integration.
+
+Core narrative (see `docs/ensnode.io` for the canonical versions):
+
+- **ENSDb** — a PostgreSQL database holding the live onchain state of ENS as a single unified data model (the **ENS Unigraph**). An open standard separating Writers (indexers) from Readers (APIs).
+- **ENSIndexer** — the reference ENSDb Writer: a Ponder-based multichain indexer combining ENSv1 Nametrees and the ENSv2 Namegraph into ENSDb.
+- **ENSApi** — serves ENSNode's APIs on top of ENSDb: the **ENS Omnigraph** GraphQL API (unified ENSv1+ENSv2, Relay spec), the legacy ENS Subgraph GraphQL API (deprecated), and REST APIs.
+- **ENSRainbow** — heals unknown labels (labelHash → label) as a sidecar consumed by ENSIndexer.
+- **ENSAdmin** — operator dashboard and ENS Protocol Inspector.
 
 ## Monorepo Structure
 
-- `apps/ensindexer` — Blockchain indexer powered by Ponder
-- `apps/ensapi` — ENS API server (GraphQL and REST, Hono)
+Apps (private, deployed as services):
+
+- `apps/ensindexer` — Multichain ENS indexer, powered by Ponder
+- `apps/ensapi` — ENS API server: Omnigraph + Subgraph GraphQL and REST (Hono)
 - `apps/ensadmin` — Dashboard for navigating indexed ENS state (Next.js)
-- `apps/ensrainbow` — Label healing service: recovers labels from labelHashes (Hono)
-- `apps/fallback-ensapi` — AWS Lambda fallback that proxies ENS Subgraph requests when ENSApi is unhealthy
-- `packages/ensdb-sdk` — SDK for interacting with data in ENSDb
-- `packages/ensnode-sdk` — SDK for interacting with ENSNode
-- `packages/ensrainbow-sdk` — SDK for interacting with ENSRainbow
+- `apps/ensrainbow` — Label healing service (Hono)
+- `apps/fallback-ensapi` — AWS Lambda fallback proxying ENS Subgraph requests when ENSApi is unhealthy
+
+Public packages (published to npm — exports are external API surface; changes need changesets):
+
+- `packages/enssdk` — `enssdk`: foundational ENS development library (typed Omnigraph client via gql.tada, hashing, normalization)
+- `packages/enskit` — `enskit`: ENS toolkit for React (urql-based Omnigraph hooks)
+- `packages/enscli` — `enscli`: agent- and human-friendly CLI for ENS, ENSNode, and the Omnigraph API
+- `packages/ensskills` — `ensskills`: agent skills for ENS, installed into consumer repos via skills-npm
+- `packages/ensnode-sdk` — SDK for interacting with ENSNode (ENSApi wire types, Omnigraph example queries)
+- `packages/ensdb-sdk` — SDK for ENSDb data (owns the indexed schema)
+- `packages/ensrainbow-sdk` — SDK for the ENSRainbow API
 - `packages/datasources` — Catalog of chain datasources (contracts, start blocks, event filters)
-- `packages/ponder-subgraph` — Hono middleware for Subgraph-compatible GraphQL
-- `packages/ponder-sdk` — Utility library for interacting with Ponder apps and data
+- `packages/ponder-sdk` / `packages/ponder-subgraph` — Ponder utilities / Subgraph-compatible GraphQL middleware
 - `packages/ens-referrals` — Utilities for ENS Referrals
 - `packages/namehash-ui` — UI components for NameHash Labs apps
-- `packages/shared-configs` — Shared TypeScript configurations
-- `docs/ensnode.io` — Documentation site (Astro/Starlight)
+
+Private packages: `packages/ensnode-react`, `packages/scalar-react`, `packages/shared-configs`, `packages/ensindexer-perf-testing`, `packages/integration-test-env`.
+
+Docs & examples: `docs/ensnode.io` (Astro/Starlight), `docs/ensrainbow.io`, `examples/*` (consumer examples for enssdk, enskit, ensskills, and raw Omnigraph GraphQL).
+
+Several projects have their own AGENTS.md with subsystem-specific invariants — it loads automatically when you work in that subtree: `apps/ensindexer`, `apps/ensapi`, `apps/ensrainbow`, `apps/ensadmin`, `apps/fallback-ensapi`, `docs/ensnode.io`, `packages/datasources`, `packages/integration-test-env`.
+
+## Agent Skills
+
+- Internal skills (repo workflows) live in `.agents/skills/` (committed). `pnpm install` mirrors them into `.claude/skills/` via `scripts/link-local-skills.mjs`; never create those symlinks by hand. New internal skills go in `.agents/skills/<name>/SKILL.md`.
+- External skills (how to use ENS/ENSNode) live in `packages/ensskills` and are symlinked in as `npm-ensskills-*` by skills-npm (configured in `skills-npm.config.ts`).
+- Placement rule: knowledge useful to external integrators (protocol concepts, Omnigraph usage, API contracts) belongs in `packages/ensskills` or `docs/ensnode.io` — never duplicated into internal AGENTS.md files. Internal AGENTS.md files hold repo-internal invariants only.
 
 ## Tech Stack
 
@@ -28,22 +54,29 @@ ENSNode is a multichain ENS indexer monorepo. It indexes ENS names across multip
 - **Indexer framework:** Ponder
 - **Validation:** Zod
 - **ORM:** Drizzle
-- **Linting/formatting:** Biome
+- **Linting/formatting:** Biome (TS/JSON), Prettier (md/mdx/astro)
 - **Testing:** Vitest
 - **Build:** tsup, tsx
 
 ## Commands
 
-Runnable commands for validating changes; lint and format with Biome.
-
 - Install dependencies: `pnpm install`
 - Run all tests: `pnpm test`
-  - Run tests for a single project: `pnpm test --project <project>` (e.g. `pnpm test --project ensapi`)
-  - Run tests for a single file: `pnpm test <path>`
+  - Single project: `pnpm test --project <project>` (e.g. `pnpm test --project ensapi`)
+  - Single file: `pnpm test <path>`
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
-- Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
+- Type checking: `pnpm typecheck` (all workspaces)
   - Always use `pnpm -F <package-name> typecheck`, never call `tsc` or `tsgo` directly
-- Omnigraph example sample responses (docs): after changing SDK Omnigraph example queries/variables in `packages/ensnode-sdk` or when refreshing live JSON shown in the docs Omnigraph examples, run `pnpm -F @docs/ensnode omnigraph-examples:refresh-responses` (requires `curl`, network). Updates `docs/ensnode.io/src/data/omnigraph-examples/responses.json`.
+- Codegen: `pnpm generate` (always from the monorepo root, never scoped to a package) — regenerates OpenAPI defs, the Omnigraph GraphQL schema, and ensskills autogen regions
+
+## Local Runtime
+
+Default ports: ENSIndexer `42069`, ENSApi `4334`, ENSAdmin `4173`, ENSRainbow `3223`, Postgres `5432`.
+
+- Each app reads `.env.local` (copy from its `.env.local.example`). Dev startup order: Postgres → `pnpm -F ensrainbow serve` → `pnpm -F ensindexer dev` → `pnpm -F ensapi dev` → `pnpm -F ensadmin dev`.
+- Cross-app invariant: ENSIndexer and ENSApi must agree on `ENSDB_URL` and `ENSINDEXER_SCHEMA_NAME` — ENSApi reads the schema ENSIndexer writes. Each running ENSIndexer needs an exclusive schema name.
+- Full stack via Docker: `docker compose -f docker/docker-compose.devnet.yml up -d` (zero-config local devnet) or `docker/docker-compose.yml` with `.env.docker.local` (mainnet/sepolia).
+- Integration tests: orchestrated by `packages/integration-test-env` (`pnpm test:integration:ci` from root).
 
 ## Testing
 
@@ -60,6 +93,7 @@ Runnable commands for validating changes; lint and format with Biome.
 - Do not duplicate definitions across multiple locations. Duplication creates a significant maintenance burden.
 - Ensure documentation resides at the correct place and the correct layer of responsibility.
 - Use type aliases to document invariants. Each invariant MUST be documented exactly once, on its type alias.
+- Terminology is exacting in this codebase (Label vs Name, Literal vs Interpreted vs Beautified, Encoded LabelHash, Subregistry, …). The canonical glossary is `docs/ensnode.io/src/content/docs/docs/reference/terminology.mdx` — consult it before naming things; link to it rather than redefining terms.
 
 ## Code Comments
 
@@ -70,25 +104,19 @@ Runnable commands for validating changes; lint and format with Biome.
 
 Fail fast and loudly on invalid inputs.
 
-- **Validation — API requests:** Use the existing Hono validation middleware (Zod schemas + `validate()` from `apps/ensapi/src/lib/handlers/validate.ts`). Failed validation becomes a 400 response with structured details via `errorResponse`; handlers receive already-validated data. Do not manually call `zod.parse`/`safeParse` in route handlers for request body/params/query when this middleware is in use.
-- **Validation — non-API code (config, SDK, scripts):** Use `zod.parse(...)` when invalid input should throw immediately; use `zod.safeParse(...)` when you need a non-throwing branch (e.g. optional or fallback). Prefer `parse` for fail-fast.
+- **Non-API code (config, SDK, scripts):** Use `zod.parse(...)` when invalid input should throw immediately; use `zod.safeParse(...)` when you need a non-throwing branch (e.g. optional or fallback). Prefer `parse` for fail-fast.
 - **Error types:** Use plain `Error` (or `ZodError` when propagating Zod validation errors). The codebase does not define a custom hierarchy (e.g. `AppError`/`ValidationError`); do not introduce one unless the project adopts it. Use `throw new Error("message")` from application code.
-- **API boundaries:** Use the shared `errorResponse` helper (`apps/ensapi/src/lib/handlers/error-response.ts`) for all error responses in ENSApi (and equivalent pattern in other Hono apps). Mapping: validation (ZodError / Standard Schema) → 400 with `{ message, details }`; other known client errors → 4xx with `{ message }`; server errors → 500 with `{ message }`. Response shape: `{ message: string, details?: unknown }` (see `packages/ensnode-sdk/src/ensapi/api/shared/errors/response.ts`). A `code` field may be adopted later for machine-readable codes; do not add it inconsistently today.
-- **Examples:** Validation at boundary: route uses `validate("json", MySchema)`; on failure → 400 + `{ message: "Invalid Input", details }`. Non-API: `const config = ConfigSchema.parse(env)` or `const parsed = MySchema.safeParse(input); if (!parsed.success) return fallback;`. Handler: `return errorResponse(c, err)` or `return errorResponse(c, "Not found", 404)`.
-
-## Ponder
-
-- Schema changes never require a migration step. Ponder only runs fully-compatible indexes against existing schemas; otherwise the index is dropped and rebuilt from scratch. Do not propose, plan, or write migration code for the ensindexer drizzle schema.
-- Schema or handler changes always require a re-index. This is implicit — never qualify plans with "requires reindex" or similar.
-- Access entities by primary key only. Ponder's cache layer keys on PK; filters or complex selects force a flush to Postgres and are extremely unperformant in the hot path. If you need a non-PK lookup at index time, design the schema so the lookup key is the primary key.
-- TOCTOU is never a concern inside Ponder event handlers. Ponder serializes events per chain and runs each handler in a transaction, so a read-modify-write against the same row from two handlers cannot interleave. Bot reviewers will sometimes flag this — dismiss those comments. (Note: TOCTOU IS a concern in ENSApi when reading `ensIndexerSchema` — both parallel and serial reads can see different snapshots of the indexer's writes.)
+- API request validation and error responses are ENSApi conventions — see `apps/ensapi/AGENTS.md`.
 
 ## Workflow
 
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
+  - ENSNode uses non-standard semver: breaking changes are `minor`, not `major`.
+  - Prefer a separate changeset per affected service/package when the changes are logically isolated, each describing that package's own change — rather than one changeset bumping several packages with a shared message. A single multi-package changeset is appropriate only when the change is genuinely one indivisible unit (e.g. a wire-format contract shared across packages).
 - Before declaring work complete, run validation in the affected project(s):
   1. If OpenAPI Defs or the Omnigraph GraphQL Schema was affected, run `pnpm generate`
      - always run `pnpm generate` from the monorepo root, do NOT scope to a specific package
+     - the OpenAPI doc is a committed artifact (`docs/ensnode.io/src/data/ensapi-openapi.json`) and CI fails if it drifts from the ENSApi routes
   2. `pnpm -F <affected-project> typecheck`
      - at the end of a work session, always run `pnpm typecheck` from the monorepo root
   3. `pnpm lint`

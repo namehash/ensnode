@@ -1,5 +1,6 @@
 import { type CoinName, getCoderByCoinName } from "@ensdomains/address-encoder";
 import { bytesToHex } from "@ensdomains/address-encoder/utils";
+import { type Codec, decode, encode } from "@ensdomains/content-hash";
 import type { CoinType, NormalizedAddress } from "enssdk";
 import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
@@ -50,6 +51,15 @@ const getRawAddress = (coinName: CoinName, address: string) => {
   };
 };
 
+const getRawContenthash = (codec: Codec, input: string) => {
+  const encoded = encode(codec, input);
+  return {
+    raw: `0x${encoded}` as Hex,
+    // decode normalizes values (e.g. IPFS CIDv0 input → CIDv1 decoded, IPNS peer id → base36 CID)
+    decoded: decode(encoded),
+  };
+};
+
 /**
  * Text records seeded on `test.eth` (PermissionedResolver) in the ens-test-env devnet.
  * @see packages/integration-test-env/src/seed/resolver-records.ts
@@ -94,8 +104,108 @@ export const fixtures = {
   fourBytesInterface: "0x11100111",
   publicKeyX: `0x${"02".repeat(32)}`,
   publicKeyY: `0x${"03".repeat(32)}`,
-  contenthash: `0x${"04".repeat(32)}`,
 
   rawAddresses: rawAddresses,
   textRecords: testEthTextRecords,
 } as const;
+
+/**
+ * Real contenthash values for each supported codec, encoded as per ENSIP-7.
+ * Input values are taken from https://github.com/ensdomains/content-hash test vectors.
+ * The `raw` field is the ENSIP-7 encoded hex; `decoded` is the human-readable value.
+ *
+ * @see https://github.com/ensdomains/content-hash/blob/master/src/index.test.ts
+ */
+export const contenthashFixtures = {
+  // CIDv0 input — decodes back to CIDv1
+  ipfs: getRawContenthash("ipfs", "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4"),
+  swarm: getRawContenthash(
+    "swarm",
+    "d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162",
+  ),
+  ipns: getRawContenthash("ipns", "12D3KooWG4NvqQVczTrWY1H2tvsJmbQf5bbA3xGYXC4FM3wWCfE4"),
+  onion: getRawContenthash("onion", "zqktlwi4fecvo6ri"),
+  onion3: getRawContenthash("onion3", "p53lf57qovyuvwsc6xnrppyply3vtqm7l6pcobkmyqsiofyeznfu5uqd"),
+  skynet: getRawContenthash("skynet", "CABAB_1Dt0FJsxqsu_J4TodNCbCGvtFf1Uys_3EgzOlTcg"),
+  arweave: getRawContenthash("arweave", "ys32Pt8uC7TrVxHdOLByOspfPEq2LO63wREHQIM9SJQ"),
+  empty: { raw: "0x", decoded: null },
+  invalid: { raw: "0xdeadbeef", decoded: null },
+  zero: {
+    raw: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    decoded: null,
+  },
+} as const;
+
+export type NameRecords = {
+  contenthash: Hex | null;
+};
+
+type ENSv1RegisteredName = {
+  type: "ENSv1";
+  name: string;
+  label: string;
+  /**
+   * When true, register via LegacyETHRegistrarController then NameWrapper.wrapETH2LD so
+   * NameWrapped heals the label. When false, legacy registration only — unhealed
+   * (`[labelhash].eth` canonical name).
+   */
+  wrapped: boolean;
+  records?: NameRecords;
+};
+
+type ENSv2RegisteredName = {
+  type: "ENSv2";
+  name: string;
+  label: string;
+  records?: NameRecords;
+  subnames?: RegisteredSubname[];
+};
+
+export type RegisteredName = ENSv1RegisteredName | ENSv2RegisteredName;
+
+export type RegisteredSubname = {
+  label: string;
+  name: string;
+  records?: NameRecords;
+};
+
+export const contenthashSubnames = Object.entries(contenthashFixtures).map(([label, fixture]) => ({
+  label: label,
+  name: `${label}.contenthash.eth`,
+  records: { contenthash: fixture.raw },
+})) satisfies RegisteredSubname[];
+
+/**
+ * Names registered at seed time via the ETHRegistrar (2LDs) or UserRegistry (subnames),
+ * together with the resolver records to seed on them.
+ *
+ * To add more names: append entries here. Seeding, DEVNET_NAMES, and tests pick them up
+ * automatically — no other files need changing.
+ */
+export const additionallyRegisteredNames = [
+  {
+    type: "ENSv2",
+    name: "contenthash.eth",
+    label: "contenthash",
+    records: { contenthash: null },
+    subnames: contenthashSubnames,
+  },
+  {
+    type: "ENSv1",
+    name: "legacy-v1-wrapped.eth",
+    label: "legacy-v1-wrapped",
+    wrapped: true,
+  },
+  {
+    type: "ENSv1",
+    name: "legacy-v1-unwrapped.eth",
+    label: "legacy-v1-unwrapped",
+    wrapped: false,
+  },
+  {
+    type: "ENSv2",
+    name: "emptyrecords.eth",
+    label: "emptyrecords",
+    records: { contenthash: "0x" },
+  },
+] as const satisfies RegisteredName[];

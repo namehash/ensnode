@@ -24,12 +24,12 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
@@ -94,9 +94,9 @@ export default {
         startBlock: 3790153,
       },
       UniversalResolver: {
-        abi: UniversalResolverV1,
-        address: "0xb7b7dadf4d42a08b3ec1d3a1079959dfbc8cffcc",
-        startBlock: 8515717,
+        abi: UniversalResolverABI,
+        address: "0xeeeeeeee14d718c2b47d9923deab1335e144eeee",
+        startBlock: 8928790,
       },
       BasenamesL1Resolver: {
         abi: ResolverABI,

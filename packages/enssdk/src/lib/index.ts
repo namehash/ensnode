@@ -16,5 +16,6 @@ export * from "./normalization";
 export * from "./parse-labelhash";
 export * from "./parse-reverse-name";
 export * from "./reinterpretation";
+export * from "./resolvable-name";
 export * from "./reverse-name";
 export * from "./types";

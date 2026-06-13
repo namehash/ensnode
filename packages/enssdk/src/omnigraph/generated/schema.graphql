@@ -26,6 +26,11 @@ type Account {
   id: Address!
 
   """
+  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.
+  """
+  nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection
+
+  """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
   """
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
@@ -118,6 +123,25 @@ type AccountId {
 input AccountIdInput {
   address: Address!
   chainId: ChainId!
+}
+
+type AccountNameReferencesConnection {
+  edges: [AccountNameReferencesConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountNameReferencesConnectionEdge {
+  cursor: String!
+  node: NameReference!
+}
+
+"""Filter for Account.nameReferences."""
+input AccountNameReferencesWhereInput {
+  """
+  If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.
+  """
+  coinType: CoinType
 }
 
 type AccountPermissionsConnection {
@@ -291,6 +315,19 @@ enum ChainName {
 scalar CoinType
 
 """
+The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+"""
+enum ContenthashProtocol {
+  ARWEAVE
+  IPFS
+  IPNS
+  ONION
+  ONION3
+  SKYNET
+  SWARM
+}
+
+"""
 DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
 """
 scalar DogecoinAddress
@@ -319,7 +356,7 @@ interface Domain {
   owner: Account
 
   """
-  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
   """
   parent: Domain
 
@@ -329,7 +366,9 @@ interface Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
   registry: Registry!
 
   """Resolve protocol-level data for this Domain."""
@@ -424,6 +463,11 @@ type DomainProfile {
   Interpreted avatar metadata. Returns null when the raw avatar record is unset or empty.
   """
   avatar: ProfileAvatar
+
+  """
+  The interpreted ENSIP-7 contenthash on the profile of an ENS name. Returns null when the raw contenthash record is unset, empty, or cannot be decoded (unknown codec or malformed bytes). See https://docs.ens.domains/ensip/7.
+  """
+  contenthash: ProfileContenthash
 
   """
   The interpreted description on the profile of an ENS name, or null when unset.
@@ -573,7 +617,7 @@ type ENSv1Domain implements Domain {
   owner: Account
 
   """
-  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
   """
   parent: Domain
 
@@ -583,7 +627,9 @@ type ENSv1Domain implements Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
   registry: Registry!
 
   """Resolve protocol-level data for this Domain."""
@@ -693,7 +739,7 @@ type ENSv2Domain implements Domain {
   owner: Account
 
   """
-  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
   """
   parent: Domain
 
@@ -708,7 +754,9 @@ type ENSv2Domain implements Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
   registry: Registry!
 
   """Resolve protocol-level data for this Domain."""
@@ -1075,6 +1123,25 @@ input NameOrNodeInput @oneOf {
   node: Node
 }
 
+"""A Name whose indexed `addr()` record points at an Account."""
+type NameReference {
+  """The CoinType of the matching `addr()` record."""
+  coinType: CoinType!
+
+  """
+  The canonical Domain whose `addr(coinType)` record points at this Account.
+  """
+  domain: Domain!
+
+  """
+  Whether this name is the ENSIP-19 Primary Name of this Account for this `coinType`. i.e. whether reverse resolution of `(address, coinType)` resolves to this exact name. Protocol Accelerated when supported.
+  """
+  match: Boolean!
+
+  """The Resolver holding the matching `addr()` record."""
+  resolver: Resolver!
+}
+
 """
 A NameWrapperRegistration represents a Registration initiated by the ENSv1 NameWrapper.
 """
@@ -1363,6 +1430,29 @@ type ProfileAvatar {
   HTTP-compatible URL for fetching the avatar image in web browsers. Abstraction over the raw avatar record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
   """
   httpUrl: String
+}
+
+"""The interpreted ENSIP-7 contenthash on the profile of an ENS name."""
+type ProfileContenthash {
+  """
+  The decoded, human-readable content identifier (e.g. a CID for IPFS, transaction ID for Arweave).
+  """
+  decoded: String!
+
+  """
+  The default public HTTP gateway URL for fetching this content in a browser (e.g. https://ipfs.io/ipfs/…). Null for protocols with no well-known public gateway (onion, skynet).
+  """
+  httpUrl: String
+
+  """
+  The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+  """
+  protocolType: ContenthashProtocol!
+
+  """
+  The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").
+  """
+  uri: String!
 }
 
 """The interpreted header image on the profile of an ENS name."""
@@ -1728,6 +1818,11 @@ type Resolver {
   """All Events associated with this Resolver."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): ResolverEventsConnection
 
+  """
+  Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed.
+  """
+  extended: Boolean!
+
   """A unique reference to this Resolver."""
   id: ResolverId!
 
@@ -1904,6 +1999,66 @@ type ThreeDNSRegistration implements Registration {
   The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
+}
+
+"""
+A resolvable-but-unindexed Domain: not present in the index, but resolvable because an ancestor in its namegraph path has an ENSIP-10 wildcard Resolver (e.g. off-chain / CCIP-Read names, unindexed 3DNS names, wildcard subnames).
+"""
+type UnindexedDomain implements Domain {
+  """
+  Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
+  """
+  canonical: DomainCanonical
+
+  """All Events associated with this Domain."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+
+  """A unique and stable reference to this Domain."""
+  id: DomainId!
+
+  """The Label associated with this Domain in the ENS Namegraph."""
+  label: Label!
+
+  """
+  If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  """
+  owner: Account
+
+  """
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
+  """
+  parent: Domain
+
+  """The latest Registration for this Domain, if exists."""
+  registration: Registration
+
+  """All Registrations for a Domain, including the latest Registration."""
+  registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
+
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
+  registry: Registry!
+
+  """Resolve protocol-level data for this Domain."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ForwardResolve!
+
+  """Resolver relationship metadata for this Domain."""
+  resolver: DomainResolver!
+
+  """
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
+  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+
+  """The Registry this Domain declares as its Subregistry, if exists."""
+  subregistry: Registry
 }
 
 """
