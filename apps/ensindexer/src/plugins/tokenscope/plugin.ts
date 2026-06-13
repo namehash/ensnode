@@ -66,7 +66,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "Seaport")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               seaport.chain.id,
               seaport.contracts.Seaport1_5,
             ),
@@ -80,7 +80,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "EthBaseRegistrar")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.BaseRegistrar,
             ),
@@ -94,7 +94,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "BaseBaseRegistrar")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               basenames.chain.id,
               basenames.contracts.BaseRegistrar,
             ),
@@ -108,7 +108,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "LineaBaseRegistrar")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               lineanames.chain.id,
               lineanames.contracts.BaseRegistrar,
             ),
@@ -118,7 +118,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "NameWrapper")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.NameWrapper,
             ),
@@ -129,12 +129,12 @@ export default createPlugin({
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               threednsOptimism.chain.id,
               threednsOptimism.contracts.ThreeDNSToken,
             ),
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               threednsBase.chain.id,
               threednsBase.contracts.ThreeDNSToken,
             ),

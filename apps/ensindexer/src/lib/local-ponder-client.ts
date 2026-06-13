@@ -12,7 +12,7 @@ import { localPonderContext } from "./local-ponder-context";
 const pluginsAllDatasourceNames = getPluginsAllDatasourceNames(config.plugins);
 const indexedBlockranges = buildIndexedBlockranges(
   config.namespace,
-  config.globalBlockrange.endBlock,
+  config.chainEndBlocks,
   pluginsAllDatasourceNames,
 );
 

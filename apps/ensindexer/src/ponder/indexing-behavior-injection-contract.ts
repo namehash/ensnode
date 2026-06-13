@@ -31,12 +31,13 @@ interface IndexingBehaviorDependencies {
   plugins: EnsIndexerConfig["plugins"];
 
   /**
-   * Global Blockrange
+   * Per-chain end blocks
    *
-   * When `globalBlockrange` changes, the blockrange of indexed chains may change,
-   * which influences the indexing behavior.
+   * When `chainEndBlocks` changes, the indexing end block of one or more chains may change,
+   * which influences the indexing behavior. Stored as a key-sorted plain object (not a Map) so it
+   * serializes into the Ponder build id.
    */
-  globalBlockrange: EnsIndexerConfig["globalBlockrange"];
+  chainEndBlocks: Record<number, number>;
 
   /**
    * Subgraph Compatibility
@@ -107,7 +108,11 @@ const indexingBehaviorDependencies = {
   // 2. Plugin execution order is determined by `ALL_PLUGINS`, not config.plugins
   // Sorting ensures consistent Build IDs for semantically identical config.
   plugins: [...config.plugins].sort(),
-  globalBlockrange: config.globalBlockrange,
+  // serialize the Map to a plain, key-sorted object so it contributes to the Ponder build id (a Map
+  // would JSON-serialize to `{}`) and yields a canonical checksum regardless of env order.
+  chainEndBlocks: Object.fromEntries(
+    [...config.chainEndBlocks.entries()].sort(([a], [b]) => a - b),
+  ),
   // these config properties don't explicitly affect the generated ponderConfig and need to be
   // injected here to ensure that, if they are configured differently, ponder generates a unique
   // build id to differentiate between runs with otherwise-identical configs (see above).
