@@ -61,7 +61,7 @@ export const evmChainIdToCoinType = (chainId: ChainId): CoinType => {
  */
 export const bigintToCoinType = (value: bigint): CoinType => {
   if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error(`'${value}' cannot represent as CoinType, it is too large.`);
+    throw new Error(`'${value}' cannot be represented as a CoinType; it is too large.`);
   }
 
   return Number(value) as CoinType;
@@ -80,7 +80,7 @@ export const bigintToChainId = (value: bigint): ChainId => {
     throw new Error(`'${value}' cannot represent a ChainId; it must be a positive integer.`);
   }
   if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error(`'${value}' cannot represent as ChainId, it is too large.`);
+    throw new Error(`'${value}' cannot be represented as a ChainId; it is too large.`);
   }
 
   return Number(value) as ChainId;
