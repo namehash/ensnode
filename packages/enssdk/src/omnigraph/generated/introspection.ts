@@ -196,6 +196,51 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "nameReferences",
+            "type": {
+              "kind": "OBJECT",
+              "name": "AccountNameReferencesConnection"
+            },
+            "args": [
+              {
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "before",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              },
+              {
+                "name": "first",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "last",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int"
+                }
+              },
+              {
+                "name": "where",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "AccountNameReferencesWhereInput"
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
             "name": "permissions",
             "type": {
               "kind": "OBJECT",
@@ -1138,6 +1183,100 @@ const introspection = {
                 "kind": "SCALAR",
                 "name": "ChainId"
               }
+            }
+          }
+        ],
+        "isOneOf": false
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AccountNameReferencesConnection",
+        "fields": [
+          {
+            "name": "edges",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AccountNameReferencesConnectionEdge"
+                  }
+                }
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "totalCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AccountNameReferencesConnectionEdge",
+        "fields": [
+          {
+            "name": "cursor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "node",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NameReference"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "AccountNameReferencesWhereInput",
+        "inputFields": [
+          {
+            "name": "coinType",
+            "type": {
+              "kind": "SCALAR",
+              "name": "CoinType"
             }
           }
         ],
@@ -5351,6 +5490,61 @@ const introspection = {
           }
         ],
         "isOneOf": true
+      },
+      {
+        "kind": "OBJECT",
+        "name": "NameReference",
+        "fields": [
+          {
+            "name": "coinType",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "CoinType"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "domain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "INTERFACE",
+                "name": "Domain"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "match",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Resolver"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",

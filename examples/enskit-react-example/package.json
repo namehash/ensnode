@@ -12,6 +12,7 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
+    "@pierre/trees": "1.0.0-beta.4",
     "enskit": "1.15.2",
     "enssdk": "1.15.2",
     "react": "catalog:",

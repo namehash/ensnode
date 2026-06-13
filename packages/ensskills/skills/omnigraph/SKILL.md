@@ -127,6 +127,7 @@ _Represents an individual Account, keyed by its Address._
 - efp: AccountEfp — This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
 - events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection — All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
 - id: Address! — A unique reference to this Account.
+- nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection — The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.
 - permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection — The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
 - registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection — The Permissions on Registries granted to this Account.
 - resolve(accelerate: Boolean): ReverseResolve! — Resolve primary names for this Account.
@@ -218,7 +219,7 @@ _An ENSIP-19 primary name for an Account on a specific coin type._
 
 Run `npx enscli ensnode omnigraph schema <Type>` for fields of:
 
-`AccelerationStatus`, `AccountEfp`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `EfpAccountMetadata`, `EfpList`, `EfpListRecord`, `EfpListStorageLocation`, `EfpQuery`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileContenthash`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
+`AccelerationStatus`, `AccountEfp`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `EfpAccountMetadata`, `EfpList`, `EfpListRecord`, `EfpListStorageLocation`, `EfpQuery`, `Event`, `Label`, `NameReference`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileContenthash`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
 
 <!-- AUTOGEN:SCHEMA end -->
 

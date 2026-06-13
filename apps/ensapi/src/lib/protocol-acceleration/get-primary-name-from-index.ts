@@ -18,6 +18,8 @@ export async function getENSIP19ReverseNameRecordFromIndex(
   address: NormalizedAddress,
   coinType: CoinType,
 ): Promise<InterpretedName | null> {
+  // @TODO(cointype-bigint): drop the BigInt() conversion (and DEFAULT_EVM_COIN_TYPE_BIGINT) once
+  // reverseNameRecord.coinType is stored as CoinType — comparisons become plain number equality. See #2293.
   const _coinType = BigInt(coinType);
 
   // retrieve from index

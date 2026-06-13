@@ -14,6 +14,7 @@ import "./schema/query-efp";
 import "./schema/event";
 import "./schema/label";
 import "./schema/name-or-node";
+import "./schema/name-reference";
 import "./schema/order-direction";
 import "./schema/permissions";
 import "./schema/query";
