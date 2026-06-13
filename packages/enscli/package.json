@@ -1,6 +1,6 @@
 {
   "name": "enscli",
-  "version": "1.15.2",
+  "version": "1.16.0",
   "type": "module",
   "description": "An agent- and human-friendly CLI for ENS, ENSNode, and the Omnigraph API.",
   "license": "MIT",

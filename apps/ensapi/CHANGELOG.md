@@ -1,5 +1,23 @@
 # ensapi
 
+## 1.16.0
+
+### Minor Changes
+
+- [#2292](https://github.com/namehash/ensnode/pull/2292) [`09b4aa5`](https://github.com/namehash/ensnode/commit/09b4aa5281875c7c3472358fa2bbb7f4991d9429) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph API**: Adds `Account.nameReferences`, surfacing the Names whose indexed `addr()` record points at the Account, optionally scoped to a single `CoinType` via `where: { coinType }`. Reflects literally-indexed, Canonical Domains only: records whose node has no canonical Domain are omitted, and Forward Resolution / CCIP-Read and ENSIP-19 address record defaulting are not applied.
+
+### Patch Changes
+
+- [#2285](https://github.com/namehash/ensnode/pull/2285) [`ba68bbe`](https://github.com/namehash/ensnode/commit/ba68bbea2c9890b62905ad9a624b8021f8884703) Thanks [@sevenzing](https://github.com/sevenzing)! - - Add `Domain.resolve.profile.contenthash` interpretation
+
+- Updated dependencies [[`09b4aa5`](https://github.com/namehash/ensnode/commit/09b4aa5281875c7c3472358fa2bbb7f4991d9429)]:
+  - @ensnode/ensdb-sdk@1.16.0
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+  - @ensnode/datasources@1.16.0
+  - @ensnode/ponder-subgraph@1.16.0
+  - @namehash/ens-referrals@1.16.0
+
 ## 1.15.2
 
 ### Patch Changes
