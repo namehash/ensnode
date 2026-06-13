@@ -175,12 +175,22 @@ builder.scalarType("TokenId", {
     z.coerce
       .string()
       .check((ctx) => {
-        // A TokenId is a non-negative uint256 serialized as a decimal string; reject hex, signs,
-        // and fractions so a malformed token id never reaches a resolver or DB query.
+        // A TokenId is a uint256 serialized as a decimal string; reject hex, signs, and fractions
+        // so a malformed token id never reaches a resolver or DB query.
         if (!/^\d+$/.test(ctx.value)) {
           ctx.issues.push({
             code: "custom",
             message: "TokenId must be a non-negative uint256 (decimal string)",
+            input: ctx.value,
+          });
+          return;
+        }
+
+        // Enforce the uint256 upper bound so the scalar contract stays honest.
+        if (BigInt(ctx.value) > 2n ** 256n - 1n) {
+          ctx.issues.push({
+            code: "custom",
+            message: "TokenId must not exceed the uint256 maximum (2^256 - 1)",
             input: ctx.value,
           });
         }
