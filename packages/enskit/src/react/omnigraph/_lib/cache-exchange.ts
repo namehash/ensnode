@@ -37,7 +37,13 @@ export const omnigraphCacheExchange = cacheExchange({
       return typeof key === "string" ? key : null;
     },
 
+    // EfpLists are keyed by their `tokenId` (the list NFT id); there is no separate `id` field
+    EfpList: (data) => (data.tokenId != null ? String(data.tokenId) : null),
+
     // These entities are Embedded Data and don't have a relevant key
+    AccountEfp: EMBEDDED_DATA,
+    EfpQuery: EMBEDDED_DATA,
+    EfpListStorageLocation: EMBEDDED_DATA,
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
     CanonicalName: EMBEDDED_DATA,

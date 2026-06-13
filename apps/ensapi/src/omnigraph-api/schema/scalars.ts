@@ -171,7 +171,22 @@ builder.scalarType("ChainId", {
 builder.scalarType("TokenId", {
   description: "TokenId represents an enssdk#TokenId.",
   serialize: (value: TokenId) => value.toString(),
-  parseValue: (value) => z.coerce.bigint().parse(value) as TokenId,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .check((ctx) => {
+        // A TokenId is a non-negative uint256 serialized as a decimal string; reject hex, signs,
+        // and fractions so a malformed token id never reaches a resolver or DB query.
+        if (!/^\d+$/.test(ctx.value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "TokenId must be a non-negative uint256 (decimal string)",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => BigInt(val) as TokenId)
+      .parse(value),
 });
 
 builder.scalarType("CoinType", {

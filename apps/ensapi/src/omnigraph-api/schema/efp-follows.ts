@@ -144,12 +144,12 @@ function fetchFollowerCandidates(
       )
       .where(
         and(
-          eq(efpListRecords.recordData, target as Hex),
+          eq(efpListRecords.recordData, target),
           eq(efpListRecords.recordType, EFP_ADDRESS_RECORD_TYPE),
           not(arrayOverlaps(efpListRecords.tags, [...EFP_NON_FOLLOW_TAGS])),
           isNotNull(efpLists.user),
-          cursor.after ? gt(efpLists.user, cursor.after as Hex) : undefined,
-          cursor.before ? lt(efpLists.user, cursor.before as Hex) : undefined,
+          cursor.after ? gt(efpLists.user, cursor.after) : undefined,
+          cursor.before ? lt(efpLists.user, cursor.before) : undefined,
         ),
       )
       .groupBy(efpLists.user, efpAccountMetadata.value)
@@ -176,8 +176,8 @@ export async function fetchValidatedFollowers(
   }: { before?: string; after?: string; limit: number; inverted: boolean },
 ): Promise<NormalizedAddress[]> {
   const cursor: { after?: NormalizedAddress; before?: NormalizedAddress } = {
-    after: after ? (cursors.decode(after) as NormalizedAddress) : undefined,
-    before: before ? (cursors.decode(before) as NormalizedAddress) : undefined,
+    after: after ? cursors.decode<NormalizedAddress>(after) : undefined,
+    before: before ? cursors.decode<NormalizedAddress>(before) : undefined,
   };
 
   const batchSize = Math.max(limit * 4, 64);

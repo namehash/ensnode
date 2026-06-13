@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, eq } from "drizzle-orm";
+import { and, eq, type SQL } from "drizzle-orm";
 import type { NormalizedAddress } from "enssdk";
 
 import { interpretMetadataKey } from "@ensnode/ensnode-sdk/internal";
@@ -57,9 +57,9 @@ AccountEfpRef.implement({
         const { ensDb, ensIndexerSchema } = di.context;
         // `following` derives from the account's primary list; resolve that scope once and share it
         // between `totalCount` and the page query.
-        let scope: ReturnType<typeof buildFollowingScope> | null = null;
-        const followingScope = () => {
-          if (scope === null) scope = buildFollowingScope(address);
+        let scope: SQL | null = null;
+        const followingScope = async () => {
+          if (scope === null) scope = await buildFollowingScope(address);
           return scope;
         };
 

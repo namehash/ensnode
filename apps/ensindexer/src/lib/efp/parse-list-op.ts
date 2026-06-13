@@ -55,6 +55,13 @@ const RECORD_PREFIX_HEX_LENGTH = RECORD_HEADER_HEX_LENGTH + ADDRESS_RECORD_HEX_B
 const RECORD_PREFIX_WITH_0X_LENGTH = RECORD_PREFIX_HEX_LENGTH + 2; // 46 chars (includes "0x")
 
 /**
+ * Upper bound on a tag's decoded byte length. Tags are short labels (e.g. "block", "close-friend"),
+ * but the on-chain payload is arbitrary bytes, so a pathological op could carry an enormous tag. Cap
+ * it generously and skip anything larger rather than store an oversized DB row.
+ */
+const MAX_TAG_BYTE_LENGTH = 512;
+
+/**
  * Decode a `ListOp.op` payload. Returns `null` for malformed input rather than throwing, matching
  * the resilient behaviour of the api-v2 indexer (which logs and skips bad ops).
  */
@@ -130,6 +137,8 @@ export function parseTagOp(data: Hex | string | null | undefined): ParsedTagOp |
   const tagHex = data.slice(RECORD_PREFIX_WITH_0X_LENGTH);
   // hex must contain whole bytes
   if (tagHex.length % 2 !== 0) return null;
+  // Reject an over-long tag rather than index an unbounded, attacker-controlled payload.
+  if (tagHex.length > MAX_TAG_BYTE_LENGTH * 2) return null;
 
   // Match api-v2: decode as UTF-8 and strip embedded NULs.
   const tag = hexToString(`0x${tagHex}`).replace(/\0/g, "");
