@@ -62,7 +62,7 @@ export async function buildFollowingScope(address: NormalizedAddress): Promise<S
       slot: ensIndexerSchema.efpLists.listStorageLocationSlot,
     })
     .from(ensIndexerSchema.efpLists)
-    .where(eq(ensIndexerSchema.efpLists.tokenId, tokenId))
+    .where(eq(ensIndexerSchema.efpLists.id, tokenId))
     .limit(1);
   if (!list || list.chainId === null || list.contractAddress === null || list.slot === null) {
     return sql`false`;
@@ -122,7 +122,7 @@ function fetchFollowerCandidates(
     ensDb
       .select({
         follower: efpLists.user,
-        candidateTokenIds: sql<string[]>`array_agg(${efpLists.tokenId}::text)`,
+        candidateTokenIds: sql<string[]>`array_agg(${efpLists.id}::text)`,
         primaryListValue: efpAccountMetadata.value,
       })
       .from(efpListRecords)

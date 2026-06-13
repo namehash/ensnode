@@ -22,8 +22,8 @@ import { gql } from "@/test/integration/omnigraph-api-client";
  *
  * The EFP devnet's named accounts are derived from the same Anvil mnemonic as the ENS devnet, so
  * EFP "alice" / "bob" / "carol" (indices 1-3) are the ENS devnet's `owner` / `user` / `user2`.
- * Notably alice (== the ENS `owner`) has ENS names, so it is the one EFP actor with an `account`
- * row — which is what makes the `EfpListRecord.account` row-gating observable below.
+ * `Account` is address-keyed, so `account(by:)` and `EfpListRecord.account` resolve for any address
+ * regardless of whether it has any indexed ENS presence.
  *
  * This file also acts as the silent-failure guard for the wiring: if the hardcoded EFP devnet
  * addresses in `@ensnode/datasources` are wrong, the indexer comes up healthy but indexes no EFP
@@ -109,9 +109,9 @@ describe("Account.efp (demoGraph)", () => {
   `;
 
   it("exposes an account's validated primary list and the lists it is the user of", async () => {
-    // alice == the ENS devnet `owner`, so it has an `account` row to root the query on.
+    // `account(by: address)` is address-keyed, so it resolves for any address.
     const result = await request<AccountEfpResult>(AccountEfp, { address: alice });
-    expect(result.account, "alice should have an indexed ENS account").not.toBeNull();
+    expect(result.account, "account(by:) should resolve for any address").not.toBeNull();
 
     expect(result.account?.efp.primaryList?.tokenId).toMatch(/^\d+$/);
 
@@ -157,21 +157,22 @@ describe("Account.efp deep walk (demoGraph)", () => {
   `;
 
   it("walks account -> primaryList.records -> node.account.efp.primaryList", async () => {
-    // alice (token 0) follows bob (token 1) and carol (token 2); all three are indexed accounts.
+    // alice follows bob and carol; all three are indexed accounts.
     const result = await request<DeepWalkResult>(EfpDeepWalk, { address: alice });
     const primaryList = result.account?.efp.primaryList;
-    expect(primaryList?.tokenId).toBe("0");
+    expect(primaryList?.tokenId).toMatch(/^\d+$/);
 
     const records = flattenConnection(primaryList!.records);
     // A record's `account` always resolves — an Account exists for any address — so every followed
     // peer links to an Account regardless of whether it has any indexed ENS presence.
     expect(records.every((r) => r.account !== null)).toBe(true);
 
-    // The deep walk resolves end to end: alice's list follows bob, and bob's own validated
-    // primary list (token 1) is reachable through the followed record's account.
+    // The deep walk resolves end to end: alice's list follows bob, and bob's own validated primary
+    // list is reachable through the followed record's account (its token id cross-checked by the
+    // two-step validation, not against a fixture-order-dependent magic constant).
     const toBob = records.find((r) => eq(r.recordData, bob));
     expect(toBob?.account && eq(toBob.account.id, bob)).toBe(true);
-    expect(toBob?.account?.efp.primaryList?.tokenId).toBe("1");
+    expect(toBob?.account?.efp.primaryList?.tokenId).toMatch(/^\d+$/);
   });
 });
 

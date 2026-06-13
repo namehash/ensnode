@@ -4071,24 +4071,12 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "chainId",
+            "name": "contract",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "ChainId"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "contractAddress",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Address"
+                "kind": "OBJECT",
+                "name": "AccountId"
               }
             },
             "args": [],
@@ -4112,7 +4100,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String"
+                "name": "ID"
               }
             },
             "args": [],
@@ -4174,33 +4162,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "listStorageLocationChainId",
-            "type": {
-              "kind": "SCALAR",
-              "name": "ChainId"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "listStorageLocationContractAddress",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Address"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "listStorageLocationSlot",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Hex"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "manager",
             "type": {
               "kind": "SCALAR",
@@ -4210,24 +4171,12 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "nftChainId",
+            "name": "nft",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "ChainId"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "nftContractAddress",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Address"
+                "kind": "OBJECT",
+                "name": "AccountId"
               }
             },
             "args": [],
@@ -4281,6 +4230,15 @@ const introspection = {
                 }
               }
             ],
+            "isDeprecated": false
+          },
+          {
+            "name": "storageLocation",
+            "type": {
+              "kind": "OBJECT",
+              "name": "EfpListStorageLocation"
+            },
+            "args": [],
             "isDeprecated": false
           },
           {
@@ -4353,24 +4311,12 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "chainId",
+            "name": "contract",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "ChainId"
-              }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "contractAddress",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Address"
+                "kind": "OBJECT",
+                "name": "AccountId"
               }
             },
             "args": [],
@@ -4394,7 +4340,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String"
+                "name": "ID"
               }
             },
             "args": [],
@@ -4578,6 +4524,49 @@ const introspection = {
           }
         ],
         "isOneOf": false
+      },
+      {
+        "kind": "OBJECT",
+        "name": "EfpListStorageLocation",
+        "fields": [
+          {
+            "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Address"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "chainId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ChainId"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "slot",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Hex"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "INPUT_OBJECT",

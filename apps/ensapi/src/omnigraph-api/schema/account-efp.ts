@@ -1,7 +1,8 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 import type { NormalizedAddress } from "enssdk";
-import type { Hex } from "viem";
+
+import { interpretMetadataKey } from "@ensnode/ensnode-sdk/internal";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
@@ -39,7 +40,7 @@ AccountEfpRef.implement({
     /////////////////////////////
     primaryList: t.field({
       description:
-        "The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.",
+        "The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset or unvalidated.",
       type: EfpListRef,
       nullable: true,
       resolve: (address) => resolveValidatedPrimaryListTokenId(address),
@@ -81,7 +82,7 @@ AccountEfpRef.implement({
                   )
                   .orderBy(orderPaginationBy(ensIndexerSchema.efpListRecords.recordData, inverted))
                   .limit(limit)
-                  .then((rows) => rows.map((row) => row.recordData as NormalizedAddress)),
+                  .then((rows) => rows.map((row) => row.recordData)),
             );
           },
         });
@@ -115,7 +116,7 @@ AccountEfpRef.implement({
       type: EfpListRef,
       resolve: (address, args) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        const scope = eq(ensIndexerSchema.efpLists.user, address as Hex);
+        const scope = eq(ensIndexerSchema.efpLists.user, address);
 
         return lazyConnection({
           totalCount: () => ensDb.$count(ensIndexerSchema.efpLists, scope),
@@ -126,10 +127,8 @@ AccountEfpRef.implement({
                 ensDb
                   .select()
                   .from(ensIndexerSchema.efpLists)
-                  .where(
-                    and(scope, paginateByBigInt(ensIndexerSchema.efpLists.tokenId, before, after)),
-                  )
-                  .orderBy(orderPaginationBy(ensIndexerSchema.efpLists.tokenId, inverted))
+                  .where(and(scope, paginateByBigInt(ensIndexerSchema.efpLists.id, before, after)))
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpLists.id, inverted))
                   .limit(limit),
             ),
         });
@@ -146,20 +145,14 @@ AccountEfpRef.implement({
       nullable: true,
       args: { key: t.arg({ type: "String", required: true }) },
       resolve: async (address, args) => {
-        const { ensDb, ensIndexerSchema } = di.context;
-        // (address, key) identifies the row; the PK also includes the AccountMetadata contract's
-        // chainId, which the API doesn't carry, so query the indexed columns. Return the full row so
-        // the loadable ref resolves it directly, with no second fetch by id.
-        const [row] = await ensDb
-          .select()
-          .from(ensIndexerSchema.efpAccountMetadata)
-          .where(
-            and(
-              eq(ensIndexerSchema.efpAccountMetadata.address, address as Hex),
-              eq(ensIndexerSchema.efpAccountMetadata.key, args.key),
-            ),
-          )
-          .limit(1);
+        const { ensDb } = di.context;
+        // A NUL-byte key is never stored (rejected on write), so it can never match — short-circuit.
+        const key = interpretMetadataKey(args.key);
+        if (key === null) return null;
+        // Return the full row so the loadable ref resolves it directly, with no second fetch by id.
+        const row = await ensDb.query.efpAccountMetadata.findFirst({
+          where: (m, { and, eq }) => and(eq(m.address, address), eq(m.key, key)),
+        });
         return row ?? null;
       },
     }),
@@ -172,7 +165,7 @@ AccountEfpRef.implement({
       type: EfpAccountMetadataRef,
       resolve: (address, args) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        const scope = eq(ensIndexerSchema.efpAccountMetadata.address, address as Hex);
+        const scope = eq(ensIndexerSchema.efpAccountMetadata.address, address);
 
         return lazyConnection({
           totalCount: () => ensDb.$count(ensIndexerSchema.efpAccountMetadata, scope),

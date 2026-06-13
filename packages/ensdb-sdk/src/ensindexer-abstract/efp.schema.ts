@@ -22,8 +22,8 @@ import { index, onchainTable } from "ponder";
 export const efpLists = onchainTable(
   "efp_lists",
   (t) => ({
-    /** ERC-721 token id of the list NFT (a uint256). */
-    tokenId: t.bigint().primaryKey().$type<TokenId>(),
+    /** ERC-721 token id of the list NFT (a uint256), the list's primary key. */
+    id: t.bigint().primaryKey().$type<TokenId>(),
     /** Current ERC-721 owner of the list NFT. */
     owner: t.hex().notNull().$type<NormalizedAddress>(),
     /** Chain id of the `ListRegistry` NFT (Base / 8453 on mainnet; the active namespace's EFP deployment chain otherwise). */
@@ -54,7 +54,7 @@ export const efpLists = onchainTable(
       t.listStorageLocationContractAddress,
       t.listStorageLocationSlot,
     ),
-    // `tokenId` is a `bigint` (Postgres `numeric`) primary key, so its implicit unique index already
+    // `id` is a `bigint` (Postgres `numeric`) primary key, so its implicit unique index already
     // orders numerically — `efp.lists` / `Account.efp.lists` pagination needs no extra index.
   }),
 );
@@ -142,6 +142,9 @@ export const efpAccountMetadata = onchainTable(
   }),
   (t) => ({
     idx_address: index().on(t.address),
+    // Account-metadata lookups (primary-list validation, `metadata(key:)`) filter by `(address, key)`;
+    // a composite index makes that a point lookup rather than an address-partition scan.
+    idx_address_key: index().on(t.address, t.key),
   }),
 );
 

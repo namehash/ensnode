@@ -1,9 +1,9 @@
 import { inArray } from "drizzle-orm";
-import type { ChainId, NormalizedAddress } from "enssdk";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { AccountIdRef } from "@/omnigraph-api/schema/account-id";
 
 export const EfpAccountMetadataRef = builder.loadableObjectRef("EfpAccountMetadata", {
   load: (ids: string[]) => {
@@ -29,26 +29,20 @@ EfpAccountMetadataRef.implement({
     //////////////////////////
     // EfpAccountMetadata.id
     //////////////////////////
-    id: t.field({ type: "String", nullable: false, resolve: (metadata) => metadata.id }),
-
-    ///////////////////////////////
-    // EfpAccountMetadata.chainId
-    ///////////////////////////////
-    chainId: t.field({
-      description: "Chain id of the AccountMetadata contract.",
-      type: "ChainId",
+    id: t.field({
+      type: "ID",
       nullable: false,
-      resolve: (metadata) => metadata.chainId as ChainId,
+      resolve: (metadata) => metadata.id,
     }),
 
-    ///////////////////////////////////////
-    // EfpAccountMetadata.contractAddress
-    ///////////////////////////////////////
-    contractAddress: t.field({
-      description: "Address of the AccountMetadata contract.",
-      type: "Address",
+    ///////////////////////////////
+    // EfpAccountMetadata.contract
+    ///////////////////////////////
+    contract: t.field({
+      description: "The CAIP-10 account id of the AccountMetadata contract.",
+      type: AccountIdRef,
       nullable: false,
-      resolve: (metadata) => metadata.contractAddress as NormalizedAddress,
+      resolve: (metadata) => ({ chainId: metadata.chainId, address: metadata.contractAddress }),
     }),
 
     ///////////////////////////////
@@ -58,7 +52,7 @@ EfpAccountMetadataRef.implement({
       description: "The account this metadata belongs to.",
       type: "Address",
       nullable: false,
-      resolve: (metadata) => metadata.address as NormalizedAddress,
+      resolve: (metadata) => metadata.address,
     }),
 
     ///////////////////////////
@@ -84,11 +78,21 @@ EfpAccountMetadataRef.implement({
     /////////////////////////////////
     // EfpAccountMetadata.createdAt
     /////////////////////////////////
-    createdAt: t.field({ type: "BigInt", nullable: false, resolve: (m) => m.createdAt }),
+    createdAt: t.field({
+      description: "When this metadata entry was first indexed (Unix timestamp, seconds).",
+      type: "BigInt",
+      nullable: false,
+      resolve: (m) => m.createdAt,
+    }),
 
     /////////////////////////////////
     // EfpAccountMetadata.updatedAt
     /////////////////////////////////
-    updatedAt: t.field({ type: "BigInt", nullable: false, resolve: (m) => m.updatedAt }),
+    updatedAt: t.field({
+      description: "When this metadata entry was last updated (Unix timestamp, seconds).",
+      type: "BigInt",
+      nullable: false,
+      resolve: (m) => m.updatedAt,
+    }),
   }),
 });

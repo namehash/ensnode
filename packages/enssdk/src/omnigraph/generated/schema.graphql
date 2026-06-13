@@ -110,7 +110,7 @@ type AccountEfp {
   metadatas(after: String, before: String, first: Int, last: Int): AccountEfpMetadatasConnection
 
   """
-  The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset, not indexed, or unvalidated.
+  The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset or unvalidated.
   """
   primaryList: EfpList
 }
@@ -974,16 +974,17 @@ type EfpAccountMetadata {
   """The account this metadata belongs to."""
   address: Address!
 
-  """Chain id of the AccountMetadata contract."""
-  chainId: ChainId!
+  """The CAIP-10 account id of the AccountMetadata contract."""
+  contract: AccountId!
 
-  """Address of the AccountMetadata contract."""
-  contractAddress: Address!
+  """When this metadata entry was first indexed (Unix timestamp, seconds)."""
   createdAt: BigInt!
-  id: String!
+  id: ID!
 
   """The metadata key (UTF-8 string)."""
   key: String!
+
+  """When this metadata entry was last updated (Unix timestamp, seconds)."""
   updatedAt: BigInt!
 
   """The metadata value (raw bytes)."""
@@ -992,27 +993,16 @@ type EfpAccountMetadata {
 
 """An EFP list NFT (a ListRegistry token) and the records it holds."""
 type EfpList {
+  """When this list was first indexed (Unix timestamp, seconds)."""
   createdAt: BigInt!
-
-  """Decoded list storage location: target chain id."""
-  listStorageLocationChainId: ChainId
-
-  """Decoded list storage location: target contract address."""
-  listStorageLocationContractAddress: Address
-
-  """Decoded list storage location: target slot (bytes32)."""
-  listStorageLocationSlot: Hex
 
   """The address allowed to administer this list."""
   manager: Address
 
   """
-  Chain id of the ListRegistry NFT (Base / 8453 on the mainnet namespace; otherwise the active namespace's EFP deployment chain, e.g. 31337 on the ens-test-env devnet).
+  The list NFT's CAIP-10 account id: the ListRegistry contract and the chain it lives on (Base / 8453 on the mainnet namespace; otherwise the active namespace's EFP deployment chain, e.g. 31337 on the ens-test-env devnet).
   """
-  nftChainId: ChainId!
-
-  """The ListRegistry contract address."""
-  nftContractAddress: Address!
+  nft: AccountId!
 
   """The current ERC-721 owner of the list NFT."""
   owner: Address!
@@ -1020,8 +1010,15 @@ type EfpList {
   """The records currently in this list (the addresses it follows)."""
   records(after: String, before: String, first: Int, last: Int): EfpListRecordsConnection
 
+  """
+  The decoded onchain location of this list's records. Null until the list emits an `UpdateListStorageLocation` (or when its payload is undecodable).
+  """
+  storageLocation: EfpListStorageLocation
+
   """The ERC-721 token id of the list NFT."""
   tokenId: TokenId!
+
+  """When this list was last updated (Unix timestamp, seconds)."""
   updatedAt: BigInt!
 
   """The address allowed to post records to this list."""
@@ -1043,18 +1040,21 @@ type EfpListRecord {
   """
   account: Account!
 
-  """Chain id of the ListRecords contract holding this record."""
-  chainId: ChainId!
+  """
+  The CAIP-10 account id of the ListRecords contract holding this record.
+  """
+  contract: AccountId!
 
-  """Address of the ListRecords contract holding this record."""
-  contractAddress: Address!
+  """When this record was first indexed (Unix timestamp, seconds)."""
   createdAt: BigInt!
-  id: String!
+  id: ID!
 
   """The EFP list this record belongs to."""
   list: EfpList
 
-  """The full record payload (version | type | data)."""
+  """
+  Canonical record bytes (version | type | address), 0x-prefixed (exactly 22 bytes), with any trailing junk after the 20-byte address truncated.
+  """
   record: Hex!
 
   """
@@ -1092,6 +1092,18 @@ input EfpListRecordsWhereInput {
 
   """The EFP record type (1 = address)."""
   recordType: Int
+}
+
+"""
+The decoded onchain location of a list's records: a (chainId, ListRecords contract address, slot) tuple.
+"""
+type EfpListStorageLocation {
+  """The ListRecords contract address holding the list's records."""
+  address: Address!
+  chainId: ChainId!
+
+  """The list's storage slot (bytes32) within the ListRecords contract."""
+  slot: Hex!
 }
 
 """Filter EFP lists by their owner, user, or manager address."""
@@ -2218,9 +2230,7 @@ type ThreeDNSRegistration implements Registration {
   unregistrant: Account
 }
 
-"""
-TokenId represents an enssdk#TokenId: an ERC-721 token id (a uint256), serialized as a decimal string.
-"""
+"""TokenId represents an enssdk#TokenId."""
 scalar TokenId
 
 """

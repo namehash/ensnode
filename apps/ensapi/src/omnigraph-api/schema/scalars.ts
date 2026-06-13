@@ -169,8 +169,7 @@ builder.scalarType("ChainId", {
 });
 
 builder.scalarType("TokenId", {
-  description:
-    "TokenId represents an enssdk#TokenId: an ERC-721 token id (a uint256), serialized as a decimal string.",
+  description: "TokenId represents an enssdk#TokenId.",
   serialize: (value: TokenId) => value.toString(),
   parseValue: (value) => z.coerce.bigint().parse(value) as TokenId,
 });

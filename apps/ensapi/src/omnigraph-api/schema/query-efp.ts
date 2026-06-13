@@ -1,6 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
-import type { Hex } from "viem";
+
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
@@ -9,11 +10,11 @@ import {
   paginateBy,
   paginateByBigInt,
 } from "@/omnigraph-api/lib/connection-helpers";
+import { isPluginEnabled } from "@/omnigraph-api/lib/is-plugin-enabled";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
 import { EfpListRecordRef } from "@/omnigraph-api/schema/efp-list-record";
-import { isEfpPluginEnabled } from "@/omnigraph-api/schema/efp-plugin";
 
 //////////////////////
 // Inputs
@@ -90,9 +91,9 @@ EfpQueryRef.implement({
         const { ensDb, ensIndexerSchema } = di.context;
         const where = args.where;
         const scope = and(
-          where?.owner ? eq(ensIndexerSchema.efpLists.owner, where.owner as Hex) : undefined,
-          where?.user ? eq(ensIndexerSchema.efpLists.user, where.user as Hex) : undefined,
-          where?.manager ? eq(ensIndexerSchema.efpLists.manager, where.manager as Hex) : undefined,
+          where?.owner ? eq(ensIndexerSchema.efpLists.owner, where.owner) : undefined,
+          where?.user ? eq(ensIndexerSchema.efpLists.user, where.user) : undefined,
+          where?.manager ? eq(ensIndexerSchema.efpLists.manager, where.manager) : undefined,
         );
 
         return lazyConnection({
@@ -104,10 +105,8 @@ EfpQueryRef.implement({
                 ensDb
                   .select()
                   .from(ensIndexerSchema.efpLists)
-                  .where(
-                    and(scope, paginateByBigInt(ensIndexerSchema.efpLists.tokenId, before, after)),
-                  )
-                  .orderBy(orderPaginationBy(ensIndexerSchema.efpLists.tokenId, inverted))
+                  .where(and(scope, paginateByBigInt(ensIndexerSchema.efpLists.id, before, after)))
+                  .orderBy(orderPaginationBy(ensIndexerSchema.efpLists.id, inverted))
                   .limit(limit),
             ),
         });
@@ -127,7 +126,7 @@ EfpQueryRef.implement({
         const where = args.where;
         const scope = and(
           where?.recordData
-            ? eq(ensIndexerSchema.efpListRecords.recordData, where.recordData as Hex)
+            ? eq(ensIndexerSchema.efpListRecords.recordData, where.recordData)
             : undefined,
           where?.recordType != null
             ? eq(ensIndexerSchema.efpListRecords.recordType, where.recordType)
@@ -162,6 +161,6 @@ builder.queryField("efp", (t) =>
       "Ethereum Follow Protocol (EFP) queries. Null when the connected ENSIndexer does not have the `efp` plugin enabled.",
     type: EfpQueryRef,
     nullable: true,
-    resolve: () => (isEfpPluginEnabled() ? {} : null),
+    resolve: () => (isPluginEnabled(PluginName.EFP) ? {} : null),
   }),
 );

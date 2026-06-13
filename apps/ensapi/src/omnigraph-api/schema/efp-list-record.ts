@@ -1,11 +1,11 @@
 import { inArray } from "drizzle-orm";
-import type { ChainId, NormalizedAddress } from "enssdk";
 import { storageLocationId } from "enssdk/efp";
 
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { AccountRef } from "@/omnigraph-api/schema/account";
+import { AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { EfpListRef } from "@/omnigraph-api/schema/efp-list";
 
 export const EfpListRecordRef = builder.loadableObjectRef("EfpListRecord", {
@@ -32,26 +32,20 @@ EfpListRecordRef.implement({
     /////////////////////
     // EfpListRecord.id
     /////////////////////
-    id: t.field({ type: "String", nullable: false, resolve: (record) => record.id }),
-
-    //////////////////////////
-    // EfpListRecord.chainId
-    //////////////////////////
-    chainId: t.field({
-      description: "Chain id of the ListRecords contract holding this record.",
-      type: "ChainId",
+    id: t.field({
+      type: "ID",
       nullable: false,
-      resolve: (record) => record.chainId as ChainId,
+      resolve: (record) => record.id,
     }),
 
-    //////////////////////////////////
-    // EfpListRecord.contractAddress
-    //////////////////////////////////
-    contractAddress: t.field({
-      description: "Address of the ListRecords contract holding this record.",
-      type: "Address",
+    //////////////////////////
+    // EfpListRecord.contract
+    //////////////////////////
+    contract: t.field({
+      description: "The CAIP-10 account id of the ListRecords contract holding this record.",
+      type: AccountIdRef,
       nullable: false,
-      resolve: (record) => record.contractAddress as NormalizedAddress,
+      resolve: (record) => ({ chainId: record.chainId, address: record.contractAddress }),
     }),
 
     ////////////////////////
@@ -68,7 +62,8 @@ EfpListRecordRef.implement({
     // EfpListRecord.record
     //////////////////////////
     record: t.field({
-      description: "The full record payload (version | type | data).",
+      description:
+        "Canonical record bytes (version | type | address), 0x-prefixed (exactly 22 bytes), with any trailing junk after the 20-byte address truncated.",
       type: "Hex",
       nullable: false,
       resolve: (record) => record.record,
@@ -92,7 +87,7 @@ EfpListRecordRef.implement({
         "The followed/target address (the record's 20-byte payload). EFP indexes only address records (recordType 1).",
       type: "Address",
       nullable: false,
-      resolve: (record) => record.recordData as NormalizedAddress,
+      resolve: (record) => record.recordData,
     }),
 
     ////////////////////////
@@ -108,7 +103,12 @@ EfpListRecordRef.implement({
     /////////////////////////////
     // EfpListRecord.createdAt
     /////////////////////////////
-    createdAt: t.field({ type: "BigInt", nullable: false, resolve: (record) => record.createdAt }),
+    createdAt: t.field({
+      description: "When this record was first indexed (Unix timestamp, seconds).",
+      type: "BigInt",
+      nullable: false,
+      resolve: (record) => record.createdAt,
+    }),
 
     ///////////////////////
     // EfpListRecord.list
@@ -138,9 +138,9 @@ EfpListRecordRef.implement({
           ? await ensDb
               .select()
               .from(ensIndexerSchema.efpLists)
-              .where(inArray(ensIndexerSchema.efpLists.tokenId, tokenIds))
+              .where(inArray(ensIndexerSchema.efpLists.id, tokenIds))
           : [];
-        const listByTokenId = new Map(lists.map((l) => [l.tokenId, l]));
+        const listByTokenId = new Map(lists.map((l) => [l.id, l]));
 
         return locationIds.map((locationId) => {
           const tokenId = tokenIdByLocation.get(locationId);
@@ -157,7 +157,7 @@ EfpListRecordRef.implement({
         "The Account this record points to (its `recordData`). Always resolvable: an Account exists for any address (see `query.account`), so a record's target can always be walked into its ENS names and own EFP presence.",
       type: AccountRef,
       nullable: false,
-      resolve: (record) => record.recordData as NormalizedAddress,
+      resolve: (record) => record.recordData,
     }),
   }),
 });

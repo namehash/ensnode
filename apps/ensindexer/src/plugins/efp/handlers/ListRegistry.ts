@@ -1,11 +1,11 @@
-import type { TokenId } from "enssdk";
+import { type TokenId, toNormalizedAddress } from "enssdk";
 import { listMetadataId, storageLocationId } from "enssdk/efp";
-import { type Hex, isAddressEqual, zeroAddress } from "viem";
+import { isAddressEqual, zeroAddress } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { EFP_LIST_METADATA_KEYS } from "@/lib/efp/constants";
-import { metadataValueToAddress } from "@/lib/efp/list-metadata";
+import { interpretMetadataValue } from "@/lib/efp/list-metadata";
 import { parseListStorageLocation } from "@/lib/efp/parse-list-storage-location";
 import {
   addOnchainEventListener,
@@ -56,7 +56,7 @@ export default function () {
       // longer exists, so drop the list row (and its storage-location reverse mapping) rather than
       // record a zero-address owner that would surface through `EfpList.owner` and `lists(where:)`.
       if (isAddressEqual(event.args.to, zeroAddress)) {
-        const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { tokenId });
+        const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { id: tokenId });
         if (
           existing?.listStorageLocationChainId != null &&
           existing.listStorageLocationContractAddress != null &&
@@ -72,14 +72,14 @@ export default function () {
             tokenId,
           );
         }
-        await context.ensDb.delete(ensIndexerSchema.efpLists, { tokenId });
+        await context.ensDb.delete(ensIndexerSchema.efpLists, { id: tokenId });
         // The list's `efp_list_records` rows are intentionally left in place: they mirror the
         // on-chain `ListRecords` contract (a burn does not clear them), and their
         // `EfpListRecord.list` back-ref resolves to null once the reverse mapping above is gone.
         return;
       }
 
-      const owner = event.args.to.toLowerCase() as Hex;
+      const owner = toNormalizedAddress(event.args.to);
       // A mint inserts the row; a later transfer of the same NFT updates only `owner`/`updatedAt`.
       // `createdAt`, `nftChainId`, and `nftContractAddress` are mint-time values left untouched on
       // conflict: an ERC-721 tokenId is unique for the ListRegistry's lifetime (a burned id is not
@@ -87,10 +87,10 @@ export default function () {
       await context.ensDb
         .insert(ensIndexerSchema.efpLists)
         .values({
-          tokenId,
+          id: tokenId,
           owner,
           nftChainId: context.chain.id,
-          nftContractAddress: event.log.address.toLowerCase() as Hex,
+          nftContractAddress: toNormalizedAddress(event.log.address),
           createdAt: ts,
           updatedAt: ts,
         })
@@ -108,7 +108,7 @@ export default function () {
       // The mint Transfer always precedes this event (both fire on the ListRegistry on Base, in
       // order), so the list row exists. Guard anyway so an unexpected ordering skips rather than
       // updating a non-existent row.
-      const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { tokenId });
+      const existing = await context.ensDb.find(ensIndexerSchema.efpLists, { id: tokenId });
       if (!existing) return;
 
       const oldLocationId =
@@ -135,7 +135,7 @@ export default function () {
         if (oldLocationId !== null) {
           await deleteStorageLocationIfOwnedBy(context, oldLocationId, tokenId);
         }
-        await context.ensDb.update(ensIndexerSchema.efpLists, { tokenId }).set({
+        await context.ensDb.update(ensIndexerSchema.efpLists, { id: tokenId }).set({
           listStorageLocation: event.args.listStorageLocation,
           listStorageLocationChainId: null,
           listStorageLocationContractAddress: null,
@@ -158,7 +158,7 @@ export default function () {
         await deleteStorageLocationIfOwnedBy(context, oldLocationId, tokenId);
       }
 
-      await context.ensDb.update(ensIndexerSchema.efpLists, { tokenId }).set({
+      await context.ensDb.update(ensIndexerSchema.efpLists, { id: tokenId }).set({
         listStorageLocation: event.args.listStorageLocation,
         listStorageLocationChainId: chainId,
         listStorageLocationContractAddress: contractAddress,
@@ -188,9 +188,9 @@ export default function () {
         });
         if (!meta) continue;
 
-        const address = metadataValueToAddress(meta.value);
+        const address = interpretMetadataValue(meta.value);
         await context.ensDb
-          .update(ensIndexerSchema.efpLists, { tokenId })
+          .update(ensIndexerSchema.efpLists, { id: tokenId })
           .set(
             key === EFP_LIST_METADATA_KEYS.USER
               ? { user: address, updatedAt: ts }

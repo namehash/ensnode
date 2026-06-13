@@ -7,6 +7,7 @@ import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 type Column = Parameters<typeof lt>[0];
 
 const indexSchema = z.number();
+const bigIntSchema = z.coerce.bigint();
 
 /**
  * Returns a SQL condition for cursor-based pagination on a string column.
@@ -38,7 +39,8 @@ export const paginateByInt = (
 /**
  * Returns a SQL condition for cursor-based pagination on a `bigint` (Postgres `numeric`) column,
  * such as an EFP `tokenId` — a uint256 that exceeds a JS-safe integer, so the cursor is decoded as
- * a `bigint` (not a `number`) for exact numeric comparison.
+ * a `bigint` (not a `number`) for exact numeric comparison. The decoded value is validated as a
+ * `bigint` so a malformed cursor fails cleanly rather than feeding a wrong-typed value into `lt`/`gt`.
  */
 export const paginateByBigInt = (
   column: Column,
@@ -46,8 +48,8 @@ export const paginateByBigInt = (
   after: string | undefined,
 ) =>
   and(
-    before ? lt(column, cursors.decode<bigint>(before)) : undefined,
-    after ? gt(column, cursors.decode<bigint>(after)) : undefined,
+    before ? lt(column, bigIntSchema.parse(cursors.decode(before))) : undefined,
+    after ? gt(column, bigIntSchema.parse(cursors.decode(after))) : undefined,
   );
 
 /**

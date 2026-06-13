@@ -1,7 +1,8 @@
+import { toNormalizedAddress } from "enssdk";
 import { accountMetadataId } from "enssdk/efp";
-import type { Hex } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
+import { interpretMetadataKey } from "@ensnode/ensnode-sdk/internal";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -16,26 +17,29 @@ export default function () {
   addOnchainEventListener(
     namespaceContract(pluginName, "AccountMetadata:UpdateAccountMetadata"),
     async ({ context, event }) => {
+      const { addr, key: rawKey, value } = event.args;
+
+      // A key carrying a NUL byte is rejected (a Postgres `text` column cannot store one) rather than
+      // stripped, which would collapse distinct on-chain keys onto one stored key.
+      const key = interpretMetadataKey(rawKey);
+      if (key === null) return;
+
       const ts = event.block.timestamp;
-      const address = event.args.addr.toLowerCase() as Hex;
-      // `key` is a free-form on-chain string used as a primary-key component. Strip NUL bytes: a
-      // Postgres text column rejects them (a NUL key would crash the insert), and the tag path
-      // strips them too for api-v2 parity.
-      const key = event.args.key.replace(/\0/g, "");
+      const address = toNormalizedAddress(addr);
 
       await context.ensDb
         .insert(ensIndexerSchema.efpAccountMetadata)
         .values({
           id: accountMetadataId(context.chain.id, address, key),
           chainId: context.chain.id,
-          contractAddress: event.log.address.toLowerCase() as Hex,
+          contractAddress: toNormalizedAddress(event.log.address),
           address,
           key,
-          value: event.args.value,
+          value,
           createdAt: ts,
           updatedAt: ts,
         })
-        .onConflictDoUpdate({ value: event.args.value, updatedAt: ts });
+        .onConflictDoUpdate({ value, updatedAt: ts });
     },
   );
 }

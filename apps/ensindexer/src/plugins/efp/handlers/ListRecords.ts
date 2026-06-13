@@ -1,10 +1,10 @@
+import { toNormalizedAddress } from "enssdk";
 import { listMetadataId, listRecordId, storageLocationId } from "enssdk/efp";
-import type { Hex } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { EFP_LIST_METADATA_KEYS, EFP_OPCODE } from "@/lib/efp/constants";
-import { metadataValueToAddress } from "@/lib/efp/list-metadata";
+import { interpretMetadataValue } from "@/lib/efp/list-metadata";
 import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "@/lib/efp/parse-list-op";
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { logger } from "@/lib/logger";
@@ -25,7 +25,7 @@ export default function () {
 
       const ts = event.block.timestamp;
       const chainId = context.chain.id;
-      const contractAddress = event.log.address.toLowerCase() as Hex;
+      const contractAddress = toNormalizedAddress(event.log.address);
       const slot = slotToBytes32(event.args.slot);
 
       switch (parsed.opcode) {
@@ -115,7 +115,7 @@ export default function () {
 
       const ts = event.block.timestamp;
       const chainId = context.chain.id;
-      const contractAddress = event.log.address.toLowerCase() as Hex;
+      const contractAddress = toNormalizedAddress(event.log.address);
       const slot = slotToBytes32(event.args.slot);
 
       // Record the location's latest metadata durably (keyed by location + key) so it can be
@@ -136,9 +136,9 @@ export default function () {
       });
       if (!mapping) return;
 
-      const address = metadataValueToAddress(event.args.value);
+      const address = interpretMetadataValue(event.args.value);
       await context.ensDb
-        .update(ensIndexerSchema.efpLists, { tokenId: mapping.tokenId })
+        .update(ensIndexerSchema.efpLists, { id: mapping.tokenId })
         .set(
           key === EFP_LIST_METADATA_KEYS.USER
             ? { user: address, updatedAt: ts }

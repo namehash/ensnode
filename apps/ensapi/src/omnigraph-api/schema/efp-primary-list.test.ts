@@ -15,7 +15,7 @@ describe("decodePrimaryListTokenId", () => {
   it("returns null for values that are not exactly 32 bytes", () => {
     expect(decodePrimaryListTokenId("0x")).toBeNull();
     expect(decodePrimaryListTokenId("0x01")).toBeNull(); // 1 byte: must not coerce to token 1
-    expect(decodePrimaryListTokenId(`0x${"0".repeat(62)}1` as `0x${string}`)).toBeNull(); // 31 bytes
+    expect(decodePrimaryListTokenId(`0x${"0".repeat(61)}1` as `0x${string}`)).toBeNull(); // 31 bytes: must not coerce to token 1
     expect(decodePrimaryListTokenId(`0x${"00".repeat(33)}` as `0x${string}`)).toBeNull(); // 33 bytes
   });
 });
