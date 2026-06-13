@@ -5,11 +5,10 @@ import { parseListOp, parseRecord, parseTagOp, slotToBytes32 } from "./parse-lis
 const A20 = "0x".padEnd(42, "a"); // 0xaaa…aaa (20 bytes)
 
 describe("parseListOp", () => {
-  it("decodes version, opcode, and data payload", () => {
+  it("decodes opcode and data payload", () => {
     // version=0x01, opcode=0x01 (ADD_RECORD), data = recordVersion(01) + recordType(01) + 20-byte address
     const op = `0x01010101${A20.slice(2)}` as `0x${string}`;
     expect(parseListOp(op)).toEqual({
-      version: 1,
       opcode: 1,
       data: `0x0101${A20.slice(2)}` as `0x${string}`,
     });

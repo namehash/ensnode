@@ -159,29 +159,27 @@ function fetchFollowerCandidates(
 }
 
 /**
- * The validated followers of `target`, ordered by address and paginated by it. Validation (does the
- * follow live in the candidate's *primary* list?) decodes the `primary-list` metadata in app — a
- * uint256 that Postgres can't compare to the numeric `tokenId` — so candidates are over-fetched in
- * batches until `limit` validated followers are found (or the candidates are exhausted).
- *
- * Used by `Account.efp.followers`.
+ * Iterate the validated followers of `target` in address order, calling `visit` for each. Owns the
+ * over-fetch batch loop and cursor advance: validation happens in app (the `primary-list` metadata is
+ * a uint256 that Postgres can't compare to the numeric `tokenId`), so candidates are fetched in
+ * batches until exhausted. `visit` returns `true` to stop early.
  */
-export async function fetchValidatedFollowers(
+async function forEachValidatedFollower(
   target: NormalizedAddress,
   {
-    before,
     after,
-    limit,
+    before,
     inverted,
-  }: { before?: string; after?: string; limit: number; inverted: boolean },
-): Promise<NormalizedAddress[]> {
-  const cursor: { after?: NormalizedAddress; before?: NormalizedAddress } = {
-    after: after ? cursors.decode<NormalizedAddress>(after) : undefined,
-    before: before ? cursors.decode<NormalizedAddress>(before) : undefined,
-  };
-
-  const batchSize = Math.max(limit * 4, 64);
-  const followers: NormalizedAddress[] = [];
+    batchSize,
+  }: {
+    after?: NormalizedAddress;
+    before?: NormalizedAddress;
+    inverted: boolean;
+    batchSize: number;
+  },
+  visit: (follower: NormalizedAddress) => boolean,
+): Promise<void> {
+  const cursor: { after?: NormalizedAddress; before?: NormalizedAddress } = { after, before };
 
   for (;;) {
     const candidates = await fetchFollowerCandidates(target, cursor, inverted, batchSize);
@@ -194,12 +192,44 @@ export async function fetchValidatedFollowers(
       else cursor.after = candidate.follower;
 
       if (!isValidatedFollower(candidate)) continue;
-      followers.push(candidate.follower);
-      if (followers.length >= limit) return followers;
+      if (visit(candidate.follower)) return;
     }
 
     if (candidates.length < batchSize) break;
   }
+}
+
+/**
+ * The validated followers of `target`, ordered by address and paginated by it. Candidates are
+ * over-fetched in batches until `limit` validated followers are found (or the candidates are
+ * exhausted), since validation happens in app (see {@link forEachValidatedFollower}).
+ *
+ * Used by `Account.efp.followers`.
+ */
+export async function fetchValidatedFollowers(
+  target: NormalizedAddress,
+  {
+    before,
+    after,
+    limit,
+    inverted,
+  }: { before?: string; after?: string; limit: number; inverted: boolean },
+): Promise<NormalizedAddress[]> {
+  const followers: NormalizedAddress[] = [];
+
+  await forEachValidatedFollower(
+    target,
+    {
+      after: after ? cursors.decode<NormalizedAddress>(after) : undefined,
+      before: before ? cursors.decode<NormalizedAddress>(before) : undefined,
+      inverted,
+      batchSize: Math.max(limit * 4, 64),
+    },
+    (follower) => {
+      followers.push(follower);
+      return followers.length >= limit;
+    },
+  );
 
   return followers;
 }
@@ -211,21 +241,12 @@ export async function fetchValidatedFollowers(
  * Used by `Account.efp.followers`.
  */
 export async function countValidatedFollowers(target: NormalizedAddress): Promise<number> {
-  const cursor: { after?: NormalizedAddress } = {};
-  const batchSize = 500;
   let count = 0;
 
-  for (;;) {
-    const candidates = await fetchFollowerCandidates(target, cursor, false, batchSize);
-    if (candidates.length === 0) break;
-
-    for (const candidate of candidates) {
-      cursor.after = candidate.follower;
-      if (isValidatedFollower(candidate)) count++;
-    }
-
-    if (candidates.length < batchSize) break;
-  }
+  await forEachValidatedFollower(target, { inverted: false, batchSize: 500 }, () => {
+    count++;
+    return false;
+  });
 
   return count;
 }

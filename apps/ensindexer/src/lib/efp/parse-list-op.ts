@@ -20,8 +20,6 @@ import { type Hex, hexToString, isHex, numberToHex } from "viem";
 import { EFP_LIST_OP_VERSION, EFP_RECORD_TYPE_ADDRESS, EFP_RECORD_VERSION } from "./constants";
 
 export interface ParsedListOp {
-  /** Top-level list-op version. Always 1 today. */
-  version: number;
   /** Opcode — see {@link import("../constants").EFP_OPCODE}. */
   opcode: number;
   /** Opcode-specific payload, still 0x-prefixed. */
@@ -78,7 +76,6 @@ export function parseListOp(op: Hex | string | null | undefined): ParsedListOp |
   if (version !== EFP_LIST_OP_VERSION) return null;
 
   return {
-    version,
     opcode: parseInt(bytes.slice(2, 4), 16),
     data: `0x${bytes.slice(4)}` as Hex,
   };

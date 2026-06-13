@@ -42,9 +42,6 @@ const SLOT_END = CONTRACT_END + 32 * HEX_CHARS_PER_BYTE; // slot (32 bytes); als
 /** The only `locationType` EFP defines: an onchain EVM contract location. */
 const LOCATION_TYPE_ONCHAIN = 1;
 
-/** Largest chain id storable in the `int8` columns without JS precision loss (2^53 - 1). */
-const MAX_SAFE_CHAIN_ID = BigInt(Number.MAX_SAFE_INTEGER);
-
 export function parseListStorageLocation(
   lsl: Hex | string | null | undefined,
 ): ParsedListStorageLocation | null {
@@ -63,15 +60,20 @@ export function parseListStorageLocation(
   if (version !== EFP_LSL_VERSION) return null;
   if (locationType !== LOCATION_TYPE_ONCHAIN) return null;
 
-  // The chain id is an opaque 32-byte field, but it must fit a JS-safe integer to land in the
-  // `int8` columns without precision loss or overflow; reject anything outside (0, 2^53 - 1] so a
-  // bad value is treated as an undecodable location rather than crashing a write downstream.
-  const chainId = BigInt(`0x${bytes.slice(LOCATION_TYPE_END, CHAIN_ID_END)}`);
-  if (chainId <= 0n || chainId > MAX_SAFE_CHAIN_ID) return null;
+  // The chain id is an opaque 32-byte field, but it must be a positive, JS-safe integer to land in
+  // the `int8` columns without precision loss or overflow. `bigintToChainId` enforces exactly that
+  // (throwing otherwise); treat an unrepresentable chain id as an undecodable location rather than
+  // crashing a write downstream.
+  let chainId: ChainId;
+  try {
+    chainId = bigintToChainId(BigInt(`0x${bytes.slice(LOCATION_TYPE_END, CHAIN_ID_END)}`));
+  } catch {
+    return null;
+  }
 
   return {
     version,
-    chainId: bigintToChainId(chainId),
+    chainId,
     contractAddress: toNormalizedAddress(`0x${bytes.slice(CHAIN_ID_END, CONTRACT_END)}`),
     // `slot` is a bytes32 value (not an address), so it has no branded type; lowercase it for a
     // canonical key.

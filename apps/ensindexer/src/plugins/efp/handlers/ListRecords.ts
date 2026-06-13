@@ -128,7 +128,7 @@ export default function () {
         .onConflictDoUpdate({ value: event.args.value });
 
       // If a list currently points at this storage location, apply the role to it now.
-      // `metadataValueToAddress` returns null for a non-20-byte value, intentionally clearing the
+      // `interpretMetadataValue` returns null for a non-20-byte value, intentionally clearing the
       // role: a malformed `user`/`manager` value is no longer a valid address, so reflecting "no
       // role" is faithful to on-chain state.
       const mapping = await context.ensDb.find(ensIndexerSchema.efpListStorageLocations, {
