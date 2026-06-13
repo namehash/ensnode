@@ -1,5 +1,16 @@
 # @ensnode/integration-test-env
 
+## 1.16.0
+
+### Patch Changes
+
+- Updated dependencies [[`09b4aa5`](https://github.com/namehash/ensnode/commit/09b4aa5281875c7c3472358fa2bbb7f4991d9429)]:
+  - @ensnode/ensdb-sdk@1.16.0
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+  - @ensnode/datasources@1.16.0
+  - @ensnode/shared-configs@1.16.0
+
 ## 1.15.2
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @ensnode/ensdb-sdk
 
+## 1.16.0
+
+### Minor Changes
+
+- [#2292](https://github.com/namehash/ensnode/pull/2292) [`09b4aa5`](https://github.com/namehash/ensnode/commit/09b4aa5281875c7c3472358fa2bbb7f4991d9429) Thanks [@shrugs](https://github.com/shrugs)! - Add a `(value, coinType)` index on `resolver_address_records` to support reverse lookups of the Names whose `addr()` record points at a given address. Powers `Account.nameReferences` in the Omnigraph API.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+
 ## 1.15.2
 
 ### Patch Changes
