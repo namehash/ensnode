@@ -31,6 +31,21 @@ function serializeRpcConfigs(
 }
 
 /**
+ * Serialize Chain End Blocks {@link ENSIndexerConfig.chainEndBlocks}.
+ */
+function serializeChainEndBlocks(
+  chainEndBlocks: ENSIndexerConfig["chainEndBlocks"],
+): SerializedENSIndexerConfig["chainEndBlocks"] {
+  const serializedChainEndBlocks: SerializedENSIndexerConfig["chainEndBlocks"] = {};
+
+  for (const [chainId, endBlock] of chainEndBlocks.entries()) {
+    serializedChainEndBlocks[serializeChainId(chainId)] = endBlock;
+  }
+
+  return serializedChainEndBlocks;
+}
+
+/**
  * Serialize redacted {@link ENSIndexerConfig} object.
  *
  * Guaranteed to have all sensitive values redacted prior serialization.
@@ -50,5 +65,6 @@ export function serializeRedactedENSIndexerConfig(
     namespace: redactedConfig.namespace,
     plugins: redactedConfig.plugins,
     rpcConfigs: serializeRpcConfigs(redactedConfig.rpcConfigs),
+    chainEndBlocks: serializeChainEndBlocks(redactedConfig.chainEndBlocks),
   } satisfies SerializedENSIndexerConfig;
 }

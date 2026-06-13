@@ -51,6 +51,11 @@ export interface SerializedENSIndexerConfig
   rpcConfigs: Record<ChainIdString, SerializedRpcConfig>;
 
   /**
+   * Serialized representation of {@link ENSIndexerConfig.chainEndBlocks}.
+   */
+  chainEndBlocks: Record<ChainIdString, number>;
+
+  /**
    * Serialized representation of {@link ENSIndexerConfig.plugins}.
    *
    * For future-proofing, this is a list of strings that may or may

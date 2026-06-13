@@ -144,6 +144,14 @@ describe("config (with base env)", () => {
       vi.stubEnv("END_BLOCK_1", "foo");
       await expect(getConfig()).rejects.toThrow(/END_BLOCK_1 must be a non-negative integer/i);
     });
+
+    it.each(["", "1e2", "0x10", "  5"])(
+      "throws if END_BLOCK_<chainId> is not a base-10 integer (%j)",
+      async (value) => {
+        vi.stubEnv("END_BLOCK_1", value);
+        await expect(getConfig()).rejects.toThrow(/END_BLOCK_1 must be a non-negative integer/i);
+      },
+    );
   });
 
   describe(".ensRainbowUrl", () => {

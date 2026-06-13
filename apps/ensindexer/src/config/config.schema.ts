@@ -57,12 +57,13 @@ export function buildChainEndBlocksFromEnv(env: ENSIndexerEnvironment): Map<Chai
     const match = /^END_BLOCK_(\d+)$/.exec(key);
     if (!match || value === undefined) continue;
 
-    const endBlock = Number(value);
-    if (!Number.isInteger(endBlock) || endBlock < 0) {
+    // Require a base-10 non-negative integer; reject the lax inputs Number() would silently accept
+    // (e.g. "" -> 0, "1e2" -> 100, "0x10" -> 16).
+    if (!/^\d+$/.test(value)) {
       throw new Error(`${key} must be a non-negative integer.`);
     }
 
-    chainEndBlocks.set(Number(match[1]), endBlock);
+    chainEndBlocks.set(Number(match[1]), Number(value));
   }
 
   return chainEndBlocks;
