@@ -19,7 +19,7 @@ export default function () {
     async ({ context, event }) => {
       const { addr, key: rawKey, value } = event.args;
 
-      // A key carrying a NUL byte is rejected (a Postgres `text` column cannot store one) rather than
+      // A key carrying a NULL byte is rejected (a Postgres `text` column cannot store one) rather than
       // stripped, which would collapse distinct on-chain keys onto one stored key.
       const key = interpretMetadataKey(rawKey);
       if (key === null) return;

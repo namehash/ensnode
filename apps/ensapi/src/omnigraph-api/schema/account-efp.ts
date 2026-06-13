@@ -146,7 +146,7 @@ AccountEfpRef.implement({
       args: { key: t.arg({ type: "String", required: true }) },
       resolve: async (address, args) => {
         const { ensDb } = di.context;
-        // A NUL-byte key is never stored (rejected on write), so it can never match — short-circuit.
+        // A NULL-byte key is never stored (rejected on write), so it can never match — short-circuit.
         const key = interpretMetadataKey(args.key);
         if (key === null) return null;
         // Return the full row so the loadable ref resolves it directly, with no second fetch by id.

@@ -111,7 +111,7 @@ export const efpListRecords = onchainTable(
     recordType: t.integer().notNull(),
     /** Decoded record data. Only address records (type 1) are indexed, so exactly a 20-byte address. */
     recordData: t.hex().notNull().$type<NormalizedAddress>(),
-    /** UTF-8 tags attached to this record (a set; NUL bytes stripped). */
+    /** UTF-8 tags attached to this record (a set; NULL bytes stripped). */
     tags: t.text().array().notNull().default([]),
     createdAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),

@@ -28,7 +28,7 @@ export function listRecordId(
 
 /**
  * `efp_account_metadata` key: a `(chainId, address, key)` tuple. `key` must already be a valid
- * metadata key — callers reject NUL-byte keys upstream (see `interpretMetadataKey`), so this helper
+ * metadata key — callers reject NULL-byte keys upstream (see `interpretMetadataKey`), so this helper
  * does not strip them (stripping would silently collapse distinct on-chain keys onto one id).
  */
 export function accountMetadataId(

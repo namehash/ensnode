@@ -88,9 +88,9 @@ describe("parseTagOp", () => {
     });
   });
 
-  it("strips NUL bytes inside the decoded tag (api-v2 parity)", () => {
+  it("strips NULL bytes inside the decoded tag (api-v2 parity)", () => {
     const recordPrefixHex = `0101${"bb".repeat(20)}`;
-    // 'a' (0x61) + NUL (0x00) + 'b' (0x62)
+    // 'a' (0x61) + NULL (0x00) + 'b' (0x62)
     const tagBytes = "610062";
     const data = `0x${recordPrefixHex}${tagBytes}` as `0x${string}`;
     expect(parseTagOp(data)?.tag).toBe("ab");

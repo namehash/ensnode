@@ -46,7 +46,7 @@ export interface ParsedRecord {
 export interface ParsedTagOp {
   /** Full record prefix `recordVersion | recordType | address`, 0x-prefixed (22 bytes). */
   record: Hex;
-  /** UTF-8 decoded tag (NUL bytes stripped, matching api-v2 behaviour). */
+  /** UTF-8 decoded tag (NULL bytes stripped, matching api-v2 behaviour). */
   tag: string;
 }
 
@@ -141,7 +141,7 @@ export function parseTagOp(data: Hex | string | null | undefined): ParsedTagOp |
   // Reject an over-long tag rather than index an unbounded, attacker-controlled payload.
   if (tagHex.length > MAX_TAG_BYTE_LENGTH * 2) return null;
 
-  // Match api-v2: decode as UTF-8 and strip embedded NULs.
+  // Match api-v2: decode as UTF-8 and strip embedded NULLs.
   const tag = hexToString(`0x${tagHex}`).replace(/\0/g, "");
 
   return { record: parsed.record, tag };
