@@ -26,6 +26,7 @@ import {
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
+import { seedEfpDevnet } from "./seed/efp";
 import { seedDevnet } from "./seed/index";
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
@@ -291,9 +292,10 @@ export async function bringUp(options: { only?: Set<Service> } = {}): Promise<vo
       "docker-compose.orchestrator.yml",
     )
       .withWaitStrategy("devnet-orchestrator", Wait.forHealthCheck())
+      .withWaitStrategy("efp-devnet-orchestrator", Wait.forHealthCheck())
       .withWaitStrategy("ensdb-orchestrator", Wait.forListeningPorts())
-      .withStartupTimeout(120_000)
-      .up(["ensdb", "devnet"]);
+      .withStartupTimeout(180_000)
+      .up(["ensdb", "devnet", "efp-devnet"]);
 
     log(`ENSDb is ready (port ${ENSDB_PORT})`);
 
@@ -313,6 +315,7 @@ export async function bringUp(options: { only?: Set<Service> } = {}): Promise<vo
     // Phase 2: Seed devnet with test data (before indexing starts)
     log("Seeding devnet...");
     await seedDevnet(RPC_URL);
+    await seedEfpDevnet(RPC_URL);
     log("Devnet seeded");
   }
 
@@ -353,7 +356,7 @@ export async function bringUp(options: { only?: Set<Service> } = {}): Promise<vo
         NAMESPACE: ENSNamespaceIds.EnsTestEnv,
         ENSDB_URL,
         ENSINDEXER_SCHEMA_NAME,
-        PLUGINS: [PluginName.Unigraph, PluginName.ProtocolAcceleration].join(","),
+        PLUGINS: [PluginName.Unigraph, PluginName.ProtocolAcceleration, PluginName.EFP].join(","),
         ENSRAINBOW_URL,
         LABEL_SET_ID,
         LABEL_SET_VERSION,

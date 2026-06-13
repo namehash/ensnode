@@ -2,15 +2,19 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { NormalizedAddress } from "enssdk";
 
+import { PluginName } from "@ensnode/ensnode-sdk";
+
 import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { resolveAccountNameReferences } from "@/omnigraph-api/lib/find-name-references/find-name-references-resolver";
+import { isPluginEnabled } from "@/omnigraph-api/lib/is-plugin-enabled";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
 import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
+import { AccountEfpRef } from "@/omnigraph-api/schema/account-efp";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
@@ -145,6 +149,17 @@ AccountRef.implement({
           ...args,
           where: { ...args.where, sender: { eq: parent } },
         }),
+    }),
+
+    ///////////////
+    // Account.efp
+    ///////////////
+    efp: t.field({
+      description:
+        "This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.",
+      type: AccountEfpRef,
+      nullable: true,
+      resolve: (parent) => (isPluginEnabled(PluginName.EFP) ? parent : null),
     }),
 
     //////////////////////////

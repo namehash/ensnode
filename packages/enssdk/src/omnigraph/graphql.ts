@@ -65,6 +65,8 @@ export type OmnigraphScalars = {
   Hex: Hex;
   ChainId: ChainId;
   CoinType: CoinType;
+  // TokenId (a uint256) is serialized to a decimal string on the wire, like BigInt.
+  TokenId: `${bigint}`;
   InterfaceId: InterfaceId;
   InterpretedName: InterpretedName;
   InterpretedLabel: InterpretedLabel;

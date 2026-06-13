@@ -81,4 +81,14 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       return passthrough(args, cache, info);
     },
   },
+  EfpQuery: {
+    list(parent, args, cache, info) {
+      const by = args.by as { tokenId?: string | bigint };
+
+      // EfpLists are keyed by `tokenId`; link to the cached entity so a repeat lookup is a cache hit.
+      if (by.tokenId != null) return { __typename: "EfpList", tokenId: String(by.tokenId) };
+
+      return passthrough(args, cache, info);
+    },
+  },
 };

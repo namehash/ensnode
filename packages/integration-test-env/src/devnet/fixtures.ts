@@ -110,6 +110,49 @@ export const fixtures = {
 } as const;
 
 /**
+ * Synthetic EFP follow targets used by the integration EFP seeder (`seed/efp.ts`) and the EFP
+ * integration tests. Each anchors a distinct seeded record so tests can look it up by `recordData`;
+ * none has any indexed ENS presence, so they exercise that `EfpListRecord.account` still resolves to
+ * an Account for an arbitrary address.
+ */
+export const efpSeedTargets = {
+  /** ADD + ADD_TAG("block") + ADD_TAG("block") -> tags === ["block"] (dedup). */
+  dedup: asNormalizedAddress(`0x${"d1".repeat(20)}`),
+  /** ADD + ADD_TAG("vip") + REMOVE + ADD -> record present, tags === [] (embed cascade + fresh). */
+  cascade: asNormalizedAddress(`0x${"ca".repeat(20)}`),
+  /** ADD + REMOVE(target + junk) -> record gone (canonical 22-byte keying). */
+  junk: asNormalizedAddress(`0x${"1c".repeat(20)}`),
+  /** Anchors a list whose `user` role must survive a storage-location re-point away and back. */
+  durable: asNormalizedAddress(`0x${"d0".repeat(20)}`),
+  /** Followed plainly by the validated {@link efpFollowActorAddress} list — a real follow. */
+  followPlain: asNormalizedAddress(`0x${"f0".repeat(20)}`),
+  /** Followed but `block`-tagged by that list — excluded from `following` / `followers`. */
+  followBlocked: asNormalizedAddress(`0x${"fb".repeat(20)}`),
+} as const satisfies Record<string, NormalizedAddress>;
+
+/** The `user` role set on the {@link efpSeedTargets.durable} list, re-derived after the re-point. */
+export const efpSeedRoleUser = asNormalizedAddress(`0x${"ab".repeat(20)}`);
+
+/**
+ * The Anvil account (mnemonic index 6) the EFP seeder mints its lists from. It has `primary-list`
+ * metadata (set by easyMintTo) but its lists' `user` is never itself, so it exercises the
+ * `primaryList` two-step validation's mismatch (rejection) branch.
+ */
+export const efpSeedActorAddress = asNormalizedAddress(
+  "0x976ea74026e726554db657fa54763abd0c3a0aa9",
+);
+
+/**
+ * The Anvil account (mnemonic index 7) the EFP seeder mints a *validated* primary list from (via
+ * easyMintTo, which sets its `primary-list` + `user`). That list follows
+ * {@link efpSeedTargets.followPlain} plainly and `block`-tags {@link efpSeedTargets.followBlocked},
+ * exercising `Account.efp.following` / `followers` and their `block`/`mute` exclusion.
+ */
+export const efpFollowActorAddress = asNormalizedAddress(
+  "0x14dc79964da2c08b23698b3d3cc7ca32193d9955",
+);
+
+/**
  * Real contenthash values for each supported codec, encoded as per ENSIP-7.
  * Input values are taken from https://github.com/ensdomains/content-hash test vectors.
  * The `raw` field is the ENSIP-7 encoded hex; `decoded` is the human-readable value.

@@ -6,6 +6,10 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for EFP Datasource
+import { AccountMetadata as efp_AccountMetadata } from "./abis/efp/AccountMetadata";
+import { ListRecords as efp_ListRecords } from "./abis/efp/ListRecords";
+import { ListRegistry as efp_ListRegistry } from "./abis/efp/ListRegistry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -499,6 +503,76 @@ export default {
         abi: Seaport1_5, // Seaport 1.5
         address: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
         startBlock: 17129405,
+      },
+    },
+  },
+
+  /**
+   * EFP (Ethereum Follow Protocol) Datasource on Base.
+   *
+   * The `ListRegistry` (list NFTs) and `AccountMetadata` contracts are deployed only on Base.
+   * The `ListRecords` contract is also deployed on Base (one of the three "list storage location"
+   * chains a list NFT may point at via `UpdateListStorageLocation`).
+   *
+   * Every address below is cross-checked against the official EFP deployments,
+   * https://docs.efp.app/production/deployments/ (and ethereumfollowprotocol/api-v2).
+   */
+  [DatasourceNames.EFPBase]: {
+    chain: base,
+    contracts: {
+      // EFPListRegistry, Base. (All three Base EFP contracts deployed in block 20197231.)
+      ListRegistry: {
+        abi: efp_ListRegistry,
+        address: "0x0e688f5dca4a0a4729946acbc44c792341714e08",
+        startBlock: 20197231,
+      },
+      // EFPAccountMetadata, Base. NOTE: this is the SAME address as EFPListRecords on Ethereum
+      // mainnet (see EFPEthereum below). EFP deploys via CREATE2, so one address can map to a
+      // different contract on each chain; this is not a copy-paste error.
+      AccountMetadata: {
+        abi: efp_AccountMetadata,
+        address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+        startBlock: 20197231,
+      },
+      // EFPListRecords, Base.
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33",
+        startBlock: 20197231,
+      },
+    },
+  },
+
+  /**
+   * EFP `ListRecords` Datasource on Optimism.
+   */
+  [DatasourceNames.EFPOptimism]: {
+    chain: optimism,
+    contracts: {
+      // EFPListRecords, Optimism.
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x4ca00413d850dcfa3516e14d21dae2772f2acb85",
+        startBlock: 125792735,
+      },
+    },
+  },
+
+  /**
+   * EFP `ListRecords` Datasource on Ethereum mainnet.
+   */
+  [DatasourceNames.EFPEthereum]: {
+    chain: mainnet,
+    contracts: {
+      // EFPListRecords, Ethereum mainnet. This shares the 0x5289…0F17EF address with
+      // EFPAccountMetadata on Base (above): EFP deploys via CREATE2, so the same address appears on
+      // multiple chains for different contracts. Confirmed as ListRecords on Ethereum mainnet at
+      // https://docs.efp.app/production/deployments/ (and ethereumfollowprotocol/api-v2); it is NOT
+      // a copy-paste of the Base AccountMetadata address.
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+        startBlock: 20820743,
       },
     },
   },
