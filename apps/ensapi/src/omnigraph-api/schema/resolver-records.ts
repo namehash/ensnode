@@ -70,8 +70,11 @@ ResolverRecordsRef.implement({
       resolve: (parent) =>
         parent.addressRecords
           .map((r) => r.coinType)
+          // @TODO(cointype-bigint): drop `bigintToCoinType` once resolverAddressRecord.coinType is CoinType. See #2293.
           .map(bigintToCoinType)
-          .toSorted(),
+          // numeric comparator: CoinTypes are numbers, so a bare toSorted() would order them
+          // lexicographically (e.g. [137, 60] instead of [60, 137])
+          .toSorted((a, b) => a - b),
     }),
   }),
 });

@@ -32,6 +32,8 @@ export const reverseNameRecord = onchainTable(
   (t) => ({
     // keyed by (address, coinType)
     address: t.hex().notNull().$type<Address>(),
+    // @TODO(cointype-bigint): store as `t.int8({ mode: "number" }).$type<CoinType>()` (like chainId
+    // elsewhere) so reads/writes use CoinType directly without bigint round-trips. See #2293.
     coinType: t.bigint().notNull(),
 
     /**
@@ -201,6 +203,8 @@ export const resolverAddressRecord = onchainTable(
     node: t.hex().notNull().$type<Node>(),
     // NOTE: all well-known CoinTypes fit into javascript number but NOT postgres .integer, must be
     // stored as BigInt
+    // @TODO(cointype-bigint): use `t.int8({ mode: "number" }).$type<CoinType>()` like `chainId` above
+    // to drop bigint round-trips at every read/write boundary. See #2293.
     coinType: t.bigint().notNull(),
 
     /**
@@ -213,6 +217,9 @@ export const resolverAddressRecord = onchainTable(
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
+    // supports the reverse lookup powering `Account.nameReferences`:
+    // `WHERE value = <address> [AND coin_type = <coinType>]`
+    byValueAndCoinType: index().on(t.value, t.coinType),
   }),
 );
 

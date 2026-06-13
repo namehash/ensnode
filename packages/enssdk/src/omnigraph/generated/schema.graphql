@@ -26,6 +26,11 @@ type Account {
   id: Address!
 
   """
+  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.
+  """
+  nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection
+
+  """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
   """
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
@@ -118,6 +123,25 @@ type AccountId {
 input AccountIdInput {
   address: Address!
   chainId: ChainId!
+}
+
+type AccountNameReferencesConnection {
+  edges: [AccountNameReferencesConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountNameReferencesConnectionEdge {
+  cursor: String!
+  node: NameReference!
+}
+
+"""Filter for Account.nameReferences."""
+input AccountNameReferencesWhereInput {
+  """
+  If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.
+  """
+  coinType: CoinType
 }
 
 type AccountPermissionsConnection {
@@ -1097,6 +1121,25 @@ scalar MonacoinAddress
 input NameOrNodeInput @oneOf {
   name: InterpretedName
   node: Node
+}
+
+"""A Name whose indexed `addr()` record points at an Account."""
+type NameReference {
+  """The CoinType of the matching `addr()` record."""
+  coinType: CoinType!
+
+  """
+  The canonical Domain whose `addr(coinType)` record points at this Account.
+  """
+  domain: Domain!
+
+  """
+  Whether this name is the ENSIP-19 Primary Name of this Account for this `coinType`. i.e. whether reverse resolution of `(address, coinType)` resolves to this exact name. Protocol Accelerated when supported.
+  """
+  match: Boolean!
+
+  """The Resolver holding the matching `addr()` record."""
+  resolver: Resolver!
 }
 
 """

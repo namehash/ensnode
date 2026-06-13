@@ -7,6 +7,7 @@ import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
+import { resolveAccountNameReferences } from "@/omnigraph-api/lib/find-name-references/find-name-references-resolver";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
 import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
@@ -23,6 +24,7 @@ import {
 } from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
+import { NameReferenceRef } from "@/omnigraph-api/schema/name-reference";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
@@ -142,6 +144,24 @@ AccountRef.implement({
         resolveFindEvents({
           ...args,
           where: { ...args.where, sender: { eq: parent } },
+        }),
+    }),
+
+    //////////////////////////
+    // Account.nameReferences
+    //////////////////////////
+    nameReferences: t.connection({
+      description:
+        "The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.",
+      type: NameReferenceRef,
+      args: {
+        where: t.arg({ type: AccountNameReferencesWhereInput }),
+      },
+      resolve: (parent, { where, ...connectionArgs }) =>
+        resolveAccountNameReferences({
+          account: parent,
+          coinType: where?.coinType,
+          ...connectionArgs,
         }),
     }),
 
@@ -277,6 +297,20 @@ export const AccountByInput = builder.inputType("AccountByInput", {
     address: t.field({ type: "Address" }),
   }),
 });
+
+export const AccountNameReferencesWhereInput = builder.inputType(
+  "AccountNameReferencesWhereInput",
+  {
+    description: "Filter for Account.nameReferences.",
+    fields: (t) => ({
+      coinType: t.field({
+        type: "CoinType",
+        description:
+          "If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.",
+      }),
+    }),
+  },
+);
 
 export const AccountPermissionsWhereInput = builder.inputType("AccountPermissionsWhereInput", {
   description: "Filter for Account.permissions.",
