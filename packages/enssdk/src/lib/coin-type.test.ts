@@ -78,4 +78,9 @@ describe("bigintToChainId", () => {
   it("should throw for too-large bigint", () => {
     expect(() => bigintToChainId(BigInt(Number.MAX_SAFE_INTEGER) + 1n)).toThrow();
   });
+
+  it("should throw for zero or negative bigint (ChainId must be positive)", () => {
+    expect(() => bigintToChainId(0n)).toThrow();
+    expect(() => bigintToChainId(-1n)).toThrow();
+  });
 });

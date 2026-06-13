@@ -16,7 +16,7 @@
  * @see https://docs.efp.app/design/list-storage-location/
  */
 
-import { bigintToChainId, type ChainId, type NormalizedAddress } from "enssdk";
+import { bigintToChainId, type ChainId, type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import { type Hex, isHex } from "viem";
 
 import { EFP_LSL_VERSION } from "./constants";
@@ -72,7 +72,9 @@ export function parseListStorageLocation(
   return {
     version,
     chainId: bigintToChainId(chainId),
-    contractAddress: `0x${bytes.slice(CHAIN_ID_END, CONTRACT_END).toLowerCase()}` as Hex,
+    contractAddress: toNormalizedAddress(`0x${bytes.slice(CHAIN_ID_END, CONTRACT_END)}`),
+    // `slot` is a bytes32 value (not an address), so it has no branded type; lowercase it for a
+    // canonical key.
     slot: `0x${bytes.slice(CONTRACT_END, SLOT_END).toLowerCase()}` as Hex,
   };
 }

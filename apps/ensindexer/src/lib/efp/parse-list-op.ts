@@ -14,6 +14,7 @@
  * @see https://docs.efp.app/design/list-ops/
  */
 
+import { type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import { type Hex, hexToString, isHex, numberToHex } from "viem";
 
 import { EFP_LIST_OP_VERSION, EFP_RECORD_TYPE_ADDRESS, EFP_RECORD_VERSION } from "./constants";
@@ -38,8 +39,8 @@ export interface ParsedRecord {
    * and remove ops, which carry the same 22-byte prefix, resolve to the same row.
    */
   record: Hex;
-  /** Record payload (0x-prefixed). For `recordType === 1` this is exactly 20 bytes. */
-  recordData: Hex;
+  /** Record payload — for `recordType === 1`, the 20-byte followed address. */
+  recordData: NormalizedAddress;
 }
 
 export interface ParsedTagOp {
@@ -113,10 +114,10 @@ export function parseRecord(data: Hex | string | null | undefined): ParsedRecord
   return {
     version,
     recordType,
-    // Lowercase so the canonical key matches across ADD / REMOVE / tag ops and the API's
-    // `recordData` filters, mirroring the List Storage Location decoder.
+    // `record` is the composite `version | type | address` prefix (not a plain address), so it has
+    // no branded type; lowercase it so the canonical key matches across ADD / REMOVE / tag ops.
     record: `0x${bytes.slice(0, RECORD_PREFIX_HEX_LENGTH).toLowerCase()}` as Hex,
-    recordData: `0x${body.toLowerCase()}` as Hex,
+    recordData: toNormalizedAddress(`0x${body}`),
   };
 }
 

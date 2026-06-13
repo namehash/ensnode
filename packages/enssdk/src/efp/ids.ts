@@ -26,13 +26,17 @@ export function listRecordId(
   return [chainId, contractAddress, slot, record].join("-");
 }
 
-/** `efp_account_metadata` key: a `(chainId, address, key)` tuple (NUL bytes stripped from the key). */
+/**
+ * `efp_account_metadata` key: a `(chainId, address, key)` tuple. `key` must already be a valid
+ * metadata key — callers reject NUL-byte keys upstream (see `interpretMetadataKey`), so this helper
+ * does not strip them (stripping would silently collapse distinct on-chain keys onto one id).
+ */
 export function accountMetadataId(
   chainId: ChainId,
   address: NormalizedAddress,
   key: string,
 ): string {
-  return [chainId, address, key.replace(/\0/g, "")].join("-");
+  return [chainId, address, key].join("-");
 }
 
 /** `efp_list_metadata` key: per-location metadata `(storage location, key)`. */
