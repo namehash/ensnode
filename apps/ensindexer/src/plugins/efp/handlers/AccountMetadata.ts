@@ -1,5 +1,5 @@
 import { toNormalizedAddress } from "enssdk";
-import { accountMetadataId } from "enssdk/efp";
+import { accountMetadataId, decodePrimaryListTokenId, EFP_PRIMARY_LIST_KEY } from "enssdk/efp";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { interpretMetadataKey } from "@ensnode/ensnode-sdk/internal";
@@ -27,6 +27,12 @@ export default function () {
       const ts = event.block.timestamp;
       const address = toNormalizedAddress(addr);
 
+      // For the `primary-list` key, decode the `abi.encodePacked(uint256)` value into a numeric token
+      // id now (it can't be compared to the numeric `efp_lists.id` in SQL otherwise), so the validated
+      // follower/following social graph is a pure SQL join. `null` for every other key.
+      const primaryListTokenId =
+        key === EFP_PRIMARY_LIST_KEY ? decodePrimaryListTokenId(value) : null;
+
       await context.ensDb
         .insert(ensIndexerSchema.efpAccountMetadata)
         .values({
@@ -36,10 +42,11 @@ export default function () {
           address,
           key,
           value,
+          primaryListTokenId,
           createdAt: ts,
           updatedAt: ts,
         })
-        .onConflictDoUpdate({ value, updatedAt: ts });
+        .onConflictDoUpdate({ value, primaryListTokenId, updatedAt: ts });
     },
   );
 }

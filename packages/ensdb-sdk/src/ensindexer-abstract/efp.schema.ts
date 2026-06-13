@@ -137,6 +137,13 @@ export const efpAccountMetadata = onchainTable(
     key: t.text().notNull(),
     /** Metadata value (raw bytes). */
     value: t.hex().notNull(),
+    /**
+     * For the `primary-list` key only: the decoded token id of the account's primary list (the
+     * `value` is `abi.encodePacked(uint256)`, which Postgres can't compare to the numeric
+     * `efp_lists.id`). Decoding it at index time makes the validated follower/following social graph
+     * a pure SQL join. `null` for any other key, or a malformed `primary-list` value.
+     */
+    primaryListTokenId: t.bigint().$type<TokenId>(),
     createdAt: t.bigint().notNull().$type<DurationBigInt>(),
     updatedAt: t.bigint().notNull().$type<DurationBigInt>(),
   }),
@@ -145,6 +152,8 @@ export const efpAccountMetadata = onchainTable(
     // Account-metadata lookups (primary-list validation, `metadata(key:)`) filter by `(address, key)`;
     // a composite index makes that a point lookup rather than an address-partition scan.
     idx_address_key: index().on(t.address, t.key),
+    // The followers join filters lists by `(user, primaryListTokenId)`; index it for the social graph.
+    idx_primaryListTokenId: index().on(t.primaryListTokenId),
   }),
 );
 

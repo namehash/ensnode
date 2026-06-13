@@ -12,8 +12,11 @@ import {
 } from "@/omnigraph-api/lib/connection-helpers";
 import { isPluginEnabled } from "@/omnigraph-api/lib/is-plugin-enabled";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
+import {
+  ID_PAGINATED_CONNECTION_ARGS,
+  TOKEN_ID_PAGINATED_CONNECTION_ARGS,
+} from "@/omnigraph-api/schema/constants";
+import { EfpListRef } from "@/omnigraph-api/schema/efp-list";
 import { EfpListRecordRef } from "@/omnigraph-api/schema/efp-list-record";
 
 //////////////////////

@@ -37,7 +37,7 @@ export interface ParsedRecord {
    * and remove ops, which carry the same 22-byte prefix, resolve to the same row.
    */
   record: Hex;
-  /** Record payload — for `recordType === 1`, the 20-byte followed address. */
+  /** Record payload — for `recordType === 1`, the 20-byte address. */
   recordData: NormalizedAddress;
 }
 

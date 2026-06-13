@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, eq, type SQL } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { NormalizedAddress } from "enssdk";
 
 import { interpretMetadataKey } from "@ensnode/ensnode-sdk/internal";
@@ -13,15 +13,18 @@ import {
 } from "@/omnigraph-api/lib/connection-helpers";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { EfpAccountMetadataRef } from "@/omnigraph-api/schema/efp-account-metadata";
 import {
   ADDRESS_PAGINATED_CONNECTION_ARGS,
+  ID_PAGINATED_CONNECTION_ARGS,
+  TOKEN_ID_PAGINATED_CONNECTION_ARGS,
+} from "@/omnigraph-api/schema/constants";
+import { EfpAccountMetadataRef } from "@/omnigraph-api/schema/efp-account-metadata";
+import {
   buildFollowingScope,
-  countValidatedFollowers,
-  fetchValidatedFollowers,
+  countFollowers,
+  fetchFollowers,
 } from "@/omnigraph-api/schema/efp-follows";
-import { EfpListRef, TOKEN_ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/efp-list";
+import { EfpListRef } from "@/omnigraph-api/schema/efp-list";
 import { resolveValidatedPrimaryListTokenId } from "@/omnigraph-api/schema/efp-primary-list";
 
 /**
@@ -53,22 +56,16 @@ AccountEfpRef.implement({
       description:
         "The accounts this account follows: the address records in its validated primary EFP list, excluding `block`/`mute`-tagged records. Empty when the account has no validated primary list.",
       type: AccountRef,
-      resolve: (address, args) => {
+      resolve: async (address, args) => {
         const { ensDb, ensIndexerSchema } = di.context;
-        // `following` derives from the account's primary list; resolve that scope once and share it
-        // between `totalCount` and the page query.
-        let scope: SQL | null = null;
-        const followingScope = async () => {
-          if (scope === null) scope = await buildFollowingScope(address);
-          return scope;
-        };
+        // Both `totalCount` and the page query depend on this scope, and selecting the connection
+        // means at least one of them is read, so resolve it once up front rather than lazily.
+        const where = await buildFollowingScope(address);
 
         return lazyConnection({
-          totalCount: async () =>
-            ensDb.$count(ensIndexerSchema.efpListRecords, await followingScope()),
-          connection: async () => {
-            const where = await followingScope();
-            return resolveCursorConnection(
+          totalCount: () => ensDb.$count(ensIndexerSchema.efpListRecords, where),
+          connection: () =>
+            resolveCursorConnection(
               { ...ADDRESS_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 ensDb
@@ -83,8 +80,7 @@ AccountEfpRef.implement({
                   .orderBy(orderPaginationBy(ensIndexerSchema.efpListRecords.recordData, inverted))
                   .limit(limit)
                   .then((rows) => rows.map((row) => row.recordData)),
-            );
-          },
+            ),
         });
       },
     }),
@@ -94,16 +90,16 @@ AccountEfpRef.implement({
     ////////////////////////
     followers: t.connection({
       description:
-        "The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record. `totalCount` enumerates every follower and can be expensive for highly-followed accounts.",
+        "The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record.",
       type: AccountRef,
       resolve: (address, args) =>
         lazyConnection({
-          totalCount: () => countValidatedFollowers(address),
+          totalCount: () => countFollowers(address),
           connection: () =>
             resolveCursorConnection(
               { ...ADDRESS_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                fetchValidatedFollowers(address, { before, after, limit, inverted }),
+                fetchFollowers(address, { before, after, limit, inverted }),
             ),
         }),
     }),

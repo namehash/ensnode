@@ -87,7 +87,7 @@ input AccountDomainsWhereInput {
 """An account's Ethereum Follow Protocol (EFP) presence."""
 type AccountEfp {
   """
-  The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record. `totalCount` enumerates every follower and can be expensive for highly-followed accounts.
+  The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record.
   """
   followers(after: String, before: String, first: Int, last: Int): AccountEfpFollowersConnection
 
@@ -999,9 +999,7 @@ type EfpList {
   """The address allowed to administer this list."""
   manager: Address
 
-  """
-  The list NFT's CAIP-10 account id: the ListRegistry contract and the chain it lives on (Base / 8453 on the mainnet namespace; otherwise the active namespace's EFP deployment chain, e.g. 31337 on the ens-test-env devnet).
-  """
+  """The list NFT's AccountId."""
   nft: AccountId!
 
   """The current ERC-721 owner of the list NFT."""
@@ -1011,11 +1009,11 @@ type EfpList {
   records(after: String, before: String, first: Int, last: Int): EfpListRecordsConnection
 
   """
-  The decoded onchain location of this list's records. Null until the list emits an `UpdateListStorageLocation` (or when its payload is undecodable).
+  The decoded onchain location of this list's records, or null if not known.
   """
   storageLocation: EfpListStorageLocation
 
-  """The ERC-721 token id of the list NFT."""
+  """The ERC-721 TokenId of the list NFT."""
   tokenId: TokenId!
 
   """When this list was last updated (Unix timestamp, seconds)."""
