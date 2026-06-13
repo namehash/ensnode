@@ -31,6 +31,21 @@ function serializeRpcConfigs(
 }
 
 /**
+ * Serialize eth_getLogs block ranges {@link ENSIndexerConfig.ethGetLogsBlockRanges}.
+ */
+function serializeEthGetLogsBlockRanges(
+  ethGetLogsBlockRanges: ENSIndexerConfig["ethGetLogsBlockRanges"],
+): SerializedENSIndexerConfig["ethGetLogsBlockRanges"] {
+  const serializedEthGetLogsBlockRanges: SerializedENSIndexerConfig["ethGetLogsBlockRanges"] = {};
+
+  for (const [chainId, blockRange] of ethGetLogsBlockRanges.entries()) {
+    serializedEthGetLogsBlockRanges[serializeChainId(chainId)] = blockRange;
+  }
+
+  return serializedEthGetLogsBlockRanges;
+}
+
+/**
  * Serialize redacted {@link ENSIndexerConfig} object.
  *
  * Guaranteed to have all sensitive values redacted prior serialization.
@@ -51,5 +66,6 @@ export function serializeRedactedENSIndexerConfig(
     namespace: redactedConfig.namespace,
     plugins: redactedConfig.plugins,
     rpcConfigs: serializeRpcConfigs(redactedConfig.rpcConfigs),
+    ethGetLogsBlockRanges: serializeEthGetLogsBlockRanges(redactedConfig.ethGetLogsBlockRanges),
   } satisfies SerializedENSIndexerConfig;
 }

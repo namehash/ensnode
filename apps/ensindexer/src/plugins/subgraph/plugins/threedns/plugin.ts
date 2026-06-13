@@ -29,11 +29,7 @@ export default createPlugin({
     } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     return ponder.createConfig({
-      chains: chainsConnectionConfigForDatasources(
-        config.namespace,
-        config.rpcConfigs,
-        REQUIRED_DATASOURCE_NAMES,
-      ),
+      chains: chainsConnectionConfigForDatasources(config, REQUIRED_DATASOURCE_NAMES),
       contracts: {
         // multi-chain ThreeDNSToken indexing config
         [namespaceContract(pluginName, "ThreeDNSToken")]: {

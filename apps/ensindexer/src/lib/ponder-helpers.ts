@@ -89,24 +89,26 @@ export const constrainBlockrange = (
 /**
  * Builds a ponder#Config["chains"] for a single, specific chain in the context of the ENSIndexerConfig.
  *
- * @param rpcConfigs - The RPC configuration object from ENSIndexerConfig, keyed by chain ID.
+ * @param config - The ENSIndexerConfig slice providing per-chain RPC configs and eth_getLogs block ranges.
  * @param chainId - The numeric chain ID for which to build the chain config.
  * @returns a ponder#Config["chains"]
  */
 export function chainsConnectionConfig(
-  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
+  config: Pick<ENSIndexerConfig, "rpcConfigs" | "ethGetLogsBlockRanges">,
   chainId: ChainId,
 ) {
-  const rpcConfig = rpcConfigs.get(chainId);
+  const rpcConfig = config.rpcConfigs.get(chainId);
 
   if (!rpcConfig) {
     throw new Error(
-      `chainsConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
+      `chainsConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available. rpcConfig specifies the following chain ids: [${[...config.rpcConfigs.keys()].join(", ")}].`,
     );
   }
 
   // NOTE: disable cache on ens-test-env
   const disableCache = chainId === ensTestEnvChain.id;
+
+  const ethGetLogsBlockRange = config.ethGetLogsBlockRanges.get(chainId);
 
   return {
     [chainId.toString()]: {
@@ -114,6 +116,8 @@ export function chainsConnectionConfig(
       rpc: rpcConfig.httpRPCs.map((httpRPC) => httpRPC.toString()),
       ws: rpcConfig.websocketRPC?.toString(),
       disableCache,
+      // only set when explicitly configured; otherwise Ponder auto-determines the range
+      ...(ethGetLogsBlockRange !== undefined ? { ethGetLogsBlockRange } : {}),
     } satisfies ChainConfig,
   };
 }
@@ -221,18 +225,17 @@ export function mergedChainConfigForContracts(
  * TODO
  */
 export function chainsConnectionConfigForDatasources(
-  namespace: ENSNamespaceId,
-  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
+  config: Pick<ENSIndexerConfig, "namespace" | "rpcConfigs" | "ethGetLogsBlockRanges">,
   datasourceNames: DatasourceName[],
 ) {
   return datasourceNames
-    .map((datasourceName) => maybeGetDatasource(namespace, datasourceName))
+    .map((datasourceName) => maybeGetDatasource(config.namespace, datasourceName))
     .filter((ds) => !!ds)
     .map((datasource) => datasource.chain)
     .reduce<Record<string, ChainConfig>>(
       (memo, chain) => ({
         ...memo,
-        ...chainsConnectionConfig(rpcConfigs, chain.id),
+        ...chainsConnectionConfig(config, chain.id),
       }),
       {},
     );

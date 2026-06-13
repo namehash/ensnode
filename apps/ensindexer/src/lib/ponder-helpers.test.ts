@@ -1,8 +1,10 @@
+import type { ChainId } from "enssdk";
 import { describe, expect, it } from "vitest";
 
+import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import { buildBlockNumberRange } from "@ensnode/ponder-sdk";
 
-import { constrainBlockrange } from "./ponder-helpers";
+import { chainsConnectionConfig, constrainBlockrange } from "./ponder-helpers";
 
 const UNDEFINED_BLOCKRANGE = buildBlockNumberRange(undefined, undefined);
 const BLOCKRANGE_WITH_END = buildBlockNumberRange(undefined, 1234);
@@ -88,6 +90,31 @@ describe("ponder helpers", () => {
         );
         expect(config).toEqual(buildBlockNumberRange(30, 1234));
       });
+    });
+  });
+
+  describe("chainsConnectionConfig", () => {
+    const CHAIN_ID = 1 as ChainId;
+    const rpcConfigs = new Map<ChainId, RpcConfig>([
+      [CHAIN_ID, { httpRPCs: [new URL("https://rpc.example/1")], websocketRPC: undefined }],
+    ]);
+
+    it("omits ethGetLogsBlockRange when the chain has no configured override", () => {
+      const chains = chainsConnectionConfig(
+        { rpcConfigs, ethGetLogsBlockRanges: new Map() },
+        CHAIN_ID,
+      );
+
+      expect(chains[CHAIN_ID.toString()]).not.toHaveProperty("ethGetLogsBlockRange");
+    });
+
+    it("includes ethGetLogsBlockRange when the chain has a configured override", () => {
+      const chains = chainsConnectionConfig(
+        { rpcConfigs, ethGetLogsBlockRanges: new Map([[CHAIN_ID, 1000]]) },
+        CHAIN_ID,
+      );
+
+      expect(chains[CHAIN_ID.toString()]).toMatchObject({ ethGetLogsBlockRange: 1000 });
     });
   });
 });
