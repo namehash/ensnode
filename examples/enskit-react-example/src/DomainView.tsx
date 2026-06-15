@@ -10,6 +10,8 @@ import { asLiteralName, beautifyInterpretedName, type DomainId } from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
+import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
+
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
@@ -149,6 +151,7 @@ function RenderDomain({ by }: { by: DomainBy }) {
 // Identify a Domain by its Name (`/domain/name/:name`).
 // Resolves to the name's Canonical Domain.
 export function DomainByNameView() {
+  const { constants } = useEnsnodeInstance();
   // the `/domain/name/:name` route guarantees `:name` is present
   const { name } = useParams() as { name: string };
 
@@ -178,7 +181,9 @@ export function DomainByNameView() {
       malformed={(name) => (
         <div>
           <h2>Invalid name: '{name}'</h2>
-          <Link to="/domain/name/eth">Back to 'eth' Domain.</Link>
+          <Link to={`/domain/name/${constants.defaultDomainName}`}>
+            Back to '{constants.defaultDomainName}' Domain.
+          </Link>
         </div>
       )}
     >

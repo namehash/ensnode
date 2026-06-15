@@ -2,6 +2,8 @@ import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
+import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
+
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: DomainsNameFilter!, $first: Int!, $after: String) {
     domains(where: { name: $name }, first: $first, after: $after) {
@@ -20,6 +22,7 @@ const PAGE_SIZE = 10;
 const DEBOUNCE_MS = 50;
 
 export function SearchView() {
+  const { constants } = useEnsnodeInstance();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("query") ?? "";
 
@@ -80,7 +83,7 @@ export function SearchView() {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="vitalik"
+        placeholder={constants.defaultSearchLabel}
       />
 
       {query.length === 0 ? (
