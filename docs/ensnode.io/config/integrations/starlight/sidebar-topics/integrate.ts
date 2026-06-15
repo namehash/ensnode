@@ -168,6 +168,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
+          label: "ENS Omnigraph MCP (AI agents)",
+          link: "/docs/integrate/integration-options/omnigraph-mcp",
+        },
+        {
           label: "ENSDb (SQL)",
           link: "/docs/integrate/integration-options/ensdb",
         },
