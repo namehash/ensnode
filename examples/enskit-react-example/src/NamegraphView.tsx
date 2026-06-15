@@ -30,8 +30,9 @@ import { FileTree, useFileTree, useFileTreeSelection } from "@pierre/trees/react
 import { graphql, type ResultOf, type VariablesOf } from "enssdk/omnigraph";
 import type { OmnigraphEnsNodeClient } from "./client";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 
+import { namegraphPath, useAppPath } from "./app-paths";
 import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
 
 const PAGE_SIZE = 50;
@@ -378,6 +379,9 @@ type NodeMeta = DomainNodeMeta | LoadMoreMeta | SentinelMeta;
 
 export function NamegraphView({ registryId }: { registryId: string }) {
   const { client } = useEnsnodeInstance();
+  const appPath = useAppPath();
+  const location = useLocation();
+  const fromRegistryId = (location.state as { fromRegistryId?: string } | null)?.fromRegistryId;
 
   // Per-path metadata backing the file tree's (path-only) nodes. A ref so the
   // model's render-time decoration callback always reads the latest map.
@@ -719,6 +723,12 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         disagrees · <strong>↩?</strong> unknown
       </p>
 
+      {fromRegistryId && (
+        <p>
+          <Link to={appPath(namegraphPath(fromRegistryId))}>← Back to parent registry</Link>
+        </p>
+      )}
+
       {status === "error" && <p style={{ color: "red" }}>Error: {errorMessage}</p>}
       {status === "loading" && <p>Loading namegraph…</p>}
 
@@ -746,7 +756,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         {/* Stretches to the row (tree) height; scrolls only when its panels exceed it. */}
         <div style={{ flex: "1 1 45%", minHeight: 0, overflowY: "auto" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <DetailPanel meta={selectedMeta} />
+            <DetailPanel meta={selectedMeta} registryId={registryId} />
             <ResolutionPanels
               domainId={selectedMeta?.kind === "domain" ? selectedMeta.domainId : null}
             />
@@ -774,7 +784,7 @@ function formatResolver(resolver: ResolverRef | null) {
   );
 }
 
-function DetailPanel({ meta }: { meta: NodeMeta | null }) {
+function DetailPanel({ meta, registryId }: { meta: NodeMeta | null; registryId: string }) {
   if (!meta) {
     return (
       <div style={panelStyle}>
@@ -859,7 +869,7 @@ function DetailPanel({ meta }: { meta: NodeMeta | null }) {
           <strong>Subregistry</strong>
         </dt>
         <dd style={{ margin: 0 }}>
-          {meta.hasSubregistry ? <SubregistryDetail meta={meta} /> : <em>none</em>}
+          {meta.hasSubregistry ? <SubregistryDetail meta={meta} registryId={registryId} /> : <em>none</em>}
         </dd>
       </dl>
     </div>
@@ -877,7 +887,14 @@ function agreementDisplay(meta: DomainNodeMeta): { color: string; text: string }
   return { color: "#888", text: "↩? pointer unknown (empty subregistry)" };
 }
 
-function SubregistryDetail({ meta }: { meta: DomainNodeMeta }) {
+function SubregistryDetail({
+  meta,
+  registryId,
+}: {
+  meta: DomainNodeMeta;
+  registryId: string;
+}) {
+  const appPath = useAppPath();
   const agreement = agreementDisplay(meta);
   return (
     <>
@@ -887,7 +904,12 @@ function SubregistryDetail({ meta }: { meta: DomainNodeMeta }) {
       <div style={{ color: agreement.color }}>{agreement.text}</div>
       {meta.subregistryId && (
         <div style={{ marginTop: 4 }}>
-          <Link to={`/namegraph/${meta.subregistryId}`}>Open subregistry as root →</Link>
+          <Link
+            to={appPath(namegraphPath(meta.subregistryId))}
+            state={{ fromRegistryId: registryId }}
+          >
+            Open subregistry as root →
+          </Link>
         </div>
       )}
     </>
@@ -1133,6 +1155,7 @@ function RecordsPanel({ records }: { records: Records }) {
 /** Resolves the namespace Root Registry id and redirects to it. */
 export function NamegraphRootRedirect() {
   const { client } = useEnsnodeInstance();
+  const appPath = useAppPath();
   const [rootId, setRootId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -1158,5 +1181,5 @@ export function NamegraphRootRedirect() {
   if (errorMessage)
     return <p style={{ color: "red" }}>Error loading root registry: {errorMessage}</p>;
   if (!rootId) return <p>Loading root registry…</p>;
-  return <Navigate to={`/namegraph/${rootId}`} replace />;
+  return <Navigate to={appPath(namegraphPath(rootId))} replace />;
 }

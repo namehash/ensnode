@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { HashRouter, Link, Outlet, Route, Routes, useParams } from "react-router";
 
 import { AccountView } from "./AccountView";
+import { accountPath, domainNamePath, useAppPath } from "./app-paths";
 import { DomainByIdView, DomainByNameView } from "./DomainView";
 import { EnsnodeInstanceProvider, InstanceSelector, useEnsnodeInstance } from "./EnsnodeInstanceProvider";
 import { NamegraphRootRedirect, NamegraphView } from "./NamegraphView";
@@ -10,6 +11,7 @@ import { SearchView } from "./SearchView";
 
 function Layout() {
   const { constants } = useEnsnodeInstance();
+  const appPath = useAppPath();
 
   return (
     <>
@@ -17,11 +19,12 @@ function Layout() {
         <InstanceSelector />
       </p>
       <nav>
-        <Link to="/">Home</Link> |{" "}
-        <Link to={`/domain/name/${constants.defaultDomainName}`}>Domain Browser</Link> |{" "}
-        <Link to={`/account/${constants.defaultAddress}`}>Account Browser</Link> |{" "}
-        <Link to="/registry">Registry Cache Demo</Link> | <Link to="/search">Search Demo</Link> |{" "}
-        <Link to="/namegraph">Namegraph Explorer</Link>
+        <Link to={appPath("/")}>Home</Link> |{" "}
+        <Link to={appPath(domainNamePath(constants.defaultDomainName))}>Domain Browser</Link> |{" "}
+        <Link to={appPath(accountPath(constants.defaultAddress))}>Account Browser</Link> |{" "}
+        <Link to={appPath("/registry")}>Registry Cache Demo</Link> |{" "}
+        <Link to={appPath("/search")}>Search Demo</Link> |{" "}
+        <Link to={appPath("/namegraph")}>Namegraph Explorer</Link>
       </nav>
       <hr />
       <Outlet />
@@ -54,11 +57,7 @@ function Home() {
         </p>
       ) : (
         <p>
-          Use the ENSNode instance selector in the header to switch between hosted instances (for
-          example Alpha Mainnet for ENSv1-oriented data, or V2 Sepolia for ENSv2-oriented data). The
-          choice is remembered in this browser. You can also deep-link with{" "}
-          <code>?instance=&lt;id&gt;</code> (for example <code>?instance=v2-sepolia</code>).
-          Per-instance demo constants live in <code>src/instances.ts</code>.
+          Use the ENSNode instance selector in the header to switch between hosted instances.
         </p>
       )}
     </div>

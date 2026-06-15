@@ -10,6 +10,13 @@ import { asLiteralName, beautifyInterpretedName, type DomainId } from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
+import {
+  accountPath,
+  domainIdPath,
+  domainNamePath,
+  parentDomainPath,
+  useAppPath,
+} from "./app-paths";
 import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
 
 const DomainFragment = graphql(`
@@ -27,7 +34,7 @@ const DomainQuery = graphql(
   query DomainBy($by: DomainIdInput!, $first: Int!, $after: String) {
     domain(by: $by) {
       ...DomainFragment
-      parent { id canonical { name { beautified } } }
+      parent { id canonical { name { beautified interpreted } } }
       subdomains(first: $first, after: $after) {
         edges {
           node {
@@ -50,27 +57,32 @@ type DomainBy = VariablesOf<typeof DomainQuery>["by"];
 const SUBDOMAINS_PAGE_SIZE = 20;
 
 function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
+  const appPath = useAppPath();
   const domain = readFragment(DomainFragment, data);
+  const ownerAddress = domain.owner?.address;
 
   return (
     <li>
       {/* link by DomainId so the exact Domain (and its ENSv1/ENSv2 variant) is preserved */}
-      <Link to={`/domain/id/${domain.id}`}>
+      <Link to={appPath(domainIdPath(domain.id))}>
         {domain.canonical?.name.beautified ?? <em>non-canonical domain</em>}
       </Link>{" "}
       ({domain.__typename})
       <span>
         {" "}
         — Owner{" "}
-        <code>
-          {domain.owner?.address ?? (domain.__typename === "ENSv2Domain" ? "Reserved" : "0x0")}
-        </code>
+        {ownerAddress ? (
+          <Link to={appPath(accountPath(ownerAddress))}>{ownerAddress}</Link>
+        ) : (
+          <code>{domain.__typename === "ENSv2Domain" ? "Reserved" : "0x0"}</code>
+        )}
       </span>
     </li>
   );
 }
 
 function RenderDomain({ by }: { by: DomainBy }) {
+  const appPath = useAppPath();
   const [after, setAfter] = useState<string | null>(null);
 
   const [result] = useOmnigraphQuery({
@@ -96,7 +108,7 @@ function RenderDomain({ by }: { by: DomainBy }) {
       <p>
         Owner:{" "}
         {domain.owner ? (
-          <Link to={`/account/${domain.owner.address}`}>{domain.owner.address}</Link>
+          <Link to={appPath(accountPath(domain.owner.address))}>{domain.owner.address}</Link>
         ) : domain.__typename === "ENSv2Domain" ? (
           "Reserved"
         ) : (
@@ -108,7 +120,7 @@ function RenderDomain({ by }: { by: DomainBy }) {
       {data.domain.parent && (
         // always link the parent by its (stable) DomainId; fall back to the id as the label when the
         // parent has no Canonical Name
-        <Link to={`/domain/id/${data.domain.parent.id}`}>
+        <Link to={appPath(parentDomainPath(data.domain.parent))}>
           ←{" "}
           {data.domain.parent.canonical
             ? data.domain.parent.canonical.name.beautified
@@ -148,9 +160,15 @@ function RenderDomain({ by }: { by: DomainBy }) {
   );
 }
 
+function CoercedNameRedirect({ name }: { name: string }) {
+  const appPath = useAppPath();
+  return <Navigate to={appPath(domainNamePath(name))} replace />;
+}
+
 // Identify a Domain by its Name (`/domain/name/:name`).
 // Resolves to the name's Canonical Domain.
 export function DomainByNameView() {
+  const appPath = useAppPath();
   const { constants } = useEnsnodeInstance();
   // the `/domain/name/:name` route guarantees `:name` is present
   const { name } = useParams() as { name: string };
@@ -175,13 +193,13 @@ export function DomainByNameView() {
       }}
       //
       // this isn't an InterpretedName, but it was coerced to an InterpretedName: redirect the user to the canonical url
-      coerced={(name) => <Navigate to={`/domain/name/${name}`} replace />}
+      coerced={(name) => <CoercedNameRedirect name={name} />}
       //
       // this name can't conform to InterpretedName nor can it be coerced: it is malformed: show an error
       malformed={(name) => (
         <div>
           <h2>Invalid name: '{name}'</h2>
-          <Link to={`/domain/name/${constants.defaultDomainName}`}>
+          <Link to={appPath(domainNamePath(constants.defaultDomainName))}>
             Back to '{constants.defaultDomainName}' Domain.
           </Link>
         </div>
