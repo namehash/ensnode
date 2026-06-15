@@ -1,0 +1,80 @@
+---
+title: ENS Omnigraph MCP (AI agents)
+description: Query the ENS Omnigraph from any MCP client — first-party, built into every ENSNode instance at /api/mcp.
+---
+
+import { Aside, LinkCard } from "@astrojs/starlight/components";
+import IntegrateHostedEnsNodeTip from "@components/molecules/IntegrateHostedEnsNodeTip.astro";
+
+Every ENSNode instance exposes the [ENS Omnigraph API](/docs/integrate/integration-options/omnigraph-graphql-api) over the [Model Context Protocol](https://modelcontextprotocol.io/) at **`/api/mcp`**, using the streamable-HTTP transport. This lets MCP clients — [Cursor](https://www.cursor.com/), [Claude Desktop](https://claude.ai/download), and any agent that speaks MCP — run Omnigraph queries directly.
+
+It's first-party and built in: the same endpoint works locally (`http://localhost:4334/api/mcp`) and against any hosted instance, so there's nothing to install or deploy — point your client at a URL and go.
+
+<IntegrateHostedEnsNodeTip />
+
+## The tool
+
+The server exposes a single, read-only tool:
+
+- **`omnigraph_query`** — accepts a GraphQL `query` (and optional `variables`) and returns the raw `{ data, errors }` JSON, exactly as the [HTTP endpoint](/docs/integrate/integration-options/omnigraph-graphql-api#1-the-endpoint) does. Because it's the full Omnigraph behind one tool, an agent can answer any question the Omnigraph can — resolve records, search Domains, list a user's Domains, and much more — without a fixed, hand-written tool per use case.
+
+## Connect your client
+
+Point your MCP client at the endpoint. For a [NameHash-hosted instance](/docs/hosted-instances):
+
+```json title="mcp.json"
+{
+  "mcpServers": {
+    "ensnode-omnigraph": {
+      "url": "https://api.v2-sepolia.ensnode.io/api/mcp"
+    }
+  }
+}
+```
+
+For local development, use your instance's URL instead:
+
+```json title="mcp.json"
+{
+  "mcpServers": {
+    "ensnode-omnigraph": {
+      "url": "http://localhost:4334/api/mcp"
+    }
+  }
+}
+```
+
+## Authoring queries
+
+The MCP endpoint runs whatever GraphQL you hand it — it does not author queries for you. To discover the schema and write correct queries:
+
+- Explore interactively in the **GraphiQL playground** at `/api/omnigraph`.
+- Browse the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) and [Omnigraph examples](/docs/integrate/omnigraph/examples).
+- Give your agent the [`ensskills`](/docs/integrate/integration-options/ensskills) **`omnigraph`** skill, which teaches the unified ENSv1 + ENSv2 datamodel, resolution, pagination, and vetted example queries — so it writes queries that work the first time.
+
+<Aside type="note" title="Read-only">
+  The Omnigraph is a read-only API, and so is this MCP server. It indexes and serves ENS state; it does not send transactions or mutate onchain data.
+</Aside>
+
+## Where to go next
+
+- Want to call the same API over plain HTTP, `curl`, or your own GraphQL client? See the [ENS Omnigraph API (GraphQL)](/docs/integrate/integration-options/omnigraph-graphql-api) guide.
+- Building integration code rather than driving an agent? Use [`enssdk`](/docs/integrate/integration-options/enssdk) (typed client) or [`enskit`](/docs/integrate/integration-options/enskit) (React).
+
+<LinkCard
+  title="ENS Omnigraph API (GraphQL)"
+  description="The HTTP GraphQL API this MCP server wraps."
+  href="/docs/integrate/integration-options/omnigraph-graphql-api"
+/>
+
+<LinkCard
+  title="ensskills (AI agents)"
+  description="Agent skills that teach how to author Omnigraph queries."
+  href="/docs/integrate/integration-options/ensskills"
+/>
+
+<LinkCard
+  title="Model Context Protocol"
+  description="The open protocol this endpoint implements."
+  href="https://modelcontextprotocol.io/"
+/>
