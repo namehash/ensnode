@@ -6,6 +6,19 @@ import { z } from "zod/v4";
 
 import { createApp } from "@/lib/hono-factory";
 
+const OmnigraphQueryInputSchema = z.object({
+  query: z.string().describe("The GraphQL query document to execute."),
+  variables: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe("Optional GraphQL variables, keyed by variable name."),
+});
+
+/** GraphQL-over-HTTP request body; always includes `variables` (`null` when omitted). */
+function buildGraphQLRequestBody(query: string, variables?: Record<string, unknown>): string {
+  return JSON.stringify({ query, variables: variables ?? null });
+}
+
 /**
  * Builds the ENSNode Omnigraph MCP server and registers its tools.
  *
@@ -26,13 +39,7 @@ export function createOmnigraphMcpServer(): McpServer {
         "unified ENSv1 + ENSv2 data model. Returns the raw GraphQL JSON response (`{ data, errors }`). " +
         "Use the `omnigraph` agent skill and the GraphiQL playground at `/api/omnigraph` to discover " +
         "the schema and author queries.",
-      inputSchema: {
-        query: z.string().describe("The GraphQL query document to execute."),
-        variables: z
-          .record(z.string(), z.unknown())
-          .optional()
-          .describe("Optional GraphQL variables, keyed by variable name."),
-      },
+      inputSchema: OmnigraphQueryInputSchema,
     },
     async ({ query, variables }) => {
       // Defer importing yoga to runtime (matching @/handlers/api/omnigraph/omnigraph-api) so the
@@ -49,7 +56,7 @@ export function createOmnigraphMcpServer(): McpServer {
         new Request("http://ensapi.internal/api/omnigraph", {
           method: "POST",
           headers: { "content-type": "application/json", accept: "application/json" },
-          body: JSON.stringify({ query, variables }),
+          body: buildGraphQLRequestBody(query, variables),
         }),
         { canAccelerate: false },
       );
@@ -72,12 +79,26 @@ export function createOmnigraphMcpServer(): McpServer {
 const mcpServer = createOmnigraphMcpServer();
 const transport = new StreamableHTTPTransport();
 
+/** In-flight `connect()` shared across concurrent cold-start requests. */
+let mcpConnectPromise: Promise<void> | undefined;
+
+function ensureMcpConnected(): Promise<void> {
+  if (mcpServer.isConnected()) {
+    return Promise.resolve();
+  }
+
+  mcpConnectPromise ??= mcpServer.connect(transport).catch((error) => {
+    mcpConnectPromise = undefined;
+    throw error;
+  });
+
+  return mcpConnectPromise;
+}
+
 const app = createApp();
 
 app.all("/", async (c) => {
-  if (!mcpServer.isConnected()) {
-    await mcpServer.connect(transport);
-  }
+  await ensureMcpConnected();
 
   // `handleRequest` may return undefined for messages that have no HTTP body (e.g. notifications).
   const response = await transport.handleRequest(c);

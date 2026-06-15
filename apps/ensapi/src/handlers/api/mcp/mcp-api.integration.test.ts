@@ -1,12 +1,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { asInterpretedLabel, type LabelHash, labelhashInterpretedLabel } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const MCP_URL = new URL("/api/mcp", process.env.ENSNODE_URL!);
-
-// 'eth' is always seeded in the devnet fixture as a healed label.
-const ETH_LABEL_HASH: LabelHash = labelhashInterpretedLabel(asInterpretedLabel("eth"));
 
 type TextContent = { type: "text"; text: string };
 
@@ -58,25 +54,24 @@ describe("Omnigraph MCP API (/api/mcp)", () => {
     expect(data).toEqual({ __typename: "Query" });
   });
 
-  it("resolves the seeded 'eth' label via Query.labels", async () => {
+  it("resolves a seeded devnet domain via Query.domain", async () => {
     const { data, errors } = await omnigraphQuery<{
-      labels: Array<{ hash: LabelHash; interpreted: string }>;
+      domain: { canonical: { name: { interpreted: string } } } | null;
     }>(
       client,
       /* GraphQL */ `
-        query LabelsByLabelHash($labelHashes: [LabelHash!]!) {
-          labels(by: { labelHashes: $labelHashes }) {
-            hash
-            interpreted
+        query DomainByName($name: InterpretedName!) {
+          domain(by: { name: $name }) {
+            canonical { name { interpreted } }
           }
         }
       `,
-      { labelHashes: [ETH_LABEL_HASH] },
+      { name: "test.eth" },
     );
 
     expect(errors).toBeUndefined();
     expect(data).toMatchObject({
-      labels: [{ hash: ETH_LABEL_HASH, interpreted: "eth" }],
+      domain: { canonical: { name: { interpreted: "test.eth" } } },
     });
   });
 

@@ -58,7 +58,7 @@ describe("Omnigraph MCP server", () => {
     expect(context).toEqual({ canAccelerate: false });
     await expect(request.clone().json()).resolves.toEqual({
       query: "{ __typename }",
-      variables: undefined,
+      variables: null,
     });
 
     // The tool returns Yoga's raw response body as text content.
