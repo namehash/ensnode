@@ -4,6 +4,7 @@ import {
   type PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -50,6 +51,10 @@ function resolveInstanceId(searchParams: URLSearchParams): string {
 export function EnsnodeInstanceProvider({ children }: PropsWithChildren) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [instanceId, setInstanceIdState] = useState(() => resolveInstanceId(searchParams));
+
+  useEffect(() => {
+    setInstanceIdState(resolveInstanceId(searchParams));
+  }, [searchParams]);
 
   const instance = getEnsnodeInstanceById(instanceId) ?? DEFAULT_ENSNODE_INSTANCE;
   const instanceSelectionDisabled = Boolean(envEnsnodeUrl);

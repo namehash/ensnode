@@ -21,7 +21,8 @@ export function namegraphPath(registryId: string): string {
 export function withInstanceSearch(path: string, searchParams: URLSearchParams): string {
   const instance = searchParams.get(INSTANCE_PARAM);
   if (!instance) return path;
-  return `${path}?${INSTANCE_PARAM}=${encodeURIComponent(instance)}`;
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}${INSTANCE_PARAM}=${encodeURIComponent(instance)}`;
 }
 
 export function useAppPath(): (path: string) => string {
