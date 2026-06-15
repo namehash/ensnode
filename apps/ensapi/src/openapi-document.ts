@@ -6,6 +6,8 @@ import { openapiMeta } from "@/openapi-meta";
  * Deprecated endpoints to exclude from the generated OpenAPI document.
  */
 const HIDE_OPENAPI_ENDPOINTS: string[] = [
+  // MCP (Model Context Protocol) over streamable HTTP — not a REST/OpenAPI surface.
+  "/api/mcp",
   // TODO: remove /amirealtime once the legacy endpoint is deleted.
   "/amirealtime",
   // TODO: remove all other endpoints from this list once the legacy endpoints are deleted.
