@@ -36,7 +36,16 @@ The Omnigraph API is a GraphQL API following the Relay specification, so you get
   href="/docs/integrate/integration-options/omnigraph-graphql-api"
 />
 
-## 4. ENSDb
+## 4. ENS Omnigraph MCP
+
+Every ENSNode instance also serves the Omnigraph over the Model Context Protocol at `/api/mcp`. Point an MCP client (Cursor, Claude Desktop, agents) at the URL and run Omnigraph queries directly — first-party, read-only, nothing to install.
+
+<LinkCard
+  title="ENS Omnigraph MCP Documentation"
+  href="/docs/integrate/integration-options/omnigraph-mcp"
+/>
+
+## 5. ENSDb
 
 For special use cases that go beyond what the ENS Omnigraph exposes, query the live state of ENSv2 directly via SQL. `ENSDb` stores ENS state in a PostgreSQL database — usable from any language with a Postgres driver.
 
@@ -45,7 +54,7 @@ For special use cases that go beyond what the ENS Omnigraph exposes, query the l
   href="/docs/integrate/integration-options/ensdb"
 />
 
-## 5. ENSDb Writers
+## 6. ENSDb Writers
 
 Build your own indexer for ENSDb by implementing the [ENSNode Plugin](/docs/integrate/integration-options/ensnode-plugins) specifications you're interested in indexing. ENSDb Writers index onchain data and write it into an ENSDb instance according to the standards set by relevant ENSNode Plugins.
 
@@ -54,7 +63,7 @@ Build your own indexer for ENSDb by implementing the [ENSNode Plugin](/docs/inte
   href="/docs/integrate/integration-options/ensdb-writers"
 />
 
-## 6. ENSDb Readers
+## 7. ENSDb Readers
 
 Build custom APIs or other specialized services on top of ENSDb. ENSDb Readers read indexed ENS data from an ENSDb instance and serve it through any API surface (GraphQL, REST, gRPC, webhooks, etc.) or pipe it into specialized data processing pipelines through the PostgreSQL write-ahead-log.
 
@@ -63,7 +72,7 @@ Build custom APIs or other specialized services on top of ENSDb. ENSDb Readers r
   href="/docs/integrate/integration-options/ensdb-readers"
 />
 
-## 7. ENSNode Plugins
+## 8. ENSNode Plugins
 
 ENSNode Plugins are abstract specifications that define indexed data models relevant to ENS. They are a key architectural piece that enables complete decoupling between ENSDb Writers and ENSDb Readers.
 
@@ -72,7 +81,7 @@ ENSNode Plugins are abstract specifications that define indexed data models rele
   href="/docs/integrate/integration-options/ensnode-plugins"
 />
 
-## 8. enscli
+## 9. enscli
 
 `enscli` is a CLI that wraps `enssdk` to bring the ENS Omnigraph to the terminal. Designed for developers exploring or validating integrations, operators wiring ENS lookups into shell pipelines, and AI coding agents driving `ensskills`.
 
@@ -81,7 +90,7 @@ ENSNode Plugins are abstract specifications that define indexed data models rele
   href="/docs/integrate/integration-options/enscli"
 />
 
-## 9. ensskills
+## 10. ensskills
 
 `ensskills` is a collection of curated skill bundles that give AI coding agents a well-defined contract for working with ENS — powering conversational ENS lookups and streamlining integration code written with `enskit`, `enssdk`, or the raw Omnigraph API.
 
@@ -90,7 +99,7 @@ ENSNode Plugins are abstract specifications that define indexed data models rele
   href="/docs/integrate/integration-options/ensskills"
 />
 
-## 10. ensdb-cli & ENSDb snapshots
+## 11. ensdb-cli & ENSDb snapshots
 
 `ensdb-cli` is the operator-facing tool for ENSDb snapshots — portable, versioned packages of an ENSDb instance. Pull one down, restore it into Postgres, and start querying ENS in minutes instead of waiting days to complete a full historical indexing backfill from scratch.
 
@@ -99,7 +108,7 @@ ENSNode Plugins are abstract specifications that define indexed data models rele
   href="/docs/integrate/integration-options/ensdb-cli"
 />
 
-## 11. ENSEngine
+## 12. ENSEngine
 
 ENSEngine watches your ENSDb for changes in real time and delivers ENS-aware events — including webhooks — to any sink you configure. Stop polling and start reacting to ENS state changes.
 
