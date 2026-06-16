@@ -38,8 +38,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.1",
-    "@changesets/changelog-github": "^0.5.2",
-    "@changesets/cli": "^2.29.8",
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
     "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "enscli": "workspace:*",
     "ensskills": "workspace:*",
@@ -62,7 +62,7 @@
       "@opentelemetry/core@<2.8.0": "^2.8.0",
       "esbuild@>=0.17.0 <0.28.1": "^0.28.1",
       "form-data@>=4.0.0 <4.0.6": "^4.0.6",
-      "js-yaml@<4.2.0": "^4.2.0",
+      "js-yaml@>=4.0.0 <4.2.0": "^4.2.0",
       "markdown-it@>14.0.0 <14.2.0": "^14.2.0",
       "tar@<7.5.16": "^7.5.16",
       "ajv@<8.18.0": "^8.18.0",
@@ -103,7 +103,7 @@
     "patchedDependencies": {
       "@opentelemetry/api": "patches/@opentelemetry__api.patch",
       "@opentelemetry/otlp-exporter-base": "patches/@opentelemetry__otlp-exporter-base.patch",
-      "@changesets/assemble-release-plan@6.0.9": "patches/@changesets__assemble-release-plan@6.0.9.patch",
+      "@changesets/assemble-release-plan@6.0.10": "patches/@changesets__assemble-release-plan@6.0.10.patch",
       "starlight-llms-txt@0.10.0": "patches/starlight-llms-txt@0.10.0.patch"
     }
   }

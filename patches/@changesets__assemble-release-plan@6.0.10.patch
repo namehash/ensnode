@@ -1,8 +1,8 @@
 diff --git a/dist/changesets-assemble-release-plan.cjs.js b/dist/changesets-assemble-release-plan.cjs.js
-index e07ba6e793021b6cfdec898afca517e293386ddb..7a836ed29b346f93f2a1d7e329afa345a7f165e8 100644
+index a91112a7ddf4b6f242965e0bf99ba2f60f988ede..02bc5b9e7b0fce419d7773d60256acdc0d938c4f 100644
 --- a/dist/changesets-assemble-release-plan.cjs.js
 +++ b/dist/changesets-assemble-release-plan.cjs.js
-@@ -317,6 +317,8 @@ function shouldBumpMajor({
+@@ -336,6 +336,8 @@ function shouldBumpMajor({
    preInfo,
    onlyUpdatePeerDependentsWhenOutOfRange
  }) {
