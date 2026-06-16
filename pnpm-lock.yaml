@@ -116,7 +116,7 @@ overrides:
   '@opentelemetry/core@<2.8.0': ^2.8.0
   esbuild@>=0.17.0 <0.28.1: ^0.28.1
   form-data@>=4.0.0 <4.0.6: ^4.0.6
-  js-yaml@>=4.0.0 <4.2.0: ^4.2.0
+  js-yaml@<4.2.0: ^4.2.0
   markdown-it@>14.0.0 <14.2.0: ^14.2.0
   tar@<7.5.16: ^7.5.16
   ajv@<8.18.0: ^8.18.0
@@ -145,6 +145,9 @@ patchedDependencies:
   '@opentelemetry/otlp-exporter-base':
     hash: 1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171
     path: patches/@opentelemetry__otlp-exporter-base.patch
+  js-yaml@4.2.0:
+    hash: ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a
+    path: patches/js-yaml@4.2.0.patch
   starlight-llms-txt@0.10.0:
     hash: b0be40873b81b978ff243b51b244d99ddad85f5b0ff444cc9890cb6a1566277a
     path: patches/starlight-llms-txt@0.10.0.patch
@@ -5319,9 +5322,6 @@ packages:
   arg@5.0.2:
     resolution: {integrity: sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg==}
 
-  argparse@1.0.10:
-    resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
-
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
@@ -6440,11 +6440,6 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  esprima@4.0.1:
-    resolution: {integrity: sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==}
-    engines: {node: '>=4'}
-    hasBin: true
-
   estree-util-attach-comments@3.0.0:
     resolution: {integrity: sha512-cKUwm/HUcTDsYh/9FgnuFqpfquUbwIqwKM26BVCGDPVgvaCl/nDCCjUfiLlx6lsEZ3Z4RFxNbOQ60pkaEwFxGw==}
 
@@ -7196,10 +7191,6 @@ packages:
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
-
-  js-yaml@3.14.2:
-    resolution: {integrity: sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==}
-    hasBin: true
 
   js-yaml@4.2.0:
     resolution: {integrity: sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==}
@@ -8986,9 +8977,6 @@ packages:
     resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
     engines: {node: '>= 10.x'}
 
-  sprintf-js@1.0.3:
-    resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
-
   ssh-remote-port-forward@1.0.4:
     resolution: {integrity: sha512-x0LV1eVDwjf1gmG7TTnfqIzf+3VPRz7vrNIjX6oYLbeCrf/PeVY6hkT68Mg+q02qXxQhrLjB0jfgvhevoCRmLQ==}
 
@@ -10274,7 +10262,7 @@ snapshots:
       github-slugger: 2.0.0
       hast-util-from-html: 2.0.3
       hast-util-to-text: 4.0.2
-      js-yaml: 4.2.0
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
       mdast-util-definitions: 6.0.0
       rehype-raw: 7.0.0
       rehype-stringify: 10.0.1
@@ -10394,7 +10382,7 @@ snapshots:
       hast-util-to-string: 3.0.1
       hastscript: 9.0.1
       i18next: 26.2.0(typescript@5.9.3)
-      js-yaml: 4.2.0
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
       klona: 2.0.6
       magic-string: 0.30.21
       mdast-util-directive: 3.1.0
@@ -11064,7 +11052,7 @@ snapshots:
   '@changesets/parse@0.4.3':
     dependencies:
       '@changesets/types': 6.1.0
-      js-yaml: 4.2.0
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
 
   '@changesets/pre@2.0.2':
     dependencies:
@@ -14990,10 +14978,6 @@ snapshots:
 
   arg@5.0.2: {}
 
-  argparse@1.0.10:
-    dependencies:
-      sprintf-js: 1.0.3
-
   argparse@2.0.1: {}
 
   aria-hidden@1.2.6:
@@ -15087,7 +15071,7 @@ snapshots:
       github-slugger: 2.0.0
       html-escaper: 3.0.3
       http-cache-semantics: 4.2.0
-      js-yaml: 4.2.0
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
       jsonc-parser: 3.3.1
       magic-string: 0.30.21
       magicast: 0.5.3
@@ -15180,7 +15164,7 @@ snapshots:
       github-slugger: 2.0.0
       html-escaper: 3.0.3
       http-cache-semantics: 4.2.0
-      js-yaml: 4.2.0
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
       jsonc-parser: 3.3.1
       magic-string: 0.30.21
       magicast: 0.5.3
@@ -16239,8 +16223,6 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  esprima@4.0.1: {}
-
   estree-util-attach-comments@3.0.0:
     dependencies:
       '@types/estree': 1.0.8
@@ -16675,7 +16657,7 @@ snapshots:
 
   gray-matter@4.0.3:
     dependencies:
-      js-yaml: 3.14.2
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
@@ -17132,12 +17114,7 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@3.14.2:
-    dependencies:
-      argparse: 1.0.10
-      esprima: 4.0.1
-
-  js-yaml@4.2.0:
+  js-yaml@4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a):
     dependencies:
       argparse: 2.0.1
 
@@ -18825,7 +18802,7 @@ snapshots:
   read-yaml-file@1.1.0:
     dependencies:
       graceful-fs: 4.2.11
-      js-yaml: 3.14.2
+      js-yaml: 4.2.0(patch_hash=ac52f51689f99f5b6ae9e93670d300024c90ce32bf55ab2753541edc2775c69a)
       pify: 4.0.1
       strip-bom: 3.0.0
 
@@ -19383,8 +19360,6 @@ snapshots:
   split-ca@1.0.1: {}
 
   split2@4.2.0: {}
-
-  sprintf-js@1.0.3: {}
 
   ssh-remote-port-forward@1.0.4:
     dependencies:
