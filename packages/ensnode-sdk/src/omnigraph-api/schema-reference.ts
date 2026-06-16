@@ -14,6 +14,7 @@ import {
   isObjectType,
   isUnionType,
 } from "graphql";
+import { z } from "zod/v4";
 
 const require = createRequire(import.meta.url);
 
@@ -141,12 +142,19 @@ function listMajorTypeNames(schema: GraphQLSchema): string[] {
 
 function describeFieldPath(schema: GraphQLSchema, typeName: string, fieldName: string) {
   const type = schema.getType(typeName);
-  if (!type || !(isObjectType(type) || isInterfaceType(type) || isInputObjectType(type))) {
+  if (!type) {
+    throw new Error(
+      `Unknown type "${typeName}". Run enscli ensnode omnigraph schema (or omnigraph_schema with no args) to list valid types.`,
+    );
+  }
+  if (!(isObjectType(type) || isInterfaceType(type) || isInputObjectType(type))) {
     throw new Error(`Type "${typeName}" has no fields.`);
   }
   const field = type.getFields()[fieldName];
   if (!field) {
-    throw new Error(`Type "${typeName}" has no field "${fieldName}".`);
+    throw new Error(
+      `Type "${typeName}" has no field "${fieldName}". Run enscli ensnode omnigraph schema ${typeName} (or omnigraph_schema with type "${typeName}") to list its fields.`,
+    );
   }
   return { parent: typeName, ...fieldInfo(field) };
 }
@@ -172,26 +180,39 @@ export type OmnigraphSchemaLookupInput = {
   search?: string;
 };
 
+const OmnigraphSchemaLookupInputSchema = z.object({
+  type: z
+    .string()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value?.includes(".")) return true;
+        const parts = value.split(".");
+        return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
+      },
+      { message: 'Invalid `type` — expected "Type.field" (e.g. Account.resolve).' },
+    ),
+  search: z.string().optional(),
+});
+
 /** Looks up Omnigraph schema fields locally. Returns JSON-serializable data. */
 export function lookupOmnigraphSchema(input: OmnigraphSchemaLookupInput): unknown {
+  const parsed = OmnigraphSchemaLookupInputSchema.parse(input);
   const schema = getOmnigraphSchema();
 
-  if (input.search) {
-    return searchSchema(schema, input.search);
+  if (parsed.search) {
+    return searchSchema(schema, parsed.search);
   }
 
-  if (input.type?.includes(".")) {
-    const [typeName, fieldName] = input.type.split(".", 2);
-    if (!typeName || !fieldName) {
-      throw new Error('Invalid `type` — expected "Type.field" (e.g. Account.resolve).');
-    }
+  if (parsed.type?.includes(".")) {
+    const [typeName, fieldName] = parsed.type.split(".", 2) as [string, string];
     return describeFieldPath(schema, typeName, fieldName);
   }
 
-  if (input.type) {
-    const type = schema.getType(input.type);
+  if (parsed.type) {
+    const type = schema.getType(parsed.type);
     if (!type) {
-      throw new Error(`Unknown type "${input.type}".`);
+      throw new Error(`Unknown type "${parsed.type}".`);
     }
     return describeType(type);
   }

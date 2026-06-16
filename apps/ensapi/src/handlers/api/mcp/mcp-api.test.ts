@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the in-process Yoga instance so the tool can be exercised without a database. The tool
@@ -9,12 +10,16 @@ vi.mock("@/omnigraph-api/yoga", () => ({ yoga: { fetch: fetchMock } }));
 
 import mcpApi, { createOmnigraphMcpServer } from "./mcp-api";
 
+const activeConnections: Array<{ client: Client; server: McpServer }> = [];
+const activeHttpSessionIds: string[] = [];
+
 /** Wires an MCP `Client` directly to a fresh server over an in-memory transport pair. */
 async function connectClient() {
   const server = createOmnigraphMcpServer();
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "test-client", version: "0.0.0" });
   await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
+  activeConnections.push({ client, server });
   return { client, server };
 }
 
@@ -23,7 +28,23 @@ describe("Omnigraph MCP server", () => {
     fetchMock.mockReset();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    for (const { client, server } of activeConnections) {
+      await client.close();
+      await server.close();
+    }
+    activeConnections.length = 0;
+
+    for (const sessionId of activeHttpSessionIds) {
+      await mcpApi.fetch(
+        new Request("http://ensapi.internal/", {
+          method: "DELETE",
+          headers: { "mcp-session-id": sessionId },
+        }),
+      );
+    }
+    activeHttpSessionIds.length = 0;
+
     vi.clearAllMocks();
   });
 
@@ -204,6 +225,31 @@ describe("Omnigraph MCP server", () => {
     expect(firstMessage.text).toContain("hello-world");
   });
 
+  it("returns a JSON-RPC parse error for invalid JSON on initialize", async () => {
+    const response = await mcpApi.fetch(
+      new Request("http://ensapi.internal/", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json, text/event-stream",
+        },
+        body: "{not-json",
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    const payload = (await response.json()) as {
+      jsonrpc: string;
+      error: { code: number; message: string };
+      id: null;
+    };
+    expect(payload).toMatchObject({
+      jsonrpc: "2.0",
+      error: { code: -32_700, message: "Parse error" },
+      id: null,
+    });
+  });
+
   it("supports POST initialize followed by GET SSE for the same session", async () => {
     const init = await mcpApi.fetch(
       new Request("http://ensapi.internal/", {
@@ -228,6 +274,7 @@ describe("Omnigraph MCP server", () => {
     expect(init.status).toBe(200);
     const sessionId = init.headers.get("mcp-session-id");
     expect(sessionId).toBeTruthy();
+    activeHttpSessionIds.push(sessionId!);
 
     const sse = await mcpApi.fetch(
       new Request("http://ensapi.internal/", {

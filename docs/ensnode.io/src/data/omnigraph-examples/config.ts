@@ -1,6 +1,6 @@
 import type { DocsOmnigraphExampleNamespace } from "@lib/examples/omnigraph/constants";
 import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
-import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/example-queries";
+import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/internal";
 
 export type OmnigraphExampleConfig = {
   id: string;

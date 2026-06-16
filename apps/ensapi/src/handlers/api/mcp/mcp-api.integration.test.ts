@@ -2,7 +2,14 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-const MCP_URL = new URL("/api/mcp", process.env.ENSNODE_URL!);
+const ensnodeUrl = process.env.ENSNODE_URL;
+if (!ensnodeUrl) {
+  throw new Error(
+    "ENSNODE_URL environment variable must be configured for Omnigraph MCP integration tests to run.",
+  );
+}
+
+const MCP_URL = new URL("/api/mcp", ensnodeUrl);
 
 type TextContent = { type: "text"; text: string };
 

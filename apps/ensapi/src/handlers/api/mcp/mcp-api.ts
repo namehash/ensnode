@@ -265,6 +265,28 @@ type McpRequestContext = Parameters<StreamableHTTPTransport["handleRequest"]>[0]
 /** Active MCP sessions keyed by `mcp-session-id` (one server + transport pair per client). */
 const sessions = new Map<string, McpSession>();
 
+/** Cap stored sessions to limit memory growth from repeated initialize requests. */
+const MAX_MCP_SESSIONS = 200;
+
+function jsonRpcErrorResponse(
+  c: { json: (data: unknown, status: number) => Response },
+  code: number,
+  message: string,
+  status: number,
+) {
+  return c.json({ jsonrpc: "2.0", error: { code, message }, id: null }, status);
+}
+
+function storeSession(id: string, session: McpSession) {
+  sessions.set(id, session);
+  if (sessions.size > MAX_MCP_SESSIONS) {
+    const oldestId = sessions.keys().next().value;
+    if (typeof oldestId === "string" && oldestId !== id) {
+      void closeSession(oldestId);
+    }
+  }
+}
+
 function getSessionId(ctx: {
   req: { header: (name: string) => string | undefined };
 }): string | undefined {
@@ -332,7 +354,12 @@ app.all("/", async (c) => {
       return response ?? c.body(null, 202);
     }
 
-    const body = await c.req.json();
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return jsonRpcErrorResponse(c, -32_700, "Parse error", 400);
+    }
     if (!isInitializeRequest(body)) {
       return c.json(
         {
@@ -345,12 +372,14 @@ app.all("/", async (c) => {
     }
 
     const server = createOmnigraphMcpServer();
+    let initializedSessionId: string | undefined;
     const session: McpSession = {
       server,
       transport: new StreamableHTTPTransport({
         sessionIdGenerator: () => crypto.randomUUID(),
         onsessioninitialized: (id) => {
-          sessions.set(id, session);
+          initializedSessionId = id;
+          storeSession(id, session);
         },
         onsessionclosed: (id) => {
           void closeSession(id);
@@ -358,9 +387,19 @@ app.all("/", async (c) => {
       }),
     };
 
-    await server.connect(session.transport);
-    const response = await session.transport.handleRequest(mcpContext, body);
-    return response ?? c.body(null, 202);
+    try {
+      await server.connect(session.transport);
+      const response = await session.transport.handleRequest(mcpContext, body);
+      return response ?? c.body(null, 202);
+    } catch (error) {
+      if (initializedSessionId) {
+        await closeSession(initializedSessionId);
+      } else {
+        await session.transport.close();
+        await session.server.close();
+      }
+      throw error;
+    }
   }
 
   return c.json(

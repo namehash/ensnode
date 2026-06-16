@@ -5,7 +5,7 @@ import {
 } from "@lib/examples/omnigraph/example-query";
 
 import { getOmnigraphExamplePageHref, OMNIGRAPH_EXAMPLES_CONFIG } from "./config";
-import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/example-queries";
+import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/internal";
 import exampleSnapshots from "./examples.json";
 import responses from "./responses.json";
 import type { SnapshotExample } from "./types";

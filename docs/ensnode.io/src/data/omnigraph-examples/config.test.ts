@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { DOCS_OMNIGRAPH_NAMESPACE_CONFIG } from "@lib/examples/omnigraph/constants";
 
-import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/example-queries";
+import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/internal";
 
 import {
   getOmnigraphExamplePageHref,

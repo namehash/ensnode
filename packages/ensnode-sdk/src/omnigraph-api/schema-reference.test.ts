@@ -23,4 +23,22 @@ describe("omnigraph schema reference", () => {
     expect(result.name).toBe("Account");
     expect(result.fields.length).toBeGreaterThan(0);
   });
+
+  it("reports unknown types for Type.field lookups", () => {
+    expect(() => lookupOmnigraphSchema({ type: "NotAType.field" })).toThrow(
+      /Unknown type "NotAType"/,
+    );
+  });
+
+  it("reports missing fields with a schema lookup hint", () => {
+    expect(() => lookupOmnigraphSchema({ type: "Account.notAField" })).toThrow(
+      /has no field "notAField"/,
+    );
+  });
+
+  it("rejects Type.field lookups with extra dot-separated segments", () => {
+    expect(() => lookupOmnigraphSchema({ type: "Account.resolve.extra" })).toThrow(
+      /Invalid `type`/,
+    );
+  });
 });
