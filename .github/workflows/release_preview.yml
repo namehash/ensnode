@@ -209,9 +209,8 @@ jobs:
         run: |
           # Publish with changesets using snapshot mode
           # --no-git-tag: Don't create git tags for preview releases
-          # --snapshot: Publish as snapshot/preview release
           # --tag: Use our custom dist-tag
-          pnpm changeset publish --no-git-tag --snapshot --tag ${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm changeset publish --no-git-tag --tag ${{ needs.validate-and-prepare.outputs.dist-tag }}
 
           # Extract published version from package.json
           PUBLISHED_VERSION=$(node -p "require('./packages/ensnode-sdk/package.json').version")
