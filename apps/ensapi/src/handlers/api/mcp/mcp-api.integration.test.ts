@@ -44,7 +44,9 @@ describe("Omnigraph MCP API (/api/mcp)", () => {
 
   it("advertises the omnigraph_query tool", async () => {
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name)).toContain("omnigraph_query");
+    expect(tools.map((t) => t.name)).toEqual(
+      expect.arrayContaining(["omnigraph_query", "omnigraph_schema"]),
+    );
   });
 
   it("executes a trivial query end-to-end through Yoga", async () => {
@@ -79,5 +81,26 @@ describe("Omnigraph MCP API (/api/mcp)", () => {
     const { errors } = await omnigraphQuery(client, "{ thisFieldDoesNotExist }");
     expect(errors).toBeDefined();
     expect(errors?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("runs a vetted example query by exampleId", async () => {
+    const result = await client.callTool({
+      name: "omnigraph_query",
+      arguments: {
+        exampleId: "domain-by-name",
+        variables: { name: "test.eth" },
+      },
+    });
+
+    const content = result.content as TextContent[];
+    const { data, errors } = JSON.parse(content[0].text) as {
+      data?: { domain: { canonical: { name: { interpreted: string } } } | null };
+      errors?: unknown[];
+    };
+
+    expect(errors).toBeUndefined();
+    expect(data).toMatchObject({
+      domain: { canonical: { name: { interpreted: "test.eth" } } },
+    });
   });
 });

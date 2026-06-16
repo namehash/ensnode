@@ -5,6 +5,7 @@ import {
 } from "@lib/examples/omnigraph/example-query";
 
 import { getOmnigraphExamplePageHref, OMNIGRAPH_EXAMPLES_CONFIG } from "./config";
+import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/example-queries";
 import exampleSnapshots from "./examples.json";
 import responses from "./responses.json";
 import type { SnapshotExample } from "./types";
@@ -33,8 +34,8 @@ export const omnigraphExamples: OmnigraphExampleQuery[] = OMNIGRAPH_EXAMPLES_CON
     const href = getOmnigraphExamplePageHref(config);
     return OmnigraphExampleQuerySchema.parse({
       id: config.id,
-      title: config.title,
-      description: config.description,
+      title: getGraphqlApiExampleQueryById(config.id).title,
+      description: getGraphqlApiExampleQueryById(config.id).description,
       category: config.category,
       namespace: config.namespace,
       query: example.query.trim(),

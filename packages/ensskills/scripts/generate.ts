@@ -14,18 +14,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  buildSchema,
-  type GraphQLField,
-  type GraphQLNamedType,
-  type GraphQLSchema,
-  isInterfaceType,
-  isObjectType,
-} from "graphql";
 import prettier from "prettier";
 
+import { buildCondensedSchemaReference } from "@ensnode/ensnode-sdk/internal";
+
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
-const SDL_PATH = resolve(SCRIPT_DIR, "../../enssdk/src/omnigraph/generated/schema.graphql");
 const SKILL_PATH = resolve(SCRIPT_DIR, "../skills/omnigraph/SKILL.md");
 const EXAMPLE_QUERIES_PATH = resolve(
   SCRIPT_DIR,
@@ -36,6 +29,8 @@ const ENSCLI_EXAMPLE_COMMANDS_PATH = resolve(SCRIPT_DIR, "../../enscli/src/examp
 
 interface ExampleQuery {
   id: string;
+  title: string;
+  description: string;
   query: string;
   variables: { default: Record<string, unknown> };
 }
@@ -47,84 +42,6 @@ interface EnscliExample {
   group: string;
 }
 
-/** Types rendered with full field listings; everything else is listed by name only. */
-const CORE_TYPES = [
-  "Domain",
-  "DomainCanonical",
-  "Account",
-  "Resolver",
-  "DomainResolver",
-  "Registry",
-  "Permissions",
-  "ReverseResolve",
-  "ForwardResolve",
-  "ResolvedRecords",
-  "PrimaryNameRecord",
-];
-
-function oneLine(description: string | null | undefined): string {
-  return description ? description.replace(/\s+/g, " ").trim() : "";
-}
-
-function renderFieldLine(field: GraphQLField<unknown, unknown>): string {
-  const args =
-    field.args.length > 0 ? `(${field.args.map((a) => `${a.name}: ${a.type}`).join(", ")})` : "";
-  const description = oneLine(field.description);
-  return `- ${field.name}${args}: ${field.type}${description ? ` — ${description}` : ""}`;
-}
-
-function renderType(type: GraphQLNamedType): string {
-  if (!isObjectType(type) && !isInterfaceType(type)) return "";
-  const lines = [`#### ${type.name}`];
-  if (type.description) lines.push(`_${oneLine(type.description)}_`);
-  for (const field of Object.values(type.getFields())) lines.push(renderFieldLine(field));
-  return lines.join("\n");
-}
-
-function buildSchemaReference(schema: GraphQLSchema): string {
-  const queryType = schema.getQueryType();
-  const sections: string[] = [];
-
-  if (queryType) {
-    const queryFields = Object.values(queryType.getFields()).map(renderFieldLine);
-    sections.push(["### Query (entry points)", ...queryFields].join("\n"));
-  }
-
-  const coreSections: string[] = [];
-  for (const name of CORE_TYPES) {
-    const type = schema.getType(name);
-    if (type) {
-      const rendered = renderType(type);
-      if (rendered) coreSections.push(rendered);
-    }
-  }
-  sections.push(["### Core types", coreSections.join("\n\n")].join("\n\n"));
-
-  const otherTypes = Object.values(schema.getTypeMap())
-    .filter((type) => isObjectType(type) && !type.name.startsWith("__"))
-    .map((type) => type.name)
-    .filter(
-      (name) =>
-        name !== queryType?.name &&
-        !CORE_TYPES.includes(name) &&
-        !name.endsWith("Connection") &&
-        !name.endsWith("ConnectionEdge") &&
-        !name.endsWith("Edge") &&
-        !name.endsWith("Payload"),
-    )
-    .sort();
-  sections.push(
-    [
-      "### Other types",
-      "Run `npx enscli ensnode omnigraph schema <Type>` for fields of:",
-      "",
-      otherTypes.map((name) => `\`${name}\``).join(", "),
-    ].join("\n"),
-  );
-
-  return sections.join("\n\n");
-}
-
 async function buildExamples(): Promise<string> {
   // load dynamically to avoid tsconfig root error
   const { GRAPHQL_API_EXAMPLE_QUERIES } = (await import(EXAMPLE_QUERIES_PATH)) as {
@@ -133,10 +50,17 @@ async function buildExamples(): Promise<string> {
   // Skip "hello-world": it's the playground welcome blurb, not a reusable query pattern.
   return GRAPHQL_API_EXAMPLE_QUERIES.filter((example) => example.id !== "hello-world")
     .map((example) => {
+      if (!example.title?.trim()) {
+        throw new Error(`GraphQL API example "${example.id}" is missing a title`);
+      }
+      if (!example.description?.trim()) {
+        throw new Error(`GraphQL API example "${example.id}" is missing a description`);
+      }
       const query = example.query.trim();
       const variables = JSON.stringify(example.variables.default, null, 2);
       return [
-        `### ${example.id}`,
+        `### ${example.title} (${example.id})`,
+        example.description,
         "```graphql",
         query,
         "```",
@@ -200,9 +124,8 @@ async function writeFormatted(path: string, content: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const schema = buildSchema(readFileSync(SDL_PATH, "utf8"));
   let content = readFileSync(SKILL_PATH, "utf8");
-  content = replaceRegion(content, "SCHEMA", buildSchemaReference(schema), SKILL_PATH);
+  content = replaceRegion(content, "SCHEMA", buildCondensedSchemaReference(), SKILL_PATH);
   content = replaceRegion(content, "EXAMPLES", await buildExamples(), SKILL_PATH);
   await writeFormatted(SKILL_PATH, content);
   console.log(`Updated ${SKILL_PATH}`);

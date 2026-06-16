@@ -218,7 +218,9 @@ These are vetted, copy-pasteable patterns. Adapt the selection set to your needs
 
 <!-- AUTOGEN:EXAMPLES start -->
 
-### find-domains
+### Find Domains (find-domains)
+
+List domains matching a name prefix with ordering and registration metadata.
 
 ```graphql
 query FindDomains($name: DomainsNameFilter!, $order: DomainsOrderInput) {
@@ -264,7 +266,9 @@ Variables:
 }
 ```
 
-### domain-by-name
+### Domain By Name (domain-by-name)
+
+Load a domain by interpreted name, including profile information.
 
 ```graphql
 query DomainByName($name: InterpretedName!) {
@@ -297,7 +301,9 @@ Variables:
 }
 ```
 
-### domain-by-name-type-condition
+### Domain By Name Type Condition (domain-by-name-type-condition)
+
+Load a domain by interpreted name with type condition.
 
 ```graphql
 query DomainByName($name: InterpretedName!) {
@@ -344,7 +350,9 @@ Variables:
 }
 ```
 
-### domain-registration
+### Domain Registration (domain-registration)
+
+Load a domain registration details.
 
 ```graphql
 query DomainRegistration($name: InterpretedName!) {
@@ -410,7 +418,9 @@ Variables:
 }
 ```
 
-### domain-records
+### Domain Records (domain-records)
+
+For given name resolve raw records like `addresses`, `texts`, `contenthash` etc.
 
 ```graphql
 query DomainRecords($name: InterpretedName!) {
@@ -445,7 +455,9 @@ Variables:
 }
 ```
 
-### domain-profile
+### Domain Profile (domain-profile)
+
+Load a domain's high-level profile (avatar, socials, addresses, and more).
 
 ```graphql
 query DomainProfile($name: InterpretedName!) {
@@ -493,7 +505,9 @@ Variables:
 }
 ```
 
-### domain-subdomains
+### Domain Subdomains (domain-subdomains)
+
+Paginate direct child names under a parent domain.
 
 ```graphql
 query DomainSubdomains($name: InterpretedName!) {
@@ -528,7 +542,9 @@ Variables:
 }
 ```
 
-### domain-subdomains-recently-registered
+### Recently Registered Subdomains (domain-subdomains-recently-registered)
+
+List a parent domain's subdomains ordered by most recent registration first.
 
 ```graphql
 query RecentlyRegisteredSubdomains($name: InterpretedName!) {
@@ -563,7 +579,9 @@ Variables:
 }
 ```
 
-### subdomains-pagination
+### Subdomains Pagination (subdomains-pagination)
+
+Paginate through all subdomains of a parent domain.
 
 ```graphql
 query SubdomainsPagination($first: Int!, $after: String) {
@@ -605,7 +623,9 @@ Variables:
 }
 ```
 
-### domain-events
+### Domain Events (domain-events)
+
+Raw contract events associated with a domain's registry records.
 
 ```graphql
 query DomainEvents($name: InterpretedName!) {
@@ -635,7 +655,9 @@ Variables:
 }
 ```
 
-### domains-by-address
+### Account Domains (domains-by-address)
+
+Load domains owned by an address via the Omnigraph `account` root field.
 
 ```graphql
 query AccountDomains($address: Address!) {
@@ -667,7 +689,9 @@ Variables:
 }
 ```
 
-### account-primary-name
+### Account Primary Name (account-primary-name)
+
+Load a primary name for an account on Ethereum, including profile information.
 
 ```graphql
 query AccountPrimaryName($address: Address!) {
@@ -703,7 +727,9 @@ Variables:
 }
 ```
 
-### account-events
+### Account Events (account-events)
+
+Events touching an account across indexed ENS contracts.
 
 ```graphql
 query AccountEvents($address: Address!) {
@@ -730,7 +756,9 @@ Variables:
 }
 ```
 
-### registry-domains
+### Registry Domains (registry-domains)
+
+Enumerate domains under a specific v2 ETH registry contract.
 
 ```graphql
 query RegistryDomains($registry: AccountIdInput!) {
@@ -765,7 +793,9 @@ Variables:
 }
 ```
 
-### permissions-by-contract
+### Permissions By Contract (permissions-by-contract)
+
+Roles and users granted on resources for a registrar or registry contract.
 
 ```graphql
 query PermissionsByContract($contract: AccountIdInput!) {
@@ -813,7 +843,9 @@ Variables:
 }
 ```
 
-### permissions-by-user
+### Permissions By User (permissions-by-user)
+
+Resources and roles for an address in the permissions graph.
 
 ```graphql
 query PermissionsByUser($address: Address!) {
@@ -838,7 +870,9 @@ Variables:
 }
 ```
 
-### account-resolver-permissions
+### Account Resolver Permissions (account-resolver-permissions)
+
+Resolver contracts where an account has been granted resolver ACLs.
 
 ```graphql
 query AccountResolverPermissions($address: Address!) {
@@ -866,7 +900,9 @@ Variables:
 }
 ```
 
-### domain-resolver
+### Domain Resolver (domain-resolver)
+
+Assigned resolver contract address and recent resolver events.
 
 ```graphql
 query DomainResolver($name: InterpretedName!) {
@@ -899,7 +935,9 @@ Variables:
 }
 ```
 
-### resolver-by-address
+### Resolver By Address (resolver-by-address)
+
+Load a resolver by its contract address.
 
 ```graphql
 query ResolverByAddress($contract: AccountIdInput!) {
@@ -948,7 +986,9 @@ Variables:
 }
 ```
 
-### namegraph
+### Namegraph (namegraph)
+
+Walk a domain's registry, parent, subregistry, and direct subdomains (as in Core Concepts).
 
 ```graphql
 query Namegraph {
@@ -997,7 +1037,9 @@ Variables:
 {}
 ```
 
-### account-migrated-names
+### Account Migration Counts (account-migrated-names)
+
+Count an account's ENSv1 vs ENSv2 domains to gauge its migration progress.
 
 ```graphql
 query AccountMigratedNames($address: Address!) {
@@ -1020,7 +1062,9 @@ Variables:
 }
 ```
 
-### eth-by-version
+### ETH TLD By Version (eth-by-version)
+
+Load the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).
 
 ```graphql
 query GetEthDomains {
@@ -1041,7 +1085,9 @@ Variables:
 {}
 ```
 
-### accelerate-resolve
+### Resolve primary name and records, and track protocol acceleration (accelerate-resolve)
+
+Resolve primary name and records, and track protocol acceleration with `trace` and `accelerate` arguments.
 
 ```graphql
 query AccelerateResolve($address: Address!) {

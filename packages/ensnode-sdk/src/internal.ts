@@ -26,6 +26,7 @@ export * from "./ensnode/api/shared/errors/examples";
 export * from "./ensnode/api/shared/errors/zod-schemas";
 export * from "./ensnode/api/shared/pagination/zod-schemas";
 export * from "./omnigraph-api/example-queries";
+export * from "./omnigraph-api/schema-reference";
 export * from "./registrars/zod-schemas";
 export * from "./rpc";
 export * from "./shared/config/build-rpc-urls";

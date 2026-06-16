@@ -1,10 +1,13 @@
 import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
-import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
+import { DatasourceNames, type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import { accounts } from "@ensnode/integration-test-env/devnet";
 
 import { getDatasourceContract } from "../shared/datasource-contract";
-import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
+import {
+  getNamespaceSpecificValue,
+  type NamespaceSpecificValue,
+} from "../shared/namespace-specific-value";
 
 const SEPOLIA_V2_V2_ETH_REGISTRY = getDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
@@ -58,6 +61,8 @@ const SEPOLIA_V2_RESOLVER_WITH_RECORDS = {
 
 export type GraphqlApiExampleQuery = {
   id: string;
+  title: string;
+  description: string;
   query: string;
   variables: NamespaceSpecificValue<Record<string, unknown>>;
 };
@@ -70,12 +75,35 @@ export function getGraphqlApiExampleQueryById(id: string): GraphqlApiExampleQuer
   return found;
 }
 
+export function listGraphqlApiExampleQueryIds(): string[] {
+  return GRAPHQL_API_EXAMPLE_QUERIES.map((example) => example.id);
+}
+
+export function resolveGraphqlApiExampleQuery(
+  id: string,
+  options?: { namespace?: ENSNamespaceId; variables?: Record<string, unknown> },
+): { query: string; variables: Record<string, unknown> } {
+  const example = getGraphqlApiExampleQueryById(id);
+  const { namespace, variables: variablesOverride } = options ?? {};
+  return {
+    query: example.query,
+    variables:
+      variablesOverride ??
+      (namespace
+        ? getNamespaceSpecificValue(namespace, example.variables)
+        : example.variables.default),
+  };
+}
+
 export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   ////////////////
   // Hello World
   ////////////////
   {
     id: "hello-world",
+    title: "Hello World",
+    description:
+      "From a wallet address: Ethereum primary name and interpreted profile, plus ENSv1 and ENSv2 ownership counts.",
     query: `query HelloWorld($address: Address!) {
   # Lookup an Account by address.
   account(by: { address: $address }) {
@@ -121,6 +149,8 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   /////////////////
   {
     id: "find-domains",
+    title: "Find Domains",
+    description: "List domains matching a name prefix with ordering and registration metadata.",
     query: `
 query FindDomains(
   $name: DomainsNameFilter!
@@ -158,6 +188,8 @@ query FindDomains(
 
   {
     id: "domain-by-name",
+    title: "Domain By Name",
+    description: "Load a domain by interpreted name, including profile information.",
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -185,6 +217,8 @@ query DomainByName($name: InterpretedName!) {
   ////////////////////////////////
   {
     id: "domain-by-name-type-condition",
+    title: "Domain By Name Type Condition",
+    description: "Load a domain by interpreted name with type condition.",
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -211,6 +245,8 @@ query DomainByName($name: InterpretedName!) {
   ///////////////////////
   {
     id: "domain-registration",
+    title: "Domain Registration",
+    description: "Load a domain registration details.",
     query: `
 query DomainRegistration($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -257,6 +293,8 @@ query DomainRegistration($name: InterpretedName!) {
   ////////////////////
   {
     id: "domain-records",
+    title: "Domain Records",
+    description: "For given name resolve raw records like `addresses`, `texts`, `contenthash` etc.",
     query: `
 query DomainRecords($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -293,6 +331,8 @@ query DomainRecords($name: InterpretedName!) {
 
   {
     id: "domain-profile",
+    title: "Domain Profile",
+    description: "Load a domain's high-level profile (avatar, socials, addresses, and more).",
     query: `
 query DomainProfile($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -337,6 +377,8 @@ query DomainProfile($name: InterpretedName!) {
   //////////////////////
   {
     id: "domain-subdomains",
+    title: "Domain Subdomains",
+    description: "Paginate direct child names under a parent domain.",
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -365,6 +407,8 @@ query DomainSubdomains($name: InterpretedName!) {
   ////////////////////////////////////
   {
     id: "domain-subdomains-recently-registered",
+    title: "Recently Registered Subdomains",
+    description: "List a parent domain's subdomains ordered by most recent registration first.",
     query: `
 query RecentlyRegisteredSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -386,6 +430,8 @@ query RecentlyRegisteredSubdomains($name: InterpretedName!) {
   ////////////////////////
   {
     id: "subdomains-pagination",
+    title: "Subdomains Pagination",
+    description: "Paginate through all subdomains of a parent domain.",
     query: `
 query SubdomainsPagination($first: Int!, $after: String) {
   domain(by: { name: "eth" }) {
@@ -412,6 +458,8 @@ query SubdomainsPagination($first: Int!, $after: String) {
   /////////////////
   {
     id: "domain-events",
+    title: "Domain Events",
+    description: "Raw contract events associated with a domain's registry records.",
     query: `
 query DomainEvents($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -441,6 +489,8 @@ query DomainEvents($name: InterpretedName!) {
   ////////////////////
   {
     id: "domains-by-address",
+    title: "Account Domains",
+    description: "Load domains owned by an address via the Omnigraph `account` root field.",
     query: `
 query AccountDomains(
   $address: Address!
@@ -468,6 +518,8 @@ query AccountDomains(
   /////////////////////////
   {
     id: "account-primary-name",
+    title: "Account Primary Name",
+    description: "Load a primary name for an account on Ethereum, including profile information.",
     query: `
 query AccountPrimaryName($address: Address!) {
   account(by: { address: $address }) {
@@ -500,6 +552,8 @@ query AccountPrimaryName($address: Address!) {
   ////////////////////
   {
     id: "account-events",
+    title: "Account Events",
+    description: "Events touching an account across indexed ENS contracts.",
     query: `
 query AccountEvents(
   $address: Address!
@@ -520,6 +574,8 @@ query AccountEvents(
   /////////////////////
   {
     id: "registry-domains",
+    title: "Registry Domains",
+    description: "Enumerate domains under a specific v2 ETH registry contract.",
     query: `
 query RegistryDomains(
   $registry: AccountIdInput!
@@ -547,6 +603,8 @@ query RegistryDomains(
   ////////////////////////////
   {
     id: "permissions-by-contract",
+    title: "Permissions By Contract",
+    description: "Roles and users granted on resources for a registrar or registry contract.",
     query: `
 query PermissionsByContract(
   $contract: AccountIdInput!
@@ -584,6 +642,8 @@ query PermissionsByContract(
   ////////////////////////
   {
     id: "permissions-by-user",
+    title: "Permissions By User",
+    description: "Resources and roles for an address in the permissions graph.",
     query: `
 query PermissionsByUser($address: Address!) {
   account(by: { address: $address }) {
@@ -608,6 +668,8 @@ query PermissionsByUser($address: Address!) {
   //////////////////////////////////
   {
     id: "account-resolver-permissions",
+    title: "Account Resolver Permissions",
+    description: "Resolver contracts where an account has been granted resolver ACLs.",
     query: `
 query AccountResolverPermissions($address: Address!) {
   account(by: { address: $address }) {
@@ -635,6 +697,8 @@ query AccountResolverPermissions($address: Address!) {
   //////////////////////////////
   {
     id: "domain-resolver",
+    title: "Domain Resolver",
+    description: "Assigned resolver contract address and recent resolver events.",
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -662,6 +726,8 @@ query DomainResolver($name: InterpretedName!) {
   ////////////////////////
   {
     id: "resolver-by-address",
+    title: "Resolver By Address",
+    description: "Load a resolver by its contract address.",
     query: `
 query ResolverByAddress($contract: AccountIdInput!) {
   resolver(by: { contract: $contract }) {
@@ -695,6 +761,9 @@ query ResolverByAddress($contract: AccountIdInput!) {
   //////////////
   {
     id: "namegraph",
+    title: "Namegraph",
+    description:
+      "Walk a domain's registry, parent, subregistry, and direct subdomains (as in Core Concepts).",
     query: `
 query Namegraph {
   domain(by: { name: "eth" }) {
@@ -720,6 +789,8 @@ query Namegraph {
   /////////////////////////////
   {
     id: "account-migrated-names",
+    title: "Account Migration Counts",
+    description: "Count an account's ENSv1 vs ENSv2 domains to gauge its migration progress.",
     query: `
 query AccountMigratedNames($address: Address!) {
   account(by: { address: $address }) {
@@ -734,6 +805,9 @@ query AccountMigratedNames($address: Address!) {
   },
   {
     id: "eth-by-version",
+    title: "ETH TLD By Version",
+    description:
+      "Load the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).",
     query: `
 query GetEthDomains {
   domains(where: { name: { eq: "eth" } }) {
@@ -749,6 +823,9 @@ query GetEthDomains {
   },
   {
     id: "accelerate-resolve",
+    title: "Resolve primary name and records, and track protocol acceleration",
+    description:
+      "Resolve primary name and records, and track protocol acceleration with `trace` and `accelerate` arguments.",
     query: `
 query AccelerateResolve($address: Address!) {
   account(by: { address: $address }) {

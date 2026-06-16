@@ -19,7 +19,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./internal": "./src/internal.ts"
+    "./internal": "./src/internal.ts",
+    "./example-queries": "./src/omnigraph-api/example-queries.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -75,6 +76,7 @@
     "caip": "catalog:",
     "date-fns": "catalog:",
     "enssdk": "workspace:*",
+    "graphql": "^16.11.0",
     "zod": "catalog:"
   }
 }

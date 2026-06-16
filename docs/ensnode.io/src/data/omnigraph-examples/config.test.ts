@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import { DOCS_OMNIGRAPH_NAMESPACE_CONFIG } from "@lib/examples/omnigraph/constants";
 
+import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/example-queries";
+
 import {
   getOmnigraphExamplePageHref,
   OMNIGRAPH_EXAMPLES_CONFIG,
@@ -56,7 +58,7 @@ describe("OMNIGRAPH_EXAMPLES_CONFIG", () => {
     });
     expect(OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS.slice(1)).toEqual(
       pageConfigs.map((config) => ({
-        label: config.title,
+        label: getGraphqlApiExampleQueryById(config.id).title,
         link: getOmnigraphExamplePageHref(config),
       })),
     );
