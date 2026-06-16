@@ -9,6 +9,7 @@ import { z } from "zod/v4";
 import {
   buildCondensedSchemaReference,
   lookupOmnigraphSchema,
+  OmnigraphSchemaLookupInputSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import {
@@ -46,17 +47,6 @@ const OmnigraphQueryInputSchema = z
       });
     }
   });
-
-const OmnigraphSchemaInputSchema = z.object({
-  type: z
-    .string()
-    .optional()
-    .describe('Type name (e.g. "Account") or "Type.field" (e.g. "Account.resolve").'),
-  search: z
-    .string()
-    .optional()
-    .describe("Keyword search over type and field names. Mutually exclusive with `type`."),
-});
 
 /**
  * Builds the ENSNode Omnigraph MCP server and registers its tools.
@@ -140,12 +130,9 @@ export function createOmnigraphMcpServer(): McpServer {
       description:
         "Discover Omnigraph types and fields from the bundled schema (no network). Omit arguments for " +
         "root query fields and type names; pass `type` for a type or Type.field; pass `search` to find matches.",
-      inputSchema: OmnigraphSchemaInputSchema,
+      inputSchema: OmnigraphSchemaLookupInputSchema,
     },
     async ({ type, search }) => {
-      if (search && type) {
-        throw new Error("Provide either `type` or `search`, not both.");
-      }
       const result = lookupOmnigraphSchema({ type, search });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -295,14 +282,7 @@ function getSessionId(ctx: {
 }
 
 function invalidSessionResponse(c: { json: (data: unknown, status: number) => Response }) {
-  return c.json(
-    {
-      jsonrpc: "2.0",
-      error: { code: -32_000, message: "Invalid or missing session ID" },
-      id: null,
-    },
-    400,
-  );
+  return jsonRpcErrorResponse(c, -32_000, "Invalid or missing session ID", 400);
 }
 
 async function closeSession(sessionId: string): Promise<void> {
@@ -341,14 +321,7 @@ app.all("/", async (c) => {
     if (sessionId) {
       const session = sessions.get(sessionId);
       if (!session) {
-        return c.json(
-          {
-            jsonrpc: "2.0",
-            error: { code: -32_000, message: "Session not found" },
-            id: null,
-          },
-          404,
-        );
+        return jsonRpcErrorResponse(c, -32_000, "Session not found", 404);
       }
       const response = await session.transport.handleRequest(mcpContext);
       return response ?? c.body(null, 202);
@@ -361,14 +334,7 @@ app.all("/", async (c) => {
       return jsonRpcErrorResponse(c, -32_700, "Parse error", 400);
     }
     if (!isInitializeRequest(body)) {
-      return c.json(
-        {
-          jsonrpc: "2.0",
-          error: { code: -32_000, message: "Bad Request: No valid session ID provided" },
-          id: null,
-        },
-        400,
-      );
+      return jsonRpcErrorResponse(c, -32_000, "Bad Request: No valid session ID provided", 400);
     }
 
     const server = createOmnigraphMcpServer();
@@ -402,14 +368,7 @@ app.all("/", async (c) => {
     }
   }
 
-  return c.json(
-    {
-      jsonrpc: "2.0",
-      error: { code: -32_000, message: "Method not allowed." },
-      id: null,
-    },
-    405,
-  );
+  return jsonRpcErrorResponse(c, -32_000, "Method not allowed.", 405);
 });
 
 export default app;

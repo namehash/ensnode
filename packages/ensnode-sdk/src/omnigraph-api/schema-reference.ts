@@ -1,6 +1,4 @@
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
-
+import { omnigraphSchemaSdl } from "enssdk/omnigraph/schema-sdl";
 import {
   buildSchema,
   type GraphQLArgument,
@@ -15,8 +13,6 @@ import {
   isUnionType,
 } from "graphql";
 import { z } from "zod/v4";
-
-const require = createRequire(import.meta.url);
 
 /** Types rendered with full field listings in the condensed schema reference. */
 export const OMNIGRAPH_CORE_TYPES = [
@@ -37,34 +33,34 @@ let cachedSchema: GraphQLSchema | undefined;
 
 /** Loads the Omnigraph schema from the SDL bundled with enssdk (no network). */
 export function getOmnigraphSchema(): GraphQLSchema {
-  cachedSchema ??= buildSchema(
-    readFileSync(require.resolve("enssdk/omnigraph/schema.graphql"), "utf8"),
-  );
+  cachedSchema ??= buildSchema(omnigraphSchemaSdl);
   return cachedSchema;
 }
 
-interface ArgInfo {
+export interface OmnigraphSchemaArgInfo {
   name: string;
   type: string;
   description: string | null;
 }
 
-interface FieldInfo {
+export interface OmnigraphSchemaFieldInfo {
   name: string;
   type: string;
   description: string | null;
-  args?: ArgInfo[];
+  args?: OmnigraphSchemaArgInfo[];
 }
 
 function oneLine(description: string | null | undefined): string {
   return description ? description.replace(/\s+/g, " ").trim() : "";
 }
 
-function argInfo(arg: GraphQLArgument): ArgInfo {
+function argInfo(arg: GraphQLArgument): OmnigraphSchemaArgInfo {
   return { name: arg.name, type: arg.type.toString(), description: arg.description ?? null };
 }
 
-function fieldInfo(field: GraphQLField<unknown, unknown> | GraphQLInputField): FieldInfo {
+function fieldInfo(
+  field: GraphQLField<unknown, unknown> | GraphQLInputField,
+): OmnigraphSchemaFieldInfo {
   const args = "args" in field && field.args.length > 0 ? field.args.map(argInfo) : undefined;
   return {
     name: field.name,
@@ -180,20 +176,29 @@ export type OmnigraphSchemaLookupInput = {
   search?: string;
 };
 
-const OmnigraphSchemaLookupInputSchema = z.object({
-  type: z
-    .string()
-    .optional()
-    .refine(
-      (value) => {
-        if (!value?.includes(".")) return true;
-        const parts = value.split(".");
-        return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
-      },
-      { message: 'Invalid `type` — expected "Type.field" (e.g. Account.resolve).' },
-    ),
-  search: z.string().optional(),
-});
+export const OmnigraphSchemaLookupInputSchema = z
+  .object({
+    type: z
+      .string()
+      .optional()
+      .refine(
+        (value) => {
+          if (!value?.includes(".")) return true;
+          const parts = value.split(".");
+          return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
+        },
+        { message: 'Invalid `type` — expected "Type.field" (e.g. Account.resolve).' },
+      ),
+    search: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.search && value.type) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Provide either `type` or `search`, not both.",
+      });
+    }
+  });
 
 /** Looks up Omnigraph schema fields locally. Returns JSON-serializable data. */
 export function lookupOmnigraphSchema(input: OmnigraphSchemaLookupInput): unknown {

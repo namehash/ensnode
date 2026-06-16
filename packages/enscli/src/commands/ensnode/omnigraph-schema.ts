@@ -1,21 +1,12 @@
-import { getOmnigraphSchema, lookupOmnigraphSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  getOmnigraphSchema,
+  lookupOmnigraphSchema,
+  type OmnigraphSchemaFieldInfo,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { printResult } from "../../lib/output";
 
-interface ArgInfo {
-  name: string;
-  type: string;
-  description: string | null;
-}
-
-interface FieldInfo {
-  name: string;
-  type: string;
-  description: string | null;
-  args?: ArgInfo[];
-}
-
-function renderField(field: FieldInfo, indent: string): string {
+function renderField(field: OmnigraphSchemaFieldInfo, indent: string): string {
   const args = field.args ? `(${field.args.map((a) => `${a.name}: ${a.type}`).join(", ")})` : "";
   const description = field.description
     ? `\n${indent}  # ${field.description.replace(/\s+/g, " ").trim()}`
@@ -27,7 +18,7 @@ function renderTypePretty(type: {
   description: string | null;
   kind: string;
   name: string;
-  fields?: FieldInfo[];
+  fields?: OmnigraphSchemaFieldInfo[];
   values?: Array<{ name: string }>;
   types?: string[];
 }): string {
@@ -41,7 +32,7 @@ function renderTypePretty(type: {
   return lines.join("\n");
 }
 
-function renderRootPretty(root: { query: FieldInfo[]; types: string[] }): string {
+function renderRootPretty(root: { query: OmnigraphSchemaFieldInfo[]; types: string[] }): string {
   return [
     "# Root query fields",
     ...root.query.map((field) => renderField(field, "  ")),
@@ -51,7 +42,7 @@ function renderRootPretty(root: { query: FieldInfo[]; types: string[] }): string
   ].join("\n");
 }
 
-function renderFieldPathPretty(field: FieldInfo & { parent: string }): string {
+function renderFieldPathPretty(field: OmnigraphSchemaFieldInfo & { parent: string }): string {
   return `${field.parent}.${renderField(field, "")}`;
 }
 
@@ -83,20 +74,17 @@ export function runOmnigraphSchema(
   }
 
   if (!target) {
-    const result = lookupOmnigraphSchema({}) as { query: FieldInfo[]; types: string[] };
+    const result = lookupOmnigraphSchema({}) as {
+      query: OmnigraphSchemaFieldInfo[];
+      types: string[];
+    };
     printResult(result, args, renderRootPretty);
     return;
   }
 
   if (target.includes(".")) {
-    const segments = target.split(".");
-    if (segments.length !== 2 || segments.some((segment) => segment.length === 0)) {
-      throw new Error(
-        `Invalid target "${target}". Expected "Type" or "Type.field" (e.g. Domain or Domain.canonical).`,
-      );
-    }
     printResult(
-      lookupOmnigraphSchema({ type: target }) as FieldInfo & { parent: string },
+      lookupOmnigraphSchema({ type: target }) as OmnigraphSchemaFieldInfo & { parent: string },
       args,
       renderFieldPathPretty,
     );
@@ -114,7 +102,7 @@ export function runOmnigraphSchema(
       description: string | null;
       kind: string;
       name: string;
-      fields?: FieldInfo[];
+      fields?: OmnigraphSchemaFieldInfo[];
       values?: Array<{ name: string }>;
       types?: string[];
     },

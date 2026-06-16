@@ -17,13 +17,15 @@
   ],
   "files": [
     "dist",
-    "src/omnigraph/generated/schema.graphql"
+    "src/omnigraph/generated/schema.graphql",
+    "src/omnigraph/generated/schema-sdl.ts"
   ],
   "exports": {
     ".": "./src/index.ts",
     "./core": "./src/core/index.ts",
     "./omnigraph": "./src/omnigraph/index.ts",
-    "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
+    "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql",
+    "./omnigraph/schema-sdl": "./src/omnigraph/generated/schema-sdl.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -41,7 +43,8 @@
         "types": "./dist/omnigraph/index.d.ts",
         "default": "./dist/omnigraph/index.js"
       },
-      "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
+      "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql",
+      "./omnigraph/schema-sdl": "./src/omnigraph/generated/schema-sdl.ts"
     }
   },
   "scripts": {
@@ -50,7 +53,7 @@
     "lint:ci": "biome ci",
     "test": "vitest",
     "typecheck": "tsgo --noEmit",
-    "generate:gqlschema": "gql.tada generate-output"
+    "generate:gqlschema": "gql.tada generate-output && node scripts/inline-schema-sdl.mjs"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "catalog:",

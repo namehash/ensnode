@@ -41,4 +41,10 @@ describe("omnigraph schema reference", () => {
       /Invalid `type`/,
     );
   });
+
+  it("rejects type and search together", () => {
+    expect(() => lookupOmnigraphSchema({ type: "Account", search: "resolve" })).toThrow(
+      /Provide either `type` or `search`/,
+    );
+  });
 });
