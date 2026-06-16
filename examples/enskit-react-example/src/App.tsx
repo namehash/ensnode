@@ -4,7 +4,11 @@ import { HashRouter, Link, Outlet, Route, Routes, useParams } from "react-router
 import { AccountView } from "./AccountView";
 import { accountPath, domainNamePath, useAppPath } from "./app-paths";
 import { DomainByIdView, DomainByNameView } from "./DomainView";
-import { EnsnodeInstanceProvider, InstanceSelector, useEnsnodeInstance } from "./EnsnodeInstanceProvider";
+import {
+  EnsnodeInstanceProvider,
+  InstanceSelector,
+  useEnsnodeInstance,
+} from "./EnsnodeInstanceProvider";
 import { NamegraphRootRedirect, NamegraphView } from "./NamegraphView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
@@ -56,9 +60,7 @@ function Home() {
           environment.
         </p>
       ) : (
-        <p>
-          Use the ENSNode instance selector in the header to switch between hosted instances.
-        </p>
+        <p>Use the ENSNode instance selector in the header to switch between hosted instances.</p>
       )}
     </div>
   );

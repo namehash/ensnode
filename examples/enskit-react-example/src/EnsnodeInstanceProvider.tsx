@@ -11,13 +11,12 @@ import {
 import { useSearchParams } from "react-router";
 
 import { createOmnigraphEnsNodeClient, type OmnigraphEnsNodeClient } from "./client";
-
 import {
   DEFAULT_ENSNODE_INSTANCE,
-  type EnsnodeInstance,
-  type EnsnodeInstanceConstants,
   ENSNODE_INSTANCE_STORAGE_KEY,
   ENSNODE_INSTANCES,
+  type EnsnodeInstance,
+  type EnsnodeInstanceConstants,
   getEnsnodeInstanceById,
 } from "./instances";
 

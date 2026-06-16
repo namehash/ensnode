@@ -28,11 +28,11 @@ import type {
 } from "@pierre/trees";
 import { FileTree, useFileTree, useFileTreeSelection } from "@pierre/trees/react";
 import { graphql, type ResultOf, type VariablesOf } from "enssdk/omnigraph";
-import type { OmnigraphEnsNodeClient } from "./client";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router";
 
 import { namegraphPath, useAppPath } from "./app-paths";
+import type { OmnigraphEnsNodeClient } from "./client";
 import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
 
 const PAGE_SIZE = 50;
@@ -869,7 +869,11 @@ function DetailPanel({ meta, registryId }: { meta: NodeMeta | null; registryId: 
           <strong>Subregistry</strong>
         </dt>
         <dd style={{ margin: 0 }}>
-          {meta.hasSubregistry ? <SubregistryDetail meta={meta} registryId={registryId} /> : <em>none</em>}
+          {meta.hasSubregistry ? (
+            <SubregistryDetail meta={meta} registryId={registryId} />
+          ) : (
+            <em>none</em>
+          )}
         </dd>
       </dl>
     </div>
@@ -887,13 +891,7 @@ function agreementDisplay(meta: DomainNodeMeta): { color: string; text: string }
   return { color: "#888", text: "↩? pointer unknown (empty subregistry)" };
 }
 
-function SubregistryDetail({
-  meta,
-  registryId,
-}: {
-  meta: DomainNodeMeta;
-  registryId: string;
-}) {
+function SubregistryDetail({ meta, registryId }: { meta: DomainNodeMeta; registryId: string }) {
   const appPath = useAppPath();
   const agreement = agreementDisplay(meta);
   return (

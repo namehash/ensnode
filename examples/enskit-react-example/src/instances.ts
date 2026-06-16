@@ -11,7 +11,6 @@ export interface EnsnodeInstance {
   constants: EnsnodeInstanceConstants;
 }
 
-
 export const ENSNODE_INSTANCES: EnsnodeInstance[] = [
   {
     id: "alpha",
