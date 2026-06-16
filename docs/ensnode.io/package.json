@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "node ../../packages/enssdk/scripts/inline-schema-sdl.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

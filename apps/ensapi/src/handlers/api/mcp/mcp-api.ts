@@ -357,14 +357,14 @@ app.all("/", async (c) => {
       await server.connect(session.transport);
       const response = await session.transport.handleRequest(mcpContext, body);
       return response ?? c.body(null, 202);
-    } catch (error) {
+    } catch {
       if (initializedSessionId) {
         await closeSession(initializedSessionId);
       } else {
         await session.transport.close();
         await session.server.close();
       }
-      throw error;
+      return jsonRpcErrorResponse(c, -32_603, "Internal error", 500);
     }
   }
 

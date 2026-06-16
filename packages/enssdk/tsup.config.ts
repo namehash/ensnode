@@ -5,6 +5,7 @@ export default defineConfig({
     index: "src/index.ts",
     "core/index": "src/core/index.ts",
     "omnigraph/index": "src/omnigraph/index.ts",
+    "omnigraph/generated/schema-sdl": "src/omnigraph/generated/schema-sdl.ts",
   },
   platform: "neutral",
   format: ["esm"],

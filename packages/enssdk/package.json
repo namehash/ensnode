@@ -17,8 +17,7 @@
   ],
   "files": [
     "dist",
-    "src/omnigraph/generated/schema.graphql",
-    "src/omnigraph/generated/schema-sdl.ts"
+    "src/omnigraph/generated/schema.graphql"
   ],
   "exports": {
     ".": "./src/index.ts",
@@ -44,7 +43,10 @@
         "default": "./dist/omnigraph/index.js"
       },
       "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql",
-      "./omnigraph/schema-sdl": "./src/omnigraph/generated/schema-sdl.ts"
+      "./omnigraph/schema-sdl": {
+        "types": "./dist/omnigraph/generated/schema-sdl.d.ts",
+        "default": "./dist/omnigraph/generated/schema-sdl.js"
+      }
     }
   },
   "scripts": {
