@@ -34,7 +34,7 @@
     "@hono/zod-openapi": "^1.4.0",
     "@namehash/ens-referrals": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/core": "^2.7.1",
+    "@opentelemetry/core": "^2.8.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.217.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.217.0",
     "@opentelemetry/resources": "^2.7.1",

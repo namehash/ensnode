@@ -15,9 +15,11 @@ RUN corepack enable
 WORKDIR /app
 
 # Copy package files for dependency installation
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml skills-npm.config.ts ./
+COPY .agents/ .agents/
 COPY packages/ packages/
 COPY patches/ patches/
+COPY scripts/ scripts/
 COPY apps/ensrainbow/package.json apps/ensrainbow/
 
 # Install dependencies
