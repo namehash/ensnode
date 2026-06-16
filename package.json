@@ -19,7 +19,7 @@
     "changeset:version": "changeset version && pnpm release:postversion",
     "changeset:next": "changeset version --snapshot next && pnpm release:postversion",
     "changeset:publish": "changeset publish",
-    "changeset:publish:next": "changeset publish --no-git-tag --snapshot --tag next",
+    "changeset:publish:next": "changeset publish --no-git-tag --tag next",
     "release:postversion": "pnpm docker:version:sync && pnpm generate:openapi",
     "packages:prepublish": "pnpm -r prepublish",
     "devnet": "docker compose -f docker/services/devnet.yml up",
