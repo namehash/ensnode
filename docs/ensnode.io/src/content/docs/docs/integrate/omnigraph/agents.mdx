@@ -12,13 +12,13 @@ import { Aside } from "@astrojs/starlight/components";
 
 [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) gives every onchain AI agent a portable identity (an NFT in an [Identity Registry](https://etherscan.io/address/0x8004a169fb4a3325136eb29fa0ceb6d2e539a432)) plus an **agent card** describing what it does and how to reach it. [ENSIP-25](https://docs.ens.domains/ensip/25) and [ENSIP-26](https://docs.ens.domains/ensip/26) connect that identity to a human-readable **ENS name**: a name can publish agent discovery records and cryptographically attest which agent(s) it controls.
 
-The Omnigraph brings both sides together. Start from an **ENS name** or from an **agent**, and get the agent card, reputation, and a **verified** name ↔ agent link — in one query, with no contract calls or IPFS fetching on your side.
+The Omnigraph brings both sides together. Start from an **ENS name** or from an **agent**, and get the agent card, reputation, and a **verified** name-to-agent link — in one query, with no contract calls or IPFS fetching on your side.
 
 ## Start from a name
 
 Most apps already have an ENS name. Ask `domain.resolve.profile.agents` for the agents linked to that name. Each `link` is one ENSIP-25 attestation, with a `verified` flag (the name and the agent confirm each other) and the full indexed agent nested inline.
 
-```graphql
+```graphql ins={8-27}
 query AgentsForName {
   domain(by: { name: "myagent.eth" }) {
     canonical {
@@ -27,9 +27,9 @@ query AgentsForName {
     resolve {
       profile {
         agents {
-          context # the agent-context record (ENSIP-26)
+          context
           links {
-            verified # true only when name ↔ agent confirm each other (ENSIP-25)
+            verified
             agent {
               agentId
               chain { name }
@@ -111,9 +111,9 @@ query FindAgents {
 }
 ```
 
-## Connect to an agent
+## Read the services of agent
 
-Once you have a `verified` link, read the endpoint you want to talk to from the agent card and connect.
+Once you have a `verified` link, read the endpoint you want to talk to from the agent card and connect. `protocol` is an `AgentServiceProtocol` enum (`MCP`, `A2A`, `X402`, `WEB`, …), and you can pass `protocols` to fetch only the services you care about.
 
 ```graphql
 query AgentEndpoint {
@@ -125,8 +125,8 @@ query AgentEndpoint {
             verified
             agent {
               card {
-                services {
-                  protocol # MCP, A2A, X402, WEB, …
+                services(protocols: [MCP, A2A]) {
+                  protocol
                   endpoint
                 }
               }
@@ -139,4 +139,4 @@ query AgentEndpoint {
 }
 ```
 
-Filter to `verified: true`, pick the service for the protocol you need (for example `MCP`), and use its `endpoint`.
+Filter to `verified: true`, pass the `protocols` you need (for example `[MCP]`), and use the returned `endpoint`.
