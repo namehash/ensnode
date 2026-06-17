@@ -97,6 +97,14 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/ens-resolution",
         },
         {
+          label: "Agents (ENSIP-25)",
+          link: "/docs/integrate/omnigraph/agents",
+          badge: {
+            text: "SOON",
+            variant: "note",
+          },
+        },
+        {
           label: "Protocol Acceleration",
           link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
