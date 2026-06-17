@@ -19,10 +19,10 @@
     "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.6",
+    "@astrojs/mdx": "^6.0.3",
     "@astrojs/react": "catalog:",
     "@astrojs/sitemap": "^3.7.2",
-    "@astrojs/starlight": "^0.39.2",
+    "@astrojs/starlight": "^0.40.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
     "@fontsource/inter": "^5.2.5",
     "@headlessui/react": "^2.2.0",
@@ -50,7 +50,7 @@
     "sharp": "^0.33.5",
     "yaml": "^2.8.3",
     "starlight-llms-txt": "^0.10.0",
-    "starlight-sidebar-topics": "^0.7.1",
+    "starlight-sidebar-topics": "^0.8.0",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
