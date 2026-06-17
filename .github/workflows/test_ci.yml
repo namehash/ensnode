@@ -91,11 +91,11 @@ jobs:
 
       - name: Verify generated files are committed
         run: |
-          if ! git diff --quiet packages/enssdk/src/omnigraph/generated/; then
+          if ! git diff --quiet packages/enssdk/src/omnigraph/generated/ packages/ensnode-sdk/src/omnigraph-api/generated/; then
             echo "Error: Generated files are out of sync"
             echo ""
             echo "The following generated files differ from what is committed:"
-            git diff --name-status packages/enssdk/src/omnigraph/generated/
+            git diff --name-status packages/enssdk/src/omnigraph/generated/ packages/ensnode-sdk/src/omnigraph-api/generated/
             echo ""
             echo "To fix, run:"
             echo "  pnpm generate:gqlschema"

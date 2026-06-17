@@ -20,6 +20,7 @@ dist
 # Ponder
 generated
 !packages/enssdk/src/omnigraph/generated/
+!packages/ensnode-sdk/src/omnigraph-api/generated/
 .ponder
 
 #jetbrains elements

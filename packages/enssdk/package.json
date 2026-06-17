@@ -23,8 +23,7 @@
     ".": "./src/index.ts",
     "./core": "./src/core/index.ts",
     "./omnigraph": "./src/omnigraph/index.ts",
-    "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql",
-    "./omnigraph/schema-sdl": "./src/omnigraph/generated/schema-sdl.ts"
+    "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -42,11 +41,7 @@
         "types": "./dist/omnigraph/index.d.ts",
         "default": "./dist/omnigraph/index.js"
       },
-      "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql",
-      "./omnigraph/schema-sdl": {
-        "types": "./dist/omnigraph/generated/schema-sdl.d.ts",
-        "default": "./dist/omnigraph/generated/schema-sdl.js"
-      }
+      "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
     }
   },
   "scripts": {
@@ -55,7 +50,7 @@
     "lint:ci": "biome ci",
     "test": "vitest",
     "typecheck": "tsgo --noEmit",
-    "generate:gqlschema": "gql.tada generate-output && node scripts/inline-schema-sdl.mjs"
+    "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "catalog:",

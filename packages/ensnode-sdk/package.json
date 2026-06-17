@@ -55,7 +55,8 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest",
-    "typecheck": "tsgo --noEmit"
+    "typecheck": "tsgo --noEmit",
+    "generate:gqlschema": "node scripts/inline-schema-sdl.mjs"
   },
   "peerDependencies": {
     "viem": "catalog:"

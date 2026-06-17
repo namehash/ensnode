@@ -1,4 +1,3 @@
-import { omnigraphSchemaSdl } from "enssdk/omnigraph/schema-sdl";
 import {
   buildSchema,
   type GraphQLArgument,
@@ -13,6 +12,8 @@ import {
   isUnionType,
 } from "graphql";
 import { z } from "zod/v4";
+
+import { omnigraphSchemaSdl } from "./generated/schema-sdl";
 
 /** Types rendered with full field listings in the condensed schema reference. */
 export const OMNIGRAPH_CORE_TYPES = [
@@ -31,7 +32,7 @@ export const OMNIGRAPH_CORE_TYPES = [
 
 let cachedSchema: GraphQLSchema | undefined;
 
-/** Loads the Omnigraph schema from the SDL bundled with enssdk (no network). */
+/** Loads the Omnigraph schema from SDL bundled with ensnode-sdk (no network). */
 export function getOmnigraphSchema(): GraphQLSchema {
   cachedSchema ??= buildSchema(omnigraphSchemaSdl);
   return cachedSchema;
