@@ -7,5 +7,6 @@ describe("omnigraph MCP support", () => {
     expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("account(id:");
     expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("exampleId account-migrated-names");
     expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("exampleId account-profile");
+    expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("starts_with");
   });
 });

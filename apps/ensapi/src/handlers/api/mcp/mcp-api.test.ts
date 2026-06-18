@@ -80,6 +80,24 @@ describe("Omnigraph MCP server", () => {
     expect(contents[0].text).toContain("resolve(accelerate: Boolean): ReverseResolve!");
     expect(contents[0].text).toContain("ProfileSocials");
     expect(contents[0].text).toContain("github:");
+    expect(contents[0].text).toContain("DomainsNameFilter");
+    expect(contents[0].text).toContain("starts_with:");
+  });
+
+  it("includes defaultVariables in the examples index", async () => {
+    const { client } = await connectClient();
+
+    const { contents } = await client.readResource({ uri: "omnigraph://examples/index" });
+
+    if (!("text" in contents[0])) throw new Error("expected text resource");
+    const payload = JSON.parse(contents[0].text) as {
+      examples: Array<{ id: string; defaultVariables?: Record<string, unknown> }>;
+    };
+    const registryDomains = payload.examples.find((example) => example.id === "registry-domains");
+    expect(registryDomains?.defaultVariables?.registry).toMatchObject({
+      chainId: expect.any(Number),
+      address: expect.any(String),
+    });
   });
 
   it("reads an example resource by id", async () => {
@@ -272,6 +290,37 @@ describe("Omnigraph MCP server", () => {
     const content = result.content as Array<{ type: string; text: string }>;
     const parsed = JSON.parse(content[0].text) as { hints: string[] };
     expect(parsed.hints.some((hint) => hint.includes("ProfileSocials"))).toBe(true);
+  });
+
+  it("appends validation hints for camelCase filter fields", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          errors: [
+            {
+              message:
+                'Variable "$name" got invalid value { startsWith: "vit" }; Field "startsWith" is not defined by type "DomainsNameFilter".',
+            },
+          ],
+        }),
+        { headers: { "content-type": "application/json" } },
+      ),
+    );
+
+    const { client } = await connectClient();
+
+    const result = await client.callTool({
+      name: "omnigraph_query",
+      arguments: {
+        query:
+          "query($name: DomainsNameFilter!) { domains(where: { name: $name }, first: 1) { totalCount } }",
+        variables: { name: { startsWith: "vit" } },
+      },
+    });
+
+    const content = result.content as Array<{ type: string; text: string }>;
+    const parsed = JSON.parse(content[0].text) as { hints: string[] };
+    expect(parsed.hints.some((hint) => hint.includes("starts_with"))).toBe(true);
   });
 
   it("returns a JSON-RPC parse error for invalid JSON on initialize", async () => {

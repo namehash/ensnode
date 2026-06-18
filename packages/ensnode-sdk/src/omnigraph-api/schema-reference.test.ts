@@ -8,6 +8,8 @@ describe("omnigraph schema reference", () => {
     expect(reference).toContain("account(by: AccountByInput!)");
     expect(reference).toContain("#### Account");
     expect(reference).toContain("resolve(accelerate: Boolean): ReverseResolve!");
+    expect(reference).toContain("#### DomainsNameFilter");
+    expect(reference).toContain("starts_with:");
   });
 
   it("searches schema fields by keyword", () => {

@@ -34,6 +34,24 @@ const VALIDATION_HINTS: Array<{ match: RegExp; hint: string }> = [
       "ProfileSocials fields: github, keybase, linkedin, telegram, twitter only. " +
       "Call omnigraph_schema({ type: 'ProfileSocials' }) or use exampleId domain-profile.",
   },
+  {
+    match: /Field "startsWith" is not defined by type "DomainsNameFilter"/,
+    hint:
+      "Omnigraph filter inputs use snake_case: starts_with, not startsWith. " +
+      "Call omnigraph_schema({ type: 'DomainsNameFilter' }).",
+  },
+  {
+    match: /Cannot query field "startsWith"/,
+    hint:
+      "Omnigraph filter inputs use snake_case: starts_with, not startsWith. " +
+      "Call omnigraph_schema({ type: 'DomainsNameFilter' }).",
+  },
+  {
+    match: /Field "[^"]*[A-Z][^"]*" is not defined by type "(DomainsNameFilter|SubdomainsWhereInput)"/,
+    hint:
+      "Omnigraph filter inputs use snake_case field names (e.g. starts_with). " +
+      "Call omnigraph_schema({ type: 'DomainsNameFilter' }) before custom where filters.",
+  },
 ];
 
 function getMcpNamespace() {
@@ -49,11 +67,19 @@ export function listOmnigraphExampleIds(): string[] {
 }
 
 export function buildOmnigraphExamplesIndex(): string {
+  const namespace = getMcpNamespace();
   return JSON.stringify(
     {
       examples: listGraphqlApiExampleQueryIds().map((id) => {
         const { title, description } = getGraphqlApiExampleQueryById(id);
-        return { id, uri: omnigraphExampleUri(id), title, description };
+        const { variables: defaultVariables } = resolveGraphqlApiExampleQuery(id, { namespace });
+        return {
+          id,
+          uri: omnigraphExampleUri(id),
+          title,
+          description,
+          defaultVariables,
+        };
       }),
     },
     null,
@@ -133,6 +159,8 @@ export const OMNIGRAPH_MCP_INSTRUCTIONS = [
   "",
   "Anti-patterns (will fail validation):",
   "- account(id: …), Account.primaryName, connection.items",
+  "- Filter fields use snake_case: starts_with, not startsWith",
+  "- Before custom where filters, call omnigraph_schema({ type: 'DomainsNameFilter' })",
   "",
   "Interactive schema browser: /api/omnigraph (GraphiQL).",
 ].join("\n");

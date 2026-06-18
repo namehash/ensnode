@@ -129,7 +129,8 @@ export function createOmnigraphMcpServer(): McpServer {
       title: "Look up ENS Omnigraph schema",
       description:
         "Discover Omnigraph types and fields from the bundled schema (no network). Omit arguments for " +
-        "root query fields and type names; pass `type` for a type or Type.field; pass `search` to find matches.",
+        "root query fields and type names; pass `type` for a type or Type.field; pass `search` to find matches. " +
+        "Use type DomainsNameFilter or SubdomainsWhereInput before writing custom where filters.",
       inputSchema: OmnigraphSchemaLookupInputSchema,
     },
     async ({ type, search }) => {

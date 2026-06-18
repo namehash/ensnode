@@ -31,6 +31,9 @@ export const OMNIGRAPH_CORE_TYPES = [
   "ProfileSocials",
 ] as const;
 
+/** Filter input types listed in the condensed schema reference (snake_case field names). */
+export const OMNIGRAPH_FILTER_INPUT_TYPES = ["DomainsNameFilter", "SubdomainsWhereInput"] as const;
+
 let cachedSchema: GraphQLSchema | undefined;
 
 /** Loads the Omnigraph schema from SDL bundled with ensnode-sdk (no network). */
@@ -79,11 +82,24 @@ function renderFieldLine(field: GraphQLField<unknown, unknown>): string {
   return `- ${field.name}${args}: ${field.type}${description ? ` — ${description}` : ""}`;
 }
 
+function renderInputFieldLine(field: GraphQLInputField): string {
+  const description = oneLine(field.description);
+  return `- ${field.name}: ${field.type}${description ? ` — ${description}` : ""}`;
+}
+
 function renderTypeMarkdown(type: GraphQLNamedType): string {
   if (!isObjectType(type) && !isInterfaceType(type)) return "";
   const lines = [`#### ${type.name}`];
   if (type.description) lines.push(`_${oneLine(type.description)}_`);
   for (const field of Object.values(type.getFields())) lines.push(renderFieldLine(field));
+  return lines.join("\n");
+}
+
+function renderInputTypeMarkdown(type: GraphQLNamedType): string {
+  if (!isInputObjectType(type)) return "";
+  const lines = [`#### ${type.name}`];
+  if (type.description) lines.push(`_${oneLine(type.description)}_`);
+  for (const field of Object.values(type.getFields())) lines.push(renderInputFieldLine(field));
   return lines.join("\n");
 }
 
@@ -248,6 +264,18 @@ export function buildCondensedSchemaReference(
     }
   }
   sections.push(["### Core types", coreSections.join("\n\n")].join("\n\n"));
+
+  const filterSections: string[] = [];
+  for (const name of OMNIGRAPH_FILTER_INPUT_TYPES) {
+    const type = schema.getType(name);
+    if (type) {
+      const rendered = renderInputTypeMarkdown(type);
+      if (rendered) filterSections.push(rendered);
+    }
+  }
+  if (filterSections.length > 0) {
+    sections.push(["### Filter inputs (snake_case)", filterSections.join("\n\n")].join("\n\n"));
+  }
 
   const otherTypes = listMajorTypeNames(schema).filter(
     (name) => !OMNIGRAPH_CORE_TYPES.includes(name as (typeof OMNIGRAPH_CORE_TYPES)[number]),
