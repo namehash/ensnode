@@ -3,10 +3,12 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock the in-process Yoga instance so the tool can be exercised without a database. The tool
+// Mock the Omnigraph API handler so the tool can be exercised without a database. The tool
 // imports it dynamically, so the mock is applied at call time.
-const fetchMock = vi.fn<(request: Request, context: unknown) => Promise<Response>>();
-vi.mock("@/omnigraph-api/yoga", () => ({ yoga: { fetch: fetchMock } }));
+const omnigraphApiFetchMock = vi.fn<(request: Request) => Promise<Response>>();
+vi.mock("@/handlers/api/omnigraph/omnigraph-api", () => ({
+  default: { fetch: omnigraphApiFetchMock },
+}));
 
 import mcpApi, { createOmnigraphMcpServer } from "./mcp-api";
 
@@ -25,7 +27,7 @@ async function connectClient() {
 
 describe("Omnigraph MCP server", () => {
   beforeEach(() => {
-    fetchMock.mockReset();
+    omnigraphApiFetchMock.mockReset();
   });
 
   afterEach(async () => {
@@ -98,6 +100,7 @@ describe("Omnigraph MCP server", () => {
       chainId: expect.any(Number),
       address: expect.any(String),
     });
+    expect(payload.examples.map((example) => example.id)).toContain("account-profile");
   });
 
   it("reads an example resource by id", async () => {
@@ -112,9 +115,9 @@ describe("Omnigraph MCP server", () => {
     expect(payload.query).toContain("primaryName(by: { chainName: ETHEREUM })");
   });
 
-  it("executes omnigraph_query via yoga.fetch and returns the raw GraphQL JSON", async () => {
+  it("executes omnigraph_query via the omnigraph API handler and returns the raw GraphQL JSON", async () => {
     const graphqlResponse = { data: { __typename: "Query" } };
-    fetchMock.mockResolvedValue(
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(JSON.stringify(graphqlResponse), {
         headers: { "content-type": "application/json" },
       }),
@@ -127,11 +130,10 @@ describe("Omnigraph MCP server", () => {
       arguments: { query: "{ __typename }" },
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [request, context] = fetchMock.mock.calls[0];
+    expect(omnigraphApiFetchMock).toHaveBeenCalledTimes(1);
+    const [request] = omnigraphApiFetchMock.mock.calls[0];
     expect(request.method).toBe("POST");
     expect(new URL(request.url).pathname).toBe("/api/omnigraph");
-    expect(context).toEqual({ canAccelerate: false });
     await expect(request.clone().json()).resolves.toEqual({
       query: "{ __typename }",
       variables: null,
@@ -143,8 +145,25 @@ describe("Omnigraph MCP server", () => {
     expect(JSON.parse(content[0].text)).toEqual(graphqlResponse);
   });
 
+  it("rejects whitespace-only query or exampleId", async () => {
+    const { client } = await connectClient();
+
+    for (const arguments_ of [
+      { query: "   " },
+      { exampleId: "   " },
+      { query: "   ", exampleId: "   " },
+    ]) {
+      const result = await client.callTool({ name: "omnigraph_query", arguments: arguments_ });
+      expect(result.isError).toBe(true);
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toMatch(/Provide exactly one of `query` or `exampleId`/);
+    }
+
+    expect(omnigraphApiFetchMock).not.toHaveBeenCalled();
+  });
+
   it("executes omnigraph_query by exampleId", async () => {
-    fetchMock.mockResolvedValue(
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(JSON.stringify({ data: { account: null } }), {
         headers: { "content-type": "application/json" },
       }),
@@ -160,7 +179,7 @@ describe("Omnigraph MCP server", () => {
       },
     });
 
-    const [request] = fetchMock.mock.calls[0];
+    const [request] = omnigraphApiFetchMock.mock.calls[0];
     const body = (await request.clone().json()) as {
       query: string;
       variables: Record<string, unknown>;
@@ -169,8 +188,8 @@ describe("Omnigraph MCP server", () => {
     expect(body.variables).toEqual({ address: "0x0000000000000000000000000000000000000001" });
   });
 
-  it("forwards GraphQL variables to yoga.fetch", async () => {
-    fetchMock.mockResolvedValue(
+  it("forwards GraphQL variables to the omnigraph API handler", async () => {
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(JSON.stringify({ data: null }), {
         headers: { "content-type": "application/json" },
       }),
@@ -186,7 +205,7 @@ describe("Omnigraph MCP server", () => {
       },
     });
 
-    const [request] = fetchMock.mock.calls[0];
+    const [request] = omnigraphApiFetchMock.mock.calls[0];
     await expect(request.clone().json()).resolves.toMatchObject({
       variables: { id: "0x1234" },
     });
@@ -207,7 +226,7 @@ describe("Omnigraph MCP server", () => {
   });
 
   it("appends validation hints for common GraphQL mistakes", async () => {
-    fetchMock.mockResolvedValue(
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
           errors: [{ message: 'Unknown argument "id" on field "Query.account".' }],
@@ -246,7 +265,7 @@ describe("Omnigraph MCP server", () => {
   });
 
   it("executes omnigraph_query by account-profile exampleId alias", async () => {
-    fetchMock.mockResolvedValue(
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(JSON.stringify({ data: { account: null } }), {
         headers: { "content-type": "application/json" },
       }),
@@ -262,14 +281,14 @@ describe("Omnigraph MCP server", () => {
       },
     });
 
-    const [request] = fetchMock.mock.calls[0];
+    const [request] = omnigraphApiFetchMock.mock.calls[0];
     const body = (await request.clone().json()) as { query: string };
     expect(body.query).toContain("primaryName(by: { chainName: ETHEREUM })");
     expect(body.query).toContain("v1DomainsCount");
   });
 
   it("appends validation hints for invalid ProfileSocials fields", async () => {
-    fetchMock.mockResolvedValue(
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
           errors: [{ message: 'Cannot query field "discord" on type "ProfileSocials".' }],
@@ -283,7 +302,8 @@ describe("Omnigraph MCP server", () => {
     const result = await client.callTool({
       name: "omnigraph_query",
       arguments: {
-        query: "{ domain(by: { name: \"vitalik.eth\" }) { resolve { profile { socials { discord { handle } } } } } }",
+        query:
+          '{ domain(by: { name: "vitalik.eth" }) { resolve { profile { socials { discord { handle } } } } } }',
       },
     });
 
@@ -293,7 +313,7 @@ describe("Omnigraph MCP server", () => {
   });
 
   it("appends validation hints for camelCase filter fields", async () => {
-    fetchMock.mockResolvedValue(
+    omnigraphApiFetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
           errors: [

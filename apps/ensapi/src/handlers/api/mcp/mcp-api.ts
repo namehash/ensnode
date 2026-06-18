@@ -12,6 +12,8 @@ import {
   OmnigraphSchemaLookupInputSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { makeLogger } from "@/lib/logger";
+
 import {
   buildOmnigraphExamplesIndex,
   executeOmnigraphQuery,
@@ -19,6 +21,8 @@ import {
   OMNIGRAPH_MCP_INSTRUCTIONS,
   resolveOmnigraphExample,
 } from "./omnigraph-mcp-support";
+
+const logger = makeLogger("mcp-api");
 
 const OmnigraphQueryInputSchema = z
   .object({
@@ -38,8 +42,8 @@ const OmnigraphQueryInputSchema = z
       .describe("GraphQL variables. With `exampleId`, overrides the example defaults."),
   })
   .superRefine((value, ctx) => {
-    const hasQuery = value.query !== undefined && value.query.length > 0;
-    const hasExample = value.exampleId !== undefined && value.exampleId.length > 0;
+    const hasQuery = value.query !== undefined && value.query.trim().length > 0;
+    const hasExample = value.exampleId !== undefined && value.exampleId.trim().length > 0;
     if (hasQuery === hasExample) {
       ctx.addIssue({
         code: "custom",
@@ -246,6 +250,7 @@ export function createOmnigraphMcpServer(): McpServer {
 type McpSession = {
   server: McpServer;
   transport: StreamableHTTPTransport;
+  lastActivityAt: number;
 };
 
 type McpRequestContext = Parameters<StreamableHTTPTransport["handleRequest"]>[0];
@@ -256,6 +261,9 @@ const sessions = new Map<string, McpSession>();
 /** Cap stored sessions to limit memory growth from repeated initialize requests. */
 const MAX_MCP_SESSIONS = 200;
 
+/** Close sessions with no client activity for this long. */
+const MCP_SESSION_IDLE_TTL_MS = 30 * 60 * 1000;
+
 function jsonRpcErrorResponse(
   c: { json: (data: unknown, status: number) => Response },
   code: number,
@@ -265,12 +273,32 @@ function jsonRpcErrorResponse(
   return c.json({ jsonrpc: "2.0", error: { code, message }, id: null }, status);
 }
 
+function touchSession(session: McpSession) {
+  session.lastActivityAt = Date.now();
+}
+
+function closeSessionFireAndForget(sessionId: string) {
+  void closeSession(sessionId).catch((err) => {
+    logger.error({ err, sessionId }, "MCP session cleanup failed");
+  });
+}
+
+function evictIdleSessions(exceptSessionId?: string) {
+  const now = Date.now();
+  for (const [id, session] of sessions) {
+    if (id !== exceptSessionId && now - session.lastActivityAt > MCP_SESSION_IDLE_TTL_MS) {
+      closeSessionFireAndForget(id);
+    }
+  }
+}
+
 function storeSession(id: string, session: McpSession) {
+  evictIdleSessions(id);
   sessions.set(id, session);
   if (sessions.size > MAX_MCP_SESSIONS) {
     const oldestId = sessions.keys().next().value;
     if (typeof oldestId === "string" && oldestId !== id) {
-      void closeSession(oldestId);
+      closeSessionFireAndForget(oldestId);
     }
   }
 }
@@ -304,6 +332,8 @@ app.all("/", async (c) => {
   if (c.req.method === "GET") {
     const session = sessionId ? sessions.get(sessionId) : undefined;
     if (!session) return invalidSessionResponse(c);
+    touchSession(session);
+    evictIdleSessions(sessionId);
     const response = await session.transport.handleRequest(mcpContext);
     return response ?? c.body(null, 202);
   }
@@ -324,6 +354,8 @@ app.all("/", async (c) => {
       if (!session) {
         return jsonRpcErrorResponse(c, -32_000, "Session not found", 404);
       }
+      touchSession(session);
+      evictIdleSessions(sessionId);
       const response = await session.transport.handleRequest(mcpContext);
       return response ?? c.body(null, 202);
     }
@@ -342,6 +374,7 @@ app.all("/", async (c) => {
     let initializedSessionId: string | undefined;
     const session: McpSession = {
       server,
+      lastActivityAt: Date.now(),
       transport: new StreamableHTTPTransport({
         sessionIdGenerator: () => crypto.randomUUID(),
         onsessioninitialized: (id) => {
@@ -349,7 +382,7 @@ app.all("/", async (c) => {
           storeSession(id, session);
         },
         onsessionclosed: (id) => {
-          void closeSession(id);
+          closeSessionFireAndForget(id);
         },
       }),
     };

@@ -47,7 +47,8 @@ const VALIDATION_HINTS: Array<{ match: RegExp; hint: string }> = [
       "Call omnigraph_schema({ type: 'DomainsNameFilter' }).",
   },
   {
-    match: /Field "[^"]*[A-Z][^"]*" is not defined by type "(DomainsNameFilter|SubdomainsWhereInput)"/,
+    match:
+      /Field "[^"]*[A-Z][^"]*" is not defined by type "(DomainsNameFilter|SubdomainsWhereInput)"/,
     hint:
       "Omnigraph filter inputs use snake_case field names (e.g. starts_with). " +
       "Call omnigraph_schema({ type: 'DomainsNameFilter' }) before custom where filters.",
@@ -119,19 +120,18 @@ function appendValidationHints(responseText: string): string {
   return JSON.stringify({ ...parsed, hints }, null, 2);
 }
 
-/** Executes a read-only Omnigraph query against the in-process Yoga instance. */
+/** Executes a read-only Omnigraph query via the /api/omnigraph handler (middleware + Yoga). */
 export async function executeOmnigraphQuery(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<string> {
-  const { yoga } = await import("@/omnigraph-api/yoga");
-  const response = await yoga.fetch(
+  const omnigraphApi = await import("@/handlers/api/omnigraph/omnigraph-api");
+  const response = await omnigraphApi.default.fetch(
     new Request("http://ensapi.internal/api/omnigraph", {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({ query, variables: variables ?? null }),
     }),
-    { canAccelerate: false },
   );
   return appendValidationHints(await response.text());
 }

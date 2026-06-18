@@ -82,7 +82,10 @@ export function getGraphqlApiExampleQueryById(id: string): GraphqlApiExampleQuer
 }
 
 export function listGraphqlApiExampleQueryIds(): string[] {
-  return GRAPHQL_API_EXAMPLE_QUERIES.map((example) => example.id);
+  return [
+    ...GRAPHQL_API_EXAMPLE_QUERIES.map((example) => example.id),
+    ...Object.keys(GRAPHQL_API_EXAMPLE_ID_ALIASES),
+  ];
 }
 
 export function resolveGraphqlApiExampleQuery(
