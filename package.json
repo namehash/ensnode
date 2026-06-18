@@ -20,7 +20,7 @@
     "changeset:next": "changeset version --snapshot next && pnpm release:postversion",
     "changeset:publish": "changeset publish",
     "changeset:publish:next": "changeset publish --no-git-tag --tag next",
-    "release:postversion": "pnpm install --lockfile-only && pnpm docker:version:sync && pnpm generate:openapi",
+    "release:postversion": "pnpm docker:version:sync && pnpm generate:openapi",
     "packages:prepublish": "pnpm -r prepublish",
     "devnet": "docker compose -f docker/services/devnet.yml up",
     "docker:build:ensnode": "pnpm run -w --parallel \"/^docker:build:.*/\"",
@@ -75,10 +75,11 @@
       "ponder>vite": "^6.4.3",
       "vite-node>vite": "^6.4.3",
       "vite@>=7.0.0 <=7.3.4": "^7.3.5",
-      "dompurify@<3.4.9": "^3.4.9",
+      "dompurify@<3.4.11": "^3.4.11",
       "protobufjs@>=7.0.0 <7.6.3": "^7.6.3",
       "protobufjs@>=8.0.0 <8.6.0": "^8.6.0",
       "postcss@>=8.0.0 <8.5.12": "^8.5.12",
+      "undici@<7.28.0": "^7.28.0",
       "ws@>=8.0.0 <8.21.0": "^8.21.0"
     },
     "peerDependencyRules": {
