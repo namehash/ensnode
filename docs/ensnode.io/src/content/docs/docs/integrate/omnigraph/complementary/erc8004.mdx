@@ -24,6 +24,7 @@ is still early and conceptual.
 ENS is already exploring this space: **ENSIP-25 and ENSIP-26** define how ENS names relate to onchain
 agent identities and discovery records. ENS Omnigraph API lets ENS be a **fast follower** — if ERC-8004 or related protocols become popular,
 support can be added as a plugin and accessed through the same unified API.
+
 </Aside>
 
 ## Plugin
@@ -41,10 +42,9 @@ ERC-8004 data is **not** part of core ENS. The fields on this page come from `er
 
 ## Who this feature is for
 
-- **AI agent developers** — you publish an **agent** under ERC-8004 and want a human-readable ENS **name** to be shown in ENS related services. 
+- **AI agent developers** — you publish an **agent** under ERC-8004 and want a human-readable ENS **name** to be shown in ENS related services.
 - **AI Apps and services** — you want to discover **agents** and show trustworthy identity, reputation, endpoints and connection to ENS.
 - **Apps with ENS integration** - you want to include information about ENSIP-25 **agent** into profile card of a **name** or show all **agents** of an **address**.
-
 
 ## Find ERC-8004 agents associated with an ENS name
 
@@ -89,9 +89,9 @@ query AgentsForName {
 ```
 
 - **Gate on `verification`** — since ENSIP-25 is **bidirectional** relationship, an ENS name can attest to an agent, and an agent can reference an ENS name. This enum covers three cases:
-  + **`VERIFIED`** — both sides agree: the ENS name attests the agent, and the agent references the name.
-  + **`ONLY_ENS`** — the ENS name attests the agent, but the agent does not reference the name back.
-  + **`ONLY_AGENT`** — the agent references the name, but the ENS name does not attest the agent.
+  - **`VERIFIED`** — both sides agree: the ENS name attests the agent, and the agent references the name.
+  - **`ONLY_ENS`** — the ENS name attests the agent, but the agent does not reference the name back.
+  - **`ONLY_AGENT`** — the agent references the name, but the ENS name does not attest the agent.
 - **A name may have several attestations** — in theory name can have several agents so `attestations` is a list. Iterate and pick what you need.
 - **Everything in one round trip** — the agent card and reputation come back nested under each attestation; no second request.
 
@@ -102,7 +102,7 @@ The reverse view `domains.attestations` returns the ENS names that attest to thi
 
 ```graphql
 query AgentById {
-  erc8004agent(by: { 
+  erc8004agent(by: {
       chainName: ETHEREUM,
       agentId: "34820"
   }) {
