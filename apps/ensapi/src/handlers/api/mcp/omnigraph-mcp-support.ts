@@ -28,6 +28,12 @@ const VALIDATION_HINTS: Array<{ match: RegExp; hint: string }> = [
     match: /Field "account" argument "by" .* is required/,
     hint: "Pass account(by: { address: $address }) or account(by: { id: $address }).",
   },
+  {
+    match: /Cannot query field "[^"]+" on type "ProfileSocials"/,
+    hint:
+      "ProfileSocials fields: github, keybase, linkedin, telegram, twitter only. " +
+      "Call omnigraph_schema({ type: 'ProfileSocials' }) or use exampleId domain-profile.",
+  },
 ];
 
 function getMcpNamespace() {
@@ -118,10 +124,12 @@ export const OMNIGRAPH_MCP_INSTRUCTIONS = [
   "- domains(where: { … }, first: N) — search canonical domains",
   "",
   "Common patterns:",
+  "- Address overview (primary name + profile + ENSv1/v2 counts): exampleId account-profile",
   "- Primary name: account.resolve.primaryName(by: { chainName: ETHEREUM })",
   "- Profile: domain.resolve.profile or primaryName.resolve.profile",
   "- ENSv1 vs ENSv2 counts: exampleId account-migrated-names",
   "- Pagination: edges { node }, pageInfo { hasNextPage endCursor }, totalCount",
+  "- Social fields: only ProfileSocials schema fields — do not guess (no discord/instagram)",
   "",
   "Anti-patterns (will fail validation):",
   "- account(id: …), Account.primaryName, connection.items",

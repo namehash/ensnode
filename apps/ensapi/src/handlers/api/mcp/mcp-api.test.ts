@@ -78,6 +78,8 @@ describe("Omnigraph MCP server", () => {
     if (!("text" in contents[0])) throw new Error("expected text resource");
     expect(contents[0].text).toContain("account(by: AccountByInput!)");
     expect(contents[0].text).toContain("resolve(accelerate: Boolean): ReverseResolve!");
+    expect(contents[0].text).toContain("ProfileSocials");
+    expect(contents[0].text).toContain("github:");
   });
 
   it("reads an example resource by id", async () => {
@@ -222,7 +224,54 @@ describe("Omnigraph MCP server", () => {
     });
     const firstMessage = messages[0].content;
     if (firstMessage.type !== "text") throw new Error("expected text prompt");
-    expect(firstMessage.text).toContain("hello-world");
+    expect(firstMessage.text).toContain("account-profile");
+  });
+
+  it("executes omnigraph_query by account-profile exampleId alias", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ data: { account: null } }), {
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    const { client } = await connectClient();
+
+    await client.callTool({
+      name: "omnigraph_query",
+      arguments: {
+        exampleId: "account-profile",
+        variables: { address: "0x0000000000000000000000000000000000000001" },
+      },
+    });
+
+    const [request] = fetchMock.mock.calls[0];
+    const body = (await request.clone().json()) as { query: string };
+    expect(body.query).toContain("primaryName(by: { chainName: ETHEREUM })");
+    expect(body.query).toContain("v1DomainsCount");
+  });
+
+  it("appends validation hints for invalid ProfileSocials fields", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          errors: [{ message: 'Cannot query field "discord" on type "ProfileSocials".' }],
+        }),
+        { headers: { "content-type": "application/json" } },
+      ),
+    );
+
+    const { client } = await connectClient();
+
+    const result = await client.callTool({
+      name: "omnigraph_query",
+      arguments: {
+        query: "{ domain(by: { name: \"vitalik.eth\" }) { resolve { profile { socials { discord { handle } } } } } }",
+      },
+    });
+
+    const content = result.content as Array<{ type: string; text: string }>;
+    const parsed = JSON.parse(content[0].text) as { hints: string[] };
+    expect(parsed.hints.some((hint) => hint.includes("ProfileSocials"))).toBe(true);
   });
 
   it("returns a JSON-RPC parse error for invalid JSON on initialize", async () => {

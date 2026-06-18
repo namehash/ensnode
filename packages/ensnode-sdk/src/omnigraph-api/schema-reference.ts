@@ -28,6 +28,7 @@ export const OMNIGRAPH_CORE_TYPES = [
   "ForwardResolve",
   "ResolvedRecords",
   "PrimaryNameRecord",
+  "ProfileSocials",
 ] as const;
 
 let cachedSchema: GraphQLSchema | undefined;

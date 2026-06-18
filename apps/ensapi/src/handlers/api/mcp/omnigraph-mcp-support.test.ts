@@ -6,5 +6,6 @@ describe("omnigraph MCP support", () => {
   it("documents anti-patterns in server instructions", () => {
     expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("account(id:");
     expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("exampleId account-migrated-names");
+    expect(OMNIGRAPH_MCP_INSTRUCTIONS).toContain("exampleId account-profile");
   });
 });

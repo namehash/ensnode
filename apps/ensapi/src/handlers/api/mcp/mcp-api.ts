@@ -180,7 +180,7 @@ export function createOmnigraphMcpServer(): McpServer {
             type: "text",
             text: [
               `Look up ENS data for address ${address}.`,
-              "Call omnigraph_query with exampleId hello-world and variables { address }.",
+              "Call omnigraph_query with exampleId account-profile and variables { address }.",
               "Summarize: primary name, profile (avatar, description, socials), and ENSv1 vs ENSv2 domain counts.",
             ].join("\n"),
           },

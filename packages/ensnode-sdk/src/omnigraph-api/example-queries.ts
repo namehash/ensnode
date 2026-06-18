@@ -67,8 +67,14 @@ export type GraphqlApiExampleQuery = {
   variables: NamespaceSpecificValue<Record<string, unknown>>;
 };
 
+/** Alternate example ids that resolve to a canonical entry in {@link GRAPHQL_API_EXAMPLE_QUERIES}. */
+export const GRAPHQL_API_EXAMPLE_ID_ALIASES: Record<string, string> = {
+  "account-profile": "hello-world",
+};
+
 export function getGraphqlApiExampleQueryById(id: string): GraphqlApiExampleQuery {
-  const found = graphqlApiExampleQueryById.get(id);
+  const resolvedId = GRAPHQL_API_EXAMPLE_ID_ALIASES[id] ?? id;
+  const found = graphqlApiExampleQueryById.get(resolvedId);
   if (!found) {
     throw new Error(`Unknown GraphQL API example query id: ${id}`);
   }
