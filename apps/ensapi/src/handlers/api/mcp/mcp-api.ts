@@ -295,12 +295,19 @@ function evictIdleSessions(exceptSessionId?: string) {
 function storeSession(id: string, session: McpSession) {
   evictIdleSessions(id);
   sessions.set(id, session);
-  if (sessions.size > MAX_MCP_SESSIONS) {
-    const oldestId = sessions.keys().next().value;
-    if (typeof oldestId === "string" && oldestId !== id) {
-      closeSessionFireAndForget(oldestId);
+  if (sessions.size <= MAX_MCP_SESSIONS) return;
+
+  // Evict the least-recently-active session (LRU), not the oldest-created.
+  let lruId: string | undefined;
+  let lruAt = Number.POSITIVE_INFINITY;
+  for (const [candidateId, candidate] of sessions) {
+    if (candidateId === id) continue;
+    if (candidate.lastActivityAt < lruAt) {
+      lruAt = candidate.lastActivityAt;
+      lruId = candidateId;
     }
   }
+  if (lruId) closeSessionFireAndForget(lruId);
 }
 
 function getSessionId(ctx: {

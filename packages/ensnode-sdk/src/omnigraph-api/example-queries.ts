@@ -255,7 +255,7 @@ query DomainByName($name: InterpretedName!) {
   {
     id: "domain-registration",
     title: "Domain Registration",
-    description: "Load a domain registration details.",
+    description: "Load domain registration details.",
     query: `
 query DomainRegistration($name: InterpretedName!) {
   domain(by: { name: $name }) {

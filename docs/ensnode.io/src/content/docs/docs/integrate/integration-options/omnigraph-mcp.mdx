@@ -12,11 +12,14 @@ It's first-party and built in: the same endpoint works locally (`http://localhos
 
 <IntegrateHostedEnsNodeTip />
 
-## The tool
+## Tools, resources, and prompts
 
-The server exposes a single, read-only tool:
+The server exposes two read-only tools:
 
-- **`omnigraph_query`** — accepts a GraphQL `query` (and optional `variables`) and returns the raw `{ data, errors }` JSON, exactly as the [HTTP endpoint](/docs/integrate/integration-options/omnigraph-graphql-api#1-the-endpoint) does. Because it's the full Omnigraph behind one tool, an agent can answer any question the Omnigraph can — resolve records, search Domains, list a user's Domains, and much more — without a fixed, hand-written tool per use case.
+- **`omnigraph_query`** — accepts a GraphQL `query` or vetted `exampleId` (and optional `variables`) and returns the raw `{ data, errors }` JSON, exactly as the [HTTP endpoint](/docs/integrate/integration-options/omnigraph-graphql-api#1-the-endpoint) does. Because it's the full Omnigraph behind one tool, an agent can answer any question the Omnigraph can — resolve records, search Domains, list a user's Domains, and much more — without a fixed, hand-written tool per use case.
+- **`omnigraph_schema`** — looks up Omnigraph types and fields from the bundled schema (no network). Use it before writing custom queries, especially for filter inputs like `DomainsNameFilter`.
+
+It also ships **resources** (condensed schema at `omnigraph://schema/condensed`, example query index at `omnigraph://examples/index`, and per-example payloads at `omnigraph://examples/{exampleId}`) and **prompts** for common tasks such as account profiles and domain lookups.
 
 ## Cursor
 
@@ -51,7 +54,7 @@ For a local ENSApi instance:
 Then:
 
 1. Open **Cursor Settings → Tools & MCP** (or **Features → MCP**).
-2. Confirm `ensnode-omnigraph` is listed with a green status and the `omnigraph_query` tool.
+2. Confirm `ensnode-omnigraph` is listed with a green status and the `omnigraph_query` and `omnigraph_schema` tools.
 3. In chat, ask ENS questions in plain language — e.g. _"Who owns vitalik.eth?"_ or _"List domains owned by 0x…"_ — and let the agent call `omnigraph_query`.
 
 <Aside type="tip" title="Pair with ensskills">
@@ -100,7 +103,7 @@ To smoke-test without an editor, use the [MCP Inspector](https://github.com/mode
 npx @modelcontextprotocol/inspector
 ```
 
-Set **Transport** to **Streamable HTTP**, **URL** to your `/api/mcp` endpoint, connect, then **List Tools** — you should see `omnigraph_query`. Call it with:
+Set **Transport** to **Streamable HTTP**, **URL** to your `/api/mcp` endpoint, connect, then **List Tools** — you should see `omnigraph_query` and `omnigraph_schema`. Call `omnigraph_query` with:
 
 ```json
 {
@@ -110,7 +113,7 @@ Set **Transport** to **Streamable HTTP**, **URL** to your `/api/mcp` endpoint, c
 
 ## Authoring queries
 
-The MCP endpoint runs whatever GraphQL you hand it — it does not author queries for you. To discover the schema and write correct queries:
+The MCP endpoint runs whatever GraphQL you hand it — it does not author queries for you. Use `omnigraph_schema` or read `omnigraph://schema/condensed` to discover the schema, then write queries (or pick a vetted `exampleId` from `omnigraph://examples/index`). You can also:
 
 - Explore interactively in the **GraphiQL playground** at `/api/omnigraph`.
 - Browse the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) and [Omnigraph examples](/docs/integrate/omnigraph/examples).
