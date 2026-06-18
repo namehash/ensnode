@@ -10,19 +10,19 @@ import { Aside, LinkCard } from "@astrojs/starlight/components";
   preview and may change before release. Expected to be available **before July 2026**.
 </Aside>
 
-[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) is an new standard that gives an onchain AI agent a portable identity (an NFT in an Identity Registry) plus an **agent card** describing what it does and how to reach it. On the ENS side, [ENSIP-25](https://docs.ens.domains/ensip/25) and [ENSIP-26](https://docs.ens.domains/ensip/26) are ENS standards that let an **ENS name** publish agent discovery records and **attest** which ERC-8004 agent(s) it controls.
+[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) is a new standard that gives an onchain AI agent a portable identity (an NFT in an Identity Registry) plus an **agent card** describing what it does and how to reach it. On the ENS side, [ENSIP-25](https://docs.ens.domains/ensip/25) and [ENSIP-26](https://docs.ens.domains/ensip/26) are ENS standards that let an **ENS name** publish agent discovery records and **attest** which ERC-8004 agent(s) it controls.
 
 The ENS Omnigraph API will bring both sides together: start from an **ENS name** or from an **ERC-8004 agent**, and get the agent card, reputation, and the attested name-to-agent relationship in one query, with no contract calls or IPFS fetching on your side.
 
 ## Why this is complementary to ENS
 
 <Aside type="note" title="A fast-follower opportunity for ENS">
-AI agent discovery is an new area where ENS names can act as the human-readable, portable
+AI agent discovery is a new area where ENS names can act as the human-readable, portable
 identity layer for autonomous agents. **ERC-8004 is one possible complementary standard** for this — it
 is still early and conceptual.
 
 ENS is already exploring this space: **ENSIP-25 and ENSIP-26** define how ENS names relate to onchain
-agent identities and discovery records. ENS Omnigraph API let ENS be a **fast follower** — if ERC-8004 or related protocols become popular,
+agent identities and discovery records. ENS Omnigraph API lets ENS be a **fast follower** — if ERC-8004 or related protocols become popular,
 support can be added as a plugin and accessed through the same unified API.
 </Aside>
 
@@ -88,11 +88,11 @@ query AgentsForName {
 }
 ```
 
-- **Gate on `verification`** — since ENSIP-25 is **bidirectional** relationship, an ENS name can attest to an agent, and an agent can reference an ENS name. This enum cover three cases:
+- **Gate on `verification`** — since ENSIP-25 is **bidirectional** relationship, an ENS name can attest to an agent, and an agent can reference an ENS name. This enum covers three cases:
   + **`VERIFIED`** — both sides agree: the ENS name attests the agent, and the agent references the name.
   + **`ONLY_ENS`** — the ENS name attests the agent, but the agent does not reference the name back.
   + **`ONLY_AGENT`** — the agent references the name, but the ENS name does not attest the agent.
-- **A name may have several attestations** — in threory name can have several agents so `attestations` is a list. Iterate and pick what you need.
+- **A name may have several attestations** — in theory name can have several agents so `attestations` is a list. Iterate and pick what you need.
 - **Everything in one round trip** — the agent card and reputation come back nested under each attestation; no second request.
 
 ## Look up the ENS names associated with an ERC-8004 agent
@@ -130,7 +130,7 @@ query AgentById {
 
 ## Search for ERC-8004 agents by indexed metadata
 
-Find agents by chain, owner, or card name.
+Find agents by chain, card name, or ENS name.
 
 ```graphql
 query FindErc8004Agents {
@@ -139,7 +139,7 @@ query FindErc8004Agents {
     where: {
       chainName: { eq: ETHEREUM }
       cardName: { contains: "trading" }
-      ensName: { constains: "eth" }
+      ensName: { contains: "eth" }
     }
   ) {
     totalCount
