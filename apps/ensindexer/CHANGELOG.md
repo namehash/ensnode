@@ -1,5 +1,19 @@
 # ensindexer
 
+## 1.16.0
+
+### Patch Changes
+
+- [#2280](https://github.com/namehash/ensnode/pull/2280) [`dff338c`](https://github.com/namehash/ensnode/commit/dff338cd586c4f4beef692a6c41a938638ea655c) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer now re-derives a Resolver's ENSIP-10 `IExtendedResolver` support when a known proxy Resolver emits an EIP-1967 `Upgraded` event, instead of fixing the value once at first visibility. Proxy Resolvers that activate `IExtendedResolver` via a post-assignment upgrade (e.g. the 3DNS Resolver behind `.box`) were stuck `extended = false` forever, silently breaking wildcard resolution for affected names.
+
+- Updated dependencies [[`09b4aa5`](https://github.com/namehash/ensnode/commit/09b4aa5281875c7c3472358fa2bbb7f4991d9429)]:
+  - @ensnode/ensdb-sdk@1.16.0
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+  - @ensnode/datasources@1.16.0
+  - @ensnode/ensrainbow-sdk@1.16.0
+  - @ensnode/ponder-sdk@1.16.0
+
 ## 1.15.2
 
 ### Patch Changes

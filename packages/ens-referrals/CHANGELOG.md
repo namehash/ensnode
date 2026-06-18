@@ -1,5 +1,13 @@
 # @namehash/ens-referrals
 
+## 1.16.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+
 ## 1.15.2
 
 ### Patch Changes
