@@ -60,7 +60,7 @@ const OmnigraphQueryInputSchema = z
 export function createOmnigraphMcpServer(): McpServer {
   const server = new McpServer(
     {
-      name: "ensnode-omnigraph",
+      name: "ENS",
       version: packageJson.version,
     },
     {
@@ -165,83 +165,6 @@ export function createOmnigraphMcpServer(): McpServer {
         ],
       };
     },
-  );
-
-  server.registerPrompt(
-    "account-profile",
-    {
-      title: "Account primary name and profile",
-      description:
-        "Resolve an address's Ethereum primary name plus avatar, description, and socials, with ENSv1/v2 domain counts.",
-      argsSchema: {
-        address: z.string().describe("EVM address (0x…)."),
-      },
-    },
-    ({ address }) => ({
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: [
-              `Look up ENS data for address ${address}.`,
-              "Call omnigraph_query with exampleId account-profile and variables { address }.",
-              "Summarize: primary name, profile (avatar, description, socials), and ENSv1 vs ENSv2 domain counts.",
-            ].join("\n"),
-          },
-        },
-      ],
-    }),
-  );
-
-  server.registerPrompt(
-    "account-domains-by-version",
-    {
-      title: "Account ENSv1 vs ENSv2 domain counts",
-      description: "Count domains owned by an address, split by ENS version.",
-      argsSchema: {
-        address: z.string().describe("EVM address (0x…)."),
-      },
-    },
-    ({ address }) => ({
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: [
-              `How many ENSv1 vs ENSv2 domains does ${address} own?`,
-              "Call omnigraph_query with exampleId account-migrated-names and variables { address }.",
-            ].join("\n"),
-          },
-        },
-      ],
-    }),
-  );
-
-  server.registerPrompt(
-    "domain-profile",
-    {
-      title: "Domain profile",
-      description: "Resolve avatar, description, addresses, and socials for an ENS name.",
-      argsSchema: {
-        name: z.string().describe("ENS name (e.g. vitalik.eth)."),
-      },
-    },
-    ({ name }) => ({
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: [
-              `What is the ENS profile for ${name}?`,
-              "Call omnigraph_query with exampleId domain-profile and variables { name }.",
-            ].join("\n"),
-          },
-        },
-      ],
-    }),
   );
 
   return server;

@@ -12,14 +12,14 @@ It's first-party and built in: the same endpoint works locally (`http://localhos
 
 <IntegrateHostedEnsNodeTip />
 
-## Tools, resources, and prompts
+## Tools and resources
 
 The server exposes two read-only tools:
 
 - **`omnigraph_query`** — accepts a GraphQL `query` or vetted `exampleId` (and optional `variables`) and returns the raw `{ data, errors }` JSON, exactly as the [HTTP endpoint](/docs/integrate/integration-options/omnigraph-graphql-api#1-the-endpoint) does. Because it's the full Omnigraph behind one tool, an agent can answer any question the Omnigraph can — resolve records, search Domains, list a user's Domains, and much more — without a fixed, hand-written tool per use case.
 - **`omnigraph_schema`** — looks up Omnigraph types and fields from the bundled schema (no network). Use it before writing custom queries, especially for filter inputs like `DomainsNameFilter`.
 
-It also ships **resources** (condensed schema at `omnigraph://schema/condensed`, example query index at `omnigraph://examples/index`, and per-example payloads at `omnigraph://examples/{exampleId}`) and **prompts** for common tasks such as account profiles and domain lookups.
+It also ships **resources**: condensed schema at `omnigraph://schema/condensed`, example query index at `omnigraph://examples/index`, and per-example payloads at `omnigraph://examples/{exampleId}`. Pick a vetted `exampleId` from the index when you want a starting point (e.g. `account-profile`, `domain-profile`) — the agent chooses the right one for your question.
 
 ## Cursor
 
@@ -30,7 +30,7 @@ Cursor supports streamable-HTTP MCP servers natively via a `url` in `mcp.json`.
 ```json title=".cursor/mcp.json"
 {
   "mcpServers": {
-    "ensnode-omnigraph": {
+    "ENS": {
       "url": "https://api.v2-sepolia.ensnode.io/api/mcp"
     }
   }
@@ -44,7 +44,7 @@ For a local ENSApi instance:
 ```json title=".cursor/mcp.json"
 {
   "mcpServers": {
-    "ensnode-omnigraph": {
+    "ENS": {
       "url": "http://localhost:4334/api/mcp"
     }
   }
@@ -54,8 +54,8 @@ For a local ENSApi instance:
 Then:
 
 1. Open **Cursor Settings → Tools & MCP** (or **Features → MCP**).
-2. Confirm `ensnode-omnigraph` is listed with a green status and the `omnigraph_query` and `omnigraph_schema` tools.
-3. In chat, ask ENS questions in plain language — e.g. _"Who owns vitalik.eth?"_ or _"List domains owned by 0x…"_ — and let the agent call `omnigraph_query`.
+2. Confirm **ENS** is listed with a green status and the `omnigraph_query` and `omnigraph_schema` tools.
+3. In chat, ask ENS questions in plain language — e.g. _"Who owns vitalik.eth?"_ or _"List domains owned by 0x…"_ — and let the agent call `omnigraph_query`. Use the server key `"ENS"` in your config so the MCP entry is easy to spot; the agent picks the right `exampleId` or writes a custom query for your question.
 
 <Aside type="tip" title="Pair with ensskills">
   MCP gives the agent **execution**; [`ensskills`](/docs/integrate/integration-options/ensskills) gives it **query authoring**. Install the **`omnigraph`** skill so the agent writes correct GraphQL on the first try — see the [`ensskills` quickstart](/docs/integrate/integration-options/ensskills) or [`examples/ensskills-example`](https://github.com/namehash/ensnode/tree/main/examples/ensskills-example) to sync skills into `.cursor/skills/`.
@@ -75,7 +75,7 @@ Many Claude Desktop builds expect **stdio** MCP servers rather than a remote URL
 ```json title="claude_desktop_config.json"
 {
   "mcpServers": {
-    "ensnode-omnigraph": {
+    "ENS": {
       "command": "npx",
       "args": [
         "-y",

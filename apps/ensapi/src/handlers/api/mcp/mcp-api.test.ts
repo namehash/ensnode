@@ -249,21 +249,6 @@ describe("Omnigraph MCP server", () => {
     );
   });
 
-  it("advertises account-profile prompt", async () => {
-    const { client } = await connectClient();
-
-    const { prompts } = await client.listPrompts();
-    expect(prompts.map((prompt) => prompt.name)).toContain("account-profile");
-
-    const { messages } = await client.getPrompt({
-      name: "account-profile",
-      arguments: { address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" },
-    });
-    const firstMessage = messages[0].content;
-    if (firstMessage.type !== "text") throw new Error("expected text prompt");
-    expect(firstMessage.text).toContain("account-profile");
-  });
-
   it("executes omnigraph_query by account-profile exampleId alias", async () => {
     omnigraphApiFetchMock.mockResolvedValue(
       new Response(JSON.stringify({ data: { account: null } }), {
