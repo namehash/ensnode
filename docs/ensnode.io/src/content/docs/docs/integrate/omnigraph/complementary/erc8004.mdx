@@ -1,0 +1,187 @@
+---
+title: ERC-8004 (AI Agent Discovery)
+description: Preview of ERC-8004 AI agent discovery in the ENS Omnigraph API — find agents associated with an ENS name, look up the names behind an agent, and read agent service profiles, gated behind a future ERC-8004 ENSNode plugin.
+---
+
+import { Aside, LinkCard } from "@astrojs/starlight/components";
+
+<Aside type="caution" title="Preview — coming soon">
+  ERC-8004 support in the ENS Omnigraph API is still being built. The shapes on this page are a
+  preview and may change before release. Expected to be available **before July 2026**.
+</Aside>
+
+[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) is an new standard that gives an onchain AI agent a portable identity (an NFT in an Identity Registry) plus an **agent card** describing what it does and how to reach it. On the ENS side, [ENSIP-25](https://docs.ens.domains/ensip/25) and [ENSIP-26](https://docs.ens.domains/ensip/26) are ENS standards that let an **ENS name** publish agent discovery records and **attest** which ERC-8004 agent(s) it controls.
+
+The ENS Omnigraph API will bring both sides together: start from an **ENS name** or from an **ERC-8004 agent**, and get the agent card, reputation, and the attested name-to-agent relationship in one query, with no contract calls or IPFS fetching on your side.
+
+## Why this is complementary to ENS
+
+<Aside type="note" title="A fast-follower opportunity for ENS">
+AI agent discovery is an new opportunity where ENS names can act as the human-readable, portable
+identity layer for autonomous agents. **ERC-8004 is one possible complementary standard** for this — it
+is still early and conceptual.
+
+ENS is already exploring this space: **ENSIP-25 and ENSIP-26** define how ENS names relate to onchain
+agent identities and discovery records. ENS Omnigraph API let ENS be a **fast follower** — if ERC-8004 or related protocols become popular,
+support can be added as a plugin and accessed through the same unified API.
+</Aside>
+
+## Plugin
+
+ERC-8004 data is **not** part of core ENS. The fields on this page come from `erc8004` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins):
+
+- Each ENSNode operator chooses which plugins to activate on their instance.
+- The ERC-8004 fields described here resolve to non-null values when ENSNode has `erc8004` plugin.
+
+<LinkCard
+  title="ENSNode Plugins"
+  description="How operators customize which onchain data an ENSNode instance indexes and exposes."
+  href="/docs/integrate/integration-options/ensnode-plugins"
+/>
+
+## Who this feature is for
+
+- **AI agent developers** — you publish an **agent** under ERC-8004 and want a human-readable ENS **name** to be shown in ENS related services. 
+- **AI Apps and services** — you want to discover **agents** and show trustworthy identity, reputation, endpoints and connection to ENS.
+- **Apps with ENS integration** - you want to include information about ENSIP-25 **agent** into profile card of a **name** or show all **agents** of an **address**.
+
+
+## Find ERC-8004 agents associated with an ENS name
+
+Most apps already have an ENS name. The agent data lives under `domain.resolve.profile.erc8004agents` — this is **interpreted ENS Resolution** (see [ENS Resolution](/docs/integrate/omnigraph/ens-resolution)): the ENS Omnigraph API reads the underlying ENSIP-25/26 records and returns clean, structured fields instead of raw text records.
+
+Each entry in `attestations` is one ENSIP-25 attestation, with its `verification` status and the indexed ERC-8004 agent nested inline. By default `attestations` returns only `VERIFIED` attestations; pass `where` to include the partial ones.
+
+```graphql ins={8-29}
+query AgentsForName {
+  domain(by: { name: "myagent.eth" }) {
+    canonical {
+      name { beautified }
+    }
+    resolve {
+      profile {
+        erc8004agents {
+          context
+          attestations(where: { verification: [VERIFIED, ONLY_ENS, ONLY_AGENT] }) {
+            verification # ONLY_ENS | ONLY_AGENT | VERIFIED
+            identityRegistry { chainId address }
+            agentId
+            erc8004agent {
+              agentId
+              chain { name }
+              card {
+                name
+                description
+                x402Support
+                supportedTrust
+              }
+              reputation {
+                feedbackCount
+                averageScore
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+- **Gate on `verification`** — since ENSIP-25 is **bidirectional** relationship, an ENS name can attest to an agent, and an agent can reference an ENS name. This enum cover three cases:
+  + **`VERIFIED`** — both sides agree: the ENS name attests the agent, and the agent references the name.
+  + **`ONLY_ENS`** — the ENS name attests the agent, but the agent does not reference the name back.
+  + **`ONLY_AGENT`** — the agent references the name, but the ENS name does not attest the agent.
+- **A name may have several attestations** — in threory name can have several agents so `attestations` is a list. Iterate and pick what you need.
+- **Everything in one round trip** — the agent card and reputation come back nested under each attestation; no second request.
+
+## Look up the ENS names associated with an ERC-8004 agent
+
+When you already have an agent (from a registry, a wallet, or search), query it directly.
+The reverse view `domains.attestations` returns the ENS names that attest to this agent.
+
+```graphql
+query AgentById {
+  erc8004agent(by: { 
+      chainName: ETHEREUM,
+      agentId: "34820"
+  }) {
+    agentId
+    owner { address }
+    card {
+      name
+      description
+      supportedTrust
+    }
+    reputation {
+      feedbackCount
+      averageScore
+    }
+    domains {
+      attestations(where: { verification: [VERIFIED, ONLY_ENS, ONLY_AGENT] }) {
+        verification
+        context
+        name { beautified }
+      }
+    }
+  }
+}
+```
+
+## Search for ERC-8004 agents by indexed metadata
+
+Find agents by chain, owner, or card name.
+
+```graphql
+query FindErc8004Agents {
+  erc8004agents(
+    first: 20
+    where: {
+      chainName: { eq: ETHEREUM }
+      cardName: { contains: "trading" }
+      ensName: { constains: "eth" }
+    }
+  ) {
+    totalCount
+    edges {
+      node {
+        agentId
+        card { name description }
+        domains {
+          attestations { verification name { beautified } }
+        }
+      }
+    }
+  }
+}
+```
+
+## Read an ERC-8004 agent service profile
+
+Read the endpoint you want to talk to from the agent card. `attestations` returns only `VERIFIED` attestations by default, so no `where` filter is needed here. `protocol` is an `AgentServiceProtocol` enum (`MCP`, `A2A`, `X402`, `WEB`, ...), and you can pass `protocols` to fetch only the services you care about.
+
+```graphql
+query AgentServices {
+  domain(by: { name: "myagent.eth" }) {
+    resolve {
+      profile {
+        erc8004agents {
+          attestations {
+            verification
+            erc8004agent {
+              card {
+                services(protocols: [MCP, A2A]) {
+                  protocol
+                  endpoint
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Since only `VERIFIED` attestations are returned by default, pass the `protocols` you need (for example `[MCP]`) and use the returned `endpoint`.

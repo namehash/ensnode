@@ -97,16 +97,22 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/ens-resolution",
         },
         {
-          label: "Agents (ENSIP-25)",
-          link: "/docs/integrate/omnigraph/agents",
-          badge: {
-            text: "SOON",
-            variant: "note",
-          },
-        },
-        {
           label: "Protocol Acceleration",
           link: "/docs/integrate/omnigraph/protocol-acceleration",
+        },
+        {
+          label: "Complementary protocols",
+          collapsed: false,
+          items: [
+            {
+              label: "Agents / ERC-8004",
+              link: "/docs/integrate/omnigraph/complementary/erc8004",
+              badge: {
+                text: "SOON",
+                variant: "note",
+              },
+            },
+          ],
         },
         {
           label: "Examples",
