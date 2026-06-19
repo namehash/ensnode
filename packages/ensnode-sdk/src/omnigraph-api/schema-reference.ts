@@ -13,6 +13,8 @@ import {
 } from "graphql";
 import { z } from "zod/v4";
 
+import { makeOptionalTrimmedNonEmptyStringSchema } from "../shared/zod-schemas";
+
 import { omnigraphSchemaSdl } from "./generated/schema-sdl";
 
 /** Types rendered with full field listings in the condensed schema reference. */
@@ -196,18 +198,8 @@ export type OmnigraphSchemaLookupInput = {
 
 export const OmnigraphSchemaLookupInputSchema = z
   .object({
-    type: z
-      .string()
-      .optional()
-      .refine(
-        (value) => {
-          if (!value?.includes(".")) return true;
-          const parts = value.split(".");
-          return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
-        },
-        { message: 'Invalid `type` — expected "Type.field" (e.g. Account.resolve).' },
-      ),
-    search: z.string().optional(),
+    type: makeOptionalTrimmedNonEmptyStringSchema(),
+    search: makeOptionalTrimmedNonEmptyStringSchema(),
   })
   .superRefine((value, ctx) => {
     if (value.search && value.type) {
@@ -215,6 +207,16 @@ export const OmnigraphSchemaLookupInputSchema = z
         code: "custom",
         message: "Provide either `type` or `search`, not both.",
       });
+    }
+    if (value.type?.includes(".")) {
+      const parts = value.type.split(".");
+      if (parts.length !== 2 || parts[0].length === 0 || parts[1].length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: 'Invalid `type` — expected "Type.field" (e.g. Account.resolve).',
+          path: ["type"],
+        });
+      }
     }
   });
 

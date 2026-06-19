@@ -249,6 +249,46 @@ describe("Omnigraph MCP server", () => {
     );
   });
 
+  it("trims padded exampleId and query before resolving", async () => {
+    omnigraphApiFetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ data: { account: null } }), {
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    const { client } = await connectClient();
+
+    await client.callTool({
+      name: "omnigraph_query",
+      arguments: {
+        exampleId: "  account-profile  ",
+        variables: { address: "0x0000000000000000000000000000000000000001" },
+      },
+    });
+
+    const [request] = omnigraphApiFetchMock.mock.calls[0];
+    const body = (await request.clone().json()) as { query: string };
+    expect(body.query).toContain("primaryName(by: { chainName: ETHEREUM })");
+
+    omnigraphApiFetchMock.mockClear();
+    omnigraphApiFetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ data: { __typename: "Query" } }), {
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    await client.callTool({
+      name: "omnigraph_query",
+      arguments: { query: "  { __typename }  " },
+    });
+
+    const [queryRequest] = omnigraphApiFetchMock.mock.calls[0];
+    await expect(queryRequest.clone().json()).resolves.toEqual({
+      query: "{ __typename }",
+      variables: null,
+    });
+  });
+
   it("executes omnigraph_query by account-profile exampleId alias", async () => {
     omnigraphApiFetchMock.mockResolvedValue(
       new Response(JSON.stringify({ data: { account: null } }), {

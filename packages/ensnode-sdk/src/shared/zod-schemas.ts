@@ -49,6 +49,21 @@ export const makeBooleanStringSchema = (valueLabel: string = "Value") =>
     .transform((val) => val === "true");
 
 /**
+ * Optional string that trims whitespace; blank or whitespace-only input becomes undefined.
+ */
+export const makeOptionalTrimmedNonEmptyStringSchema = (description?: string) => {
+  const schema = z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (value === undefined) return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    });
+  return description ? schema.describe(description) : schema;
+};
+
+/**
  * Parses a numeric value as a finite non-negative number.
  */
 export const makeFiniteNonNegativeNumberSchema = (valueLabel: string = "Value") =>

@@ -9,6 +9,7 @@ import { z } from "zod/v4";
 import {
   buildCondensedSchemaReference,
   lookupOmnigraphSchema,
+  makeOptionalTrimmedNonEmptyStringSchema,
   OmnigraphSchemaLookupInputSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -18,7 +19,7 @@ import {
   buildOmnigraphExamplesIndex,
   executeOmnigraphQuery,
   listOmnigraphExampleIds,
-  OMNIGRAPH_MCP_INSTRUCTIONS,
+  buildOmnigraphMcpInstructions,
   resolveOmnigraphExample,
 } from "./omnigraph-mcp-support";
 
@@ -26,24 +27,20 @@ const logger = makeLogger("mcp-api");
 
 const OmnigraphQueryInputSchema = z
   .object({
-    query: z
-      .string()
-      .optional()
-      .describe("GraphQL query document. Mutually exclusive with `exampleId`."),
-    exampleId: z
-      .string()
-      .optional()
-      .describe(
-        "Run a vetted example query by id (see omnigraph://examples/index). Mutually exclusive with `query`.",
-      ),
+    query: makeOptionalTrimmedNonEmptyStringSchema(
+      "GraphQL query document. Mutually exclusive with `exampleId`.",
+    ),
+    exampleId: makeOptionalTrimmedNonEmptyStringSchema(
+      "Run a vetted example query by id (see omnigraph://examples/index). Mutually exclusive with `query`.",
+    ),
     variables: z
       .record(z.string(), z.unknown())
       .optional()
       .describe("GraphQL variables. With `exampleId`, overrides the example defaults."),
   })
   .superRefine((value, ctx) => {
-    const hasQuery = value.query !== undefined && value.query.trim().length > 0;
-    const hasExample = value.exampleId !== undefined && value.exampleId.trim().length > 0;
+    const hasQuery = value.query !== undefined;
+    const hasExample = value.exampleId !== undefined;
     if (hasQuery === hasExample) {
       ctx.addIssue({
         code: "custom",
@@ -64,7 +61,7 @@ export function createOmnigraphMcpServer(): McpServer {
       version: packageJson.version,
     },
     {
-      instructions: OMNIGRAPH_MCP_INSTRUCTIONS,
+      instructions: buildOmnigraphMcpInstructions(),
     },
   );
 

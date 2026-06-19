@@ -136,31 +136,41 @@ export async function executeOmnigraphQuery(
   return appendValidationHints(await response.text());
 }
 
-export const OMNIGRAPH_MCP_INSTRUCTIONS = [
-  "ENS Omnigraph MCP — read-only GraphQL over indexed ENSv1 + ENSv2 state.",
-  "",
-  "Before writing custom GraphQL:",
-  "1. Read omnigraph://schema/condensed or call omnigraph_schema.",
-  "2. Prefer omnigraph_query with exampleId (vetted queries) over guessing field names.",
-  "3. Read omnigraph://examples/index for available exampleId values.",
-  "",
-  "Entry points:",
-  "- account(by: { address }) — address-owned domains, permissions, reverse resolution",
-  "- domain(by: { name }) — a single name",
-  "- domains(where: { … }, first: N) — search canonical domains",
-  "",
-  "Common patterns:",
-  "- Address overview (primary name + profile + ENSv1/v2 counts): exampleId account-profile",
-  "- Primary name: account.resolve.primaryName(by: { chainName: ETHEREUM })",
-  "- Profile: domain.resolve.profile or primaryName.resolve.profile",
-  "- ENSv1 vs ENSv2 counts: exampleId account-migrated-names",
-  "- Pagination: edges { node }, pageInfo { hasNextPage endCursor }, totalCount",
-  "- Social fields: only ProfileSocials schema fields — do not guess (no discord/instagram)",
-  "",
-  "Anti-patterns (will fail validation):",
-  "- account(id: …), Account.primaryName, connection.items",
-  "- Filter fields use snake_case: starts_with, not startsWith",
-  "- Before custom where filters, call omnigraph_schema({ type: 'DomainsNameFilter' })",
-  "",
-  "Interactive schema browser: /api/omnigraph (GraphiQL).",
-].join("\n");
+/** One-line catalog of vetted exampleId values for MCP server instructions. */
+function buildInlinedExamplesCatalog(): string {
+  return listGraphqlApiExampleQueryIds()
+    .map((id) => {
+      const { description } = getGraphqlApiExampleQueryById(id);
+      return `- ${id} — ${description}`;
+    })
+    .join("\n");
+}
+
+/** MCP server instructions sent to clients at initialize (system prompt). */
+export function buildOmnigraphMcpInstructions(): string {
+  return [
+    "ENS Omnigraph MCP — read-only GraphQL over indexed ENSv1 + ENSv2 state.",
+    "",
+    "Before ANY query: call omnigraph_query with exampleId from the list below. Only write custom GraphQL if no example fits.",
+    "",
+    "Vetted exampleId values:",
+    buildInlinedExamplesCatalog(),
+    "",
+    "When no example fits, discover the schema before writing custom GraphQL:",
+    "- Read omnigraph://schema/condensed or call omnigraph_schema.",
+    "- Use omnigraph_schema({ type: 'DomainsNameFilter' }) before custom where filters.",
+    "",
+    "Entry points:",
+    "- account(by: { address }) — address-owned domains, permissions, reverse resolution",
+    "- domain(by: { name }) — a single name",
+    "- domains(where: { … }, first: N) — search canonical domains",
+    "",
+    "Anti-patterns (will fail validation):",
+    "- account(id: …), Account.primaryName, connection.items",
+    "- Filter fields use snake_case: starts_with, not startsWith",
+    "- ProfileSocials: github, keybase, linkedin, telegram, twitter only — do not guess (no discord/instagram)",
+    "- Pagination: edges { node }, pageInfo { hasNextPage endCursor }, totalCount — not items",
+    "",
+    "Interactive schema browser: /api/omnigraph (GraphiQL).",
+  ].join("\n");
+}

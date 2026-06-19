@@ -18,6 +18,7 @@ import {
   makeIntegerSchema,
   makeNonNegativeIntegerSchema,
   makeNormalizedAddressSchema,
+  makeOptionalTrimmedNonEmptyStringSchema,
   makePositiveIntegerSchema,
   makePriceSchema,
   makeReinterpretedNameSchema,
@@ -47,6 +48,12 @@ describe("ENSIndexer: Shared", () => {
         expect(formatParseError(makeBooleanStringSchema().safeParse("off"))).toContain(
           errorMessage,
         );
+      });
+
+      it("trims optional strings and treats whitespace-only input as undefined", () => {
+        expect(makeOptionalTrimmedNonEmptyStringSchema().parse("  hello  ")).toBe("hello");
+        expect(makeOptionalTrimmedNonEmptyStringSchema().parse(undefined)).toBeUndefined();
+        expect(makeOptionalTrimmedNonEmptyStringSchema().parse("   ")).toBeUndefined();
       });
 
       it("can parse integer values", () => {

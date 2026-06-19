@@ -44,6 +44,21 @@ describe("omnigraph schema reference", () => {
     );
   });
 
+  it("trims type and search before lookup", () => {
+    const byType = lookupOmnigraphSchema({ type: " Account " }) as { name: string };
+    expect(byType.name).toBe("Account");
+
+    const bySearch = lookupOmnigraphSchema({ search: " primaryName " }) as { fields: string[] };
+    expect(bySearch.fields).toContain("ReverseResolve.primaryName");
+
+    const byFieldPath = lookupOmnigraphSchema({ type: " Account.resolve " }) as {
+      parent: string;
+      name: string;
+    };
+    expect(byFieldPath.parent).toBe("Account");
+    expect(byFieldPath.name).toBe("resolve");
+  });
+
   it("rejects type and search together", () => {
     expect(() => lookupOmnigraphSchema({ type: "Account", search: "resolve" })).toThrow(
       /Provide either `type` or `search`/,
