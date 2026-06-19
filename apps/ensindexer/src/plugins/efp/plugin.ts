@@ -46,7 +46,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "ListRegistry")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               efpBase.chain.id,
               efpBase.contracts.ListRegistry,
             ),
@@ -56,7 +56,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "AccountMetadata")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               efpBase.chain.id,
               efpBase.contracts.AccountMetadata,
             ),
@@ -67,17 +67,17 @@ export default createPlugin({
         [namespaceContract(pluginName, "ListRecords")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               efpBase.chain.id,
               efpBase.contracts.ListRecords,
             ),
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               efpOptimism.chain.id,
               efpOptimism.contracts.ListRecords,
             ),
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               efpEthereum.chain.id,
               efpEthereum.contracts.ListRecords,
             ),

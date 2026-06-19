@@ -140,6 +140,9 @@ export function parseTagOp(data: Hex | string | null | undefined): ParsedTagOp |
 
   // Match api-v2: decode as UTF-8 and strip embedded NULLs.
   const tag = hexToString(`0x${tagHex}`).replace(/\0/g, "");
+  // A tag op carrying no tag bytes (or an all-NULL payload) has no meaningful tag; skip it rather
+  // than store an empty-string tag.
+  if (tag === "") return null;
 
   return { record: parsed.record, tag };
 }

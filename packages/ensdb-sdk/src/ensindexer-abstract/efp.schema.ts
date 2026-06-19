@@ -65,29 +65,23 @@ export const efpLists = onchainTable(
  * events (emitted by the `ListRecords` contract, keyed only by slot) can find the owning list NFT
  * by primary key instead of scanning `efp_lists`.
  */
-export const efpListStorageLocations = onchainTable(
-  "efp_list_storage_locations",
-  (t) => ({
-    /** Composite key "chainId-contractAddress-slot". */
-    id: t.text().primaryKey(),
-    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
-    contractAddress: t.hex().notNull().$type<NormalizedAddress>(),
-    slot: t.hex().notNull(),
-    /**
-     * Token id of the list NFT that owns this storage location's reverse mapping. The slot is
-     * arbitrary, attacker-settable bytes, so multiple list NFTs can point at the same
-     * `(chainId, contract, slot)`; this records the FIRST list to claim it (first writer wins), and
-     * the `UpdateListStorageLocation` handler gates every write/delete of this row on that ownership.
-     * A consequence: when lists share a slot, only the owner's `EfpListRecord.list` back-ref and
-     * `user`/`manager` role routing track that slot.
-     */
-    tokenId: t.bigint().notNull().$type<TokenId>(),
-    updatedAt: t.bigint().notNull().$type<DurationBigInt>(),
-  }),
-  (t) => ({
-    idx_tokenId: index().on(t.tokenId),
-  }),
-);
+export const efpListStorageLocations = onchainTable("efp_list_storage_locations", (t) => ({
+  /** Composite key "chainId-contractAddress-slot". */
+  id: t.text().primaryKey(),
+  chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+  contractAddress: t.hex().notNull().$type<NormalizedAddress>(),
+  slot: t.hex().notNull(),
+  /**
+   * Token id of the list NFT that owns this storage location's reverse mapping. The slot is
+   * arbitrary, attacker-settable bytes, so multiple list NFTs can point at the same
+   * `(chainId, contract, slot)`; this records the FIRST list to claim it (first writer wins), and
+   * the `UpdateListStorageLocation` handler gates every write/delete of this row on that ownership.
+   * A consequence: when lists share a slot, only the owner's `EfpListRecord.list` back-ref and
+   * `user`/`manager` role routing track that slot.
+   */
+  tokenId: t.bigint().notNull().$type<TokenId>(),
+  updatedAt: t.bigint().notNull().$type<DurationBigInt>(),
+}));
 
 /**
  * One row per record currently in a list. The `record` column is the canonical

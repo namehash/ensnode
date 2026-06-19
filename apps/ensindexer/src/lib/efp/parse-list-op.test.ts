@@ -109,6 +109,14 @@ describe("parseTagOp", () => {
     expect(parseTagOp("0x0101")).toBeNull();
     expect(parseTagOp(null)).toBeNull();
   });
+
+  it("returns null when the tag is empty after decoding", () => {
+    const recordPrefixHex = `0101${"cc".repeat(20)}`;
+    // a valid record prefix carrying no tag bytes
+    expect(parseTagOp(`0x${recordPrefixHex}` as `0x${string}`)).toBeNull();
+    // a record prefix carrying an all-NULL tag payload
+    expect(parseTagOp(`0x${recordPrefixHex}0000` as `0x${string}`)).toBeNull();
+  });
 });
 
 describe("slotToBytes32", () => {
