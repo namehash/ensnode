@@ -1596,12 +1596,12 @@
         "resolver": {
           "assigned": {
             "contract": {
-              "address": "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63"
+              "address": "0xc6d566a56a1aff6508b41f6c90ff131615583bcd"
             }
           },
           "effective": {
             "contract": {
-              "address": "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63"
+              "address": "0xde9049636f4a1dfe0a64d1bfe3155c0a14c54f31"
             }
           }
         }

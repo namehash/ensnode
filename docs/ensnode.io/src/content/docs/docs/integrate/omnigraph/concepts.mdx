@@ -82,7 +82,7 @@ query Namegraph {
 
 The **Unigraph** is the entire collection of these disjoint ENSv2 Namegraphs and multiple ENSv1 Nametables, combined together into a single unified data model using ENS Resolution semantics. Navigating the Unigraph from `"eth"` down to `"vitalik.eth"` and beyond looks identical regardless of whether the underlying entities are ENSv1 or ENSv2.
 
-The `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins), implemented in [ENSIndexer](/docs/services/ensindexer), is what builds this unified model. The Unigraph constructs many Namegraphs — at minimum one rooted at the ENSv1 Root Registry and one rooted at the ENSv2 Root Registry. It also includes special support for unifying multiple ENSv1 Nametables across multiple chains into the Unigraph, including: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`).
+The `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins), implemented in [ENSIndexer](/docs/services/ensindexer), is what builds this unified model. The Unigraph models many Namegraphs and Nametables together — for example, the ENSv1 Nametable rooted at the ENSv1 Root Registry and the ENSv2 Namegraph rooted at the ENSv2 Root Registry. It also includes special support for unifying multiple ENSv1 Nametables across multiple chains into the Unigraph, including: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`).
 
 ```mermaid
 flowchart TD
@@ -120,7 +120,7 @@ query Basenames {
 
 Once ENSv2 launches, the ENSv2 Namegraphs will exist in parallel with the ENSv1 Nametables. When referencing a Domain by `name`, the Omnigraph will start at the **ENSv2 Root Registry**, and traverse the Unigraph to find the appropriate Domain. Once `.eth` names are reserved in the ENSv2 `EthRegistry`, then the **ENSv2 Domain** will be returned, since that's the Domain that would be referenced during resolution. This is part of why it's important to reference specific Domains by `id`; once `vitalik` has been reserved in the ENSv2 EthRegistry, the ENS protocol considers the ENSv2 Domain (_not_ the ENSv1 Domain) to be the 'real' one. That said, after the `.eth` names are reserved (but before they're individually migrated), their resolver will be the `ENSv1Resolver`, forwarding resolution to the ENSv1 Nametable.
 
-The end result is that there are **two** Domains considered to be "vitalik.eth", one in the ENSv1 Nametable and one in an ENSv2 Namegraph.
+The end result is that there are **two** Domains considered to be "vitalik.eth", one in an ENSv1 Nametable and one in an ENSv2 Namegraph.
 
 ```graphql title="example.gql"
 query ByProtocolVersion {
@@ -174,7 +174,7 @@ Addressing a Domain by **name** is a different operation. It's **forward travers
 These two views are not interchangeable:
 
 - The `id` you receive from a name lookup _is_ the stable reference to the on-chain entity that the Unigraph currently resolves `"vitalik.eth"` to.
-- But `"vitalik.eth"` is not a stable reference to that entity. A Domain's position in the namegraph can be re-parented or re-aliased — and tomorrow, `"vitalik.eth"` may resolve to an entirely different on-chain Domain, which may have a different resolver with different records.
+- But `"vitalik.eth"` is not a stable reference to that entity. A Domain's position in the Unigraph can be re-parented or re-aliased — and tomorrow, `"vitalik.eth"` may resolve to an entirely different on-chain Domain, which may have a different resolver with different records.
 
 Address the exact on-chain entity by `id` — stable across time:
 
