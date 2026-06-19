@@ -186,8 +186,10 @@ builder.scalarType("TokenId", {
           return;
         }
 
-        // Enforce the uint256 upper bound so the scalar contract stays honest.
-        if (BigInt(ctx.value) > 2n ** 256n - 1n) {
+        // Enforce the uint256 upper bound so the scalar contract stays honest. A uint256 is at most
+        // 78 decimal digits, so reject longer strings up front — a pathologically long input never
+        // reaches the unbounded BigInt() conversion.
+        if (ctx.value.length > 78 || BigInt(ctx.value) > 2n ** 256n - 1n) {
           ctx.issues.push({
             code: "custom",
             message: "TokenId must not exceed the uint256 maximum (2^256 - 1)",
