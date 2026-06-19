@@ -177,7 +177,7 @@
   },
   {
     "id": "efp-who-follows",
-    "query": "# Raw record view: includes block/mute and non-primary lists — inspect `tags`.\n# For the validated social graph, prefer Account.efp.followers instead.\nquery EfpWhoFollows($address: Address!) {\n  efp {\n    listRecords(where: { recordData: $address }, first: 25) {\n      totalCount\n      edges {\n        node {\n          tags\n          list { tokenId user }\n        }\n      }\n    }\n  }\n}",
+    "query": "# Raw record view: includes block/mute and non-primary lists — inspect the tags.\n# For the validated social graph, prefer Account.efp.followers instead.\nquery EfpWhoFollows($address: Address!) {\n  efp {\n    listRecords(where: { recordData: $address }, first: 25) {\n      totalCount\n      edges {\n        node {\n          tags\n          list { tokenId user }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     }

@@ -964,7 +964,7 @@ query EfpFollowGraph($address: Address!) {
     id: "efp-who-follows",
     plugin: PluginName.EFP,
     query: `
-# Raw record view: includes block/mute and non-primary lists — inspect \`tags\`.
+# Raw record view: includes block/mute and non-primary lists — inspect the tags.
 # For the validated social graph, prefer Account.efp.followers instead.
 query EfpWhoFollows($address: Address!) {
   efp {

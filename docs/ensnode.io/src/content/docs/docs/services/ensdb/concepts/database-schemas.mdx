@@ -528,3 +528,98 @@ After an NFT is indexed, it is never deleted from the index. When an indexed NFT
 | `mint_status`      | `text`        | no       | Either `minted` or `burned`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 **Indexes:** `domain_id`, `owner`.
+
+---
+
+### EFP
+
+Defined in [`efp.schema.ts`](https://github.com/namehash/ensnode/blob/main/packages/ensdb-sdk/src/ensindexer-abstract/efp.schema.ts).
+
+Indexes the [Ethereum Follow Protocol (EFP)](/docs/integrate/omnigraph/efp) onchain social graph — list NFTs, the records and tags they hold, and account metadata. Tables are prefixed `efp_`. The model mirrors the [ethereumfollowprotocol/api-v2](https://github.com/ethereumfollowprotocol/api) reference indexer, with two adaptations for ENSNode's primary-key-only access pattern: `efp_list_storage_locations` is a reverse index so list-metadata events resolve the owning list NFT by primary key, and a record's tags are embedded as an array on `efp_list_records` (rather than a separate join table) so removing a record is a single primary-key delete. See the [EFP Omnigraph reference](/docs/integrate/omnigraph/efp) for the higher-level API over this data.
+
+#### efp_lists
+
+One row per minted `ListRegistry` NFT (a "list"). EFP separates the NFT `owner`, the `user` allowed to post records, and the `manager` allowed to administer the list. The `list_storage_location_*` columns describe which `(chain_id, contract_address, slot)` tuple in `efp_list_records` stores this list's records.
+
+| Column                                   | Type          | Nullable | Description                                                            |
+| ---------------------------------------- | ------------- | -------- | ---------------------------------------------------------------------- |
+| `id`                                     | `numeric(78)` | no       | ERC-721 token id of the list NFT (a `uint256`). Primary key.           |
+| `owner`                                  | `text`        | no       | Current ERC-721 owner of the list NFT.                                 |
+| `nft_chain_id`                           | `bigint`      | no       | Chain id of the `ListRegistry` NFT (Base / `8453` on mainnet).         |
+| `nft_contract_address`                   | `text`        | no       | `ListRegistry` contract address on `nft_chain_id`.                     |
+| `list_storage_location`                  | `text`        | yes      | Raw `UpdateListStorageLocation` payload.                               |
+| `list_storage_location_chain_id`         | `bigint`      | yes      | Decoded list storage location: target chain id. `null` if undecodable. |
+| `list_storage_location_contract_address` | `text`        | yes      | Decoded list storage location: target contract address.                |
+| `list_storage_location_slot`             | `text`        | yes      | Decoded list storage location: target slot (`bytes32`).                |
+| `user`                                   | `text`        | yes      | Address allowed to post records to this list (the EFP "user").         |
+| `manager`                                | `text`        | yes      | Address allowed to administer this list (the EFP "manager").           |
+| `created_at`                             | `numeric(78)` | no       | Unix timestamp when the list was first indexed.                        |
+| `updated_at`                             | `numeric(78)` | no       | Unix timestamp of the most recent update.                              |
+
+**Indexes:** `owner`, `user`, `manager`, `(list_storage_location_chain_id, list_storage_location_contract_address, list_storage_location_slot)`. The `numeric` primary key already orders numerically, so list pagination needs no extra index.
+
+#### efp_list_storage_locations
+
+Reverse index from a storage location `(chain_id, contract_address, slot)` to the list NFT that points at it, so `UpdateListMetadata` events (keyed only by slot) can resolve the owning list NFT by primary key instead of scanning `efp_lists`. The slot is arbitrary, attacker-settable bytes, so multiple list NFTs can point at the same location; this records the first list to claim it (first writer wins).
+
+| Column             | Type          | Nullable | Description                                                                  |
+| ------------------ | ------------- | -------- | ---------------------------------------------------------------------------- |
+| `id`               | `text`        | no       | Composite key `{chain_id}-{contract_address}-{slot}`. Primary key.           |
+| `chain_id`         | `bigint`      | no       | Target chain id of the storage location.                                     |
+| `contract_address` | `text`        | no       | `ListRecords` contract address.                                              |
+| `slot`             | `text`        | no       | Storage slot (`bytes32`).                                                    |
+| `token_id`         | `numeric(78)` | no       | Token id of the list NFT that owns this reverse mapping (first writer wins). |
+| `updated_at`       | `numeric(78)` | no       | Unix timestamp of the most recent update.                                    |
+
+#### efp_list_records
+
+One row per record currently in a list. `record` is the canonical `version | type | address` 22-byte prefix (any trailing junk after the address truncated), which is also what tag and remove ops reference. A record's `tags` are embedded here as a set, so removing a record drops its tags in the same primary-key delete.
+
+| Column             | Type          | Nullable | Description                                                                             |
+| ------------------ | ------------- | -------- | --------------------------------------------------------------------------------------- |
+| `id`               | `text`        | no       | Composite key `{chain_id}-{contract_address}-{slot}-{record}`. Primary key.             |
+| `chain_id`         | `bigint`      | no       | Chain id where the records are stored.                                                  |
+| `contract_address` | `text`        | no       | `ListRecords` contract address.                                                         |
+| `slot`             | `text`        | no       | Storage slot (`bytes32`) of the owning list.                                            |
+| `record`           | `text`        | no       | Canonical record prefix `version \| type \| address` (22 bytes).                        |
+| `record_version`   | `integer`     | no       | Decoded record header — version byte.                                                   |
+| `record_type`      | `integer`     | no       | Decoded record header — type byte (only `1` = address record is indexed).               |
+| `record_data`      | `text`        | no       | Decoded record data — the 20-byte target address.                                       |
+| `tags`             | `text[]`      | no       | UTF-8 tags attached to this record (a set; e.g. `block`, `mute`, `top8`). Default `[]`. |
+| `created_at`       | `numeric(78)` | no       | Unix timestamp when the record was added.                                               |
+
+**Indexes:** `(chain_id, contract_address, slot)`, `record_data`.
+
+#### efp_account_metadata
+
+Most-recent `value` per `(address, key)` account-metadata pair (today only `primary-list`).
+
+| Column                  | Type          | Nullable | Description                                                                                                                          |
+| ----------------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                    | `text`        | no       | Composite key `{chain_id}-{address}-{key}`. Primary key.                                                                             |
+| `chain_id`              | `bigint`      | no       | Chain id of the `AccountMetadata` contract.                                                                                          |
+| `contract_address`      | `text`        | no       | `AccountMetadata` contract address.                                                                                                  |
+| `address`               | `text`        | no       | Account whose metadata this is.                                                                                                      |
+| `key`                   | `text`        | no       | Metadata key (UTF-8 string), e.g. `primary-list`.                                                                                    |
+| `value`                 | `text`        | no       | Metadata value (raw bytes).                                                                                                          |
+| `primary_list_token_id` | `numeric(78)` | yes      | For the `primary-list` key only: the decoded token id of the account's primary list. `null` for any other key, or a malformed value. |
+| `created_at`            | `numeric(78)` | no       | Unix timestamp when first indexed.                                                                                                   |
+| `updated_at`            | `numeric(78)` | no       | Unix timestamp of the most recent update.                                                                                            |
+
+**Indexes:** `address`, `(address, key)`, `primary_list_token_id`.
+
+#### efp_list_metadata
+
+EFP List Metadata (`user` / `manager`), keyed by the storage location it is set at (`{chain_id}-{contract_address}-{slot}-{key}`), not by list NFT. `UpdateListMetadata` is emitted on the `ListRecords` contract while the storage-location mapping is created by `UpdateListStorageLocation` on the `ListRegistry` contract (a different contract, sometimes on a different chain), so the two can arrive in either order. The value here is durable: it survives a list re-pointing its storage location.
+
+| Column             | Type          | Nullable | Description                                                              |
+| ------------------ | ------------- | -------- | ------------------------------------------------------------------------ |
+| `id`               | `text`        | no       | Composite key `{chain_id}-{contract_address}-{slot}-{key}`. Primary key. |
+| `chain_id`         | `bigint`      | no       | Target chain id of the storage location.                                 |
+| `contract_address` | `text`        | no       | `ListRecords` contract address.                                          |
+| `slot`             | `text`        | no       | Storage slot (`bytes32`).                                                |
+| `key`              | `text`        | no       | Metadata key (`user` or `manager`).                                      |
+| `value`            | `text`        | no       | Metadata value (raw bytes).                                              |
+| `created_at`       | `numeric(78)` | no       | Unix timestamp when first indexed.                                       |
+
+**Indexes:** `(chain_id, contract_address, slot)`.
