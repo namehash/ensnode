@@ -1,6 +1,6 @@
 ---
 name: efp-protocol
-description: How the Ethereum Follow Protocol (EFP) works and how it surfaces in the ENS Omnigraph — the onchain social graph (lists, list records, tags), primary-list validation, block/mute follower semantics, and the `query.efp` / `Account.efp` fields for reading follows, followers, and following. Read this before querying or displaying EFP follow data.
+description: How the Ethereum Follow Protocol (EFP) works and how it surfaces in the ENS Omnigraph — the onchain social graph (lists, list records, tags), primary-list validation, block/mute follower semantics, and the `Query.efp` / `Account.efp` fields for reading follows, followers, and following. Read this before querying or displaying EFP follow data.
 ---
 
 # Ethereum Follow Protocol (EFP)
@@ -76,7 +76,7 @@ Prefer this for "who does X follow / who follows X" — it applies primary-list 
 - `lists` — every list this account is the `user` of (not necessarily validated/primary).
 - `metadata(key: "primary-list")` / `metadatas` — raw account-metadata entries.
 
-### `query.efp` — list-centric queries
+### `Query.efp` — list-centric queries
 
 - `efp.list(by: { tokenId })` — one list by NFT token id.
 - `efp.lists(where: { owner, user, manager })` — find lists by role address.
