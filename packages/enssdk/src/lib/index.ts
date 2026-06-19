@@ -13,6 +13,7 @@ export * from "./labelhash";
 export * from "./namehash";
 export * from "./names";
 export * from "./normalization";
+export * from "./omnigraph-consts";
 export * from "./parse-labelhash";
 export * from "./parse-reverse-name";
 export * from "./reinterpretation";

@@ -1,0 +1,38 @@
+{
+  "private": true,
+  "name": "ensrainbowbeam",
+  "version": "1.10.1",
+  "type": "module",
+  "description": "EnsRainbowBeam — ingests label submissions and classifies them against ENSNode's Omnigraph index",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensrainbowbeam"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensrainbowbeam",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch --env-file ./.env.local src/index.ts",
+    "test": "vitest",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "@hono/node-server": "catalog:",
+    "enssdk": "workspace:*",
+    "graphql": "^16.11.0",
+    "hono": "catalog:",
+    "viem": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "tsx": "^4.19.3",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

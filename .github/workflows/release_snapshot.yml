@@ -12,7 +12,7 @@
 #
 # Published artifacts:
 # - NPM packages: All @ensnode/* packages published with @next tag
-# - Docker images: ensindexer, ensadmin, ensapi, ensrainbow published with @next tag
+# - Docker images: ensindexer, ensadmin, ensapi, ensrainbow, ensrainbowbeam published with @next tag
 # - No GitHub releases or tags are created
 #
 # Version behavior:
@@ -96,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [ensindexer, ensadmin, ensrainbow, ensapi]
+        app: [ensindexer, ensadmin, ensrainbow, ensapi, ensrainbowbeam]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

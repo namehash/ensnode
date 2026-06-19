@@ -21,6 +21,7 @@ import type {
   InterpretedLabel,
   InterpretedName,
   JsonValue,
+  LabelHash,
   LitecoinAddress,
   MonacoinAddress,
   Node,
@@ -86,6 +87,7 @@ export type BuilderScalars = {
   BinanceAddress: { Input: BinanceAddress; Output: BinanceAddress };
   SolanaAddress: { Input: SolanaAddress; Output: SolanaAddress };
   Hex: { Input: Hex; Output: Hex };
+  LabelHash: { Input: LabelHash; Output: LabelHash };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };
   InterfaceId: { Input: InterfaceId; Output: InterfaceId };

@@ -1,0 +1,21 @@
+services:
+  ensrainbowbeam:
+    container_name: ensrainbowbeam
+    image: ghcr.io/namehash/ensnode/ensrainbowbeam:${ENSNODE_VERSION:-1.10.1}
+    build:
+      dockerfile: ./apps/ensrainbowbeam/Dockerfile
+      context: ../..
+    ports:
+      - "4444:4444"
+    environment:
+      ENSNODE_URL: http://ensapi:4334
+    depends_on:
+      ensapi:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:4444/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      start_interval: 1s

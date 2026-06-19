@@ -20,6 +20,7 @@ jobs:
       ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
       ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.tag }}"
       ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag }}"
+      ENSRAINBOWBEAM_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbowbeam:${{ inputs.tag }}"
       ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag }}"
       # Terraform related envs
 
@@ -55,6 +56,7 @@ jobs:
           docker manifest inspect ${{ env.ENSINDEXER_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSINDEXER_DOCKER_IMAGE }}"; exit 1; }
           docker manifest inspect ${{ env.ENSAPI_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSAPI_DOCKER_IMAGE }}"; exit 1; }
           docker manifest inspect ${{ env.ENSRAINBOW_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}"; exit 1; }
+          docker manifest inspect ${{ env.ENSRAINBOWBEAM_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSRAINBOWBEAM_DOCKER_IMAGE }}"; exit 1; }
           docker manifest inspect ${{ env.ENSADMIN_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSADMIN_DOCKER_IMAGE }}"; exit 1; }
 
       - name: Setup Terraform
