@@ -15,15 +15,16 @@ RUN corepack enable
 WORKDIR /app
 
 # Copy package files for dependency installation
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml skills-npm.config.ts ./
-COPY .agents/ .agents/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ packages/
 COPY patches/ patches/
-COPY scripts/ scripts/
 COPY apps/ensrainbow/package.json apps/ensrainbow/
 
-# Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# Install dependencies. --ignore-scripts skips the root `prepare` lifecycle (dev-only skill
+# symlinking via skills-npm + scripts/link-local-skills.mjs), which is irrelevant to a runtime
+# image and would otherwise force copying skills-npm.config.ts, .agents/ and scripts/ into the
+# build context. The lockfile pins no built dependencies, so nothing else relies on scripts here.
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy the application source and scripts
 COPY apps/ensrainbow/src/ apps/ensrainbow/src/
