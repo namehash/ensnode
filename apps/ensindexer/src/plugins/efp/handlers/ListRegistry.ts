@@ -127,9 +127,11 @@ export default function () {
       // An undecodable payload (future version, non-onchain location type, or malformed) replaces
       // the on-chain location with something this indexer can't represent. Drop the stale decoded
       // location, its reverse mapping, and its location-scoped roles rather than keep resolving the
-      // old slot; keep the raw payload for debugging.
+      // old slot; keep the raw payload for debugging. This is an expected on-chain condition (e.g.
+      // lists that encode a zero chainId, which EFP's own API also resolves to no records), so log
+      // at debug rather than flood warnings.
       if (!parsed) {
-        logger.warn({
+        logger.debug({
           msg: `EFP UpdateListStorageLocation(tokenId=${tokenId}) has an undecodable payload; clearing the list's location`,
         });
         if (oldLocationId !== null) {
