@@ -170,8 +170,8 @@ export const integrateSidebarTopic = {
           ],
         },
         {
-          label: "SQL Viewer",
-          link: "/docs/integrate/unigraph/sql-viewer",
+          label: "Interactive Playground",
+          link: "/docs/integrate/unigraph/interactive-playground",
         },
         {
           label: "Schema Reference",
