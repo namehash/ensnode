@@ -16,6 +16,10 @@ This skill depends on the following sibling skills — load them first:
 - **`base`** — the shared working conventions every ENS skill assumes.
 - **`ens-protocol`** — the protocol this API models (names and the nametree, normalization, resolution, registries/resolvers/registrars, records). Read it first if the data shapes below don't yet make sense.
 
+Conditionally, load when the task touches those fields:
+
+- **`efp-protocol`** — load first whenever the query involves Ethereum Follow Protocol fields (`query.efp`, `Account.efp`, and the `Efp*` types: lists, list records, following/followers, tags, primary lists). Those fields are governed by EFP-specific validity rules (primary-list validation, `block`/`mute` exclusion, validated vs. raw record views) that you will get wrong without it.
+
 To _run_ the queries you author here, use a runner: **`enscli`** from a shell (every example below uses it), or **`enssdk`** from TypeScript. Those runners depend on this skill, not the other way around.
 
 ## How to run a query
@@ -783,6 +787,10 @@ query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
+      # Reverse resolution: given this address + a chain, get the primary
+      # name the address has set for that chain.
+      # primaryName returns the result for a single chain (here, Optimism).
+      # (onePrimaryName / twoPrimaryNames are just GraphQL aliases.)
       onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
         chainName
         name {
@@ -791,6 +799,7 @@ query AccountPrimaryNames($address: Address!) {
         }
       }
 
+      # primaryNames returns one result per requested chain, in a single call.
       twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         chainName
         name {
@@ -1016,18 +1025,17 @@ Variables:
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
+      # the Resolver explicitly assigned to this Domain
       assigned {
         contract {
           address
         }
-        events(first: 5) {
-          edges {
-            node {
-              topics
-              data
-              timestamp
-            }
-          }
+      }
+      # the Resolver that ENS Forward Resolution (ENSIP-10) actually lands
+      # on for this Domain — i.e. its effective Resolver
+      effective {
+        contract {
+          address
         }
       }
     }
@@ -1146,6 +1154,9 @@ Variables:
 ```graphql
 query AccountMigratedNames($address: Address!) {
   account(by: { address: $address }) {
+    # Count the ENSv1 and ENSv2 domains owned by the account.
+    # For simplicity this example query doesn't include additional logic
+    # to filter out domains that have expired.
     v1DomainsCount: domains(where: { version: ENSv1 }) {
       totalCount
     }
