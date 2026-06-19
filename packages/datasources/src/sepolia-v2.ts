@@ -87,10 +87,13 @@ export default {
         address: "0x250a6c640297f605b63c6e91c7cd376f04b288da",
         startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
+      // NOTE: named UpgradableUniversalResolverProxy in deployment
+      // The proxy itself was deployed at block 8928790 (reused cross-chain vanity address); index
+      // from the sepolia-v2 deployment block, since earlier blocks predate its use in this deployment.
       UniversalResolver: {
         abi: UniversalResolverABI,
-        address: "0x651d670ce0d0f1ed0893f39d51fd0dbd4546c9ef",
-        startBlock: 10893223,
+        address: "0xeeeeeeee14d718c2b47d9923deab1335e144eeee",
+        startBlock: 10921916,
       },
     },
   },
@@ -106,18 +109,18 @@ export default {
       },
       RootRegistry: {
         abi: Registry,
-        address: "0x835f0b284e78cd3f358bcf6cba3b53809f09b79e",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0xc960f7217d3643b525ef36bec8adf86953cd9ab8",
+        startBlock: 10921920,
       },
       ETHRegistry: {
         abi: Registry,
-        address: "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0xdedb92913a25abe1f7bcdd85d8a344a43b398b67",
+        startBlock: 10921984,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0xb68e594a47fe057bd31e7a8229ffcfd85b2e28af",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x8c2e866b439358c41ae05de9cbe8a00bfefaffca",
+        startBlock: 10921994,
       },
     },
   },
@@ -131,11 +134,11 @@ export default {
         startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
       },
 
-      // NOTE: named PublicResolver in deployment
+      // NOTE: named PublicResolverV2 in deployment
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0xb441cb480460eb8b2964dcb82b64a883b14abf3e",
-        startBlock: SEPOLIA_ENSV2_DEPLOYMENT_BLOCK,
+        address: "0x5239a812ec9a62f46dbb5de8f346c8efe7553a9f",
+        startBlock: 10921998,
       },
 
       BaseReverseResolver: {
