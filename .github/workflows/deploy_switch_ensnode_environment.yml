@@ -86,6 +86,9 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
+          # ENSDB PLAYGROUND
+          redis-cli -u $REDIS_URL SET traefik/http/routers/ensdb-playground-router/service "${TARGET_ENVIRONMENT}-ensdb-playground"
+
           # ENSRAINBOW
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
 
