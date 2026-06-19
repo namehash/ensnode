@@ -136,14 +136,14 @@ export function blockrangeForChain(
  * indexing range by the chain's end block (see {@link blockrangeForChain}).
  *
  * @param chainEndBlocks per-chain end-block overrides, keyed by chain id
- * @param {number} chainId
+ * @param {ChainId} chainId
  * @param {ContractConfig} contractConfig
  *
  * @returns network configuration based on the contract
  */
 export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
   chainEndBlocks: ReadonlyMap<ChainId, number>,
-  chainId: number,
+  chainId: ChainId,
   contractConfig: CONTRACT_CONFIG,
 ) {
   const contractBlockrange = buildBlockNumberRange(
@@ -195,7 +195,7 @@ export function pickContracts<T extends string>(
  */
 export function mergedChainConfigForContracts(
   chainEndBlocks: ReadonlyMap<ChainId, number>,
-  chainId: number,
+  chainId: ChainId,
   contracts: readonly ContractConfig[],
 ) {
   if (contracts.length === 0) {

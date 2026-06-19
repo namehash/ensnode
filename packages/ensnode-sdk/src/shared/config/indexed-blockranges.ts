@@ -48,9 +48,16 @@ export function buildIndexedBlockranges(
           continue;
         }
 
+        // The chain's end block caps the contract's range: index up to whichever bound comes first
+        // (the contract's own endBlock or the chain's). This mirrors `constrainBlockrange` on the
+        // Ponder config path, so the derived view never reports a range exceeding the checkpoint.
+        const effectiveEndBlock = Math.min(
+          datasourceContract.endBlock ?? Infinity,
+          chainEndBlock ?? Infinity,
+        );
         const contractIndexedBlockrange = buildBlockNumberRange(
           datasourceContract.startBlock,
-          datasourceContract.endBlock ?? chainEndBlock,
+          Number.isFinite(effectiveEndBlock) ? effectiveEndBlock : undefined,
         );
 
         const indexedBlockrange = currentChainIndexedBlockrange

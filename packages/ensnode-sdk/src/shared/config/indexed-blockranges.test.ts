@@ -228,4 +228,41 @@ describe("buildIndexedBlockranges()", () => {
 
     expect(result).toStrictEqual(expectedEntries);
   });
+
+  it("caps a contract's explicit end block at the chain end block when it exceeds it", () => {
+    // Arrange
+    const ensrootDatasourceConfig: unknown = {
+      chain: { id: 1 },
+      contracts: {
+        // explicit endBlock (800) exceeds the chain end block (500), so it must be capped to 500
+        registry: { startBlock: 100, endBlock: 800 },
+      },
+    };
+
+    const datasourcesByName: Partial<
+      Record<DatasourceName, ReturnType<typeof datasources.maybeGetDatasource>>
+    > = {
+      [DatasourceNames.ENSRoot]: datasourceMock(ensrootDatasourceConfig),
+    };
+
+    maybeGetDatasourceMock.mockImplementation(
+      (_namespace, datasourceName) => datasourcesByName[datasourceName as DatasourceName],
+    );
+
+    const pluginsRequiredDatasourceNames = new Map([
+      [PluginName.Subgraph, [DatasourceNames.ENSRoot]],
+    ]);
+
+    const chainEndBlocks = new Map<ChainId, number>([[1, 500]]);
+
+    // Act
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      chainEndBlocks,
+      pluginsRequiredDatasourceNames,
+    );
+
+    // Assert
+    expect(result).toStrictEqual(new Map([[1, buildBlockNumberRange(100, 500)]]));
+  });
 });
