@@ -8,7 +8,7 @@ function buildOmnigraphCurlRequestBody(params: {
   query: string;
   variables: Record<string, unknown>;
 }): string {
-  const compactQuery = params.query.replace(/\s+/g, " ").trim();
+  const compactQuery = compactGraphQLQuery(params.query);
   return `{
   "query": ${JSON.stringify(compactQuery)},
   "variables": ${JSON.stringify(params.variables)}
@@ -83,4 +83,14 @@ export function buildEnsAdminOmnigraphUrl(params: {
   url.searchParams.set("connection", params.connection);
   url.searchParams.set("variables", stringifyJsonForDocs(params.variables));
   return url.toString();
+}
+
+/** Strip GraphQL `#` line comments so compacting or parsing ignores comment text. */
+export function stripGraphQLLineComments(query: string): string {
+  return query.replace(/^\s*#.*$/gm, "");
+}
+
+/** Single-line GraphQL suitable for JSON curl bodies. */
+export function compactGraphQLQuery(query: string): string {
+  return stripGraphQLLineComments(query).replace(/\s+/g, " ").trim();
 }

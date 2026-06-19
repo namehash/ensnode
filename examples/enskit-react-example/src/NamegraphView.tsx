@@ -3,8 +3,7 @@
  *  Namegraph Explorer — a vibe-coded demo
  * ─────────────────────────────────────────────────────────────────────────────
  *
- *  This whole page and its supporting modules (this file, plus `ensnode.ts`)
- *  were vibe-coded: written largely by prompting an agent, not by hand-tuning
+ *  This whole page and its supporting modules were vibe-coded:
  *  every line. They exist to show how far you can get building real ENS
  *  experiences with off-the-shelf tooling alone:
  *
@@ -30,9 +29,11 @@ import type {
 import { FileTree, useFileTree, useFileTreeSelection } from "@pierre/trees/react";
 import { graphql, type ResultOf, type VariablesOf } from "enssdk/omnigraph";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 
-import { client } from "./ensnode";
+import { namegraphPath, useAppPath } from "./app-paths";
+import type { OmnigraphEnsNodeClient } from "./client";
+import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
 
 const PAGE_SIZE = 50;
 
@@ -268,7 +269,11 @@ interface RegistryPage {
   endCursor: string | null;
 }
 
-async function fetchRegistryPage(registryId: string, after: string | null): Promise<RegistryPage> {
+async function fetchRegistryPage(
+  client: OmnigraphEnsNodeClient,
+  registryId: string,
+  after: string | null,
+): Promise<RegistryPage> {
   const result = await client.omnigraph.query({
     query: RegistryDomainsQuery,
     variables: {
@@ -373,6 +378,11 @@ interface SentinelMeta {
 type NodeMeta = DomainNodeMeta | LoadMoreMeta | SentinelMeta;
 
 export function NamegraphView({ registryId }: { registryId: string }) {
+  const { client } = useEnsnodeInstance();
+  const appPath = useAppPath();
+  const location = useLocation();
+  const fromRegistryId = (location.state as { fromRegistryId?: string } | null)?.fromRegistryId;
+
   // Per-path metadata backing the file tree's (path-only) nodes. A ref so the
   // model's render-time decoration callback always reads the latest map.
   const metaRef = useRef<Map<string, NodeMeta>>(new Map());
@@ -564,7 +574,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
       };
 
       try {
-        const page = await fetchRegistryPage(meta.subregistryId, null);
+        const page = await fetchRegistryPage(client, meta.subregistryId, null);
         // Mark loaded only on success so a failed fetch stays retryable.
         loadedDirsRef.current.add(dirPath);
         dropSentinel(placeholderPath);
@@ -596,7 +606,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         pendingDirsRef.current.add(dirPath);
       }
     },
-    [model, addDomain, addLoadMore],
+    [client, model, addDomain, addLoadMore],
   );
 
   const loadMore = useCallback(
@@ -606,7 +616,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         ops.push({ type: "remove", path: meta.path, recursive: true });
       }
       try {
-        const page = await fetchRegistryPage(meta.registryId, meta.after);
+        const page = await fetchRegistryPage(client, meta.registryId, meta.after);
         for (const domain of page.domains) addDomain(ops, meta.parentPath, domain);
         if (page.hasNextPage && page.endCursor) {
           addLoadMore(ops, meta.parentPath, meta.registryId, page.endCursor);
@@ -618,7 +628,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
       }
       model.batch(ops);
     },
-    [model, addDomain, addLoadMore],
+    [client, model, addDomain, addLoadMore],
   );
 
   // Auto-load wrapper: dedupes concurrent triggers for the same sentinel while
@@ -640,7 +650,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
     setErrorMessage(null);
     (async () => {
       try {
-        const page = await fetchRegistryPage(registryId, null);
+        const page = await fetchRegistryPage(client, registryId, null);
         if (cancelled) return;
         anchorRef.current = page.domains[0]?.parentCanonicalName ?? "";
 
@@ -665,7 +675,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [model, registryId, addDomain, addLoadMore]);
+  }, [client, model, registryId, addDomain, addLoadMore]);
 
   // Lazily load a subregistry the first time its Domain is expanded. The library
   // has no expand event, so we detect expansion from any model change.
@@ -713,6 +723,12 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         disagrees · <strong>↩?</strong> unknown
       </p>
 
+      {fromRegistryId && (
+        <p>
+          <Link to={appPath(namegraphPath(fromRegistryId))}>← Back to parent registry</Link>
+        </p>
+      )}
+
       {status === "error" && <p style={{ color: "red" }}>Error: {errorMessage}</p>}
       {status === "loading" && <p>Loading namegraph…</p>}
 
@@ -740,7 +756,7 @@ export function NamegraphView({ registryId }: { registryId: string }) {
         {/* Stretches to the row (tree) height; scrolls only when its panels exceed it. */}
         <div style={{ flex: "1 1 45%", minHeight: 0, overflowY: "auto" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <DetailPanel meta={selectedMeta} />
+            <DetailPanel meta={selectedMeta} registryId={registryId} />
             <ResolutionPanels
               domainId={selectedMeta?.kind === "domain" ? selectedMeta.domainId : null}
             />
@@ -768,7 +784,7 @@ function formatResolver(resolver: ResolverRef | null) {
   );
 }
 
-function DetailPanel({ meta }: { meta: NodeMeta | null }) {
+function DetailPanel({ meta, registryId }: { meta: NodeMeta | null; registryId: string }) {
   if (!meta) {
     return (
       <div style={panelStyle}>
@@ -853,7 +869,11 @@ function DetailPanel({ meta }: { meta: NodeMeta | null }) {
           <strong>Subregistry</strong>
         </dt>
         <dd style={{ margin: 0 }}>
-          {meta.hasSubregistry ? <SubregistryDetail meta={meta} /> : <em>none</em>}
+          {meta.hasSubregistry ? (
+            <SubregistryDetail meta={meta} registryId={registryId} />
+          ) : (
+            <em>none</em>
+          )}
         </dd>
       </dl>
     </div>
@@ -871,7 +891,8 @@ function agreementDisplay(meta: DomainNodeMeta): { color: string; text: string }
   return { color: "#888", text: "↩? pointer unknown (empty subregistry)" };
 }
 
-function SubregistryDetail({ meta }: { meta: DomainNodeMeta }) {
+function SubregistryDetail({ meta, registryId }: { meta: DomainNodeMeta; registryId: string }) {
+  const appPath = useAppPath();
   const agreement = agreementDisplay(meta);
   return (
     <>
@@ -881,7 +902,12 @@ function SubregistryDetail({ meta }: { meta: DomainNodeMeta }) {
       <div style={{ color: agreement.color }}>{agreement.text}</div>
       {meta.subregistryId && (
         <div style={{ marginTop: 4 }}>
-          <Link to={`/namegraph/${meta.subregistryId}`}>Open subregistry as root →</Link>
+          <Link
+            to={appPath(namegraphPath(meta.subregistryId))}
+            state={{ fromRegistryId: registryId }}
+          >
+            Open subregistry as root →
+          </Link>
         </div>
       )}
     </>
@@ -949,6 +975,7 @@ function ResolutionStatus({ children, error }: { children: React.ReactNode; erro
  * a resolution summary (timing + acceleration), the profile, and the records.
  */
 function ResolutionPanels({ domainId }: { domainId: string | null }) {
+  const { client } = useEnsnodeInstance();
   const [state, setState] = useState<
     | { status: "idle" }
     | { status: "loading" }
@@ -981,7 +1008,7 @@ function ResolutionPanels({ domainId }: { domainId: string | null }) {
     return () => {
       cancelled = true;
     };
-  }, [domainId]);
+  }, [client, domainId]);
 
   if (state.status === "idle") {
     return (
@@ -1125,6 +1152,8 @@ function RecordsPanel({ records }: { records: Records }) {
 
 /** Resolves the namespace Root Registry id and redirects to it. */
 export function NamegraphRootRedirect() {
+  const { client } = useEnsnodeInstance();
+  const appPath = useAppPath();
   const [rootId, setRootId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -1145,10 +1174,10 @@ export function NamegraphRootRedirect() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [client]);
 
   if (errorMessage)
     return <p style={{ color: "red" }}>Error loading root registry: {errorMessage}</p>;
   if (!rootId) return <p>Loading root registry…</p>;
-  return <Navigate to={`/namegraph/${rootId}`} replace />;
+  return <Navigate to={appPath(namegraphPath(rootId))} replace />;
 }

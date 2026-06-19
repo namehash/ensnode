@@ -58,7 +58,7 @@ locals {
       ensnode_indexer_type         = "v2-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "v2SepoliaSchema-${var.ensnode_version}"
-      plugins                      = "unigraph,protocol-acceleration"
+      plugins                      = "subgraph,unigraph,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
@@ -120,7 +120,7 @@ module "ensdb" {
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
-  disk_size_gb          = 500
+  disk_size_gb          = 750
 }
 
 module "ensrainbow" {

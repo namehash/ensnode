@@ -3,6 +3,8 @@ import { isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
+import { accountPath, domainIdPath, useAppPath } from "./app-paths";
+
 const AccountDomainsQuery = graphql(`
   query AccountDomains($address: Address!, $first: Int!, $after: String) {
     account(by: { address: $address }) {
@@ -21,6 +23,7 @@ const AccountDomainsQuery = graphql(`
 const PAGE_SIZE = 20;
 
 function RenderAccount({ address }: { address: NormalizedAddress }) {
+  const appPath = useAppPath();
   const [after, setAfter] = useState<string | null>(null);
 
   const [result] = useOmnigraphQuery({
@@ -55,7 +58,7 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
           <ul>
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
-                <Link to={`/domain/id/${edge.node.id}`}>
+                <Link to={appPath(domainIdPath(edge.node.id))}>
                   {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
                 </Link>{" "}
                 ({edge.node.__typename})
@@ -79,6 +82,7 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
 }
 
 export function AccountView() {
+  const appPath = useAppPath();
   const params = useParams();
   const raw = params.address ?? "";
 
@@ -86,12 +90,12 @@ export function AccountView() {
     // try to coerce mixed-case / checksummed input to a NormalizedAddress and redirect
     try {
       const normalized = toNormalizedAddress(raw);
-      return <Navigate to={`/account/${normalized}`} replace />;
+      return <Navigate to={appPath(accountPath(normalized))} replace />;
     } catch {
       return (
         <div>
           <h2>Invalid address: '{raw}'</h2>
-          <Link to="/">Home</Link>
+          <Link to={appPath("/")}>Home</Link>
         </div>
       );
     }

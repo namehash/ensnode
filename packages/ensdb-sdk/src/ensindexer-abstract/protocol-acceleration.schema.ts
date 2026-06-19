@@ -218,8 +218,10 @@ export const resolverAddressRecord = onchainTable(
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
     // supports the reverse lookup powering `Account.nameReferences`:
-    // `WHERE value = <address> [AND coin_type = <coinType>]`
-    byValueAndCoinType: index().on(t.value, t.coinType),
+    // `WHERE value = <address> [AND coin_type = <coinType>] ORDER BY (node, coinType, chainId, address)`.
+    // The `value` prefix seeks the filter; the remaining columns match the keyset ORDER BY tuple so
+    // rows are yielded already sorted, letting pagination range-scan to the cursor instead of sorting.
+    byValueKeyset: index().on(t.value, t.node, t.coinType, t.chainId, t.address),
   }),
 );
 
