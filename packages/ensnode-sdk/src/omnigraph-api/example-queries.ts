@@ -109,7 +109,9 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
     }
 
     # Also load the count of ENSv1 and ENSv2 domains owned by the account
-    # to see if they have domains they should upgrade to ENSv2
+    # to see if they have domains they should upgrade to ENSv2.
+    # For simplicity this example query doesn't include additional logic
+    # to filter out domains that have expired.
     v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
     v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
   }
@@ -552,11 +554,16 @@ query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
+      # Reverse resolution: given this address + a chain, get the primary
+      # name the address has set for that chain.
+      # primaryName returns the result for a single chain (here, Optimism).
+      # (onePrimaryName / twoPrimaryNames are just GraphQL aliases.)
       onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
         chainName
         name { interpreted beautified }
       }
 
+      # primaryNames returns one result per requested chain, in a single call.
       twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         chainName
         name { interpreted beautified }
@@ -743,13 +750,14 @@ query AccountResolverPermissions($address: Address!) {
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
+      # the Resolver explicitly assigned to this Domain
       assigned {
-        contract {
-          address
-        }
-        events(first: 5) {
-          edges { node { topics data timestamp } }
-        }
+        contract { address }
+      }
+      # the Resolver that ENS Forward Resolution (ENSIP-10) actually lands
+      # on for this Domain — i.e. its effective Resolver
+      effective {
+        contract { address }
       }
     }
   }
@@ -827,6 +835,9 @@ query Namegraph {
     query: `
 query AccountMigratedNames($address: Address!) {
   account(by: { address: $address }) {
+    # Count the ENSv1 and ENSv2 domains owned by the account.
+    # For simplicity this example query doesn't include additional logic
+    # to filter out domains that have expired.
     v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
     v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
   }

@@ -62,7 +62,7 @@ The [Omnigraph API](/docs/integrate/omnigraph) provides a unified datamodel acro
 ## ENSv1 only — blind to ENSv2
 
 :::danger[Stale the moment ENSv2 launches]
-The Subgraph's data model has no concept of ENSv2. The moment ENSv2 launches (Summer 2026), apps still reading the Subgraph are looking at a stale, partial view of ENS — missing the new Namegraph data model entirely. There is no upgrade path: the schema was never designed for it.
+The Subgraph's data model has no concept of ENSv2. The moment ENSv2 launches (Summer 2026), apps still reading the Subgraph are looking at a stale, partial view of ENS — missing the new ENSv2 Namegraph data model entirely. There is no upgrade path: the schema was never designed for it.
 :::
 
 :::tip[The Omnigraph transparently upgrades to ENSv2]
@@ -153,11 +153,11 @@ The Subgraph exposes raw values straight from the ENS protocol, with none of the
 Every bit of this interpretation, decoding, and normalization is left to the app developer. The result is more bugs in ENS integrations across the ecosystem, which damages the network effects and growth of ENS.
 :::
 
-:::tip[Interpreted records — coming soon 🚧]
-The [Omnigraph API](/docs/integrate/omnigraph) will support two major record resolution use-cases:
+:::tip[Interpreted records]
+The [Omnigraph API](/docs/integrate/omnigraph) supports two major record resolution use-cases:
 
-1. Protocol-accurate 'raw' requests, without post processing, and
-2. Consumer-friendly semantic interpretation of records for, e.g. profile display.
+1. Protocol-accurate 'raw' requests, without post processing (`resolve.records`), and
+2. Consumer-friendly semantic interpretation of records for, e.g. profile display (`resolve.profile`).
 
 :::
 
@@ -167,8 +167,8 @@ The [Omnigraph API](/docs/integrate/omnigraph) will support two major record res
 A common and important flow is taking an NFT reference as input and mapping it: **NFT Ref → Domain → Name → Avatar text record → Avatar image.** This powers services like the ENS Metadata Service, which provides NFT metadata for ENS names using standardized protocols adopted by platforms such as OpenSea, Rarible, Grails, and ENS Vision. The Subgraph's raw, resolution-free data model makes this flow far harder than it should be.
 :::
 
-:::tip[Automatic avatars — coming soon 🚧]
-The [Omnigraph API](/docs/integrate/omnigraph) will support automatic avatar url derivation; all your app will need to do is render an `<img />` tag!
+:::tip[Automatic avatars]
+The [Omnigraph API](/docs/integrate/omnigraph) supports automatic avatar URL derivation, including deriving images from NFT references per [ENSIP-12](https://docs.ens.domains/ensip/12); all your app needs to do is render an `<img />` tag!
 :::
 
 ## Unhealed names degrade developer and user experience

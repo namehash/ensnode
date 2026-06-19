@@ -7,7 +7,7 @@ sidebar:
 
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
 
-The **ENS Unigraph** combines every ENSv1 "Nametree" (the mainnet ENS Registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, and more) and the ENSv2 "Namegraph" into a **single unified data model** — indexed into [ENSDb](/docs/services/ensdb), a standard PostgreSQL database.
+The **ENS Unigraph** combines every ENSv1 "Nametable" (the mainnet ENS Registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, and more) and the ENSv2 "Namegraphs" into a **single unified data model** — indexed into [ENSDb](/docs/services/ensdb), a standard PostgreSQL database.
 
 **ENS Unigraph SQL** is direct, read-only SQL access to that data. The [ENS Omnigraph API](/docs/integrate/omnigraph) is built _on top of_ the Unigraph; Unigraph SQL is the layer beneath it, for use cases that go past what the Omnigraph exposes — custom analytics, data pipelines, dashboards, or building your own service. Because it's just Postgres, you can query it from **any language with a Postgres driver** — TypeScript, Python, Rust, Go, and more.
 
