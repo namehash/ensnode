@@ -9,7 +9,6 @@ import {
 
 import type { PluginName } from "../../ensindexer/config/types";
 import {
-  type BlockNumberRange,
   type BlockNumberRangeWithStartBlock,
   buildBlockNumberRange,
   mergeBlockNumberRanges,
@@ -23,7 +22,7 @@ import {
  */
 export function buildIndexedBlockranges(
   namespace: ENSNamespaceId,
-  globalBlockrangeEndBlock: BlockNumberRange["endBlock"],
+  chainEndBlocks: ReadonlyMap<ChainId, number>,
   pluginsDatasourceNames: Map<PluginName, DatasourceName[]>,
 ): Map<ChainId, BlockNumberRangeWithStartBlock> {
   const indexedBlockranges = new Map<ChainId, BlockNumberRangeWithStartBlock>();
@@ -37,23 +36,28 @@ export function buildIndexedBlockranges(
 
       const datasourceChainId = datasource.chain.id;
       const datasourceContracts = Object.values<ContractConfig>(datasource.contracts);
+      const chainEndBlock = chainEndBlocks.get(datasourceChainId);
 
       for (const datasourceContract of datasourceContracts) {
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);
 
-        if (
-          typeof globalBlockrangeEndBlock === "number" &&
-          datasourceContract.startBlock > globalBlockrangeEndBlock
-        ) {
-          // If the contract's start block is greater than the global end block,
+        if (typeof chainEndBlock === "number" && datasourceContract.startBlock > chainEndBlock) {
+          // If the contract's start block is greater than the chain's end block,
           // then this contract is not indexed at all, so we can skip it from
           // consideration in the indexed blockrange.
           continue;
         }
 
+        // The chain's end block caps the contract's range: index up to whichever bound comes first
+        // (the contract's own endBlock or the chain's). This mirrors `constrainBlockrange` on the
+        // Ponder config path, so the derived view never reports a range exceeding the checkpoint.
+        const effectiveEndBlock = Math.min(
+          datasourceContract.endBlock ?? Infinity,
+          chainEndBlock ?? Infinity,
+        );
         const contractIndexedBlockrange = buildBlockNumberRange(
           datasourceContract.startBlock,
-          datasourceContract.endBlock ?? globalBlockrangeEndBlock,
+          Number.isFinite(effectiveEndBlock) ? effectiveEndBlock : undefined,
         );
 
         const indexedBlockrange = currentChainIndexedBlockrange

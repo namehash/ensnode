@@ -52,7 +52,7 @@ export default createPlugin({
         //////////////////////
         [namespaceContract(pluginName, "Ethnames_BaseRegistrar")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             ethnames.chain.id,
             ethnames.contracts.BaseRegistrar,
           ),
@@ -65,7 +65,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "Ethnames_RegistrarController")]: {
           abi: AnyRegistrarControllerABI,
           chain: mergedChainConfigForContracts(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             ethnames.chain.id,
             pickContracts(ethnames.contracts, [
               "LegacyEthRegistrarController",
@@ -81,7 +81,7 @@ export default createPlugin({
         ///////////////////////
         [namespaceContract(pluginName, "Basenames_BaseRegistrar")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             basenames.chain.id,
             basenames.contracts.BaseRegistrar,
           ),
@@ -93,7 +93,7 @@ export default createPlugin({
         ///////////////////////////////////
         [namespaceContract(pluginName, "Basenames_EARegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             basenames.chain.id,
             basenames.contracts.EARegistrarController,
           ),
@@ -101,7 +101,7 @@ export default createPlugin({
         },
         [namespaceContract(pluginName, "Basenames_RegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             basenames.chain.id,
             basenames.contracts.RegistrarController,
           ),
@@ -109,7 +109,7 @@ export default createPlugin({
         },
         [namespaceContract(pluginName, "Basenames_UpgradeableRegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             basenames.chain.id,
             basenames.contracts.UpgradeableRegistrarController,
           ),
@@ -121,7 +121,7 @@ export default createPlugin({
         ////////////////////////
         [namespaceContract(pluginName, "Lineanames_BaseRegistrar")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             lineanames.chain.id,
             lineanames.contracts.BaseRegistrar,
           ),
@@ -133,7 +133,7 @@ export default createPlugin({
         ////////////////////////////////////
         [namespaceContract(pluginName, "Lineanames_EthRegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             lineanames.chain.id,
             lineanames.contracts.EthRegistrarController,
           ),

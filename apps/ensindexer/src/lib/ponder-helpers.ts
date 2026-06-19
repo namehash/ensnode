@@ -119,18 +119,31 @@ export function chainsConnectionConfig(
 }
 
 /**
+ * Resolves the {@link BlockNumberRange} for `chainId` from its chain-specific end block
+ * (`END_BLOCK_<chainId>`). Unbounded if the chain has no end block set; otherwise right-bounded at
+ * that block. This is the mechanism behind deterministic checkpoints, where every chain stops at a
+ * block corresponding to a shared timestamp.
+ */
+export function blockrangeForChain(
+  chainEndBlocks: ReadonlyMap<ChainId, number>,
+  chainId: ChainId,
+): BlockNumberRange {
+  return buildBlockNumberRange(undefined, chainEndBlocks.get(chainId));
+}
+
+/**
  * Builds a `ponder#ContractConfig['chain']` given a contract's config, constraining the contract's
- * indexing range by the globally configured blockrange.
+ * indexing range by the chain's end block (see {@link blockrangeForChain}).
  *
- * @param {BlockNumberRange} globalBlockrange
- * @param {number} chainId
+ * @param chainEndBlocks per-chain end-block overrides, keyed by chain id
+ * @param {ChainId} chainId
  * @param {ContractConfig} contractConfig
  *
  * @returns network configuration based on the contract
  */
 export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
-  globalBlockrange: BlockNumberRange,
-  chainId: number,
+  chainEndBlocks: ReadonlyMap<ChainId, number>,
+  chainId: ChainId,
   contractConfig: CONTRACT_CONFIG,
 ) {
   const contractBlockrange = buildBlockNumberRange(
@@ -139,7 +152,10 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
   );
 
   // Ponder will index the contract in perpetuity if endBlock is `undefined`
-  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractBlockrange);
+  const { startBlock, endBlock } = constrainBlockrange(
+    blockrangeForChain(chainEndBlocks, chainId),
+    contractBlockrange,
+  );
 
   return {
     [chainId.toString()]: {
@@ -174,12 +190,12 @@ export function pickContracts<T extends string>(
  * - `startBlock` is the earliest contract `startBlock`.
  * - `endBlock` is the latest contract `endBlock` if every contract specifies one, otherwise undefined.
  *
- * The result is then constrained against `globalBlockrange` like {@link chainConfigForContract}.
+ * The result is then constrained against the chain's end block like {@link chainConfigForContract}.
  * Pass `contracts` as an array; callers can use `.filter(...)` to drop namespace-conditional ones.
  */
 export function mergedChainConfigForContracts(
-  globalBlockrange: BlockNumberRange,
-  chainId: number,
+  chainEndBlocks: ReadonlyMap<ChainId, number>,
+  chainId: ChainId,
   contracts: readonly ContractConfig[],
 ) {
   if (contracts.length === 0) {
@@ -201,7 +217,7 @@ export function mergedChainConfigForContracts(
     : undefined;
 
   const { startBlock, endBlock } = constrainBlockrange(
-    globalBlockrange,
+    blockrangeForChain(chainEndBlocks, chainId),
     buildBlockNumberRange(minStartBlock, maxEndBlock),
   );
 

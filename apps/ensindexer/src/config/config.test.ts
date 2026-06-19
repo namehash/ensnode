@@ -29,7 +29,7 @@ import {
   getENSNamespace,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-import { buildBlockNumberRange, ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { buildConfigFromEnvironment } from "@/config/config.schema";
@@ -88,7 +88,6 @@ describe("config (with base env)", () => {
     it("returns a valid config object using environment variables", async () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
-      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
       expect(config.ensIndexerSchemaName).toBe("ensindexer_test");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
@@ -105,65 +104,54 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".globalBlockrange", () => {
-    it("returns both startBlock and endBlock as numbers when both are set", async () => {
-      vi.stubEnv("START_BLOCK", "10");
-      vi.stubEnv("END_BLOCK", "20");
+  describe(".chainEndBlocks", () => {
+    it("defaults to an empty map when no END_BLOCK_<chainId> is set", async () => {
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(10, 20));
+      expect(config.chainEndBlocks).toEqual(new Map());
     });
 
-    it("returns only startBlock when only START_BLOCK is set", async () => {
-      vi.stubEnv("START_BLOCK", "5");
+    it("parses END_BLOCK_<chainId> into the chainEndBlocks map", async () => {
+      vi.stubEnv("END_BLOCK_1", "100");
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(5, undefined));
+      expect(config.chainEndBlocks).toEqual(new Map([[1, 100]]));
     });
 
-    it("returns only endBlock when only END_BLOCK is set", async () => {
-      vi.stubEnv("END_BLOCK", "15");
+    it("allows per-chain end blocks across multiple indexed chains", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
+      stubRpcUrlsForNamespace("mainnet");
+      vi.stubEnv("END_BLOCK_1", "100");
+      vi.stubEnv("END_BLOCK_8453", "200");
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, 15));
-    });
-
-    it("returns both as undefined when neither is set", async () => {
-      const config = await getConfig();
-      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
-    });
-
-    it("throws if START_BLOCK is negative", async () => {
-      vi.stubEnv("START_BLOCK", "-1");
-      await expect(getConfig()).rejects.toThrow(/START_BLOCK must be a positive integer/i);
-    });
-
-    it("throws if END_BLOCK is negative", async () => {
-      vi.stubEnv("END_BLOCK", "-5");
-      await expect(getConfig()).rejects.toThrow(/END_BLOCK must be a positive integer/i);
-    });
-
-    it("throws if START_BLOCK is not a number", async () => {
-      vi.stubEnv("START_BLOCK", "foo");
-      await expect(getConfig()).rejects.toThrow(/START_BLOCK must be a positive integer/i);
-    });
-
-    it("throws if END_BLOCK is not a number", async () => {
-      vi.stubEnv("END_BLOCK", "bar");
-      await expect(getConfig()).rejects.toThrow(/END_BLOCK must be a positive integer/i);
-    });
-
-    it("throws if START_BLOCK > END_BLOCK", async () => {
-      vi.stubEnv("START_BLOCK", "100");
-      vi.stubEnv("END_BLOCK", "50");
-      await expect(getConfig()).rejects.toThrow(
-        /START_BLOCK must be less than or equal to END_BLOCK/i,
+      expect(config.chainEndBlocks).toEqual(
+        new Map([
+          [1, 100],
+          [8453, 200],
+        ]),
       );
     });
 
-    it("does not throw if START_BLOCK == END_BLOCK", async () => {
-      vi.stubEnv("START_BLOCK", "100");
-      vi.stubEnv("END_BLOCK", "100");
-      const config = await getConfig();
-      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(100, 100));
+    it("throws if END_BLOCK_<chainId> targets a chain that is not indexed", async () => {
+      vi.stubEnv("END_BLOCK_8453", "100");
+      await expect(getConfig()).rejects.toThrow(/no active plugin indexes chain 8453/i);
     });
+
+    it("throws if END_BLOCK_<chainId> is negative", async () => {
+      vi.stubEnv("END_BLOCK_1", "-5");
+      await expect(getConfig()).rejects.toThrow(/END_BLOCK_1 must be a non-negative integer/i);
+    });
+
+    it("throws if END_BLOCK_<chainId> is not a number", async () => {
+      vi.stubEnv("END_BLOCK_1", "foo");
+      await expect(getConfig()).rejects.toThrow(/END_BLOCK_1 must be a non-negative integer/i);
+    });
+
+    it.each(["", "1e2", "0x10", "  5"])(
+      "throws if END_BLOCK_<chainId> is not a base-10 integer (%j)",
+      async (value) => {
+        vi.stubEnv("END_BLOCK_1", value);
+        await expect(getConfig()).rejects.toThrow(/END_BLOCK_1 must be a non-negative integer/i);
+      },
+    );
   });
 
   describe(".ensRainbowUrl", () => {
@@ -578,13 +566,6 @@ describe("config (with base env)", () => {
     it("requires rpc url for indexed chains", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+/i);
-    });
-
-    it("cannot constrain blockrange with multiple chains", async () => {
-      vi.stubEnv("PLUGINS", "subgraph,basenames");
-      stubRpcUrlsForNamespace("mainnet");
-      vi.stubEnv("END_BLOCK", "1");
-      await expect(getConfig()).rejects.toThrow(/multiple chains/i);
     });
   });
 

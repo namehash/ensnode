@@ -1,26 +1,34 @@
-import { OmnigraphProvider } from "enskit/react/omnigraph";
 import { StrictMode } from "react";
 import { HashRouter, Link, Outlet, Route, Routes, useParams } from "react-router";
 
 import { AccountView } from "./AccountView";
+import { accountPath, domainNamePath, useAppPath } from "./app-paths";
 import { DomainByIdView, DomainByNameView } from "./DomainView";
-import { client, ENSNODE_URL } from "./ensnode";
+import {
+  EnsnodeInstanceProvider,
+  InstanceSelector,
+  useEnsnodeInstance,
+} from "./EnsnodeInstanceProvider";
 import { NamegraphRootRedirect, NamegraphView } from "./NamegraphView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
 
-const EXAMPLE_ACCOUNT_ADDRESS = "0x801d2e48d378f161dba7ad7ad002ad557714c191";
-
-console.log(`Connecting to ENSNode at ${ENSNODE_URL}`);
-
 function Layout() {
+  const { constants } = useEnsnodeInstance();
+  const appPath = useAppPath();
+
   return (
     <>
+      <p>
+        <InstanceSelector />
+      </p>
       <nav>
-        <Link to="/">Home</Link> | <Link to="/domain/name/eth">Domain Browser</Link> |{" "}
-        <Link to={`/account/${EXAMPLE_ACCOUNT_ADDRESS}`}>Account Browser</Link> |{" "}
-        <Link to="/registry">Registry Cache Demo</Link> | <Link to="/search">Search Demo</Link> |{" "}
-        <Link to="/namegraph">Namegraph Explorer</Link>
+        <Link to={appPath("/")}>Home</Link> |{" "}
+        <Link to={appPath(domainNamePath(constants.defaultDomainName))}>Domain Browser</Link> |{" "}
+        <Link to={appPath(accountPath(constants.defaultAddress))}>Account Browser</Link> |{" "}
+        <Link to={appPath("/registry")}>Registry Cache Demo</Link> |{" "}
+        <Link to={appPath("/search")}>Search Demo</Link> |{" "}
+        <Link to={appPath("/namegraph")}>Namegraph Explorer</Link>
       </nav>
       <hr />
       <Outlet />
@@ -34,15 +42,26 @@ function Layout() {
  */
 function NamegraphRoute() {
   const { registryId } = useParams<{ registryId: string }>();
+  const { ensnodeUrl } = useEnsnodeInstance();
   if (!registryId) return <NamegraphRootRedirect />;
-  return <NamegraphView key={registryId} registryId={registryId} />;
+  return <NamegraphView key={`${ensnodeUrl}:${registryId}`} registryId={registryId} />;
 }
 
 function Home() {
+  const { ensnodeUrl, instanceSelectionDisabled } = useEnsnodeInstance();
+
   return (
     <div>
       <p>Welcome — pick a demo above.</p>
-      <p>Connected to ENSNode at {ENSNODE_URL}</p>
+      <p>Connected to ENSNode at {ensnodeUrl}</p>
+      {instanceSelectionDisabled ? (
+        <p>
+          Instance selection is disabled because <code>VITE_ENSNODE_URL</code> is set in the
+          environment.
+        </p>
+      ) : (
+        <p>Use the ENSNode instance selector in the header to switch between hosted instances.</p>
+      )}
     </div>
   );
 }
@@ -50,11 +69,11 @@ function Home() {
 export function App() {
   return (
     <StrictMode>
-      <OmnigraphProvider client={client}>
-        <h1>
-          <code>enskit</code> Example App
-        </h1>
-        <HashRouter>
+      <HashRouter>
+        <EnsnodeInstanceProvider>
+          <h1>
+            <code>enskit</code> Example App
+          </h1>
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
@@ -68,8 +87,8 @@ export function App() {
               <Route path="/namegraph/:registryId" element={<NamegraphRoute />} />
             </Route>
           </Routes>
-        </HashRouter>
-      </OmnigraphProvider>
+        </EnsnodeInstanceProvider>
+      </HashRouter>
     </StrictMode>
   );
 }

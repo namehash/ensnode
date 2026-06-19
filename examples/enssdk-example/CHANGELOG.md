@@ -1,5 +1,12 @@
 # @ensnode/enssdk-example
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.16.0
+
 ## 0.0.4
 
 ### Patch Changes

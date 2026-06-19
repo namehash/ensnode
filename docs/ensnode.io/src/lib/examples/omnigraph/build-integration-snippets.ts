@@ -1,5 +1,6 @@
 import snapshot from "@data/omnigraph-examples/snapshot.json";
 import { DEFAULT_ENSNODE_URL } from "@lib/examples/omnigraph/constants";
+import { stripGraphQLLineComments } from "@lib/examples/omnigraph/docs-utils";
 
 /** Package managers shown in Setup tabs (npm default). */
 export type SetupPackageManager = "npm" | "pnpm";
@@ -71,11 +72,6 @@ ${pasteStep}
 # 4. Run
 ${runEnv} pnpm run dev`,
   };
-}
-
-/** Strip GraphQL `#` line comments so operation parsing ignores comment text like `your query here`. */
-function stripGraphQLLineComments(query: string): string {
-  return query.replace(/^\s*#.*$/gm, "");
 }
 
 /** Parse the operation name from a GraphQL query string (e.g. `query RegistryDomains` → `"RegistryDomains"`). */

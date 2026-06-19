@@ -32,8 +32,11 @@ Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a t
 ## What you get
 
 - **Multichain in one query** — mainnet `.eth`, Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) all in a single unified schema.
-- **Typed, no footguns** — names and labels are normalized for you, so rendering them in a UI is trivial.
+- **ENSv1 + ENSv2 + indexed data + resolutions, together** — the world's first and only API that gives you indexed ENS state _and_ live resolutions across both protocol versions, from a single query.
+- **A declarative, no-footguns data model** — the schema is semantically aligned and self-documenting: fields mean what you'd naturally assume them to mean, names and labels are normalized for you, and the surprising edge-cases of the raw protocol are handled at the schema layer instead of in your app. That least-surprise design is exactly what AI agents need too — they write correct ENS integrations when the surface behaves the way they'd assume by default.
+- **Both kinds of resolution** — "bare-metal" resolutions that give you the full expressive power of the ENS protocol, _and_ "interpreted" resolutions that hand you clean, display-ready records (`resolve.profile`) with no decoding on your end.
 - **The full ENS picture** — resolve records, search Domains, list what an address owns, read a complete history of onchain Events, inspect Permissions, and more.
+- **Type-safe and fully documented** — every type and field is documented in the schema, so `enssdk` and `enskit` give you end-to-end type safety and editor autocomplete. The same fully-typed, self-describing surface lets both human developers and AI agents build high-quality ENS integrations with confidence.
 - **Built-in pagination** — Relay-spec connections mean infinite scroll and stable pagination work out of the box.
 
 ## Your first query
@@ -50,7 +53,7 @@ Browse more patterns in [Examples](/docs/integrate/omnigraph/examples). When you
 <CardGrid>
   <LinkCard
     title="Core Concepts"
-    description="The data model behind the Omnigraph — Namegraph, canonicality, polymorphism, Events, and Permissions."
+    description="The data model behind the Omnigraph — Namegraphs, canonicality, polymorphism, Events, and Permissions."
     href="/docs/integrate/omnigraph/concepts"
   />
   <LinkCard

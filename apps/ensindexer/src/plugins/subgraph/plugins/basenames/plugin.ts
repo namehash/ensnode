@@ -35,16 +35,16 @@ export default createPlugin({
       ),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.Registry),
           abi: contracts.Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
         [namespaceContract(pluginName, "EARegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             chain.id,
             contracts.EARegistrarController,
           ),
@@ -52,7 +52,7 @@ export default createPlugin({
         },
         [namespaceContract(pluginName, "RegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             chain.id,
             contracts.RegistrarController,
           ),
@@ -60,7 +60,7 @@ export default createPlugin({
         },
         [namespaceContract(pluginName, "UpgradeableRegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             chain.id,
             contracts.UpgradeableRegistrarController,
           ),
@@ -68,7 +68,7 @@ export default createPlugin({
         },
         // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.Resolver),
           abi: contracts.Resolver.abi,
         },
       },

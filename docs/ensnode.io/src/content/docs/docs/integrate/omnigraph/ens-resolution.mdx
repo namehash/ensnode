@@ -9,9 +9,9 @@ import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExam
 The ENS protocol defines two forms of resolution:
 
 - **Forward resolution** — given a name (`vitalik.eth`), resolve its records: avatar, bio, links, multichain addresses, and more.
-- **Reverse resolution** — given an address, resolve its **primary name** on a chain ([ENSIP-19](https://docs.ens.domains/ensip/19)).
+- **Reverse resolution** — given an address _and a coin type_ (the [ENSIP-19](https://docs.ens.domains/ensip/19) identifier for a chain), resolve the **primary name** that address has set for that chain. Reverse resolution is always defined for an `(address, coinType)` pair, not an address alone — the same address can have different primary names per chain.
 
-One of the most common patterns when building on ENS is to combine both: given an address, first perform **reverse resolution** to get the primary name, then perform **forward resolution** on that name to fetch its avatar, social handles, and other display details. Because this pattern is so common, the Omnigraph provides support for it as **complete resolution** — reverse and forward in a single query with no extra round trip.
+One of the most common patterns when building on ENS is to combine both: given an address, first perform **reverse resolution** to get the primary name, then perform **forward resolution** on that name to fetch its avatar, social handles, and other display details. Because this pattern is so common, the Omnigraph provides support for it as a single operation we call **complete resolution** — reverse and forward in one query, with no extra round trips.
 
 Moreover, the Omnigraph handles the underlying protocol complexity for you — resolver contracts, coin-type encoding, inconsistent text-record keys, and avatar formats that may be URLs, IPFS paths, or NFT references — and **returns clean, structured results** for all three patterns.
 
@@ -51,7 +51,7 @@ Primary names are stored linked to coin-types, but Omnigraph allows using friend
 
 ## Complete resolution
 
-Complete resolution is the pattern most wallets and explorers actually implement: given an address, resolve its primary name and then immediately forward-resolve the records on that name.
+**Complete resolution** is the term we use in the ENS Omnigraph API for the pattern most wallets and explorers actually implement: given an address, resolve its primary name and then immediately forward-resolve the records on that name — all in a single query, with no extra round trips.
 
 <OmnigraphStaticExampleSet id="account-primary-name-records" hideBackToExamples />
 

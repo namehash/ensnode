@@ -13,8 +13,9 @@ export type ENSIndexerEnvironment = EnsDbEnvironment &
     PLUGINS?: string;
     SUBGRAPH_COMPAT?: string;
 
-    START_BLOCK?: string;
-    END_BLOCK?: string;
+    // Chain-specific end blocks, keyed by chain id (e.g. END_BLOCK_1, END_BLOCK_8453). Mirrors the
+    // RPC_URL_<chainId> convention. See ENSIndexerConfig.chainEndBlocks.
+    [x: `END_BLOCK_${number}`]: string | undefined;
 
     ENSRAINBOW_URL?: string;
     LABEL_SET_ID?: string;
