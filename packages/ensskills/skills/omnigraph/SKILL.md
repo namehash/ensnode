@@ -18,7 +18,7 @@ This skill depends on the following sibling skills — load them first:
 
 Conditionally, load when the task touches those fields:
 
-- **`efp-protocol`** — load first whenever the query involves Ethereum Follow Protocol fields (`query.efp`, `Account.efp`, and the `Efp*` types: lists, list records, following/followers, tags, primary lists). Those fields are governed by EFP-specific validity rules (primary-list validation, `block`/`mute` exclusion, validated vs. raw record views) that you will get wrong without it.
+- **`efp-protocol`** — load first whenever the query involves Ethereum Follow Protocol fields (`Query.efp`, `Account.efp`, and the `Efp*` types: lists, list records, following/followers, tags, primary lists). Those fields are governed by EFP-specific validity rules (primary-list validation, `block`/`mute` exclusion, validated vs. raw record views) that you will get wrong without it.
 
 To _run_ the queries you author here, use a runner: **`enscli`** from a shell (every example below uses it), or **`enssdk`** from TypeScript. Those runners depend on this skill, not the other way around.
 

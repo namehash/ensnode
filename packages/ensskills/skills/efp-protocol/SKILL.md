@@ -14,7 +14,7 @@ This skill explains the EFP data model and the validity rules that govern it, th
 - **`base`** — the shared working conventions every ENS skill assumes.
 - **`ens-protocol`** — EFP composes with ENS; a record's target address is walked into ENS names and primary names via the same Account/resolution model that skill describes.
 
-To _run_ the queries below, use the **`omnigraph`** skill (it depends on this one for EFP shapes) plus a runner — **`enscli`** from a shell or **`enssdk`** from TypeScript.
+To _run_ the queries below, load the **`omnigraph`** skill alongside this one (it points back here for EFP shapes when a query touches EFP fields — a conditional dependency, not the reverse) plus a runner — **`enscli`** from a shell or **`enssdk`** from TypeScript.
 
 ## The data model
 
@@ -34,10 +34,10 @@ A **List Record** is the atomic follow. The only indexed record type is the **ad
 
 Tags are UTF-8 strings on a record. Standard ones:
 
-- **`block`** — mutual exclusion; takes precedence over everything. A blocked record never counts as a follow/follower.
+- **`block`** — the strongest negative tag; never counts as a follow/follower (and apps typically hide the account entirely).
 - **`mute`** — one-directional silence; also excluded from follow/follower counts.
 - **`top8`** — UI "Top 8" marker.
-- **custom** — arbitrary lowercase alphanumeric/emoji tags (e.g. `close-friend`).
+- **custom** — arbitrary UTF-8 string tags (e.g. `close-friend`). The Omnigraph returns whatever tag bytes are onchain as `[String!]!`; the EFP protocol restricts tags (alphanumerics plus most emoji, normalized to lowercase), but read tags as opaque strings rather than treating a returned tag as invalid for failing that.
 
 The crucial rule: **`block`- and `mute`-tagged records are excluded from following/followers.** A plain follow has no tags (or only non-block/mute tags).
 
