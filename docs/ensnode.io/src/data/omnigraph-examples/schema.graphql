@@ -35,6 +35,11 @@ type Account {
   ): AccountDomainsConnection
 
   """
+  This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
+  """
+  efp: AccountEfp
+
+  """
   All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
   """
   events(
@@ -49,6 +54,17 @@ type Account {
   A unique reference to this Account.
   """
   id: Address!
+
+  """
+  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.
+  """
+  nameReferences(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: AccountNameReferencesWhereInput
+  ): AccountNameReferencesConnection
 
   """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
@@ -132,6 +148,85 @@ input AccountDomainsWhereInput {
   version: ENSProtocolVersion
 }
 
+"""
+An account's Ethereum Follow Protocol (EFP) presence.
+"""
+type AccountEfp {
+  """
+  The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record.
+  """
+  followers(after: String, before: String, first: Int, last: Int): AccountEfpFollowersConnection
+
+  """
+  The accounts this account follows: the address records in its validated primary EFP list, excluding `block`/`mute`-tagged records. Empty when the account has no validated primary list.
+  """
+  following(after: String, before: String, first: Int, last: Int): AccountEfpFollowingConnection
+
+  """
+  The EFP lists this account is the `user` of (the lists representing it).
+  """
+  lists(after: String, before: String, first: Int, last: Int): AccountEfpListsConnection
+
+  """
+  Get one of this account's EFP account-metadata values by key (e.g. "primary-list").
+  """
+  metadata(key: String!): EfpAccountMetadata
+
+  """
+  All of this account's EFP account-metadata entries.
+  """
+  metadatas(after: String, before: String, first: Int, last: Int): AccountEfpMetadatasConnection
+
+  """
+  The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset or unvalidated.
+  """
+  primaryList: EfpList
+}
+
+type AccountEfpFollowersConnection {
+  edges: [AccountEfpFollowersConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpFollowersConnectionEdge {
+  cursor: String!
+  node: Account!
+}
+
+type AccountEfpFollowingConnection {
+  edges: [AccountEfpFollowingConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpFollowingConnectionEdge {
+  cursor: String!
+  node: Account!
+}
+
+type AccountEfpListsConnection {
+  edges: [AccountEfpListsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpListsConnectionEdge {
+  cursor: String!
+  node: EfpList!
+}
+
+type AccountEfpMetadatasConnection {
+  edges: [AccountEfpMetadatasConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpMetadatasConnectionEdge {
+  cursor: String!
+  node: EfpAccountMetadata!
+}
+
 type AccountEventsConnection {
   edges: [AccountEventsConnectionEdge!]!
   pageInfo: PageInfo!
@@ -177,6 +272,27 @@ A CAIP-10 Account ID including chainId and address.
 input AccountIdInput {
   address: Address!
   chainId: ChainId!
+}
+
+type AccountNameReferencesConnection {
+  edges: [AccountNameReferencesConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountNameReferencesConnectionEdge {
+  cursor: String!
+  node: NameReference!
+}
+
+"""
+Filter for Account.nameReferences.
+"""
+input AccountNameReferencesWhereInput {
+  """
+  If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.
+  """
+  coinType: CoinType
 }
 
 type AccountPermissionsConnection {
@@ -380,6 +496,19 @@ CoinType represents an enssdk#CoinType.
 scalar CoinType
 
 """
+The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+"""
+enum ContenthashProtocol {
+  ARWEAVE
+  IPFS
+  IPNS
+  ONION
+  ONION3
+  SKYNET
+  SWARM
+}
+
+"""
 DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
 """
 scalar DogecoinAddress
@@ -560,6 +689,11 @@ type DomainProfile {
   Interpreted avatar metadata. Returns null when the raw avatar record is unset or empty.
   """
   avatar: ProfileAvatar
+
+  """
+  The interpreted ENSIP-7 contenthash on the profile of an ENS name. Returns null when the raw contenthash record is unset, empty, or cannot be decoded (unknown codec or malformed bytes). See https://docs.ens.domains/ensip/7.
+  """
+  contenthash: ProfileContenthash
 
   """
   The interpreted description on the profile of an ENS name, or null when unset.
@@ -1167,6 +1301,269 @@ type ENSv2RegistryReservation implements Registration {
 }
 
 """
+An EFP `(address, key) -> value` account-metadata entry (e.g. "primary-list").
+"""
+type EfpAccountMetadata {
+  """
+  The account this metadata belongs to.
+  """
+  address: Address!
+
+  """
+  The CAIP-10 account id of the AccountMetadata contract.
+  """
+  contract: AccountId!
+
+  """
+  When this metadata entry was first indexed (Unix timestamp, seconds).
+  """
+  createdAt: BigInt!
+  id: ID!
+
+  """
+  The metadata key (UTF-8 string).
+  """
+  key: String!
+
+  """
+  When this metadata entry was last updated (Unix timestamp, seconds).
+  """
+  updatedAt: BigInt!
+
+  """
+  The metadata value (raw bytes).
+  """
+  value: Hex!
+}
+
+"""
+An EFP list NFT (a ListRegistry token) and the records it holds.
+"""
+type EfpList {
+  """
+  When this list was first indexed (Unix timestamp, seconds).
+  """
+  createdAt: BigInt!
+
+  """
+  The address allowed to administer this list.
+  """
+  manager: Address
+
+  """
+  The list NFT's AccountId.
+  """
+  nft: AccountId!
+
+  """
+  The current ERC-721 owner of the list NFT.
+  """
+  owner: Address!
+
+  """
+  The records currently in this list (the addresses it follows).
+  """
+  records(after: String, before: String, first: Int, last: Int): EfpListRecordsConnection
+
+  """
+  The decoded onchain location of this list's records, or null if not known.
+  """
+  storageLocation: EfpListStorageLocation
+
+  """
+  The ERC-721 TokenId of the list NFT.
+  """
+  tokenId: TokenId!
+
+  """
+  When this list was last updated (Unix timestamp, seconds).
+  """
+  updatedAt: BigInt!
+
+  """
+  The address allowed to post records to this list.
+  """
+  user: Address
+}
+
+"""
+Identify an EFP list by its NFT token id.
+"""
+input EfpListByInput {
+  """
+  The ERC-721 token id of the list NFT.
+  """
+  tokenId: TokenId!
+}
+
+"""
+A single record within an EFP list (an address it follows), with its tags.
+"""
+type EfpListRecord {
+  """
+  The Account this record points to (its `recordData`). Always resolvable: an Account exists for any address (see `query.account`), so a record's target can always be walked into its ENS names and own EFP presence.
+  """
+  account: Account!
+
+  """
+  The CAIP-10 account id of the ListRecords contract holding this record.
+  """
+  contract: AccountId!
+
+  """
+  When this record was first indexed (Unix timestamp, seconds).
+  """
+  createdAt: BigInt!
+  id: ID!
+
+  """
+  The EFP list this record belongs to.
+  """
+  list: EfpList
+
+  """
+  Canonical record bytes (version | type | address), 0x-prefixed (exactly 22 bytes), with any trailing junk after the 20-byte address truncated.
+  """
+  record: Hex!
+
+  """
+  The followed/target address (the record's 20-byte payload). EFP indexes only address records (recordType 1).
+  """
+  recordData: Address!
+
+  """
+  The EFP record type (1 = address).
+  """
+  recordType: Int!
+
+  """
+  The list's storage slot (bytes32) within the ListRecords contract.
+  """
+  slot: Hex!
+
+  """
+  UTF-8 tags attached to this record (e.g. "close-friend", "block").
+  """
+  tags: [String!]!
+}
+
+type EfpListRecordsConnection {
+  edges: [EfpListRecordsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpListRecordsConnectionEdge {
+  cursor: String!
+  node: EfpListRecord!
+}
+
+"""
+Filter EFP list records.
+"""
+input EfpListRecordsWhereInput {
+  """
+  The target address of an address record (recordType 1). Filtering by this answers 'which lists follow this address?'.
+  """
+  recordData: Address
+
+  """
+  The EFP record type (1 = address).
+  """
+  recordType: Int
+}
+
+"""
+The decoded onchain location of a list's records: a (chainId, ListRecords contract address, slot) tuple.
+"""
+type EfpListStorageLocation {
+  """
+  The ListRecords contract address holding the list's records.
+  """
+  address: Address!
+  chainId: ChainId!
+
+  """
+  The list's storage slot (bytes32) within the ListRecords contract.
+  """
+  slot: Hex!
+}
+
+"""
+Filter EFP lists by their owner, user, or manager address.
+"""
+input EfpListsWhereInput {
+  """
+  The address allowed to administer the list.
+  """
+  manager: Address
+
+  """
+  The ERC-721 owner of the list NFT.
+  """
+  owner: Address
+
+  """
+  The address allowed to post records.
+  """
+  user: Address
+}
+
+"""
+Queries for Ethereum Follow Protocol (EFP) data.
+"""
+type EfpQuery {
+  """
+  Get an EFP list by its NFT token id.
+  """
+  list(by: EfpListByInput!): EfpList
+
+  """
+  Find EFP list records. Filter by `recordData` to answer 'which lists follow this address?'.
+  """
+  listRecords(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EfpListRecordsWhereInput
+  ): EfpQueryListRecordsConnection
+
+  """
+  Find EFP lists, optionally filtered by owner / user / manager.
+  """
+  lists(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    where: EfpListsWhereInput
+  ): EfpQueryListsConnection
+}
+
+type EfpQueryListRecordsConnection {
+  edges: [EfpQueryListRecordsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListRecordsConnectionEdge {
+  cursor: String!
+  node: EfpListRecord!
+}
+
+type EfpQueryListsConnection {
+  edges: [EfpQueryListsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListsConnectionEdge {
+  cursor: String!
+  node: EfpList!
+}
+
+"""
 Email represents a validated contact email address.
 """
 scalar Email
@@ -1430,6 +1827,31 @@ Constructs a reference to a specific Node via one of `name` or `node`.
 input NameOrNodeInput @oneOf {
   name: InterpretedName
   node: Node
+}
+
+"""
+A Name whose indexed `addr()` record points at an Account.
+"""
+type NameReference {
+  """
+  The CoinType of the matching `addr()` record.
+  """
+  coinType: CoinType!
+
+  """
+  The canonical Domain whose `addr(coinType)` record points at this Account.
+  """
+  domain: Domain!
+
+  """
+  Whether this name is the ENSIP-19 Primary Name of this Account for this `coinType`. i.e. whether reverse resolution of `(address, coinType)` resolves to this exact name. Protocol Accelerated when supported.
+  """
+  match: Boolean!
+
+  """
+  The Resolver holding the matching `addr()` record.
+  """
+  resolver: Resolver!
 }
 
 """
@@ -1817,6 +2239,31 @@ type ProfileAvatar {
 }
 
 """
+The interpreted ENSIP-7 contenthash on the profile of an ENS name.
+"""
+type ProfileContenthash {
+  """
+  The decoded, human-readable content identifier (e.g. a CID for IPFS, transaction ID for Arweave).
+  """
+  decoded: String!
+
+  """
+  The default public HTTP gateway URL for fetching this content in a browser (e.g. https://ipfs.io/ipfs/…). Null for protocols with no well-known public gateway (onion, skynet).
+  """
+  httpUrl: String
+
+  """
+  The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+  """
+  protocolType: ContenthashProtocol!
+
+  """
+  The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").
+  """
+  uri: String!
+}
+
+"""
 The interpreted header image on the profile of an ENS name.
 """
 type ProfileHeader {
@@ -1903,6 +2350,11 @@ type Query {
     order: DomainsOrderInput
     where: DomainsWhereInput!
   ): QueryDomainsConnection
+
+  """
+  Ethereum Follow Protocol (EFP) queries. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
+  """
+  efp: EfpQuery
 
   """
   Identify Permissions by ID or AccountId.
@@ -2557,6 +3009,11 @@ type ThreeDNSRegistration implements Registration {
   """
   unregistrant: Account
 }
+
+"""
+TokenId represents an enssdk#TokenId.
+"""
+scalar TokenId
 
 """
 A resolvable-but-unindexed Domain: not present in the index, but resolvable because an ancestor in its namegraph path has an ENSIP-10 wildcard Resolver (e.g. off-chain / CCIP-Read names, unindexed 3DNS names, wildcard subnames).

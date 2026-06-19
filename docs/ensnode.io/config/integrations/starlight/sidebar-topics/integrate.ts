@@ -101,6 +101,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
         {
+          label: "EFP",
+          link: "/docs/integrate/omnigraph/efp",
+        },
+        {
           label: "FAQ",
           link: "/docs/integrate/omnigraph/faq",
         },

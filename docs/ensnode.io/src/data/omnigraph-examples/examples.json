@@ -109,7 +109,7 @@
     "variables": {
       "registry": {
         "chainId": 11155111,
-        "address": "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1"
+        "address": "0xdedb92913a25abe1f7bcdd85d8a344a43b398b67"
       }
     }
   },
@@ -119,7 +119,7 @@
     "variables": {
       "contract": {
         "chainId": 11155111,
-        "address": "0x64c81210d0e580cfc7746f3fb910bf0e8f6378e1"
+        "address": "0xdedb92913a25abe1f7bcdd85d8a344a43b398b67"
       }
     }
   },
@@ -166,6 +166,27 @@
     "query": "query AccelerateResolve($address: Address!) {\n  account(by: { address: $address }) {\n    address\n    # resolve is automatically accelerated. To disable, resolve(accelerate: false)\n    resolve {\n      acceleration { requested attempted }\n      primaryName(by: { chainName: ETHEREUM }) {\n        name { interpreted beautified }\n        resolve {\n          acceleration { requested attempted }\n          profile { description }\n        }\n      }\n    }\n  }\n}",
     "variables": {
       "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+    }
+  },
+  {
+    "id": "efp-follow-graph",
+    "query": "query EfpFollowGraph($address: Address!) {\n  account(by: { address: $address }) {\n    efp {\n      # The validated primary list, or null if unset/unvalidated.\n      primaryList { tokenId }\n      # following/followers are validated and block/mute-filtered, so the\n      # edges are full Accounts you can walk straight into ENS names.\n      following(first: 10) {\n        totalCount\n        edges {\n          node {\n            address\n            resolve {\n              primaryName(by: { chainName: ETHEREUM }) {\n                name { beautified }\n              }\n            }\n          }\n        }\n      }\n      followers(first: 10) {\n        totalCount\n        edges { node { address } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+    }
+  },
+  {
+    "id": "efp-who-follows",
+    "query": "# Raw record view: includes block/mute and non-primary lists — inspect `tags`.\n# For the validated social graph, prefer Account.efp.followers instead.\nquery EfpWhoFollows($address: Address!) {\n  efp {\n    listRecords(where: { recordData: $address }, first: 25) {\n      totalCount\n      edges {\n        node {\n          tags\n          list { tokenId user }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+    }
+  },
+  {
+    "id": "efp-list",
+    "query": "query EfpList($tokenId: TokenId!) {\n  efp {\n    list(by: { tokenId: $tokenId }) {\n      tokenId\n      owner\n      user\n      manager\n      storageLocation { chainId address slot }\n      # Raw records (any tag, no primary-list validation).\n      records(first: 25) {\n        totalCount\n        edges { node { recordData tags } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "tokenId": "1"
     }
   }
 ]

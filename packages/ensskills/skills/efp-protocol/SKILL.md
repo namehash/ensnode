@@ -96,15 +96,20 @@ Prefer this for "who does X follow / who follows X" — it applies primary-list 
 
 Run these with the **omnigraph**/**enscli** skill. They assume an instance with the `efp` plugin enabled.
 
-### Following & followers, with names
+<!-- AUTOGEN:EXAMPLES start -->
+
+### efp-follow-graph
 
 ```graphql
 query EfpFollowGraph($address: Address!) {
   account(by: { address: $address }) {
     efp {
+      # The validated primary list, or null if unset/unvalidated.
       primaryList {
         tokenId
       }
+      # following/followers are validated and block/mute-filtered, so the
+      # edges are full Accounts you can walk straight into ENS names.
       following(first: 10) {
         totalCount
         edges {
@@ -133,10 +138,19 @@ query EfpFollowGraph($address: Address!) {
 }
 ```
 
-### Who follows this address (raw records, with tags)
+Variables:
+
+```json
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+}
+```
+
+### efp-who-follows
 
 ```graphql
 # Raw record view: includes block/mute and non-primary lists — inspect `tags`.
+# For the validated social graph, prefer Account.efp.followers instead.
 query EfpWhoFollows($address: Address!) {
   efp {
     listRecords(where: { recordData: $address }, first: 25) {
@@ -155,7 +169,15 @@ query EfpWhoFollows($address: Address!) {
 }
 ```
 
-### A list by token id, with its records and storage location
+Variables:
+
+```json
+{
+  "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+}
+```
+
+### efp-list
 
 ```graphql
 query EfpList($tokenId: TokenId!) {
@@ -170,6 +192,7 @@ query EfpList($tokenId: TokenId!) {
         address
         slot
       }
+      # Raw records (any tag, no primary-list validation).
       records(first: 25) {
         totalCount
         edges {
@@ -183,6 +206,16 @@ query EfpList($tokenId: TokenId!) {
   }
 }
 ```
+
+Variables:
+
+```json
+{
+  "tokenId": "1"
+}
+```
+
+<!-- AUTOGEN:EXAMPLES end -->
 
 ## Related skills
 

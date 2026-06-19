@@ -1,0 +1,62 @@
+---
+title: Ethereum Follow Protocol (EFP)
+description: Query the Ethereum Follow Protocol (EFP) onchain social graph through the ENS Omnigraph API by enabling the efp plugin.
+sidebar:
+  label: EFP
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
+
+The [Ethereum Follow Protocol (EFP)](https://efp.app) is an onchain social graph for Ethereum accounts — a decentralized "who follows whom" primitive. Because EFP composes directly with ENS identity, the ENS Omnigraph API exposes it alongside ENS data, so you can read an account's follow graph **and** resolve each followed account's ENS name in a single query.
+
+## Enabling the plugin
+
+EFP is indexed by the **`efp` plugin**. The Omnigraph's `Query.efp` and `Account.efp` fields return data only when the connected ENSIndexer has this plugin enabled; otherwise they resolve to `null` — treat that like any other unsupported-instance case, not a query error.
+
+To enable it on your own instance, add `efp` to the ENSIndexer `PLUGINS` environment variable (a comma-separated list), for example:
+
+```bash
+PLUGINS=unigraph,efp
+```
+
+The `efp` plugin's datasources are defined for the **mainnet** namespace (the EFP contracts on Base, OP Mainnet, and Ethereum Mainnet) and the local **ens-test-env** devnet.
+
+:::note[Already enabled on the Alpha instance]
+The hosted [ENSNode 'Alpha'](/docs/hosted-instances#ensnode-alpha) instance has the `efp` plugin enabled, so you can run every query on this page against it without hosting anything yourself.
+:::
+
+## What it indexes
+
+The plugin indexes the full EFP onchain state into ENSDb:
+
+- **Lists** — the ERC-721 NFTs that hold follow relationships, with their `owner` / `manager` / `user` roles and storage location.
+- **List records** — the individual follows (address records), each with its **tags** (`block`, `mute`, `top8`, and custom tags).
+- **Account metadata** — the onchain `(address, key) → value` store, including the `primary-list` key used to validate an account's primary list.
+
+## The API surface
+
+EFP is exposed through two entry points:
+
+- **`Account.efp`** — an account's EFP presence: validated, block/mute-filtered `following` / `followers` connections (whose edges are full `Account`s you can resolve straight into ENS names), the validated `primaryList`, and raw account `metadata`.
+- **`Query.efp`** — list-centric queries: `list(by: { tokenId })`, `lists(where:)` by role address, and `listRecords(where:)` (the raw record set, including `block`/`mute`).
+
+Prefer `Account.efp.following` / `followers` for the social-graph answer — they apply EFP's primary-list validation and block/mute filtering for you. Drop to the raw `Query.efp.listRecords` / `EfpList.records` only when you specifically need tags, storage location, or non-primary lists.
+
+## Example
+
+<OmnigraphStaticExampleSet id="efp-follow-graph" hideBackToExamples />
+
+## Learn more
+
+<LinkCard
+  title="EFP examples"
+  description="Runnable Omnigraph queries for the EFP social graph, lists, and records."
+  href="/docs/integrate/omnigraph/examples"
+/>
+
+<LinkCard
+  title="EFP protocol docs"
+  description="The data model and validity rules behind EFP, at docs.efp.app."
+  href="https://docs.efp.app"
+/>
