@@ -42,7 +42,7 @@ const SEPOLIA_V2_NAME = asInterpretedName("roppp.eth");
 
 const VITALIK_NAME = asInterpretedName("vitalik.eth");
 
-// a Basename (`.base.eth`) — its assigned vs. effective Resolver differ, making it a
+// a Basename (`.base.eth`) — its assigned vs. effective resolvers differ, making it a
 // more interesting subject than a mainnet `.eth` name for the Domain resolver example
 const JESSE_BASE_NAME = asInterpretedName("jesse.base.eth");
 
