@@ -141,7 +141,7 @@
     "id": "domain-resolver",
     "query": "query DomainResolver($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolver {\n      # the Resolver explicitly assigned to this Domain\n      assigned {\n        contract { address }\n      }\n      # the Resolver that ENS Forward Resolution (ENSIP-10) actually lands\n      # on for this Domain — i.e. its effective Resolver\n      effective {\n        contract { address }\n      }\n    }\n  }\n}",
     "variables": {
-      "name": "jesse.base.eth"
+      "name": "dperri.com"
     }
   },
   {

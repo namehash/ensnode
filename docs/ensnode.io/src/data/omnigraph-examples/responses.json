@@ -1594,14 +1594,10 @@
     "data": {
       "domain": {
         "resolver": {
-          "assigned": {
-            "contract": {
-              "address": "0xc6d566a56a1aff6508b41f6c90ff131615583bcd"
-            }
-          },
+          "assigned": null,
           "effective": {
             "contract": {
-              "address": "0xde9049636f4a1dfe0a64d1bfe3155c0a14c54f31"
+              "address": "0xf142b308cf687d4358410a4cb885513b30a42025"
             }
           }
         }

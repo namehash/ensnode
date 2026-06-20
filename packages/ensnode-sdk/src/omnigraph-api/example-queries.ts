@@ -42,9 +42,9 @@ const SEPOLIA_V2_NAME = asInterpretedName("roppp.eth");
 
 const VITALIK_NAME = asInterpretedName("vitalik.eth");
 
-// a Basename (`.base.eth`) — its assigned vs. effective resolvers differ, making it a
+// a DNS-imported (3DNS) name — its assigned vs. effective resolvers differ, making it a
 // more interesting subject than a mainnet `.eth` name for the Domain resolver example
-const JESSE_BASE_NAME = asInterpretedName("jesse.base.eth");
+const DPERRI_DNS_NAME = asInterpretedName("dperri.com");
 
 const GREG_NAME = asInterpretedName("gregskril.eth");
 
@@ -767,7 +767,7 @@ query DomainResolver($name: InterpretedName!) {
   }
 }`,
     variables: {
-      default: { name: JESSE_BASE_NAME },
+      default: { name: DPERRI_DNS_NAME },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
       [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
