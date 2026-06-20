@@ -1,0 +1,4 @@
+# Scripts source lib.sh via a runtime $(dirname "$0") path shellcheck cannot resolve statically.
+disable=SC1091
+# Controlled glob over a known system path (postgresql bin dirs).
+disable=SC2012

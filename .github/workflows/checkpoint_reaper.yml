@@ -1,0 +1,49 @@
+name: "[next] Checkpoint: reap stale Cherry boxes"
+
+# Safety net (the third box-teardown guard, alongside the workflow's always() teardown and the on-box
+# self-destruct watchdog): terminate any Cherry server named `ensindexer-checkpoint-*` older than the
+# TTL, in case a runner died before tearing its box down. Only ever touches checkpoint boxes — never
+# Railway/production.
+
+on:
+  schedule:
+    - cron: "17 * * * *" # hourly
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  reap:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    env:
+      CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
+      CHERRY_PROJECT_ID: ${{ secrets.CHERRY_PROJECT_ID }}
+      BOX_HOSTNAME_PREFIX: ensindexer-checkpoint
+      MAX_AGE_HOURS: "14"
+    steps:
+      - name: Terminate stale checkpoint boxes
+        run: |
+          set -euo pipefail
+          API=https://api.cherryservers.com/v1
+          now=$(date +%s)
+          servers="$(curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" "$API/projects/$CHERRY_PROJECT_ID/servers")"
+          echo "$servers" | jq -c '.[]?' | while read -r s; do
+            id="$(echo "$s" | jq -r '.id')"
+            host="$(echo "$s" | jq -r '.hostname // ""')"
+            # Cherry response shape varies; try common created-time fields.
+            created="$(echo "$s" | jq -r '.created // .created_at // .deployed_at // ""')"
+            case "$host" in
+              "$BOX_HOSTNAME_PREFIX"*) ;;
+              *) continue ;;
+            esac
+            cts="$(date -d "$created" +%s 2>/dev/null || echo 0)"
+            [ "$cts" -gt 0 ] || { echo "skip $id ($host): unparseable created '$created'"; continue; }
+            age=$(( (now - cts) / 3600 ))
+            if [ "$age" -ge "$MAX_AGE_HOURS" ]; then
+              echo "reaping server $id ($host, ${age}h old)"
+              curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" -X DELETE "$API/servers/$id" || true
+            else
+              echo "keep server $id ($host, ${age}h old)"
+            fi
+          done

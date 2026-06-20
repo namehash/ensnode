@@ -11,9 +11,14 @@ on:
           - green
           - blue
       tag:
-        description: "Docker Image Tag (also used for schema name generation)"
+        description: "Version used for ENSINDEXER schema names (e.g. 1.16.0)"
         required: true
         type: string
+      image_tag:
+        description: "Docker image tag to deploy (defaults to `tag`; set to a sha- tag for release-candidate images)"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   id-token: write
@@ -24,11 +29,16 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
+      # `tag` names the ENSINDEXER schemas (version); `image_tag` selects the Docker images and
+      # defaults to `tag`. They differ when deploying release-candidate images, which are sha-tagged
+      # while the schemas keep the release version (so a pre-seeded checkpoint and the eventual
+      # release deploy share the schema).
       TAG: ${{ inputs.tag }}
-      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
-      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.tag }}"
-      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag }}"
-      ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag }}"
+      IMAGE_TAG: ${{ inputs.image_tag != '' && inputs.image_tag || inputs.tag }}
+      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.image_tag != '' && inputs.image_tag || inputs.tag }}"
+      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.image_tag != '' && inputs.image_tag || inputs.tag }}"
+      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.image_tag != '' && inputs.image_tag || inputs.tag }}"
+      ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.image_tag != '' && inputs.image_tag || inputs.tag }}"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}

@@ -1,0 +1,35 @@
+{
+  "name": "@ensnode/ensdb-cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Internal CLI to dump/load ENSIndexer schemas (plus their ENSNode metadata) between ENSDb instances.",
+  "license": "MIT",
+  "bin": {
+    "ensdb-cli": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "test": "vitest",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@ensnode/ensdb-sdk": "workspace:*",
+    "citty": "^0.1.6",
+    "drizzle-orm": "catalog:",
+    "ponder": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

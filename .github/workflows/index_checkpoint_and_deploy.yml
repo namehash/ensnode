@@ -1,0 +1,170 @@
+name: "[next] Checkpoint: index release-candidate on Cherry, load, and deploy (Blue/Green)"
+
+# Productionized remote-checkpoint flow. Indexes the two heavy mainnet-namespace configs (alpha,
+# mainnet) on disposable Cherry Servers boxes, loads the resulting schemas into the target env's
+# Postgres as warm `<ns>Schema<VERSION>`, then dispatches the existing blue/green deploy so the
+# alpha/mainnet indexers resume in minutes while sepolia/etc index from scratch as normal.
+#
+# Manual trigger only. Yellow (Render/Terraform) is out of scope for this workflow — see the plan.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target environment (green or blue)"
+        required: true
+        type: choice
+        options:
+          - green
+          - blue
+      commit:
+        description: "Commit to index (default: head of the open 'Release New Version' PR)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write # dispatch the downstream deploy workflow
+
+concurrency:
+  group: checkpoint-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      version: ${{ steps.resolve.outputs.version }}
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Resolve RC commit, version, and image tag
+        id: resolve
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.commit }}" ]; then
+            SHA="${{ inputs.commit }}"
+          else
+            # The changesets bot opens the "Release New Version" PR on branch changeset-release/main.
+            SHA="$(gh pr list --repo ${{ github.repository }} --head changeset-release/main --state open --json headRefOid -q '.[0].headRefOid')"
+            [ -n "$SHA" ] || { echo "No open 'Release New Version' PR found; pass an explicit commit input."; exit 1; }
+          fi
+          # Full 40-char sha; build_docker_image's type=sha produces sha-<7>.
+          SHORT="$(echo "$SHA" | cut -c1-7)"
+          VERSION="$(gh api repos/${{ github.repository }}/contents/apps/ensindexer/package.json?ref=$SHA -q '.content' | base64 -d | jq -r '.version')"
+          [ -n "$VERSION" ] && [ "$VERSION" != "null" ] || { echo "could not read version from package.json at $SHA"; exit 1; }
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "image_tag=sha-$SHORT" >> "$GITHUB_OUTPUT"
+          echo "Resolved sha=$SHA version=$VERSION image_tag=sha-$SHORT"
+
+      - name: Validate target ENSDb admin URL is configured
+        run: |
+          case "${{ inputs.target }}" in
+            green) [ -n "${{ secrets.GREEN_ENSDB_ADMIN_URL }}" ] || { echo "GREEN_ENSDB_ADMIN_URL not set"; exit 1; } ;;
+            blue) [ -n "${{ secrets.BLUE_ENSDB_ADMIN_URL }}" ] || { echo "BLUE_ENSDB_ADMIN_URL not set"; exit 1; } ;;
+            *) echo "unsupported target"; exit 1 ;;
+          esac
+
+  build-images:
+    needs: resolve
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ensindexer, ensadmin, ensrainbow, ensapi]
+    steps:
+      - name: Checkout RC commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          fetch-depth: 1
+
+      - name: Build and push sha-tagged image
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          dockerfile: apps/${{ matrix.app }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: |
+            type=raw,value=${{ needs.resolve.outputs.image_tag }}
+            type=sha
+
+  index-and-load:
+    needs: resolve
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 600 # GitHub-hosted's 6h cap doesn't apply to Blacksmith; default is 360, raise it
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - config: alpha
+            schema_prefix: alphaSchema
+            do_seed: "1" # alpha refreshes the canonical R2 seed with the live tail
+          - config: mainnet
+            schema_prefix: mainnetSchema
+            do_seed: "0"
+    env:
+      # Cherry + R2 + RPC come from secrets. Confirm the R2_* secret names match your existing ones.
+      CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
+      CHERRY_PROJECT_ID: ${{ secrets.CHERRY_PROJECT_ID }}
+      CHERRY_SSH_KEY_ID: ${{ secrets.CHERRY_SSH_KEY_ID }}
+      CHERRY_SSH_KEY: ${{ secrets.CHERRY_SSH_KEY }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Write SSH key + resolve target Postgres URL
+        run: |
+          install -m600 /dev/null /tmp/cherry_key
+          printf '%s\n' "$CHERRY_SSH_KEY" > /tmp/cherry_key
+          echo "SSH_KEY=/tmp/cherry_key" >> "$GITHUB_ENV"
+          case "${{ inputs.target }}" in
+            green) echo "TARGET_URL=${{ secrets.GREEN_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
+            blue) echo "TARGET_URL=${{ secrets.BLUE_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
+          esac
+
+      - name: Index ${{ matrix.config }} on Cherry, load into ${{ inputs.target }}
+        env:
+          CONFIG: ${{ matrix.config }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+          MODE: full-backfill
+          DO_LOAD: "1"
+          DO_SEED: ${{ matrix.do_seed }}
+          TARGET_SCHEMA: ${{ matrix.schema_prefix }}${{ needs.resolve.outputs.version }}
+        run: bash packages/ensindexer-checkpoint/scripts/checkpoint.sh
+
+      - name: Tear down the Cherry box (always)
+        if: always()
+        run: bash packages/ensindexer-checkpoint/scripts/cherry-down.sh || true
+
+  deploy:
+    needs: [resolve, build-images, index-and-load]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Dispatch blue/green deploy (image=sha, schemas=version)
+        # If GITHUB_TOKEN cannot dispatch (org policy / token recursion), set a PAT secret with
+        # actions:write and use it here instead.
+        run: |
+          gh workflow run deploy_ensnode_blue_green.yml \
+            --repo ${{ github.repository }} \
+            -f target=${{ inputs.target }} \
+            -f tag=${{ needs.resolve.outputs.version }} \
+            -f image_tag=${{ needs.resolve.outputs.image_tag }}
