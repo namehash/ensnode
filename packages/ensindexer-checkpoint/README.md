@@ -8,8 +8,17 @@ with real ENSRainbow heals, exports the output schema (custom-format dump + ENSN
 optionally loads it into a target Postgres, and tears the box down. The box is **disposable** — it
 holds nothing durable; R2 holds the seed + checkpoints.
 
+**Production runs index both mainnet-namespace configs (alpha + mainnet) in parallel on a _single_
+box**, sharing one Postgres and one `ponder_sync` cache. Ponder's indexing loop is single-threaded, so
+two configs fit comfortably on one high-core box — and co-location means the ~200GB `ponder_sync` seed
+is restored once (not twice) and the shared chain-1 RPC tail is fetched once. Each config gets its own
+Ponder web-server port (alpha `:42069`, mainnet `:42169`), its own ENSRainbow (different labelsets →
+different ports `:3223`/`:3224` and data dirs), and its own process group so graceful-stop never
+touches the sibling.
+
 These scripts are driven by the GitHub workflows (`index_checkpoint_and_deploy.yml`, `checkpoint.yml`)
-and can also be run manually via `checkpoint.sh`.
+and can also be run manually via `index-both.sh` (production, both configs) or `checkpoint.sh`
+(single-config dev checkpoint).
 
 ## Two modes
 
@@ -29,8 +38,9 @@ That identity is sourced from the committed, single-source-of-truth env files:
 - `apps/ensindexer/configs/alpha.env` (mainnet namespace, all alpha plugins **+ efp**, searchlight/1)
 - `apps/ensindexer/configs/mainnet.env` (subgraph-compatible)
 
-`remote-run.sh` sources `apps/ensindexer/configs/<CONFIG>.env` for `NAMESPACE`/`PLUGINS`/labelset and
-adds only deployment-specific runtime vars. The deployed Railway service must use the same identity.
+`remote-index-one.sh` sources `apps/ensindexer/configs/<CONFIG>.env` for `NAMESPACE`/`PLUGINS`/labelset
+and adds only deployment-specific runtime vars (passed inline as process env — no shared `.env.local`,
+since two configs run from the same repo dir). The deployed Railway service must use the same identity.
 
 ## Layout
 
@@ -42,13 +52,20 @@ adds only deployment-specific runtime vars. The deployed Railway service must us
   self-destruct watchdog so the box dies even if the runner does).
 - `scripts/remote-provision.sh` — install node24/pnpm/pg17/rclone on a fresh box.
 - `scripts/remote-rehydrate.sh` — mount NVMe, init a write-heavy postgres cluster, restore the R2 seed.
-- `scripts/remote-run.sh` — index a config to `is_ready=1`, then graceful-stop (full-backfill or
-  end-block mode).
+- `scripts/remote-checkout.sh` — shared cheap setup: stop stale stack, check out the repo @ SHA,
+  install deps, build ensdb-cli (no storage/ponder_sync work).
+- `scripts/remote-index-one.sh` — index ONE config to `is_ready=1` in an isolated process group on
+  caller-assigned ports, then graceful-stop just that config (full-backfill or end-block mode).
+- `scripts/remote-run.sh` — single-config convenience wrapper (checkout + rehydrate + index-one).
 - `scripts/remote-resolve-end-blocks.sh` — `timestamp` → per-chain `END_BLOCK_<chainId>` (end-block mode).
-- `scripts/remote-checkpoint.sh` — on-box orchestrator: lock → produce-or-reuse checkpoint → load → seed.
-- `scripts/remote-seed-export.sh` — dump the enriched `ponder_sync` → canonical R2 seed (alpha only).
+- `scripts/remote-checkpoint-prod.sh` — **production** on-box orchestrator: lock → checkout → index
+  alpha + mainnet **in parallel** → dump/upload each → load each → refresh seed once.
+- `scripts/remote-checkpoint.sh` — single-config on-box orchestrator: lock → produce-or-reuse
+  checkpoint → load → seed (used by the dev checkpoint workflow).
+- `scripts/remote-seed-export.sh` — dump the enriched `ponder_sync` → canonical R2 seed.
 - `scripts/detect-done.sh` — authoritative completion signal (`_ponder_meta.app.is_ready` 0→1).
-- `scripts/checkpoint.sh` — manual end-to-end runner (up → ship → provision → run → down).
+- `scripts/index-both.sh` — **production** manual runner: up → ship → provision → index both → down.
+- `scripts/checkpoint.sh` — single-config manual runner: up → ship → provision → run → down.
 
 ## R2 layout
 

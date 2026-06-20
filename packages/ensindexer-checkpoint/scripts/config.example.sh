@@ -10,7 +10,7 @@
 export CHERRY_API_TOKEN="${CHERRY_API_TOKEN:-}"     # Cherry API token (secret)
 export CHERRY_PROJECT_ID="${CHERRY_PROJECT_ID:-}"   # numeric project id (secret)
 # Plan/region are hardcoded (not secrets) — a single bare-metal SKU/region for the checkpoint box.
-export CHERRY_PLAN="${CHERRY_PLAN:-amd-ryzen-9900x}"
+export CHERRY_PLAN="${CHERRY_PLAN:-amd-ryzen-9950x}"
 export CHERRY_REGION="${CHERRY_REGION:-US-Chicago}"
 export CHERRY_IMAGE="${CHERRY_IMAGE:-ubuntu_22_04}" # OS image slug
 export CHERRY_SSH_KEY_ID="${CHERRY_SSH_KEY_ID:-}"   # numeric id of the SSH key registered with Cherry

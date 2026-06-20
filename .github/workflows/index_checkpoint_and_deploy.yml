@@ -1,9 +1,10 @@
 name: "[next] Checkpoint: index release-candidate on Cherry, load, and deploy (Blue/Green)"
 
 # Productionized remote-checkpoint flow. Indexes the two heavy mainnet-namespace configs (alpha,
-# mainnet) on disposable Cherry Servers boxes, loads the resulting schemas into the target env's
-# Postgres as warm `<ns>Schema<VERSION>`, then dispatches the existing blue/green deploy so the
-# alpha/mainnet indexers resume in minutes while sepolia/etc index from scratch as normal.
+# mainnet) IN PARALLEL on a single disposable Cherry Servers box (shared Postgres + ponder_sync),
+# loads the resulting schemas into the target env's Postgres as warm `<ns>Schema<VERSION>`, then
+# dispatches the existing blue/green deploy so the alpha/mainnet indexers resume in minutes while
+# sepolia/etc index from scratch as normal.
 #
 # Manual trigger only. Yellow (Render/Terraform) is out of scope for this workflow — see the plan.
 
@@ -99,16 +100,6 @@ jobs:
     needs: resolve
     runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 600 # GitHub-hosted's 6h cap doesn't apply to Blacksmith; default is 360, raise it
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - config: alpha
-            schema_prefix: alphaSchema
-            do_seed: "1" # alpha refreshes the canonical R2 seed with the live tail
-          - config: mainnet
-            schema_prefix: mainnetSchema
-            do_seed: "0"
     env:
       # Cherry + R2 + RPC come from secrets. Confirm the R2_* secret names match your existing ones.
       CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
@@ -134,15 +125,13 @@ jobs:
             blue) echo "TARGET_URL=${{ secrets.BLUE_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
           esac
 
-      - name: Index ${{ matrix.config }} on Cherry, load into ${{ inputs.target }}
+      - name: Index alpha + mainnet in parallel on one Cherry box, load into ${{ inputs.target }}
         env:
-          CONFIG: ${{ matrix.config }}
           SHA: ${{ needs.resolve.outputs.sha }}
-          MODE: full-backfill
-          DO_LOAD: "1"
-          DO_SEED: ${{ matrix.do_seed }}
-          TARGET_SCHEMA: ${{ matrix.schema_prefix }}${{ needs.resolve.outputs.version }}
-        run: bash packages/ensindexer-checkpoint/scripts/checkpoint.sh
+          VERSION: ${{ needs.resolve.outputs.version }}
+          DO_LOAD: "1" # load both alpha + mainnet checkpoints into the target ENSDb
+          DO_SEED: "1" # refresh the canonical R2 seed from the enriched (all-chain) ponder_sync
+        run: bash packages/ensindexer-checkpoint/scripts/index-both.sh
 
       - name: Tear down the Cherry box (always)
         if: always()
