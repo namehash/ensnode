@@ -1,6 +1,7 @@
 import AstroStarlight from "@astrojs/starlight";
 import type { AstroIntegration } from "astro";
 import starlightSidebarTopics from "starlight-sidebar-topics";
+import starlightPageActions from "starlight-page-actions";
 
 import { starlightLlmsTxtPlugin } from "../llms-txt";
 import { starlightSidebarTopicsConfig } from "./sidebar-topics";
@@ -33,7 +34,11 @@ export function starlight(): AstroIntegration {
       "@fontsource/inter/800.css",
       "@fontsource/inter/900.css",
     ],
-    plugins: [starlightLlmsTxtPlugin, starlightSidebarTopics(starlightSidebarTopicsConfig)],
+    plugins: [
+      starlightLlmsTxtPlugin,
+      starlightSidebarTopics(starlightSidebarTopicsConfig),
+      starlightPageActions(),
+    ],
     title: "ENSNode",
     disable404Route: true,
     logo: {
