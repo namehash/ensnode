@@ -22,7 +22,7 @@ ENSIndexer is the write path of your ENSNode deployment. If it falls behind or f
 
 ENSApi is the read path. Monitor it to ensure queries stay fast and available.
 
-- **Worst-case indexing distance**: use the Realtime API (`GET /api/realtime`) to monitor whether your ENSNode instance has indexed sufficient blocks to be within an acceptable distance from the current "tip" of all indexed chain.
+- **Worst-case indexing distance**: use the Realtime API (`GET /api/realtime`) to monitor whether your ENSNode instance has indexed sufficient blocks to be within an acceptable distance from the current "tip" of all indexed chains.
 - **Request latency and error rate**: track p50, p95, and p99 response times for GraphQL and REST requests.
 - **Database connection pool health**: if connections are exhausted, requests queue or fail.
 - **Query complexity**: unusually expensive queries can overload the database. Log or alert on slow queries.

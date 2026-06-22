@@ -87,11 +87,9 @@ The Terraform configuration creates the following components:
 
 - **Render**
   - Render project and environment
-  - PostgreSQL database (ENSDb)
-  - ENSIndexer services for each configured namespace
-  - ENSRainbow services
-- **AWS**
-  - DNS records for the hosted ENSNode services
+  - PostgreSQL server for hosting ENSDb
+  - ENSIndexer and ENSApi instances for each supported configuration template (Alpha, Alpha-Sepolia, v2-Sepolia, Mainnet, and Sepolia)
+  - ENSRainbow instance for each supported label set (searchlight, subgraph)
 
 ## Deployment steps
 
