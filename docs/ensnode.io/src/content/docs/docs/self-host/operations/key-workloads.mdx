@@ -1,0 +1,78 @@
+---
+title: Key workloads
+description: Understand the key workloads to consider while choosing infrastructure for self-hosting ENSNode.
+
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+ENSNode is responsible for several key workloads. Understanding these workloads can help you make better decisions about the infrastructure you will need to run your own ENSNode effectively.
+
+## Indexing historical ENS data (backfill)
+
+Indexing historical onchain ENS data is the most resource-intensive ENSNode workload. It involves processing and indexing all ENS events across multiple chains which were emitted over many years. Deploying an ENSNode instance from scratch requires catching up with the entire history of ENS events. At this stage, you should expect different resource requirements among ENSNode services.
+
+### ENSIndexer
+
+When starting from scratch, the [ENSIndexer](/docs/services/ensindexer) instance may need to fetch and process all historical ENS events from multiple chains which were emitted across many years. The key bottlenecks at this stage are:
+
+- **RPC throughput**: fetching historical events requires making a large number of RPC calls to indexed chains, which can be time-consuming and may require a high-throughput RPC provider or multiple providers. Ensure that your RPC provider can handle the volume of requests needed for the initial backfill.
+- **Single-threaded CPU performance**: the indexing process is currently single-threaded, so the CPU performance of the machine running ENSIndexer can significantly impact the time it takes to complete the initial backfill. A more powerful CPU can help speed up this process significantly.
+- **Fast network connections**: ENSIndexer may require executing some read and write operations for each onchain event being indexed. Collectively, these can add up to a significant amount of network traffic to handle:
+  - **ENSRainbow reads**: ENSIndexer may need to send a large number of requests to the [ENSRainbow instance](/docs/services/ensrainbow) to perform "name healing", which can be a bottleneck if the network connection is slow.
+  - **ENSDb writes**: ENSIndexer needs to write indexed data to the ENSDb instance, which can also be a bottleneck if the network connection is slow or if the database server is not optimized for high write throughput.
+
+### ENSDb
+
+The key requirements for the database server hosting the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance) are:
+
+- **Co-location with the [ENSIndexer](/docs/services/ensindexer) instance**: to minimize request latency and maximize throughput.
+- **High write throughput**: to handle the large volume of write operations during the initial backfill process. This may require optimizing the database configuration for high write performance or using a managed database service that can scale resources as needed.
+- **Sufficient disk space**: to store the indexed ENS data. The exact disk space required will depend on multiple factors, for example, the activated [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins) and the [ENS namespace](/docs/services/ensdb#ens-namespace) you choose to index. To give you a rough idea, the ENSNode Alpha hosted instance requires at least `380 GB` of disk space and is expected to grow over time as more future ENS events will need to be indexed.
+
+### ENSRainbow
+
+The key requirements for the [ENSRainbow](/docs/services/ensrainbow) instance are:
+
+- **Co-location with the [ENSIndexer](/docs/services/ensindexer) instance**: to minimize request latency and maximize throughput.
+- **Sufficient disk space**: to store the ENSRainbow database. The exact disk space required will depend on the label set config you set for the ENSRainbow instance. For example, you may need at least `55 GB` to serve the `searchlight` label set.
+
+## Indexing live ENS data
+
+After the initial backfill is complete, the resource requirements for indexing live ENS data are significantly lower as there are way fewer events to process and index at any given time compared to the backfill. The key requirements for indexing live ENS data remain the same when it comes to **fast network connections** among ENSIndexer, ENSRainbow, and ENSDb, but the CPU resource requirements are much more manageable and can be handled by more modest infrastructure.
+
+:::danger[ENSIndexer always starts from the backfill]
+Even if your ENSIndexer instance has been indexing live data, when it restarts, it will always [start the "crash recovery" process](/docs/services/ensindexer/concepts/startup-sequence#ensdb-writer-schema-migrations), which leads back to the backfill. A huge downside of this is that ENSIndexer will drop indexes in the [ENSIndexer Schema](/docs/services/ensdb/concepts/glossary#ensindexer-schema) and after completing the backfill in a short while, it will have to rebuilt the indexes again. Depending on the selected [ENS Namespace](/docs/hosted-instances#ens-namespaces) and activated [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins), this can take from a few minutes to up to several hours.
+:::
+
+## Serving API requests
+
+ENSNode serves API requests through the [ENSApi](/docs/services/ensapi) instance, which queries the indexed ENS data stored in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance). Depending on the volume of API requests and the complexity of the queries, you may need to consider scaling your infrastructure to ensure that the ENSApi instance can handle the load and provide fast responses. This may involve optimizing database queries, implementing caching strategies, or scaling the ENSApi instance horizontally by running multiple instances behind a load balancer.
+
+<LinkCard
+  title="Learn about ENSNode's massive scalability"
+  description="Architecture overview of how to scale ENSNode to handle a massive volume of requests."
+  href="/docs/self-host/operations/scalability"
+/>
+
+## Recommendations
+
+### Bootstrap from a snapshot
+
+Deploying ENSNode from scratch can be costly (i.e. high use of RPC credits) and time-consuming (i.e. it can take several days or weeks to complete the initial backfill).
+
+:::tip[The ENSDb snapshot shortcut]
+
+You can avoid the resource-intensive initial backfill by bootstrapping from an [ENSDb snapshot](/docs/integrate/integration-options/ensdb-cli#ensdb-snapshots), which includes RPC cache and an indexed state of ENS data as of a certain date. This allows ENSIndexer to shorten the backfill process to only the most recent events that occurred after the snapshot point, significantly reducing both the time and cost required to get your ENSNode instance up and running.
+
+:::
+
+### Hybrid setup
+
+To optimize resource usage and costs, you can consider a hybrid setup where the initial backfill is performed by an ENSNode deployment running a powerful machine (e.g. a cloud instance with high CPU performance and fast network connections). You can configure ENSIndexer to stop indexing any chain at certain block height, and then, take an ENSDb Snapshot. After that, you can switch to a more modest machine, restore this ENSDb Snapshot, and continue indexing live ENS data once the backfill is complete. This approach allows you to efficiently manage resources while ensuring that your ENSNode instance remains responsive and up-to-date with the latest ENS events.
+
+:::note[Have questions or need help?]
+
+If you'd like any help or guidance, feel welcome to reach out to the NameHash team on [Telegram](https://t.me/ensnode).
+
+:::

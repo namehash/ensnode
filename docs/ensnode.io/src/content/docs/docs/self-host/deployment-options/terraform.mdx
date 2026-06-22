@@ -6,10 +6,10 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-This guide will help you deploy ENSNode using Terraform to Render. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
+This guide walks through deploying ENSNode using Terraform to [Render](https://render.com/), with AWS-managed DNS. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
 
-:::note[Important]
-These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While these scripts provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs. We plan to generalize these scripts in the future to better support community deployments.
+:::caution[NameHash Labs specific]
+These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While they provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs. We plan to generalize these scripts in the future to better support community deployments.
 :::
 
 <LinkCard
@@ -18,14 +18,16 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
   href="https://github.com/namehash/ensnode/tree/main/terraform"
 />
 
-## Prerequisites
+## What you must bring
+
+Before starting, make sure you have:
 
 - [Terraform](https://www.terraform.io/downloads.html) installed
-- [Render](https://render.com/) account
-- Render API token (generate from https://render.com/docs/api#1-create-an-api-key)
-- RPC URLs for the chains you want to support (Mainnet, Sepolia, Base, Linea)
-- AWS account (for DNS management)
-- AWS S3 bucket defined inside AWS account - `ensnode-terraform` (for Terraform state)
+- A [Render](https://render.com/) account and an API token ([create one](https://render.com/docs/api#1-create-an-api-key))
+- Your Render owner ID and an environment name
+- RPC URLs for every chain you want to index (Mainnet, Sepolia, Base, Linea, and optionally Optimism, Arbitrum, and Scroll)
+- An AWS account and credentials for DNS management
+- An AWS S3 bucket named `ensnode-terraform` to store Terraform state
 
 :::note[Postgres Requirement]
 ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. Render's managed Postgres has [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) available by default; if you adapt this configuration to a different provider, confirm the extension is available for installation on your Postgres plan.
@@ -33,52 +35,70 @@ ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back part
 
 ## Configuration
 
-Copy `.env.sample` to `.env.local` and fill in your configuration values:
+Copy the sample environment file and fill in your values:
 
 ```bash
-# ENSNode configuration
-ensnode_version                           = "0.0.0"  # pin to the specific version you want to use as found at https://github.com/namehash/ensnode/releases
-ensrainbow_searchlight_label_set_version  = "1" # pin to the specific version, see https://ensnode.io/ensrainbow/concepts/glossary#label_set_version
-anthropic_api_key                         = "your_anthropic_api_key"
-
-# Render configuration
-render_api_key            = "your_render_api_key"
-render_owner_id           = "your_render_owner_id"
-render_environment        = "your_render_environment"
-
-# Mainnet RPC URLs
-ethereum_mainnet_rpc_url  = "your_ethereum_mainnet_rpc_url"
-base_mainnet_rpc_url      = "your_base_mainnet_rpc_url"
-linea_mainnet_rpc_url     = "your_linea_mainnet_rpc_url"
-arbitrum_mainnet_rpc_url  = "your_arbitrum_mainnet_rpc_url"
-scroll_mainnet_rpc_url    = "your_scroll_mainnet_rpc_url"
-
-# Sepolia RPC URLs
-ethereum_sepolia_rpc_url   = "your_ethereum_sepolia_rpc_url"
-base_sepolia_rpc_url      = "your_base_sepolia_rpc_url"
-linea_sepolia_rpc_url     = "your_linea_sepolia_rpc_url"
-optimism_sepolia_rpc_url  = "your_optimism_sepolia_rpc_url"
-arbitrum_sepolia_rpc_url  = "your_arbitrum_sepolia_rpc_url"
-scroll_sepolia_rpc_url    = "your_scroll_sepolia_rpc_url"
+cp terraform/.env.sample terraform/.env.local
 ```
 
-## Infrastructure Components
+Edit `terraform/.env.local`. Terraform reads variables that start with `TF_VAR_` and passes them into the configuration automatically:
 
-The Terraform configuration sets up the following components:
+```bash
+# ENSNode version
+TF_VAR_ensnode_version="v0.0.0"  # pin to a release from https://github.com/namehash/ensnode/releases
 
-- Render
+# ENSRainbow Searchlight label set version
+TF_VAR_ensrainbow_searchlight_label_set_version="1"  # see https://ensnode.io/ensrainbow/concepts/glossary#label_set_version
+
+# Optional: ENSAdmin server connection library URLs
+TF_VAR_next_public_server_connection_library=""
+
+# Optional: used by some Render service modules
+TF_VAR_anthropic_api_key=""
+TF_VAR_alchemy_api_key=""
+TF_VAR_quicknode_api_key=""
+TF_VAR_quicknode_endpoint_name=""
+
+# Render
+TF_VAR_render_api_key="your_render_api_key"
+TF_VAR_render_owner_id="your_render_owner_id"
+TF_VAR_render_environment="your_render_environment"
+
+# Mainnet RPC URLs
+TF_VAR_ethereum_mainnet_rpc_url="your_ethereum_mainnet_rpc_url"
+TF_VAR_base_mainnet_rpc_url="your_base_mainnet_rpc_url"
+TF_VAR_linea_mainnet_rpc_url="your_linea_mainnet_rpc_url"
+TF_VAR_optimism_mainnet_rpc_url="your_optimism_mainnet_rpc_url"
+TF_VAR_arbitrum_mainnet_rpc_url="your_arbitrum_mainnet_rpc_url"
+TF_VAR_scroll_mainnet_rpc_url="your_scroll_mainnet_rpc_url"
+
+# Sepolia RPC URLs
+TF_VAR_ethereum_sepolia_rpc_url="your_ethereum_sepolia_rpc_url"
+TF_VAR_base_sepolia_rpc_url="your_base_sepolia_rpc_url"
+TF_VAR_linea_sepolia_rpc_url="your_linea_sepolia_rpc_url"
+TF_VAR_optimism_sepolia_rpc_url="your_optimism_sepolia_rpc_url"
+TF_VAR_arbitrum_sepolia_rpc_url="your_arbitrum_sepolia_rpc_url"
+TF_VAR_scroll_sepolia_rpc_url="your_scroll_sepolia_rpc_url"
+```
+
+## What it creates
+
+The Terraform configuration creates the following components:
+
+- **Render**
   - Render project and environment
-  - PostgreSQL database
-  - ENSIndexer services
-  - ENSRainbow service
-- AWS
-  - DNS configuration
+  - PostgreSQL database (ENSDb)
+  - ENSIndexer services for each configured namespace
+  - ENSRainbow services
+- **AWS**
+  - DNS records for the hosted ENSNode services
 
-## Deployment Steps
+## Deployment steps
 
 1. Initialize Terraform:
 
 ```bash
+cd terraform
 terraform init
 ```
 

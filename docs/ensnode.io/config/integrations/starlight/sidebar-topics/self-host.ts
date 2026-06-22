@@ -15,8 +15,8 @@ export const selfHostSidebarTopic = {
           link: "/docs/self-host/operations",
         },
         {
-          label: "Critical workloads 🚨",
-          link: "/docs/self-host/operations/critical-workloads",
+          label: "Key workloads",
+          link: "/docs/self-host/operations/key-workloads",
         },
         {
           label: "Scalability",
@@ -25,6 +25,10 @@ export const selfHostSidebarTopic = {
         {
           label: "Monitoring",
           link: "/docs/self-host/operations/monitoring",
+        },
+        {
+          label: "Troubleshooting",
+          link: "/docs/self-host/operations/troubleshooting",
         },
       ],
     },

@@ -6,7 +6,11 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud.
+The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud. All [ENSNode releases](https://github.com/namehash/ensnode/releases) include Docker images for the core ENSNode services:
+
+- [ENSRainbow](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensrainbow)
+- [ENSIndexer](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensindexer)
+- [ENSApi](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensapi)
 
 :::note[Postgres Requirement]
 ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. If you're swapping out the bundled `postgres:17` image for a managed or custom Postgres, make sure the [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) extension is available for installation (it ships with stock Postgres contrib and is available for installation on most managed providers).
@@ -22,7 +26,7 @@ ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) file
 - **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, ensdb (postgres)
 - **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), works out of the box with no configuration required
 
-### Mainnet / Sepolia
+## Mainnet / Sepolia
 
 Copy the example env file and configure it:
 
@@ -30,15 +34,15 @@ Copy the example env file and configure it:
 cp docker/envs/.env.docker.example docker/envs/.env.docker.local
 ```
 
-Edit `docker/envs/.env.docker.local` to set your `NAMESPACE`, `PLUGINS`, and RPC endpoints (e.g. `ALCHEMY_API_KEY` or `RPC_URL_1`), then run:
+Edit the file you just created (`docker/envs/.env.docker.local`) to set your `NAMESPACE`, `PLUGINS`, and RPC endpoints (e.g. `ALCHEMY_API_KEY` or `RPC_URL_1`), then run:
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
 ```
 
-### Local devnet
+## Local devnet
 
-Configuration is optional. To customize defaults (e.g. change `PLUGINS`), copy the example as in previous step and edit it.
+Configuration is optional. To customize defaults (e.g. change `PLUGINS`), copy the example as in the previous step and edit it.
 
 Otherwise, skip setup and run directly:
 
