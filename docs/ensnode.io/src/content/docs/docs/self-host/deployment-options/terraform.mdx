@@ -1,0 +1,121 @@
+---
+title: Deploying ENSNode with Terraform
+sidebar:
+  label: Terraform
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+This guide walks through deploying ENSNode using Terraform to [Render](https://render.com/), with AWS-managed DNS. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
+
+:::caution[NameHash Labs specific]
+These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While they provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs. We plan to generalize these scripts in the future to better support community deployments.
+:::
+
+<LinkCard
+  title="Example Terraform Configuration"
+  description="View the example Terraform configuration on GitHub."
+  href="https://github.com/namehash/ensnode/tree/main/terraform"
+/>
+
+## What you must bring
+
+Before starting, make sure you have:
+
+- [Terraform](https://www.terraform.io/downloads.html) installed
+- A [Render](https://render.com/) account and an API token ([create one](https://render.com/docs/api#1-create-an-api-key))
+- Your Render owner ID and an environment name
+- RPC URLs for every chain you want to index (Mainnet, Sepolia, Base, Linea, and optionally Optimism, Arbitrum, and Scroll)
+- An AWS account and credentials for DNS management
+- An AWS S3 bucket named `ensnode-terraform` to store Terraform state
+
+:::note[Postgres Requirement]
+ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. Render's managed Postgres has [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) available by default; if you adapt this configuration to a different provider, confirm the extension is available for installation on your Postgres plan.
+:::
+
+## Configuration
+
+Copy the sample environment file and fill in your values:
+
+```bash
+cp terraform/.env.sample terraform/.env.local
+```
+
+Edit `terraform/.env.local`. Terraform reads variables that start with `TF_VAR_` and passes them into the configuration automatically:
+
+```bash
+# ENSNode version
+TF_VAR_ensnode_version="v0.0.0"  # pin to a release from https://github.com/namehash/ensnode/releases
+
+# ENSRainbow Searchlight label set version
+TF_VAR_ensrainbow_searchlight_label_set_version="1"  # see https://ensnode.io/ensrainbow/concepts/glossary#label_set_version
+
+# Optional: ENSAdmin server connection library URLs
+TF_VAR_next_public_server_connection_library=""
+
+# Optional: used by some Render service modules
+TF_VAR_anthropic_api_key=""
+TF_VAR_alchemy_api_key=""
+TF_VAR_quicknode_api_key=""
+TF_VAR_quicknode_endpoint_name=""
+
+# Render
+TF_VAR_render_api_key="your_render_api_key"
+TF_VAR_render_owner_id="your_render_owner_id"
+TF_VAR_render_environment="your_render_environment"
+
+# Mainnet RPC URLs
+TF_VAR_ethereum_mainnet_rpc_url="your_ethereum_mainnet_rpc_url"
+TF_VAR_base_mainnet_rpc_url="your_base_mainnet_rpc_url"
+TF_VAR_linea_mainnet_rpc_url="your_linea_mainnet_rpc_url"
+TF_VAR_optimism_mainnet_rpc_url="your_optimism_mainnet_rpc_url"
+TF_VAR_arbitrum_mainnet_rpc_url="your_arbitrum_mainnet_rpc_url"
+TF_VAR_scroll_mainnet_rpc_url="your_scroll_mainnet_rpc_url"
+
+# Sepolia RPC URLs
+TF_VAR_ethereum_sepolia_rpc_url="your_ethereum_sepolia_rpc_url"
+TF_VAR_base_sepolia_rpc_url="your_base_sepolia_rpc_url"
+TF_VAR_linea_sepolia_rpc_url="your_linea_sepolia_rpc_url"
+TF_VAR_optimism_sepolia_rpc_url="your_optimism_sepolia_rpc_url"
+TF_VAR_arbitrum_sepolia_rpc_url="your_arbitrum_sepolia_rpc_url"
+TF_VAR_scroll_sepolia_rpc_url="your_scroll_sepolia_rpc_url"
+```
+
+## What it creates
+
+The Terraform configuration creates the following components:
+
+- **Render**
+  - Render project and environment
+  - PostgreSQL server for hosting ENSDb
+  - ENSIndexer and ENSApi instances for each supported configuration template (Alpha, Alpha-Sepolia, v2-Sepolia, Mainnet, and Sepolia)
+  - ENSRainbow instance for each supported label set (searchlight, subgraph)
+
+## Deployment steps
+
+1. Initialize Terraform:
+
+```bash
+cd terraform
+terraform init
+```
+
+2. Review the planned changes:
+
+```bash
+terraform plan
+```
+
+3. Apply the configuration:
+
+```bash
+terraform apply
+```
+
+## Cleanup
+
+To destroy the infrastructure:
+
+```bash
+terraform destroy
+```

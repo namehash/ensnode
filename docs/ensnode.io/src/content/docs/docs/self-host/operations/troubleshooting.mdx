@@ -1,0 +1,66 @@
+---
+title: ENSNode Troubleshooting
+description: Common symptoms and resolutions for ENSNode deployments.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+This page lists common symptoms you might see while running ENSNode and how to resolve them.
+
+## Common symptoms
+
+### Indexing is slow
+
+Historical backfill is the most resource-intensive ENSNode workload. If indexing is slower than expected:
+
+- **Check RPC throughput.** Slow or rate-limited providers are the most common bottleneck. Use a high-throughput provider or multiple providers during backfill.
+- **Check CPU performance.** Indexing path for ENSIndexer is single-threaded, so a faster CPU directly improves throughput.
+- **Check network latency to ENSRainbow and ENSDb.** Co-locate all three services on the same local network, and if applicable, in the same availability zone to minimize latency.
+- **Consider applying an ENSDb snapshot.** Bootstrapping from an [ENSDb snapshot](/docs/integrate/integration-options/ensdb-cli#ensdb-snapshots) skips most of the historical backfill.
+
+### ENSApi returns stale data
+
+If ENSApi returns data that lags behind the latest onchain state:
+
+- **Check Indexing Status API response.** If the `worstCaseDistance` field keeps increasing, ENSIndexer is likely falling behind. Check ENSIndexer logs for RPC errors or event handler issues.
+- **Check ENSDb replication lag.** If ENSApi reads from a replica, asynchronous replication may lag behind the primary.
+- **Verify ENSApi is connected to the correct schema.** ENSApi and ENSIndexer must agree on the `ENSDB_URL` and `ENSINDEXER_SCHEMA_NAME`.
+
+### ENSDb errors on startup
+
+If ENSIndexer fails to start with a database error:
+
+- **Confirm the `pg_trgm` extension is available.** ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup. This extension must be installable in your PostgreSQL instance.
+- **Check connection string and credentials.** Ensure `ENSDB_URL` is reachable from the ENSIndexer container or host.
+- **Check database schema permissions.** ENSIndexer needs permission to create tables, indexes, and extensions in the [ENSDb Writer Schema](/docs/services/ensdb/concepts/glossary#ensdb-writer-schema).
+
+### Out of disk space
+
+Disk usage grows as you index more chains and events:
+
+- **ENSDb:** mainnet deployments can require 380 GB or more, and the database grows over time.
+- **ENSRainbow:** the searchlight label set can require at least 55 GB.
+- Monitor disk usage early and scale volumes before they fill.
+
+### ENSRainbow is not healing labels
+
+If unknown labels are not being resolved:
+
+- **Confirm ENSRainbow is running and reachable.** Check the network path between ENSIndexer and ENSRainbow.
+- **Verify the loaded label set.** Ensure the label set version matches what you configured.
+
+### RPC rate limits or timeouts
+
+If you see frequent RPC errors:
+
+- **Use a paid or high-throughput RPC plan.** Free tiers are usually insufficient for backfill.
+- **Spread load across providers.** [Configure multiple RPC endpoints](/docs/services/ensindexer/usage/configuration) for each indexed chain.
+- **Reduce the number of active plugins or chains.** Fewer plugins means fewer events to fetch.
+
+## Next steps
+
+<LinkCard
+  title="ENSNode Deployment Options"
+  description="Compare Docker, Railway, and Terraform deployment options."
+  href="/docs/self-host/deployment-options"
+/>

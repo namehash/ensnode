@@ -174,6 +174,10 @@ export const integrateSidebarTopic = {
           ],
         },
         {
+          label: "Interactive Playground",
+          link: "/docs/integrate/unigraph/interactive-playground",
+        },
+        {
           label: "Schema Reference",
           link: "/docs/integrate/unigraph/schema-reference",
         },

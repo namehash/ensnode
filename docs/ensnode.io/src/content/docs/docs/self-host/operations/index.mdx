@@ -1,0 +1,46 @@
+---
+title: ENSNode Operations
+description: Understand how to operate and manage ENSNode deployments.
+sidebar:
+  label: Operations
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+Operating an ENSNode deployment requires understanding the key workloads that ENSNode is responsible for, as well as the best practices for managing and optimizing these workloads, including monitoring, scaling, and resource management.
+
+## Base requirements
+
+Before you run ENSNode in any environment, you will need:
+
+- **PostgreSQL database** with the [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) extension available.
+- **RPC Provider access** for each chain you want to index. High-throughput, low-latency RPCs are essential during the initial historical backfill.
+- **Disk space** for ENSDb (anything from tens of gigabytes to several hundreds, depending on the selected [ENS Namespace](/docs/hosted-instances#ens-namespaces) and activated [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins)).
+- **Disk space** for ENSRainbow (at least 55 GB for the `searchlight` label set).
+- **Co-located service instances** for best performance. ENSIndexer, ENSRainbow, and ENSDb should be on the same local network, and ideally, in the same availability zone to minimize latency.
+
+## In this section
+
+<LinkCard
+  title="Key workloads"
+  description="Understand the resource demands behind each ENSNode workload."
+  href="/docs/self-host/operations/key-workloads"
+/>
+
+<LinkCard
+  title="ENSNode Scalability"
+  description="Architecture overview of how to scale ENSNode to handle a massive volume of requests."
+  href="/docs/self-host/operations/scalability"
+/>
+
+<LinkCard
+  title="ENSNode Monitoring"
+  description="Learn what to monitor and how to set up basic alerts."
+  href="/docs/self-host/operations/monitoring"
+/>
+
+<LinkCard
+  title="Troubleshooting"
+  description="Common symptoms and how to resolve them."
+  href="/docs/self-host/operations/troubleshooting"
+/>
