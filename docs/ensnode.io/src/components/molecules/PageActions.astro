@@ -1,0 +1,457 @@
+---
+import { ChatGptIcon } from "../atoms/icons/ChatGptIcon";
+import { ClaudeIcon } from "../atoms/icons/ClaudeIcon";
+import { MarkdownIcon } from "../atoms/icons/MarkdownIcon";
+
+const RAW_CONTENT_BASE_URL = "https://raw.githubusercontent.com/namehash/ensnode/main/";
+
+const entry = Astro.locals.starlightRoute.entry;
+const entryFilePath = (
+  (entry?.data as { file?: string } | undefined)?.file ??
+  entry?.filePath ??
+  ""
+)
+  .toString()
+  .replace(/^\.?\//, "");
+
+const sourceMarkdownUrl =
+  entryFilePath.length === 0
+    ? null
+    : new URL(
+        entryFilePath.startsWith("docs/ensnode.io/")
+          ? entryFilePath
+          : `docs/ensnode.io/${entryFilePath}`,
+        RAW_CONTENT_BASE_URL,
+      ).toString();
+---
+
+<aside class="page-actions" data-page-actions-root data-menu-open="false">
+  <div class="split-action">
+    <button
+      type="button"
+      class="split-main"
+      data-page-action="copy-markdown"
+      aria-label="Copy page">
+      <span class="item-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </span>
+      <span class="split-main-label">Copy page</span>
+    </button>
+
+    <button
+      type="button"
+      class="split-toggle"
+      data-page-actions-toggle
+      aria-label="Open page actions menu"
+      aria-haspopup="menu"
+      aria-expanded="false">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true">
+        <path d="m6 9 6 6 6-6"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="action-menu" data-page-actions-menu hidden>
+    <ul>
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="chatgpt"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <ChatGptIcon />
+          </span>
+          <span class="item-title">Open in ChatGPT</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="claude"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <ClaudeIcon />
+          </span>
+          <span class="item-title">Open in Claude</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="view-markdown"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <MarkdownIcon />
+          </span>
+          <span class="item-title">View as Markdown</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="copy-markdown-url"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <MarkdownIcon />
+          </span>
+          <span class="item-title">Copy Markdown URL</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="copy-markdown"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </span>
+          <span class="item-title">Copy page</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</aside>
+
+<script define:vars={{ sourceMarkdownUrl }} is:inline>
+  const rootSelector = "[data-page-actions-root]";
+
+  let resolvedMarkdownUrl;
+
+  function getRouteMarkdownUrl() {
+    return new URL("index.md", window.location.href.replace(/\/?$/, "/")).toString();
+  }
+
+  async function resolveMarkdownUrl() {
+    if (resolvedMarkdownUrl) {
+      return resolvedMarkdownUrl;
+    }
+
+    const routeMarkdownUrl = getRouteMarkdownUrl();
+
+    try {
+      const probeResponse = await fetch(routeMarkdownUrl, { method: "HEAD" });
+      if (probeResponse.ok || probeResponse.status === 405) {
+        resolvedMarkdownUrl = routeMarkdownUrl;
+        return resolvedMarkdownUrl;
+      }
+    } catch {
+      // Ignore probe failures and continue to the source fallback.
+    }
+
+    if (sourceMarkdownUrl) {
+      resolvedMarkdownUrl = sourceMarkdownUrl;
+      return resolvedMarkdownUrl;
+    }
+
+    resolvedMarkdownUrl = routeMarkdownUrl;
+    return resolvedMarkdownUrl;
+  }
+
+  async function getLlmPrompt() {
+    const markdownUrl = await resolveMarkdownUrl();
+    return `Read from ${markdownUrl} so I can ask questions about it.`;
+  }
+
+  function openChat(url) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  async function copyMarkdownUrl() {
+    const markdownUrl = await resolveMarkdownUrl();
+    await navigator.clipboard.writeText(markdownUrl);
+  }
+
+  async function copyMarkdown() {
+    const markdownUrl = await resolveMarkdownUrl();
+    const response = await fetch(markdownUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Markdown (${response.status})`);
+    }
+
+    const markdown = await response.text();
+    await navigator.clipboard.writeText(markdown);
+  }
+
+  async function openInChatGPT() {
+    const message = encodeURIComponent(await getLlmPrompt());
+    openChat(`https://chatgpt.com/?q=${message}`);
+  }
+
+  async function openInClaude() {
+    const message = encodeURIComponent(await getLlmPrompt());
+    openChat(`https://claude.ai/new?q=${message}`);
+  }
+
+  async function viewAsMarkdown() {
+    const markdownUrl = await resolveMarkdownUrl();
+    window.open(markdownUrl, "_blank", "noopener,noreferrer");
+  }
+
+  const handlers = {
+    "copy-markdown": copyMarkdown,
+    "copy-markdown-url": copyMarkdownUrl,
+    "view-markdown": viewAsMarkdown,
+    chatgpt: openInChatGPT,
+    claude: openInClaude,
+  };
+
+  function setMenuOpen(root, isOpen) {
+    const menu = root.querySelector("[data-page-actions-menu]");
+    const toggle = root.querySelector("[data-page-actions-toggle]");
+
+    if (!menu || !toggle) {
+      return;
+    }
+
+    root.dataset.menuOpen = isOpen ? "true" : "false";
+    menu.hidden = !isOpen;
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+
+  function closeMenusExcept(exceptionRoot) {
+    document.querySelectorAll(rootSelector).forEach((root) => {
+      if (root !== exceptionRoot) {
+        setMenuOpen(root, false);
+      }
+    });
+  }
+
+  function bindGlobalHandlersOnce() {
+    if (window.__ensnodePageActionsGlobalHandlersBound === true) {
+      return;
+    }
+
+    document.addEventListener("click", (event) => {
+      document.querySelectorAll(rootSelector).forEach((root) => {
+        if (!root.contains(event.target)) {
+          setMenuOpen(root, false);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      document.querySelectorAll(rootSelector).forEach((root) => {
+        setMenuOpen(root, false);
+      });
+    });
+
+    window.__ensnodePageActionsGlobalHandlersBound = true;
+  }
+
+  function initPageActions(root) {
+    if (root.dataset.initialized === "true") {
+      return;
+    }
+
+    root.addEventListener("click", async (event) => {
+      const toggleButton = event.target.closest("button[data-page-actions-toggle]");
+      if (toggleButton && root.contains(toggleButton)) {
+        event.preventDefault();
+
+        const currentlyOpen = root.dataset.menuOpen === "true";
+        closeMenusExcept(root);
+        setMenuOpen(root, !currentlyOpen);
+        return;
+      }
+
+      const button = event.target.closest("button[data-page-action]");
+      if (!button || !root.contains(button)) {
+        return;
+      }
+
+      const action = button.dataset.pageAction;
+      const handler = action ? handlers[action] : undefined;
+
+      if (!handler) {
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        await handler();
+      } catch (error) {
+        console.error("Page action failed:", error);
+      } finally {
+        button.disabled = false;
+      }
+
+      if (button.dataset.menuItem === "true") {
+        setMenuOpen(root, false);
+      }
+    });
+
+    setMenuOpen(root, false);
+    root.dataset.initialized = "true";
+  }
+
+  function initializeAllPageActions() {
+    bindGlobalHandlersOnce();
+
+    document.querySelectorAll(rootSelector).forEach((root) => {
+      initPageActions(root);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeAllPageActions, { once: true });
+  } else {
+    initializeAllPageActions();
+  }
+
+  document.addEventListener("astro:page-load", initializeAllPageActions);
+</script>
+
+<style>
+  .page-actions {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .split-action {
+    border: 1px solid var(--sl-color-hairline-shade);
+    border-radius: var(--radius-xl);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    overflow: hidden;
+    background: var(--sl-color-bg-nav);
+  }
+
+  .split-main,
+  .split-toggle {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--sl-color-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1rem;
+    cursor: pointer;
+    height: 2.625rem;
+  }
+
+  .split-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    text-align: left;
+  }
+
+  .split-toggle {
+    border-inline-start: 1px solid var(--sl-color-hairline-shade);
+    width: 2.875rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .split-toggle svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .split-main:hover,
+  .split-toggle:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .page-actions[data-menu-open="true"] .split-toggle {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .item-icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .item-icon :global(svg) {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .action-menu {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(100% + 0.2rem);
+    z-index: var(--sl-z-index-toc, 10);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--sl-color-hairline-shade);
+    background: var(--sl-color-bg-nav);
+    padding: 0.375rem;
+  }
+
+  .action-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .action-menu-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--sl-color-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1rem;
+    text-align: left;
+  }
+
+  .action-menu-item:hover:not(:disabled) {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .item-title {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    transition: color 0.15s ease;
+  }
+
+  .split-main:disabled,
+  .split-toggle:disabled,
+  .action-menu-item:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+</style>
