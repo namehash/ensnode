@@ -41,10 +41,6 @@ The key requirements for the [ENSRainbow](/docs/services/ensrainbow) instance ar
 
 After the initial backfill is complete, the resource requirements for indexing live ENS data are significantly lower as there are way fewer events to process and index at any given time compared to the backfill. The key requirements for indexing live ENS data remain the same when it comes to **fast network connections** among ENSIndexer, ENSRainbow, and ENSDb, but the CPU resource requirements are much more manageable and can be handled by more modest infrastructure.
 
-:::danger[ENSIndexer always starts from the backfill]
-Even if your ENSIndexer instance has been indexing live data, when it restarts, it will always [start the "crash recovery" process](/docs/services/ensindexer/concepts/startup-sequence#ensdb-writer-schema-migrations), which leads back to the backfill. A huge downside of this is that ENSIndexer will drop indexes in the [ENSIndexer Schema](/docs/services/ensdb/concepts/glossary#ensindexer-schema) and after completing the backfill in a short while, it will have to rebuild the indexes again. Depending on the selected [ENS Namespace](/docs/hosted-instances#ens-namespaces) and activated [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins), this can take from a few minutes to up to several hours.
-:::
-
 ## Serving API requests
 
 ENSNode serves API requests through the [ENSApi](/docs/services/ensapi) instance, which queries the indexed ENS data stored in the [ENSDb instance](/docs/services/ensdb/concepts/glossary#ensdb-instance). Depending on the volume of API requests and the complexity of the queries, you may need to consider scaling your infrastructure to ensure that the ENSApi instance can handle the load and provide fast responses. This may involve optimizing database queries, implementing caching strategies, or scaling the ENSApi instance horizontally by running multiple instances behind a load balancer.
