@@ -5,15 +5,24 @@ tableOfContents: false
 sidebarDocked: true
 ---
 
+import { LinkCard } from "@astrojs/starlight/components";
+
 Use an interactive ENSDb playground to query the [ENS Unigraph](/docs/integrate/unigraph/concepts#indexed-data-model) from a read-only [ENSDb Snapshot](/docs/integrate/integration-options/ensdb-cli).
 
-### Get started
+<LinkCard
+   title="Open fullscreen view"
+   description="Open the ENSDb Interactive Playground in a new tab to have a fullscreen view."
+   href="https://ensdb-playground.ensnode.io/"
+   target="_blank"
+/>
+
+## Get started
 
 1. Click the "_ENSDb Alpha (read-only snapshot)_" button below to connect to a read-only ENSDb Snapshot Server.
 
    :::caution[This playground hosts a point-in-time snapshot, not a live ENSDb]
    This interactive playground hosts a [point-in-time snapshot](/docs/integrate/integration-options/ensdb-cli) of an [ENSDb instance](/docs/services/ensdb/concepts/database-schemas#ensdb-instance), and does not expose a live ENSDb with the current state of ENS. However, it is still a convenient way to explore the ENS Unigraph data model and run some test queries without needing to deploy ENSNode in order to access your own live ENSDb instance.
-   
+
    This snapshot was taken at a single point in time from the [ENSNode Alpha `v1.16.0` hosted instance](/docs/hosted-instances#ensnode-alpha).
    :::
 
