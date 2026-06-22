@@ -101,6 +101,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
         {
+          label: "FAQ",
+          link: "/docs/integrate/omnigraph/faq",
+        },
+        {
           label: "Examples",
           collapsed: true,
           items: OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS,

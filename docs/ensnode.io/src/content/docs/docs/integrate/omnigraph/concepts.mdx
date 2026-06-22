@@ -1,6 +1,6 @@
 ---
 title: ENS Omnigraph Core Concepts
-description: The core data-model concepts behind the ENS Omnigraph API — Namegraph, Unigraph, canonicality, polymorphism, Interpreted Names, Events, and Permissions.
+description: The core data-model concepts behind the ENS Omnigraph API — Namegraphs, Unigraph, canonicality, polymorphism, Interpreted Names, Events, and Permissions.
 sidebar:
   label: Core Concepts
 ---
@@ -82,7 +82,7 @@ query Namegraph {
 
 The **Unigraph** is the entire collection of these disjoint ENSv2 Namegraphs and multiple ENSv1 Nametables, combined together into a single unified data model using ENS Resolution semantics. Navigating the Unigraph from `"eth"` down to `"vitalik.eth"` and beyond looks identical regardless of whether the underlying entities are ENSv1 or ENSv2.
 
-The `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins), implemented in [ENSIndexer](/docs/services/ensindexer), is what builds this unified model. The Unigraph constructs two Namegraphs, one rooted at the ENSv1 Root Registry and another rooted at the ENSv2 Root Registry. It also includes special support for unifying multiple ENSv1 Nametables across multiple chains into the unigraph, including: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`).
+The `unigraph` [ENSNode plugin](/docs/integrate/integration-options/ensnode-plugins), implemented in [ENSIndexer](/docs/services/ensindexer), is what builds this unified model. The Unigraph models many Namegraphs and Nametables together — for example, the ENSv1 Nametable rooted at the ENSv1 Root Registry and the ENSv2 Namegraph rooted at the ENSv2 Root Registry. It also includes special support for unifying multiple ENSv1 Nametables across multiple chains into the Unigraph, including: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`).
 
 ```mermaid
 flowchart TD
@@ -118,9 +118,9 @@ query Basenames {
 
 ## Unigraph with ENSv2
 
-Once ENSv2 launches, the ENSv2 Namegraph will exist in parallel with the ENSv1 Namegraph. When referencing a Domain by `name`, the Omnigraph will start at the **ENSv2 Root Registry**, and traverse the Namegraph to find the appropriate Domain. Once `.eth` names are reserved in the ENSv2 `EthRegistry`, then the **ENSv2 Domain** will be returned, since that's the Domain that would be referenced during resolution. This is part of why it's important to reference specific Domains by `id`; once `vitalik` has been reserved in the ENSv2 EthRegistry, the ENS protocol considers the ENSv2 Domain (_not_ the ENSv1 Domain) to be the 'real' one. That said, after the `.eth` names are reserved (but before they're individually migrated), their resolver will be the `ENSv1Resolver`, forwarding resolution to the ENSv1 Namegraph.
+Once ENSv2 launches, the ENSv2 Namegraphs will exist in parallel with the ENSv1 Nametables. When referencing a Domain by `name`, the Omnigraph will start at the **ENSv2 Root Registry**, and traverse the Unigraph to find the appropriate Domain. Once `.eth` names are reserved in the ENSv2 `EthRegistry`, then the **ENSv2 Domain** will be returned, since that's the Domain that would be referenced during resolution. This is part of why it's important to reference specific Domains by `id`; once `vitalik` has been reserved in the ENSv2 EthRegistry, the ENS protocol considers the ENSv2 Domain (_not_ the ENSv1 Domain) to be the 'real' one. That said, after the `.eth` names are reserved (but before they're individually migrated), their resolver will be the `ENSv1Resolver`, forwarding resolution to the ENSv1 Nametable.
 
-The end result is that there are **two** Domains considered to be "vitalik.eth", one in the ENSv1 Namegraph and one in the ENSv2 Namegraph.
+The end result is that there are **two** Domains considered to be "vitalik.eth", one in an ENSv1 Nametable and one in an ENSv2 Namegraph.
 
 ```graphql title="example.gql"
 query ByProtocolVersion {
@@ -143,7 +143,7 @@ This is part of why there's a distinction between a Domain's `id` (the stable, u
 
 Given that a Domain entity (say, the `sub` in `sub.example.eth`) can be reached by infinitely many aliases (for example, `sub.other.eth`), it becomes important to determine a _canonical_ reference to the Domain — this is the **Canonical Name**. Canonicality is also connected to nameability within the Unigraph; if an ENSv2 Domain exists on-chain but isn't eventually connected to the ENSv1 or ENSv2 Root Registry via a series of canonical names, **it doesn't have a Canonical Name!**
 
-Within the Omnigraph API the complexity of the Namegraph is reduced, and all Canonical Domains are queryable, searchable, and addressable by said Canonical Name. Domains that are not canonical are _still_ referenceable by `id` (eg. `domain(by: { id: DomainId! })`).
+Within the Omnigraph API the complexity of the namegraphs is reduced, and all Canonical Domains are queryable, searchable, and addressable by said Canonical Name. Domains that are not canonical are _still_ referenceable by `id` (eg. `domain(by: { id: DomainId! })`).
 
 Canonical Domains have a `Domain.canonical` field hosting the canonicality-derived fields such as `name`, `node`, `depth` (i.e. 2 for `vitalik.eth`), and `path` from the ENS root.
 
@@ -169,12 +169,12 @@ Every entity in the Omnigraph has an `id` — a nominally-typed, stable referenc
 
 For Domains, when you already have an `id` and want to reference the _exact same_ on-chain entity, query it by `id`: `domain(by: { id: "..." })` which is stable across time, even if its Canonical Name could change.
 
-Addressing a Domain by **name** is a different operation. It's **forward traversal of the unified Namegraph**: `domain(by: { name: "vitalik.eth" })` walks from the Root Registry (ENSv1 or ENSv2 if defined) → `"eth"` in that Registry → the Registry that `"eth"` points at (the EthRegistry) → `"vitalik"` in that Registry. The Domain returned is whichever on-chain entity (if any) would be identified during Forward Resolution.
+Addressing a Domain by **name** is a different operation. It's **forward traversal of the Unigraph**: `domain(by: { name: "vitalik.eth" })` walks from the Root Registry (ENSv1 or ENSv2 if defined) → `"eth"` in that Registry → the Registry that `"eth"` points at (the EthRegistry) → `"vitalik"` in that Registry. The Domain returned is whichever on-chain entity (if any) would be identified during Forward Resolution.
 
 These two views are not interchangeable:
 
-- The `id` you receive from a name lookup _is_ the stable reference to the on-chain entity that the Namegraph currently resolves `"vitalik.eth"` to.
-- But `"vitalik.eth"` is not a stable reference to that entity. The Namegraph can be re-parented or re-aliased — and tomorrow, `"vitalik.eth"` may resolve to an entirely different on-chain Domain, which may have a different resolver with different records.
+- The `id` you receive from a name lookup _is_ the stable reference to the on-chain entity that the Unigraph currently resolves `"vitalik.eth"` to.
+- But `"vitalik.eth"` is not a stable reference to that entity. A Domain's position in the Unigraph can be re-parented or re-aliased — and tomorrow, `"vitalik.eth"` may resolve to an entirely different on-chain Domain, which may have a different resolver with different records.
 
 Address the exact on-chain entity by `id` — stable across time:
 
@@ -208,7 +208,7 @@ So if you're writing an application that shows a profile for `vitalik.eth`, `by:
 
 `Domain`, `Registry`, and `Registration` are GraphQL **interfaces**, with concrete types implementing each:
 
-- `Domain` → `ENSv1Domain`, `ENSv2Domain`
+- `Domain` → `ENSv1Domain`, `ENSv2Domain`, `UnindexedDomain`
 - `Registry` → `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Registry`
 - `Registration` → `BaseRegistrarRegistration`, `NameWrapperRegistration`, `ThreeDNSRegistration`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`
 
@@ -232,25 +232,38 @@ query Polymorphism {
 }
 ```
 
+## UnindexedDomain
+
+Not every resolvable Domain is in the index. A Domain can be **resolvable but unindexed** when an ancestor on its namegraph path carries an [ENSIP-10](https://docs.ens.domains/ensip/10) wildcard Resolver — for example off-chain / CCIP-Read subnames, wildcard subnames, and unindexed 3DNS names. The Omnigraph represents these with the `UnindexedDomain` type, so that a `domain(by: { name })` lookup still returns a usable Domain even when there's no indexed onchain entity behind that exact name.
+
+An `UnindexedDomain` implements the `Domain` interface — it still has a Canonical Name and resolves records — but it has no Registry of its own: its `registry` and `parent` reflect the wildcard-bearing ancestor's Registry. Branch on `__typename` (or a typed inline fragment) when you need to distinguish it from an indexed `ENSv1Domain` / `ENSv2Domain`.
+
+```graphql title="example.gql"
+query UnindexedDomain {
+  # a name resolvable only via an ancestor's ENSIP-10 wildcard resolver
+  domain(by: { name: "alice.cb.id" }) {
+    __typename # may be UnindexedDomain
+    canonical { name { interpreted } }
+    resolve { profile { addresses { ethereum } } }
+  }
+}
+```
+
 ## InterpretedNames and InterpretedLabels everywhere
 
 Every name and label crossing the Omnigraph surface is an **Interpreted Name** (or **Interpreted Label**). Each label in an Interpreted Name is either a normalized literal label or an Encoded LabelHash (`[abc123…]`) when the literal isn't known or is unnormalized. This eliminates one of the most common ENS UI footguns — unnormalized labels, unhealed hashes, and rendering surprises — at the schema layer, making UI rendering trivial. See [terminology](/docs/reference/terminology#interpreted-label) for the full definition.
-
-In addition, both provide a `beautified` variant, where the [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form is rendered. This allows your UI to trivially render the best form of a name or label, without further logic.
 
 ```graphql title="example.gql"
 query InterpretedNames {
   domain(by: { name: "vitalik.eth" }) {
     label {
       interpreted   # "vitalik"
-      beautified    # "vitalik"
       hash          # 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
     }
 
     canonical {
       name {
         interpreted # "vitalik.eth"
-        beautified  # "vitalik.eth"
       }
     }
   }
@@ -258,7 +271,7 @@ query InterpretedNames {
 ```
 
 ```tsx title="Example.tsx"
-<p>the Label for this domain is {domain.label.beautified}</p>
+<p>the Label for this domain is {domain.label.interpreted}</p>
 ```
 
 <CardGrid>
@@ -271,16 +284,6 @@ query InterpretedNames {
     title="Interpreted Label"
     description="The full definition in terminology."
     href="/docs/reference/terminology#interpreted-label"
-  />
-  <LinkCard
-    title="Beautified Name"
-    description="The full definition in terminology."
-    href="/docs/reference/terminology#beautified-name"
-  />
-  <LinkCard
-    title="Beautified Label"
-    description="The full definition in terminology."
-    href="/docs/reference/terminology#beautified-label"
   />
 </CardGrid>
 
@@ -303,22 +306,25 @@ query ByInterpretedName {
 ```
 
 :::danger[Not all InterpretedNames are Resolvable]
-ENS Forward Resolution does _not_ support Encoded LabelHashes in names, so while an InterpretedName can be used to traverse the Namegraph (i.e. with `domain(by: { name: "" })`), if the Canonical Name is not a [ResolvableName](/docs/reference/terminology#resolvable-name), then the records for that name _cannot_ be determined.
+ENS Forward Resolution does _not_ support Encoded LabelHashes in names, so while an InterpretedName can be used to traverse the Unigraph (i.e. with `domain(by: { name: "" })`), if the Canonical Name is not a [ResolvableName](/docs/reference/terminology#resolvable-name), then the records for that name _cannot_ be determined.
 :::
 
 ### BeautifiedNames and BeautifiedLabels
 
-For some labels and names, there exists an [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form, where certain normalized characters are 'beautified' into their _un-normalized_ but _normalizable_ prettier forms.
+For some labels and names, there exists an [ENSIP-15](https://docs.ens.domains/ensip/15) beautified form, where certain normalized characters are 'beautified' into their _un-normalized_ but _normalizable_ prettier forms. For example, the InterpretedName `♾.eth` beautifies to `♾️.eth`, and the Greek letter `ξ` beautifies to `Ξ` — so the InterpretedName `ξsomeone.eth` beautifies to `Ξsomeone.eth`. Each beautified form is _un-normalized_ but _normalizable_ back to its InterpretedName.
 
-For example, the InterpretedName `♾.eth` (normalized) would be beautified to `♾️.eth` (un-normalized, but is normalizable back to `♾.eth`). All name and label fields in the Omnigraph provide a `beautified` variant which can be used for display.
+All name and label fields in the Omnigraph provide a `beautified` variant for display. The distinction is clearest when resolving the primary name of an address whose name contains such a character: `interpreted` is the stable form to use for lookups and links, while `beautified` is what you render to the user.
 
 ```graphql title="example.gql"
-query Beautified {
-  domain(by: { name: "♾.eth" }) {
-    canonical {
-      name {
-        interpreted # ♾.eth
-        beautified  # ♾️.eth
+query BeautifiedPrimaryName($address: Address!) {
+  account(by: { address: $address }) {
+    resolve {
+      # the primary name this address has set on Ethereum mainnet
+      primaryName(by: { chainName: ETHEREUM }) {
+        name {
+          interpreted # "ξsomeone.eth" — the stable form for lookups & links
+          beautified  # "Ξsomeone.eth" — ξ is beautified to Ξ for display
+        }
       }
     }
   }
@@ -326,8 +332,21 @@ query Beautified {
 ```
 
 ```tsx title="Example.tsx"
-<p>the Domain's name is {domain.canonical?.name.beautified ?? 'unknown'}</p>
+<p>display the primary name as {primaryName?.name.beautified ?? 'unknown'}</p>
 ```
+
+<CardGrid>
+  <LinkCard
+    title="Beautified Name"
+    description="The full definition in terminology."
+    href="/docs/reference/terminology#beautified-name"
+  />
+  <LinkCard
+    title="Beautified Label"
+    description="The full definition in terminology."
+    href="/docs/reference/terminology#beautified-label"
+  />
+</CardGrid>
 
 :::danger[Only use BeautifiedNames for Display]
 [BeautifiedNames](/docs/reference/terminology#beautified-name) are only suitable for display, not for identification of a Domain. Always use a Domain's `id` or [InterpretedName](/docs/reference/terminology#interpreted-name) as an identifier (for url paths, for example).

@@ -1,3 +1,5 @@
+import type { NormalizedAddress, TokenId } from "enssdk";
+
 import { cursors } from "@/omnigraph-api/lib/cursors";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 
@@ -9,6 +11,20 @@ export const PAGINATION_DEFAULT_MAX_SIZE = 1000;
  */
 export const ID_PAGINATED_CONNECTION_ARGS = {
   toCursor: <T extends { id: string }>(model: T) => cursors.encode(getModelId(model)),
+  defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+  maxSize: PAGINATION_DEFAULT_MAX_SIZE,
+} as const;
+
+/** Connection args for a connection of account addresses, cursored by the address itself. */
+export const ADDRESS_PAGINATED_CONNECTION_ARGS = {
+  toCursor: (address: NormalizedAddress) => cursors.encode(address),
+  defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+  maxSize: PAGINATION_DEFAULT_MAX_SIZE,
+} as const;
+
+/** Connection args paginated by a list NFT's `TokenId` (the `efp_lists` primary key). */
+export const TOKEN_ID_PAGINATED_CONNECTION_ARGS = {
+  toCursor: (list: { id: TokenId }) => cursors.encode(list.id),
   defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
   maxSize: PAGINATION_DEFAULT_MAX_SIZE,
 } as const;

@@ -26,10 +26,7 @@ Defined in [`unigraph.schema.ts`](https://github.com/namehash/ensnode/blob/main/
 This schema takes a balanced approach to materialization: it mimics on-chain state as closely as
 possible, with the exception of materializing specific state that must be trivially filterable. Then,
 resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
-behavior. This forces our implementation to match the protocol as closely as possible, with the
-obvious note that the performance tradeoffs of evm code and our app are different. For example,
-it's more expensive for us to recursively traverse the `namegraph` (like evm code does) because our
-individual roundtrips from the db are relatively more expensive, but can be batched.
+behavior.
 
 In general: the indexed schema should match on-chain state as closely as possible, and
 resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time

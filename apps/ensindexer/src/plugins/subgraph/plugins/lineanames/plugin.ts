@@ -36,28 +36,28 @@ export default createPlugin({
       ),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.Registry),
           abi: contracts.Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
         [namespaceContract(pluginName, "EthRegistrarController")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             chain.id,
             contracts.EthRegistrarController,
           ),
           abi: contracts.EthRegistrarController.abi,
         },
         [namespaceContract(pluginName, "NameWrapper")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.NameWrapper),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.NameWrapper),
           abi: contracts.NameWrapper.abi,
         },
         // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.Resolver),
           abi: contracts.Resolver.abi,
         },
       },

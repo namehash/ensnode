@@ -19,6 +19,7 @@ export enum PluginName {
   /** @deprecated use {@link PluginName.Unigraph} instead */
   ENSv2 = "ensv2",
   Unigraph = "unigraph",
+  EFP = "efp",
 }
 
 /**

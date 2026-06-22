@@ -1,0 +1,27 @@
+---
+title: ENS Omnigraph API FAQ
+description: Frequently asked questions about the ENS Omnigraph API.
+sidebar:
+  label: FAQ
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+## Does the ENS Omnigraph API reduce the decentralization of ENS?
+
+No. The decentralization of ENS is valuable and important, and ENSNode fully supports it. Querying ENS through the Omnigraph API introduces no reduction in decentralization compared to resolving ENS through raw RPC calls.
+
+It helps to ask: when you make ENS resolutions via RPC calls (rather than via the Omnigraph API), where are those RPC calls actually being sent?
+
+- **If you self-host your own Ethereum node:** you can also self-host your own ENSNode instance and configure it to send RPC requests exclusively to your own node. There's no reduction in decentralization — the source of truth for all ENS data remains rooted in RPC calls to your self-hosted Ethereum node.
+- **If you use a cloud-hosted RPC provider (Alchemy, QuickNode, dRPC, etc.):** you can self-host an ENSNode instance configured to use that same RPC provider, which introduces no decrease in decentralization compared to your existing setup. Alternatively, you can use NameHash's hosted ENSNode instances — a convenience option for the ENS ecosystem to query ENS data without running their own Ethereum nodes or ENSNodes.
+
+Either way, ENSNode introduces no reduction in the decentralization of ENS relative to making ENS resolutions through raw RPC calls.
+
+In fact, through [ENS Protocol Acceleration](/docs/integrate/omnigraph/protocol-acceleration), ENSNode can _improve_ the practical decentralization and unstoppability of ENS by reducing the hard dependency on centralized CCIP-Read gateway servers whose downtime would otherwise take impacted multichain names offline.
+
+<LinkCard
+  title="Strengthen the decentralization and unstoppability of ENS"
+  description="How Protocol Acceleration reduces ENS's dependence on centralized CCIP-Read gateways."
+  href="/docs/integrate/omnigraph/protocol-acceleration#strengthen-the-decentralization-and-unstoppability-of-ens"
+/>

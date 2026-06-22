@@ -34,6 +34,7 @@ import {
   type RippleAddress,
   type RootstockAddress,
   type SolanaAddress,
+  type TokenId,
 } from "enssdk";
 import { isHex, size } from "viem";
 import { z } from "zod/v4";
@@ -165,6 +166,39 @@ builder.scalarType("ChainId", {
   description: "ChainId represents an enssdk#ChainId.",
   serialize: (value: ChainId) => value,
   parseValue: (value) => makeChainIdSchema("ChainId").parse(value),
+});
+
+builder.scalarType("TokenId", {
+  description: "TokenId represents an enssdk#TokenId.",
+  serialize: (value: TokenId) => value.toString(),
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .check((ctx) => {
+        // A TokenId is a uint256 serialized as a decimal string; reject hex, signs, and fractions
+        // so a malformed token id never reaches a resolver or DB query.
+        if (!/^\d+$/.test(ctx.value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "TokenId must be a non-negative uint256 (decimal string)",
+            input: ctx.value,
+          });
+          return;
+        }
+
+        // Enforce the uint256 upper bound so the scalar contract stays honest. A uint256 is at most
+        // 78 decimal digits, so reject longer strings up front — a pathologically long input never
+        // reaches the unbounded BigInt() conversion.
+        if (ctx.value.length > 78 || BigInt(ctx.value) > 2n ** 256n - 1n) {
+          ctx.issues.push({
+            code: "custom",
+            message: "TokenId must not exceed the uint256 maximum (2^256 - 1)",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => BigInt(val) as TokenId)
+      .parse(value),
 });
 
 builder.scalarType("CoinType", {

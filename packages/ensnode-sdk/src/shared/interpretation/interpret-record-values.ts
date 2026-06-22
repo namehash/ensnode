@@ -85,6 +85,23 @@ export function interpretTextRecordKey(key: string): string | null {
 }
 
 /**
+ * Interprets an EFP account-metadata key and returns null if the key should be rejected.
+ *
+ * The key is a free-form on-chain string used as a primary-key component. A NULL byte cannot be
+ * stored in a Postgres `text` column, so a key containing one is rejected (the metadata entry is
+ * skipped on write and never matches on read) rather than silently stripped — stripping would
+ * collapse distinct on-chain keys onto one stored key.
+ *
+ * @param key - The EFP account-metadata key to interpret.
+ * @returns The key as-is, or null if it must be rejected.
+ */
+export function interpretMetadataKey(key: string): string | null {
+  if (hasNullByte(key)) return null;
+
+  return key;
+}
+
+/**
  * Interprets a text record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:

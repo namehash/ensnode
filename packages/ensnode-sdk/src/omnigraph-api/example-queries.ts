@@ -42,6 +42,10 @@ const SEPOLIA_V2_NAME = asInterpretedName("roppp.eth");
 
 const VITALIK_NAME = asInterpretedName("vitalik.eth");
 
+// a DNS-imported (3DNS) name — its assigned vs. effective resolvers differ, making it a
+// more interesting subject than a mainnet `.eth` name for the Domain resolver example
+const DPERRI_DNS_NAME = asInterpretedName("dperri.com");
+
 const GREG_NAME = asInterpretedName("gregskril.eth");
 
 const GREG_ADDRESS = toNormalizedAddress("0x179a862703a4adfb29896552df9e307980d19285");
@@ -109,7 +113,9 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
     }
 
     # Also load the count of ENSv1 and ENSv2 domains owned by the account
-    # to see if they have domains they should upgrade to ENSv2
+    # to see if they have domains they should upgrade to ENSv2.
+    # For simplicity this example query doesn't include additional logic
+    # to filter out domains that have expired.
     v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
     v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
   }
@@ -552,11 +558,16 @@ query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
+      # Reverse resolution: given this address + a chain, get the primary
+      # name the address has set for that chain.
+      # primaryName returns the result for a single chain (here, Optimism).
+      # (onePrimaryName / twoPrimaryNames are just GraphQL aliases.)
       onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
         chainName
         name { interpreted beautified }
       }
 
+      # primaryNames returns one result per requested chain, in a single call.
       twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         chainName
         name { interpreted beautified }
@@ -743,19 +754,20 @@ query AccountResolverPermissions($address: Address!) {
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
+      # the Resolver explicitly assigned to this Domain
       assigned {
-        contract {
-          address
-        }
-        events(first: 5) {
-          edges { node { topics data timestamp } }
-        }
+        contract { address }
+      }
+      # the Resolver that ENS Forward Resolution (ENSIP-10) actually lands
+      # on for this Domain — i.e. its effective Resolver
+      effective {
+        contract { address }
       }
     }
   }
 }`,
     variables: {
-      default: { name: VITALIK_NAME },
+      default: { name: DPERRI_DNS_NAME },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
       [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME },
     },
@@ -827,6 +839,9 @@ query Namegraph {
     query: `
 query AccountMigratedNames($address: Address!) {
   account(by: { address: $address }) {
+    # Count the ENSv1 and ENSv2 domains owned by the account.
+    # For simplicity this example query doesn't include additional logic
+    # to filter out domains that have expired.
     v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
     v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
   }

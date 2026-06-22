@@ -22,6 +22,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./core": "./src/core/index.ts",
+    "./efp": "./src/efp/index.ts",
     "./omnigraph": "./src/omnigraph/index.ts",
     "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
   },
@@ -36,6 +37,10 @@
       "./core": {
         "types": "./dist/core/index.d.ts",
         "default": "./dist/core/index.js"
+      },
+      "./efp": {
+        "types": "./dist/efp/index.d.ts",
+        "default": "./dist/efp/index.js"
       },
       "./omnigraph": {
         "types": "./dist/omnigraph/index.d.ts",

@@ -2,7 +2,7 @@ import type { ChainId } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { EnsDbConfig } from "@ensnode/ensdb-sdk";
-import type { BlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 import { RpcConfig, type RpcConfigs } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
@@ -120,23 +120,19 @@ export interface EnsIndexerConfig {
   ensDbUrl: EnsDbConfig["ensDbUrl"];
 
   /**
-   * Constrains the global blockrange for indexing, useful for testing purposes.
+   * Chain-specific end blocks, keyed by {@link ChainId}, parsed from `END_BLOCK_<chainId>` env vars.
    *
-   * This is strictly designed for testing and development and its usage in production will result
-   * in incorrect or out-of-date indexes.
-   *
-   * ENSIndexer will constrain all indexed contracts to the provided {@link BlockNumberRange.startBlock}
-   * and {@link BlockNumberRange.endBlock} if specified.
+   * Constrains the indexing end block of each specified chain — strictly for testing/checkpoints;
+   * usage in production results in incorrect or out-of-date indexes. Designed for producing
+   * deterministic, reproducible checkpoints where every indexed chain stops at a block corresponding
+   * to a shared timestamp. Empty when no `END_BLOCK_<chainId>` vars are set.
    *
    * Invariants:
-   * - both `startBlock` and `endBlock` are optional, and expected to be undefined
-   * - if defined, startBlock must be an integer greater than 0
-   * - if defined, endBlock must be an integer greater than 0
-   * - if defined, endBlock must be greater than startBlock
-   * - if either `startBlock` or `endBlock` are defined, the number of indexed chains described
-   *   by {@link plugins} must be 1
+   * - each key must be a {@link ChainId} indexed by the active {@link plugins}
+   * - each value must be a non-negative integer
+   * - may be set across any number of indexed chains
    */
-  globalBlockrange: BlockNumberRange;
+  chainEndBlocks: Map<ChainId, number>;
 
   /**
    * A feature flag to enable/disable ENSIndexer's Subgraph Compatible Indexing Behavior.

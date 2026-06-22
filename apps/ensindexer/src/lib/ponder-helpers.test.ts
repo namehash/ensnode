@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildBlockNumberRange } from "@ensnode/ponder-sdk";
 
-import { constrainBlockrange } from "./ponder-helpers";
+import { blockrangeForChain, constrainBlockrange } from "./ponder-helpers";
 
 const UNDEFINED_BLOCKRANGE = buildBlockNumberRange(undefined, undefined);
 const BLOCKRANGE_WITH_END = buildBlockNumberRange(undefined, 1234);
@@ -88,6 +88,25 @@ describe("ponder helpers", () => {
         );
         expect(config).toEqual(buildBlockNumberRange(30, 1234));
       });
+    });
+  });
+
+  describe("blockrangeForChain", () => {
+    it("is unbounded when the chain has no end block", () => {
+      expect(blockrangeForChain(new Map(), 1)).toEqual(buildBlockNumberRange(undefined, undefined));
+    });
+
+    it("is right-bounded at the chain's end block", () => {
+      expect(blockrangeForChain(new Map([[1, 100]]), 1)).toEqual(
+        buildBlockNumberRange(undefined, 100),
+      );
+    });
+
+    it("applies the end block only to the matching chain", () => {
+      const chainEndBlocks = new Map([[1, 100]]);
+      expect(blockrangeForChain(chainEndBlocks, 8453)).toEqual(
+        buildBlockNumberRange(undefined, undefined),
+      );
     });
   });
 });
