@@ -448,13 +448,16 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
  * * not bolded
  * * the same color as the rest of the sidebar text
  */
-ul.top-level details details > summary .group-label span {
-  @media (min-width: 50rem) {
-    font-size: var(--sl-text-sm);
-  }
-
+ul.top-level details details > summary .group-label > span.large {
+  font-size: var(--sl-text-base);
   font-weight: normal;
   color: var(--sl-color-gray-2);
+}
+
+@media (min-width: 50rem) {
+  ul.top-level details details > summary .group-label > span.large {
+    font-size: var(--sl-text-sm);
+  }
 }
 
 /* Customize badge styles in the sidebar */
