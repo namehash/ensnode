@@ -28,7 +28,7 @@ The key requirements for the database server hosting the [ENSDb instance](/docs/
 
 - **Co-location with the [ENSIndexer](/docs/services/ensindexer) instance**: to minimize request latency and maximize throughput.
 - **High write throughput**: to handle the large volume of write operations during the initial backfill process. This may require optimizing the database configuration for high write performance or using a managed database service that can scale resources as needed.
-- **Sufficient disk space**: to store the indexed ENS data. The exact disk space required will depend on multiple factors, for example, the activated [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins) and the [ENS namespace](/docs/services/ensdb#ens-namespace) you choose to index. To give you a rough idea, the ENSNode Alpha hosted instance requires at least `380 GB` of disk space and is expected to grow over time as more future ENS events will need to be indexed.
+- **Sufficient disk space**: to store the indexed ENS data. The exact disk space required will depend on multiple factors, for example, the activated [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins) and the [ENS namespace](/docs/hosted-instances#ens-namespaces) you choose to index. To give you a rough idea, the ENSNode Alpha hosted instance requires at least `380 GB` of disk space and is expected to grow over time as more future ENS events will need to be indexed.
 
 ### ENSRainbow
 
