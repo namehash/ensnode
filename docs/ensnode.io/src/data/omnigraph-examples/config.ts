@@ -172,7 +172,7 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     id: "domain-resolver",
     title: "Domain Resolver",
     description:
-      "This query loads the assigned resolver contract address and recent resolver events.",
+      "This query loads both the assigned resolver and the ENSIP-10 effective resolver for a name.",
     category: "Resolution",
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: true,

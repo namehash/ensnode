@@ -1,6 +1,6 @@
 {
   "name": "ensskills",
-  "version": "1.15.2",
+  "version": "1.16.0",
   "type": "module",
   "description": "Agent skills for ENS — install with skills-npm to teach AI coding agents the ENS Omnigraph",
   "license": "MIT",

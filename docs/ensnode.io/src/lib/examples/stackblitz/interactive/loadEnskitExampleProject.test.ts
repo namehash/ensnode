@@ -10,7 +10,7 @@ describe("loadEnskitExampleProject", () => {
 
     expect(project.files["index.html"]).toContain('id="root"');
     expect(project.files["vite.config.ts"]).toContain("@vitejs/plugin-react");
-    expect(project.files["src/App.tsx"]).toContain("OmnigraphProvider");
+    expect(project.files["src/App.tsx"]).toContain("EnsnodeInstanceProvider");
 
     expect(Object.keys(project.dependencies).sort()).toEqual(
       Object.keys(enskitExamplePackageJson.dependencies).sort(),

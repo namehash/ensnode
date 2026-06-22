@@ -1,5 +1,16 @@
 # ensadmin
 
+## 1.16.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+  - @ensnode/datasources@1.16.0
+  - @namehash/namehash-ui@1.16.0
+  - @ensnode/scalar-react@0.0.0
+
 ## 1.15.2
 
 ### Patch Changes

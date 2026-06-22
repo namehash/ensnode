@@ -7,6 +7,7 @@ import config from "@/config";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import attach_EFPHandlers from "@/plugins/efp/event-handlers";
 import attach_protocolAccelerationHandlers from "@/plugins/protocol-acceleration/event-handlers";
 import attach_NodeMigrationHandlers from "@/plugins/protocol-acceleration/handlers/node-migration";
 import attach_RegistrarsHandlers from "@/plugins/registrars/event-handlers";
@@ -45,6 +46,11 @@ if (config.plugins.includes(PluginName.Registrars)) {
 // TokenScope Plugin
 if (config.plugins.includes(PluginName.TokenScope)) {
   attach_TokenscopeHandlers();
+}
+
+// EFP Plugin
+if (config.plugins.includes(PluginName.EFP)) {
+  attach_EFPHandlers();
 }
 
 // IMPORTANT: the order of these attach_*() calls does NOT control the order Ponder dispatches

@@ -101,6 +101,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
         {
+          label: "FAQ",
+          link: "/docs/integrate/omnigraph/faq",
+        },
+        {
           label: "Examples",
           collapsed: true,
           items: OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS,
@@ -168,6 +172,10 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/unigraph/examples/indexing-status",
             },
           ],
+        },
+        {
+          label: "Interactive Playground",
+          link: "/docs/integrate/unigraph/interactive-playground",
         },
         {
           label: "Schema Reference",

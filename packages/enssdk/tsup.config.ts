@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "core/index": "src/core/index.ts",
+    "efp/index": "src/efp/index.ts",
     "omnigraph/index": "src/omnigraph/index.ts",
   },
   platform: "neutral",

@@ -1,6 +1,7 @@
 ---
 title: ENS Unigraph Schema Reference
 description: The unified ENSv1 + ENSv2 data model of the ENS Unigraph — every table, column, and index.
+sidebarDocked: true
 sidebar:
   label: Schema Reference
 ---
@@ -25,10 +26,7 @@ Defined in [`unigraph.schema.ts`](https://github.com/namehash/ensnode/blob/main/
 This schema takes a balanced approach to materialization: it mimics on-chain state as closely as
 possible, with the exception of materializing specific state that must be trivially filterable. Then,
 resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
-behavior. This forces our implementation to match the protocol as closely as possible, with the
-obvious note that the performance tradeoffs of evm code and our app are different. For example,
-it's more expensive for us to recursively traverse the `namegraph` (like evm code does) because our
-individual roundtrips from the db are relatively more expensive, but can be batched.
+behavior.
 
 In general: the indexed schema should match on-chain state as closely as possible, and
 resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
@@ -85,7 +83,7 @@ the Event responsible for its existence.
 
 ## Enums
 
-**`RegistryType`**
+### `RegistryType`
 
 | Value                  |
 | ---------------------- |
@@ -93,14 +91,14 @@ the Event responsible for its existence.
 | `ENSv1VirtualRegistry` |
 | `ENSv2Registry`        |
 
-**`DomainType`**
+### `DomainType`
 
 | Value         |
 | ------------- |
 | `ENSv1Domain` |
 | `ENSv2Domain` |
 
-**`RegistrationType`**
+### `RegistrationType`
 
 | Value                       |
 | --------------------------- |
@@ -110,7 +108,9 @@ the Event responsible for its existence.
 | `ENSv2RegistryRegistration` |
 | `ENSv2RegistryReservation`  |
 
-## events
+## Tables
+
+### `events`
 
 | Column              | Type          | Nullable | Description                                                                                                                                                                                                                                                             |
 | ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -130,14 +130,14 @@ the Event responsible for its existence.
 | `topics`            | `text[]`      | no       | All log topics.                                                                                                                                                                                                                                                         |
 | `data`              | `text`        | no       | Log data.                                                                                                                                                                                                                                                               |
 
-**Indexes:**
+#### Indexes
 
 - `selector`
 - `from`
 - `sender`
 - `timestamp`
 
-## domain_events
+### `domain_events`
 
 Join table linking a `domains` record to its associated `events`.
 
@@ -148,7 +148,7 @@ Join table linking a `domains` record to its associated `events`.
 
 **Primary key:** `(domain_id, event_id)`.
 
-## resolver_events
+### `resolver_events`
 
 Join table linking a `resolvers` record to its associated `events`.
 
@@ -159,7 +159,7 @@ Join table linking a `resolvers` record to its associated `events`.
 
 **Primary key:** `(resolver_id, event_id)`.
 
-## permissions_events
+### `permissions_events`
 
 Join table linking a `permissions` record to its associated `events`.
 
@@ -170,7 +170,7 @@ Join table linking a `permissions` record to its associated `events`.
 
 **Primary key:** `(permissions_id, event_id)`.
 
-## permissions_user_events
+### `permissions_user_events`
 
 Join table linking a `permissions_users` record to its associated `events` — i.e. the per-`(contract, resource, user)` history of role grants, revokes, and bitmap mutations.
 
@@ -181,7 +181,7 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 **Primary key:** `(permissions_user_id, event_id)`.
 
-## accounts
+### `accounts`
 
 | Column | Type   | Nullable | Description                    |
 | ------ | ------ | -------- | ------------------------------ |
@@ -189,7 +189,7 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 **Relations:** has many `registrations` (as registrant), has many `domains`, has many `permissions_users`.
 
-## registries
+### `registries`
 
 For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`ENSv1VirtualRegistry`) whose sole parent is that domain. Children of the parent then point their `registry_id` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry, the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a single `ENSv2Registry` RootRegistry.
 
@@ -204,13 +204,13 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 | `canonical`           | `boolean`      | no       | Whether this Registry is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Default `false`. |
 | `has_children`        | `boolean`      | no       | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`.                                                                                                                                                                                                                                                                                    |
 
-**Indexes:**
+#### Indexes
 
 - `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
 
 **Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chain_id, address)`.
 
-## domains
+### `domains`
 
 The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domains.owner_id`.
 
@@ -239,7 +239,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `__latest_registration_start`  | `numeric(78)` | no       | Materialized `start` of this Domain's latest Registration, or the `REGISTRATION_SORT_SENTINEL` (`2^256 − 1`) when the Domain has no Registration. Mirror of the latest `registration.start`, maintained by `registration-db-helpers.ts`. Backs `REGISTRATION_TIMESTAMP`-ordered find-domains queries via the `(registry_id, __latest_registration_start, id)` composite index, avoiding a join through `latest_registration_indexes` → `registrations` and a sort. Held `NOT NULL` (absent → sentinel) so the keyset stays a plain tuple compare. The `__` prefix marks it an internal materialized mirror — the canonical (possibly null) value lives on the Registration entity. |
 | `__latest_registration_expiry` | `numeric(78)` | no       | Materialized `expiry` of this Domain's latest Registration, or the `REGISTRATION_SORT_SENTINEL` (`2^256 − 1`) when the Domain has no Registration or its latest Registration never expires (effectively +∞). Mirror of the latest `registration.expiry`, maintained by `registration-db-helpers.ts`. Backs `REGISTRATION_EXPIRY`-ordered queries; see `__latest_registration_start`.                                                                                                                                                                                                                                                                                               |
 
-**Indexes:**
+#### Indexes
 
 - `type`
 - `subregistry_id` (partial: non-null only)
@@ -257,7 +257,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 
 **Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 
-## labels
+### `labels`
 
 Internal rainbow table mapping a `label_hash` to its interpreted label string. Domains reference labels by hash; names are healed at resolution-time.
 
@@ -266,14 +266,14 @@ Internal rainbow table mapping a `label_hash` to its interpreted label string. D
 | `label_hash`  | `text` | no       | `keccak256` of the label. Primary key. |
 | `interpreted` | `text` | no       | The interpreted label string.          |
 
-**Indexes:**
+#### Indexes
 
 - `interpreted` (hash index for exact match)
 - `interpreted` (GIN trigram index for prefix/substring `LIKE`)
 
 **Relations:** has many `domains`.
 
-## registrations
+### `registrations`
 
 A registration is keyed by `id`.
 
@@ -297,13 +297,13 @@ A registration is keyed by `id`.
 | `wrapped`            | `boolean`          | no       | Whether the registration is currently wrapped by the NameWrapper. Default `false`.                                                                             |
 | `event_id`           | `text`             | no       | The event that created this registration record.                                                                                                               |
 
-**Indexes:**
+#### Indexes
 
 - unique on `(domain_id, registration_index)`
 
 **Relations:** belongs to one `domains` record, has one `accounts` record (registrant), has one `accounts` record (unregistrant), has many `renewals`, has one `events` record.
 
-## latest_registration_indexes
+### `latest_registration_indexes`
 
 Tracks the highest `registration_index` seen for each domain. Used to sequence registrations.
 
@@ -314,7 +314,7 @@ Tracks the highest `registration_index` seen for each domain. Used to sequence r
 
 **Primary key:** `domain_id`.
 
-## renewals
+### `renewals`
 
 A renewal is keyed by `id` and belongs to a specific registration.
 
@@ -330,13 +330,13 @@ A renewal is keyed by `id` and belongs to a specific registration.
 | `premium`            | `numeric(78)` | yes      | Premium cost in wei above base. ENSv1 `RegistrarControllers` only.                |
 | `event_id`           | `text`        | no       | The event that created this renewal record.                                       |
 
-**Indexes:**
+#### Indexes
 
 - unique on `(domain_id, registration_index, renewal_index)`
 
 **Relations:** belongs to one `registrations` record via `(domain_id, registration_index)`, has one `events` record via `(event_id)`.
 
-## latest_renewal_indexes
+### `latest_renewal_indexes`
 
 Tracks the highest `renewal_index` seen for each registration. Used to sequence renewals.
 
@@ -348,7 +348,7 @@ Tracks the highest `renewal_index` seen for each registration. Used to sequence 
 
 **Primary key:** `(domain_id, registration_index)`.
 
-## permissions
+### `permissions`
 
 An ENSv2 permissions contract instance.
 
@@ -358,13 +358,13 @@ An ENSv2 permissions contract instance.
 | `chain_id` | `bigint` | no       | Chain the permissions contract is deployed on. |
 | `address`  | `text`   | no       | Address of the permissions contract.           |
 
-**Indexes:**
+#### Indexes
 
 - unique on `(chain_id, address)`
 
 **Relations:** has many `permissions_resources`, has many `permissions_users`.
 
-## permissions_resources
+### `permissions_resources`
 
 A resource managed by a `permissions` contract.
 
@@ -375,13 +375,13 @@ A resource managed by a `permissions` contract.
 | `address`  | `text`        | no       | Address of the parent permissions contract.            |
 | `resource` | `numeric(78)` | no       | Resource identifier (a `uint256` token ID or similar). |
 
-**Indexes:**
+#### Indexes
 
 - unique on `(chain_id, address, resource)`
 
 **Relations:** belongs to one `permissions` via `(chain_id, address)`.
 
-## permissions_users
+### `permissions_users`
 
 A user's role bitmap for a specific resource within a `permissions` contract.
 
@@ -394,7 +394,7 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 | `user`     | `text`        | no       | The user/grantee address this Permission is granted to (the HCA account address if used). |
 | `roles`    | `numeric(78)` | no       | Roles bitmap for this user on this resource.                                              |
 
-**Indexes:**
+#### Indexes
 
 - unique on `(chain_id, address, resource, user)`
 

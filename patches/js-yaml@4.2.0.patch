@@ -1,0 +1,14 @@
+diff --git a/index.js b/index.js
+index 02e605f72a1a5c40c16c77e46baf2c9fef89a8a2..a171361c29a16b4f67bc59d9e61aa6c4a7b7c31f 100644
+--- a/index.js
++++ b/index.js
+@@ -39,6 +39,6 @@ module.exports.types = {
+ }
+ 
+ // Removed functions from JS-YAML 3.0.x
+-module.exports.safeLoad = renamed('safeLoad', 'load')
+-module.exports.safeLoadAll = renamed('safeLoadAll', 'loadAll')
+-module.exports.safeDump = renamed('safeDump', 'dump')
++module.exports.safeLoad = module.exports.load
++module.exports.safeLoadAll = module.exports.loadAll
++module.exports.safeDump = module.exports.dump

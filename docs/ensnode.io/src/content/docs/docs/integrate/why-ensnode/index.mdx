@@ -9,7 +9,7 @@ ENSNode is the full-stack ENSv2 development platform — a single, unified API o
 
 ## The Subgraph won't survive ENSv2
 
-[ENSv2](https://ens.domains/ensv2) is a fundamental change to ENS's onchain data model. The legacy ENS Subgraph wasn't designed for it, and it never will be — single-chain, no resolution, no understanding of the new ENSv2 Namegraph. Apps that stay on the Subgraph will be left behind the moment ENSv2 launches.
+[ENSv2](https://ens.domains/ensv2) is a fundamental change to ENS's onchain data model. The legacy ENS Subgraph wasn't designed for it, and it never will be — single-chain, no resolution, no understanding of the new ENSv2 Namegraphs. Apps that stay on the Subgraph will be left behind the moment ENSv2 launches.
 
 :::danger[🚨 What's at stake]
 Indexed ENS data is critical infrastructure for ENS — and the legacy ENS Subgraph is fundamentally unsuitable for ENSv2. When ENSv2 launches, that gap becomes breaking for many of ENS's most important apps.
@@ -42,7 +42,7 @@ Adopt the ENS Omnigraph today and your app is ENSv2-ready before ENSv2 even ship
 
 ## How ENSNode delivers
 
-**One unified API over ENSv1 + ENSv2** — The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that returns a polymorphic, unified view of every ENS Domain — regardless of whether it lives in an ENSv1 Nametree, the ENSv2 Namegraph, on mainnet, or on an L2 subregistry such as base.eth subnames on Base. ENSv1 and ENSv2 coexist after the ENSv2 launch; your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of which protocol version the underlying domain is on.
+**One unified API over ENSv1 + ENSv2** — The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that returns a polymorphic, unified view of every ENS Domain — regardless of whether it lives in an ENSv1 Nametable, an ENSv2 Namegraph, on mainnet, or on an L2 subregistry such as base.eth subnames on Base. ENSv1 and ENSv2 coexist after the ENSv2 launch; your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of which protocol version the underlying domain is on.
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
@@ -53,7 +53,7 @@ Adopt the ENS Omnigraph today and your app is ENSv2-ready before ENSv2 even ship
 - **Lineanames** (`.linea.eth`) on Linea
 - **3DNS** names (`.box`, tokenized DNS) on Optimism and Base
 
-No more wiring up a per-chain Subgraph, reconciling overlapping ENS Nametrees, or writing CCIP-Read logic in your app — ENSNode handles forward and reverse resolution, including offchain gateways, server-side.
+No more wiring up a per-chain Subgraph, reconciling overlapping ENS Nametables, or writing CCIP-Read logic in your app — ENSNode handles forward and reverse resolution, including offchain gateways, server-side.
 
 **Full-stack integration surfaces** — whatever your stack looks like, there's an ENSNode integration shaped for it: React, TypeScript, GraphQL, or direct Postgres access.
 
@@ -65,7 +65,7 @@ No more wiring up a per-chain Subgraph, reconciling overlapping ENS Nametrees, o
 
 ## Join those already building on ENSNode
 
-A growing set of companies and apps have already moved onto ENSNode and have future-proofed their ENS applications.
+A growing set of companies and apps are already building on ENSNode.
 
 - **[ENS Labs](https://enslabs.org/)** — [ENSv2 Explorer](https://explorer.ens.dev/), [ENSv2 App](https://app.ens.dev/), [ens-test-env](https://github.com/ensdomains/ens-test-env).
 - **[EthId Foundation](https://ethid.org/)** — [Grails](https://grails.app/), [ENS Market Bot](https://x.com/ENSMarketBot), [Grails CLI](https://github.com/grailsmarket/cli).

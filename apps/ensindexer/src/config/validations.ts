@@ -78,32 +78,18 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
   }
 }
 
-// Invariant: if a global blockrange is defined, only one chain is indexed
-export function invariant_globalBlockrange(
-  ctx: ZodCheckFnInput<
-    Pick<EnsIndexerConfig, "globalBlockrange" | "indexedChainIds" | "namespace" | "plugins">
-  >,
+// Invariant: each END_BLOCK_<chainId> targets a chain that is actually indexed
+export function invariant_chainEndBlocks(
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "chainEndBlocks" | "indexedChainIds">>,
 ) {
   const { value: config } = ctx;
-  const { globalBlockrange } = config;
 
-  if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    if (config.indexedChainIds.size > 1) {
+  for (const chainId of config.chainEndBlocks.keys()) {
+    if (!config.indexedChainIds.has(chainId)) {
       ctx.issues.push({
         code: "custom",
         input: config,
-        message: `ENSIndexer's behavior when indexing _multiple chains_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
-
-  NAMESPACE=${config.namespace}
-  PLUGINS=${config.plugins.join(",")}
-  START_BLOCK=${globalBlockrange.startBlock || "n/a"}
-  END_BLOCK=${globalBlockrange.endBlock || "n/a"}
-
-  The usage you're most likely interested in is:
-    NAMESPACE=(mainnet|sepolia) PLUGINS=subgraph END_BLOCK=x pnpm run start
-  which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
-
-  In the future, indexing multiple chains with chain-specific blockrange constraints may be possible.`,
+        message: `END_BLOCK_${chainId} is set, but no active plugin indexes chain ${chainId}.`,
       });
     }
   }

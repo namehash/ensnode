@@ -2,6 +2,9 @@ import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
+import { domainIdPath, useAppPath } from "./app-paths";
+import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
+
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: DomainsNameFilter!, $first: Int!, $after: String) {
     domains(where: { name: $name }, first: $first, after: $after) {
@@ -20,6 +23,8 @@ const PAGE_SIZE = 10;
 const DEBOUNCE_MS = 50;
 
 export function SearchView() {
+  const appPath = useAppPath();
+  const { constants } = useEnsnodeInstance();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("query") ?? "";
 
@@ -80,7 +85,7 @@ export function SearchView() {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="vitalik"
+        placeholder={constants.defaultSearchLabel}
       />
 
       {query.length === 0 ? (
@@ -95,7 +100,7 @@ export function SearchView() {
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  <Link to={`/domain/id/${edge.node.id}`}>
+                  <Link to={appPath(domainIdPath(edge.node.id))}>
                     {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
                   </Link>
                 </li>

@@ -132,6 +132,7 @@ export async function handleResolverAddressRecordUpdate(
   address: Address,
 ) {
   // construct the ResolverAddressRecord's Composite Key
+  // @TODO(cointype-bigint): drop `BigInt(...)` once resolverAddressRecord.coinType is CoinType. See #2293.
   const id = { ...resolverRecordsKey, coinType: BigInt(coinType) };
 
   // interpret the incoming address record value

@@ -76,12 +76,13 @@ It detects your agents and writes the skills into each (`.claude/skills`, `.curs
 
 - **`ens-protocol`** — how the ENS protocol works at a conceptual level: the nametree, normalization, namehash/labelhash, registry/resolver/registrar, forward & reverse resolution, primary names, records, and ENS across chains. Vendor-neutral, intentionally stable, with pull-as-needed reference pages. The mental model the other skills build on.
 - **`omnigraph`** — the monolithic ENS skill. Teaches the unified ENSv1 + ENSv2 datamodel, resolution via `Domain.resolve` / `Account.resolve`, Relay pagination, a condensed schema reference, vetted example queries, and how to execute and explore queries with `enscli`.
+- **`efp-protocol`** — how the Ethereum Follow Protocol (EFP) onchain social graph works (lists, list records, tags, primary-list validation, `block`/`mute` follower semantics) and how it surfaces in the Omnigraph (`Query.efp` / `Account.efp`). A conditional dependency of `omnigraph`, loaded when a query touches EFP fields.
 - **`enscli`** — running ENS lookups from the shell: the output contract, namespace/URL resolution, input hardening, and every command (Omnigraph queries, offline schema exploration, `namehash`/`labelhash`, ENSRainbow healing, indexing status).
+- **`enssdk`** — TypeScript integration: the typed Omnigraph client (gql.tada setup, fragments, union/connection narrowing) and the easy-to-get-wrong primitives (normalization, namehash/labelhash, interpretation/beautification, branded types).
+- **`enskit`** — React integration: `OmnigraphProvider` setup, `useOmnigraphQuery`, the preconfigured normalized cache, Relay pagination patterns, and name-display conventions.
 
 The following are reserved and ship as stubs today, fleshed out in upcoming releases:
 
-- **`enssdk`** — TypeScript integration with the typed Omnigraph client.
-- **`enskit`** — React integration (`useOmnigraphQuery`, cache directives, infinite pagination).
 - **`migrate-to-omnigraph`** — migrating from the legacy ENS Subgraph.
 - **`unigraph-sql`** — SQL over ENSDb for query shapes the Omnigraph doesn't express.
 

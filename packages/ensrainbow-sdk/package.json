@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensrainbow-sdk",
-  "version": "1.15.2",
+  "version": "1.16.0",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
   "license": "MIT",
@@ -40,7 +40,7 @@
       }
     },
     "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
+    "module": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
   "scripts": {

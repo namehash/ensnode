@@ -16,6 +16,10 @@ This skill depends on the following sibling skills — load them first:
 - **`base`** — the shared working conventions every ENS skill assumes.
 - **`ens-protocol`** — the protocol this API models (names and the nametree, normalization, resolution, registries/resolvers/registrars, records). Read it first if the data shapes below don't yet make sense.
 
+Conditionally, load when the task touches those fields:
+
+- **`efp-protocol`** — load first whenever the query involves Ethereum Follow Protocol fields (`Query.efp`, `Account.efp`, and the `Efp*` types: lists, list records, following/followers, tags, primary lists). Those fields are governed by EFP-specific validity rules (primary-list validation, `block`/`mute` exclusion, validated vs. raw record views) that you will get wrong without it.
+
 To _run_ the queries you author here, use a runner: **`enscli`** from a shell (every example below uses it), or **`enssdk`** from TypeScript. Those runners depend on this skill, not the other way around.
 
 ## How to run a query
@@ -83,6 +87,7 @@ If a question genuinely isn't expressible in the Omnigraph schema, the underlyin
 - account(by: AccountByInput!): Account — Identify an Account by ID or Address.
 - domain(by: DomainIdInput!): Domain — Identify a Domain by Name or DomainId
 - domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection — Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+- efp: EfpQuery — Ethereum Follow Protocol (EFP) queries. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
 - permissions(by: PermissionsIdInput!): Permissions — Identify Permissions by ID or AccountId.
 - registry(by: RegistryIdInput!): Registry — Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
 - resolver(by: ResolverIdInput!): Resolver — Identify a Resolver by ID or AccountId.
@@ -123,8 +128,10 @@ _Represents an individual Account, keyed by its Address._
 
 - address: Address! — An EVM Address that uniquely identifies this Account on-chain.
 - domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection — The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+- efp: AccountEfp — This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
 - events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection — All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
 - id: Address! — A unique reference to this Account.
+- nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection — The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.
 - permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection — The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
 - registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection — The Permissions on Registries granted to this Account.
 - resolve(accelerate: Boolean): ReverseResolve! — Resolve primary names for this Account.
@@ -216,7 +223,7 @@ _An ENSIP-19 primary name for an Account on a specific coin type._
 
 Run `npx enscli ensnode omnigraph schema <Type>` for fields of:
 
-`AccelerationStatus`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `Event`, `Label`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileContenthash`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
+`AccelerationStatus`, `AccountEfp`, `AccountId`, `BaseRegistrarRegistration`, `CanonicalName`, `DomainProfile`, `ENSv1Domain`, `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Domain`, `ENSv2Registry`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`, `EfpAccountMetadata`, `EfpList`, `EfpListRecord`, `EfpListStorageLocation`, `EfpQuery`, `Event`, `Label`, `NameReference`, `NameWrapperRegistration`, `PageInfo`, `PermissionsResource`, `PermissionsUser`, `ProfileAddresses`, `ProfileAvatar`, `ProfileContenthash`, `ProfileHeader`, `ProfileSocialAccount`, `ProfileSocials`, `ProfileWebsite`, `RegistryPermissionsUser`, `Renewal`, `ResolvedAbiRecord`, `ResolvedAddressRecord`, `ResolvedInterfaceRecord`, `ResolvedPubkeyRecord`, `ResolvedRawTextRecord`, `ResolverPermissionsUser`, `ResolverRecords`, `ThreeDNSRegistration`, `UnindexedDomain`, `WrappedBaseRegistrarRegistration`
 
 <!-- AUTOGEN:SCHEMA end -->
 
@@ -780,6 +787,10 @@ query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
     address
     resolve {
+      # Reverse resolution: given this address + a chain, get the primary
+      # name the address has set for that chain.
+      # primaryName returns the result for a single chain (here, Optimism).
+      # (onePrimaryName / twoPrimaryNames are just GraphQL aliases.)
       onePrimaryName: primaryName(by: { chainName: OPTIMISM }) {
         chainName
         name {
@@ -788,6 +799,7 @@ query AccountPrimaryNames($address: Address!) {
         }
       }
 
+      # primaryNames returns one result per requested chain, in a single call.
       twoPrimaryNames: primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
         chainName
         name {
@@ -1013,18 +1025,17 @@ Variables:
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
+      # the Resolver explicitly assigned to this Domain
       assigned {
         contract {
           address
         }
-        events(first: 5) {
-          edges {
-            node {
-              topics
-              data
-              timestamp
-            }
-          }
+      }
+      # the Resolver that ENS Forward Resolution (ENSIP-10) actually lands
+      # on for this Domain — i.e. its effective Resolver
+      effective {
+        contract {
+          address
         }
       }
     }
@@ -1143,6 +1154,9 @@ Variables:
 ```graphql
 query AccountMigratedNames($address: Address!) {
   account(by: { address: $address }) {
+    # Count the ENSv1 and ENSv2 domains owned by the account.
+    # For simplicity this example query doesn't include additional logic
+    # to filter out domains that have expired.
     v1DomainsCount: domains(where: { version: ENSv1 }) {
       totalCount
     }

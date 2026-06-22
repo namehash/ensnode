@@ -89,3 +89,26 @@ export const contracts = {
   MockUSDC: "0xfd471836031dc5108809d173a067e8486b9047a3",
   MockDAI: "0xcbeaf3bde82155f56486fb5a1072cb8baaf547cc",
 } as const satisfies Record<string, NormalizedAddress>;
+
+/**
+ * Deterministic addresses of the EFP (Ethereum Follow Protocol) contracts, deployed onto the
+ * ens-test-env devnet (chain 31337) by the EFP devnet image in attach mode, on top of the
+ * contracts-v2 ENS deployment. The three contracts the EFP plugin indexes, plus the `EFPListMinter`
+ * (not indexed) which the integration-test EFP seeder uses to mint lists.
+ *
+ * These addresses depend on the deployer's (Anvil account 0) nonce after the ENS deployment, so
+ * they are a function of BOTH the pinned ENS devnet image (`docker/services/devnet.yml`, run with
+ * `--testNames`) and the pinned EFP devnet image (`docker/services/efp-devnet.yml`). They were
+ * verified stable across clean redeploys. Re-capture whenever either image pin is bumped:
+ *
+ *   docker compose -f docker/docker-compose.devnet.yml up devnet efp-devnet
+ *   docker exec efp-devnet cat /app/deployments/devnet-31337.json
+ *
+ * @see https://github.com/ethereumfollowprotocol/contracts/pull/7
+ */
+export const efpContracts = {
+  EFPAccountMetadata: "0xd5ac451b0c50b9476107823af206ed814a2e2580",
+  EFPListRegistry: "0xf8e31cb472bc70500f08cd84917e5a1912ec8397",
+  EFPListRecords: "0xc0f115a19107322cfbf1cdbc7ea011c19ebdb4f8",
+  EFPListMinter: "0xc96304e3c037f81da488ed9dea1d8f2a48278a75",
+} as const satisfies Record<string, NormalizedAddress>;

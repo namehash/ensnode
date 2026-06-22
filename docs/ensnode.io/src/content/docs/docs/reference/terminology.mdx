@@ -163,7 +163,7 @@ Because the beautified form is not guaranteed to be normalized, a **Beautified N
 A **Resolvable Name** is a Name that can be used as input to ENS Forward Resolution. It contains only literal label segments (normalized or unnormalized), and each label is at most 255 bytes due to the [DNS Encoding](https://docs.ens.domains/resolution/names/#dns-encoding) standard.
 
 :::danger[Interpreted Name !== Resolvable Name]
-Because Forward Resolution does not support **Encoded LabelHashes**, an **Interpreted Name** containing an **Encoded LabelHash** is NOT a **Resolvable Name**: it can be used to traverse the Namegraph, but the records for that name cannot be resolved.
+Because Forward Resolution does not support **Encoded LabelHashes**, an **Interpreted Name** containing an **Encoded LabelHash** is NOT a **Resolvable Name**: it can be used to traverse the Unigraph, but the records for that name cannot be resolved.
 :::
 
 ## Subgraph Indexability & Label/Name Interpretation
@@ -196,6 +196,22 @@ A **Subgraph Interpreted Label** is a **Label** that is either:
 ### Subgraph Interpreted Name
 
 A **Subgraph Interpreted Name** is a name exclusively composed of 0 or more **Subgraph Interpreted Labels**.
+
+## ENS Data Models: Nametable, Namegraph, Unigraph
+
+ENSv1 and ENSv2 use fundamentally different onchain data models, and ENSNode unifies them into a single one. These three terms name those models precisely.
+
+### Nametable
+
+A **Nametable** is the native onchain data model of ENSv1: a flat mapping from each name's **node** (namehash) to its onchain state, rather than a connected graph of Registries and Domains. Each ENSv1 datasource is its own Nametable — e.g. Ethnames (the mainnet ENS Registry), Basenames, Lineanames, and 3DNS.
+
+### Namegraph
+
+A **Namegraph** is the native onchain data model of ENSv2: it represents names as a graph of `Registry → Domain → Registry → Domain → …` rather than as a flat Nametable. A Namegraph may be cyclic, and an unbounded number of _disjoint_ Namegraphs can exist. There is no single global Namegraph — prefer "a Namegraph" or "the Namegraphs" over "the Namegraph".
+
+### Unigraph
+
+The **Unigraph** is the entire collection of ENSv1 Nametables and ENSv2 Namegraphs combined into a **single unified data model** using ENS Resolution semantics, indexed into [ENSDb](/docs/services/ensdb) by [ENSIndexer](/docs/services/ensindexer)'s `unigraph` plugin. Within the Unigraph, ENSv1 Nametables are represented in namegraph shape via virtual Registries (`ENSv1VirtualRegistry`), so navigating the Unigraph looks identical regardless of whether the underlying entity is ENSv1 or ENSv2.
 
 ## Core Protocol Extension Concepts
 

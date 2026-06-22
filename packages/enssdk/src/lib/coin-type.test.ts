@@ -5,6 +5,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  bigintToChainId,
   bigintToCoinType,
   coinTypeToEvmChainId,
   DEFAULT_EVM_CHAIN_ID,
@@ -66,5 +67,20 @@ describe("bigintToCoinType", () => {
 
   it("should throw for too-large bigint", () => {
     expect(() => bigintToCoinType(BigInt(Number.MAX_SAFE_INTEGER) + 1n)).toThrow();
+  });
+});
+
+describe("bigintToChainId", () => {
+  it("should convert a safe bigint to ChainId", () => {
+    expect(bigintToChainId(BigInt(VALID_CHAIN_ID))).toBe(VALID_CHAIN_ID);
+  });
+
+  it("should throw for too-large bigint", () => {
+    expect(() => bigintToChainId(BigInt(Number.MAX_SAFE_INTEGER) + 1n)).toThrow();
+  });
+
+  it("should throw for zero or negative bigint (ChainId must be positive)", () => {
+    expect(() => bigintToChainId(0n)).toThrow();
+    expect(() => bigintToChainId(-1n)).toThrow();
   });
 });

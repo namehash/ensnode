@@ -14,6 +14,15 @@ services:
       service: devnet
     container_name: devnet-orchestrator
 
+  efp-devnet:
+    extends:
+      file: services/efp-devnet.yml
+      service: efp-devnet
+    container_name: efp-devnet-orchestrator
+    depends_on:
+      devnet:
+        condition: service_healthy
+
   ensdb:
     extends:
       file: services/ensdb.yml
@@ -27,4 +36,6 @@ services:
 
 volumes:
   ensdb_data:
+    driver: local
+  efp-deployments:
     driver: local

@@ -36,6 +36,7 @@ import type {
   RippleAddress,
   RootstockAddress,
   SolanaAddress,
+  TokenId,
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
@@ -88,6 +89,7 @@ export type BuilderScalars = {
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };
+  TokenId: { Input: TokenId; Output: TokenId };
   InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };
   InterpretedName: { Input: InterpretedName; Output: InterpretedName };

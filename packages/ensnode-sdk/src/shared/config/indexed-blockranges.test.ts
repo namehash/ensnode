@@ -70,7 +70,7 @@ describe("buildIndexedBlockranges()", () => {
     // Act
     const result = buildIndexedBlockranges(
       ENSNamespaceIds.Mainnet,
-      undefined,
+      new Map(),
       pluginsRequiredDatasourceNames,
     );
 
@@ -110,7 +110,7 @@ describe("buildIndexedBlockranges()", () => {
     // Act
     const result = buildIndexedBlockranges(
       ENSNamespaceIds.Mainnet,
-      undefined,
+      new Map(),
       pluginsRequiredDatasourceNames,
     );
 
@@ -147,7 +147,7 @@ describe("buildIndexedBlockranges()", () => {
     // Act
     const result = buildIndexedBlockranges(
       ENSNamespaceIds.Mainnet,
-      undefined,
+      new Map(),
       pluginsRequiredDatasourceNames,
     );
 
@@ -164,7 +164,7 @@ describe("buildIndexedBlockranges()", () => {
     // Act
     const result = buildIndexedBlockranges(
       ENSNamespaceIds.Mainnet,
-      undefined,
+      new Map(),
       pluginsDatasourceNames,
     );
 
@@ -172,21 +172,21 @@ describe("buildIndexedBlockranges()", () => {
     expect(result).toStrictEqual(new Map());
   });
 
-  it("applies global end block to contracts without end block and skips contracts starting after global end block", () => {
+  it("applies per-chain end block to contracts without end block and skips contracts starting after the chain end block", () => {
     // Arrange
     const ensrootDatasourceConfig: unknown = {
       chain: { id: 1 },
       contracts: {
-        registry: { startBlock: 100 }, // no endBlock, should use global end block (500)
+        registry: { startBlock: 100 }, // no endBlock, should use chain end block (500)
         resolver: { startBlock: 80, endBlock: 200 }, // has endBlock, should keep it
-        registrar: { startBlock: 600 }, // startBlock > global end block, should be skipped
+        registrar: { startBlock: 600 }, // startBlock > chain end block, should be skipped
       },
     };
 
     const basenamesDatasourceConfig: unknown = {
       chain: { id: 8453 },
       contracts: {
-        registry: { startBlock: 5 }, // no endBlock, should use global end block (500)
+        registry: { startBlock: 5 }, // no endBlock, should use chain end block (500)
       },
     };
 
@@ -206,12 +206,15 @@ describe("buildIndexedBlockranges()", () => {
       [PluginName.Basenames, [DatasourceNames.Basenames]],
     ]);
 
-    const globalBlockrangeEndBlock = 500;
+    const chainEndBlocks = new Map<ChainId, number>([
+      [1, 500],
+      [8453, 500],
+    ]);
 
     // Act
     const result = buildIndexedBlockranges(
       ENSNamespaceIds.Mainnet,
-      globalBlockrangeEndBlock,
+      chainEndBlocks,
       pluginsRequiredDatasourceNames,
     );
 
@@ -219,10 +222,47 @@ describe("buildIndexedBlockranges()", () => {
     const expectedEntries = new Map<ChainId, BlockNumberRangeWithStartBlock>([
       // Chain 1: min startBlock = 80, max endBlock = max(500 from registry, 200 from resolver) = 500
       [1, buildBlockNumberRange(80, 500)],
-      // Chain 8453: startBlock = 5, endBlock = 500 (from global)
+      // Chain 8453: startBlock = 5, endBlock = 500 (from chain end block)
       [8453, buildBlockNumberRange(5, 500)],
     ]);
 
     expect(result).toStrictEqual(expectedEntries);
+  });
+
+  it("caps a contract's explicit end block at the chain end block when it exceeds it", () => {
+    // Arrange
+    const ensrootDatasourceConfig: unknown = {
+      chain: { id: 1 },
+      contracts: {
+        // explicit endBlock (800) exceeds the chain end block (500), so it must be capped to 500
+        registry: { startBlock: 100, endBlock: 800 },
+      },
+    };
+
+    const datasourcesByName: Partial<
+      Record<DatasourceName, ReturnType<typeof datasources.maybeGetDatasource>>
+    > = {
+      [DatasourceNames.ENSRoot]: datasourceMock(ensrootDatasourceConfig),
+    };
+
+    maybeGetDatasourceMock.mockImplementation(
+      (_namespace, datasourceName) => datasourcesByName[datasourceName as DatasourceName],
+    );
+
+    const pluginsRequiredDatasourceNames = new Map([
+      [PluginName.Subgraph, [DatasourceNames.ENSRoot]],
+    ]);
+
+    const chainEndBlocks = new Map<ChainId, number>([[1, 500]]);
+
+    // Act
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      chainEndBlocks,
+      pluginsRequiredDatasourceNames,
+    );
+
+    // Assert
+    expect(result).toStrictEqual(new Map([[1, buildBlockNumberRange(100, 500)]]));
   });
 });
