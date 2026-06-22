@@ -1,6 +1,6 @@
 ---
 title: ENSDb Interactive Playground
-description: Use an interactive ENSDb playground to query ENS Unigraph from a read-only ENSDb Snapshot.
+description: Use an interactive ENSDb playground to query the ENS Unigraph from a read-only ENSDb Snapshot.
 tableOfContents: false
 sidebarDocked: true
 ---
@@ -11,13 +11,15 @@ Use an interactive ENSDb playground to query the [ENS Unigraph](/docs/integrate/
 
 1. Click the "_ENSDb Alpha (read-only snapshot)_" button below to connect to a read-only ENSDb Snapshot Server.
 
-   :::caution[ENS state may be out of date]
-   This ENSDb Snapshot Server hosts an [ENSDb instance](/docs/services/ensdb/concepts/database-schemas#ensdb-instance) created from an [ENSDb Snapshot](/docs/integrate/integration-options/ensdb-cli) which was taken at a single point in time from the [ENSNode Alpha hosted instance](/docs/hosted-instances#ensnode-alpha). As a result, this particular ENSDb instance does not reflect the current state of ENS. However, it is still a convenient way to explore the ENS Unigraph data model and run queries without needing to deploy ENSNode in order to access your own ENSDb instance.
+   :::caution[This playground hosts a point-in-time snapshot, not a live ENSDb]
+   This interactive playground hosts a [point-in-time snapshot](/docs/integrate/integration-options/ensdb-cli) of an [ENSDb instance](/docs/services/ensdb/concepts/database-schemas#ensdb-instance), and does not expose a live ENSDb with the current state of ENS. However, it is still a convenient way to explore the ENS Unigraph data model and run some test queries without needing to deploy ENSNode in order to access your own live ENSDb instance.
+   
+   This snapshot was taken at a single point in time from the [ENSNode Alpha `v1.16.0` hosted instance](/docs/hosted-instances#ensnode-alpha).
    :::
 
 2. Browse tables in the [ENSDb Writer Schema](/docs/services/ensdb/concepts/database-schemas#ensdb-writer-schema) (named as `alpha` in this example ENSDb instance) and the [ENSNode Schema](/docs/services/ensdb/concepts/database-schemas#ensnode-schema) (always named as `ensnode`).
 
-3. Use "_SQL Console_" to run queries against the ENS Unigraph data model.
+3. Use the "_SQL Console_" to explore possible queries against the ENS Unigraph data model.
 
 4. Use "_Schema_" to view the schema of each table, including columns and indexes.
 
