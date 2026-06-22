@@ -15,7 +15,7 @@ Use an interactive ENSDb playground to query the [ENS Unigraph](/docs/integrate/
    This ENSDb Snapshot Server hosts an [ENSDb instance](/docs/services/ensdb/concepts/database-schemas#ensdb-instance) created from an [ENSDb Snapshot](/docs/integrate/integration-options/ensdb-cli) which was taken at a single point in time from the [ENSNode Alpha hosted instance](/docs/hosted-instances#ensnode-alpha). As a result, this particular ENSDb instance does not reflect the current state of ENS. However, it is still a convenient way to explore the ENS Unigraph data model and run queries without needing to deploy ENSNode in order to access your own ENSDb instance.
    :::
 
-2. Browse tables in the [ENSDb Writer Schema](/docs/services/ensdb/concepts/database-schemas#ensdb-writer-schema) (named as `alpha` in this example ENSDb instance) and the [ENSNode Schema](http://localhost:4321/docs/services/ensdb/concepts/database-schemas#ensnode-schema) (always named as `ensnode`).
+2. Browse tables in the [ENSDb Writer Schema](/docs/services/ensdb/concepts/database-schemas#ensdb-writer-schema) (named as `alpha` in this example ENSDb instance) and the [ENSNode Schema](/docs/services/ensdb/concepts/database-schemas#ensnode-schema) (always named as `ensnode`).
 
 3. Use "_SQL Console_" to run queries against the ENS Unigraph data model.
 
@@ -27,4 +27,4 @@ The interactive playground is powered by a [Drizzle Gateway](https://gateway.dri
 
 :::
 
-<iframe src="https://ensdb-playground.ensnode.io/" width="100%" height="100%" style="min-height: 800px;" />
+<iframe title="ENSDb Interactive Playground" loading="lazy" src="https://ensdb-playground.ensnode.io/" width="100%" height="100%" style="min-height: 800px;" />
