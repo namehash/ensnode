@@ -80,9 +80,16 @@ if [ "$MODE" = "end-block" ]; then
       pnpm exec tsx scripts/print-indexed-chain-ids.ts | paste -sd, -)"
   [ -n "$CHAIN_IDS" ] || die "[$CONFIG] could not derive indexed chain ids from config"
   log "[$CONFIG] indexed chains: $CHAIN_IDS"
+  # Resolve into a file and check the exit code explicitly — a process substitution would swallow a
+  # `die` in the resolver (the while loop would read partial output and exit 0), leaving some chains
+  # without an end block and silently indexing them to realtime.
+  END_BLOCKS_OUT="/tmp/${SCHEMA}.endblocks"
+  CHAIN_IDS="$CHAIN_IDS" MANIFEST_OUT="/tmp/${SCHEMA}.blocks.json" \
+    bash "$LIB_DIR/remote-resolve-end-blocks.sh" >"$END_BLOCKS_OUT" ||
+    die "[$CONFIG] end-block resolution failed (cache may not cover all chains at timestamp $TIMESTAMP)"
   while IFS= read -r line; do
     [ -n "$line" ] && END_BLOCK_ENV+=("$line")
-  done < <(CHAIN_IDS="$CHAIN_IDS" MANIFEST_OUT="/tmp/${SCHEMA}.blocks.json" bash "$LIB_DIR/remote-resolve-end-blocks.sh")
+  done <"$END_BLOCKS_OUT"
 fi
 
 log "[$CONFIG] dropping any prior schema $SCHEMA"
