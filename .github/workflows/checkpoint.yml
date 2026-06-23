@@ -74,12 +74,13 @@ jobs:
             echo "### Checkpoint ready"
             echo ""
             echo "- R2: \`${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ}\`"
-            echo "- metadata: \`${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ%.dump}.metadata.json\`"
+            echo "- metadata: \`${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ}.metadata.json\`"
             echo ""
-            echo "Restore locally:"
+            echo "Restore locally (the metadata sidecar must sit next to the dump; load reads it automatically):"
             echo '```'
             echo "rclone copy r2:${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ} ."
-            echo "ensdb-cli load ${OBJ} --into \$LOCAL_ENSDB_URL --metadata ${OBJ%.dump}.metadata.json"
+            echo "rclone copy r2:${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ}.metadata.json ."
+            echo "ensdb-cli load ${OBJ} --into \$LOCAL_ENSDB_URL --schema <your-ensIndexerSchemaName>"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

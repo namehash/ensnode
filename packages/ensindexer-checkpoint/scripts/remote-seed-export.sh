@@ -8,7 +8,8 @@ require psql
 require pg_dump
 require rclone
 
-OUT="/tmp/${R2_SEED_OBJECT}"
+# Write to the large data mount, NOT /tmp — the seed dump is ~200GB and would exhaust the root/tmp fs.
+OUT="$DATA_MOUNT/${R2_SEED_OBJECT}"
 log "ponder_sync size: $(pg -tAc "SELECT pg_size_pretty(sum(pg_total_relation_size(c.oid))) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='ponder_sync' AND c.relkind='r'" | tr -d '[:space:]')"
 log "pg_dump -Fc -Z3 ponder_sync -> $OUT (compressed; long)"
 pg_dump -Fc -Z3 --no-owner --no-privileges -n ponder_sync "$PG_CONN" -f "$OUT"
