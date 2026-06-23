@@ -1,15 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { EnsDbReader } from "@ensnode/ensdb-sdk";
+
 import di from "@/di";
 
 vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   },
   makeLogger: vi.fn(() => ({
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   })),
 }));
 
@@ -23,6 +27,9 @@ vi.mock("@ensnode/ensdb-sdk", async (importOriginal) => {
     ensIndexerSchema = {};
     ensIndexerSchemaName = "ensindexer_test";
     async isHealthy() {
+      return true;
+    }
+    async isReady() {
       return true;
     }
     async destroy() {}
@@ -98,6 +105,25 @@ describe("ensdb singleton bootstrap", () => {
     expect(ensDbClient.ensIndexerSchemaName).toBe(VALID_ENSINDEXER_SCHEMA_NAME);
     expect(ensDb).toBeDefined();
     expect(ensIndexerSchema).toBeDefined();
+  }, 10_000);
+
+  it("waits for ENSDb to become ready before initializing caches", async () => {
+    vi.useFakeTimers();
+    const isReadySpy = vi
+      .spyOn(EnsDbReader.prototype, "isReady")
+      .mockResolvedValueOnce(false)
+      .mockResolvedValue(true);
+
+    try {
+      const initPromise = di.init();
+      await vi.advanceTimersByTimeAsync(60_000);
+      await initPromise;
+
+      expect(isReadySpy).toHaveBeenCalledTimes(2);
+    } finally {
+      isReadySpy.mockRestore();
+      vi.useRealTimers();
+    }
   }, 10_000);
 
   it("exits when ENSDB_URL is missing", async () => {
