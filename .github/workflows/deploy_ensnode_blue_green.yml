@@ -11,11 +11,12 @@ on:
           - green
           - blue
       version:
-        description: "Version used for ENSINDEXER schema names (e.g. 1.16.0)"
-        required: true
+        description: "Version for ENSINDEXER schema names (e.g. 1.16.0). Defaults to `tag` if omitted."
+        required: false
         type: string
+        default: ""
       tag:
-        description: "Docker image tag to deploy (defaults to `version`; set to a sha- tag for release-candidate images)"
+        description: "Docker image tag to deploy. Defaults to `version`; set to a sha- tag for release-candidate images."
         required: false
         type: string
         default: ""
@@ -29,11 +30,11 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
-      # `version` names the ENSINDEXER schemas; `tag` selects the Docker images and defaults to
-      # `version`. They differ when deploying release-candidate images, which are sha-tagged while
-      # the schemas keep the release version (so a pre-seeded checkpoint and the eventual release
-      # deploy share the schema).
-      VERSION: ${{ inputs.version }}
+      # `version` names the ENSINDEXER schemas; `tag` selects the Docker images. Each defaults to the
+      # other, so any one of: `version` only (normal release — images=schemas), `tag` only
+      # (backward-compatible with the old single-input interface), or both (RC: sha images, version
+      # schemas) works. At least one must be provided (guarded in the first step).
+      VERSION: ${{ inputs.version != '' && inputs.version || inputs.tag }}
       TAG: ${{ inputs.tag != '' && inputs.tag || inputs.version }}
       ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag != '' && inputs.tag || inputs.version }}"
       ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.tag != '' && inputs.tag || inputs.version }}"
@@ -45,6 +46,13 @@ jobs:
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
 
     steps:
+      - name: Require version or tag
+        run: |
+          if [ -z "${{ inputs.version }}" ] && [ -z "${{ inputs.tag }}" ]; then
+            echo "Provide at least one of: version (schema names) or tag (image tag)." >&2
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
