@@ -4,9 +4,14 @@ Bash orchestration to produce ENSIndexer **checkpoints** on disposable Cherry Se
 load them into target ENSDb instances — cutting a full index from ~1 week to ~6 hours.
 
 A run spins up a bare-metal Ryzen box, rehydrates the `ponder_sync` cache from R2, indexes a commit
-with real ENSRainbow heals, exports the output schema (custom-format dump + ENSNode metadata) to R2,
-optionally loads it into a target Postgres, and tears the box down. The box is **disposable** — it
-holds nothing durable; R2 holds the seed + checkpoints.
+with real ENSRainbow heals, exports each output schema (custom-format dump + ENSNode metadata) to R2,
+and tears the box down. The box is **disposable** — it holds nothing durable; R2 holds the seed +
+checkpoints.
+
+**The box only _produces_ checkpoints; the _load_ into a target ENSDb runs on the runner afterward**
+(`load-checkpoints.sh`), once the box is gone. A restore is bound by the destination Postgres (RAM),
+not by this box and not by network IO — it can take hours — so keeping bare metal alive for it is pure
+waste. Splitting it also means a load-only re-run (checkpoints already in R2) provisions no box at all.
 
 A run indexes one or more configs **in parallel on a _single_ box**, sharing one Postgres and one
 `ponder_sync` cache. Production passes both mainnet-namespace configs (`alpha` + `mainnet`); the dev
@@ -86,13 +91,16 @@ considers incompatible, so it's a deliberate operator action, not part of the pi
   caller-assigned ports, then graceful-stop just that config (full-backfill or end-block mode). In
   end-block mode it derives the indexed chain IDs from the config itself.
 - `scripts/remote-resolve-end-blocks.sh` — `timestamp` → per-chain `END_BLOCK_<chainId>` (end-block mode).
-- `scripts/remote-checkpoint.sh` — the unified on-box orchestrator: lock → checkout → (for each config
-  whose checkpoint is missing) rehydrate once → index all in parallel → dump/upload each → optionally
-  load each → optionally refresh seed.
+- `scripts/remote-checkpoint.sh` — the on-box producer: lock → checkout → (for each config whose
+  checkpoint is missing) rehydrate once → index all in parallel → dump/upload each → optionally refresh
+  seed. Does NOT load (that's the runner's job).
 - `scripts/remote-seed-export.sh` — dump the enriched `ponder_sync` → canonical R2 seed.
 - `scripts/detect-done.sh` — authoritative completion signal (`_ponder_meta.app.is_ready` 0→1).
-- `scripts/checkpoint.sh` — the unified manual runner: up → ship → provision → run → down (covers
-  production and dev via `CONFIGS`/`MODE`/`DO_LOAD`/`DO_SEED`).
+- `scripts/load-checkpoints.sh` — **runner-side** load: download each sha-keyed checkpoint from R2 and
+  restore it into the target ENSDb as `<config>Schema<VERSION>`. Runs after the box is torn down.
+- `scripts/checkpoint.sh` — the unified manual runner: up → ship → provision → produce → down, then
+  (if `DO_LOAD=1`) run `load-checkpoints.sh` on this machine. Covers production and dev via
+  `CONFIGS`/`MODE`/`DO_LOAD`/`DO_SEED`.
 
 ## R2 layout
 

@@ -1,22 +1,24 @@
 #!/usr/bin/env bash
-# BOX: the unified on-box orchestrator. Index one or more configs (in parallel, sharing the local
-# postgres + ponder_sync), dump each as a sha-keyed R2 checkpoint, then optionally load each into a
-# target ENSDb and refresh the canonical R2 seed. Idempotent + R2-locked.
+# BOX: produce checkpoints. Index one or more configs (in parallel, sharing the local postgres +
+# ponder_sync), dump each as a sha-keyed R2 checkpoint, and optionally refresh the canonical R2 seed.
+# Idempotent + R2-locked. This runs entirely on the disposable Cherry box; the LOAD into a target
+# ENSDb is deliberately NOT here — it runs on the runner (load-checkpoints.sh) AFTER the box is torn
+# down, since the restore is bound by the destination Postgres (RAM), not by this box, and a multi-hour
+# restore should not keep bare metal running.
 #
 # This single path covers both flows; they differ only in inputs:
-#   - production warm-start: CONFIGS="alpha mainnet" MODE=full-backfill DO_LOAD=1 (+VERSION,TARGET_URL) DO_SEED=1
-#   - dev point-in-time:     CONFIGS="<config>"      MODE=end-block TIMESTAMP=<unix>     (no load, no seed)
+#   - production warm-start: CONFIGS="alpha mainnet" MODE=full-backfill DO_SEED=1
+#   - dev point-in-time:     CONFIGS="<config>"      MODE=end-block TIMESTAMP=<unix>
 #
 # Flow:
 #   - acquire one R2 lock for the run; release on exit
-#   - checkout repo @ SHA + build ensdb-cli (always — needed for dump/load)
+#   - checkout repo @ SHA + build ensdb-cli (needed for the dump)
 #   - for each config whose sha-keyed checkpoint is missing in R2:
 #       rehydrate (once) -> index all-missing in parallel -> dump each -> upload to R2
-#   - if DO_LOAD=1 -> load each config's dump into TARGET_URL as <config>Schema<VERSION>
 #   - if DO_SEED=1 -> refresh the canonical R2 seed from the (now enriched) shared ponder_sync
 #
 # Env: CONFIGS (space-separated), SHA, MODE (full-backfill|end-block), ALCHEMY_API_KEY,
-#      TIMESTAMP (end-block only), VERSION + TARGET_URL (DO_LOAD only), DO_LOAD(0/1), DO_SEED(0/1).
+#      TIMESTAMP (end-block only), DO_SEED(0/1).
 source "$(dirname "$0")/lib.sh"
 require rclone
 require pnpm
@@ -24,10 +26,8 @@ require node
 require psql
 
 : "${CONFIGS:?}" "${SHA:?}" "${MODE:?}"
-DO_LOAD="${DO_LOAD:-0}"
 DO_SEED="${DO_SEED:-0}"
 [ "$MODE" = "end-block" ] && : "${TIMESTAMP:?end-block mode requires TIMESTAMP}"
-[ "$DO_LOAD" = "1" ] && : "${VERSION:?DO_LOAD requires VERSION}" "${TARGET_URL:?DO_LOAD requires TARGET_URL}"
 
 read -ra CONFIG_LIST <<<"$CONFIGS"
 [ "${#CONFIG_LIST[@]}" -gt 0 ] || die "CONFIGS is empty"
@@ -101,23 +101,6 @@ if [ "${#NEED[@]}" -gt 0 ]; then
     log "[$c] uploading checkpoint + metadata to R2"
     rclone copyto "$ld" "$(r2_checkpoint "$cn")"
     rclone copyto "$ld.metadata.json" "$(r2_checkpoint "$cn.metadata.json")"
-  done
-fi
-
-# ── load each config into the target ENSDb as <config>Schema<VERSION> ─────────
-if [ "$DO_LOAD" = "1" ]; then
-  mkdir -p "$DATA_MOUNT"
-  for c in "${CONFIG_LIST[@]}"; do
-    cn="$(ckpt_name "$c")"
-    ld="$DATA_MOUNT/$cn"
-    if [ ! -f "$ld" ]; then
-      log "[$c] downloading $cn (+ metadata) from R2 for load"
-      rclone copyto "$(r2_checkpoint "$cn")" "$ld"
-      rclone copyto "$(r2_checkpoint "$cn.metadata.json")" "$ld.metadata.json"
-    fi
-    tgt="${c}Schema${VERSION}"
-    log "[$c] loading into target as $tgt"
-    ensdb_cli load "$ld" --into "$TARGET_URL" --schema "$tgt"
   done
 fi
 

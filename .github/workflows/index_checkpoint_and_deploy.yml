@@ -5,9 +5,14 @@ name: "[next] Checkpoint: index release-candidate on Cherry, load, and deploy (B
 #
 #   1. deploy-light  — deploy the RC commit to sepolia/alphaSepolia/v2Sepolia (these index from
 #                      scratch on Railway), with their schema vars set to <ns>Schema<version>.
-#   2. index-and-load — index alpha + mainnet IN PARALLEL on a single disposable Cherry box
-#                      (shared Postgres + ponder_sync), loading the resulting schemas into the
-#                      target env's Postgres as warm <ns>Schema<version>, and refreshing the R2 seed.
+#   2. index-checkpoint — index alpha + mainnet IN PARALLEL on a single disposable Cherry box
+#                      (shared Postgres + ponder_sync), producing checkpoints uploaded to R2 and
+#                      refreshing the R2 seed. The Cherry box ONLY produces; no target load happens
+#                      here so the bare-metal box is torn down promptly.
+#   2b. load         — on a plain runner (NO Cherry), download the checkpoints from R2 and restore
+#                      them into the target env's Postgres as warm <ns>Schema<version>. The restore
+#                      is bound by the destination Postgres (~4h), so it runs after the box is gone
+#                      and a load-only re-run needs no Cherry box.
 #   3. deploy-heavy  — once the warm schemas are loaded, deploy alpha + mainnet so their indexers
 #                      resume in minutes from the warm schemas.
 #
@@ -156,13 +161,21 @@ jobs:
             local variable_name=$2
             local variable_value=$3
             echo "Setting $variable_name"
-            curl --request POST \
+            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
+            # array), so --fail alone misses it; inspect the body and fail loudly.
+            local resp
+            resp="$(curl --request POST \
               --silent \
               --fail \
+              --show-error \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}'
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
+            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
+              echo "Railway GraphQL error: $resp" >&2
+              exit 1
+            fi
             echo "Finished setting $variable_name"
           }
 
@@ -205,9 +218,9 @@ jobs:
             ${{ env.ALPHA_SEPOLIA_API_SVC_ID }}
             ${{ env.V2_SEPOLIA_API_SVC_ID }}
 
-  # PHASE 2: index alpha + mainnet in parallel on one Cherry box, load the warm schemas into the
-  # target ENSDb, and refresh the canonical R2 seed.
-  index-and-load:
+  # PHASE 2: index alpha + mainnet in parallel on one Cherry box, producing checkpoints to R2 and
+  # refreshing the canonical R2 seed. The box ONLY produces (no load) so it is torn down promptly.
+  index-checkpoint:
     needs: resolve
     runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 960 # ensure timeout is large enough for full index
@@ -226,34 +239,66 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Write SSH key + resolve target Postgres URL
+      - name: Write SSH key
         run: |
           install -m600 /dev/null /tmp/cherry_key
           printf '%s\n' "$CHERRY_SSH_KEY" > /tmp/cherry_key
           echo "SSH_KEY=/tmp/cherry_key" >> "$GITHUB_ENV"
-          case "${{ inputs.target }}" in
-            green) echo "TARGET_URL=${{ secrets.GREEN_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
-            blue) echo "TARGET_URL=${{ secrets.BLUE_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
-          esac
 
-      - name: Index alpha + mainnet in parallel on one Cherry box, load into ${{ inputs.target }}
+      - name: Produce alpha + mainnet checkpoints on one Cherry box (no load; upload to R2)
         env:
           CONFIGS: "alpha mainnet"
           SHA: ${{ needs.resolve.outputs.sha }}
-          VERSION: ${{ needs.resolve.outputs.version }}
           MODE: full-backfill
-          DO_LOAD: "1" # load both alpha + mainnet checkpoints into the target ENSDb
           DO_SEED: "1" # refresh the canonical R2 seed from the enriched (all-chain) ponder_sync
+          DO_LOAD: "0" # produce only — no load, no TARGET_URL reaches the box
         run: bash packages/ensindexer-checkpoint/scripts/checkpoint.sh
 
       - name: Tear down the Cherry box (always)
         if: always()
         run: bash packages/ensindexer-checkpoint/scripts/cherry-down.sh || true
 
+  # PHASE 2b: on a plain runner (NO Cherry), download the checkpoints from R2 and restore them into
+  # the target ENSDb as warm <ns>Schema<version>. The restore is bound by the destination Postgres
+  # (~4h), so it runs after the box is gone and a load-only re-run needs no Cherry box.
+  load:
+    needs: [resolve, index-checkpoint]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 600 # restore is bound by the destination Postgres
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node + pnpm + install dependencies
+        uses: ./.github/actions/setup_node_environment
+
+      - name: Install rclone
+        run: sudo apt-get update && sudo apt-get install -y rclone
+
+      - name: Resolve target Postgres URL
+        run: |
+          case "${{ inputs.target }}" in
+            green) echo "TARGET_URL=${{ secrets.GREEN_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
+            blue) echo "TARGET_URL=${{ secrets.BLUE_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
+            *) echo "unsupported target"; exit 1 ;;
+          esac
+
+      - name: Restore alpha + mainnet checkpoints into ${{ inputs.target }}
+        env:
+          CONFIGS: "alpha mainnet"
+          SHA: ${{ needs.resolve.outputs.sha }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          MODE: full-backfill
+          R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: bash packages/ensindexer-checkpoint/scripts/load-checkpoints.sh
+
   # PHASE 3: once the warm schemas are loaded, deploy alpha + mainnet so they resume from the warm
   # schemas. ENSRainbow first.
   deploy-heavy:
-    needs: [resolve, index-and-load, deploy-light]
+    needs: [resolve, load, deploy-light]
     runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
@@ -300,13 +345,21 @@ jobs:
             local variable_name=$2
             local variable_value=$3
             echo "Setting $variable_name"
-            curl --request POST \
+            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
+            # array), so --fail alone misses it; inspect the body and fail loudly.
+            local resp
+            resp="$(curl --request POST \
               --silent \
               --fail \
+              --show-error \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}'
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
+            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
+              echo "Railway GraphQL error: $resp" >&2
+              exit 1
+            fi
             echo "Finished setting $variable_name"
           }
 

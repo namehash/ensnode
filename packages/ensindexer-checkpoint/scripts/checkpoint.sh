@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# The unified manual runner (the GitHub workflows orchestrate the same steps inline). Brings ONE Cherry
-# box up, ships scripts + configs + an rclone.conf, provisions it, runs remote-checkpoint.sh, and tears
-# the box down. Covers both flows via CONFIGS/MODE/DO_LOAD/DO_SEED:
+# The unified manual runner (the GitHub workflows orchestrate the same steps). Brings ONE Cherry box
+# up, ships scripts + configs + an rclone.conf, provisions it, runs remote-checkpoint.sh to produce the
+# checkpoints (index → dump → upload to R2 → optional seed refresh), then tears the box down. If
+# DO_LOAD=1 it then runs the load on THIS machine (the runner) — after the box is gone — via
+# load-checkpoints.sh, so a multi-hour restore (bound by the destination Postgres) doesn't keep bare
+# metal alive.
+#
 #   production:  CONFIGS="alpha mainnet" SHA=<sha> VERSION=<v> MODE=full-backfill DO_LOAD=1 TARGET_URL=<url> DO_SEED=1
 #   dev:         CONFIGS="<config>"      SHA=<sha>             MODE=end-block TIMESTAMP=<unix>
 #
@@ -11,14 +15,16 @@
 #   MODE          full-backfill|end-block (default full-backfill)
 #   TIMESTAMP     unix seconds (end-block mode only)
 #   VERSION       release version for target schema names     (required when DO_LOAD=1)
-#   DO_LOAD=1 + TARGET_URL                                    load checkpoints into a target ENSDb
+#   DO_LOAD=1 + TARGET_URL                                    restore checkpoints into a target ENSDb (on the runner)
 #   DO_SEED=1                                                 refresh the canonical R2 seed
 #   KEEP_BOX=1                                                leave the box up afterwards (debugging)
 source "$(dirname "$0")/lib.sh"
 
 : "${CONFIGS:?}" "${SHA:?}"
 MODE="${MODE:-full-backfill}"
+DO_LOAD="${DO_LOAD:-0}"
 REMOTE_DIR="checkpoint-scripts"
+[ "$DO_LOAD" = "1" ] && : "${VERSION:?DO_LOAD requires VERSION}" "${TARGET_URL:?DO_LOAD requires TARGET_URL}"
 
 cleanup() { [ "${KEEP_BOX:-0}" = "1" ] || bash "$LIB_DIR/cherry-down.sh"; }
 
@@ -38,10 +44,10 @@ write_rclone_conf "$RCLONE_TMP"
 scp_to_box "$RCLONE_TMP" ".config/rclone/rclone.conf"
 rm -f "$RCLONE_TMP"
 
-# Ship run params + secrets (notably TARGET_URL) via a 600 file, NOT as SSH-command argv — argv is
-# readable in the box's process table. remote-checkpoint.sh is invoked after sourcing it.
+# Ship run params via a 600 file, NOT as SSH-command argv (argv is readable in the box's process
+# table). The box produces checkpoints only — TARGET_URL never reaches the box (the load runs here).
 ENV_TMP="$(mktemp)"
-write_env_file "$ENV_TMP" CONFIGS SHA MODE TIMESTAMP VERSION DO_LOAD DO_SEED TARGET_URL ALCHEMY_API_KEY
+write_env_file "$ENV_TMP" CONFIGS SHA MODE TIMESTAMP DO_SEED ALCHEMY_API_KEY
 scp_to_box "$ENV_TMP" "$REMOTE_DIR/.run-env"
 rm -f "$ENV_TMP"
 on_box "chmod 600 ~/$REMOTE_DIR/.run-env"
@@ -53,7 +59,20 @@ else
   on_box "cd ~/$REMOTE_DIR && bash remote-provision.sh"
 fi
 
-log "running remote-checkpoint.sh on the box (the long part)"
+log "producing checkpoints on the box (the long part)"
 on_box "cd ~/$REMOTE_DIR && set -a && . ./.run-env && set +a && bash remote-checkpoint.sh; rc=\$?; rm -f ./.run-env; exit \$rc"
+
+# Checkpoints are now in R2 and the box has nothing left to do — tear it down BEFORE the load so we
+# stop paying for bare metal during the (much longer, destination-bound) restore.
+log "checkpoints uploaded; tearing the box down before the load"
+cleanup
+trap - EXIT
+
+if [ "$DO_LOAD" = "1" ]; then
+  log "restoring checkpoints into the target on the runner (box already down)"
+  CONFIGS="$CONFIGS" SHA="$SHA" VERSION="$VERSION" TARGET_URL="$TARGET_URL" \
+    MODE="$MODE" TIMESTAMP="${TIMESTAMP:-}" \
+    bash "$LIB_DIR/load-checkpoints.sh"
+fi
 
 log "checkpoint run complete."

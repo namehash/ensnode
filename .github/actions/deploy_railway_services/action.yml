@@ -38,14 +38,27 @@ runs:
       run: |
         set -euo pipefail
 
+        # Railway's GraphQL endpoint returns HTTP 200 even when a mutation fails (the error lives in
+        # the response body's top-level `errors` array), so --fail alone misses it. Fail loudly when
+        # the body carries a GraphQL error.
+        fail_on_graphql_error() {
+          local resp=$1
+          if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
+            echo "Railway GraphQL error: $resp" >&2
+            exit 1
+          fi
+        }
+
         update_service_image() {
           local environment_id=$1
           local service_id=$2
           local docker_image=$3
           echo "Updating service $service_id"
-          curl --request POST \
+          local resp
+          resp="$(curl --request POST \
             --silent \
             --fail \
+            --show-error \
             --url https://backboard.railway.app/graphql/v2 \
             --header 'Authorization: Bearer '"$RAILWAY_TOKEN" \
             --header 'Content-Type: application/json' \
@@ -56,7 +69,8 @@ runs:
                 "input": {"source": {"image": "'"$docker_image"'"}},
                 "serviceId": "'"$service_id"'"
               }
-            }'
+            }')"
+          fail_on_graphql_error "$resp"
           echo "Finished updating $service_id"
         }
 
@@ -64,14 +78,16 @@ runs:
           local environment_id=$1
           local service_id=$2
           echo "Redeploying $service_id"
-          curl --request POST \
+          local resp
+          resp="$(curl --request POST \
             --silent \
             --fail \
             --show-error \
             --url https://backboard.railway.app/graphql/v2 \
             --header 'Authorization: Bearer '"$RAILWAY_TOKEN" \
             --header 'Content-Type: application/json' \
-            --data "{\"query\":\"mutation serviceInstanceDeploy(\$serviceId: String!, \$environmentId: String!) { serviceInstanceDeploy(serviceId: \$serviceId, environmentId: \$environmentId) }\",\"variables\":{\"environmentId\":\"${environment_id}\",\"serviceId\":\"${service_id}\"}}"
+            --data "{\"query\":\"mutation serviceInstanceDeploy(\$serviceId: String!, \$environmentId: String!) { serviceInstanceDeploy(serviceId: \$serviceId, environmentId: \$environmentId) }\",\"variables\":{\"environmentId\":\"${environment_id}\",\"serviceId\":\"${service_id}\"}}")"
+          fail_on_graphql_error "$resp"
           echo "Finished redeploying $service_id"
         }
 
