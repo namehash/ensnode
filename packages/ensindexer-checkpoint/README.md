@@ -8,24 +8,26 @@ with real ENSRainbow heals, exports the output schema (custom-format dump + ENSN
 optionally loads it into a target Postgres, and tears the box down. The box is **disposable** — it
 holds nothing durable; R2 holds the seed + checkpoints.
 
-**Production runs index both mainnet-namespace configs (alpha + mainnet) in parallel on a _single_
-box**, sharing one Postgres and one `ponder_sync` cache. Ponder's indexing loop is single-threaded, so
-two configs fit comfortably on one high-core box — and co-location means the ~200GB `ponder_sync` seed
-is restored once (not twice) and the shared chain-1 RPC tail is fetched once. Each config gets its own
-Ponder web-server port (alpha `:42069`, mainnet `:42169`), its own ENSRainbow (different labelsets →
+A run indexes one or more configs **in parallel on a _single_ box**, sharing one Postgres and one
+`ponder_sync` cache. Production passes both mainnet-namespace configs (`alpha` + `mainnet`); the dev
+checkpoint passes one. Ponder's indexing loop is single-threaded, so multiple configs fit comfortably
+on one high-core box — and co-location means the ~200GB `ponder_sync` seed is restored once (not once
+per config) and the shared chain-1 RPC tail is fetched once. Each config gets its own Ponder
+web-server port (`42069`, `42169`, … by list position), its own ENSRainbow (different labelsets →
 different ports `:3223`/`:3224` and data dirs), and its own process group so graceful-stop never
-touches the sibling.
+touches a sibling.
 
-These scripts are driven by the GitHub workflows (`index_checkpoint_and_deploy.yml`, `checkpoint.yml`)
-and can also be run manually via `index-both.sh` (production, both configs) or `checkpoint.sh`
-(single-config dev checkpoint).
+The same unified pair drives both flows. The GitHub workflows (`index_checkpoint_and_deploy.yml`,
+`checkpoint.yml`) and the manual runner `checkpoint.sh` all invoke the on-box orchestrator
+`remote-checkpoint.sh`; production vs dev is just `MODE`/`DO_LOAD`/`DO_SEED` inputs (see Two modes).
 
 ## Two modes
 
 - **`full-backfill`** (production warm-start): index a config to the live finalized tip, then
-  graceful-stop. Because the box runs the **exact** production env (no `END_BLOCK_*`), Ponder's
-  `build_id` matches a deployed service with the same config, so the loaded schema **resumes** rather
-  than re-indexing. The alpha run also refreshes the canonical R2 seed with the freshly-fetched tail.
+  graceful-stop. Because the box runs the **exact** production identity — same commit/image _and_ env,
+  no `END_BLOCK_*` — Ponder's `build_id` matches the deployed service, so the loaded schema **resumes**
+  rather than re-indexing (see the Build-ID parity contract below). The alpha run also refreshes the
+  canonical R2 seed with the freshly-fetched tail.
 - **`end-block`** (developer checkpoint): index deterministically to per-chain end blocks resolved
   from a target `timestamp` (zero-RPC if the seed covers it). Produces a resumable point-in-time
   checkpoint for local debugging.
@@ -42,6 +44,31 @@ That identity is sourced from the committed, single-source-of-truth env files:
 and adds only deployment-specific runtime vars (passed inline as process env — no shared `.env.local`,
 since two configs run from the same repo dir). The deployed Railway service must use the same identity.
 
+**`build_id` is environment-specific — it hashes the indexed code, not just the env.** Ponder gates
+crash-recovery resume on `_ponder_meta.app.build_id` matching (`ponder/dist/.../database/index.js:498`
+throws and crashes on mismatch). The Build ID is derived from the indexing _code/contracts_ plus the
+identity above. So a checkpoint **resumes a stock deployed indexer only when it was produced from the
+exact same commit/image that the indexer runs.** The production workflow guarantees this by
+construction: `index_checkpoint_and_deploy.yml` builds the `sha-<short>` images **from the indexed
+commit** and the deploy step dispatches `deploy_ensnode_blue_green.yml` with that same `image_tag` — so
+the box, the checkpoint, and the deployed image are all the same SHA.
+
+**Escape hatch (when they differ — patched/cherry-picked checkpoints, or seeding a stock image with a
+checkpoint built from a different commit):** the loaded schema will _not_ resume. Either rebuild the
+checkpoint from the exact deployed image, or patch the loaded schema to the consuming image's Build ID
+and clear the lock. Get the target Build ID by booting the stock image once against a scratch schema
+and reading its `_ponder_meta.app.build_id`, then:
+
+```sql
+UPDATE "<schema>"._ponder_meta
+SET value = jsonb_set(jsonb_set(value, '{build_id}', to_jsonb('<TARGET_BUILD_ID>'::text)),
+                      '{is_locked}', to_jsonb(0))
+WHERE key = 'app';
+```
+
+`enscli`/`ensdb-cli` does not do this automatically — patching forces a resume of a schema Ponder
+considers incompatible, so it's a deliberate operator action, not part of the pipeline.
+
 ## Layout
 
 - `scripts/config.example.sh` — every value via env; copy to `config.sh` (gitignored) for manual runs.
@@ -55,17 +82,16 @@ since two configs run from the same repo dir). The deployed Railway service must
 - `scripts/remote-checkout.sh` — shared cheap setup: stop stale stack, check out the repo @ SHA,
   install deps, build ensdb-cli (no storage/ponder_sync work).
 - `scripts/remote-index-one.sh` — index ONE config to `is_ready=1` in an isolated process group on
-  caller-assigned ports, then graceful-stop just that config (full-backfill or end-block mode).
-- `scripts/remote-run.sh` — single-config convenience wrapper (checkout + rehydrate + index-one).
+  caller-assigned ports, then graceful-stop just that config (full-backfill or end-block mode). In
+  end-block mode it derives the indexed chain IDs from the config itself.
 - `scripts/remote-resolve-end-blocks.sh` — `timestamp` → per-chain `END_BLOCK_<chainId>` (end-block mode).
-- `scripts/remote-checkpoint-prod.sh` — **production** on-box orchestrator: lock → checkout → index
-  alpha + mainnet **in parallel** → dump/upload each → load each → refresh seed once.
-- `scripts/remote-checkpoint.sh` — single-config on-box orchestrator: lock → produce-or-reuse
-  checkpoint → load → seed (used by the dev checkpoint workflow).
+- `scripts/remote-checkpoint.sh` — the unified on-box orchestrator: lock → checkout → (for each config
+  whose checkpoint is missing) rehydrate once → index all in parallel → dump/upload each → optionally
+  load each → optionally refresh seed.
 - `scripts/remote-seed-export.sh` — dump the enriched `ponder_sync` → canonical R2 seed.
 - `scripts/detect-done.sh` — authoritative completion signal (`_ponder_meta.app.is_ready` 0→1).
-- `scripts/index-both.sh` — **production** manual runner: up → ship → provision → index both → down.
-- `scripts/checkpoint.sh` — single-config manual runner: up → ship → provision → run → down.
+- `scripts/checkpoint.sh` — the unified manual runner: up → ship → provision → run → down (covers
+  production and dev via `CONFIGS`/`MODE`/`DO_LOAD`/`DO_SEED`).
 
 ## R2 layout
 
@@ -73,11 +99,11 @@ since two configs run from the same repo dir). The deployed Railway service must
 <R2_CHECKPOINTS_BUCKET>/
   seed/ponder_sync.dump                       # canonical zero-RPC cache (refreshed by alpha runs)
   checkpoints/<config>-<sha>[-t<ts>].dump      # sha-keyed checkpoint + .metadata.json sidecar
-  locks/<config>-<sha>[-t<ts>].lock            # best-effort run lock (GH concurrency is the hard one)
+  locks/<configs>-<sha>[-t<ts>]               # best-effort run lock (GH concurrency is the hard one)
 ```
 
 ## Safety
 
 The box is never left running, even on crash: (1) `cherry-down.sh` in an `if: always()` teardown,
-(2) an on-box self-destruct watchdog (`SELF_DESTRUCT_HOURS`), and (3) a scheduled reaper workflow that
-terminates any `ensindexer-checkpoint-*` box past its TTL.
+(2) an on-box self-destruct watchdog (`SELF_DESTRUCT_HOURS`), and (3) a scheduled garbage-collector
+workflow (`checkpoint_gc.yml`) that terminates any `ensindexer-checkpoint-*` box past its TTL.

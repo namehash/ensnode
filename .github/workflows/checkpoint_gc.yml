@@ -1,4 +1,4 @@
-name: "[next] Checkpoint: reap stale Cherry boxes"
+name: "[next] Garbage Collector: terminate orphaned ENSIndexer checkpoint Cherry boxes"
 
 # Safety net (the third box-teardown guard, alongside the workflow's always() teardown and the on-box
 # self-destruct watchdog): terminate any Cherry server named `ensindexer-checkpoint-*` older than the
@@ -13,9 +13,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: checkpoint-gc
+  cancel-in-progress: false
+
 jobs:
-  reap:
+  collect:
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 15
     env:
       CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
       CHERRY_PROJECT_ID: ${{ secrets.CHERRY_PROJECT_ID }}
@@ -41,7 +46,7 @@ jobs:
             [ "$cts" -gt 0 ] || { echo "skip $id ($host): unparseable created '$created'"; continue; }
             age=$(( (now - cts) / 3600 ))
             if [ "$age" -ge "$MAX_AGE_HOURS" ]; then
-              echo "reaping server $id ($host, ${age}h old)"
+              echo "collecting server $id ($host, ${age}h old)"
               curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" -X DELETE "$API/servers/$id" || true
             else
               echo "keep server $id ($host, ${age}h old)"

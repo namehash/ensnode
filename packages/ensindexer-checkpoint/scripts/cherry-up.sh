@@ -38,6 +38,8 @@ for _ in $(seq 1 120); do
 done
 [ -n "$ip" ] || die "timed out waiting for active+IP (last state=${state:-?})"
 echo "$ip" >"$LIB_DIR/.box-host"
+# Fresh box → fresh per-run known_hosts (TOFU pins this box's key on first connect; see lib.sh).
+rm -f "$KNOWN_HOSTS_FILE"
 
 log "server active at $ip; waiting for SSH"
 up=0
@@ -52,10 +54,17 @@ done
 
 # Arm the self-destruct watchdog: a detached process on the box that, after SELF_DESTRUCT_HOURS,
 # DELETEs this server via the Cherry API. Survives runner death; cherry-down.sh is the normal path.
+# The API token is shipped via a 600 file and read at DELETE time — NOT embedded in the SSH command
+# argv (which is world-readable in the box's process table).
 log "arming self-destruct watchdog (${SELF_DESTRUCT_HOURS}h) on the box"
-on_box "CHERRY_API_TOKEN='$CHERRY_API_TOKEN' setsid bash -c '
+TOKEN_TMP="$(mktemp)"
+printf '%s' "$CHERRY_API_TOKEN" >"$TOKEN_TMP"
+scp_to_box "$TOKEN_TMP" ".cherry-token"
+rm -f "$TOKEN_TMP"
+on_box "chmod 600 ~/.cherry-token && setsid bash -c '
   sleep $(( SELF_DESTRUCT_HOURS * 3600 ))
-  curl -fsS -H \"Authorization: Bearer \$CHERRY_API_TOKEN\" -X DELETE https://api.cherryservers.com/v1/servers/$id
+  curl -fsS -H \"Authorization: Bearer \$(cat ~/.cherry-token)\" -X DELETE https://api.cherryservers.com/v1/servers/$id
+  rm -f ~/.cherry-token
 ' </dev/null >/tmp/self-destruct.log 2>&1 &" || warn "could not arm watchdog (continuing)"
 
 log "box up: ssh -i $SSH_KEY ${BOX_USER:-root}@$ip"

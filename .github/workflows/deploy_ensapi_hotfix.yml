@@ -21,8 +21,11 @@ on:
         type: string
 
 permissions:
-  id-token: write
   contents: read
+
+concurrency:
+  group: deploy-ensapi-hotfix-${{ inputs.target }}
+  cancel-in-progress: false
 
 jobs:
   deploy-ensapi:
@@ -71,56 +74,20 @@ jobs:
               ;;
           esac
 
-      - name: Update ENSApi service images
-        run: |
-          update_service_image() {
-            local environment_id=$1
-            local service_id=$2
-            local docker_image=$3
-            echo "Updating service $service_id"
-            curl --request POST \
-              --silent \
-              --fail \
-              --url https://backboard.railway.app/graphql/v2 \
-              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "query": "mutation serviceInstanceUpdate($environmentId: String, $input: ServiceInstanceUpdateInput!, $serviceId: String!) { serviceInstanceUpdate(environmentId: $environmentId input: $input serviceId: $serviceId) }",
-                "variables": {
-                  "environmentId": "'$environment_id'",
-                  "input": {"source": {"image": "'$docker_image'"}},
-                  "serviceId": "'$service_id'"
-                }
-              }'
-            echo "Finished updating $service_id"
-          }
-
-          update_service_image ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}         ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}       ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID} ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image ${RAILWAY_ENVIRONMENT_ID} ${V2_SEPOLIA_API_SVC_ID}    ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}       ${{ env.ENSAPI_DOCKER_IMAGE }}
-
-      - name: Redeploy ENSApi instances
-        run: |
-          redeploy_service() {
-            local environment_id=$1
-            local service_id=$2
-            echo "Redeploying $service_id"
-            curl --request POST \
-              --silent \
-              --url https://backboard.railway.app/graphql/v2 \
-              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
-              --header 'Content-Type: application/json' \
-              --data "{\"query\":\"mutation serviceInstanceDeploy(\$serviceId: String!, \$environmentId: String!) { serviceInstanceDeploy(serviceId: \$serviceId, environmentId: \$environmentId) }\",\"variables\":{\"environmentId\":\"${environment_id}\",\"serviceId\":\"${service_id}\"}}"
-            echo "Finished redeploying $service_id"
-          }
-
-          redeploy_service ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}
-          redeploy_service ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
-          redeploy_service ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}
-          redeploy_service ${RAILWAY_ENVIRONMENT_ID} ${V2_SEPOLIA_API_SVC_ID}
-          redeploy_service ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
+      - name: Update + redeploy the five ENSApi instances
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSAPI_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          # No ENSRainbow services here, so ordering is cosmetic; keep the original order.
+          service_ids: |
+            ${{ env.ALPHA_API_SVC_ID }}
+            ${{ env.MAINNET_API_SVC_ID }}
+            ${{ env.ALPHA_SEPOLIA_API_SVC_ID }}
+            ${{ env.V2_SEPOLIA_API_SVC_ID }}
+            ${{ env.SEPOLIA_API_SVC_ID }}
 
       - uses: ./.github/actions/send_slack_notification
         with:

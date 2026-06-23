@@ -15,12 +15,17 @@ require jq
 : "${CHAIN_IDS:?CHAIN_IDS required (comma-separated)}"
 : "${MANIFEST_OUT:?MANIFEST_OUT required}"
 
+# Both values are interpolated into SQL below; require plain integers so they can only ever be numeric
+# literals (defense-in-depth even though the caller derives CHAIN_IDS from the config).
+[[ "$TIMESTAMP" =~ ^[0-9]+$ ]] || die "TIMESTAMP must be a non-negative integer (got '$TIMESTAMP')"
+
 log "resolving per-chain end blocks for timestamp $TIMESTAMP from the ponder_sync cache"
 chains_json="$(jq -n '{}')"
 IFS=',' read -ra IDS <<<"$CHAIN_IDS"
 for c in "${IDS[@]}"; do
   c="$(echo "$c" | tr -d '[:space:]')"
   [ -n "$c" ] || continue
+  [[ "$c" =~ ^[0-9]+$ ]] || die "chain id must be a non-negative integer (got '$c')"
   EB="$(pg -tAc "SELECT max(number) FROM ponder_sync.blocks WHERE chain_id=$c AND timestamp<=$TIMESTAMP" | tr -d '[:space:]')"
   [ -n "$EB" ] || die "cache does not cover chain $c up to timestamp $TIMESTAMP"
   echo "END_BLOCK_${c}=${EB}"

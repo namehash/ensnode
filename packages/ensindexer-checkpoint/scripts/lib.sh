@@ -22,7 +22,12 @@ die() {
 require() { command -v "$1" >/dev/null 2>&1 || die "missing required command: $1"; }
 
 # ── box connection (Cherry, plain ssh/scp) ───────────────────────────────────
-SSH_OPTS=(-o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10)
+# TOFU host pinning: the first connection of a run records the box's host key in a per-run known_hosts
+# file (cherry-up.sh clears it for a fresh box); every subsequent connection in the run verifies
+# against it, so a mid-run host-key change is caught. We can't pre-know an ephemeral box's key, but the
+# box IP itself comes from the Cherry API over TLS.
+KNOWN_HOSTS_FILE="${KNOWN_HOSTS_FILE:-$LIB_DIR/.known_hosts}"
+SSH_OPTS=(-o StrictHostKeyChecking=accept-new -o "UserKnownHostsFile=$KNOWN_HOSTS_FILE" -o ConnectTimeout=10)
 
 box_host() { [ -f "$LIB_DIR/.box-host" ] && cat "$LIB_DIR/.box-host" || echo ""; }
 box_id() { [ -f "$LIB_DIR/.box-id" ] && cat "$LIB_DIR/.box-id" || echo ""; }
@@ -66,22 +71,48 @@ checkpoint_object() { echo "${1}-${2}${3:-}.dump"; }
 r2_exists() { rclone lsf "$1" >/dev/null 2>&1 && [ -n "$(rclone lsf "$1" 2>/dev/null)" ]; }
 
 # ── R2 lock (defense-in-depth; the GH Actions concurrency group is the hard guarantee) ───────────
+# Best-effort mutual exclusion. R2/S3 has no atomic create-if-absent over rclone, so this is a
+# write-then-read-back-and-verify-owner check: it shrinks (does not eliminate) the TOCTOU window. The
+# authoritative guarantee against concurrent runs is the GitHub Actions `concurrency` group.
 LOCK_TTL_SECONDS="${LOCK_TTL_SECONDS:-43200}" # 12h: a stale lock older than this is broken
+# Unique-enough owner id for this process (no Math.random/uuid dependency on the box).
+LOCK_OWNER="${LOCK_OWNER:-$(hostname 2>/dev/null || echo box)-$$-${RANDOM}${RANDOM}}"
 acquire_lock() {
-  local key="$1" p now held
+  local key="$1" p now held held_owner held_ts back
   p="$(r2_lock "$key")"
   now="$(date +%s)"
   if r2_exists "$p"; then
-    held="$(rclone cat "$p" 2>/dev/null | head -1 | tr -d '[:space:]')"
-    if [[ "$held" =~ ^[0-9]+$ ]] && [ $((now - held)) -lt "$LOCK_TTL_SECONDS" ]; then
-      die "R2 lock held for '$key' (age $((now - held))s < TTL). Another checkpoint run in progress?"
+    held="$(rclone cat "$p" 2>/dev/null | head -1)"
+    held_ts="${held%% *}"
+    held_owner="${held#* }"
+    if [[ "$held_ts" =~ ^[0-9]+$ ]] && [ $((now - held_ts)) -lt "$LOCK_TTL_SECONDS" ] &&
+      [ "$held_owner" != "$LOCK_OWNER" ]; then
+      die "R2 lock held for '$key' (age $((now - held_ts))s < TTL, owner $held_owner). Another checkpoint run in progress?"
     fi
-    warn "breaking stale R2 lock for '$key'"
+    [ "$held_owner" = "$LOCK_OWNER" ] || warn "breaking stale R2 lock for '$key' (age $((now - held_ts))s)"
   fi
-  printf '%s\n' "$now" | rclone rcat "$p"
-  log "acquired R2 lock '$key'"
+  printf '%s %s\n' "$now" "$LOCK_OWNER" | rclone rcat "$p"
+  # Read back: if another writer raced us, the file now holds their owner — bail rather than proceed.
+  back="$(rclone cat "$p" 2>/dev/null | head -1)"
+  [ "${back#* }" = "$LOCK_OWNER" ] || die "R2 lock '$key' taken by a racing run (${back#* }); aborting"
+  log "acquired R2 lock '$key' (owner $LOCK_OWNER)"
 }
 release_lock() { rclone deletefile "$(r2_lock "$1")" 2>/dev/null || true; }
+
+# Write the named environment variables to $1 as a sourceable, single-quote-escaped file (mode 600).
+# Used to ship secrets/params to the box via scp instead of embedding them in the SSH command argv —
+# argv is world-readable in the remote process table (/proc/<pid>/cmdline, `ps`), a file is not.
+write_env_file() {
+  local out="$1" name val
+  shift
+  : >"$out"
+  chmod 600 "$out"
+  for name in "$@"; do
+    [ -n "${!name+set}" ] || continue
+    val="${!name}"
+    printf "export %s='%s'\n" "$name" "${val//\'/\'\\\'\'}" >>"$out"
+  done
+}
 
 # ── postgres lifecycle (BOX only) — self-managed cluster at $PGDATA ───────────
 PG_BIN="$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -1 || true)"

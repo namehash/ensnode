@@ -1,0 +1,81 @@
+name: Deploy Railway services
+description: >-
+  Update + redeploy a set of Railway service instances to one Docker image, in series.
+  Services are processed in the order given; ENSRainbow-type services should be listed first.
+
+inputs:
+  railway_token:
+    description: "Railway API token (Authorization: Bearer)"
+    required: true
+
+  environment_id:
+    description: "Railway environment id the service instances belong to"
+    required: true
+
+  image:
+    description: "Full ghcr image reference including tag (e.g. ghcr.io/namehash/ensnode/ensindexer:1.2.3)"
+    required: true
+
+  service_ids:
+    description: "Newline-separated Railway service ids, applied IN ORDER (ENSRainbow-type first)"
+    required: true
+
+  project_id:
+    description: "Railway project id (optional; unused by the update/deploy mutations but accepted for parity)"
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Update + redeploy service instances in order
+      shell: bash
+      env:
+        RAILWAY_TOKEN: ${{ inputs.railway_token }}
+        ENVIRONMENT_ID: ${{ inputs.environment_id }}
+        DOCKER_IMAGE: ${{ inputs.image }}
+        SERVICE_IDS: ${{ inputs.service_ids }}
+      run: |
+        set -euo pipefail
+
+        update_service_image() {
+          local environment_id=$1
+          local service_id=$2
+          local docker_image=$3
+          echo "Updating service $service_id"
+          curl --request POST \
+            --silent \
+            --fail \
+            --url https://backboard.railway.app/graphql/v2 \
+            --header 'Authorization: Bearer '"$RAILWAY_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data '{
+              "query": "mutation serviceInstanceUpdate($environmentId: String, $input: ServiceInstanceUpdateInput!, $serviceId: String!) { serviceInstanceUpdate(environmentId: $environmentId input: $input serviceId: $serviceId) }",
+              "variables": {
+                "environmentId": "'"$environment_id"'",
+                "input": {"source": {"image": "'"$docker_image"'"}},
+                "serviceId": "'"$service_id"'"
+              }
+            }'
+          echo "Finished updating $service_id"
+        }
+
+        redeploy_service() {
+          local environment_id=$1
+          local service_id=$2
+          echo "Redeploying $service_id"
+          curl --request POST \
+            --silent \
+            --url https://backboard.railway.app/graphql/v2 \
+            --header 'Authorization: Bearer '"$RAILWAY_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data "{\"query\":\"mutation serviceInstanceDeploy(\$serviceId: String!, \$environmentId: String!) { serviceInstanceDeploy(serviceId: \$serviceId, environmentId: \$environmentId) }\",\"variables\":{\"environmentId\":\"${environment_id}\",\"serviceId\":\"${service_id}\"}}"
+          echo "Finished redeploying $service_id"
+        }
+
+        # Process each service id in order: update its image, then redeploy it.
+        while IFS= read -r service_id; do
+          [ -n "$service_id" ] || continue
+          update_service_image "$ENVIRONMENT_ID" "$service_id" "$DOCKER_IMAGE"
+          redeploy_service "$ENVIRONMENT_ID" "$service_id"
+        done <<< "$SERVICE_IDS"

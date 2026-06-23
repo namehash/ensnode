@@ -15,10 +15,11 @@
 #   MODE=full-backfill  — index to the live finalized tip (production warm-start). build_id matches a
 #                         deployed service with the same config.
 #   MODE=end-block      — index deterministically to per-chain end blocks resolved from $TIMESTAMP
-#                         (dev checkpoint). Requires TIMESTAMP + CHAIN_IDS.
+#                         (dev checkpoint). Requires TIMESTAMP; the indexed chain IDs are derived from
+#                         the config itself (not passed in).
 #
 # Env: MODE, CONFIG, SHA, SCHEMA (box-local output schema), INDEXER_PORT, RAINBOW_PORT,
-#      RAINBOW_DATA_DIR, ALCHEMY_API_KEY, and for end-block mode: TIMESTAMP, CHAIN_IDS.
+#      RAINBOW_DATA_DIR, ALCHEMY_API_KEY, and for end-block mode: TIMESTAMP.
 source "$(dirname "$0")/lib.sh"
 require pnpm
 require psql
@@ -55,19 +56,33 @@ sleep 1
   DATA_DIR="$RAINBOW_DATA_DIR" LABEL_SET_ID="$LABEL_SET_ID" LABEL_SET_VERSION="$LABEL_SET_VERSION" \
     PORT="$RAINBOW_PORT" pnpm run entrypoint >"/tmp/ensrainbow-$CONFIG.log" 2>&1) &
 RAINBOW_MARKER="$RAINBOW_DATA_DIR/ensrainbow_db_ready"
+rainbow_ready=0
 for _ in $(seq 1 720); do
-  [ -f "$RAINBOW_MARKER" ] && curl -fsS "http://localhost:$RAINBOW_PORT/health" >/dev/null 2>&1 && break
+  if [ -f "$RAINBOW_MARKER" ] && curl -fsS "http://localhost:$RAINBOW_PORT/health" >/dev/null 2>&1; then
+    rainbow_ready=1
+    break
+  fi
   sleep 5
 done
-[ -f "$RAINBOW_MARKER" ] || die "[$CONFIG] ensrainbow DB did not become ready (see /tmp/ensrainbow-$CONFIG.log)"
+# Require BOTH the DB marker AND a live health response — a marker alone (server not actually serving)
+# would let the indexer start against a dead ENSRainbow and heal nothing.
+[ "$rainbow_ready" = "1" ] || die "[$CONFIG] ensrainbow did not become ready+healthy on :$RAINBOW_PORT (see /tmp/ensrainbow-$CONFIG.log)"
 
 # ── per-chain end blocks (end-block mode only) ───────────────────────────────
+# Derive the indexed chain IDs from the config itself (rather than passing a CHAIN_IDS list), then
+# resolve each chain's end block for $TIMESTAMP from the ponder_sync cache.
 END_BLOCK_ENV=()
 if [ "$MODE" = "end-block" ]; then
-  : "${TIMESTAMP:?}" "${CHAIN_IDS:?}"
+  : "${TIMESTAMP:?}"
+  log "[$CONFIG] deriving indexed chain ids from config"
+  CHAIN_IDS="$(cd "$REPO_DIR/apps/ensindexer" &&
+    ENSRAINBOW_URL="http://localhost:$RAINBOW_PORT" ENSINDEXER_SCHEMA_NAME="$SCHEMA" \
+      pnpm exec tsx scripts/print-indexed-chain-ids.ts | paste -sd, -)"
+  [ -n "$CHAIN_IDS" ] || die "[$CONFIG] could not derive indexed chain ids from config"
+  log "[$CONFIG] indexed chains: $CHAIN_IDS"
   while IFS= read -r line; do
     [ -n "$line" ] && END_BLOCK_ENV+=("$line")
-  done < <(MANIFEST_OUT="/tmp/${SCHEMA}.blocks.json" bash "$LIB_DIR/remote-resolve-end-blocks.sh")
+  done < <(CHAIN_IDS="$CHAIN_IDS" MANIFEST_OUT="/tmp/${SCHEMA}.blocks.json" bash "$LIB_DIR/remote-resolve-end-blocks.sh")
 fi
 
 log "[$CONFIG] dropping any prior schema $SCHEMA"
@@ -106,16 +121,24 @@ INDEXER_PGID="$(tr -d '[:space:]' <"$PGID_FILE" 2>/dev/null || true)"
 [ -n "$INDEXER_PGID" ] || die "[$CONFIG] could not determine indexer process group id"
 
 # ── wait for historical backfill completion (authoritative: is_ready 0->1) ───
+# Crash detection is process-liveness-first (robust to new Ponder error modes): if the indexer's
+# process group dies before is_ready flips, that's a crash regardless of the log text. The error-string
+# scan is a secondary fast-path so we surface a clear failure without waiting for the process to exit.
 log "[$CONFIG] waiting for is_ready=1 (historical backfill complete)"
 while true; do
-  if grep -qE "unhandledRejection|Started shutdown|index row requires|ELIFECYCLE|Failed to shutdown" "$INDEXER_LOG" 2>/dev/null; then
-    warn "[$CONFIG] indexer crashed:"
-    tail -50 "$INDEXER_LOG" >&2
-    die "[$CONFIG] indexer crashed before is_ready"
-  fi
   status="$(bash "$LIB_DIR/detect-done.sh" "$SCHEMA")"
   echo "$(date +%H:%M:%S) [$CONFIG] $status" >&2
   echo "$status" | grep -q "is_ready=1" && break
+  if ! kill -0 -- "-$INDEXER_PGID" 2>/dev/null; then
+    warn "[$CONFIG] indexer process group exited before is_ready:"
+    tail -50 "$INDEXER_LOG" >&2
+    die "[$CONFIG] indexer died before is_ready"
+  fi
+  if grep -qE "unhandledRejection|Started shutdown|index row requires|ELIFECYCLE|Failed to shutdown" "$INDEXER_LOG" 2>/dev/null; then
+    warn "[$CONFIG] indexer crashed (matched error pattern):"
+    tail -50 "$INDEXER_LOG" >&2
+    die "[$CONFIG] indexer crashed before is_ready"
+  fi
   sleep 30
 done
 log "[$CONFIG] is_ready=1 — backfill complete"

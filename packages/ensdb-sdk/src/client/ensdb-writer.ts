@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { sql } from "drizzle-orm/sql";
 
 import {
   type IndexingMetadataContextInitialized,
@@ -57,6 +57,25 @@ export class EnsDbWriter extends EnsDbReader {
   }
 
   /**
+   * Drop a Postgres schema (and everything in it) from the ENSDb instance, if it exists.
+   */
+  async dropSchema(schemaName: string): Promise<void> {
+    await this.ensDb.execute(sql`drop schema if exists ${sql.identifier(schemaName)} cascade`);
+  }
+
+  /**
+   * Rename a Postgres schema within the ENSDb instance.
+   *
+   * The Postgres schema name does not affect Ponder's build_id, so renaming a restored ENSIndexer
+   * schema is safe for resume.
+   */
+  async renameSchema(fromSchemaName: string, toSchemaName: string): Promise<void> {
+    await this.ensDb.execute(
+      sql`alter schema ${sql.identifier(fromSchemaName)} rename to ${sql.identifier(toSchemaName)}`,
+    );
+  }
+
+  /**
    * Upsert Indexing Metadata Context Initialized
    *
    * @throws when upsert operation failed.
@@ -64,18 +83,21 @@ export class EnsDbWriter extends EnsDbReader {
   async upsertIndexingMetadataContext(
     indexingMetadataContext: IndexingMetadataContextInitialized,
   ): Promise<void> {
-    await this.upsertEnsNodeMetadata({
+    await this.writeEnsNodeMetadata({
       key: EnsNodeMetadataKeys.IndexingMetadataContext,
       value: serializeIndexingMetadataContext(indexingMetadataContext),
     });
   }
 
   /**
-   * Upsert ENSNode metadata
+   * Write (upsert) an ENSNode metadata record under this instance's ENSIndexer Schema.
    *
-   * @throws when upsert operation failed.
+   * Re-keys the record to this writer's {@link ensIndexerSchemaName}, so metadata read from one
+   * ENSIndexer Schema can be written under a different (e.g. renamed) one.
+   *
+   * @throws when the upsert operation failed.
    */
-  private async upsertEnsNodeMetadata(metadata: SerializedEnsNodeMetadata): Promise<void> {
+  async writeEnsNodeMetadata(metadata: SerializedEnsNodeMetadata): Promise<void> {
     await this.ensDb
       .insert(this.ensNodeSchema.metadata)
       .values({

@@ -1,74 +1,135 @@
 #!/usr/bin/env bash
-# BOX: the on-box orchestrator. Produce (or reuse) a sha-keyed checkpoint for a config, then
-# optionally load it into a target ENSDb and refresh the R2 seed. Idempotent + R2-locked.
+# BOX: the unified on-box orchestrator. Index one or more configs (in parallel, sharing the local
+# postgres + ponder_sync), dump each as a sha-keyed R2 checkpoint, then optionally load each into a
+# target ENSDb and refresh the canonical R2 seed. Idempotent + R2-locked.
 #
-# Flow per (CONFIG, SHA[, CKPT_SUFFIX]):
-#   - acquire R2 lock; on exit, release it
-#   - if checkpoints/<CONFIG>-<SHA>[suffix].dump exists in R2 -> download it (skip indexing)
-#     else -> remote-run.sh (index to is_ready) -> ensdb-cli dump -> upload dump+metadata to R2
-#   - if DO_LOAD=1 -> ensdb-cli load into TARGET_URL as TARGET_SCHEMA (--skip-if-exists)
-#   - if DO_SEED=1 -> remote-seed-export.sh (refresh canonical R2 seed)
+# This single path covers both flows; they differ only in inputs:
+#   - production warm-start: CONFIGS="alpha mainnet" MODE=full-backfill DO_LOAD=1 (+VERSION,TARGET_URL) DO_SEED=1
+#   - dev point-in-time:     CONFIGS="<config>"      MODE=end-block TIMESTAMP=<unix>     (no load, no seed)
 #
-# Env: MODE (full-backfill|end-block), CONFIG, SHA, SCHEMA (box-local), ALCHEMY_API_KEY,
-#      DO_LOAD (0/1) [+ TARGET_URL, TARGET_SCHEMA], DO_SEED (0/1),
-#      CKPT_SUFFIX (optional, e.g. -t<timestamp>), and for end-block mode: TIMESTAMP, CHAIN_IDS.
+# Flow:
+#   - acquire one R2 lock for the run; release on exit
+#   - checkout repo @ SHA + build ensdb-cli (always — needed for dump/load)
+#   - for each config whose sha-keyed checkpoint is missing in R2:
+#       rehydrate (once) -> index all-missing in parallel -> dump each -> upload to R2
+#   - if DO_LOAD=1 -> load each config's dump into TARGET_URL as <config>Schema<VERSION>
+#   - if DO_SEED=1 -> refresh the canonical R2 seed from the (now enriched) shared ponder_sync
+#
+# Env: CONFIGS (space-separated), SHA, MODE (full-backfill|end-block), ALCHEMY_API_KEY,
+#      TIMESTAMP (end-block only), VERSION + TARGET_URL (DO_LOAD only), DO_LOAD(0/1), DO_SEED(0/1).
 source "$(dirname "$0")/lib.sh"
 require rclone
 require pnpm
 require node
+require psql
 
-: "${MODE:?}" "${CONFIG:?}" "${SHA:?}" "${SCHEMA:?}"
+: "${CONFIGS:?}" "${SHA:?}" "${MODE:?}"
 DO_LOAD="${DO_LOAD:-0}"
 DO_SEED="${DO_SEED:-0}"
-CKPT_SUFFIX="${CKPT_SUFFIX:-}"
+[ "$MODE" = "end-block" ] && : "${TIMESTAMP:?end-block mode requires TIMESTAMP}"
+[ "$DO_LOAD" = "1" ] && : "${VERSION:?DO_LOAD requires VERSION}" "${TARGET_URL:?DO_LOAD requires TARGET_URL}"
 
-LOCK_KEY="${CONFIG}-${SHA}${CKPT_SUFFIX}"
+read -ra CONFIG_LIST <<<"$CONFIGS"
+[ "${#CONFIG_LIST[@]}" -gt 0 ] || die "CONFIGS is empty"
+
+# Checkpoint object suffix: dev (end-block) checkpoints are timestamp-specific; production
+# (full-backfill) checkpoints are keyed by sha alone.
+SUFFIX=""
+[ "$MODE" = "end-block" ] && SUFFIX="-t${TIMESTAMP}"
+
+box_schema() { echo "ckpt_${1}_${SHA}${SUFFIX}"; }
+ckpt_name() { checkpoint_object "$1" "$SHA" "$SUFFIX"; } # <config>-<sha>[-t<ts>].dump
+
+LOCK_KEY="${CONFIGS// /+}-${SHA}${SUFFIX}"
 acquire_lock "$LOCK_KEY"
 trap 'release_lock "$LOCK_KEY"' EXIT
 
-CKPT_NAME="$(checkpoint_object "$CONFIG" "$SHA" "$CKPT_SUFFIX")"
-META_NAME="${CKPT_NAME%.dump}.metadata.json"
-LOCAL_DUMP="$DATA_MOUNT/${CKPT_NAME}"
-LOCAL_META="$DATA_MOUNT/${META_NAME}"
+ensdb_cli() { node "$REPO_DIR/packages/ensdb-cli/dist/cli.js" "$@"; }
 
-ensdb_cli() {
-  node "$REPO_DIR/packages/ensdb-cli/dist/cli.js" "$@"
-}
+log "checkout repo @ $SHA (+ build ensdb-cli)"
+SHA="$SHA" bash "$LIB_DIR/remote-checkout.sh"
 
-if r2_exists "$(r2_checkpoint "$CKPT_NAME")"; then
-  log "checkpoint $CKPT_NAME already in R2 — reusing (skipping index)"
-  rclone copy "$(r2_checkpoint "$CKPT_NAME")" "$DATA_MOUNT/"
-  rclone copy "$(r2_checkpoint "$META_NAME")" "$DATA_MOUNT/" 2>/dev/null || warn "no metadata object for $CKPT_NAME"
-else
-  log "no checkpoint in R2 — indexing $CONFIG @ $SHA (mode=$MODE)"
-  MODE="$MODE" CONFIG="$CONFIG" SHA="$SHA" SCHEMA="$SCHEMA" \
-    TIMESTAMP="${TIMESTAMP:-}" CHAIN_IDS="${CHAIN_IDS:-}" \
-    bash "$LIB_DIR/remote-run.sh"
+# ── which configs still need indexing? (sha-keyed checkpoint already in R2 -> reuse) ──
+NEED=()
+for c in "${CONFIG_LIST[@]}"; do
+  if r2_exists "$(r2_checkpoint "$(ckpt_name "$c")")"; then
+    log "checkpoint for $c already in R2 ($(ckpt_name "$c")) — will reuse (skip indexing)"
+  else
+    NEED+=("$c")
+  fi
+done
 
-  log "building ensdb-cli"
-  pnpm -C "$REPO_DIR" -F @ensnode/ensdb-cli build >/dev/null
-  log "dumping schema $SCHEMA -> $LOCAL_DUMP (+ metadata)"
-  ensdb_cli dump "$SCHEMA" --from "$ENSDB_URL" -f "$LOCAL_DUMP" --metadata-out "$LOCAL_META"
+# ── index the missing configs in parallel into the shared postgres ───────────
+if [ "${#NEED[@]}" -gt 0 ]; then
+  log "rehydrating storage + ponder_sync (shared by all configs)"
+  bash "$LIB_DIR/remote-rehydrate.sh"
 
-  log "uploading checkpoint + metadata to R2"
-  rclone copyto "$LOCAL_DUMP" "$(r2_checkpoint "$CKPT_NAME")"
-  rclone copyto "$LOCAL_META" "$(r2_checkpoint "$META_NAME")"
+  log "indexing in parallel: ${NEED[*]}"
+  declare -A PID
+  i=0
+  for c in "${NEED[@]}"; do
+    sch="$(box_schema "$c")"
+    CONFIG="$c" SHA="$SHA" SCHEMA="$sch" MODE="$MODE" \
+      INDEXER_PORT="$((42069 + i * 100))" RAINBOW_PORT="$((3223 + i))" \
+      RAINBOW_DATA_DIR="$DATA_MOUNT/ensrainbow-$c" ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-}" \
+      TIMESTAMP="${TIMESTAMP:-}" \
+      bash "$LIB_DIR/remote-index-one.sh" >"/tmp/index-$c.out" 2>&1 &
+    PID[$c]=$!
+    log "  -> $c indexing (pid ${PID[$c]}, schema $sch, indexer :$((42069 + i * 100)), rainbow :$((3223 + i)))"
+    i=$((i + 1))
+  done
+
+  FAIL=0
+  for c in "${NEED[@]}"; do
+    if wait "${PID[$c]}"; then
+      log "$c index complete"
+    else
+      warn "$c index FAILED — last 80 lines:"
+      tail -80 "/tmp/index-$c.out" >&2
+      FAIL=1
+    fi
+  done
+  [ "$FAIL" = 0 ] || die "one or more parallel indexes failed"
+
+  log "dumping + uploading sha-keyed checkpoints for: ${NEED[*]}"
+  for c in "${NEED[@]}"; do
+    sch="$(box_schema "$c")"
+    cn="$(ckpt_name "$c")"
+    ld="$DATA_MOUNT/$cn"
+    log "[$c] dumping schema $sch -> $ld (+ metadata sidecar)"
+    ensdb_cli dump "$sch" --from "$ENSDB_URL" -f "$ld"
+    log "[$c] uploading checkpoint + metadata to R2"
+    rclone copyto "$ld" "$(r2_checkpoint "$cn")"
+    rclone copyto "$ld.metadata.json" "$(r2_checkpoint "$cn.metadata.json")"
+  done
 fi
 
+# ── load each config into the target ENSDb as <config>Schema<VERSION> ─────────
 if [ "$DO_LOAD" = "1" ]; then
-  : "${TARGET_URL:?}" "${TARGET_SCHEMA:?}"
-  [ -d "$REPO_DIR/packages/ensdb-cli/dist" ] || pnpm -C "$REPO_DIR" -F @ensnode/ensdb-cli build >/dev/null
-  log "loading checkpoint into target as $TARGET_SCHEMA (--skip-if-exists)"
-  meta_arg=()
-  [ -f "$LOCAL_META" ] && meta_arg=(--metadata "$LOCAL_META")
-  ensdb_cli load "$LOCAL_DUMP" --into "$TARGET_URL" --schema "$TARGET_SCHEMA" \
-    "${meta_arg[@]}" --skip-if-exists
+  mkdir -p "$DATA_MOUNT"
+  for c in "${CONFIG_LIST[@]}"; do
+    cn="$(ckpt_name "$c")"
+    ld="$DATA_MOUNT/$cn"
+    if [ ! -f "$ld" ]; then
+      log "[$c] downloading $cn (+ metadata) from R2 for load"
+      rclone copyto "$(r2_checkpoint "$cn")" "$ld"
+      rclone copyto "$(r2_checkpoint "$cn.metadata.json")" "$ld.metadata.json"
+    fi
+    tgt="${c}Schema${VERSION}"
+    log "[$c] loading into target as $tgt"
+    ensdb_cli load "$ld" --into "$TARGET_URL" --schema "$tgt"
+  done
 fi
 
+# ── refresh the canonical R2 seed once (shared ponder_sync now spans all chains) ──
 if [ "$DO_SEED" = "1" ]; then
-  log "refreshing canonical R2 seed from enriched ponder_sync"
-  bash "$LIB_DIR/remote-seed-export.sh"
+  if [ "${#NEED[@]}" -gt 0 ]; then
+    log "refreshing canonical R2 seed from enriched ponder_sync"
+    bash "$LIB_DIR/remote-seed-export.sh"
+  else
+    warn "DO_SEED=1 but nothing was indexed this run (all checkpoints reused) — skipping seed refresh"
+  fi
 fi
 
-log "remote-checkpoint complete: $CKPT_NAME"
-echo "CHECKPOINT_DONE_OK $CKPT_NAME"
+log "remote-checkpoint complete (configs='$CONFIGS' sha=$SHA mode=$MODE)"
+echo "CHECKPOINT_DONE_OK configs='$CONFIGS' sha=$SHA"

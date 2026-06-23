@@ -213,6 +213,44 @@ describe("EnsDbReader", () => {
     });
   });
 
+  describe("schemaExists", () => {
+    it("returns true when the schema exists", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [{ exists: 1 }] });
+
+      await expect(createEnsDbReader().schemaExists("ensnode")).resolves.toBe(true);
+    });
+
+    it("returns false when the schema does not exist", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [] });
+
+      await expect(createEnsDbReader().schemaExists("ensnode")).resolves.toBe(false);
+    });
+  });
+
+  describe("getEnsNodeMetadata", () => {
+    it("returns the full { key, value } record when one exists", async () => {
+      selectResult.current = [{ key: "indexing_metadata_context", value: { foo: "bar" } } as any];
+
+      await expect(
+        createEnsDbReader().getEnsNodeMetadata({ key: "indexing_metadata_context" as any }),
+      ).resolves.toStrictEqual({ key: "indexing_metadata_context", value: { foo: "bar" } });
+    });
+
+    it("returns undefined when no record exists", async () => {
+      await expect(
+        createEnsDbReader().getEnsNodeMetadata({ key: "indexing_metadata_context" as any }),
+      ).resolves.toBeUndefined();
+    });
+
+    it("throws when multiple records exist", async () => {
+      selectResult.current = [{ value: "a" }, { value: "b" }];
+
+      await expect(
+        createEnsDbReader().getEnsNodeMetadata({ key: "indexing_metadata_context" as any }),
+      ).rejects.toThrow(/There must be exactly one ENSNodeMetadata record/);
+    });
+  });
+
   describe("destroy", () => {
     it("calls $client.end() to close the connection pool", async () => {
       const ensDbReader = createEnsDbReader();

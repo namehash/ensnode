@@ -20,8 +20,8 @@ export BOX_HOSTNAME="${BOX_HOSTNAME:-ensindexer-checkpoint}"  # used as the Cher
 # postgres refuses to run as root; on a root box run the cluster as the `postgres` OS user.
 export PG_RUN_USER="${PG_RUN_USER:-postgres}"
 # Safety net: the box terminates ITSELF this many hours after provisioning, even if the orchestrating
-# runner dies and never tears it down. Keep comfortably above a full index (~6h).
-export SELF_DESTRUCT_HOURS="${SELF_DESTRUCT_HOURS:-12}"
+# runner dies and never tears it down. Keep comfortably above a full index (~6h) for headroom.
+export SELF_DESTRUCT_HOURS="${SELF_DESTRUCT_HOURS:-20}"
 
 # Bare-metal data device(s): the NVMe NOT holding the OS (inspect `lsblk`). Empty = use a directory
 # on the existing filesystem.

@@ -12,7 +12,17 @@ if [ -z "$id" ]; then
 fi
 
 log "terminating Cherry server $id"
-curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" -X DELETE "$API/servers/$id" >/dev/null \
-  || warn "DELETE returned non-200 (already gone?)"
-rm -f "$LIB_DIR/.box-id" "$LIB_DIR/.box-host"
-log "down."
+http="$(curl -sS -o /dev/null -w '%{http_code}' \
+  -H "Authorization: Bearer $CHERRY_API_TOKEN" -X DELETE "$API/servers/$id" 2>/dev/null || echo 000)"
+case "$http" in
+  2* | 404)
+    # Terminated (or already gone) — safe to discard the local handle.
+    rm -f "$LIB_DIR/.box-id" "$LIB_DIR/.box-host"
+    log "down (http $http)."
+    ;;
+  *)
+    # KEEP .box-id/.box-host: discarding the only handle to a still-running box would orphan billable
+    # hardware. The self-destruct watchdog + GC workflow are backstops, but surface this loudly.
+    die "DELETE failed (http $http) for server $id — keeping .box-id/.box-host so it can be retried; terminate manually if it persists"
+    ;;
+esac

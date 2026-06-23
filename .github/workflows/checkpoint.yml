@@ -22,11 +22,6 @@ on:
         description: "Chain-time to index up to (unix seconds)"
         required: true
         type: string
-      chain_ids:
-        description: "Override indexed chain ids (comma list); default derived from config"
-        required: false
-        type: string
-        default: ""
 
 permissions:
   contents: read
@@ -54,34 +49,27 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Write SSH key + resolve indexed chain ids
+      - name: Write SSH key
         run: |
           install -m600 /dev/null /tmp/cherry_key
           printf '%s\n' "$CHERRY_SSH_KEY" > /tmp/cherry_key
           echo "SSH_KEY=/tmp/cherry_key" >> "$GITHUB_ENV"
-          CHAIN_IDS="${{ inputs.chain_ids }}"
-          if [ -z "$CHAIN_IDS" ]; then
-            case "${{ inputs.config }}" in
-              alpha) CHAIN_IDS="1,8453,10,42161,59144,534352" ;;
-              mainnet) CHAIN_IDS="1" ;;
-            esac
-          fi
-          echo "CHAIN_IDS=$CHAIN_IDS" >> "$GITHUB_ENV"
 
-      - name: Index ${{ inputs.config }} @ ${{ inputs.commit }} to t=${{ inputs.timestamp }}
+      - name: Index config at commit to the requested chain-time
         env:
-          CONFIG: ${{ inputs.config }}
+          CONFIGS: ${{ inputs.config }}
           SHA: ${{ inputs.commit }}
           MODE: end-block
           TIMESTAMP: ${{ inputs.timestamp }}
-          CKPT_SUFFIX: -t${{ inputs.timestamp }}
-          DO_LOAD: "0"
-          DO_SEED: "0"
         run: bash packages/ensindexer-checkpoint/scripts/checkpoint.sh
 
       - name: Report checkpoint R2 location
+        env:
+          CONFIG: ${{ inputs.config }}
+          COMMIT: ${{ inputs.commit }}
+          TIMESTAMP: ${{ inputs.timestamp }}
         run: |
-          OBJ="${{ inputs.config }}-${{ inputs.commit }}-t${{ inputs.timestamp }}.dump"
+          OBJ="${CONFIG}-${COMMIT}-t${TIMESTAMP}.dump"
           {
             echo "### Checkpoint ready"
             echo ""

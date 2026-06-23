@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm/sql";
+import { and, eq, sql } from "drizzle-orm/sql";
 
 import {
   buildIndexingMetadataContextUninitialized,
@@ -173,6 +173,16 @@ export class EnsDbReader<
   }
 
   /**
+   * Check whether a Postgres schema with the given name exists in the ENSDb instance.
+   */
+  async schemaExists(schemaName: string): Promise<boolean> {
+    const result = await this.ensDb.execute<{ exists: number }>(
+      sql`select 1 as exists from information_schema.schemata where schema_name = ${schemaName} limit 1`,
+    );
+    return result.rows.length > 0;
+  }
+
+  /**
    * Get Indexing Metadata Context
    *
    * @returns the initialized record, or a default uninitialized one if no record exists in ENSDb.
@@ -186,7 +196,7 @@ export class EnsDbReader<
       return buildIndexingMetadataContextUninitialized();
     }
 
-    return deserializeIndexingMetadataContext(record);
+    return deserializeIndexingMetadataContext(record.value);
   }
 
   /**
@@ -202,14 +212,15 @@ export class EnsDbReader<
   /**
    * Get ENSNode Metadata record
    *
-   * @returns selected record in ENSDb.
+   * @returns the full `{ key, value }` record for the given key under this instance's
+   *          ENSIndexer Schema, or undefined if no such record exists.
    * @throws when more than one matching metadata record is found
    *         (should be impossible given the composite PK constraint on
    *         'ensIndexerSchemaName' and 'key')
    */
-  private async getEnsNodeMetadata<EnsNodeMetadataType extends SerializedEnsNodeMetadata>(
+  async getEnsNodeMetadata<EnsNodeMetadataType extends SerializedEnsNodeMetadata>(
     metadata: Pick<EnsNodeMetadataType, "key">,
-  ): Promise<EnsNodeMetadataType["value"] | undefined> {
+  ): Promise<EnsNodeMetadataType | undefined> {
     const result = await this.ensDb
       .select()
       .from(this.ensNodeSchema.metadata)
@@ -225,7 +236,7 @@ export class EnsDbReader<
     }
 
     if (result.length === 1 && result[0]) {
-      return result[0].value as EnsNodeMetadataType["value"];
+      return { key: result[0].key, value: result[0].value } as EnsNodeMetadataType;
     }
 
     throw new Error(
