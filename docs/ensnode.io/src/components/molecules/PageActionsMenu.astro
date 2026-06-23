@@ -1,18 +1,20 @@
 ---
-import { ChatGptIcon } from "../atoms/icons/ChatGptIcon";
+import { ChevronDownIcon } from "../atoms/icons/ChevronDownIcon";
 import { ClaudeIcon } from "../atoms/icons/ClaudeIcon";
+import { CopyIcon } from "../atoms/icons/CopyIcon";
+import { FileTextIcon } from "../atoms/icons/FileTextIcon";
+import { LinkIcon } from "../atoms/icons/LinkIcon";
 import { MarkdownIcon } from "../atoms/icons/MarkdownIcon";
+import { SparklesIcon } from "../atoms/icons/SparklesIcon";
 
 const RAW_CONTENT_BASE_URL = "https://raw.githubusercontent.com/namehash/ensnode/main/";
 
 const entry = Astro.locals.starlightRoute.entry;
-const entryFilePath = (
-  (entry?.data as { file?: string } | undefined)?.file ??
-  entry?.filePath ??
-  ""
-)
-  .toString()
-  .replace(/^\.?\//, "");
+const entryData = entry?.data;
+const entryDataFile =
+  entryData && typeof entryData === "object" && "file" in entryData ? entryData.file : undefined;
+
+const entryFilePath = `${entryDataFile ?? entry?.filePath ?? ""}`.replace(/^\.?\//, "");
 
 const sourceMarkdownUrl =
   entryFilePath.length === 0
@@ -25,20 +27,21 @@ const sourceMarkdownUrl =
       ).toString();
 ---
 
-<aside class="page-actions" data-page-actions-root data-menu-open="false">
+<aside
+  class="page-actions"
+  data-page-actions-root
+  data-menu-open="false"
+  data-source-markdown-url={sourceMarkdownUrl ?? ""}>
   <div class="split-action">
     <button
       type="button"
       class="split-main"
-      data-page-action="copy-markdown"
-      aria-label="Copy page">
+      data-page-action="chatgpt"
+      aria-label="Ask ChatGPT about this page">
       <span class="item-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
+        <SparklesIcon />
       </span>
-      <span class="split-main-label">Copy page</span>
+      <span class="split-main-label">Ask in ChatGPT</span>
     </button>
 
     <button
@@ -48,14 +51,7 @@ const sourceMarkdownUrl =
       aria-label="Open page actions menu"
       aria-haspopup="menu"
       aria-expanded="false">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        aria-hidden="true">
-        <path d="m6 9 6 6 6-6"></path>
-      </svg>
+      <ChevronDownIcon />
     </button>
   </div>
 
@@ -65,25 +61,12 @@ const sourceMarkdownUrl =
         <button
           type="button"
           class="action-menu-item"
-          data-page-action="chatgpt"
-          data-menu-item="true">
-          <span class="item-icon" aria-hidden="true">
-            <ChatGptIcon />
-          </span>
-          <span class="item-title">Open in ChatGPT</span>
-        </button>
-      </li>
-
-      <li>
-        <button
-          type="button"
-          class="action-menu-item"
           data-page-action="claude"
           data-menu-item="true">
           <span class="item-icon" aria-hidden="true">
             <ClaudeIcon />
           </span>
-          <span class="item-title">Open in Claude</span>
+          <span class="item-title">Ask in Claude</span>
         </button>
       </li>
 
@@ -96,7 +79,7 @@ const sourceMarkdownUrl =
           <span class="item-icon" aria-hidden="true">
             <MarkdownIcon />
           </span>
-          <span class="item-title">View as Markdown</span>
+          <span class="item-title">View page as Markdown</span>
         </button>
       </li>
 
@@ -107,7 +90,7 @@ const sourceMarkdownUrl =
           data-page-action="copy-markdown-url"
           data-menu-item="true">
           <span class="item-icon" aria-hidden="true">
-            <MarkdownIcon />
+            <LinkIcon />
           </span>
           <span class="item-title">Copy Markdown URL</span>
         </button>
@@ -120,28 +103,57 @@ const sourceMarkdownUrl =
           data-page-action="copy-markdown"
           data-menu-item="true">
           <span class="item-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
+            <CopyIcon />
           </span>
-          <span class="item-title">Copy page</span>
+          <span class="item-title">Copy page for LLMs</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="llms-txt"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <FileTextIcon />
+          </span>
+          <span class="item-title">llms.txt</span>
         </button>
       </li>
     </ul>
   </div>
+
+  <p
+    class="action-feedback"
+    data-page-actions-feedback
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    hidden>
+  </p>
 </aside>
 
-<script define:vars={{ sourceMarkdownUrl }} is:inline>
+<script is:inline>
   const rootSelector = "[data-page-actions-root]";
+  const actionSuccessMessages = {
+    "copy-markdown": "Copied page for LLMs",
+    "copy-markdown-url": "Copied Markdown URL",
+  };
 
   let resolvedMarkdownUrl;
+  const feedbackHideTimers = new WeakMap();
+
+  function getSourceMarkdownUrl(root) {
+    const value = root.dataset.sourceMarkdownUrl;
+    return value && value.length > 0 ? value : null;
+  }
 
   function getRouteMarkdownUrl() {
     return new URL("index.md", window.location.href.replace(/\/?$/, "/")).toString();
   }
 
-  async function resolveMarkdownUrl() {
+  async function resolveMarkdownUrl(root) {
     if (resolvedMarkdownUrl) {
       return resolvedMarkdownUrl;
     }
@@ -158,6 +170,7 @@ const sourceMarkdownUrl =
       // Ignore probe failures and continue to the source fallback.
     }
 
+    const sourceMarkdownUrl = getSourceMarkdownUrl(root);
     if (sourceMarkdownUrl) {
       resolvedMarkdownUrl = sourceMarkdownUrl;
       return resolvedMarkdownUrl;
@@ -167,8 +180,14 @@ const sourceMarkdownUrl =
     return resolvedMarkdownUrl;
   }
 
-  async function getLlmPrompt() {
-    const markdownUrl = await resolveMarkdownUrl();
+  function assertClipboardAvailability() {
+    if (!navigator.clipboard?.writeText) {
+      throw new Error("Clipboard API unavailable");
+    }
+  }
+
+  async function getLlmPrompt(root) {
+    const markdownUrl = await resolveMarkdownUrl(root);
     return `Read from ${markdownUrl} so I can ask questions about it.`;
   }
 
@@ -176,13 +195,17 @@ const sourceMarkdownUrl =
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  async function copyMarkdownUrl() {
-    const markdownUrl = await resolveMarkdownUrl();
+  async function copyMarkdownUrl(root) {
+    assertClipboardAvailability();
+
+    const markdownUrl = await resolveMarkdownUrl(root);
     await navigator.clipboard.writeText(markdownUrl);
   }
 
-  async function copyMarkdown() {
-    const markdownUrl = await resolveMarkdownUrl();
+  async function copyMarkdown(root) {
+    assertClipboardAvailability();
+
+    const markdownUrl = await resolveMarkdownUrl(root);
     const response = await fetch(markdownUrl);
 
     if (!response.ok) {
@@ -193,28 +216,63 @@ const sourceMarkdownUrl =
     await navigator.clipboard.writeText(markdown);
   }
 
-  async function openInChatGPT() {
-    const message = encodeURIComponent(await getLlmPrompt());
+  async function openInChatGPT(root) {
+    const message = encodeURIComponent(await getLlmPrompt(root));
     openChat(`https://chatgpt.com/?q=${message}`);
   }
 
-  async function openInClaude() {
-    const message = encodeURIComponent(await getLlmPrompt());
+  async function openInClaude(root) {
+    const message = encodeURIComponent(await getLlmPrompt(root));
     openChat(`https://claude.ai/new?q=${message}`);
   }
 
-  async function viewAsMarkdown() {
-    const markdownUrl = await resolveMarkdownUrl();
+  async function viewAsMarkdown(root) {
+    const markdownUrl = await resolveMarkdownUrl(root);
     window.open(markdownUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function viewLlmsTxt() {
+    window.open(
+      new URL("/llms.txt", window.location.origin).toString(),
+      "_blank",
+      "noopener,noreferrer",
+    );
   }
 
   const handlers = {
     "copy-markdown": copyMarkdown,
     "copy-markdown-url": copyMarkdownUrl,
     "view-markdown": viewAsMarkdown,
+    "llms-txt": viewLlmsTxt,
     chatgpt: openInChatGPT,
     claude: openInClaude,
   };
+
+  function showActionFeedback(root, message, kind = "success") {
+    const feedback = root.querySelector("[data-page-actions-feedback]");
+
+    if (!feedback) {
+      return;
+    }
+
+    const existingTimer = feedbackHideTimers.get(root);
+    if (existingTimer) {
+      window.clearTimeout(existingTimer);
+    }
+
+    feedback.textContent = message;
+    feedback.hidden = false;
+    feedback.dataset.kind = kind;
+
+    const nextTimer = window.setTimeout(() => {
+      feedback.hidden = true;
+      feedback.textContent = "";
+      delete feedback.dataset.kind;
+      feedbackHideTimers.delete(root);
+    }, 2200);
+
+    feedbackHideTimers.set(root, nextTimer);
+  }
 
   function setMenuOpen(root, isOpen) {
     const menu = root.querySelector("[data-page-actions-menu]");
@@ -293,9 +351,15 @@ const sourceMarkdownUrl =
 
       try {
         button.disabled = true;
-        await handler();
+        await handler(root);
+
+        const successMessage = actionSuccessMessages[action];
+        if (successMessage) {
+          showActionFeedback(root, successMessage);
+        }
       } catch (error) {
         console.error("Page action failed:", error);
+        showActionFeedback(root, "Could not complete that action", "error");
       } finally {
         button.disabled = false;
       }
@@ -446,6 +510,18 @@ const sourceMarkdownUrl =
     font-weight: inherit;
     line-height: inherit;
     transition: color 0.15s ease;
+  }
+
+  .action-feedback {
+    margin: 0.5rem 0.2rem 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--sl-color-text-accent);
+  }
+
+  .action-feedback[data-kind="error"] {
+    color: var(--sl-color-red-high, var(--sl-color-text));
   }
 
   .split-main:disabled,

@@ -1,7 +1,7 @@
 ---
 import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
-import PageActions from "../molecules/PageActions.astro";
+import PageActionsMenu from "../molecules/PageActionsMenu.astro";
 import ScalarTableOfContents from "../molecules/ScalarTableOfContents.astro";
 import TelegramInvite from "../molecules/TelegramInvite.astro";
 
@@ -9,7 +9,7 @@ const { starlightRoute } = Astro.locals;
 const isApiReference = starlightRoute.slug === "ensapi/reference/api-reference";
 ---
 
-<PageActions />
+<PageActionsMenu />
 <br />
 {isApiReference ? <ScalarTableOfContents /> : <Default />}
 <br />
