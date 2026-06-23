@@ -50,10 +50,14 @@ r2_checkpoint() { echo "${RCLONE_REMOTE}:${R2_CHECKPOINTS_BUCKET}/${R2_CHECKPOIN
 r2_lock() { echo "${RCLONE_REMOTE}:${R2_CHECKPOINTS_BUCKET}/${R2_LOCK_PREFIX}/$1"; }
 
 # Write an rclone.conf for the "$RCLONE_REMOTE" S3-compatible R2 remote from R2_* credentials.
+# Created mode 600 (umask 077) — it holds the R2 access key/secret and must not be world-readable.
 write_rclone_conf() {
   local dest="${1:?dest path}"
   mkdir -p "$(dirname "$dest")"
-  cat >"$dest" <<EOF
+  # Subshell-scoped umask so the 600 creation doesn't leak to the rest of the script.
+  (
+    umask 077
+    cat >"$dest" <<EOF
 [${RCLONE_REMOTE}]
 type = s3
 provider = Cloudflare
@@ -62,6 +66,7 @@ secret_access_key = ${R2_SECRET_ACCESS_KEY}
 endpoint = ${R2_ENDPOINT}
 no_check_bucket = true
 EOF
+  )
 }
 
 # checkpoint object name for a (config, sha) pair; optional suffix (e.g. -t<timestamp>) for dev checkpoints.

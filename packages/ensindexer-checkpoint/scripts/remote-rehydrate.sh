@@ -5,6 +5,7 @@
 source "$(dirname "$0")/lib.sh"
 require rclone
 require psql
+require pg_restore
 
 # ── data storage: dedicated NVMe (mount, RAID0 if multiple) OR a dir on the existing fs ──────────
 if ! mountpoint -q "$DATA_MOUNT" && [ ! -d "$PGDATA" ]; then
