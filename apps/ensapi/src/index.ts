@@ -13,8 +13,8 @@ import app from "./app";
 sdk.start();
 // initialize DI container and its resources in a non-blocking way to
 // allow HTTP server to start immediately and serve requests
-void di.init().catch((error) => {
-  logger.error(error, "Error initializing DI container");
+void di.init().catch((err) => {
+  logger.error({ err }, "Error initializing DI container");
   process.exit(1);
 });
 
@@ -68,8 +68,8 @@ const gracefulShutdown = async () => {
     await di.destroy();
 
     process.exit(0);
-  } catch (error) {
-    logger.error(error);
+  } catch (err) {
+    logger.error({ err }, "Error during graceful shutdown");
     process.exit(1);
   }
 };
@@ -78,7 +78,7 @@ const gracefulShutdown = async () => {
 process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
 
-process.on("uncaughtException", async (error) => {
-  logger.error(error, "uncaughtException");
+process.on("uncaughtException", async (err) => {
+  logger.error({ err }, "uncaughtException");
   await gracefulShutdown();
 });
