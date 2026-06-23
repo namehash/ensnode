@@ -50,8 +50,9 @@ throws and crashes on mismatch). The Build ID is derived from the indexing _code
 identity above. So a checkpoint **resumes a stock deployed indexer only when it was produced from the
 exact same commit/image that the indexer runs.** The production workflow guarantees this by
 construction: `index_checkpoint_and_deploy.yml` builds the `sha-<short>` images **from the indexed
-commit** and the deploy step dispatches `deploy_ensnode_blue_green.yml` with that same `image_tag` — so
-the box, the checkpoint, and the deployed image are all the same SHA.
+commit** and deploys those same images directly (its `deploy-light` / `deploy-heavy` phases, via the
+`deploy_railway_services` action) — so the box, the checkpoint, and the deployed image are all the
+same SHA.
 
 **Escape hatch (when they differ — patched/cherry-picked checkpoints, or seeding a stock image with a
 checkpoint built from a different commit):** the loaded schema will _not_ resume. Either rebuild the

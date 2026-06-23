@@ -69,8 +69,12 @@ export const load = defineCommand({
       // pg_trgm extension exist before pg_restore recreates the ENSIndexer schema's trigram indexes.
       await writer.migrateEnsNodeSchema(ensnodeMigrationsDir());
 
-      // Fail-fast on conflicts unless --force.
+      // Fail-fast on conflicts unless --force. This includes the dump's own (staging) schema name:
+      // the restore drops it before renaming to the target, so a pre-existing schema with that name
+      // would be destroyed — guard it like the target.
       const targetSchemaExists = await writer.schemaExists(ensIndexerSchemaName);
+      const stagingSchemaCollides =
+        dumpSchemaName !== ensIndexerSchemaName && (await writer.schemaExists(dumpSchemaName));
       const existingMetadata = await writer.getEnsNodeMetadata({
         key: EnsNodeMetadataKeys.IndexingMetadataContext,
       });
@@ -78,6 +82,7 @@ export const load = defineCommand({
       if (!force) {
         const conflicts: string[] = [];
         if (targetSchemaExists) conflicts.push(`schema "${ensIndexerSchemaName}"`);
+        if (stagingSchemaCollides) conflicts.push(`staging schema "${dumpSchemaName}"`);
         if (existingMetadata) {
           conflicts.push(`ENSNode metadata entry for "${ensIndexerSchemaName}"`);
         }
