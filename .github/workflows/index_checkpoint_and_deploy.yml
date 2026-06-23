@@ -139,6 +139,7 @@ jobs:
               echo "SEPOLIA_API_SVC_ID=${{ secrets.GREEN_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
               echo "ALPHA_SEPOLIA_API_SVC_ID=${{ secrets.GREEN_ALPHA_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
               echo "V2_SEPOLIA_API_SVC_ID=${{ secrets.GREEN_V2_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSADMIN_SVC_ID=${{ secrets.GREEN_ENSADMIN_SVC_ID }}" >> "$GITHUB_ENV"
               ;;
             "blue")
               echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> "$GITHUB_ENV"
@@ -150,6 +151,7 @@ jobs:
               echo "SEPOLIA_API_SVC_ID=${{ secrets.BLUE_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
               echo "ALPHA_SEPOLIA_API_SVC_ID=${{ secrets.BLUE_ALPHA_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
               echo "V2_SEPOLIA_API_SVC_ID=${{ secrets.BLUE_V2_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSADMIN_SVC_ID=${{ secrets.BLUE_ENSADMIN_SVC_ID }}" >> "$GITHUB_ENV"
               ;;
             *) echo "Environment not recognized"; exit 1 ;;
           esac
@@ -217,6 +219,18 @@ jobs:
             ${{ env.SEPOLIA_API_SVC_ID }}
             ${{ env.ALPHA_SEPOLIA_API_SVC_ID }}
             ${{ env.V2_SEPOLIA_API_SVC_ID }}
+
+      - name: Update + redeploy ENSAdmin
+        # ENSAdmin is a single, namespace-agnostic dashboard — deploy it once here with the RC image
+        # (the existing blue/green deploy always deploys it; this workflow must too).
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: "ghcr.io/namehash/ensnode/ensadmin:${{ needs.resolve.outputs.image_tag }}"
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.ENSADMIN_SVC_ID }}
 
   # PHASE 2: index alpha + mainnet in parallel on one Cherry box, producing checkpoints to R2 and
   # refreshing the canonical R2 seed. The box ONLY produces (no load) so it is torn down promptly.
