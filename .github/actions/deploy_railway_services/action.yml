@@ -66,6 +66,8 @@ runs:
           echo "Redeploying $service_id"
           curl --request POST \
             --silent \
+            --fail \
+            --show-error \
             --url https://backboard.railway.app/graphql/v2 \
             --header 'Authorization: Bearer '"$RAILWAY_TOKEN" \
             --header 'Content-Type: application/json' \
