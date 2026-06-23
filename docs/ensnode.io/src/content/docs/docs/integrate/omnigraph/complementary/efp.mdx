@@ -2,13 +2,27 @@
 title: Ethereum Follow Protocol (EFP)
 description: Query the Ethereum Follow Protocol (EFP) onchain social graph through the ENS Omnigraph API by enabling the efp plugin.
 sidebar:
-  label: EFP
+  label: EFP (Social Graph)
 ---
 
-import { LinkCard } from "@astrojs/starlight/components";
+import { Aside, LinkCard } from "@astrojs/starlight/components";
 import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
 The [Ethereum Follow Protocol (EFP)](https://efp.app) is an onchain social graph for Ethereum accounts — a decentralized "who follows whom" primitive. Because EFP composes directly with ENS identity, the ENS Omnigraph API exposes it alongside ENS data, so you can read an account's follow graph **and** resolve each followed account's ENS name in a single query.
+
+## A complementary protocol for ENS
+
+<Aside type="note" title="Strengthen ENS's role as the identity layer for social graphs">
+A social graph is only useful when its nodes have human-readable identity, and ENS is the
+identity layer EFP already builds on. Harmonizing EFP with ENS in the ENS Omnigraph API lets ENS
+capture the network effects and market distribution of onchain social — every followed account
+resolves straight to an ENS name and profile.
+
+As with every complementary protocol, this harmonization is achieved through an optional ENSNode
+plugin at the API layer. Each operator of an ENSNode instance decides for themselves whether to
+activate the `efp` plugin, so ENS gains the integration without permanently committing to it.
+
+</Aside>
 
 ## Enabling the plugin
 

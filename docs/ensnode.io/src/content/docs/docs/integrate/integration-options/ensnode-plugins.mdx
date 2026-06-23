@@ -30,17 +30,17 @@ When new ENSNode plugins are created, it becomes possible for the [ENS Omnigraph
 
 [ENSIndexer](/docs/services/ensindexer) is a reference implementation of an [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) that implements multiple existing ENSNode Plugin specifications. The code for each plugin inside ENSIndexer is a reference implementation of that plugin's abstract specification. [The ENSNode Plugins implemented in ENSIndexer today](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins) are:
 
-| Plugin                  | Description                                                                                                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unigraph`              | Unified ENSv1 + ENSv2 data model with polymorphic entities                                                                                           |
-| `protocol-acceleration` | Accelerated lookups for ENS resolution                                                                                                               |
-| `subgraph`              | Legacy ENS Subgraph-compatible data model                                                                                                            |
-| `basenames`             | Basenames (`.base.eth`) subname indexing                                                                                                             |
-| `lineanames`            | Lineanames (`.linea.eth`) subname indexing                                                                                                           |
-| `threedns`              | 3DNS (`.box`) name indexing                                                                                                                          |
-| `registrars`            | Registration and renewal lifecycle tracking                                                                                                          |
-| `tokenscope`            | NFT tokenization of ENS names                                                                                                                        |
-| `efp`                   | [Ethereum Follow Protocol](https://efp.app/) onchain social graph (lists, records, tags) — see [EFP in the Omnigraph](/docs/integrate/omnigraph/efp) |
+| Plugin                  | Description                                                                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `unigraph`              | Unified ENSv1 + ENSv2 data model with polymorphic entities                                                                                                         |
+| `protocol-acceleration` | Accelerated lookups for ENS resolution                                                                                                                             |
+| `subgraph`              | Legacy ENS Subgraph-compatible data model                                                                                                                          |
+| `basenames`             | Basenames (`.base.eth`) subname indexing                                                                                                                           |
+| `lineanames`            | Lineanames (`.linea.eth`) subname indexing                                                                                                                         |
+| `threedns`              | 3DNS (`.box`) name indexing                                                                                                                                        |
+| `registrars`            | Registration and renewal lifecycle tracking                                                                                                                        |
+| `tokenscope`            | NFT tokenization of ENS names                                                                                                                                      |
+| `efp`                   | [Ethereum Follow Protocol](https://efp.app/) onchain social graph (lists, records, tags) — see [EFP in the Omnigraph](/docs/integrate/omnigraph/complementary/efp) |
 
 ## New Plugins
 
