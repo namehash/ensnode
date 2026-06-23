@@ -274,8 +274,21 @@ jobs:
       - name: Setup Node + pnpm + install dependencies
         uses: ./.github/actions/setup_node_environment
 
-      - name: Install rclone
-        run: sudo apt-get update && sudo apt-get install -y rclone
+      - name: Install rclone + PostgreSQL 17 client (the box dumps with pg17)
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y rclone curl ca-certificates lsb-release
+          # PGDG repo for postgresql-client-17 (the Cherry box produces pg17 custom-format dumps; an
+          # older pg_restore cannot read them). pg_wrapper then resolves `pg_restore` to v17.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          pg_restore --version
 
       - name: Resolve target Postgres URL
         run: |

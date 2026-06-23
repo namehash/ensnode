@@ -85,11 +85,14 @@ acquire_lock() {
     held="$(rclone cat "$p" 2>/dev/null | head -1)"
     held_ts="${held%% *}"
     held_owner="${held#* }"
-    if [[ "$held_ts" =~ ^[0-9]+$ ]] && [ $((now - held_ts)) -lt "$LOCK_TTL_SECONDS" ] &&
-      [ "$held_owner" != "$LOCK_OWNER" ]; then
-      die "R2 lock held for '$key' (age $((now - held_ts))s < TTL, owner $held_owner). Another checkpoint run in progress?"
+    # Compute age only when the timestamp is a plain integer; a malformed/empty payload (age=-1) is
+    # treated as stale and broken, never crashing the arithmetic under `set -e`.
+    local age=-1
+    [[ "$held_ts" =~ ^[0-9]+$ ]] && age=$((now - held_ts))
+    if [ "$age" -ge 0 ] && [ "$age" -lt "$LOCK_TTL_SECONDS" ] && [ "$held_owner" != "$LOCK_OWNER" ]; then
+      die "R2 lock held for '$key' (age ${age}s < TTL, owner $held_owner). Another checkpoint run in progress?"
     fi
-    [ "$held_owner" = "$LOCK_OWNER" ] || warn "breaking stale R2 lock for '$key' (age $((now - held_ts))s)"
+    [ "$held_owner" = "$LOCK_OWNER" ] || warn "breaking stale R2 lock for '$key' (age ${age}s)"
   fi
   printf '%s %s\n' "$now" "$LOCK_OWNER" | rclone rcat "$p"
   # Read back: if another writer raced us, the file now holds their owner — bail rather than proceed.

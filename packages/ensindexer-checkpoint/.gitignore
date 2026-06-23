@@ -2,3 +2,4 @@
 scripts/config.sh
 scripts/.box-id
 scripts/.box-host
+scripts/.known_hosts

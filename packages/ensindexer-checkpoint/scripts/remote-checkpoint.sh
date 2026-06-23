@@ -37,7 +37,10 @@ read -ra CONFIG_LIST <<<"$CONFIGS"
 SUFFIX=""
 [ "$MODE" = "end-block" ] && SUFFIX="-t${TIMESTAMP}"
 
-box_schema() { echo "ckpt_${1}_${SHA}${SUFFIX}"; }
+# On-box (staging) schema name. Uses a SHORT sha so it stays under Postgres' 63-byte identifier limit
+# even in end-block mode (full sha + `-t<timestamp>` would overflow and silently truncate). This name
+# is box-local only — it does not affect build_id or the R2 checkpoint object name (which keep the full sha).
+box_schema() { echo "ckpt_${1}_${SHA:0:12}${SUFFIX}"; }
 ckpt_name() { checkpoint_object "$1" "$SHA" "$SUFFIX"; } # <config>-<sha>[-t<ts>].dump
 
 LOCK_KEY="${CONFIGS// /+}-${SHA}${SUFFIX}"

@@ -104,7 +104,7 @@ considers incompatible, so it's a deliberate operator action, not part of the pi
 
 ## R2 layout
 
-```
+```text
 <R2_CHECKPOINTS_BUCKET>/
   seed/ponder_sync.dump                       # canonical zero-RPC cache (refreshed by alpha runs)
   checkpoints/<config>-<sha>[-t<ts>].dump      # sha-keyed checkpoint + .metadata.json sidecar

@@ -27,6 +27,7 @@ require curl
 
 : "${MODE:?}" "${CONFIG:?}" "${SHA:?}" "${SCHEMA:?}"
 : "${INDEXER_PORT:?}" "${RAINBOW_PORT:?}" "${RAINBOW_DATA_DIR:?}"
+: "${ENSDB_URL:?}" # box-local postgres (default from config.example.sh); feeds the indexer's env below
 
 # ── config identity (the single source of truth for build_id parity) ─────────
 # Prefer the config shipped alongside the scripts (from the orchestrating branch) over the one in the
