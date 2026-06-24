@@ -14,7 +14,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /// - https://ensnode.io/ensrainbow#the-problem-unknown-labels
 /// - https://ensnode.io/ensrainbow/concepts/unknown-labels
 ///
-/// ENSNameHealer is the sole onchain outlet for publishing discovered label preimages.
+/// ENSNameHealer is onchain tool for publishing discovered labels.
 /// Healing happens in indexers; this contract only emits `LabelPublished` events.
 ///
 /// @dev Upgradeable via UUPS. Storage layout must be preserved across upgrades.
@@ -35,7 +35,6 @@ contract ENSNameHealer is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     event PublisherSet(address indexed publisher);
 
     error NotPublisher();
-    error ZeroAddress();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -44,8 +43,6 @@ contract ENSNameHealer is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /// @param owner Address to assign ownership.
     function initialize(address owner) external initializer {
-        if (owner == address(0)) revert ZeroAddress();
-
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
     }
