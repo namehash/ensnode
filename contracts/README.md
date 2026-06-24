@@ -10,6 +10,6 @@ Note that this is not a directory of all ENS contracts. For general directories 
 
 ## Contracts
 
-| Directory          | Contract       | Purpose                                                                                             |
-| ------------------ | -------------- | --------------------------------------------------------------------------------------------------- |
+| Directory          | Contract        | Purpose                                                                                             |
+| ------------------ | --------------- | --------------------------------------------------------------------------------------------------- |
 | `ens-name-healer/` | `ENSNameHealer` | Enable healed labels in ENS names to automatically propagate to all decentralized ENSNode instances |

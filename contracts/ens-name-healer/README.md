@@ -11,12 +11,12 @@ Some ENS registry contracts emit events containing only a labelhash, without the
 
 ## Terminology
 
-| Term | Meaning |
-| ---- | ------- |
-| **LiteralLabel** | Any possible string published onchain. Not limited to ENSIP-15 labels. See [terminology](https://ensnode.io/docs/reference/terminology). |
-| **Discoverer** | Offchain actor who finds a label preimage and submits it to ENSRainbowBeam. May receive onchain attribution via `LabelPublished`. |
-| **Publisher** | The single address authorized to call `publishLabel` / `publishLabels` on this contract (typically ENSRainbowBeam). |
-| **LabelPublished** | Onchain event emitted by this contract. Indexers consume it to heal unknown labels. |
+| Term               | Meaning                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **LiteralLabel**   | Any possible string published onchain. Not limited to ENSIP-15 labels. See [terminology](https://ensnode.io/docs/reference/terminology). |
+| **Discoverer**     | Offchain actor who finds a label preimage and submits it to ENSRainbowBeam. May receive onchain attribution via `LabelPublished`.        |
+| **Publisher**      | The single address authorized to call `publishLabel` / `publishLabels` on this contract (typically ENSRainbowBeam).                      |
+| **LabelPublished** | Onchain event emitted by this contract. Indexers consume it to heal unknown labels.                                                      |
 
 Discoverers submit labels to ENSRainbowBeam (via ensrainbow.io, client libraries, or direct API calls). ENSRainbowBeam publishes productive labels through the sole publisher address. This contract is not where community submissions land — it is where filtered labels are emitted for all indexers.
 
