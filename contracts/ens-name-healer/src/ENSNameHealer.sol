@@ -14,24 +14,43 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /// - https://ensnode.io/ensrainbow#the-problem-unknown-labels
 /// - https://ensnode.io/ensrainbow/concepts/unknown-labels
 ///
-/// ENSNameHealer is onchain tool for publishing discovered labels.
-/// Healing happens in indexers; this contract only emits `LabelPublished` events.
+/// ENSNameHealer does not heal labels itself. It emits `LabelPublished` events that
+/// indexers consume to heal unknown labels in indexed ENS name data.
+///
+/// ## Ecosystem
+///
+/// - **Discoverers** submit candidate label preimages to ENSRainbowBeam (offchain).
+///   A discoverer address may be attributed when labels are published onchain.
+/// - **ENSRainbowBeam** filters submissions and calls this contract as the sole publisher.
+/// - **Publisher** — the single `publisher` address enforced by this contract.
+/// - **Indexers** consume `LabelPublished` events and update indexed data.
+///
+/// ## Responsibilities
+///
+/// 1. Discoverers find preimages of encoded labelhashes in indexed ENS data.
+/// 2. Discoverers submit candidates to ENSRainbowBeam with optional discoverer attribution.
+/// 3. ENSRainbowBeam minimizes unproductive publishes that would not heal indexed labels.
+/// 4. ENSNameHealer enforces single-publisher access and emits all published labels.
+/// 5. Indexers interpret each LiteralLabel, handle duplicates idempotently, and retain
+///    published labels so a label indexed at time T may heal additional names at T+N.
+///
+/// ## Design
+///
+/// A single publisher is enforced to minimize duplicate events and coordination overhead.
+/// Only one ENSRainbowBeam instance should publish across the ENS ecosystem. To pause
+/// publishing, the owner sets `publisher` to the zero address.
 ///
 /// @dev Upgradeable via UUPS. Storage layout must be preserved across upgrades.
-///
-/// Design: a single publisher address is enforced at a time. This minimizes duplicate
-/// `LabelPublished` events indexers must consume and avoids coordination complexity
-/// across multiple publishers. Only one ENSRainbowBeam instance, acting as publisher,
-/// is needed across the ENS ecosystem. To pause publishing, the owner sets the
-/// publisher to the zero address.
 contract ENSNameHealer is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     /// @notice Sole address permitted to publish labels onchain.
     address public publisher;
 
-    /// @param literalLabel Any possible string (a LiteralLabel); not limited to ENSIP-15 labels.
-    /// @param discoverer Optional attribution for who discovered the label. `address(0)` when absent.
+    /// @notice A LiteralLabel was published for indexer consumption.
+    /// @param literalLabel Any possible string; see https://ensnode.io/docs/reference/terminology
+    /// @param discoverer Optional discoverer attribution. `address(0)` when absent.
     event LabelPublished(string literalLabel, address indexed discoverer);
 
+    /// @notice The publisher address was updated.
     event PublisherSet(address indexed publisher);
 
     error NotPublisher();
@@ -53,20 +72,24 @@ contract ENSNameHealer is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         emit PublisherSet(newPublisher);
     }
 
+    /// @notice Publish a LiteralLabel without discoverer attribution.
     function publishLabel(string calldata literalLabel) external onlyPublisher {
         emit LabelPublished(literalLabel, address(0));
     }
 
+    /// @notice Publish a LiteralLabel with discoverer attribution.
     function publishLabel(string calldata literalLabel, address discoverer) external onlyPublisher {
         emit LabelPublished(literalLabel, discoverer);
     }
 
+    /// @notice Publish multiple LiteralLabels without discoverer attribution.
     function publishLabels(string[] calldata literalLabels) external onlyPublisher {
         for (uint256 i = 0; i < literalLabels.length; i++) {
             emit LabelPublished(literalLabels[i], address(0));
         }
     }
 
+    /// @notice Publish multiple LiteralLabels with shared discoverer attribution.
     function publishLabels(string[] calldata literalLabels, address discoverer) external onlyPublisher {
         for (uint256 i = 0; i < literalLabels.length; i++) {
             emit LabelPublished(literalLabels[i], discoverer);

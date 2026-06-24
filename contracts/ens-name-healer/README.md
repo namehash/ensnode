@@ -9,19 +9,32 @@ Some ENS registry contracts emit events containing only a labelhash, without the
 
 `ENSNameHealer` is the sole onchain publisher of discovered label preimages. Healing happens in indexers when they consume `LabelPublished` events — this contract does not heal anything itself.
 
-## Ecosystem roles
+## Terminology
 
-1. **Discoverers** — anyone who finds the preimage of an encoded labelhash in indexed ENS data and submits it to ENSRainbowBeam (optionally with attribution).
-2. **ENSRainbowBeam** — filters submissions and publishes productive labels through the sole publisher address.
-3. **Publisher** — the single address authorized to call `publishLabel` / `publishLabels` on this contract.
-4. **ENSNameHealer** — enforces the single-publisher rule and emits `LabelPublished` events.
-5. **Indexers** — consume events, compute labelhashes, and heal unknown labels in indexed data.
+| Term | Meaning |
+| ---- | ------- |
+| **LiteralLabel** | Any possible string published onchain. Not limited to ENSIP-15 labels. See [terminology](https://ensnode.io/docs/reference/terminology). |
+| **Discoverer** | Offchain actor who finds a label preimage and submits it to ENSRainbowBeam. May receive onchain attribution via `LabelPublished`. |
+| **Publisher** | The single address authorized to call `publishLabel` / `publishLabels` on this contract (typically ENSRainbowBeam). |
+| **LabelPublished** | Onchain event emitted by this contract. Indexers consume it to heal unknown labels. |
+
+Discoverers submit labels to ENSRainbowBeam (via ensrainbow.io, client libraries, or direct API calls). ENSRainbowBeam publishes productive labels through the sole publisher address. This contract is not where community submissions land — it is where filtered labels are emitted for all indexers.
+
+## Ecosystem responsibilities
+
+1. **Discoverers** find preimages of encoded labelhashes in indexed ENS name data.
+2. **Discoverers** submit candidates to ENSRainbowBeam with optional discoverer attribution.
+3. **ENSRainbowBeam** minimizes publishes that would not heal one or more already-indexed labels.
+4. **ENSNameHealer** enforces single-publisher access and emits all published LiteralLabels.
+5. **Indexers** interpret each LiteralLabel, handle duplicate publishes gracefully, and retain published labels so a label indexed at time T may heal additional names at T+N.
 
 To pause publishing, the owner sets the publisher to the zero address via `setPublisher`.
 
 ## LiteralLabel
 
-All label inputs are `LiteralLabel` values: any possible string, not limited to ENSIP-15 normalized labels. The empty string, strings containing `.`, null bytes, and unnormalizable sequences are all valid.
+All label inputs are LiteralLabel values: any possible string, not limited to ENSIP-15 normalized labels. The empty string, strings containing `.`, null bytes, and unnormalizable sequences are all valid.
+
+ENSRainbowBeam should currently accept only normalized labels for submission. Unnormalized candidates are discarded until indexers can distinguish unknown from unnormalized labels in indexed data.
 
 ## Prerequisites
 
