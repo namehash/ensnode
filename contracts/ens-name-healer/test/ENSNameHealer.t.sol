@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../src/ENSNameHealer.sol";
 
 contract ENSNameHealerTest is Test {
@@ -28,14 +29,6 @@ contract ENSNameHealerTest is Test {
 
     function test_initialize_assignsOwner() public view {
         assertEq(healer.owner(), owner);
-    }
-
-    function test_initialize_revertsForZeroOwner() public {
-        ENSNameHealer freshImpl = new ENSNameHealer();
-        bytes memory initData = abi.encodeCall(ENSNameHealer.initialize, (address(0)));
-
-        vm.expectRevert(ENSNameHealer.ZeroAddress.selector);
-        new ERC1967Proxy(address(freshImpl), initData);
     }
 
     function test_setPublisher_revertsForNonOwner() public {

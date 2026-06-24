@@ -10,9 +10,13 @@ on:
       - main
     paths:
       - "contracts/**"
+      - ".github/workflows/contracts_ci.yml"
+      - ".gitmodules"
   pull_request:
     paths:
       - "contracts/**"
+      - ".github/workflows/contracts_ci.yml"
+      - ".gitmodules"
 
 jobs:
   discover:
@@ -60,3 +64,7 @@ jobs:
       - name: Test
         working-directory: ${{ matrix.contract }}
         run: forge test -vvv
+
+      - name: Gas snapshot
+        working-directory: ${{ matrix.contract }}
+        run: forge snapshot --check

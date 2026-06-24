@@ -35,10 +35,12 @@ git submodule update --init --recursive contracts/
 
 ## Environment
 
-Copy `.env.example` and fill in the values:
+Copy `.env.example` and fill in the values. Variables are exported so `source .env` passes them to forge:
 
 ```bash
 cp .env.example .env
+# edit .env, then:
+source .env
 ```
 
 ## Development
@@ -141,38 +143,33 @@ cast logs --rpc-url http://localhost:8545 \
 Deploy a fresh proxy after contract API changes; prior Sepolia deployments used the old ABI.
 
 ```bash
-source .env && forge script script/Deploy.s.sol \
+source .env
+forge script script/Deploy.s.sol \
   --rpc-url sepolia \
   --private-key $DEPLOYER_PRIVATE_KEY \
   --broadcast \
   --verify
 ```
 
-Then set the publisher. Requires `PROXY_ADDRESS` and `PUBLISHER_ADDRESS`:
+Then set the publisher (`PROXY_ADDRESS` and `PUBLISHER_ADDRESS` must be set in `.env`):
 
 ```bash
+source .env
 forge script script/SetPublisher.s.sol \
   --rpc-url sepolia \
   --private-key $DEPLOYER_PRIVATE_KEY \
   --broadcast
 ```
 
-To pause publishing:
-
-```bash
-PUBLISHER_ADDRESS=0x0000000000000000000000000000000000000000 \
-forge script script/SetPublisher.s.sol \
-  --rpc-url sepolia \
-  --private-key $DEPLOYER_PRIVATE_KEY \
-  --broadcast
-```
+To pause publishing, set `PUBLISHER_ADDRESS=0x0000000000000000000000000000000000000000` in `.env` and run `SetPublisher.s.sol` again.
 
 ### Mainnet
 
 Always do a dry-run first (drop `--broadcast`) to simulate the deployment and review expected transactions:
 
 ```bash
-source .env && forge script script/Deploy.s.sol \
+source .env
+forge script script/Deploy.s.sol \
   --rpc-url mainnet \
   --private-key $DEPLOYER_PRIVATE_KEY
 ```
@@ -180,7 +177,8 @@ source .env && forge script script/Deploy.s.sol \
 Then broadcast:
 
 ```bash
-source .env && forge script script/Deploy.s.sol \
+source .env
+forge script script/Deploy.s.sol \
   --rpc-url mainnet \
   --private-key $DEPLOYER_PRIVATE_KEY \
   --broadcast \
