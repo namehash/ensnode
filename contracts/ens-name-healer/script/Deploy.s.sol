@@ -3,9 +3,9 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "../src/ENSLabelHealer.sol";
+import "../src/ENSNameHealer.sol";
 
-/// @notice Deploys ENSLabelHealer behind an ERC-1967 / UUPS proxy.
+/// @notice Deploys ENSNameHealer behind an ERC-1967 / UUPS proxy.
 ///
 /// Required environment variables:
 ///   OWNER_ADDRESS      — address to assign ownership on the proxy.
@@ -18,12 +18,13 @@ import "../src/ENSLabelHealer.sol";
 contract Deploy is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
+        require(owner != address(0), "OWNER_ADDRESS must not be zero");
 
         vm.startBroadcast();
 
-        ENSLabelHealer impl = new ENSLabelHealer();
-        bytes memory initData = abi.encodeCall(ENSLabelHealer.initialize, (owner));
-        ENSLabelHealer proxy = ENSLabelHealer(address(new ERC1967Proxy(address(impl), initData)));
+        ENSNameHealer impl = new ENSNameHealer();
+        bytes memory initData = abi.encodeCall(ENSNameHealer.initialize, (owner));
+        ENSNameHealer proxy = ENSNameHealer(address(new ERC1967Proxy(address(impl), initData)));
 
         vm.stopBroadcast();
 
