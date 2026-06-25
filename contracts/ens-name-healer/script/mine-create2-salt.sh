@@ -10,7 +10,7 @@ if [[ -f .env ]]; then
 fi
 
 : "${OWNER_ADDRESS:?Set OWNER_ADDRESS in .env}"
-: "${CREATE2_PREFIX:=1abe1}"
+: "${CREATE2_PREFIX:=1abe15}"
 
 forge script script/ComputeCreate2.s.sol -q
 

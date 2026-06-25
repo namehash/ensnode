@@ -167,11 +167,11 @@ forge script script/Deploy.s.sol \
   --verify
 ```
 
-CREATE2 vanity deploy (proxy address prefix via `CREATE2_PREFIX`, default `1abe1`):
+CREATE2 vanity deploy (proxy address prefix via `CREATE2_PREFIX`, default `1abe15`):
 
 ```bash
 source .env
-export CREATE2_PREFIX=1abe1   # hex without 0x; change as needed
+export CREATE2_PREFIX=1abe15   # hex without 0x; change as needed
 ./script/mine-create2-salt.sh  # prints CREATE2_SALT; add to .env
 source .env
 
