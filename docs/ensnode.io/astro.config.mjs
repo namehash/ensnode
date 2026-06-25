@@ -14,7 +14,28 @@ export default defineConfig({
   site: "https://ensnode.io",
   trailingSlash: "never",
   integrations: [mermaid(), starlight(), sitemap(), react(), mdx(), icon()],
+  server: {
+    // for production build
+    headers: {
+      "cross-origin-opener-policy": "same-origin",
+      "cross-origin-embedder-policy": "credentialless",
+    },
+  },
   vite: {
+    plugins: [
+      tailwindcss(),
+      {
+        name: "cross-origin-isolation-headers",
+        configureServer(server) {
+          server.middlewares.use((_req, res, next) => {
+            // for development build
+            res.setHeader("cross-origin-embedder-policy", "credentialless");
+            res.setHeader("cross-origin-opener-policy", "same-origin");
+            next();
+          });
+        },
+      },
+    ],
     resolve: {
       alias: {
         "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
@@ -30,7 +51,6 @@ export default defineConfig({
     ssr: {
       noExternal: ["@namehash/namehash-ui"],
     },
-    plugins: [tailwindcss()],
   },
   redirects: {
     "/docs": "/docs/integrate",
