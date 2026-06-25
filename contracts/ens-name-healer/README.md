@@ -156,6 +156,8 @@ cast logs --rpc-url http://localhost:8545 \
 
 Deploy a fresh proxy after contract API changes; prior Sepolia deployments used the old ABI.
 
+Standard deploy:
+
 ```bash
 source .env
 forge script script/Deploy.s.sol \
@@ -164,6 +166,23 @@ forge script script/Deploy.s.sol \
   --broadcast \
   --verify
 ```
+
+CREATE2 vanity deploy (proxy address prefix via `CREATE2_PREFIX`, default `1abe1`):
+
+```bash
+source .env
+export CREATE2_PREFIX=1abe1   # hex without 0x; change as needed
+./script/mine-create2-salt.sh  # prints CREATE2_SALT; add to .env
+source .env
+
+forge script script/DeployCreate2.s.sol \
+  --rpc-url sepolia \
+  --private-key $DEPLOYER_PRIVATE_KEY \
+  --broadcast \
+  --verify
+```
+
+Mining depends on prefix length (`cast create2 --starts-with`). Re-run `mine-create2-salt.sh` whenever `OWNER_ADDRESS`, `PUBLISHER_ADDRESS`, or contract bytecode changes.
 
 Then set the publisher if it was not set at deploy (`PROXY_ADDRESS` and `PUBLISHER_ADDRESS` in `.env`):
 

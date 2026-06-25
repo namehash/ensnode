@@ -1,3 +1,4 @@
+ENSNameHealerCreate2Test:test_create2_deployProxyWithVanityPrefix() (gas: 1210360)
 ENSNameHealerTest:test_initialize_assignsOwner() (gas: 14734)
 ENSNameHealerTest:test_initialize_setsPublisher() (gas: 14762)
 ENSNameHealerTest:test_publishLabel_allowsDuplicates() (gas: 29001)
