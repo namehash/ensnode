@@ -99,9 +99,9 @@ Commit the `.gas-snapshot` file to track gas changes across PRs.
 
 ## Deployment
 
-The deploy script (`script/Deploy.s.sol`) deploys `ENSNameHealer` behind a UUPS proxy. It reads `OWNER_ADDRESS` from the environment.
+The deploy script (`script/Deploy.s.sol`) deploys `ENSNameHealer` behind a UUPS proxy. It reads `OWNER_ADDRESS` and optional `PUBLISHER_ADDRESS` from the environment.
 
-The set-publisher script (`script/SetPublisher.s.sol`) assigns the publisher on an existing proxy.
+The set-publisher script (`script/SetPublisher.s.sol`) updates the publisher on an existing proxy.
 
 ### Local devnet (Anvil)
 
@@ -115,13 +115,14 @@ Deploy using Anvil's pre-funded account 0:
 
 ```bash
 OWNER_ADDRESS=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
+PUBLISHER_ADDRESS=0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \
 forge script script/Deploy.s.sol \
   --rpc-url http://localhost:8545 \
   --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
   --broadcast
 ```
 
-Set the publisher:
+To set or change the publisher after deployment:
 
 ```bash
 PROXY_ADDRESS=<proxy address from deployment> \
@@ -164,7 +165,7 @@ forge script script/Deploy.s.sol \
   --verify
 ```
 
-Then set the publisher (`PROXY_ADDRESS` and `PUBLISHER_ADDRESS` must be set in `.env`):
+Then set the publisher if it was not set at deploy (`PROXY_ADDRESS` and `PUBLISHER_ADDRESS` in `.env`):
 
 ```bash
 source .env

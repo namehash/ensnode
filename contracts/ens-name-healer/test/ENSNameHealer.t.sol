@@ -3,7 +3,6 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../src/ENSNameHealer.sol";
 
 contract ENSNameHealerTest is Test {
@@ -19,16 +18,17 @@ contract ENSNameHealerTest is Test {
 
     function setUp() public {
         impl = new ENSNameHealer();
-        bytes memory initData = abi.encodeCall(ENSNameHealer.initialize, (owner));
+        bytes memory initData = abi.encodeCall(ENSNameHealer.initialize, (owner, publisher));
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         healer = ENSNameHealer(address(proxy));
-
-        vm.prank(owner);
-        healer.setPublisher(publisher);
     }
 
     function test_initialize_assignsOwner() public view {
         assertEq(healer.owner(), owner);
+    }
+
+    function test_initialize_setsPublisher() public view {
+        assertEq(healer.publisher(), publisher);
     }
 
     function test_setPublisher_revertsForNonOwner() public {
@@ -53,12 +53,14 @@ contract ENSNameHealerTest is Test {
     }
 
     function test_publishLabel_revertsWhenPublisherUnset() public {
-        vm.prank(owner);
-        healer.setPublisher(address(0));
+        ENSNameHealer freshImpl = new ENSNameHealer();
+        bytes memory initData = abi.encodeCall(ENSNameHealer.initialize, (owner, address(0)));
+        ERC1967Proxy proxy = new ERC1967Proxy(address(freshImpl), initData);
+        ENSNameHealer pausedHealer = ENSNameHealer(address(proxy));
 
         vm.prank(publisher);
         vm.expectRevert(ENSNameHealer.NotPublisher.selector);
-        healer.publishLabel("vitalik");
+        pausedHealer.publishLabel("vitalik");
     }
 
     function test_publishLabel_emitsLabelPublished() public {

@@ -61,9 +61,12 @@ contract ENSNameHealer is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /// @param owner Address to assign ownership.
-    function initialize(address owner) external initializer {
+    /// @param initialPublisher Initial publisher address. Use `address(0)` to start paused.
+    function initialize(address owner, address initialPublisher) external initializer {
         __Ownable_init(owner);
         __UUPSUpgradeable_init();
+        publisher = initialPublisher;
+        emit PublisherSet(initialPublisher);
     }
 
     /// @notice Assign the sole publisher. Set to `address(0)` to pause publishing.
