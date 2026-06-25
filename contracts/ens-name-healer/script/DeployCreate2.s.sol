@@ -13,6 +13,7 @@ import "../src/ENSNameHealer.sol";
 contract DeployCreate2 is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
+        require(owner != address(0), "OWNER_ADDRESS must not be zero");
         address publisher = vm.envOr("PUBLISHER_ADDRESS", address(0));
         bytes32 implSalt = vm.envOr("CREATE2_IMPL_SALT", bytes32(0));
         bytes32 proxySalt = vm.envBytes32("CREATE2_SALT");
