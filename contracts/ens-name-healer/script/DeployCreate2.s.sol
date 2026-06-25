@@ -27,11 +27,21 @@ contract DeployCreate2 is Script {
 
         vm.startBroadcast();
 
-        address impl = Create2Deploy.deploy(implSalt, implInitCode);
-        require(impl == implPredicted, "impl address mismatch");
+        address impl = implPredicted;
+        if (implPredicted.code.length == 0) {
+            impl = Create2Deploy.deploy(implSalt, implInitCode);
+            require(impl == implPredicted, "impl address mismatch");
+        } else {
+            console.log("Implementation already deployed, skipping CREATE2");
+        }
 
-        address proxy = Create2Deploy.deploy(proxySalt, proxyInitCode);
-        require(proxy == proxyPredicted, "proxy address mismatch");
+        address proxy = proxyPredicted;
+        if (proxyPredicted.code.length == 0) {
+            proxy = Create2Deploy.deploy(proxySalt, proxyInitCode);
+            require(proxy == proxyPredicted, "proxy address mismatch");
+        } else {
+            console.log("Proxy already deployed, skipping CREATE2");
+        }
 
         vm.stopBroadcast();
 
