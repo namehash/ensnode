@@ -57,7 +57,7 @@ If you see frequent RPC errors:
 - **Spread load across providers.** [Configure multiple RPC endpoints](/docs/services/ensindexer/usage/configuration) for each indexed chain.
 - **Reduce the number of active plugins or chains.** Fewer plugins means fewer events to fetch.
 
-## ENSIndexer crashes or fails with database timeouts
+## ENSIndexer runtime tuning issues
 
 When your ENSIndexer instance has multiple plugins active, it may need extra runtime tuning.
 
@@ -115,7 +115,7 @@ PONDER_STATEMENT_TIMEOUT=600000
 
 This gives enough time, up to 10 minutes, for long-running internal queries on large datasets.
 
-These overrides are typically only needed for for ENSIndexer instances which are indexing multiple chains.
+These overrides are typically only needed for ENSIndexer instances that are indexing multiple chains.
 
 ## Next steps
 
