@@ -47,8 +47,11 @@ jobs:
 
     steps:
       - name: Require version or tag
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          if [ -z "${{ inputs.version }}" ] && [ -z "${{ inputs.tag }}" ]; then
+          if [ -z "$INPUT_VERSION" ] && [ -z "$INPUT_TAG" ]; then
             echo "Provide at least one of: version (schema names) or tag (image tag)." >&2
             exit 1
           fi
