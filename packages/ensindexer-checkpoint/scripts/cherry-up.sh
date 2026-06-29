@@ -21,9 +21,19 @@ body=$(jq -n \
   --arg plan "$CHERRY_PLAN" --arg region "$CHERRY_REGION" --arg image "$CHERRY_IMAGE" \
   --arg hostname "$BOX_HOSTNAME" --argjson ssh "[$CHERRY_SSH_KEY_ID]" \
   '{plan:$plan, region:$region, image:$image, hostname:$hostname, ssh_keys:$ssh}')
-resp=$(curl -fsS "${AUTH[@]}" -X POST "$API/projects/$CHERRY_PROJECT_ID/servers" -d "$body")
+# Capture the HTTP status alongside the body (no -f) so an auth failure reports as an actionable
+# credential error rather than a bare `curl (22)`.
+resp=$(curl -sS -w $'\n%{http_code}' "${AUTH[@]}" -X POST "$API/projects/$CHERRY_PROJECT_ID/servers" -d "$body") \
+  || die "Cherry API request failed (network/curl error)"
+code=${resp##*$'\n'}
+resp=${resp%$'\n'*}
+case "$code" in
+  2*) ;;
+  401 | 403) die "Cherry API auth failed (HTTP $code): the CHERRY_API_TOKEN secret is invalid or expired. Generate a fresh token in the Cherry Servers dashboard and update it (\`gh secret set CHERRY_API_TOKEN\`). Response: $resp" ;;
+  *) die "Cherry deploy failed (HTTP $code): $resp" ;;
+esac
 id=$(echo "$resp" | jq -r '.id // empty')
-[ -n "$id" ] || die "deploy failed: $resp"
+[ -n "$id" ] || die "deploy returned HTTP $code but no server id: $resp"
 echo "$id" >"$LIB_DIR/.box-id"
 log "server id $id provisioning; waiting for active + public IP (bare metal: a few minutes)"
 
