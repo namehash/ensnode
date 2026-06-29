@@ -16,24 +16,29 @@ if [ -n "$(box_id)" ]; then
   exit 0
 fi
 
-log "deploying Cherry $CHERRY_PLAN in $CHERRY_REGION ($CHERRY_IMAGE)"
-body=$(jq -n \
-  --arg plan "$CHERRY_PLAN" --arg region "$CHERRY_REGION" --arg image "$CHERRY_IMAGE" \
-  --arg hostname "$BOX_HOSTNAME" --argjson ssh "[$CHERRY_SSH_KEY_ID]" \
-  '{plan:$plan, region:$region, image:$image, hostname:$hostname, ssh_keys:$ssh}')
-# Capture the HTTP status alongside the body (no -f) so an auth failure reports as an actionable
-# credential error rather than a bare `curl (22)`.
-resp=$(curl -sS -w $'\n%{http_code}' "${AUTH[@]}" -X POST "$API/projects/$CHERRY_PROJECT_ID/servers" -d "$body") \
-  || die "Cherry API request failed (network/curl error)"
-code=${resp##*$'\n'}
-resp=${resp%$'\n'*}
-case "$code" in
-  2*) ;;
-  401 | 403) die "Cherry API auth failed (HTTP $code): the CHERRY_API_TOKEN secret is invalid or expired. Generate a fresh token in the Cherry Servers dashboard and update it (\`gh secret set CHERRY_API_TOKEN\`). Response: $resp" ;;
-  *) die "Cherry deploy failed (HTTP $code): $resp" ;;
-esac
-id=$(echo "$resp" | jq -r '.id // empty')
-[ -n "$id" ] || die "deploy returned HTTP $code but no server id: $resp"
+# CHERRY_REGION may be a space-separated fallback list: bare-metal stock is region-specific and
+# transient, so an out-of-stock region rolls over to the next one before giving up.
+id=""
+for region in $CHERRY_REGION; do
+  log "deploying Cherry $CHERRY_PLAN in $region ($CHERRY_IMAGE)"
+  body=$(jq -n \
+    --arg plan "$CHERRY_PLAN" --arg region "$region" --arg image "$CHERRY_IMAGE" \
+    --arg hostname "$BOX_HOSTNAME" --argjson ssh "[$CHERRY_SSH_KEY_ID]" \
+    '{plan:$plan, region:$region, image:$image, hostname:$hostname, ssh_keys:$ssh}')
+  # Capture the HTTP status alongside the body (no -f) so an auth failure reports as an actionable
+  # credential error rather than a bare `curl (22)`.
+  resp=$(curl -sS -w $'\n%{http_code}' "${AUTH[@]}" -X POST "$API/projects/$CHERRY_PROJECT_ID/servers" -d "$body") \
+    || die "Cherry API request failed (network/curl error)"
+  code=${resp##*$'\n'}
+  resp=${resp%$'\n'*}
+  case "$code" in
+    2*) id=$(echo "$resp" | jq -r '.id // empty'); break ;;
+    401 | 403) die "Cherry API auth failed (HTTP $code): the CHERRY_API_TOKEN secret is invalid or expired. Generate a fresh token in the Cherry Servers dashboard and update it (\`gh secret set CHERRY_API_TOKEN\`). Response: $resp" ;;
+    400) warn "region $region unavailable (HTTP 400): $(echo "$resp" | jq -r '.message // .' 2>/dev/null); trying next region"; continue ;;
+    *) die "Cherry deploy failed (HTTP $code) in $region: $resp" ;;
+  esac
+done
+[ -n "$id" ] || die "Cherry deploy failed: no region in '$CHERRY_REGION' had $CHERRY_PLAN in stock"
 echo "$id" >"$LIB_DIR/.box-id"
 log "server id $id provisioning; waiting for active + public IP (bare metal: a few minutes)"
 

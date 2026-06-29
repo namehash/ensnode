@@ -9,9 +9,11 @@
 # ── Cherry Servers (the disposable build box) ────────────────────────────────
 export CHERRY_API_TOKEN="${CHERRY_API_TOKEN:-}"     # Cherry API token (secret)
 export CHERRY_PROJECT_ID="${CHERRY_PROJECT_ID:-}"   # numeric project id (secret)
-# Plan/region are hardcoded (not secrets) — a single bare-metal SKU/region for the checkpoint box.
+# Plan/region are hardcoded (not secrets) — the bare-metal SKU + a space-separated region fallback
+# list (cherry-up.sh tries each until one has stock). amd-ryzen-9950x stock is region-specific and
+# transient; check live availability at https://api.cherryservers.com/v1/plans/amd-ryzen-9950x.
 export CHERRY_PLAN="${CHERRY_PLAN:-amd-ryzen-9950x}"
-export CHERRY_REGION="${CHERRY_REGION:-US-Chicago}"
+export CHERRY_REGION="${CHERRY_REGION:-SE-Stockholm US-Chicago LT-Siauliai DE-Frankfurt NL-Amsterdam JP-Tokyo}"
 export CHERRY_IMAGE="${CHERRY_IMAGE:-ubuntu_22_04}" # OS image slug
 export CHERRY_SSH_KEY_ID="${CHERRY_SSH_KEY_ID:-}"   # numeric id of the SSH key registered with Cherry
 export SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519}"  # matching private key for ssh/scp to the box
