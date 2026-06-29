@@ -9,6 +9,10 @@ Some ENS registry contracts emit events containing only a labelhash, without the
 
 `ENSNameHealer` is the sole onchain publisher of discovered label preimages. Healing happens in indexers when they consume `LabelPublished` events — this contract does not heal anything itself.
 
+## Deployments
+
+- Sepolia - `0x1abe158C47C2B97613450d5E1D2b343c04b5Db58`
+
 ## Terminology
 
 | Term               | Meaning                                                                                                                                  |
