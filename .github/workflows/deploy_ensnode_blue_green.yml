@@ -10,16 +10,10 @@ on:
         options:
           - green
           - blue
-      version:
-        description: "Version for ENSINDEXER schema names (e.g. 1.16.0). Defaults to `tag` if omitted."
-        required: false
-        type: string
-        default: ""
       tag:
-        description: "Docker image tag to deploy. Defaults to `version`; set to a sha- tag for release-candidate images."
-        required: false
+        description: "Docker Image Tag (also used for schema name generation)"
+        required: true
         type: string
-        default: ""
 
 permissions:
   id-token: write
@@ -30,32 +24,17 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
-      # `version` names the ENSINDEXER schemas; `tag` selects the Docker images. Each defaults to the
-      # other, so any one of: `version` only (normal release — images=schemas), `tag` only
-      # (backward-compatible with the old single-input interface), or both (RC: sha images, version
-      # schemas) works. At least one must be provided (guarded in the first step).
-      VERSION: ${{ inputs.version != '' && inputs.version || inputs.tag }}
-      TAG: ${{ inputs.tag != '' && inputs.tag || inputs.version }}
-      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag != '' && inputs.tag || inputs.version }}"
-      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.tag != '' && inputs.tag || inputs.version }}"
-      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag != '' && inputs.tag || inputs.version }}"
-      ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag != '' && inputs.tag || inputs.version }}"
+      TAG: ${{ inputs.tag }}
+      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
+      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.tag }}"
+      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag }}"
+      ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag }}"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
 
     steps:
-      - name: Require version or tag
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-          INPUT_TAG: ${{ inputs.tag }}
-        run: |
-          if [ -z "$INPUT_VERSION" ] && [ -z "$INPUT_TAG" ]; then
-            echo "Provide at least one of: version (schema names) or tag (image tag)." >&2
-            exit 1
-          fi
-
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -99,7 +78,7 @@ jobs:
               echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID="${{ secrets.GREEN_ENSRAINBOW_SEARCHLIGHT_SVC_ID }} >> "$GITHUB_ENV"
               #ENSADMIN
               echo "ENSADMIN_SVC_ID="${{ secrets.GREEN_ENSADMIN_SVC_ID }} >> "$GITHUB_ENV"
-              echo "SLACK_TITLE=':large_green_circle: GREEN environment is now having new ENSNode version - '"${{ env.VERSION }} >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=':large_green_circle: GREEN environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
               ;;
             "blue")
               #ENVIRONMENT
@@ -125,14 +104,61 @@ jobs:
               echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID="${{ secrets.BLUE_ENSRAINBOW_SEARCHLIGHT_SVC_ID }} >> "$GITHUB_ENV"
               #ENSADMIN
               echo "ENSADMIN_SVC_ID="${{ secrets.BLUE_ENSADMIN_SVC_ID }} >> "$GITHUB_ENV"
-              echo "SLACK_TITLE=':large_blue_circle: BLUE environment is now having new ENSNode version - '"${{ env.VERSION }} >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=':large_blue_circle: BLUE environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
               ;;
             *)
               echo "Environment not recognized, skipping workflow"
               exit 1
           esac
 
-      # Update ENSINDEXER_SCHEMA_NAME for each indexer based on the input version
+      # Update indexer source docker image
+      - name: Update shared environment variable
+        run: |
+          update_service_image() {
+            local environment_id=$1
+            local service_id=$2
+            local docker_image=$3
+            echo "Updating service $service_id"
+            curl --request POST \
+              --silent \
+              --fail \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+                            --data '{
+                        "query": "mutation serviceInstanceUpdate($environmentId: String, $input: ServiceInstanceUpdateInput!, $serviceId: String!) { serviceInstanceUpdate(environmentId: $environmentId input: $input serviceId: $serviceId) }",
+                        "variables": {
+                          "environmentId": "'$environment_id'",
+                          "input": {"source": {"image": "'$docker_image'"}},
+                          "serviceId": "'$service_id'"
+                        }
+                      }'
+            echo "Finished updating $service_id"
+          }
+
+          #ALPHA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}               ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}           ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #MAINNET
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}             ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}         ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #ALPHA-SEPOLIA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}       ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID}   ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #V2-SEPOLIA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${V2_SEPOLIA_API_SVC_ID}          ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${V2_SEPOLIA_INDEXER_SVC_ID}      ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #SEPOLIA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}             ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}         ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #ENSRAINBOW
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}              ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          #ENSRAINBOW SEARCHLIGHT
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SEARCHLIGHT_SVC_ID}  ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          #ENSADMIN
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}                ${{ env.ENSADMIN_DOCKER_IMAGE }}
+
+      # Update ENSINDEXER_SCHEMA_NAME for each indexer based on input tag
       - name: Update shared environment variable
         run: |
           set_shared_variable() {
@@ -140,79 +166,58 @@ jobs:
             local variable_name=$2
             local variable_value=$3
             echo "Setting $variable_name"
-            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
-            # array), so --fail alone misses it; inspect the body and fail loudly.
-            local resp
-            resp="$(curl --request POST \
+            curl --request POST \
               --silent \
               --fail \
-              --show-error \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
-            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
-              echo "Railway GraphQL error: $resp" >&2
-              exit 1
-            fi
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}'
             echo "Finished setting $variable_name"
           }
 
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_ENSINDEXER_SCHEMA_NAME" "alphaSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_ENSINDEXER_SCHEMA_NAME" "mainnetSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "alphaSepoliaSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "v2SepoliaSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_ENSINDEXER_SCHEMA_NAME" "sepoliaSchema${VERSION}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_ENSINDEXER_SCHEMA_NAME" "alphaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_ENSINDEXER_SCHEMA_NAME" "mainnetSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "alphaSepoliaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "v2SepoliaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_ENSINDEXER_SCHEMA_NAME" "sepoliaSchema${TAG}"
 
-      # Update images + redeploy every service in series, ENSRainbow-type services first.
-      - name: Update + redeploy ENSRainbow instances
-        uses: ./.github/actions/deploy_railway_services
-        with:
-          railway_token: ${{ env.RAILWAY_TOKEN }}
-          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
-          image: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
-          project_id: ${{ env.RAILWAY_PROJECT_ID }}
-          service_ids: |
-            ${{ env.ENSRAINBOW_SVC_ID }}
-            ${{ env.ENSRAINBOW_SEARCHLIGHT_SVC_ID }}
+      - name: Redeploy ENSNode instances
+        run: |
+          redeploy_service() {
+          local environment_id=$1
+          local service_id=$2
+          echo "Redeploying $service_id"
+          curl --request POST \
+          --silent \
+          --url https://backboard.railway.app/graphql/v2 \
+          --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+          --header 'Content-Type: application/json' \
+          --data "{\"query\":\"mutation serviceInstanceDeploy(\$serviceId: String!, \$environmentId: String!) { serviceInstanceDeploy(serviceId: \$serviceId, environmentId: \$environmentId) }\",\"variables\":{\"environmentId\":\"${environment_id}\",\"serviceId\":\"${service_id}\"}}"
+          echo "Finished redeploying $service_id"
+          }
 
-      - name: Update + redeploy ENSIndexer instances
-        uses: ./.github/actions/deploy_railway_services
-        with:
-          railway_token: ${{ env.RAILWAY_TOKEN }}
-          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
-          image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
-          project_id: ${{ env.RAILWAY_PROJECT_ID }}
-          service_ids: |
-            ${{ env.ALPHA_INDEXER_SVC_ID }}
-            ${{ env.MAINNET_INDEXER_SVC_ID }}
-            ${{ env.ALPHA_SEPOLIA_INDEXER_SVC_ID }}
-            ${{ env.V2_SEPOLIA_INDEXER_SVC_ID }}
-            ${{ env.SEPOLIA_INDEXER_SVC_ID }}
-
-      - name: Update + redeploy ENSApi instances
-        uses: ./.github/actions/deploy_railway_services
-        with:
-          railway_token: ${{ env.RAILWAY_TOKEN }}
-          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
-          image: ${{ env.ENSAPI_DOCKER_IMAGE }}
-          project_id: ${{ env.RAILWAY_PROJECT_ID }}
-          service_ids: |
-            ${{ env.ALPHA_API_SVC_ID }}
-            ${{ env.MAINNET_API_SVC_ID }}
-            ${{ env.ALPHA_SEPOLIA_API_SVC_ID }}
-            ${{ env.V2_SEPOLIA_API_SVC_ID }}
-            ${{ env.SEPOLIA_API_SVC_ID }}
-
-      - name: Update + redeploy ENSAdmin instance
-        uses: ./.github/actions/deploy_railway_services
-        with:
-          railway_token: ${{ env.RAILWAY_TOKEN }}
-          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
-          image: ${{ env.ENSADMIN_DOCKER_IMAGE }}
-          project_id: ${{ env.RAILWAY_PROJECT_ID }}
-          service_ids: |
-            ${{ env.ENSADMIN_SVC_ID }}
+          #ALPHA
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}
+          #MAINNET
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}
+          #ALPHA-SEPOLIA
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID}
+          #V2-SEPOLIA
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${V2_SEPOLIA_API_SVC_ID}
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${V2_SEPOLIA_INDEXER_SVC_ID}
+          #SEPOLIA
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
+          #ENSRAINBOW
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
+          #ENSRAINBOW SEARCHLIGHT
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SEARCHLIGHT_SVC_ID}
+          #ENSADMIN
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}
 
       - uses: ./.github/actions/send_slack_notification
         with:
