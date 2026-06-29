@@ -6,13 +6,12 @@ import { type EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
-import { type IndexingStatusCache, indexingStatusCache } from "@/cache/indexing-status.cache";
+import { buildIndexingStatusCache, type IndexingStatusCache } from "@/cache/indexing-status.cache";
 import {
+  buildReferralProgramEditionConfigSetCache,
   type ReferralProgramEditionConfigSetCache,
-  referralProgramEditionConfigSetCache,
 } from "@/cache/referral-program-edition-set.cache";
-import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
-import { stackInfoCache } from "@/cache/stack-info.cache";
+import { buildStackInfoCache, type EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
 import type { EnsApiConfig } from "@/config/config.schema";
 import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
@@ -164,7 +163,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get indexingStatusCache(): IndexingStatusCache {
       if (instances.indexingStatusCache === undefined) {
-        instances.indexingStatusCache = indexingStatusCache;
+        instances.indexingStatusCache = buildIndexingStatusCache(context.ensDbClient);
       }
 
       return instances.indexingStatusCache;
@@ -172,7 +171,9 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get referralProgramEditionConfigSetCache(): ReferralProgramEditionConfigSetCache {
       if (instances.referralProgramEditionConfigSetCache === undefined) {
-        instances.referralProgramEditionConfigSetCache = referralProgramEditionConfigSetCache;
+        instances.referralProgramEditionConfigSetCache = buildReferralProgramEditionConfigSetCache(
+          context.ensApiConfig.referralProgramEditionConfigSetUrl,
+        );
       }
 
       return instances.referralProgramEditionConfigSetCache;
@@ -180,7 +181,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get stackInfoCache(): EnsNodeStackInfoCache {
       if (instances.stackInfoCache === undefined) {
-        instances.stackInfoCache = stackInfoCache;
+        instances.stackInfoCache = buildStackInfoCache(context.ensDbClient, context.ensApiConfig);
       }
 
       return instances.stackInfoCache;
