@@ -87,7 +87,7 @@ Aborted
 
 #### Resolution
 
-Increase the Node.js heap size with `NODE_OPTIONS` environment variable for ENSIndexer instance.
+Increase the Node.js heap size with the `NODE_OPTIONS` environment variable for your ENSIndexer instance.
 
 ```bash
 NODE_OPTIONS=--max-old-space-size=4096
@@ -107,7 +107,7 @@ error: canceling statement due to statement timeout
 
 #### Resolution
 
-Extend Ponder's internal SQL statement timeout with `PONDER_STATEMENT_TIMEOUT` (value in milliseconds) environment variable for ENSIndexer instance.
+Extend Ponder's internal SQL statement timeout with the `PONDER_STATEMENT_TIMEOUT` environment variable (value in milliseconds) for your ENSIndexer instance.
 
 ```bash
 PONDER_STATEMENT_TIMEOUT=600000
