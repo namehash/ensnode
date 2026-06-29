@@ -1,0 +1,59 @@
+name: "Deploy: Switch ENSDb Playground Environment"
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "New ENSDb Playground environment"
+        required: true
+        type: choice
+        options:
+          - green
+          - blue
+
+jobs:
+  switch-environment:
+    # NOTE: this needs to run on GH runner because of some obscure skopeo permissions thing
+    runs-on: ubuntu-latest
+    name: Switch Environment to ${{ inputs.target }}
+    env:
+      TARGET_ENVIRONMENT: ${{ inputs.target }}
+      REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Calculate env variables
+        run: |
+          case "$TARGET_ENVIRONMENT" in
+            "green")
+              echo "SLACK_TITLE=:large_green_circle: ENSDb Playground GREEN Environment Activated" >> "$GITHUB_ENV"
+              ;;
+            "blue")
+              echo "SLACK_TITLE=:large_blue_circle: ENSDb Playground BLUE Environment Activated" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "SLACK_TITLE=:large_red_circle: Unrecognized ENSDb Playground Environment Activated" >> "$GITHUB_ENV"
+          esac
+
+      - name: Switch Traefik Routing
+        run: |
+          sudo apt update
+          sudo apt install -y redis-tools
+
+          # ENSDB PLAYGROUND
+          redis-cli -u $REDIS_URL SET traefik/http/routers/ensdb-playground-router/service "${TARGET_ENVIRONMENT}-ensdb-playground"
+
+      - name: Send Slack Notification
+        uses: ./.github/actions/send_slack_notification
+        with:
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_title: ${{ env.SLACK_TITLE }}
+          slack_message: "✅ Switch ENSDb Playground environment completed"
