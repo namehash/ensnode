@@ -85,6 +85,10 @@ jobs:
   build-images:
     needs: resolve
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Override the workflow-level permissions: pushing sha-tagged images to GHCR needs packages:write.
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
