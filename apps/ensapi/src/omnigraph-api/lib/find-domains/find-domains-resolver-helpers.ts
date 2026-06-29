@@ -7,10 +7,6 @@ import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
  * The order column / expression for each `DomainsOrderBy` value.
- *
- * Computed lazily using sql template so importing this module doesn't access the lazyProxy-backed
- * `ensIndexerSchema` at module load time (test harnesses import it without env-driven DB
- * config wired up).
  */
 function getOrderColumn(orderBy: typeof DomainsOrderBy.$inferType): SQL {
   const { ensIndexerSchema } = di.context;
