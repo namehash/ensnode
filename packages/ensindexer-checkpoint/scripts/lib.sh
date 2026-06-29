@@ -27,7 +27,9 @@ require() { command -v "$1" >/dev/null 2>&1 || die "missing required command: $1
 # against it, so a mid-run host-key change is caught. We can't pre-know an ephemeral box's key, but the
 # box IP itself comes from the Cherry API over TLS.
 KNOWN_HOSTS_FILE="${KNOWN_HOSTS_FILE:-$LIB_DIR/.known_hosts}"
-SSH_OPTS=(-o StrictHostKeyChecking=accept-new -o "UserKnownHostsFile=$KNOWN_HOSTS_FILE" -o ConnectTimeout=10)
+# ServerAlive* keeps the long-lived producer SSH session (a multi-hour index) alive across network
+# stalls instead of dropping it: probe every 30s, give up only after 10 missed probes (~5 min).
+SSH_OPTS=(-o StrictHostKeyChecking=accept-new -o "UserKnownHostsFile=$KNOWN_HOSTS_FILE" -o ConnectTimeout=10 -o ServerAliveInterval=30 -o ServerAliveCountMax=10)
 
 box_host() { [ -f "$LIB_DIR/.box-host" ] && cat "$LIB_DIR/.box-host" || echo ""; }
 box_id() { [ -f "$LIB_DIR/.box-id" ] && cat "$LIB_DIR/.box-id" || echo ""; }

@@ -135,7 +135,9 @@ INDEXER_PGID="$(tr -d '[:space:]' <"$PGID_FILE" 2>/dev/null || true)"
 log "[$CONFIG] waiting for is_ready=1 (historical backfill complete)"
 while true; do
   status="$(bash "$LIB_DIR/detect-done.sh" "$SCHEMA")"
-  echo "$(date +%H:%M:%S) [$CONFIG] $status" >&2
+  # Surface Ponder's own latest backfill progress (%, ETA) alongside the authoritative readiness probe.
+  prog="$(grep -aE "Updated backfill indexing progress" "$INDEXER_LOG" 2>/dev/null | tail -1 | sed -E 's/.*(progress=.*)$/\1/')"
+  echo "$(date +%H:%M:%S) [$CONFIG] $status${prog:+ | $prog}" >&2
   echo "$status" | grep -q "is_ready=1" && break
   if ! kill -0 -- "-$INDEXER_PGID" 2>/dev/null; then
     warn "[$CONFIG] indexer process group exited before is_ready:"

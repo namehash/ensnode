@@ -72,22 +72,29 @@ if [ "${#NEED[@]}" -gt 0 ]; then
   i=0
   for c in "${NEED[@]}"; do
     sch="$(box_schema "$c")"
-    CONFIG="$c" SHA="$SHA" SCHEMA="$sch" MODE="$MODE" \
-      INDEXER_PORT="$((42069 + i * 100))" RAINBOW_PORT="$((3223 + i))" \
-      RAINBOW_DATA_DIR="$DATA_MOUNT/ensrainbow-$c" ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-}" \
-      TIMESTAMP="${TIMESTAMP:-}" \
-      bash "$LIB_DIR/remote-index-one.sh" >"/tmp/index-$c.out" 2>&1 &
+    # Stream each config's output (stdout+stderr) live to this script's stdout, which flows back over
+    # the SSH session into the GitHub job log — so the box's indexing progress is visible there in real
+    # time. `tee` keeps a raw copy for the failure tail; the subshell records remote-index-one.sh's real
+    # exit code to a file (the pipeline's own status is sed's, always 0); `sed -u` prefixes per config.
+    ( CONFIG="$c" SHA="$SHA" SCHEMA="$sch" MODE="$MODE" \
+        INDEXER_PORT="$((42069 + i * 100))" RAINBOW_PORT="$((3223 + i))" \
+        RAINBOW_DATA_DIR="$DATA_MOUNT/ensrainbow-$c" ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-}" \
+        TIMESTAMP="${TIMESTAMP:-}" \
+        bash "$LIB_DIR/remote-index-one.sh"; echo "$?" >"/tmp/index-$c.rc" ) 2>&1 \
+      | tee "/tmp/index-$c.out" | sed -u "s/^/[$c] /" &
     PID[$c]=$!
-    log "  -> $c indexing (pid ${PID[$c]}, schema $sch, indexer :$((42069 + i * 100)), rainbow :$((3223 + i)))"
+    log "  -> $c indexing (schema $sch, indexer :$((42069 + i * 100)), rainbow :$((3223 + i)))"
     i=$((i + 1))
   done
 
   FAIL=0
   for c in "${NEED[@]}"; do
-    if wait "${PID[$c]}"; then
+    wait "${PID[$c]}" || true
+    rc="$(cat "/tmp/index-$c.rc" 2>/dev/null || echo 1)"
+    if [ "$rc" = 0 ]; then
       log "$c index complete"
     else
-      warn "$c index FAILED — last 80 lines:"
+      warn "$c index FAILED (rc=$rc) — last 80 lines:"
       tail -80 "/tmp/index-$c.out" >&2
       FAIL=1
     fi
