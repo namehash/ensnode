@@ -160,35 +160,6 @@ jobs:
             *) echo "Environment not recognized"; exit 1 ;;
           esac
 
-      - name: Set light schema names (<ns>Schema<version>)
-        run: |
-          set_shared_variable() {
-            local environment_id=$1
-            local variable_name=$2
-            local variable_value=$3
-            echo "Setting $variable_name"
-            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
-            # array), so --fail alone misses it; inspect the body and fail loudly.
-            local resp
-            resp="$(curl --request POST \
-              --silent \
-              --fail \
-              --show-error \
-              --url https://backboard.railway.app/graphql/v2 \
-              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
-              --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
-            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
-              echo "Railway GraphQL error: $resp" >&2
-              exit 1
-            fi
-            echo "Finished setting $variable_name"
-          }
-
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_ENSINDEXER_SCHEMA_NAME" "sepoliaSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "alphaSepoliaSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "v2SepoliaSchema${VERSION}"
-
       - name: Update + redeploy ENSRainbow instances (first)
         uses: ./.github/actions/deploy_railway_services
         with:
@@ -200,17 +171,42 @@ jobs:
             ${{ env.ENSRAINBOW_SVC_ID }}
             ${{ env.ENSRAINBOW_SEARCHLIGHT_SVC_ID }}
 
-      - name: Update + redeploy sepolia ENSIndexer instances
+      # Each ENSIndexer is deployed per-config so its image and schema-name variable flip in one
+      # mutation: the new image is what initializes the versioned schema. (A shared "set all schema
+      # names" step would redeploy the still-old image into the new schema first — wrong build_id +
+      # version — and the new ENSApi would then crash-loop on the version mismatch.)
+      - name: Update + redeploy sepolia ENSIndexer (sepolia)
         uses: ./.github/actions/deploy_railway_services
         with:
           railway_token: ${{ env.RAILWAY_TOKEN }}
           environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
           image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           project_id: ${{ env.RAILWAY_PROJECT_ID }}
-          service_ids: |
-            ${{ env.SEPOLIA_INDEXER_SVC_ID }}
-            ${{ env.ALPHA_SEPOLIA_INDEXER_SVC_ID }}
-            ${{ env.V2_SEPOLIA_INDEXER_SVC_ID }}
+          schema_var_name: SEPOLIA_ENSINDEXER_SCHEMA_NAME
+          schema_var_value: sepoliaSchema${{ env.VERSION }}
+          service_ids: ${{ env.SEPOLIA_INDEXER_SVC_ID }}
+
+      - name: Update + redeploy sepolia ENSIndexer (alpha-sepolia)
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          schema_var_name: ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME
+          schema_var_value: alphaSepoliaSchema${{ env.VERSION }}
+          service_ids: ${{ env.ALPHA_SEPOLIA_INDEXER_SVC_ID }}
+
+      - name: Update + redeploy sepolia ENSIndexer (v2-sepolia)
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          schema_var_name: V2-SEPOLIA_ENSINDEXER_SCHEMA_NAME
+          schema_var_value: v2SepoliaSchema${{ env.VERSION }}
+          service_ids: ${{ env.V2_SEPOLIA_INDEXER_SVC_ID }}
 
       - name: Update + redeploy sepolia ENSApi instances
         uses: ./.github/actions/deploy_railway_services
@@ -369,34 +365,6 @@ jobs:
             *) echo "Environment not recognized"; exit 1 ;;
           esac
 
-      - name: Set heavy schema names (<ns>Schema<version>)
-        run: |
-          set_shared_variable() {
-            local environment_id=$1
-            local variable_name=$2
-            local variable_value=$3
-            echo "Setting $variable_name"
-            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
-            # array), so --fail alone misses it; inspect the body and fail loudly.
-            local resp
-            resp="$(curl --request POST \
-              --silent \
-              --fail \
-              --show-error \
-              --url https://backboard.railway.app/graphql/v2 \
-              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
-              --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
-            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
-              echo "Railway GraphQL error: $resp" >&2
-              exit 1
-            fi
-            echo "Finished setting $variable_name"
-          }
-
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_ENSINDEXER_SCHEMA_NAME" "alphaSchema${VERSION}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_ENSINDEXER_SCHEMA_NAME" "mainnetSchema${VERSION}"
-
       - name: Update + redeploy ENSRainbow instances (first)
         uses: ./.github/actions/deploy_railway_services
         with:
@@ -408,16 +376,29 @@ jobs:
             ${{ env.ENSRAINBOW_SVC_ID }}
             ${{ env.ENSRAINBOW_SEARCHLIGHT_SVC_ID }}
 
-      - name: Update + redeploy alpha + mainnet ENSIndexer instances
+      # Per-config so the image and schema-name variable flip in one mutation (see deploy-light). The
+      # warm <ns>Schema<version> was loaded with the RC's build_id, so only the RC image resumes it.
+      - name: Update + redeploy ENSIndexer (alpha)
         uses: ./.github/actions/deploy_railway_services
         with:
           railway_token: ${{ env.RAILWAY_TOKEN }}
           environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
           image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           project_id: ${{ env.RAILWAY_PROJECT_ID }}
-          service_ids: |
-            ${{ env.ALPHA_INDEXER_SVC_ID }}
-            ${{ env.MAINNET_INDEXER_SVC_ID }}
+          schema_var_name: ALPHA_ENSINDEXER_SCHEMA_NAME
+          schema_var_value: alphaSchema${{ env.VERSION }}
+          service_ids: ${{ env.ALPHA_INDEXER_SVC_ID }}
+
+      - name: Update + redeploy ENSIndexer (mainnet)
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          schema_var_name: MAINNET_ENSINDEXER_SCHEMA_NAME
+          schema_var_value: mainnetSchema${{ env.VERSION }}
+          service_ids: ${{ env.MAINNET_INDEXER_SVC_ID }}
 
       - name: Update + redeploy alpha + mainnet ENSApi instances
         uses: ./.github/actions/deploy_railway_services
