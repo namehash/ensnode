@@ -821,9 +821,10 @@
                                 "versionInfo": {
                                   "type": "object",
                                   "properties": {
+                                    "commit": { "type": "string", "minLength": 1 },
                                     "ensRainbow": { "type": "string", "minLength": 1 }
                                   },
-                                  "required": ["ensRainbow"]
+                                  "required": ["commit", "ensRainbow"]
                                 }
                               },
                               "required": ["serverLabelSet", "versionInfo"]
@@ -860,11 +861,18 @@
                               "type": "object",
                               "properties": {
                                 "ponder": { "type": "string", "minLength": 1 },
+                                "commit": { "type": "string", "minLength": 1 },
                                 "ensDb": { "type": "string", "minLength": 1 },
                                 "ensIndexer": { "type": "string", "minLength": 1 },
                                 "ensNormalize": { "type": "string", "minLength": 1 }
                               },
-                              "required": ["ponder", "ensDb", "ensIndexer", "ensNormalize"]
+                              "required": [
+                                "ponder",
+                                "commit",
+                                "ensDb",
+                                "ensIndexer",
+                                "ensNormalize"
+                              ]
                             }
                           },
                           "required": [
@@ -896,8 +904,11 @@
                             },
                             "versionInfo": {
                               "type": "object",
-                              "properties": { "ensRainbow": { "type": "string", "minLength": 1 } },
-                              "required": ["ensRainbow"]
+                              "properties": {
+                                "commit": { "type": "string", "minLength": 1 },
+                                "ensRainbow": { "type": "string", "minLength": 1 }
+                              },
+                              "required": ["commit", "ensRainbow"]
                             }
                           },
                           "required": ["serverLabelSet", "versionInfo"]
@@ -931,9 +942,10 @@
                                     "versionInfo": {
                                       "type": "object",
                                       "properties": {
+                                        "commit": { "type": "string", "minLength": 1 },
                                         "ensRainbow": { "type": "string", "minLength": 1 }
                                       },
-                                      "required": ["ensRainbow"]
+                                      "required": ["commit", "ensRainbow"]
                                     }
                                   },
                                   "required": ["serverLabelSet", "versionInfo"]
@@ -970,11 +982,18 @@
                                   "type": "object",
                                   "properties": {
                                     "ponder": { "type": "string", "minLength": 1 },
+                                    "commit": { "type": "string", "minLength": 1 },
                                     "ensDb": { "type": "string", "minLength": 1 },
                                     "ensIndexer": { "type": "string", "minLength": 1 },
                                     "ensNormalize": { "type": "string", "minLength": 1 }
                                   },
-                                  "required": ["ponder", "ensDb", "ensIndexer", "ensNormalize"]
+                                  "required": [
+                                    "ponder",
+                                    "commit",
+                                    "ensDb",
+                                    "ensIndexer",
+                                    "ensNormalize"
+                                  ]
                                 }
                               },
                               "required": [
@@ -1020,10 +1039,11 @@
                             "versionInfo": {
                               "type": "object",
                               "properties": {
+                                "commit": { "type": "string", "minLength": 1 },
                                 "ensApi": { "type": "string", "minLength": 1 },
                                 "ensNormalize": { "type": "string", "minLength": 1 }
                               },
-                              "required": ["ensApi", "ensNormalize"]
+                              "required": ["commit", "ensApi", "ensNormalize"]
                             }
                           },
                           "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
