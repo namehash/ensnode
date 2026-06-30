@@ -9,6 +9,7 @@ import {
 import di from "@/di";
 import { createApp } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
+import { assertApiReadinessMiddleware } from "@/middleware/assert-api-readiness.middleware";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
@@ -17,7 +18,7 @@ import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middl
 
 const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in seconds
 
-const app = createApp({ middlewares: [indexingStatusMiddleware] });
+const app = createApp({ middlewares: [assertApiReadinessMiddleware, indexingStatusMiddleware] });
 
 app.use(async (c, next) => {
   const configPrerequisite = hasSubgraphApiConfigSupport(di.context.stackInfo.ensIndexer);
