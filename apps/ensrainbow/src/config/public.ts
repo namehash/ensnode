@@ -5,11 +5,22 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import type { DbConfig } from "./types";
 
+/**
+ * Get the codebase commit hash.
+ *
+ * In Docker builds this is injected via the GIT_COMMIT env var.
+ * Falls back to "unknown" when not available (e.g. local dev).
+ */
+function getCommit(): string {
+  return process.env.GIT_COMMIT ?? "unknown";
+}
+
 /** Builds public config from a label set (CLI/env before DB open, or from DB after open). */
 export function buildEnsRainbowPublicConfigFromLabelSet(
   serverLabelSet: EnsRainbowServerLabelSet,
 ): EnsRainbow.ENSRainbowPublicConfig {
   const versionInfo = {
+    commit: getCommit(),
     ensRainbow: packageJson.version,
   } satisfies EnsRainbowVersionInfo;
 

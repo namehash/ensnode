@@ -122,6 +122,8 @@ jobs:
             type=raw,value=next
             type=raw,value=${{ steps.snapshot-tag.outputs.tag }}
             type=sha
+          build_args: |
+            GIT_COMMIT=${{ github.sha }}
 
   build-and-publish-lambdas:
     name: Build & Publish Snapshot Lambdas

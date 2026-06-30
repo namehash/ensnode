@@ -27,6 +27,7 @@ vi.mock("@/config", () => ({
 vi.mock("@/lib/version-info", () => ({
   getEnsIndexerVersion: vi.fn(),
   getPackageVersion: vi.fn(),
+  getCommit: vi.fn(),
 }));
 
 // Mock the SDK validation functions
@@ -47,18 +48,20 @@ import {
   validateEnsIndexerVersionInfo,
 } from "@ensnode/ensnode-sdk";
 
-import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
+import { getCommit, getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 
 // Test fixtures
 const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
   versionInfo: {
+    commit: "f3e7c0d",
     ensRainbow: "1.0.0",
   },
 };
 
 const mockVersionInfo: EnsIndexerVersionInfo = {
   ponder: "0.9.0",
+  commit: "f3e7c0d",
   ensDb: "1.0.0",
   ensIndexer: "1.0.0",
   ensNormalize: "1.10.0",
@@ -83,6 +86,7 @@ function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {})
 function setupStandardMocks() {
   vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
   vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
+  vi.mocked(getCommit).mockReturnValue("unknown");
   vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
 }
 
@@ -115,6 +119,7 @@ describe("PublicConfigBuilder", () => {
 
       expect(validateEnsIndexerVersionInfo).toHaveBeenCalledWith({
         ponder: "0.9.0",
+        commit: "unknown",
         ensDb: "1.0.0",
         ensIndexer: "1.0.0",
         ensNormalize: "0.9.0",
@@ -182,6 +187,7 @@ describe("PublicConfigBuilder", () => {
 
       const customVersionInfo: EnsIndexerVersionInfo = {
         ponder: "1.0.0",
+        commit: "f3e7c0d",
         ensDb: "2.0.0",
         ensIndexer: "2.0.0",
         ensNormalize: "1.10.0",
@@ -210,6 +216,7 @@ describe("PublicConfigBuilder", () => {
       const customEnsRainbowConfig: EnsRainbowPublicConfig = {
         serverLabelSet: { labelSetId: "custom", highestLabelSetVersion: 1 },
         versionInfo: {
+          commit: "f3e7c0d",
           ensRainbow: "1.0.0",
         },
       };

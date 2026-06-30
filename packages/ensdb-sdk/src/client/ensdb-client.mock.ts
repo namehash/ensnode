@@ -31,6 +31,7 @@ export const publicConfig = {
       highestLabelSetVersion: 0,
     },
     versionInfo: {
+      commit: "f3e7c0d",
       ensRainbow: "0.32.0",
     },
   },
@@ -44,6 +45,7 @@ export const publicConfig = {
   plugins: [PluginName.Subgraph],
   versionInfo: {
     ponder: "0.11.25",
+    commit: "f3e7c0d",
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",
     ensNormalize: "1.11.1",

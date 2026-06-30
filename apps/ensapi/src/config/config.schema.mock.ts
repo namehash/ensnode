@@ -33,6 +33,7 @@ export const ENSINDEXER_PUBLIC_CONFIG = {
   ensRainbowPublicConfig: {
     serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
     versionInfo: {
+      commit: "f3e7c0d",
       ensRainbow: packageJson.version,
     },
   },
@@ -41,6 +42,7 @@ export const ENSINDEXER_PUBLIC_CONFIG = {
   clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   plugins: [PluginName.Subgraph],
   versionInfo: {
+    commit: "f3e7c0d",
     ensDb: packageJson.version,
     ensIndexer: packageJson.version,
     ensNormalize: "1.11.1",
@@ -51,6 +53,7 @@ export const ENSINDEXER_PUBLIC_CONFIG = {
 const ENSRAINBOW_PUBLIC_CONFIG = {
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
   versionInfo: {
+    commit: "f3e7c0d",
     ensRainbow: packageJson.version,
   },
 } satisfies EnsRainbowPublicConfig;

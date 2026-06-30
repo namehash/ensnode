@@ -7,6 +7,16 @@ import { fileURLToPath } from "node:url";
 import type { EnsApiVersionInfo } from "@ensnode/ensnode-sdk";
 
 /**
+ * Get the codebase commit hash.
+ *
+ * In Docker builds this is injected via the GIT_COMMIT env var.
+ * Falls back to "unknown" when not available (e.g. local dev).
+ */
+function getCommit(): string {
+  return process.env.GIT_COMMIT ?? "unknown";
+}
+
+/**
  * Get ENS API version
  */
 function getEnsApiVersion(): string {
@@ -101,6 +111,7 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
 }
 
 export const ensApiVersionInfo = {
+  commit: getCommit(),
   ensApi: getEnsApiVersion(),
   ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
 } as const satisfies EnsApiVersionInfo;

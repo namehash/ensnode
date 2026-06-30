@@ -48,13 +48,14 @@ function makeMinimalStackInfo() {
       ensIndexerSchemaName: "test_schema",
       ensRainbowPublicConfig: {
         serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-        versionInfo: { ensRainbow: "1.0.0" },
+        versionInfo: { commit: "f3e7c0d", ensRainbow: "1.0.0" },
       },
       indexedChainIds: new Set([1]),
       isSubgraphCompatible: true,
       plugins: ["subgraph"],
       versionInfo: {
         ponder: "0.11.25",
+        commit: "f3e7c0d",
         ensDb: "0.32.0",
         ensIndexer: "0.32.0",
         ensNormalize: "1.11.1",
@@ -62,7 +63,7 @@ function makeMinimalStackInfo() {
     },
     {
       serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-      versionInfo: { ensRainbow: "1.0.0" },
+      versionInfo: { commit: "f3e7c0d", ensRainbow: "1.0.0" },
     },
   );
 }
