@@ -53,8 +53,9 @@ export const makeEnsRainbowPublicConfigSchema = (valueLabel: string = "EnsRainbo
     }),
 
     versionInfo: z.object({
+      commit: z.string().nonempty(`${valueLabel}.versionInfo.commit must be a non-empty string.`),
       ensRainbow: z
         .string()
-        .nonempty({ error: `${valueLabel}.versionInfo.ensRainbow must be a non-empty string.` }),
+        .nonempty(`${valueLabel}.versionInfo.ensRainbow must be a non-empty string.`),
     }),
   });

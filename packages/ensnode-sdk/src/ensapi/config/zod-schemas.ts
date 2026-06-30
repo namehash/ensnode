@@ -13,6 +13,7 @@ export { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema };
 
 const makeEnsApiVersionInfoSchema = (valueLabel: string = "ENS API version info") =>
   z.object({
+    commit: z.string().nonempty(`${valueLabel}.commit must be a non-empty string`),
     ensApi: z.string().nonempty(`${valueLabel}.ensApi must be a non-empty string`),
     ensNormalize: z.string().nonempty(`${valueLabel}.ensNormalize must be a non-empty string`),
   });

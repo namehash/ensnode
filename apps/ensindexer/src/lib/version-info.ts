@@ -7,6 +7,16 @@ import { fileURLToPath } from "node:url";
 import { logger } from "@/lib/logger";
 
 /**
+ * Get the codebase commit hash.
+ *
+ * In Docker builds this is injected via the GIT_COMMIT env var.
+ * Falls back to "unknown" when not available (e.g. local dev).
+ */
+export function getCommit(): string {
+  return process.env.GIT_COMMIT ?? "unknown";
+}
+
+/**
  * Get ENSIndexer version
  */
 export function getEnsIndexerVersion(): string {

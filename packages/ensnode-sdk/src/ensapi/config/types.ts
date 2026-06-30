@@ -8,6 +8,11 @@ export type { TheGraphCannotFallbackReason, TheGraphFallback };
  */
 export interface EnsApiVersionInfo {
   /**
+   * ENSApi codebase commit hash
+   */
+  commit: string;
+
+  /**
    * ENSApi service version
    *
    * @see https://ghcr.io/namehash/ensnode/ensapi

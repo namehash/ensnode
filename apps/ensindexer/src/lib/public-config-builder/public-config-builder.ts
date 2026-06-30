@@ -8,7 +8,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
-import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
+import { getCommit, getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 
 export class PublicConfigBuilder {
   /**
@@ -84,6 +84,7 @@ export class PublicConfigBuilder {
 
     return validateEnsIndexerVersionInfo({
       ponder: getPackageVersion("ponder"),
+      commit: getCommit(),
       ensDb: ensDbVersion,
       ensIndexer: ensIndexerVersion,
       ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
