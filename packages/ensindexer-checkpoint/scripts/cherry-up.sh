@@ -102,10 +102,14 @@ TOKEN_TMP="$(mktemp)"
 printf '%s' "$CHERRY_API_TOKEN" >"$TOKEN_TMP"
 scp_to_box "$TOKEN_TMP" ".cherry-token"
 rm -f "$TOKEN_TMP"
-on_box "chmod 600 ~/.cherry-token && setsid bash -c '
+# `setsid --fork` (NOT a trailing `&`): the watchdog forks into its own session and the parent returns
+# immediately, so the SSH command completes and the channel closes. A trailing `&` instead backgrounds
+# a subshell that keeps the SSH channel's stdout/stderr open (only the inner process was redirected),
+# so sshd never closes the channel and this on_box HANGS until the 20h sleep finishes — wedging the run.
+on_box "chmod 600 ~/.cherry-token && setsid --fork bash -c '
   sleep $(( SELF_DESTRUCT_HOURS * 3600 ))
   curl -fsS -H \"Authorization: Bearer \$(cat ~/.cherry-token)\" -X DELETE https://api.cherryservers.com/v1/servers/$id
   rm -f ~/.cherry-token
-' </dev/null >/tmp/self-destruct.log 2>&1 &" || warn "could not arm watchdog (continuing)"
+' </dev/null >/tmp/self-destruct.log 2>&1" || warn "could not arm watchdog (continuing)"
 
 log "box up: ssh -i $SSH_KEY ${BOX_USER:-root}@$ip"
