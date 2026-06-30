@@ -45,7 +45,7 @@ ENSNODE_VERSION=$(curl \
   --show-error \
   --fail \
   --url "$INDEXING_STATUS_URL" | \
-  jq -r '.stackInfo.ensApi.versionInfo.ensApi')
+  jq -r '.stackInfo.ensIndexer.versionInfo.ensIndexer')
 
 echo "Found ENSNode version: $ENSNODE_VERSION"
 

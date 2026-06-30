@@ -45,6 +45,8 @@ jobs:
               ;;
             *)
               echo "SLACK_TITLE=:large_red_circle: Unrecognized ENSNode Environment Activated" >> "$GITHUB_ENV"
+              exit 1
+              ;;
           esac
 
       - name: Switch Traefik Routing
