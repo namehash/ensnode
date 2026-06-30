@@ -74,8 +74,17 @@ on_box "cd ~/$REMOTE_DIR && bash remote-launch.sh"
 # Supervise: stream the producer's box log incrementally (so progress shows in the job log) and poll
 # its status until DONE/FAILED. Each iteration is one short SSH — a dropped connection or dead runner
 # does not stop the detached producer; re-running this workflow resumes supervision from offset 0.
+#
+# Heartbeat: some box phases are long and silent (seed download, pg_restore, a quiet indexing stretch),
+# so streamed box output alone can leave the job log dark for many minutes. When a poll yields no new
+# box output, emit a heartbeat at most every HEARTBEAT_SECS with elapsed time + producer status — so
+# the job log always shows liveness (and any hang is visible as "still RUNNING after Nm"). GitHub does
+# not kill a job for output-inactivity, but this keeps the run observable and connections warm.
+HEARTBEAT_SECS="${SUPERVISE_HEARTBEAT_SECS:-120}"
 log "supervising detached producer (streaming box log; survives runner restart)"
 offset=0
+start_ts="$(date +%s)"
+last_emit="$start_ts"
 while true; do
   chunk="$(on_box "tail -c +$((offset + 1)) ~/$REMOTE_DIR/checkpoint.log 2>/dev/null
 echo
@@ -83,8 +92,16 @@ echo \"__OFF__\$(wc -c <~/$REMOTE_DIR/checkpoint.log 2>/dev/null || echo $offset
 echo \"__ST__\$(cat ~/$REMOTE_DIR/checkpoint.status 2>/dev/null || echo RUNNING)\"" || true)"
   st="$(printf '%s\n' "$chunk" | sed -n 's/^__ST__//p' | tail -1)"
   newoff="$(printf '%s\n' "$chunk" | sed -n 's/^__OFF__//p' | tail -1)"
-  # Echo the new log bytes (strip the trailing marker lines) so the box's progress streams to the job log.
-  printf '%s\n' "$chunk" | sed '/^__OFF__/d; /^__ST__/d' | sed -e '${/^$/d}'
+  # New box log bytes this poll (strip the marker lines + the trailing blank separator).
+  body="$(printf '%s\n' "$chunk" | sed '/^__OFF__/d; /^__ST__/d' | sed -e '${/^$/d}')"
+  now="$(date +%s)"
+  if [ -n "$body" ]; then
+    printf '%s\n' "$body" # box made progress — that IS the liveness signal
+    last_emit="$now"
+  elif [ "$((now - last_emit))" -ge "$HEARTBEAT_SECS" ]; then
+    log "supervising: producer ${st:-RUNNING}, $(((now - start_ts) / 60))m elapsed (box quiet)"
+    last_emit="$now"
+  fi
   case "${st:-RUNNING}" in
   DONE) log "producer reported DONE — checkpoints are in R2" && break ;;
   FAILED) die "producer reported FAILED (see streamed log above)" ;;
