@@ -21,6 +21,18 @@ All commands are run from the **monorepo root**.
 > docker compose -f docker/docker-compose.yml config
 > ```
 
+## Build-time environment
+
+The ENSNode service images (`ensindexer`, `ensapi`, `ensrainbow`) bake a `GIT_COMMIT` value into their public config's `versionInfo.commit`. When building via Docker Compose or the root `pnpm docker:build:*` scripts, the short SHA is injected automatically from the local git checkout.
+
+To override the commit value (or if git is unavailable), set `GIT_COMMIT` before building:
+
+```bash
+GIT_COMMIT=f3e7c0d docker compose -f docker/docker-compose.yml up --build
+```
+
+If `GIT_COMMIT` is not provided, it defaults to `"unknown"`.
+
 ## Use cases
 
 ### Mainnet / Sepolia
