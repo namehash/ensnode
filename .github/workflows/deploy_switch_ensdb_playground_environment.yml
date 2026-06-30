@@ -22,7 +22,6 @@ jobs:
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -41,6 +40,7 @@ jobs:
               ;;
             *)
               echo "SLACK_TITLE=:large_red_circle: Unrecognized ENSDb Playground Environment Activated" >> "$GITHUB_ENV"
+              exit 1
           esac
 
       - name: Switch Traefik Routing
