@@ -43,7 +43,9 @@ if pg -tAc "SELECT 1 FROM information_schema.schemata WHERE schema_name='ponder_
   warn "ponder_sync already present; skipping restore"
 elif r2_exists "$(r2_seed "$R2_SEED_OBJECT")"; then
   log "downloading + restoring ponder_sync from R2 (large; be patient)"
-  rclone copy --progress "$(r2_seed "$R2_SEED_OBJECT")" "$DATA_MOUNT/"
+  # One compact progress line every 20s (NOT --progress, whose ~2Hz redraw becomes thousands of lines
+  # when piped to the non-TTY job log — it's a single download, just a live meter refreshing in place).
+  rclone copy --stats=20s --stats-one-line --stats-log-level NOTICE "$(r2_seed "$R2_SEED_OBJECT")" "$DATA_MOUNT/"
   pg_restore --no-owner --no-privileges -j 4 -d "$PG_CONN" "$DATA_MOUNT/$R2_SEED_OBJECT"
   rm -f "$DATA_MOUNT/$R2_SEED_OBJECT"
 else
