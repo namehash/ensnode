@@ -131,6 +131,10 @@ describe("EnsDbReader", () => {
   });
 
   describe("isReady", () => {
+    beforeEach(() => {
+      executeMock.mockResolvedValue({ rows: [{ exists: true }] });
+    });
+
     it("returns true when indexing metadata context is initialized", async () => {
       const indexingStatus = deserializeCrossChainIndexingStatusSnapshot(
         ensDbClientMock.serializedSnapshot,
@@ -157,6 +161,32 @@ describe("EnsDbReader", () => {
     });
 
     it("returns false when indexing metadata context is uninitialized", async () => {
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when the ENSNode schema does not exist", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [{ exists: false }] });
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when the ENSIndexer schema does not exist", async () => {
+      executeMock
+        .mockResolvedValueOnce({ rows: [{ exists: true }] })
+        .mockResolvedValueOnce({ rows: [{ exists: false }] });
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when schema existence check fails", async () => {
+      executeMock.mockRejectedValueOnce(new Error("Connection refused"));
+
       const result = await createEnsDbReader().isReady();
 
       expect(result).toBe(false);
