@@ -82,6 +82,61 @@ describe("EnsDbWriter", () => {
     });
   });
 
+  describe("writeEnsNodeMetadata", () => {
+    it("re-keys the record to the writer's ENSIndexer schema and upserts it", async () => {
+      const ensDbWriter = createEnsDbWriter();
+      const { ensNodeSchema } = ensDbWriter;
+
+      const metadata = {
+        key: EnsNodeMetadataKeys.IndexingMetadataContext,
+        value: { hello: "world" },
+      } as any;
+
+      await ensDbWriter.writeEnsNodeMetadata(metadata);
+
+      expect(insertMock).toHaveBeenCalledWith(ensNodeSchema.metadata);
+      expect(valuesMock).toHaveBeenCalledWith({
+        ensIndexerSchemaName: ensDbClientMock.ensIndexerSchemaName,
+        key: metadata.key,
+        value: metadata.value,
+      });
+      expect(onConflictDoUpdateMock).toHaveBeenCalledWith({
+        target: [ensNodeSchema.metadata.ensIndexerSchemaName, ensNodeSchema.metadata.key],
+        set: { value: metadata.value },
+      });
+    });
+  });
+
+  describe("dropSchema", () => {
+    it("executes a drop schema ... cascade statement", async () => {
+      await createEnsDbWriter().dropSchema("someSchema");
+
+      expect(executeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryChunks: expect.arrayContaining([
+            expect.objectContaining({ value: ["drop schema if exists "] }),
+            expect.objectContaining({ value: [" cascade"] }),
+          ]),
+        }),
+      );
+    });
+  });
+
+  describe("renameSchema", () => {
+    it("executes an alter schema ... rename to statement", async () => {
+      await createEnsDbWriter().renameSchema("from", "to");
+
+      expect(executeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryChunks: expect.arrayContaining([
+            expect.objectContaining({ value: ["alter schema "] }),
+            expect.objectContaining({ value: [" rename to "] }),
+          ]),
+        }),
+      );
+    });
+  });
+
   describe("migrateEnsNodeSchema", () => {
     it("calls drizzle-orm migrate with the correct parameters inside a transaction", async () => {
       const migrationsDirPath = "/path/to/migrations";

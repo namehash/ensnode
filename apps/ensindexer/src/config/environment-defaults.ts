@@ -26,10 +26,10 @@ export const EnvironmentDefaults = {
       PluginName.ProtocolAcceleration,
       PluginName.Registrars,
       PluginName.TokenScope,
+      PluginName.Unigraph,
     ].join(","),
-    // TODO: set these to the most up-to-date ENSRainbow Label Set
-    LABEL_SET_ID: "subgraph",
-    LABEL_SET_VERSION: "0",
+    LABEL_SET_ID: "searchlight",
+    LABEL_SET_VERSION: "1",
   },
 } satisfies Record<string, Partial<ENSIndexerEnvironment>>;
 

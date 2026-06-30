@@ -1,0 +1,5 @@
+# Secrets and per-run state — never commit. Configure via env (CI) or a local copy of config.example.sh.
+scripts/config.sh
+scripts/.box-id
+scripts/.box-host
+scripts/.known_hosts

@@ -1,9 +1,10 @@
 import { createApp } from "@/lib/hono-factory";
+import { assertApiReadinessMiddleware } from "@/middleware/assert-api-readiness.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import { realtimeGetMeta } from "./realtime-api.routes";
 
-const app = createApp({ middlewares: [indexingStatusMiddleware] });
+const app = createApp({ middlewares: [assertApiReadinessMiddleware, indexingStatusMiddleware] });
 
 // allow performance monitoring clients to read HTTP Status for the provided
 // `maxWorstCaseDistance` param
