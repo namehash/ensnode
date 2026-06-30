@@ -1,5 +1,14 @@
 # ensrainbow
 
+## 1.17.0
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af)]:
+  - @ensnode/ensnode-sdk@1.17.0
+  - enssdk@1.17.0
+  - @ensnode/ensrainbow-sdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

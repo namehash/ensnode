@@ -1,5 +1,12 @@
 # @docs/ensrainbow
 
+## 1.17.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes
