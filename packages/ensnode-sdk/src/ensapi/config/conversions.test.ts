@@ -10,6 +10,7 @@ import type { EnsApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
   versionInfo: {
+    commit: "f3e7c0d",
     ensApi: "1.9.0",
     ensNormalize: "1.11.1",
   },
@@ -23,6 +24,7 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     ensRainbowPublicConfig: {
       serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
       versionInfo: {
+        commit: "f3e7c0d",
         ensRainbow: "0.36.0",
       },
     },
@@ -31,6 +33,7 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     plugins: [PluginName.Subgraph],
     versionInfo: {
+      commit: "f3e7c0d",
       ensDb: "0.36.0",
       ensIndexer: "0.36.0",
       ensNormalize: "1.1.1",
@@ -48,6 +51,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
 
       expect(result).toEqual({
         versionInfo: {
+          commit: "f3e7c0d",
           ensApi: "1.9.0",
           ensNormalize: "1.11.1",
         },
@@ -61,6 +65,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           ensRainbowPublicConfig: {
             serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
             versionInfo: {
+              commit: "f3e7c0d",
               ensRainbow: "0.36.0",
             },
           },
@@ -69,6 +74,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
           plugins: [PluginName.Subgraph],
           versionInfo: {
+            commit: "f3e7c0d",
             ensDb: "0.36.0",
             ensIndexer: "0.36.0",
             ensNormalize: "1.1.1",
@@ -98,6 +104,20 @@ describe("ENSApi Config Serialization/Deserialization", () => {
 
       expect(() => deserializeEnsApiPublicConfig(invalidConfig, "testConfig")).toThrow(
         /testConfig.versionInfo.ensApi/,
+      );
+    });
+
+    it("rejects an empty commit hash", () => {
+      const invalidConfig = {
+        ...MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG,
+        versionInfo: {
+          ...MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG.versionInfo,
+          commit: "",
+        },
+      };
+
+      expect(() => deserializeEnsApiPublicConfig(invalidConfig, "testConfig")).toThrow(
+        /testConfig.versionInfo.commit/,
       );
     });
   });

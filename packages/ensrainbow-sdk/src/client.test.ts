@@ -357,6 +357,7 @@ describe("EnsRainbowApiClient", () => {
           highestLabelSetVersion: 5,
         },
         versionInfo: {
+          commit: "f3e7c0d",
           ensRainbow: "2.0.0",
         },
       };

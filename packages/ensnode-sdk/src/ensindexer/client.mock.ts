@@ -20,6 +20,7 @@ export const configResponseMock = {
       highestLabelSetVersion: 0,
     },
     versionInfo: {
+      commit: "f3e7c0d",
       ensRainbow: "0.31.0",
     },
   },
@@ -35,6 +36,7 @@ export const configResponseMock = {
   ],
   versionInfo: {
     ponder: "0.11.43",
+    commit: "f3e7c0d",
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",
     ensNormalize: "1.11.1",

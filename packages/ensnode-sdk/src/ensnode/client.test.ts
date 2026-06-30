@@ -62,6 +62,7 @@ const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
   versionInfo: {
+    commit: "f3e7c0d",
     ensApi: "1.9.0",
     ensNormalize: "1.11.1",
   },
@@ -73,6 +74,7 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
     ensRainbowPublicConfig: {
       serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
       versionInfo: {
+        commit: "f3e7c0d",
         ensRainbow: "1.9.0",
       },
     },
@@ -94,6 +96,7 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
     ],
     versionInfo: {
       ponder: "0.11.43",
+      commit: "f3e7c0d",
       ensDb: "1.9.0",
       ensIndexer: "1.9.0",
       ensNormalize: "1.11.1",
@@ -111,6 +114,7 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
   ensRainbowPublicConfig: {
     serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
     versionInfo: {
+      commit: "f3e7c0d",
       ensRainbow: "1.9.0",
     },
   },
@@ -132,6 +136,7 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
   ],
   versionInfo: {
     ponder: "0.11.43",
+    commit: "f3e7c0d",
     ensDb: "1.9.0",
     ensIndexer: "1.9.0",
     ensNormalize: "1.11.1",
@@ -141,6 +146,7 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
 const EXAMPLE_ENSRAINBOW_PUBLIC_CONFIG = {
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
   versionInfo: {
+    commit: "f3e7c0d",
     ensRainbow: "1.9.0",
   },
 } satisfies SerializedEnsRainbowPublicConfig;

@@ -95,12 +95,14 @@ describe("ENSIndexer: Config", () => {
         expect(
           makeEnsIndexerVersionInfoSchema().parse({
             ponder: "0.11.25",
+            commit: "f3e7c0d",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
           } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
           ponder: "0.11.25",
+          commit: "f3e7c0d",
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
           ensNormalize: "1.11.1",
@@ -110,6 +112,7 @@ describe("ENSIndexer: Config", () => {
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
               ponder: "",
+              commit: "",
               ensDb: "",
               ensIndexer: "",
               ensNormalize: "",
@@ -117,6 +120,8 @@ describe("ENSIndexer: Config", () => {
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
   → at ponder
+✖ Value must be a non-empty string.
+  → at commit
 ✖ Value must be a non-empty string.
   → at ensDb
 ✖ Value must be a non-empty string.
@@ -130,6 +135,7 @@ describe("ENSIndexer: Config", () => {
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
               ponder: "0.11.25",
+              commit: "f3e7c0d",
               ensDb: "0.32.0",
               ensIndexer: "0.33.0", // Different from ensDb
               ensNormalize: "1.11.1",
@@ -146,6 +152,7 @@ describe("ENSIndexer: Config", () => {
               highestLabelSetVersion: 0,
             },
             versionInfo: {
+              commit: "f3e7c0d",
               ensRainbow: "0.32.0",
             },
           },
@@ -156,6 +163,7 @@ describe("ENSIndexer: Config", () => {
           ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
             ponder: "0.11.25",
+            commit: "f3e7c0d",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
@@ -197,6 +205,7 @@ describe("ENSIndexer: Config", () => {
               highestLabelSetVersion: 0,
             },
             versionInfo: {
+              commit: "f3e7c0d",
               ensRainbow: "0.32.0",
             },
           },
@@ -211,6 +220,7 @@ describe("ENSIndexer: Config", () => {
           ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
             ponder: "0.11.25",
+            commit: "f3e7c0d",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",

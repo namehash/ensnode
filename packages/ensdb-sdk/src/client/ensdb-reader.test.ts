@@ -140,7 +140,7 @@ describe("EnsDbReader", () => {
       };
       const ensRainbowPublicConfig = {
         serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-        versionInfo: { ensRainbow: "1.9.0" },
+        versionInfo: { commit: "f3e7c0d", ensRainbow: "1.9.0" },
       };
       const stackInfo = buildEnsIndexerStackInfo(
         ensDbPublicConfig,
@@ -185,7 +185,7 @@ describe("EnsDbReader", () => {
       };
       const ensRainbowPublicConfig = {
         serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-        versionInfo: { ensRainbow: "1.9.0" },
+        versionInfo: { commit: "f3e7c0d", ensRainbow: "1.9.0" },
       };
       const stackInfo = buildEnsIndexerStackInfo(
         ensDbPublicConfig,

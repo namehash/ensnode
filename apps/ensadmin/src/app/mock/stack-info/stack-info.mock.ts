@@ -17,12 +17,14 @@ const COMMON_ENSDB_CONFIG = {
 
 const COMMON_ENSINDEXER_VERSION_INFO = {
   ponder: "0.11.43",
+  commit: "f3e7c0d",
   ensDb: "1.9.0",
   ensIndexer: "1.9.0",
   ensNormalize: "1.11.1",
 } as const;
 
 const COMMON_ENSAPI_VERSION_INFO = {
+  commit: "f3e7c0d",
   ensApi: "1.9.0",
   ensNormalize: "1.11.1",
 } as const;
@@ -38,6 +40,7 @@ const COMMON_ENSRAINBOW_CONFIG = {
     highestLabelSetVersion: 0,
   },
   versionInfo: {
+    commit: "f3e7c0d",
     ensRainbow: "1.9.0",
   },
 } as const;
@@ -205,6 +208,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
         },
         versionInfo: {
           ponder: "",
+          commit: "",
           ensDb: "",
           ensIndexer: "",
           ensNormalize: "",
@@ -220,6 +224,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
             highestLabelSetVersion: -1,
           },
           versionInfo: {
+            commit: "",
             ensRainbow: "",
           },
         },
@@ -233,6 +238,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       },
       versionInfo: {
         ponder: "",
+        commit: "",
         ensDb: "",
         ensIndexer: "",
         ensNormalize: "",
@@ -244,6 +250,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       isSubgraphCompatible: true,
       ensRainbowPublicConfig: {
         versionInfo: {
+          commit: "",
           ensRainbow: "",
         },
         serverLabelSet: {
@@ -254,6 +261,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
     },
     ensRainbow: {
       versionInfo: {
+        commit: "",
         ensRainbow: "",
       },
       serverLabelSet: {

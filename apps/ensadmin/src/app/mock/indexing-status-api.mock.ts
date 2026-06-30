@@ -37,6 +37,7 @@ const serializedEnsIndexerPublicConfig = {
     },
     versionInfo: {
       ensRainbow: "1.9.0",
+      commit: "f3e7c0d",
     },
   },
   isSubgraphCompatible: false,
@@ -52,6 +53,7 @@ const serializedEnsIndexerPublicConfig = {
   ],
   versionInfo: {
     ponder: "0.11.43",
+    commit: "f3e7c0d",
     ensIndexer: "1.9.0",
     ensDb: "1.9.0",
     ensNormalize: "1.11.1",
@@ -65,6 +67,7 @@ export const serializedEnsApiPublicConfig = {
     url: "https://api.thegraph.com/subgraphs/name/ensdomains/ens",
   },
   versionInfo: {
+    commit: "f3e7c0d",
     ensApi: "1.9.0",
     ensNormalize: "1.11.1",
   },

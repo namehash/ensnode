@@ -29,7 +29,7 @@ const mockEnsIndexerPublicConfig = {
   ensIndexerSchemaName: "ensindexer_0",
   ensRainbowPublicConfig: {
     serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    versionInfo: { ensRainbow: "1.9.0" },
+    versionInfo: { commit: "f3e7c0d", ensRainbow: "1.9.0" },
   },
   clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   indexedChainIds: new Set([1]),
@@ -38,6 +38,7 @@ const mockEnsIndexerPublicConfig = {
   plugins: [],
   versionInfo: {
     ponder: "0.11.0",
+    commit: "f3e7c0d",
     ensDb: "1.0.0",
     ensIndexer: "1.0.0",
     ensNormalize: "1.0.0",
@@ -46,7 +47,7 @@ const mockEnsIndexerPublicConfig = {
 
 const mockEnsRainbowPublicConfig = {
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-  versionInfo: { ensRainbow: "1.9.0" },
+  versionInfo: { commit: "f3e7c0d", ensRainbow: "1.9.0" },
 };
 
 const mockStackInfo = {

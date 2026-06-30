@@ -400,6 +400,7 @@ describe("buildEnsRainbowPublicConfig", () => {
     expect(result).toStrictEqual({
       serverLabelSet: dbConfig.serverLabelSet,
       versionInfo: {
+        commit: "unknown",
         ensRainbow: packageJson.version,
       },
     } satisfies EnsRainbowPublicConfig);
