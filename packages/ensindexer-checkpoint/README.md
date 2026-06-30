@@ -111,8 +111,30 @@ considers incompatible, so it's a deliberate operator action, not part of the pi
   locks/<configs>-<sha>[-t<ts>]               # best-effort run lock (GH concurrency is the hard one)
 ```
 
+## Surviving a dead orchestrating runner
+
+The index is long (hours) and the orchestrating CI runner may not outlive it (e.g. an ephemeral
+runner VM gets reclaimed). The pipeline is built so a lost runner never loses indexing work:
+
+- **Detached producer.** `remote-launch.sh` starts `remote-checkpoint.sh` under `setsid` on the box,
+  so it is NOT killed when the SSH session (and thus the runner) dies. The orchestrator only
+  *supervises* — streaming the box's `checkpoint.log` and polling `checkpoint.status` — so its death
+  stops supervision, not indexing.
+- **Re-attach on re-run.** The box hostname is deterministic per-sha (`ensindexer-checkpoint-<sha>`).
+  `cherry-up.sh` discovers an existing box by hostname (via the Cherry API) and reconnects instead of
+  provisioning a new one, and `remote-launch.sh` re-attaches to the still-running session rather than
+  restarting. So re-running the workflow resumes a still-live box.
+- **Durable progress.** Each config is dumped + uploaded to R2 the moment *it* finishes
+  (not after a barrier waiting for all configs). Combined with the sha-keyed R2 skip, a re-run — even
+  on a fresh box (if the original was already reaped) — reuses every already-completed checkpoint and
+  only re-indexes what is missing.
+
+> Re-attach has a window: the box is collected at `MAX_AGE_HOURS` (reaper) or `SELF_DESTRUCT_HOURS`
+> (watchdog), so a re-run after that provisions fresh and re-indexes the not-yet-banked configs.
+
 ## Safety
 
 The box is never left running, even on crash: (1) `cherry-down.sh` in an `if: always()` teardown,
 (2) an on-box self-destruct watchdog (`SELF_DESTRUCT_HOURS`), and (3) a scheduled garbage-collector
-workflow (`checkpoint_gc.yml`) that terminates any `ensindexer-checkpoint-*` box past its TTL.
+workflow (`checkpoint_gc.yml`) that terminates any `ensindexer-checkpoint-*` box past its TTL (with
+retry/backoff against transient Cherry API 5xx).

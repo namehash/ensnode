@@ -24,6 +24,10 @@ source "$(dirname "$0")/lib.sh"
 MODE="${MODE:-full-backfill}"
 DO_LOAD="${DO_LOAD:-0}"
 REMOTE_DIR="checkpoint-scripts"
+# Deterministic per-sha box hostname so a re-run (e.g. after the orchestrating runner died) discovers
+# and RE-ATTACHES to the same still-running box instead of provisioning a fresh one. Still matches the
+# reaper's `ensindexer-checkpoint-*` glob.
+export BOX_HOSTNAME="ensindexer-checkpoint-${SHA:0:12}"
 [ "$DO_LOAD" = "1" ] && : "${VERSION:?DO_LOAD requires VERSION}" "${TARGET_URL:?DO_LOAD requires TARGET_URL}"
 
 cleanup() { [ "${KEEP_BOX:-0}" = "1" ] || bash "$LIB_DIR/cherry-down.sh"; }
@@ -59,8 +63,35 @@ else
   on_box "cd ~/$REMOTE_DIR && bash remote-provision.sh"
 fi
 
-log "producing checkpoints on the box (the long part)"
-on_box "cd ~/$REMOTE_DIR && set -a && . ./.run-env && set +a && bash remote-checkpoint.sh; rc=\$?; rm -f ./.run-env; exit \$rc"
+log "launching detached producer on the box (the long part)"
+# Launch the producer DETACHED on the box (or re-attach if it is already running/done). Because it is
+# detached (setsid), it keeps running if THIS runner dies — and a re-run re-discovers the box
+# (cherry-up by hostname) and re-enters the supervise loop below. The producer's progress is durable
+# regardless: each config banks its checkpoint to R2 the moment it finishes (remote-checkpoint.sh), so
+# even a fresh box on re-run reuses already-completed configs.
+on_box "cd ~/$REMOTE_DIR && bash remote-launch.sh"
+
+# Supervise: stream the producer's box log incrementally (so progress shows in the job log) and poll
+# its status until DONE/FAILED. Each iteration is one short SSH — a dropped connection or dead runner
+# does not stop the detached producer; re-running this workflow resumes supervision from offset 0.
+log "supervising detached producer (streaming box log; survives runner restart)"
+offset=0
+while true; do
+  chunk="$(on_box "tail -c +$((offset + 1)) ~/$REMOTE_DIR/checkpoint.log 2>/dev/null
+echo
+echo \"__OFF__\$(wc -c <~/$REMOTE_DIR/checkpoint.log 2>/dev/null || echo $offset)\"
+echo \"__ST__\$(cat ~/$REMOTE_DIR/checkpoint.status 2>/dev/null || echo RUNNING)\"" || true)"
+  st="$(printf '%s\n' "$chunk" | sed -n 's/^__ST__//p' | tail -1)"
+  newoff="$(printf '%s\n' "$chunk" | sed -n 's/^__OFF__//p' | tail -1)"
+  # Echo the new log bytes (strip the trailing marker lines) so the box's progress streams to the job log.
+  printf '%s\n' "$chunk" | sed '/^__OFF__/d; /^__ST__/d' | sed -e '${/^$/d}'
+  case "${st:-RUNNING}" in
+  DONE) log "producer reported DONE — checkpoints are in R2" && break ;;
+  FAILED) die "producer reported FAILED (see streamed log above)" ;;
+  esac
+  [[ "$newoff" =~ ^[0-9]+$ ]] && offset="$newoff"
+  sleep 30
+done
 
 # Checkpoints are now in R2 and the box has nothing left to do — tear it down BEFORE the load so we
 # stop paying for bare metal during the (much longer, destination-bound) restore.

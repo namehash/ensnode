@@ -16,6 +16,32 @@ if [ -n "$(box_id)" ]; then
   exit 0
 fi
 
+# Re-attach: if a box for THIS run already exists (matched by the deterministic hostname), reuse it
+# instead of provisioning a new one. Covers a re-run after the orchestrating runner died mid-index —
+# the detached producer kept running on the box, so we reconnect and resume supervising it. The local
+# .box-id/.box-host don't survive to a fresh runner, so we discover via the Cherry API by hostname.
+existing="$(curl -fsS "${AUTH[@]}" "$API/projects/$CHERRY_PROJECT_ID/servers" 2>/dev/null \
+  | jq -r --arg h "$BOX_HOSTNAME" 'map(select(.hostname == $h and (.state == "active" or .state == "provisioning"))) | (.[0].id // empty)' 2>/dev/null || true)"
+if [ -n "$existing" ]; then
+  log "re-attaching to existing box $existing (hostname $BOX_HOSTNAME)"
+  echo "$existing" >"$LIB_DIR/.box-id"
+  ip=""
+  for _ in $(seq 1 120); do
+    s=$(curl -fsS "${AUTH[@]}" "$API/servers/$existing" 2>/dev/null || true)
+    ip=$(echo "$s" | jq -r '[.ip_addresses[]? | select(.type=="primary-ip" or .type=="public") | .address] | first // empty' 2>/dev/null || true)
+    [ -n "$ip" ] && break
+    sleep 15
+  done
+  [ -n "$ip" ] || die "existing box $existing has no public IP yet"
+  echo "$ip" >"$LIB_DIR/.box-host"
+  log "waiting for SSH to $ip"
+  for _ in $(seq 1 30); do on_box true >/dev/null 2>&1 && break; sleep 10; done
+  on_box true >/dev/null 2>&1 || die "timed out waiting for SSH to re-attached box $ip"
+  # Watchdog is already armed on this box from its original cherry-up; don't stack another.
+  log "re-attached: ssh -i $SSH_KEY ${BOX_USER:-root}@$ip"
+  exit 0
+fi
+
 # CHERRY_REGION may be a space-separated fallback list: bare-metal stock is region-specific and
 # transient, so an out-of-stock region rolls over to the next one before giving up.
 id=""

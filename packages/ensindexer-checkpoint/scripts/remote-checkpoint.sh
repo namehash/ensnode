@@ -62,28 +62,46 @@ for c in "${CONFIG_LIST[@]}"; do
   fi
 done
 
-# ── index the missing configs in parallel into the shared postgres ───────────
+# Index ONE config to is_ready, then immediately dump its schema and upload the sha-keyed checkpoint —
+# so each config is banked to R2 the moment IT finishes, independent of its siblings. A later failure
+# (or a runner/box loss) then never discards an already-completed config: the sha-keyed R2 check above
+# skips it on the next run. (Previously dump+upload ran only after a barrier waiting for ALL configs,
+# so a slow/failed sibling stranded a finished config's work.)
+produce_one() {
+  local c="$1" i="$2" sch cn ld
+  sch="$(box_schema "$c")"
+  cn="$(ckpt_name "$c")"
+  ld="$DATA_MOUNT/$cn"
+  CONFIG="$c" SHA="$SHA" SCHEMA="$sch" MODE="$MODE" \
+    INDEXER_PORT="$((42069 + i * 100))" RAINBOW_PORT="$((3223 + i))" \
+    RAINBOW_DATA_DIR="$DATA_MOUNT/ensrainbow-$c" ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-}" \
+    TIMESTAMP="${TIMESTAMP:-}" \
+    bash "$LIB_DIR/remote-index-one.sh"
+  log "[$c] index done; dumping schema $sch -> $ld (+ metadata sidecar)"
+  ensdb_cli dump "$sch" --from "$ENSDB_URL" -f "$ld"
+  log "[$c] uploading checkpoint + metadata to R2 ($cn)"
+  rclone copyto "$ld" "$(r2_checkpoint "$cn")"
+  rclone copyto "$ld.metadata.json" "$(r2_checkpoint "$cn.metadata.json")"
+  log "[$c] checkpoint banked in R2"
+}
+
+# ── index + dump + upload the missing configs in parallel into the shared postgres ───────────
 if [ "${#NEED[@]}" -gt 0 ]; then
   log "rehydrating storage + ponder_sync (shared by all configs)"
   bash "$LIB_DIR/remote-rehydrate.sh"
 
-  log "indexing in parallel: ${NEED[*]}"
+  log "producing (index -> dump -> upload, each banked as it finishes) in parallel: ${NEED[*]}"
   declare -A PID
   i=0
   for c in "${NEED[@]}"; do
-    sch="$(box_schema "$c")"
     # Stream each config's output (stdout+stderr) live to this script's stdout, which flows back over
-    # the SSH session into the GitHub job log — so the box's indexing progress is visible there in real
-    # time. `tee` keeps a raw copy for the failure tail; the subshell records remote-index-one.sh's real
-    # exit code to a file (the pipeline's own status is sed's, always 0); `sed -u` prefixes per config.
-    ( CONFIG="$c" SHA="$SHA" SCHEMA="$sch" MODE="$MODE" \
-        INDEXER_PORT="$((42069 + i * 100))" RAINBOW_PORT="$((3223 + i))" \
-        RAINBOW_DATA_DIR="$DATA_MOUNT/ensrainbow-$c" ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-}" \
-        TIMESTAMP="${TIMESTAMP:-}" \
-        bash "$LIB_DIR/remote-index-one.sh"; echo "$?" >"/tmp/index-$c.rc" ) 2>&1 \
+    # the SSH session into the GitHub job log — so the box's progress is visible there in real time.
+    # `tee` keeps a raw copy for the failure tail; the subshell records produce_one's real exit code to
+    # a file (the pipeline's own status is sed's, always 0); `sed -u` prefixes per config.
+    ( produce_one "$c" "$i"; echo "$?" >"/tmp/index-$c.rc" ) 2>&1 \
       | tee "/tmp/index-$c.out" | sed -u "s/^/[$c] /" &
     PID[$c]=$!
-    log "  -> $c indexing (schema $sch, indexer :$((42069 + i * 100)), rainbow :$((3223 + i)))"
+    log "  -> $c started (schema $(box_schema "$c"), indexer :$((42069 + i * 100)), rainbow :$((3223 + i)))"
     i=$((i + 1))
   done
 
@@ -92,26 +110,14 @@ if [ "${#NEED[@]}" -gt 0 ]; then
     wait "${PID[$c]}" || true
     rc="$(cat "/tmp/index-$c.rc" 2>/dev/null || echo 1)"
     if [ "$rc" = 0 ]; then
-      log "$c index complete"
+      log "$c complete (checkpoint in R2)"
     else
-      warn "$c index FAILED (rc=$rc) — last 80 lines:"
+      warn "$c FAILED (rc=$rc) — last 80 lines:"
       tail -80 "/tmp/index-$c.out" >&2
       FAIL=1
     fi
   done
-  [ "$FAIL" = 0 ] || die "one or more parallel indexes failed"
-
-  log "dumping + uploading sha-keyed checkpoints for: ${NEED[*]}"
-  for c in "${NEED[@]}"; do
-    sch="$(box_schema "$c")"
-    cn="$(ckpt_name "$c")"
-    ld="$DATA_MOUNT/$cn"
-    log "[$c] dumping schema $sch -> $ld (+ metadata sidecar)"
-    ensdb_cli dump "$sch" --from "$ENSDB_URL" -f "$ld"
-    log "[$c] uploading checkpoint + metadata to R2"
-    rclone copyto "$ld" "$(r2_checkpoint "$cn")"
-    rclone copyto "$ld.metadata.json" "$(r2_checkpoint "$cn.metadata.json")"
-  done
+  [ "$FAIL" = 0 ] || die "one or more configs failed to produce a checkpoint"
 fi
 
 # ── refresh the canonical R2 seed once (shared ponder_sync now spans all chains) ──

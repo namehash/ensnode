@@ -32,7 +32,19 @@ jobs:
           set -euo pipefail
           API=https://api.cherryservers.com/v1
           now=$(date +%s)
-          servers="$(curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" "$API/projects/$CHERRY_PROJECT_ID/servers")"
+          # Retry the list call with backoff: Cherry's API returns transient 5xx, and a single one
+          # shouldn't fail the GC (a `-fsS` death on one 500 is what previously broke a run). Only fail
+          # after exhausting retries, so a *persistent* outage still surfaces rather than masking a leak.
+          servers=""
+          for attempt in 1 2 3 4 5; do
+            if servers="$(curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" "$API/projects/$CHERRY_PROJECT_ID/servers")"; then
+              break
+            fi
+            echo "list servers attempt $attempt failed; retrying in $((attempt * 10))s" >&2
+            sleep "$((attempt * 10))"
+            servers=""
+          done
+          [ -n "$servers" ] || { echo "could not list Cherry servers after retries" >&2; exit 1; }
           echo "$servers" | jq -c '.[]?' | while read -r s; do
             id="$(echo "$s" | jq -r '.id')"
             host="$(echo "$s" | jq -r '.hostname // ""')"
@@ -47,7 +59,11 @@ jobs:
             age=$(( (now - cts) / 3600 ))
             if [ "$age" -ge "$MAX_AGE_HOURS" ]; then
               echo "collecting server $id ($host, ${age}h old)"
-              curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" -X DELETE "$API/servers/$id" || true
+              for attempt in 1 2 3; do
+                curl -fsS -H "Authorization: Bearer $CHERRY_API_TOKEN" -X DELETE "$API/servers/$id" && break
+                echo "delete $id attempt $attempt failed; retrying in $((attempt * 5))s" >&2
+                sleep "$((attempt * 5))"
+              done
             else
               echo "keep server $id ($host, ${age}h old)"
             fi
