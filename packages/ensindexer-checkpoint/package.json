@@ -1,0 +1,11 @@
+{
+  "name": "@ensnode/ensindexer-checkpoint",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bash orchestration to produce ENSIndexer checkpoints on disposable Cherry Servers hardware and load them into target ENSDb instances.",
+  "license": "MIT",
+  "scripts": {
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci"
+  }
+}

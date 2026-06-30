@@ -57,6 +57,66 @@ If you see frequent RPC errors:
 - **Spread load across providers.** [Configure multiple RPC endpoints](/docs/services/ensindexer/usage/configuration) for each indexed chain.
 - **Reduce the number of active plugins or chains.** Fewer plugins means fewer events to fetch.
 
+## ENSIndexer runtime tuning issues
+
+When your ENSIndexer instance has multiple plugins active, it may need extra runtime tuning.
+
+### Heap out of memory
+
+#### Issue
+
+Your ENSIndexer instance may run out of memory and crash with a message like:
+
+```log
+1: 0x744ae8 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [node]
+<--- Last few GCs --->
+[15:0x1a5ac000] 15584424 ms: Mark-Compact (reduce) 1984.5 (2054.3) -> 1954.0 (1988.5) MB, pooled: 0 MB, 97.37 / 0.21 ms  (+ 776.3 ms in 87 steps since start of marking, biggest step 54.4 ms, walltime since start of marking 999 ms) (average mu = 0.397, cur
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+[15:0x1a5ac000] 15583426 ms: Scavenge 1985.0 (2018.3) -> 1978.0 (2053.1) MB, pooled: 0 MB, 20.34 / 0.00 ms  (average mu = 0.366, current mu = 0.360) allocation failure;
+2: 0xc1a6f0  [node]
+3: 0xc1a7df  [node]
+4: 0xebdfe5  [node]
+5: 0xebe012  [node]
+6: 0xebe30a  [node]
+7: 0xecf00a  [node]
+8: 0xed33b0  [node]
+9: 0x1965811  [node]
+Aborted
+```
+
+#### Resolution
+
+Increase the Node.js heap size with the `NODE_OPTIONS` environment variable for your ENSIndexer instance.
+
+```bash
+NODE_OPTIONS=--max-old-space-size=4096
+```
+
+This is especially useful when running many plugins or chains and RPC retries temporarily spike memory usage.
+
+### Database statement timeout errors
+
+#### Issue
+
+Your ENSIndexer instance may fail to complete long-running internal Ponder queries, and you see errors like:
+
+```log
+error: canceling statement due to statement timeout
+```
+
+#### Resolution
+
+Extend Ponder's internal SQL statement timeout with the `PONDER_STATEMENT_TIMEOUT` environment variable (value in milliseconds) for your ENSIndexer instance.
+
+```bash
+PONDER_STATEMENT_TIMEOUT=600000
+```
+
+This gives enough time, up to 10 minutes, for long-running internal queries on large datasets.
+
+These overrides are typically only needed for ENSIndexer instances that are indexing multiple chains.
+
 ## Next steps
 
 <LinkCard

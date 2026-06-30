@@ -605,7 +605,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("LABEL_SET_VERSION", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "searchlight", labelSetVersion: 1 },
         });
       });
     });

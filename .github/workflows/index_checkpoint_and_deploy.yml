@@ -1,0 +1,427 @@
+name: "[next] Checkpoint: index release-candidate on Cherry, load, and deploy (Blue/Green)"
+
+# Productionized remote-checkpoint flow with three sequential deploy/index phases so the light
+# (from-scratch) configs index on Railway in parallel with the heavy Cherry checkpointing:
+#
+#   1. deploy-light  — deploy the RC commit to sepolia/alphaSepolia/v2Sepolia (these index from
+#                      scratch on Railway), with their schema vars set to <ns>Schema<version>.
+#   2. index-checkpoint — index alpha + mainnet IN PARALLEL on a single disposable Cherry box
+#                      (shared Postgres + ponder_sync), producing checkpoints uploaded to R2 and
+#                      refreshing the R2 seed. The Cherry box ONLY produces; no target load happens
+#                      here so the bare-metal box is torn down promptly.
+#   2b. load         — on a plain runner (NO Cherry), download the checkpoints from R2 and restore
+#                      them into the target env's Postgres as warm <ns>Schema<version>. The restore
+#                      is bound by the destination Postgres (~4h), so it runs after the box is gone
+#                      and a load-only re-run needs no Cherry box.
+#   3. deploy-heavy  — once the warm schemas are loaded, deploy alpha + mainnet so their indexers
+#                      resume in minutes from the warm schemas.
+#
+# Manual trigger only. Yellow (Render/Terraform) is out of scope for this workflow — see the plan.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target environment (green or blue)"
+        required: true
+        type: choice
+        options:
+          - green
+          - blue
+      commit:
+        description: "Commit to index (default: head of the open 'Release New Version' PR)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: checkpoint-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      version: ${{ steps.resolve.outputs.version }}
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      INPUT_COMMIT: ${{ inputs.commit }}
+    steps:
+      - name: Resolve RC commit, version, and image tag
+        id: resolve
+        run: |
+          set -euo pipefail
+          if [ -n "$INPUT_COMMIT" ]; then
+            SHA="$INPUT_COMMIT"
+          else
+            # The changesets bot opens the "Release New Version" PR on branch changeset-release/main.
+            SHA="$(gh pr list --repo ${{ github.repository }} --head changeset-release/main --state open --json headRefOid -q '.[0].headRefOid')"
+          fi
+          # gh prints the literal string "null" when no PR matches the jq path; treat empty/null as fatal.
+          [ -n "$SHA" ] && [ "$SHA" != "null" ] || { echo "No open 'Release New Version' PR found; pass an explicit commit input."; exit 1; }
+          # Full 40-char sha; build_docker_image's type=sha produces sha-<7>.
+          SHORT="$(echo "$SHA" | cut -c1-7)"
+          VERSION="$(gh api repos/${{ github.repository }}/contents/apps/ensindexer/package.json?ref=$SHA -q '.content' | base64 -d | jq -r '.version')"
+          [ -n "$VERSION" ] && [ "$VERSION" != "null" ] || { echo "could not read version from package.json at $SHA"; exit 1; }
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "image_tag=sha-$SHORT" >> "$GITHUB_OUTPUT"
+          echo "Resolved sha=$SHA version=$VERSION image_tag=sha-$SHORT"
+
+      - name: Validate target ENSDb admin URL is configured
+        run: |
+          case "${{ inputs.target }}" in
+            green) [ -n "${{ secrets.GREEN_ENSDB_ADMIN_URL }}" ] || { echo "GREEN_ENSDB_ADMIN_URL not set"; exit 1; } ;;
+            blue) [ -n "${{ secrets.BLUE_ENSDB_ADMIN_URL }}" ] || { echo "BLUE_ENSDB_ADMIN_URL not set"; exit 1; } ;;
+            *) echo "unsupported target"; exit 1 ;;
+          esac
+
+  build-images:
+    needs: resolve
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ensindexer, ensadmin, ensrainbow, ensapi]
+    steps:
+      - name: Checkout RC commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          fetch-depth: 1
+
+      - name: Build and push sha-tagged image
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          dockerfile: apps/${{ matrix.app }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: |
+            type=raw,value=${{ needs.resolve.outputs.image_tag }}
+            type=sha
+
+  # PHASE 1: deploy the RC to the light (from-scratch) configs so they index on Railway in parallel
+  # with the heavy Cherry checkpointing. ENSRainbow first.
+  deploy-light:
+    needs: [resolve, build-images]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    env:
+      TARGET_ENVIRONMENT: ${{ inputs.target }}
+      VERSION: ${{ needs.resolve.outputs.version }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ needs.resolve.outputs.image_tag }}"
+      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ needs.resolve.outputs.image_tag }}"
+      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ needs.resolve.outputs.image_tag }}"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Resolve light service ids + environment
+        run: |
+          case "$TARGET_ENVIRONMENT" in
+            "green")
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SVC_ID=${{ secrets.GREEN_ENSRAINBOW_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID=${{ secrets.GREEN_ENSRAINBOW_SEARCHLIGHT_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "SEPOLIA_INDEXER_SVC_ID=${{ secrets.GREEN_SEPOLIA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_SEPOLIA_INDEXER_SVC_ID=${{ secrets.GREEN_ALPHA_SEPOLIA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "V2_SEPOLIA_INDEXER_SVC_ID=${{ secrets.GREEN_V2_SEPOLIA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "SEPOLIA_API_SVC_ID=${{ secrets.GREEN_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_SEPOLIA_API_SVC_ID=${{ secrets.GREEN_ALPHA_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "V2_SEPOLIA_API_SVC_ID=${{ secrets.GREEN_V2_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSADMIN_SVC_ID=${{ secrets.GREEN_ENSADMIN_SVC_ID }}" >> "$GITHUB_ENV"
+              ;;
+            "blue")
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SVC_ID=${{ secrets.BLUE_ENSRAINBOW_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID=${{ secrets.BLUE_ENSRAINBOW_SEARCHLIGHT_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "SEPOLIA_INDEXER_SVC_ID=${{ secrets.BLUE_SEPOLIA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_SEPOLIA_INDEXER_SVC_ID=${{ secrets.BLUE_ALPHA_SEPOLIA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "V2_SEPOLIA_INDEXER_SVC_ID=${{ secrets.BLUE_V2_SEPOLIA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "SEPOLIA_API_SVC_ID=${{ secrets.BLUE_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_SEPOLIA_API_SVC_ID=${{ secrets.BLUE_ALPHA_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "V2_SEPOLIA_API_SVC_ID=${{ secrets.BLUE_V2_SEPOLIA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSADMIN_SVC_ID=${{ secrets.BLUE_ENSADMIN_SVC_ID }}" >> "$GITHUB_ENV"
+              ;;
+            *) echo "Environment not recognized"; exit 1 ;;
+          esac
+
+      - name: Set light schema names (<ns>Schema<version>)
+        run: |
+          set_shared_variable() {
+            local environment_id=$1
+            local variable_name=$2
+            local variable_value=$3
+            echo "Setting $variable_name"
+            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
+            # array), so --fail alone misses it; inspect the body and fail loudly.
+            local resp
+            resp="$(curl --request POST \
+              --silent \
+              --fail \
+              --show-error \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
+            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
+              echo "Railway GraphQL error: $resp" >&2
+              exit 1
+            fi
+            echo "Finished setting $variable_name"
+          }
+
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_ENSINDEXER_SCHEMA_NAME" "sepoliaSchema${VERSION}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "alphaSepoliaSchema${VERSION}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "v2SepoliaSchema${VERSION}"
+
+      - name: Update + redeploy ENSRainbow instances (first)
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.ENSRAINBOW_SVC_ID }}
+            ${{ env.ENSRAINBOW_SEARCHLIGHT_SVC_ID }}
+
+      - name: Update + redeploy sepolia ENSIndexer instances
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.SEPOLIA_INDEXER_SVC_ID }}
+            ${{ env.ALPHA_SEPOLIA_INDEXER_SVC_ID }}
+            ${{ env.V2_SEPOLIA_INDEXER_SVC_ID }}
+
+      - name: Update + redeploy sepolia ENSApi instances
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSAPI_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.SEPOLIA_API_SVC_ID }}
+            ${{ env.ALPHA_SEPOLIA_API_SVC_ID }}
+            ${{ env.V2_SEPOLIA_API_SVC_ID }}
+
+      - name: Update + redeploy ENSAdmin
+        # ENSAdmin is a single, namespace-agnostic dashboard — deploy it once here with the RC image
+        # (the existing blue/green deploy always deploys it; this workflow must too).
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: "ghcr.io/namehash/ensnode/ensadmin:${{ needs.resolve.outputs.image_tag }}"
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.ENSADMIN_SVC_ID }}
+
+  # PHASE 2: index alpha + mainnet in parallel on one Cherry box, producing checkpoints to R2 and
+  # refreshing the canonical R2 seed. The box ONLY produces (no load) so it is torn down promptly.
+  index-checkpoint:
+    needs: resolve
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 960 # ensure timeout is large enough for full index
+    env:
+      # Cherry + R2 + RPC come from secrets. Confirm the R2_* secret names match your existing ones.
+      CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
+      CHERRY_PROJECT_ID: ${{ secrets.CHERRY_PROJECT_ID }}
+      CHERRY_SSH_KEY_ID: ${{ secrets.CHERRY_SSH_KEY_ID }}
+      CHERRY_SSH_KEY: ${{ secrets.CHERRY_SSH_KEY }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Write SSH key
+        run: |
+          install -m600 /dev/null /tmp/cherry_key
+          printf '%s\n' "$CHERRY_SSH_KEY" > /tmp/cherry_key
+          echo "SSH_KEY=/tmp/cherry_key" >> "$GITHUB_ENV"
+
+      - name: Produce alpha + mainnet checkpoints on one Cherry box (no load; upload to R2)
+        env:
+          CONFIGS: "alpha mainnet"
+          SHA: ${{ needs.resolve.outputs.sha }}
+          MODE: full-backfill
+          DO_SEED: "1" # refresh the canonical R2 seed from the enriched (all-chain) ponder_sync
+          DO_LOAD: "0" # produce only — no load, no TARGET_URL reaches the box
+        run: bash packages/ensindexer-checkpoint/scripts/checkpoint.sh
+
+      - name: Tear down the Cherry box (always)
+        if: always()
+        run: bash packages/ensindexer-checkpoint/scripts/cherry-down.sh || true
+
+  # PHASE 2b: on a plain runner (NO Cherry), download the checkpoints from R2 and restore them into
+  # the target ENSDb as warm <ns>Schema<version>. The restore is bound by the destination Postgres
+  # (~4h), so it runs after the box is gone and a load-only re-run needs no Cherry box.
+  load:
+    needs: [resolve, index-checkpoint]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 600 # restore is bound by the destination Postgres
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node + pnpm + install dependencies
+        uses: ./.github/actions/setup_node_environment
+
+      - name: Install rclone + PostgreSQL 17 client (the box dumps with pg17)
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y rclone curl ca-certificates lsb-release
+          # PGDG repo for postgresql-client-17 (the Cherry box produces pg17 custom-format dumps; an
+          # older pg_restore cannot read them). pg_wrapper then resolves `pg_restore` to v17.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          pg_restore --version
+
+      - name: Resolve target Postgres URL
+        run: |
+          case "${{ inputs.target }}" in
+            green) echo "TARGET_URL=${{ secrets.GREEN_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
+            blue) echo "TARGET_URL=${{ secrets.BLUE_ENSDB_ADMIN_URL }}" >> "$GITHUB_ENV" ;;
+            *) echo "unsupported target"; exit 1 ;;
+          esac
+
+      - name: Restore alpha + mainnet checkpoints into ${{ inputs.target }}
+        env:
+          CONFIGS: "alpha mainnet"
+          SHA: ${{ needs.resolve.outputs.sha }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          MODE: full-backfill
+          R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: bash packages/ensindexer-checkpoint/scripts/load-checkpoints.sh
+
+  # PHASE 3: once the warm schemas are loaded, deploy alpha + mainnet so they resume from the warm
+  # schemas. ENSRainbow first.
+  deploy-heavy:
+    needs: [resolve, load, deploy-light]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    env:
+      TARGET_ENVIRONMENT: ${{ inputs.target }}
+      VERSION: ${{ needs.resolve.outputs.version }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ needs.resolve.outputs.image_tag }}"
+      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ needs.resolve.outputs.image_tag }}"
+      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ needs.resolve.outputs.image_tag }}"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Resolve heavy service ids + environment
+        run: |
+          case "$TARGET_ENVIRONMENT" in
+            "green")
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SVC_ID=${{ secrets.GREEN_ENSRAINBOW_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID=${{ secrets.GREEN_ENSRAINBOW_SEARCHLIGHT_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_INDEXER_SVC_ID=${{ secrets.GREEN_ALPHA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "MAINNET_INDEXER_SVC_ID=${{ secrets.GREEN_MAINNET_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_API_SVC_ID=${{ secrets.GREEN_ALPHA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "MAINNET_API_SVC_ID=${{ secrets.GREEN_MAINNET_API_SVC_ID }}" >> "$GITHUB_ENV"
+              ;;
+            "blue")
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SVC_ID=${{ secrets.BLUE_ENSRAINBOW_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID=${{ secrets.BLUE_ENSRAINBOW_SEARCHLIGHT_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_INDEXER_SVC_ID=${{ secrets.BLUE_ALPHA_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "MAINNET_INDEXER_SVC_ID=${{ secrets.BLUE_MAINNET_INDEXER_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "ALPHA_API_SVC_ID=${{ secrets.BLUE_ALPHA_API_SVC_ID }}" >> "$GITHUB_ENV"
+              echo "MAINNET_API_SVC_ID=${{ secrets.BLUE_MAINNET_API_SVC_ID }}" >> "$GITHUB_ENV"
+              ;;
+            *) echo "Environment not recognized"; exit 1 ;;
+          esac
+
+      - name: Set heavy schema names (<ns>Schema<version>)
+        run: |
+          set_shared_variable() {
+            local environment_id=$1
+            local variable_name=$2
+            local variable_value=$3
+            echo "Setting $variable_name"
+            # Railway returns HTTP 200 even when the mutation fails (error in the body's `errors`
+            # array), so --fail alone misses it; inspect the body and fail loudly.
+            local resp
+            resp="$(curl --request POST \
+              --silent \
+              --fail \
+              --show-error \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}')"
+            if printf '%s' "$resp" | jq -e '.errors' >/dev/null 2>&1; then
+              echo "Railway GraphQL error: $resp" >&2
+              exit 1
+            fi
+            echo "Finished setting $variable_name"
+          }
+
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_ENSINDEXER_SCHEMA_NAME" "alphaSchema${VERSION}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_ENSINDEXER_SCHEMA_NAME" "mainnetSchema${VERSION}"
+
+      - name: Update + redeploy ENSRainbow instances (first)
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.ENSRAINBOW_SVC_ID }}
+            ${{ env.ENSRAINBOW_SEARCHLIGHT_SVC_ID }}
+
+      - name: Update + redeploy alpha + mainnet ENSIndexer instances
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.ALPHA_INDEXER_SVC_ID }}
+            ${{ env.MAINNET_INDEXER_SVC_ID }}
+
+      - name: Update + redeploy alpha + mainnet ENSApi instances
+        uses: ./.github/actions/deploy_railway_services
+        with:
+          railway_token: ${{ env.RAILWAY_TOKEN }}
+          environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          image: ${{ env.ENSAPI_DOCKER_IMAGE }}
+          project_id: ${{ env.RAILWAY_PROJECT_ID }}
+          service_ids: |
+            ${{ env.ALPHA_API_SVC_ID }}
+            ${{ env.MAINNET_API_SVC_ID }}
