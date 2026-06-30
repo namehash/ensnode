@@ -20,6 +20,7 @@ import {
 import { formatAccountingCsv } from "@/lib/ensanalytics/referrer-leaderboard/format-accounting-csv";
 import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { assertApiReadinessMiddleware } from "@/middleware/assert-api-readiness.middleware";
 import { ensanalyticsApiMiddleware } from "@/middleware/ensanalytics.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { referralEditionSnapshotsCachesMiddleware } from "@/middleware/referral-edition-snapshots-caches.middleware";
@@ -36,6 +37,7 @@ const logger = makeLogger("ensanalytics-api");
 
 const app = createApp({
   middlewares: [
+    assertApiReadinessMiddleware,
     indexingStatusMiddleware,
     ensanalyticsApiMiddleware,
     referralProgramEditionConfigSetMiddleware,
