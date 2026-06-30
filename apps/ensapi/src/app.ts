@@ -7,6 +7,7 @@ import { html } from "hono/html";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
+import { serviceStatusMiddleware } from "@/middleware/service-status.middleware";
 import { generateOpenApi31Document } from "@/openapi-document";
 
 import realtimeApi from "./handlers/api/meta/realtime-api";
@@ -15,7 +16,7 @@ import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
 import ensApiProbesApi from "./handlers/ensapi-probes/ensapi-probes-api";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
 
-const app = createApp();
+const app = createApp({ middlewares: [serviceStatusMiddleware] });
 
 // set the X-ENSNode-Version response header to the current version
 app.use(async (ctx, next) => {

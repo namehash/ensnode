@@ -9,9 +9,11 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
 import type { ReferralEditionSnapshotsCachesMiddlewareVariables } from "@/middleware/referral-edition-snapshots-caches.middleware";
 import type { ReferralProgramEditionConfigSetMiddlewareVariables } from "@/middleware/referral-program-edition-set.middleware";
+import type { ServiceStatusMiddlewareVariables } from "@/middleware/service-status.middleware";
 import type { StackInfoMiddlewareVariables } from "@/middleware/stack-info.middleware";
 
-export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
+export type MiddlewareVariables = ServiceStatusMiddlewareVariables &
+  IndexingStatusMiddlewareVariables &
   IsRealtimeMiddlewareVariables &
   CanAccelerateMiddlewareVariables &
   ReferralProgramEditionConfigSetMiddlewareVariables &
