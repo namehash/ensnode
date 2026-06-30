@@ -100,7 +100,27 @@ jobs:
           ref: ${{ needs.resolve.outputs.sha }}
           fetch-depth: 1
 
+      # Idempotency: sha-tagged images are immutable, so if this app's image already exists in the
+      # registry for this sha (e.g. a re-run after a later job failed), skip the rebuild+push entirely.
+      - name: Probe registry for existing image
+        id: probe
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          TAG: ${{ needs.resolve.outputs.image_tag }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$REGISTRY_TOKEN" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
+          if docker manifest inspect "$IMAGE:$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "$IMAGE:$TAG already in registry — skipping build+push"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "$IMAGE:$TAG not found — will build"
+          fi
+
       - name: Build and push sha-tagged image
+        if: steps.probe.outputs.exists != 'true'
         uses: ./.github/actions/build_docker_image
         with:
           image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
