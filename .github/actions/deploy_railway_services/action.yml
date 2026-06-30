@@ -95,7 +95,7 @@ runs:
             payload="$(jq -n \
               --arg env "$environment_id" --arg sid "$service_id" --arg imageref "$docker_image" \
               --arg proj "$PROJECT_ID" --arg vn "$SCHEMA_VAR_NAME" --arg vv "$SCHEMA_VAR_VALUE" \
-              '{query: "mutation($env: String, $sid: String!, $input: ServiceInstanceUpdateInput!, $proj: String!, $vn: String!, $vv: String!) { setImage: serviceInstanceUpdate(environmentId: $env, serviceId: $sid, input: $input) setSchema: variableUpsert(input: { projectId: $proj, environmentId: $env, name: $vn, value: $vv }) }",
+              '{query: "mutation($env: String!, $sid: String!, $input: ServiceInstanceUpdateInput!, $proj: String!, $vn: String!, $vv: String!) { setImage: serviceInstanceUpdate(environmentId: $env, serviceId: $sid, input: $input) setSchema: variableUpsert(input: { projectId: $proj, environmentId: $env, name: $vn, value: $vv }) }",
                 variables: { env: $env, sid: $sid, input: { source: { image: $imageref } }, proj: $proj, vn: $vn, vv: $vv }}')"
           else
             echo "Updating service $service_id"
