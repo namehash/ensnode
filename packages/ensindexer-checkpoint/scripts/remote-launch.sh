@@ -40,7 +40,8 @@ setsid bash -c '
   echo "$$" >"'"$PGID_FILE"'"
   set -a; . ./.run-env; set +a
   rm -f ./.run-env
-  if bash remote-checkpoint.sh; then echo DONE; else echo FAILED; fi >"'"$STATUS_FILE"'"
+  if bash remote-checkpoint.sh; then rc=DONE; else rc=FAILED; fi
+  echo "$rc" >"'"$STATUS_FILE"'"
   rm -f "'"$PGID_FILE"'"
 ' </dev/null >>"$LOG_FILE" 2>&1 &
 

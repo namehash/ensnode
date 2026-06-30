@@ -89,7 +89,7 @@ while true; do
   chunk="$(on_box "tail -c +$((offset + 1)) ~/$REMOTE_DIR/checkpoint.log 2>/dev/null
 echo
 echo \"__OFF__\$(wc -c <~/$REMOTE_DIR/checkpoint.log 2>/dev/null || echo $offset)\"
-echo \"__ST__\$(cat ~/$REMOTE_DIR/checkpoint.status 2>/dev/null || echo RUNNING)\"" || true)"
+echo \"__ST__\$(tail -1 ~/$REMOTE_DIR/checkpoint.status 2>/dev/null || echo RUNNING)\"" || true)"
   st="$(printf '%s\n' "$chunk" | sed -n 's/^__ST__//p' | tail -1)"
   newoff="$(printf '%s\n' "$chunk" | sed -n 's/^__OFF__//p' | tail -1)"
   # New box log bytes this poll (strip the marker lines + the trailing blank separator).
