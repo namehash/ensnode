@@ -14,6 +14,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 FROM deps AS runner
 WORKDIR /app/apps/ensapi
 ENV NODE_ENV=production
+ARG GIT_COMMIT=unknown
+ENV GIT_COMMIT=$GIT_COMMIT
+LABEL org.opencontainers.image.revision=$GIT_COMMIT
 EXPOSE 4334
 
 CMD ["pnpm", "start"]

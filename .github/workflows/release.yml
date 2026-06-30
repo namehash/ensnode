@@ -155,6 +155,8 @@ jobs:
             type=semver,pattern={{version}},value=${{ matrix.apps.version }}
             type=ref,event=branch
             type=sha
+          build_args: |
+            GIT_COMMIT=${{ github.sha }}
 
   build-lambdas:
     name: ${{ matrix.lambdas.name }} ${{ matrix.lambdas.version }}
