@@ -141,7 +141,10 @@ pg_tuned_opts() {
   cache_mb=$((total_mb * 7 / 10))
   printf -- '-c listen_addresses=localhost -p 5432 -c unix_socket_directories=/tmp'
   printf -- ' -c shared_buffers=%sMB -c effective_cache_size=%sMB' "$shared_mb" "$cache_mb"
-  printf -- ' -c maintenance_work_mem=2GB -c max_wal_size=48GB -c min_wal_size=2GB'
+  # work_mem: the default 4MB spills the indexing queries' sorts/hashes to disk against the multi-10s-GB
+  # ponder_sync/output tables — a measured ~2.4x eps drop. 256MB keeps them in memory (Ponder's small
+  # connection pool bounds total usage well under available RAM on these boxes).
+  printf -- ' -c work_mem=256MB -c maintenance_work_mem=2GB -c max_wal_size=48GB -c min_wal_size=2GB'
   printf -- ' -c checkpoint_timeout=30min -c checkpoint_completion_target=0.9'
   printf -- ' -c synchronous_commit=off -c wal_compression=off'
   printf -- ' -c autovacuum_vacuum_scale_factor=0.4 -c max_parallel_maintenance_workers=4'
