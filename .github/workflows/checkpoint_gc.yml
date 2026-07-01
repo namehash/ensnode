@@ -1,9 +1,16 @@
 name: "[next] Garbage Collector: terminate orphaned ENSIndexer checkpoint Cherry boxes"
 
 # Safety net (the third box-teardown guard, alongside the workflow's always() teardown and the on-box
-# self-destruct watchdog): terminate any Cherry server named `ensindexer-checkpoint-*` older than the
-# TTL, in case a runner died before tearing its box down. Only ever touches checkpoint boxes — never
-# Railway/production.
+# self-destruct watchdog): terminate ORPHANED Cherry servers named `ensindexer-checkpoint-*`, in case a
+# runner died before tearing its box down. Only ever touches checkpoint boxes — never Railway/production.
+#
+# Two-tier "orphaned" test (a fixed age alone is a bad proxy — it once reaped a box mid-index):
+#   1. PRIMARY — if ANY checkpoint workflow run is active (in_progress/queued), a box may legitimately
+#      belong to it, so skip reaping entirely. This is what keeps a live multi-hour index safe.
+#   2. BACKSTOP — only when NO run is active, collect boxes older than MAX_AGE_HOURS. This catches the
+#      true-leak case (dead runner AND failed self-destruct) without racing a live run. The age floor
+#      also spares a box in the brief gap between a runner death and the re-dispatch that RE-ATTACHES to
+#      it (during that gap no run is in_progress, but the box is young).
 
 on:
   schedule:
@@ -12,6 +19,7 @@ on:
 
 permissions:
   contents: read
+  actions: read # read run status of the checkpoint workflows (the primary orphaned-box test)
 
 concurrency:
   group: checkpoint-gc
@@ -24,12 +32,15 @@ jobs:
     env:
       CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
       CHERRY_PROJECT_ID: ${{ secrets.CHERRY_PROJECT_ID }}
+      GH_TOKEN: ${{ github.token }} # for `gh run list` (the active-run guard)
       BOX_HOSTNAME_PREFIX: ensindexer-checkpoint
-      # Backstop-only: this reaper must fire STRICTLY AFTER a box's own self-destruct watchdog
-      # (config.example.sh SELF_DESTRUCT_HOURS=25), so it only ever collects genuinely leaked boxes
-      # (dead runner AND failed self-destruct) — never a box still doing a legitimate multi-hour index.
+      # Space-separated checkpoint workflows that provision boxes; an active run of any of these spares
+      # every checkpoint box this cycle (the primary orphaned-box test above).
+      CHECKPOINT_WORKFLOWS: "index_checkpoint_and_deploy.yml checkpoint.yml"
+      # Backstop age, applied ONLY when no checkpoint run is active. Sits strictly above a box's own
+      # self-destruct watchdog (config.example.sh SELF_DESTRUCT_HOURS=25), so the age tier only ever
+      # collects genuinely leaked boxes (dead runner AND failed self-destruct).
       # Invariant: MAX_AGE_HOURS > SELF_DESTRUCT_HOURS > longest expected index (~14-20h).
-      # (A prior value of 14h reaped a still-indexing box at 14h old — before self-destruct could run.)
       MAX_AGE_HOURS: "28"
     steps:
       - name: Terminate stale checkpoint boxes
@@ -37,6 +48,28 @@ jobs:
           set -euo pipefail
           API=https://api.cherryservers.com/v1
           now=$(date +%s)
+
+          # ── PRIMARY test: never reap while a checkpoint workflow run is active ──────────────────────
+          # A running/queued checkpoint workflow may own any of the boxes (including one it is about to
+          # re-attach to), so if ANY is active we skip this whole cycle. gh failing (API blip) must NOT
+          # let us fall through to deleting boxes — treat an errored count as "active" (fail safe).
+          active=0
+          for wf in $CHECKPOINT_WORKFLOWS; do
+            for st in in_progress queued; do
+              if n="$(gh run list --workflow "$wf" --status "$st" --json databaseId --jq 'length' 2>/dev/null)"; then
+                active=$((active + n))
+              else
+                echo "warn: could not read $wf/$st runs; treating as active (fail-safe)" >&2
+                active=$((active + 1))
+              fi
+            done
+          done
+          if [ "$active" -gt 0 ]; then
+            echo "checkpoint workflow run(s) active ($active) — skipping GC (a box may belong to a live run)"
+            exit 0
+          fi
+          echo "no active checkpoint workflow runs — applying ${MAX_AGE_HOURS}h age backstop"
+
           # Retry the list call with backoff: Cherry's API returns transient 5xx, and a single one
           # shouldn't fail the GC (a `-fsS` death on one 500 is what previously broke a run). Only fail
           # after exhausting retries, so a *persistent* outage still surfaces rather than masking a leak.
