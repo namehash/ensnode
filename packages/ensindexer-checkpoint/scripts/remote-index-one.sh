@@ -137,6 +137,14 @@ INDEXER_PGID="$(tr -d '[:space:]' <"$PGID_FILE" 2>/dev/null || true)"
 # process group dies before is_ready flips, that's a crash regardless of the log text. The error-string
 # scan is a secondary fast-path so we surface a clear failure without waiting for the process to exit.
 log "[$CONFIG] waiting for is_ready=1 (historical backfill complete)"
+# Instantaneous-eps window state. Ponder does not log an events/sec figure in `start` mode (only the
+# dev TUI computes one), so we derive it: each Ponder "Indexed block[ range]" line carries a clean
+# `event_count=<n>` field, and summing those over one poll window / elapsed wall-clock is the TRUE
+# indexing throughput — including RPC-wait gaps — which is exactly the signal that separates a
+# cache-served stretch (thousands eps) from an RPC-bound tail (tens eps). Seed ev_off past the log's
+# current tail so the first window measures only newly-indexed events, not the whole backlog.
+ev_off="$(wc -c <"$INDEXER_LOG" 2>/dev/null || echo 0)"
+ev_last_ts="$(date +%s)"
 while true; do
   status="$(bash "$LIB_DIR/detect-done.sh" "$SCHEMA")"
   # Surface Ponder's own latest backfill progress (%, ETA) alongside the authoritative readiness probe.
@@ -144,7 +152,15 @@ while true; do
   # `pipefail` a bare `prog=$(…)` assignment with a failing pipeline would kill this script on the
   # very first wait-loop iteration (before any is_ready/crash check). Progress is best-effort.
   prog="$(grep -aE "Updated backfill indexing progress" "$INDEXER_LOG" 2>/dev/null | tail -1 | sed -E 's/.*(progress=.*)$/\1/' || true)"
-  echo "$(date +%H:%M:%S) [$CONFIG] $status${prog:+ | $prog}" >&2
+  # Instantaneous eps over this poll window: sum event_count from log bytes appended since last poll,
+  # divide by elapsed seconds. Reported only when the window actually indexed events ("when reported").
+  ev_now="$(wc -c <"$INDEXER_LOG" 2>/dev/null || echo "$ev_off")"
+  ev_sum="$(tail -c +$((ev_off + 1)) "$INDEXER_LOG" 2>/dev/null | grep -aoE 'event_count=[0-9]+' | cut -d= -f2 | awk '{s+=$1} END{print s+0}')"
+  ev_ts="$(date +%s)"; ev_win=$((ev_ts - ev_last_ts)); [ "$ev_win" -lt 1 ] && ev_win=1
+  eps=$(( ${ev_sum:-0} / ev_win ))
+  ev_off="$ev_now"; ev_last_ts="$ev_ts"
+  epstext=""; [ "${ev_sum:-0}" -gt 0 ] && epstext=" | eps=$eps"
+  echo "$(date +%H:%M:%S) [$CONFIG] $status${prog:+ | $prog}${epstext}" >&2
   echo "$status" | grep -q "is_ready=1" && break
   if ! kill -0 -- "-$INDEXER_PGID" 2>/dev/null; then
     warn "[$CONFIG] indexer process group exited before is_ready:"
