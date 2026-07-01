@@ -53,9 +53,13 @@ log "[$CONFIG] starting ensrainbow on :$RAINBOW_PORT (labelset=$LABEL_SET_ID v$L
 mkdir -p "$RAINBOW_DATA_DIR"
 rm -f "$RAINBOW_DATA_DIR/ensrainbow_db_ready"
 sleep 1
-(cd "$REPO_DIR/apps/ensrainbow" &&
-  DATA_DIR="$RAINBOW_DATA_DIR" LABEL_SET_ID="$LABEL_SET_ID" LABEL_SET_VERSION="$LABEL_SET_VERSION" \
-    PORT="$RAINBOW_PORT" pnpm run entrypoint >"/tmp/ensrainbow-$CONFIG.log" 2>&1) &
+# setsid (NOT a bare `( … ) &`): ENSRainbow is a long-lived server. As a direct background child it
+# wedges this shell's later `$(detect-done.sh)` command substitution — bash blocks in wait4() on the
+# never-exiting child, so the wait loop never runs and the checkpoint never completes. setsid detaches
+# it into its own session (like the indexer below), and </dev/null closes the last inherited fd.
+setsid bash -c "cd '$REPO_DIR/apps/ensrainbow' && \
+  DATA_DIR='$RAINBOW_DATA_DIR' LABEL_SET_ID='$LABEL_SET_ID' LABEL_SET_VERSION='$LABEL_SET_VERSION' \
+    PORT='$RAINBOW_PORT' exec pnpm run entrypoint" </dev/null >"/tmp/ensrainbow-$CONFIG.log" 2>&1 &
 RAINBOW_MARKER="$RAINBOW_DATA_DIR/ensrainbow_db_ready"
 rainbow_ready=0
 for _ in $(seq 1 720); do
