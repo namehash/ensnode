@@ -140,7 +140,10 @@ log "[$CONFIG] waiting for is_ready=1 (historical backfill complete)"
 while true; do
   status="$(bash "$LIB_DIR/detect-done.sh" "$SCHEMA")"
   # Surface Ponder's own latest backfill progress (%, ETA) alongside the authoritative readiness probe.
-  prog="$(grep -aE "Updated backfill indexing progress" "$INDEXER_LOG" 2>/dev/null | tail -1 | sed -E 's/.*(progress=.*)$/\1/')"
+  # `|| true`: before the indexer emits its first progress line grep exits 1, and under `set -e` +
+  # `pipefail` a bare `prog=$(…)` assignment with a failing pipeline would kill this script on the
+  # very first wait-loop iteration (before any is_ready/crash check). Progress is best-effort.
+  prog="$(grep -aE "Updated backfill indexing progress" "$INDEXER_LOG" 2>/dev/null | tail -1 | sed -E 's/.*(progress=.*)$/\1/' || true)"
   echo "$(date +%H:%M:%S) [$CONFIG] $status${prog:+ | $prog}" >&2
   echo "$status" | grep -q "is_ready=1" && break
   if ! kill -0 -- "-$INDEXER_PGID" 2>/dev/null; then
