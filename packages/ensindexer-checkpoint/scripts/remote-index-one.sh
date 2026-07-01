@@ -155,7 +155,10 @@ while true; do
   # Instantaneous eps over this poll window: sum event_count from log bytes appended since last poll,
   # divide by elapsed seconds. Reported only when the window actually indexed events ("when reported").
   ev_now="$(wc -c <"$INDEXER_LOG" 2>/dev/null || echo "$ev_off")"
-  ev_sum="$(tail -c +$((ev_off + 1)) "$INDEXER_LOG" 2>/dev/null | grep -aoE 'event_count=[0-9]+' | cut -d= -f2 | awk '{s+=$1} END{print s+0}')"
+  # `|| true`: same set -e/pipefail trap as the prog= line above — until the indexer emits its first
+  # "Indexed block" line grep matches nothing and exits 1, and a bare `ev_sum=$(…|grep…)` assignment
+  # would kill this script on the first wait-loop iteration. (awk still prints 0, so ev_sum stays "0".)
+  ev_sum="$(tail -c +$((ev_off + 1)) "$INDEXER_LOG" 2>/dev/null | grep -aoE 'event_count=[0-9]+' | cut -d= -f2 | awk '{s+=$1} END{print s+0}' || true)"
   ev_ts="$(date +%s)"; ev_win=$((ev_ts - ev_last_ts)); [ "$ev_win" -lt 1 ] && ev_win=1
   eps=$(( ${ev_sum:-0} / ev_win ))
   ev_off="$ev_now"; ev_last_ts="$ev_ts"
