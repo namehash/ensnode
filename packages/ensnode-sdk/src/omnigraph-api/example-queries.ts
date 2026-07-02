@@ -3,6 +3,7 @@ import { asInterpretedName, toNormalizedAddress } from "enssdk";
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 import { accounts } from "@ensnode/integration-test-env/devnet";
 
+import { PluginName } from "../ensindexer/config/types";
 import { getDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
@@ -67,6 +68,8 @@ const SEPOLIA_V2_RESOLVER_WITH_RECORDS = {
 
 export type GraphqlApiExampleQuery = {
   id: string;
+  /** The plugin that must be enabled on the connected ENSIndexer for this query to return data. */
+  plugin: PluginName;
   query: string;
   variables: NamespaceSpecificValue<Record<string, unknown>>;
 };
@@ -85,6 +88,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   ////////////////
   {
     id: "hello-world",
+    plugin: PluginName.Unigraph,
     query: `query HelloWorld($address: Address!) {
   # Lookup an Account by address.
   account(by: { address: $address }) {
@@ -132,6 +136,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   /////////////////
   {
     id: "find-domains",
+    plugin: PluginName.Unigraph,
     query: `
 query FindDomains(
   $name: DomainsNameFilter!
@@ -169,6 +174,7 @@ query FindDomains(
 
   {
     id: "domain-by-name",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -196,6 +202,7 @@ query DomainByName($name: InterpretedName!) {
   ////////////////////////////////
   {
     id: "domain-by-name-type-condition",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -222,6 +229,7 @@ query DomainByName($name: InterpretedName!) {
   ///////////////////////
   {
     id: "domain-registration",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainRegistration($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -268,6 +276,7 @@ query DomainRegistration($name: InterpretedName!) {
   ////////////////////
   {
     id: "domain-records",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainRecords($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -304,6 +313,7 @@ query DomainRecords($name: InterpretedName!) {
 
   {
     id: "domain-profile",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainProfile($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -345,6 +355,7 @@ query DomainProfile($name: InterpretedName!) {
 
   {
     id: "domain-profile-and-records",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainProfileAndRecords($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -392,6 +403,7 @@ query DomainProfileAndRecords($name: InterpretedName!) {
   ////////////////////////////////////
   {
     id: "offchain-name",
+    plugin: PluginName.Unigraph,
     query: `
 query OffchainName($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -422,6 +434,7 @@ query OffchainName($name: InterpretedName!) {
   //////////////////////
   {
     id: "domain-subdomains",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -450,6 +463,7 @@ query DomainSubdomains($name: InterpretedName!) {
   ////////////////////////////////////
   {
     id: "domain-subdomains-recently-registered",
+    plugin: PluginName.Unigraph,
     query: `
 query RecentlyRegisteredSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -471,6 +485,7 @@ query RecentlyRegisteredSubdomains($name: InterpretedName!) {
   ////////////////////////
   {
     id: "subdomains-pagination",
+    plugin: PluginName.Unigraph,
     query: `
 query SubdomainsPagination($first: Int!, $after: String) {
   domain(by: { name: "eth" }) {
@@ -497,6 +512,7 @@ query SubdomainsPagination($first: Int!, $after: String) {
   /////////////////
   {
     id: "domain-events",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainEvents($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -526,6 +542,7 @@ query DomainEvents($name: InterpretedName!) {
   ////////////////////
   {
     id: "domains-by-address",
+    plugin: PluginName.Unigraph,
     query: `
 query AccountDomains(
   $address: Address!
@@ -553,6 +570,7 @@ query AccountDomains(
   /////////////////////////
   {
     id: "account-primary-names",
+    plugin: PluginName.Unigraph,
     query: `
 query AccountPrimaryNames($address: Address!) {
   account(by: { address: $address }) {
@@ -583,6 +601,7 @@ query AccountPrimaryNames($address: Address!) {
   },
   {
     id: "account-primary-name-records",
+    plugin: PluginName.Unigraph,
     query: `
 query AccountPrimaryNameRecords($address: Address!) {
   account(by: { address: $address }) {
@@ -615,6 +634,7 @@ query AccountPrimaryNameRecords($address: Address!) {
   ////////////////////
   {
     id: "account-events",
+    plugin: PluginName.Unigraph,
     query: `
 query AccountEvents(
   $address: Address!
@@ -635,6 +655,7 @@ query AccountEvents(
   /////////////////////
   {
     id: "registry-domains",
+    plugin: PluginName.Unigraph,
     query: `
 query RegistryDomains(
   $registry: AccountIdInput!
@@ -662,6 +683,7 @@ query RegistryDomains(
   ////////////////////////////
   {
     id: "permissions-by-contract",
+    plugin: PluginName.Unigraph,
     query: `
 query PermissionsByContract(
   $contract: AccountIdInput!
@@ -699,6 +721,7 @@ query PermissionsByContract(
   ////////////////////////
   {
     id: "permissions-by-user",
+    plugin: PluginName.Unigraph,
     query: `
 query PermissionsByUser($address: Address!) {
   account(by: { address: $address }) {
@@ -723,6 +746,7 @@ query PermissionsByUser($address: Address!) {
   //////////////////////////////////
   {
     id: "account-resolver-permissions",
+    plugin: PluginName.Unigraph,
     query: `
 query AccountResolverPermissions($address: Address!) {
   account(by: { address: $address }) {
@@ -750,6 +774,7 @@ query AccountResolverPermissions($address: Address!) {
   //////////////////////////////
   {
     id: "domain-resolver",
+    plugin: PluginName.Unigraph,
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -778,6 +803,7 @@ query DomainResolver($name: InterpretedName!) {
   ////////////////////////
   {
     id: "resolver-by-address",
+    plugin: PluginName.Unigraph,
     query: `
 query ResolverByAddress($contract: AccountIdInput!) {
   resolver(by: { contract: $contract }) {
@@ -811,6 +837,7 @@ query ResolverByAddress($contract: AccountIdInput!) {
   //////////////
   {
     id: "namegraph",
+    plugin: PluginName.Unigraph,
     query: `
 query Namegraph {
   domain(by: { name: "eth" }) {
@@ -836,6 +863,7 @@ query Namegraph {
   /////////////////////////////
   {
     id: "account-migrated-names",
+    plugin: PluginName.Unigraph,
     query: `
 query AccountMigratedNames($address: Address!) {
   account(by: { address: $address }) {
@@ -853,6 +881,7 @@ query AccountMigratedNames($address: Address!) {
   },
   {
     id: "eth-by-version",
+    plugin: PluginName.Unigraph,
     query: `
 query GetEthDomains {
   domains(where: { name: { eq: "eth" } }) {
@@ -868,6 +897,7 @@ query GetEthDomains {
   },
   {
     id: "accelerate-resolve",
+    plugin: PluginName.Unigraph,
     query: `
 query AccelerateResolve($address: Address!) {
   account(by: { address: $address }) {
@@ -889,6 +919,97 @@ query AccelerateResolve($address: Address!) {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
       [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ACCOUNT_WITH_V1_AND_V2 },
+    },
+  },
+
+  ///////////////////////////////////////
+  // Ethereum Follow Protocol (EFP)
+  //
+  // Require the `efp` plugin on the connected ENSIndexer; `Query.efp` / `Account.efp`
+  // are null otherwise. Indexed only in the mainnet namespace.
+  ///////////////////////////////////////
+  {
+    id: "efp-follow-graph",
+    plugin: PluginName.EFP,
+    query: `
+query EfpFollowGraph($address: Address!) {
+  account(by: { address: $address }) {
+    efp {
+      # The validated primary list, or null if unset/unvalidated.
+      primaryList { tokenId }
+      # following/followers are validated and block/mute-filtered, so the
+      # edges are full Accounts you can walk straight into ENS names.
+      following(first: 10) {
+        totalCount
+        edges {
+          node {
+            address
+            resolve {
+              primaryName(by: { chainName: ETHEREUM }) {
+                name { beautified }
+              }
+            }
+          }
+        }
+      }
+      followers(first: 10) {
+        totalCount
+        edges { node { address } }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+    },
+  },
+
+  {
+    id: "efp-who-follows",
+    plugin: PluginName.EFP,
+    query: `
+# Raw record view: includes block/mute and non-primary lists — inspect the tags.
+# For the validated social graph, prefer Account.efp.followers instead.
+query EfpWhoFollows($address: Address!) {
+  efp {
+    listRecords(where: { recordData: $address }, first: 25) {
+      totalCount
+      edges {
+        node {
+          tags
+          list { tokenId user }
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+    },
+  },
+
+  {
+    id: "efp-list",
+    plugin: PluginName.EFP,
+    query: `
+query EfpList($tokenId: TokenId!) {
+  efp {
+    list(by: { tokenId: $tokenId }) {
+      tokenId
+      owner
+      user
+      manager
+      storageLocation { chainId address slot }
+      # Raw records (any tag, no primary-list validation).
+      records(first: 25) {
+        totalCount
+        edges { node { recordData tags } }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { tokenId: "1" },
     },
   },
 ];

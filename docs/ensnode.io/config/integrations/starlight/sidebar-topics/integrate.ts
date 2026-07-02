@@ -101,6 +101,20 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph/protocol-acceleration",
         },
         {
+          label: "Complementary Protocols",
+          collapsed: true,
+          items: [
+            {
+              label: "EFP (Social Graph)",
+              link: "/docs/integrate/omnigraph/complementary/efp",
+            },
+            {
+              label: "AI Agents / ERC-8004",
+              link: "/docs/integrate/omnigraph/complementary/erc-8004",
+            },
+          ],
+        },
+        {
           label: "FAQ",
           link: "/docs/integrate/omnigraph/faq",
         },

@@ -213,6 +213,33 @@ export const OMNIGRAPH_EXAMPLES_CONFIG: OmnigraphExampleConfig[] = [
     namespace: ENSNamespaceIds.Mainnet,
     hostSeparatePage: false,
   },
+  {
+    id: "efp-follow-graph",
+    title: "EFP Follow Graph",
+    description:
+      "This query loads an account's validated EFP social graph — its primary list, <code>following</code>, and <code>followers</code> — and resolves each followed account's ENS primary name. Requires the <code>efp</code> plugin.",
+    category: "EFP",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: true,
+  },
+  {
+    id: "efp-who-follows",
+    title: "EFP Who Follows",
+    description:
+      'This query finds the raw EFP list records pointing at an address (any list, including <code>block</code>/<code>mute</code> tags), to answer "which lists follow this address?". Requires the <code>efp</code> plugin.',
+    category: "EFP",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: true,
+  },
+  {
+    id: "efp-list",
+    title: "EFP List",
+    description:
+      "This query loads an EFP list by <code>tokenId</code> — its roles, storage location, and raw records with tags. Requires the <code>efp</code> plugin.",
+    category: "EFP",
+    namespace: ENSNamespaceIds.Mainnet,
+    hostSeparatePage: true,
+  },
 ];
 
 export const OMNIGRAPH_EXAMPLES_INDEX_PATH = "/docs/integrate/omnigraph/examples" as const;
