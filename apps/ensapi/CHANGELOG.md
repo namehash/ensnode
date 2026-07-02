@@ -1,5 +1,25 @@
 # ensapi
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2296](https://github.com/namehash/ensnode/pull/2296) [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20) Thanks [@shrugs](https://github.com/shrugs)! - Exposes EFP (Ethereum Follow Protocol) data through the Omnigraph API.
+
+  `Query.efp` (null if `efp` plugin is not enabled) exposes the EFP-protocol-level queries `Query.efp.list(by:)`, `Query.efp.lists(where:)`, and `Query.efp.listRecords(where:)` (each record exposing its owning `list`), with cursor-paginated connections and where-filters (owner/user/manager, recordData).
+
+  `Account.efp` (null if `efp` plugin is not enabled) exposes the Account-specific queries `Account.efp.primaryList`, `Account.efp.following` / `Account.efp.followers` (the validated social follow graph — accounts whose validated primary list follows, or is followed by, this account, excluding `block`/`mute`-tagged records), the `Account.efp.lists` it is the `user` of, and its account `Account.efp.metadata(key:)` / `Account.efp.metadatas`.
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`eb33f1d`](https://github.com/namehash/ensnode/commit/eb33f1df137c00d17840bb99ecb072ced49259a6), [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af), [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc), [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3)]:
+  - @ensnode/datasources@1.17.0
+  - @ensnode/ensdb-sdk@1.17.0
+  - enssdk@1.17.0
+  - @ensnode/ensnode-sdk@1.17.0
+  - @namehash/ens-referrals@1.17.0
+  - @ensnode/ponder-subgraph@1.17.0
+
 ## 1.16.0
 
 ### Minor Changes
