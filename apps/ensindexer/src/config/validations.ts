@@ -136,3 +136,16 @@ export function invariant_unigraphRequiresProtocolAcceleration(
     );
   }
 }
+
+// Invariant: efp plugin requires unigraph
+export function invariant_efpRequiresUnigraph(
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "plugins">>,
+) {
+  const { value: config } = ctx;
+
+  if (config.plugins.includes(PluginName.EFP) && !config.plugins.includes(PluginName.Unigraph)) {
+    throw new Error(
+      `The '${PluginName.EFP}' plugin depends on the inclusion of '${PluginName.Unigraph}' plugin.`,
+    );
+  }
+}

@@ -523,15 +523,28 @@ describe("config (with base env)", () => {
     // EFP exists on `mainnet` and `ens-test-env`. On the devnet all three EFP datasources
     // (Base/Optimism/Ethereum) point at the single Anvil chain, so the plugin must activate and
     // index exactly one chain — guarding both the datasource-presence unlock and the collapse.
+    // EFP requires unigraph (which itself requires protocol-acceleration); on the devnet those
+    // datasources also collapse onto the single Anvil chain.
     it("derives the single devnet chain id for efp on ens-test-env", async () => {
       vi.stubEnv("NAMESPACE", ENSNamespaceIds.EnsTestEnv);
-      vi.stubEnv("PLUGINS", PluginName.EFP);
+      vi.stubEnv(
+        "PLUGINS",
+        [PluginName.Unigraph, PluginName.ProtocolAcceleration, PluginName.EFP].join(","),
+      );
       stubRpcUrlsForNamespace(ENSNamespaceIds.EnsTestEnv);
 
       const config = await getConfig();
 
       expect(config.plugins).toContain(PluginName.EFP);
       expect(config.indexedChainIds).toEqual(new Set([ensTestEnvChain.id]));
+    });
+
+    it("rejects efp without unigraph", async () => {
+      vi.stubEnv("NAMESPACE", ENSNamespaceIds.EnsTestEnv);
+      vi.stubEnv("PLUGINS", PluginName.EFP);
+      stubRpcUrlsForNamespace(ENSNamespaceIds.EnsTestEnv);
+
+      await expect(getConfig()).rejects.toThrow(/depends on the inclusion of 'unigraph'/i);
     });
   });
 
