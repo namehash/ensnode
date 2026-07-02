@@ -1,4 +1,4 @@
-import type { Duration, NormalizedAddress } from "enssdk";
+import { type AccountId, type Duration, stringifyAccountId } from "enssdk";
 
 import { isPositiveInteger } from "../../number";
 import type { ReferrerMetrics } from "../../referrer-metrics";
@@ -25,9 +25,9 @@ export interface ReferrerMetricsForComparison {
   totalIncrementalDuration: Duration;
 
   /**
-   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
+   * The {@link AccountId} of the referrer.
    */
-  referrer: NormalizedAddress;
+  referrer: AccountId;
 }
 
 export const compareReferrerMetrics = (
@@ -39,9 +39,12 @@ export const compareReferrerMetrics = (
     return b.totalIncrementalDuration - a.totalIncrementalDuration;
   }
 
-  // Secondary sort: referrer address using lexicographic comparison of ASCII hex strings (descending)
-  if (b.referrer > a.referrer) return 1;
-  if (b.referrer < a.referrer) return -1;
+  // Secondary sort: referrer CAIP-10 string lexicographic (descending) — deterministic tie-break
+  // across both chainId and address.
+  const aKey = stringifyAccountId(a.referrer);
+  const bKey = stringifyAccountId(b.referrer);
+  if (bKey > aKey) return 1;
+  if (bKey < aKey) return -1;
   return 0;
 };
 

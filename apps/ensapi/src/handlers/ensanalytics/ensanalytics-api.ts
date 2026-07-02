@@ -134,7 +134,7 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
   }
 });
 
-// Get referrer detail for a specific address for requested editions
+// Get referrer detail for a specific referrer for requested editions
 app.openapi(getReferrerDetailRoute, async (c) => {
   try {
     const { referrer } = c.req.valid("param");

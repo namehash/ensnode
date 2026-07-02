@@ -1,4 +1,10 @@
-import { type Address, asInterpretedName } from "enssdk";
+import {
+  type AccountId,
+  type Address,
+  asInterpretedName,
+  stringifyAccountId,
+  toNormalizedAddress,
+} from "enssdk";
 import type { Hash } from "viem";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -11,8 +17,15 @@ import { type AdminAction, AdminActionTypes, buildReferralProgramRulesRevShareCa
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
-const ADDR_A = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as const;
-const ADDR_B = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as const;
+const acct = (address: Address): AccountId => ({
+  chainId: 1,
+  address: toNormalizedAddress(address),
+});
+
+const ADDR_A: AccountId = acct("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+const ADDR_B: AccountId = acct("0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+
+const KEY_A = stringifyAccountId(ADDR_A);
 
 const CHECKPOINT_PREFIX =
   "0000000000" + "0000000000000001" + "0000000000000001" + "0000000000000000" + "0";
@@ -29,7 +42,7 @@ function buildTestRules(
     0.5,
     parseTimestamp("2026-01-01T00:00:00Z"),
     parseTimestamp("2026-12-31T23:59:59Z"),
-    { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
+    acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
     new URL("https://example.com/rules"),
     false,
     adminActions,
@@ -38,7 +51,7 @@ function buildTestRules(
 
 let eventIdCounter = 0;
 function makeEvent(
-  referrer: `0x${string}`,
+  referrer: AccountId,
   timestamp: number,
   incrementalDuration: number,
 ): ReferralEvent {
@@ -279,7 +292,7 @@ describe("buildReferralEditionSnapshotRevShareCap — per-event trace", () => {
     expect(leaderboard.awardModel).toBe(rules.awardModel);
     expect(leaderboard.rules).toBe(rules);
     expect(leaderboard.accurateAsOf).toBe(accurateAsOf);
-    const a = leaderboard.referrers.get(ADDR_A)!;
+    const a = leaderboard.referrers.get(KEY_A)!;
     expect(a.isQualified).toBe(true);
     // A: 1.5 years → base $7.50 → uncapped $3.75
     expect(a.uncappedAward.amount).toBe(parseUsdc("3.75").amount);

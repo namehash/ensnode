@@ -1,4 +1,4 @@
-import type { Address, Duration, InterpretedName, NormalizedAddress, UnixTimestamp } from "enssdk";
+import type { AccountId, Address, Duration, InterpretedName, UnixTimestamp } from "enssdk";
 import type { Hash } from "viem";
 
 import type { PriceEth, RegistrarActionType } from "@ensnode/ensnode-sdk";
@@ -11,9 +11,9 @@ import type { PriceEth, RegistrarActionType } from "@ensnode/ensnode-sdk";
  */
 export interface ReferralEvent {
   /**
-   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
+   * The {@link AccountId} of the referrer.
    */
-  referrer: NormalizedAddress;
+  referrer: AccountId;
 
   /**
    * Unix seconds block timestamp.

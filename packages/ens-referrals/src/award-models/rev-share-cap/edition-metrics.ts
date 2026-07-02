@@ -61,7 +61,7 @@ export interface ReferrerEditionMetricsRankedRevShareCap {
 }
 
 /**
- * Referrer edition metrics data for a specific referrer address NOT on the rev-share-cap leaderboard.
+ * Referrer edition metrics data for a specific referrer NOT on the rev-share-cap leaderboard.
  *
  * Includes the referrer's unranked metrics (with null rank and isQualified: false) plus timestamp.
  *
