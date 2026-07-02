@@ -21,6 +21,7 @@ import { derive_indexedChainIds } from "./derived-params";
 import type { EnsIndexerConfig } from "./types";
 import {
   invariant_chainEndBlocks,
+  invariant_efpRequiresUnigraph,
   invariant_requiredDatasources,
   invariant_requiredDatasourcesSubsetOfAll,
   invariant_rpcConfigsSpecifiedForIndexedChains,
@@ -144,6 +145,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_validContractConfigs)
   .check(invariant_unigraphRequiresProtocolAcceleration)
+  .check(invariant_efpRequiresUnigraph)
   .check(invariant_isSubgraphCompatibleRequirements)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_chainEndBlocks);

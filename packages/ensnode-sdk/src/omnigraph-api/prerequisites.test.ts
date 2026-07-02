@@ -8,18 +8,13 @@ const configWithPlugins = (plugins: PluginName[]) =>
   ({ plugins }) as unknown as EnsIndexerPublicConfig;
 
 describe("hasOmnigraphApiConfigSupport", () => {
-  it("is supported by unigraph, ensv2, or efp (efp alone counts)", () => {
+  it("is supported by unigraph or ensv2", () => {
     expect(hasOmnigraphApiConfigSupport(configWithPlugins([PluginName.Unigraph])).supported).toBe(
       true,
     );
     expect(hasOmnigraphApiConfigSupport(configWithPlugins([PluginName.ENSv2])).supported).toBe(
       true,
     );
-    expect(hasOmnigraphApiConfigSupport(configWithPlugins([PluginName.EFP])).supported).toBe(true);
-    expect(
-      hasOmnigraphApiConfigSupport(configWithPlugins([PluginName.Subgraph, PluginName.EFP]))
-        .supported,
-    ).toBe(true);
   });
 
   it("is unsupported without one of those plugins", () => {
