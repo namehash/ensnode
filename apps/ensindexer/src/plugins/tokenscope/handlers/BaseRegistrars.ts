@@ -33,7 +33,9 @@ export default function () {
         nft,
       };
 
-      await handleNFTTransfer(context, event.args.from, event.args.to, false, nft, metadata);
+      // BaseRegistrar contracts allow re-registration of expired names, which emits
+      // a Transfer from 0x0 even though the token was previously minted and never burned.
+      await handleNFTTransfer(context, event.args.from, event.args.to, true, nft, metadata);
     },
   );
 
@@ -55,7 +57,9 @@ export default function () {
         nft,
       };
 
-      await handleNFTTransfer(context, event.args.from, event.args.to, false, nft, metadata);
+      // BaseRegistrar contracts allow re-registration of expired names, which emits
+      // a Transfer from 0x0 even though the token was previously minted and never burned.
+      await handleNFTTransfer(context, event.args.from, event.args.to, true, nft, metadata);
     },
   );
 
@@ -77,7 +81,9 @@ export default function () {
         nft,
       };
 
-      await handleNFTTransfer(context, event.args.from, event.args.to, false, nft, metadata);
+      // BaseRegistrar contracts allow re-registration of expired names, which emits
+      // a Transfer from 0x0 even though the token was previously minted and never burned.
+      await handleNFTTransfer(context, event.args.from, event.args.to, true, nft, metadata);
     },
   );
 }
