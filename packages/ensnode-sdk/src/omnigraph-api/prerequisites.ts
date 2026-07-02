@@ -7,16 +7,15 @@ import type { PrerequisiteResult } from "../shared/prerequisites";
  * Check if provided EnsIndexerPublicConfig supports the Omnigraph API.
  *
  * The Omnigraph API is served whenever the config indexes the ENS data model
- * (`unigraph` / `ensv2`).
+ * (`unigraph`).
  */
 export function hasOmnigraphApiConfigSupport(config: EnsIndexerPublicConfig): PrerequisiteResult {
-  const supported =
-    config.plugins.includes(PluginName.Unigraph) || config.plugins.includes(PluginName.ENSv2);
+  const supported = config.plugins.includes(PluginName.Unigraph);
   if (supported) return { supported };
 
   return {
     supported: false,
-    reason: `The connected ENSNode's Config must have one of the '${PluginName.Unigraph}' or '${PluginName.ENSv2}' plugins enabled.`,
+    reason: `The connected ENSNode's Config must have the '${PluginName.Unigraph}' plugin enabled.`,
   };
 }
 
