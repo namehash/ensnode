@@ -1,5 +1,19 @@
 # @ensnode/ensnode-sdk
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2176](https://github.com/namehash/ensnode/pull/2176) [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af) Thanks [@shrugs](https://github.com/shrugs)! - `buildIndexedBlockranges` now accepts a `chainEndBlocks: ReadonlyMap<ChainId, number>` (per-chain end blocks via `END_BLOCK_<chainId>`) instead of a single `globalBlockrangeEndBlock: number | undefined`. The chain's end block now caps each contract's indexed range, mirroring the Ponder config path.
+
+- [#2344](https://github.com/namehash/ensnode/pull/2344) [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc) Thanks [@shrugs](https://github.com/shrugs)! - Removes the deprecated `PluginName.ENSv2` (`"ensv2"`) enum member. It was retained for one release as a backwards-compatible alias for `PluginName.Unigraph` and is now fully removed; use `PluginName.Unigraph` (`"unigraph"`) instead.
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3)]:
+  - @ensnode/datasources@1.17.0
+  - enssdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

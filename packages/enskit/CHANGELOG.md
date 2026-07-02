@@ -1,5 +1,16 @@
 # enskit
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2296](https://github.com/namehash/ensnode/pull/2296) [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20) Thanks [@shrugs](https://github.com/shrugs)! - Adds urql cache key resolvers for the EFP (Ethereum Follow Protocol) Omnigraph types (`EfpList` keyed by `tokenId`; `AccountEfp`, `EfpQuery`, and `EfpListStorageLocation` as Embedded Data), and a `by tokenId` lookup resolver on `EfpQuery.list` so repeat list lookups are cache hits.
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20)]:
+  - enssdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

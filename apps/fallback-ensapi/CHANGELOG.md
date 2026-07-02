@@ -1,5 +1,13 @@
 # fallback-ensapi
 
+## 1.17.0
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af), [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc), [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3)]:
+  - @ensnode/datasources@1.17.0
+  - @ensnode/ensnode-sdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes
