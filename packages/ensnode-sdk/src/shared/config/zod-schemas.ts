@@ -55,4 +55,8 @@ export const PortNumberSchema = z.coerce
 
 export const OptionalPortNumberSchema = PortNumberSchema.optional();
 
+export const GitCommitShaSchema = z.string().length(40, {
+  error: "Git commit SHA must be a 40-character string.",
+});
+
 export const TheGraphApiKeySchema = z.string().optional();
