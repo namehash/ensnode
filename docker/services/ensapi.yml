@@ -5,6 +5,8 @@ services:
     build:
       dockerfile: ./apps/ensapi/Dockerfile
       context: ../..
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}
     ports:
       - "4334:4334"
     healthcheck:
