@@ -25,7 +25,7 @@ catalog:
   p-retry: 7.1.1
   pg-connection-string: ^2.9.1
   pino: 10.1.0
-  ponder: 0.16.6
+  ponder: "npm:@ensnode/ponder@0.16.7"
   postcss: 8.5.12
   prettier: 3.6.2
   prettier-plugin-astro: 0.14.1

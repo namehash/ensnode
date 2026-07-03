@@ -41,6 +41,9 @@ const ENSINDEXER_PORT = 42069;
 const ENSAPI_PORT = 4334;
 const ENSDB_PORT = 5433;
 
+// docker-compose.orchestrator.yml overrides container_name to these.
+const EFP_DEVNET_CONTAINER = "efp-devnet-orchestrator";
+
 // Shared config
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
@@ -170,6 +173,55 @@ async function waitForHealth(url: string, timeoutMs: number, serviceName: string
   throw new Error(`${serviceName} did not become healthy within ${timeoutMs / 1000}s`);
 }
 
+function containerHealth(container: string): string {
+  const result = execaSync(
+    "docker",
+    ["inspect", "--format", "{{.State.Health.Status}}", container],
+    {
+      reject: false,
+    },
+  );
+  return result.stdout?.trim() ?? "unknown";
+}
+
+/**
+ * Wait for a docker container to report `healthy`, restarting it if it stalls.
+ *
+ * Some images (notably `efp-devnet`, an amd64 image that runs under QEMU emulation on arm64/Apple
+ * Silicon) intermittently deadlock on their very first start: the process idles at ~0% CPU and
+ * never brings up its healthcheck endpoint, so the container sits in `starting`/`unhealthy`
+ * forever. A `docker restart` reliably clears the hang. We poll for `healthy` within a per-attempt
+ * budget and restart-and-retry rather than passively waiting out the full compose startup timeout.
+ */
+async function waitForContainerHealthyWithRestart(
+  container: string,
+  serviceName: string,
+  { attempts, perAttemptMs }: { attempts: number; perAttemptMs: number },
+): Promise<void> {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const start = Date.now();
+    while (Date.now() - start < perAttemptMs) {
+      checkAborted();
+      const status = containerHealth(container);
+      if (status === "healthy") {
+        log(`${serviceName} is healthy`);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+
+    if (attempt < attempts) {
+      log(
+        `${serviceName} did not become healthy within ${perAttemptMs / 1000}s (attempt ${attempt}/${attempts}); restarting container...`,
+      );
+      execaSync("docker", ["restart", container], { reject: false });
+    }
+  }
+  throw new Error(
+    `${serviceName} did not become healthy after ${attempts} attempts of ${perAttemptMs / 1000}s each`,
+  );
+}
+
 function spawnService(
   command: string,
   args: string[],
@@ -292,12 +344,23 @@ export async function bringUp(options: { only?: Set<Service> } = {}): Promise<vo
       "docker-compose.orchestrator.yml",
     )
       .withWaitStrategy("devnet-orchestrator", Wait.forHealthCheck())
-      .withWaitStrategy("efp-devnet-orchestrator", Wait.forHealthCheck())
       .withWaitStrategy("ensdb-orchestrator", Wait.forListeningPorts())
+      // Do NOT wait on efp-devnet's healthcheck here. testcontainers' default wait for a container
+      // with a HEALTHCHECK is forHealthCheck(), which throws the moment the container goes
+      // unhealthy — before we get a chance to recover it. efp-devnet intermittently deadlocks on
+      // first start under QEMU emulation, so instead we only wait for it to reach its first log
+      // line, then handle real health (with restart-and-retry) in waitForContainerHealthyWithRestart.
+      .withWaitStrategy("efp-devnet-orchestrator", Wait.forLogMessage(/Starting EFP devnet/))
       .withStartupTimeout(180_000)
       .up(["ensdb", "devnet", "efp-devnet"]);
 
     log(`ENSDb is ready (port ${ENSDB_PORT})`);
+
+    // Wait for efp-devnet to finish deploying, restarting it if it hangs (see helper docs).
+    await waitForContainerHealthyWithRestart(EFP_DEVNET_CONTAINER, "EFP Devnet", {
+      attempts: 10,
+      perAttemptMs: 20_000,
+    });
 
     // Devnet Chain Id check
     const publicClient = createPublicClient({

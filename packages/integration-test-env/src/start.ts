@@ -52,6 +52,13 @@ async function main() {
   }
 
   // Block forever — SIGINT/SIGTERM handlers in lifecycle.ts call cleanup() and exit.
+  //
+  // An unresolved Promise does NOT keep the Node.js event loop alive on its own; the process
+  // only stays up while libuv has an active handle. With `--only devnet` no long-lived child
+  // processes are spawned (everything is docker-compose/testcontainers), so without an explicit
+  // keep-alive handle Node would exit immediately after bring-up. A long-interval timer keeps
+  // the loop alive until a signal handler tears everything down.
+  setInterval(() => {}, 1 << 30);
   await new Promise<never>(() => {});
 }
 
