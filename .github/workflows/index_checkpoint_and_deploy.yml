@@ -279,6 +279,9 @@ jobs:
           printf '%s\n' "$CHERRY_SSH_KEY" > /tmp/cherry_key
           echo "SSH_KEY=/tmp/cherry_key" >> "$GITHUB_ENV"
 
+      - name: Install rclone (runner-side R2 idempotency check — skip the box when checkpoints exist)
+        run: sudo apt-get update && sudo apt-get install -y rclone
+
       - name: Produce alpha + mainnet checkpoints on one Cherry box (no load; upload to R2)
         env:
           CONFIGS: "alpha mainnet"

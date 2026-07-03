@@ -33,6 +33,36 @@ export BOX_HOSTNAME="ensindexer-checkpoint-${SHA:0:12}"
 cleanup() { [ "${KEEP_BOX:-0}" = "1" ] || bash "$LIB_DIR/cherry-down.sh"; }
 
 log "checkpoint run: configs='$CONFIGS' sha=$SHA mode=$MODE"
+
+# ── Runner-side R2 idempotency: skip the box ENTIRELY when nothing needs indexing ───────────────
+# If every config's sha-keyed checkpoint already exists in R2, a box would only spin up, re-discover
+# that, and skip — pure waste, and a hard failure when the Cherry balance is low or its API is flaky.
+# A load-only re-run (e.g. after the box died post-upload, or a load bug) must not need bare metal.
+# The load restores straight from R2, so go there directly without ever provisioning a box.
+# (If rclone is absent the check fails closed — need_box=1 — falling back to the normal box path.)
+SUFFIX=""
+[ "$MODE" = "end-block" ] && SUFFIX="-t${TIMESTAMP:?end-block mode requires TIMESTAMP}"
+mkdir -p "$HOME/.config/rclone"
+write_rclone_conf "$HOME/.config/rclone/rclone.conf"
+need_box=0
+for c in $CONFIGS; do
+  r2_exists "$(r2_checkpoint "$(checkpoint_object "$c" "$SHA" "$SUFFIX")")" || {
+    need_box=1
+    break
+  }
+done
+if [ "$need_box" = "0" ]; then
+  log "all checkpoints already in R2 ($CONFIGS @ ${SHA:0:12}) — skipping the Cherry box entirely"
+  if [ "$DO_LOAD" = "1" ]; then
+    log "restoring checkpoints into the target from R2 (no box needed)"
+    CONFIGS="$CONFIGS" SHA="$SHA" VERSION="$VERSION" TARGET_URL="$TARGET_URL" \
+      MODE="$MODE" TIMESTAMP="${TIMESTAMP:-}" \
+      bash "$LIB_DIR/load-checkpoints.sh"
+  fi
+  log "checkpoint run complete (reused R2 checkpoints; no box needed)."
+  exit 0
+fi
+
 bash "$LIB_DIR/cherry-up.sh"
 trap cleanup EXIT
 
