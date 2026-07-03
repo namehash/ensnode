@@ -181,6 +181,17 @@ function containerHealth(container: string): string {
       reject: false,
     },
   );
+  // `docker inspect` exits non-zero only when the container is missing (or docker itself errors) —
+  // legitimate `starting`/`unhealthy` states exit 0. Fail loudly instead of returning "" and
+  // silently looping, which would otherwise mask a container-name mismatch (e.g. if
+  // docker-compose.orchestrator.yml's container_name diverges from these constants).
+  if (result.exitCode !== 0) {
+    throw new Error(
+      `docker inspect failed for container "${container}" (exit ${result.exitCode}): ${
+        result.stderr?.trim() || "unknown error"
+      }. Does this name match docker-compose's container_name?`,
+    );
+  }
   return result.stdout?.trim() ?? "unknown";
 }
 
@@ -214,7 +225,14 @@ async function waitForContainerHealthyWithRestart(
       log(
         `${serviceName} did not become healthy within ${perAttemptMs / 1000}s (attempt ${attempt}/${attempts}); restarting container...`,
       );
-      execaSync("docker", ["restart", container], { reject: false });
+      const restart = execaSync("docker", ["restart", container], { reject: false });
+      if (restart.exitCode !== 0) {
+        throw new Error(
+          `Failed to restart container "${container}" (exit ${restart.exitCode}): ${
+            restart.stderr?.trim() || "unknown error"
+          }. Does this name match docker-compose's container_name?`,
+        );
+      }
     }
   }
   throw new Error(
