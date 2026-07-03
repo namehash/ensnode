@@ -1,4 +1,8 @@
-import type { EnsDbEnvironment, RpcEnvironment } from "@ensnode/ensnode-sdk/internal";
+import type {
+  EnsDbEnvironment,
+  GitEnvironment,
+  RpcEnvironment,
+} from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.
@@ -7,7 +11,8 @@ import type { EnsDbEnvironment, RpcEnvironment } from "@ensnode/ensnode-sdk/inte
  * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
-export type ENSIndexerEnvironment = EnsDbEnvironment &
+export type ENSIndexerEnvironment = GitEnvironment &
+  EnsDbEnvironment &
   RpcEnvironment & {
     NAMESPACE?: string;
     PLUGINS?: string;
