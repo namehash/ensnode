@@ -45,7 +45,9 @@ for c in "${CONFIG_LIST[@]}"; do
   rclone copyto "$(r2_checkpoint "$cn.metadata.json")" "$ld.metadata.json"
   tgt="${c}Schema${VERSION}"
   log "[$c] restoring into target as $tgt"
-  ensdb_cli load "$ld" --into "$TARGET_URL" --schema "$tgt"
+  # --force: the checkpoint pipeline is authoritative for its target schema, so a re-run (e.g. after a
+  # prior load timed out mid-restore, leaving a partial staging schema) must overwrite rather than fail.
+  ensdb_cli load "$ld" --into "$TARGET_URL" --schema "$tgt" --force
   rm -f "$ld" "$ld.metadata.json" # free disk between configs (dumps are large)
 done
 rmdir "$WORK" 2>/dev/null || true

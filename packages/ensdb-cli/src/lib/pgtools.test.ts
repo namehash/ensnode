@@ -30,14 +30,27 @@ describe("pgDumpArgs", () => {
 });
 
 describe("pgRestoreArgs", () => {
-  it("restores a dump file, stripping owner/ACLs", () => {
+  it("restores a dump file, stripping owner/ACLs, in parallel", () => {
     expect(pgRestoreArgs("postgresql://x/y", "/tmp/o.dump")).toEqual([
       "--no-owner",
       "--no-privileges",
+      "-j",
+      "4",
       "-d",
       "postgresql://x/y",
       "/tmp/o.dump",
     ]);
+  });
+
+  it("honors ENSDB_CLI_RESTORE_JOBS", () => {
+    const prev = process.env.ENSDB_CLI_RESTORE_JOBS;
+    process.env.ENSDB_CLI_RESTORE_JOBS = "6";
+    try {
+      expect(pgRestoreArgs("postgresql://x/y", "/tmp/o.dump")).toContain("6");
+    } finally {
+      if (prev === undefined) delete process.env.ENSDB_CLI_RESTORE_JOBS;
+      else process.env.ENSDB_CLI_RESTORE_JOBS = prev;
+    }
   });
 });
 

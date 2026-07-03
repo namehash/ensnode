@@ -349,6 +349,11 @@ jobs:
           MODE: full-backfill
           R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          # pg_restore parallelism (idle destination cores) + a subprocess timeout above the expected
+          # parallel-restore wall time but below the 600-min job timeout (a serial restore hit the 6h
+          # ensdb-cli default and was killed mid-index-build).
+          ENSDB_CLI_RESTORE_JOBS: "4"
+          ENSDB_CLI_TIMEOUT_MS: "28800000" # 8h
         run: bash packages/ensindexer-checkpoint/scripts/load-checkpoints.sh
 
   # PHASE 3: once the warm schemas are loaded, deploy alpha + mainnet so they resume from the warm

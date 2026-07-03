@@ -36,11 +36,20 @@ export function pgDumpArgs(schema: string, url: string, outFile: string): string
 
 /** `pg_restore` args for a custom-format dump. */
 export function pgRestoreArgs(url: string, dumpFile: string): string[] {
+  // Parallel restore: pg_restore -j builds indexes and COPYs tables across N connections concurrently.
+  // A serial (-j 1) restore of a large ENSIndexer schema is index-build-bound and leaves the
+  // destination Postgres's other cores idle — a ~200GB alpha schema exceeded the 6h subprocess timeout
+  // that way. The restore is bound by the destination (each connection may use up to
+  // maintenance_work_mem), so keep N modest. Configurable via env; default 4.
+  const jobs = process.env.ENSDB_CLI_RESTORE_JOBS ?? "4";
   return [
     // skip ALTER ... OWNER TO; restore objects as the connecting role (matches the `--no-owner` dump).
     "--no-owner",
     // skip GRANT/REVOKE; the dump carries none (`--no-privileges` on dump) and the target's roles differ.
     "--no-privileges",
+    // parallel jobs (custom-format archive supports -j).
+    "-j",
+    jobs,
     // target ENSDb connection string.
     "-d",
     url,
