@@ -34,12 +34,13 @@ export async function waitForEnsDbToBeReady(ensDbClient: EnsDbReader): Promise<v
       retries: 15, // This allows for a total of over 15 minutes of retries with 1 minute between attempts.
       minTimeout: secondsToMilliseconds(60),
       maxTimeout: secondsToMilliseconds(60),
-      onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
+      onFailedAttempt: ({ attemptNumber, retriesLeft, error }) => {
         logger.warn(
           {
             ensIndexerSchemaName,
             attempt: attemptNumber,
             retriesLeft,
+            err: error,
             advice: `This might be due to ENSDb instance having a cold start, which can take several minutes.`,
           },
           `ENSDb instance readiness check failed`,
