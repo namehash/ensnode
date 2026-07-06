@@ -226,15 +226,14 @@ export class EnsDbReader<
    */
   private async ensDbSchemaExists(schemaName: string): Promise<boolean> {
     const result = await this.ensDb.execute<{ exists: boolean }>(
-      `SELECT EXISTS (
-        SELECT FROM information_schema.schemata
-        WHERE schema_name = '${schemaName}'
-      );`,
+      sql`SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.schemata
+        WHERE schema_name = ${schemaName}
+      ) AS "exists";`,
     );
 
-    const exists = result.rows[0].exists;
-
-    return exists;
+    return result.rows[0]?.exists ?? false;
   }
 
   /**
