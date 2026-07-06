@@ -16,6 +16,7 @@ export {
   type IndexingMetadataContextUninitialized,
 } from "@ensnode/ensnode-sdk";
 
+import { ENSNODE_SCHEMA_NAME } from "../ensnode";
 import {
   type AbstractEnsIndexerSchema,
   buildEnsDbDrizzleClient,
@@ -154,6 +155,17 @@ export class EnsDbReader<
    */
   async isReady(): Promise<boolean> {
     try {
+      const [ensNodeSchemaExists, ensDbWriterSchemaExists] = await Promise.all([
+        this.ensDbSchemaExists(ENSNODE_SCHEMA_NAME),
+        this.ensDbSchemaExists(this.ensIndexerSchemaName),
+      ]);
+
+      // If either the ENSNode Schema or the ENSIndexer Schema does not exist in the ENSDb instance,
+      // then it is not ready to serve queries.
+      if (!ensNodeSchemaExists || !ensDbWriterSchemaExists) {
+        return false;
+      }
+
       const indexingMetadataContext = await this.getIndexingMetadataContext();
       return indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized;
     } catch {
@@ -275,5 +287,20 @@ export class EnsDbReader<
     return {
       postgresql: postgresVersion,
     };
+  }
+
+  /**
+   * Check if the specified database schema exists in the ENSDb instance.
+   */
+  private async ensDbSchemaExists(schemaName: string): Promise<boolean> {
+    const result = await this.ensDb.execute<{ exists: boolean }>(
+      sql`SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.schemata
+        WHERE schema_name = ${schemaName}
+      ) AS "exists";`,
+    );
+
+    return result.rows[0]?.exists ?? false;
   }
 }
