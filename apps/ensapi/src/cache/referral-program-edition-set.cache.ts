@@ -31,7 +31,7 @@ export type ReferralProgramEditionConfigSetCache = SWRCache<ReferralProgramEditi
  * Configuration:
  * - ttl: Infinity - Never expires once cached
  * - proactiveRevalidationInterval: undefined - No proactive revalidation
- * - proactivelyInitialize: true - Load immediately on startup
+ * - proactivelyInitialize: true - Load immediately when the cache is constructed
  */
 export function buildReferralProgramEditionConfigSetCache(
   referralProgramEditionConfigSetUrl: URL | undefined,

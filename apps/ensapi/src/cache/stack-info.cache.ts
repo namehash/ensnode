@@ -29,7 +29,7 @@ export type EnsNodeStackInfoCache = SWRCache<EnsNodeStackInfo>;
  * - ttl: 1 minute - Allow cached value to be fresh for up to 1 minute.
  * - errorTtl: 1 minute - If loading fails, retry on next access after 1 minute.
  * - proactiveRevalidationInterval: 5 minutes - Refresh the cached value every 5 minutes.
- * - proactivelyInitialize: true - Load immediately on startup
+ * - proactivelyInitialize: true - Load immediately when the cache is constructed
  */
 export function buildStackInfoCache(
   ensDbClient: EnsDbReader,
