@@ -5,6 +5,8 @@ services:
     build:
       dockerfile: ./apps/ensindexer/Dockerfile
       context: ../..
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}
     ports:
       - "42069:42069"
     healthcheck:

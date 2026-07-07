@@ -81,6 +81,16 @@ variable "subgraph_compat" {
   type = bool
 }
 
+variable "node_options" {
+  type    = string
+  default = null
+}
+
+variable "ponder_statement_timeout" {
+  type    = string
+  default = null
+}
+
 variable "alchemy_api_key" {
   type = string
 }

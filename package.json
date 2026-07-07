@@ -25,10 +25,13 @@
     "devnet": "docker compose -f docker/services/devnet.yml up",
     "docker:build:ensnode": "pnpm run -w --parallel \"/^docker:build:.*/\"",
     "docker:version:sync": "node ./scripts/sync-docker-services-tags.mjs \"$(pnpm -F ensapi -s version:current)\"",
-    "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
+    "docker:build:ensindexer": "docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
-    "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
-    "docker:build:ensapi": "docker build -f apps/ensapi/Dockerfile -t ghcr.io/namehash/ensnode/ensapi:latest .",
+    "docker:build:ensrainbow": "docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
+    "docker:build:ensapi": "docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) -f apps/ensapi/Dockerfile -t ghcr.io/namehash/ensnode/ensapi:latest .",
+    "docker:compose:build": "GIT_COMMIT=$(git rev-parse HEAD) docker compose -f docker/docker-compose.yml build",
+    "docker:compose:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:compose:down": "docker compose -f docker/docker-compose.yml down",
     "otel-desktop-viewer": "docker run -p 8000:8000 -p 4317:4317 -p 4318:4318 davetron5000/otel-desktop-viewer:alpine-3",
     "generate": "pnpm run -w \"/^generate:.*/\"",
     "generate:openapi": "pnpm -r generate:openapi",
@@ -106,6 +109,7 @@
       "@opentelemetry/api": "patches/@opentelemetry__api.patch",
       "@opentelemetry/otlp-exporter-base": "patches/@opentelemetry__otlp-exporter-base.patch",
       "js-yaml@4.2.0": "patches/js-yaml@4.2.0.patch",
+      "ponder@0.16.6": "patches/ponder@0.16.6.patch",
       "starlight-llms-txt@0.10.0": "patches/starlight-llms-txt@0.10.0.patch"
     }
   }

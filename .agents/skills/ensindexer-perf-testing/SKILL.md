@@ -69,7 +69,7 @@ Pick a unique schema per run so concurrent/sequential runs don't pollute each ot
 
 ```env
 NAMESPACE=mainnet
-PLUGINS=ensv2,protocol-acceleration   # or whatever combo
+PLUGINS=unigraph,protocol-acceleration   # or whatever combo
 ENSINDEXER_SCHEMA_NAME=ensindexer_perf_<label>
 DISABLE_ENSRAINBOW_HEAL=true
 
@@ -84,8 +84,8 @@ validation against the subgraph label set baseline.
 
 Useful preset combos:
 
-- "alpha": `subgraph,basenames,lineanames,threedns,ensv2,protocol-acceleration,registrars,tokenscope`
-- "ensv2": `ensv2,protocol-acceleration`
+- "alpha": `subgraph,basenames,lineanames,threedns,unigraph,protocol-acceleration,registrars,tokenscope`
+- "unigraph": `unigraph,protocol-acceleration`
 - "subgraph": `subgraph,basenames,lineanames,threedns,protocol-acceleration`
 
 ## Step 5 — wipe state
@@ -280,7 +280,7 @@ block range` log lines stop appearing for minutes.
   `curl :42069/metrics | grep -E "^ponder_indexing_(store|rpc)"` is the source of truth.
 - **Querying prometheus after indexer stops** without a `time=` parameter returns empty results.
   Always snapshot at `end-epoch`.
-- **`ensv2-only` is not v2-only** — the ensv2 plugin pulls in chains 1/8453/10/42161/59144/534352
+- **`unigraph-only` is not v2-only** — the unigraph plugin pulls in chains 1/8453/10/42161/59144/534352
   to mirror v1 state. Same shape as the canonical multichain configs in terms of chain count.
 - **TOCTOU during snapshot** — wait until the wait script signals all chains live before
   snapshotting. Mid-realtime numbers are not stable.

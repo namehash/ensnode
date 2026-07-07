@@ -16,8 +16,6 @@ export enum PluginName {
   ProtocolAcceleration = "protocol-acceleration",
   Registrars = "registrars",
   TokenScope = "tokenscope",
-  /** @deprecated use {@link PluginName.Unigraph} instead */
-  ENSv2 = "ensv2",
   Unigraph = "unigraph",
   EFP = "efp",
 }
@@ -32,6 +30,13 @@ export interface EnsIndexerVersionInfo {
    * @see https://www.npmjs.com/package/ponder
    **/
   ponder: string;
+
+  /**
+   * ENSIndexer codebase commit hash
+   *
+   * Optional, as it may not be available in all environments.
+   */
+  commit?: string;
 
   /**
    * ENSDb service version

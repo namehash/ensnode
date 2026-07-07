@@ -36,6 +36,12 @@ RUN chmod +x /app/apps/ensrainbow/scripts/download-prebuilt-database.sh
 
 # Set environment variables
 ENV NODE_ENV=production
+# Read the build arg
+ARG GIT_COMMIT
+# Set the GIT_COMMIT as an environment variable for the app runtime.
+ENV GIT_COMMIT=$GIT_COMMIT
+# Attach the GIT_COMMIT as a label for the image, so it can be inspected later.
+LABEL org.opencontainers.image.revision=$GIT_COMMIT
 # PORT is consumed by the entrypoint command, defaulting to 3223 if not set at runtime.
 # DB_SCHEMA_VERSION, LABEL_SET_ID, LABEL_SET_VERSION must be provided at runtime to the entrypoint.
 

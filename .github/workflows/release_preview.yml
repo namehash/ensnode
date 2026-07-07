@@ -247,6 +247,8 @@ jobs:
             type=raw,value=${{ needs.validate-and-prepare.outputs.docker-tag-base }}
             type=raw,value=${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
             type=sha
+          build_args: |
+            GIT_COMMIT=${{ github.sha }}
 
   build-and-publish-lambdas:
     name: Build & Publish Preview Lambdas

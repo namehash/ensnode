@@ -99,6 +99,7 @@ export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
     .object(
       {
         ponder: makeNonEmptyStringSchema(),
+        commit: z.optional(makeNonEmptyStringSchema()),
         ensDb: makeNonEmptyStringSchema(),
         ensIndexer: makeNonEmptyStringSchema(),
         ensNormalize: makeNonEmptyStringSchema(),
