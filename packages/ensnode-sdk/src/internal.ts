@@ -30,6 +30,7 @@ export * from "./registrars/zod-schemas";
 export * from "./rpc";
 export * from "./shared/config/build-rpc-urls";
 export * from "./shared/config/environments";
+export * from "./shared/config/git-ref";
 export * from "./shared/config/pretty-printing";
 export * from "./shared/config/redacting";
 export * from "./shared/config/rpc-configs-from-env";

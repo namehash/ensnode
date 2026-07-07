@@ -4,7 +4,17 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { buildCommitRef } from "@ensnode/ensnode-sdk/internal";
+
+import type { ENSIndexerEnvironment } from "@/config/environment";
 import { logger } from "@/lib/logger";
+
+/**
+ * Get ENSIndexer codebase commit reference
+ */
+export function getEnsIndexerCommitRef(): string | undefined {
+  return buildCommitRef(process.env satisfies ENSIndexerEnvironment);
+}
 
 /**
  * Get ENSIndexer version

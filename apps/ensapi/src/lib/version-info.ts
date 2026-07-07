@@ -5,6 +5,16 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { EnsApiVersionInfo } from "@ensnode/ensnode-sdk";
+import { buildCommitRef } from "@ensnode/ensnode-sdk/internal";
+
+import type { EnsApiEnvironment } from "@/config/environment";
+
+/**
+ * Get ENSApi codebase commit reference
+ */
+export function getEnsApiCommitRef(): string | undefined {
+  return buildCommitRef(process.env satisfies EnsApiEnvironment);
+}
 
 /**
  * Get ENS API version
@@ -101,6 +111,7 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
 }
 
 export const ensApiVersionInfo = {
+  commit: getEnsApiCommitRef(),
   ensApi: getEnsApiVersion(),
   ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
 } as const satisfies EnsApiVersionInfo;

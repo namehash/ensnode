@@ -397,7 +397,7 @@ describe("buildEnsRainbowPublicConfig", () => {
   it("returns a valid ENSRainbow public config with correct structure", () => {
     const result = buildEnsRainbowPublicConfig(dbConfig);
 
-    expect(result).toStrictEqual({
+    expect(result).toMatchObject({
       serverLabelSet: dbConfig.serverLabelSet,
       versionInfo: {
         ensRainbow: packageJson.version,

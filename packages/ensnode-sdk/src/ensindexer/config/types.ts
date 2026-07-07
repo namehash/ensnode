@@ -32,6 +32,13 @@ export interface EnsIndexerVersionInfo {
   ponder: string;
 
   /**
+   * ENSIndexer codebase commit hash
+   *
+   * Optional, as it may not be available in all environments.
+   */
+  commit?: string;
+
+  /**
    * ENSDb service version
    *
    * Guaranteed to be the same as {@link ENSIndexerVersionInfo.ensIndexer}.
