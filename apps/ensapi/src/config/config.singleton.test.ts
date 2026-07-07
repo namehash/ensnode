@@ -6,10 +6,12 @@ vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   },
   makeLogger: vi.fn(() => ({
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   })),
 }));
 
@@ -23,6 +25,9 @@ vi.mock("@ensnode/ensdb-sdk", async (importOriginal) => {
     ensIndexerSchema = {};
     ensIndexerSchemaName = "ensindexer_test";
     async isHealthy() {
+      return true;
+    }
+    async isReady() {
       return true;
     }
     async destroy() {}

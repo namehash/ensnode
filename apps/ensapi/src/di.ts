@@ -17,6 +17,7 @@ import type { EnsApiConfig } from "@/config/config.schema";
 import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
+import { waitForEnsDbToBeReady } from "@/lib/ensdb";
 import { makeLogger } from "@/lib/logger";
 import { buildRootChainPublicClient } from "@/lib/public-client";
 
@@ -265,15 +266,16 @@ class EnsApiDiContainer {
         throw new Error("ENSDb health check failed");
       }
 
+      // Wait for ENSDb to be ready for handling queries before proceeding with further steps.
+      await waitForEnsDbToBeReady(this.context.ensDbClient);
+
       logger.info(
         { ensIndexerSchemaName: this.context.ensDbConfig.ensIndexerSchemaName },
         "Successfully connected to ENSDb",
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      throw new Error(
-        `DI container initialization failed: could not connect to ENSDb due to ${errorMessage}`,
-      );
+      throw new Error(`DI container initialization failed: ${errorMessage}`);
     }
 
     try {
