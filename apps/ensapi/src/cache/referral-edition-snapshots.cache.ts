@@ -16,8 +16,6 @@ import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/
 import { getReferralEditionSnapshot } from "@/lib/ensanalytics/referrer-leaderboard/get-referral-edition-snapshot";
 import { makeLogger } from "@/lib/logger";
 
-import { indexingStatusCache } from "./indexing-status.cache";
-
 const logger = makeLogger("referral-edition-snapshots-cache");
 
 /**
@@ -79,6 +77,7 @@ function createEditionSnapshotBuilder(
       );
     }
 
+    const { indexingStatusCache } = di.context;
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       logger.error(
