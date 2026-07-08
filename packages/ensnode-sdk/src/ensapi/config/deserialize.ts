@@ -1,6 +1,5 @@
 import { prettifyError } from "zod/v4";
 
-import { buildUnvalidatedEnsIndexerPublicConfig } from "../../ensindexer/config/deserialize";
 import type { Unvalidated } from "../../shared/types";
 import type { SerializedEnsApiPublicConfig } from "./serialized-types";
 import type { EnsApiPublicConfig } from "./types";
@@ -19,12 +18,7 @@ import {
 export function buildUnvalidatedEnsApiPublicConfig(
   serializedPublicConfig: SerializedEnsApiPublicConfig,
 ): Unvalidated<EnsApiPublicConfig> {
-  return {
-    ...serializedPublicConfig,
-    ensIndexerPublicConfig: buildUnvalidatedEnsIndexerPublicConfig(
-      serializedPublicConfig.ensIndexerPublicConfig,
-    ),
-  };
+  return serializedPublicConfig;
 }
 
 /**

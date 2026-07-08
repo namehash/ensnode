@@ -133,6 +133,5 @@ export function buildEnsApiPublicConfig(
       theGraphApiKey: ensApiConfig.theGraphApiKey ? "<API_KEY>" : undefined,
       isSubgraphCompatible: ensIndexerPublicConfig.isSubgraphCompatible,
     }),
-    ensIndexerPublicConfig,
   };
 }
