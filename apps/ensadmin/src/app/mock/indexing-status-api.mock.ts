@@ -30,15 +30,6 @@ const serializedEnsIndexerPublicConfig = {
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352, 567],
   ensIndexerSchemaName: "alphaSchema1.9.0",
-  ensRainbowPublicConfig: {
-    serverLabelSet: {
-      labelSetId: "subgraph",
-      highestLabelSetVersion: 0,
-    },
-    versionInfo: {
-      ensRainbow: "1.9.0",
-    },
-  },
   isSubgraphCompatible: false,
   namespace: "mainnet",
   plugins: [
@@ -75,8 +66,13 @@ const serializedEnsDbPublicConfig = {
   },
 } satisfies SerializedEnsDbPublicConfig;
 
-const serializedEnsRainbowPublicConfig =
-  serializedEnsIndexerPublicConfig.ensRainbowPublicConfig satisfies SerializedEnsRainbowPublicConfig;
+const serializedEnsRainbowPublicConfig = {
+  serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  versionInfo: {
+    commit: "a26a979f06f52ef0e40e69da1052e190240db29b",
+    ensRainbow: "1.0.0",
+  },
+} satisfies SerializedEnsRainbowPublicConfig;
 
 const serializedStackInfo = {
   ensApi: serializedEnsApiPublicConfig,

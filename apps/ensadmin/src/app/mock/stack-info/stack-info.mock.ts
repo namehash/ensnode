@@ -108,7 +108,6 @@ function createEnsIndexerConfig(
     namespace,
     plugins,
     versionInfo: { ...COMMON_ENSINDEXER_VERSION_INFO },
-    ensRainbowPublicConfig: createEnsRainbowConfig(),
   };
 }
 
@@ -207,15 +206,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       plugins: ["subgraph"],
       ensIndexerSchemaName: "DeserializationSchema1.9.0",
       isSubgraphCompatible: true,
-      ensRainbowPublicConfig: {
-        versionInfo: {
-          ensRainbow: "",
-        },
-        serverLabelSet: {
-          labelSetId: "",
-          highestLabelSetVersion: -1,
-        },
-      },
     },
     ensRainbow: {
       versionInfo: {

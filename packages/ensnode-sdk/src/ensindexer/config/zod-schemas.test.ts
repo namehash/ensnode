@@ -138,68 +138,8 @@ describe("ENSIndexer: Config", () => {
         ).toContain("`ensDb` version must be same as `ensIndexer` version");
       });
 
-      it("validates ENSRainbow label set and version compatibility", () => {
-        const baseConfig = {
-          ensRainbowPublicConfig: {
-            serverLabelSet: {
-              labelSetId: "subgraph",
-              highestLabelSetVersion: 0,
-            },
-            versionInfo: {
-              ensRainbow: "0.32.0",
-            },
-          },
-          indexedChainIds: [1], // Use array for serialized config
-          isSubgraphCompatible: false, // Set to false to bypass isSubgraphCompatible invariant
-          namespace: "mainnet" as const,
-          plugins: [PluginName.Subgraph, PluginName.Registrars], // Multiple plugins allowed when not subgraph compatible
-          ensIndexerSchemaName: "ensindexer_0",
-          versionInfo: {
-            ponder: "0.11.25",
-            ensDb: "0.32.0",
-            ensIndexer: "0.32.0",
-            ensNormalize: "1.11.1",
-          },
-        };
-
-        // Test mismatched label set IDs
-        expect(
-          formatParseError(
-            makeEnsIndexerPublicConfigSchema().safeParse(
-              buildUnvalidatedEnsIndexerPublicConfig({
-                ...baseConfig,
-                clientLabelSet: { labelSetId: "custom-labels", labelSetVersion: 0 },
-              }),
-            ),
-          ),
-        ).toContain(
-          'Server label set ID "subgraph" does not match client\'s requested label set ID "custom-labels"',
-        );
-
-        // Test server version too low
-        expect(
-          formatParseError(
-            makeEnsIndexerPublicConfigSchema().safeParse(
-              buildUnvalidatedEnsIndexerPublicConfig({
-                ...baseConfig,
-                clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 5 },
-              }),
-            ),
-          ),
-        ).toContain("Server highest label set version 0 is less than client's requested version 5");
-      });
-
       it("can parse full ENSIndexerPublicConfig with label set", () => {
         const validConfig = {
-          ensRainbowPublicConfig: {
-            serverLabelSet: {
-              labelSetId: "subgraph",
-              highestLabelSetVersion: 0,
-            },
-            versionInfo: {
-              ensRainbow: "0.32.0",
-            },
-          },
           clientLabelSet: {
             labelSetId: "subgraph",
             labelSetVersion: 0,

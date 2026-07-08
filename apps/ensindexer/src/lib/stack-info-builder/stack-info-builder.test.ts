@@ -27,10 +27,6 @@ const mockEnsDbPublicConfig = {
 
 const mockEnsIndexerPublicConfig = {
   ensIndexerSchemaName: "ensindexer_0",
-  ensRainbowPublicConfig: {
-    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    versionInfo: { ensRainbow: "1.9.0" },
-  },
   clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   indexedChainIds: new Set([1]),
   isSubgraphCompatible: true,

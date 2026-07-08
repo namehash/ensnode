@@ -78,12 +78,6 @@ const EXAMPLE_ENSDB_PUBLIC_RESPONSE = {
 } satisfies SerializedEnsDbPublicConfig;
 
 const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
-  ensRainbowPublicConfig: {
-    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    versionInfo: {
-      ensRainbow: "1.9.0",
-    },
-  },
   clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,

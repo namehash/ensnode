@@ -6,7 +6,6 @@ import {
   validateEnsIndexerPublicConfig,
   validateEnsIndexerVersionInfo,
 } from "@ensnode/ensnode-sdk";
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import {
   getEnsIndexerCommitRef,
@@ -16,27 +15,12 @@ import {
 
 export class PublicConfigBuilder {
   /**
-   * ENSRainbow Client
-   *
-   * Used to fetch ENSRainbow Public Config, which is part of
-   * the ENSIndexer Public Config.
-   */
-  private ensRainbowClient: EnsRainbow.ApiClient;
-
-  /**
    * Immutable ENSIndexer Public Config
    *
    * The cached ENSIndexer Public Config object, which is built and validated
    * on the first call to `getPublicConfig()`, and returned as-is on subsequent calls.
    */
   private immutablePublicConfig: EnsIndexerPublicConfig | undefined;
-
-  /**
-   * @param ensRainbowClient ENSRainbow Client instance used to fetch ENSRainbow Public Config
-   */
-  constructor(ensRainbowClient: EnsRainbow.ApiClient) {
-    this.ensRainbowClient = ensRainbowClient;
-  }
 
   /**
    * Get ENSIndexer Public Config
@@ -49,17 +33,12 @@ export class PublicConfigBuilder {
    * @throws if the built {@link EnsIndexerPublicConfig} does not conform to
    *         the expected schema
    */
-  async getPublicConfig(): Promise<EnsIndexerPublicConfig> {
+  getPublicConfig(): EnsIndexerPublicConfig {
     if (typeof this.immutablePublicConfig === "undefined") {
-      const [versionInfo, ensRainbowPublicConfig] = await Promise.all([
-        this.getEnsIndexerVersionInfo(),
-        // TODO: remove dependency on ENSRainbow by dropping `ensRainbowPublicConfig` from `EnsIndexerPublicConfig`.
-        this.ensRainbowClient.config(),
-      ]);
+      const versionInfo = this.getEnsIndexerVersionInfo();
 
       this.immutablePublicConfig = validateEnsIndexerPublicConfig({
         ensIndexerSchemaName: config.ensIndexerSchemaName,
-        ensRainbowPublicConfig,
         clientLabelSet: config.clientLabelSet,
         indexedChainIds: config.indexedChainIds,
         isSubgraphCompatible: config.isSubgraphCompatible,
