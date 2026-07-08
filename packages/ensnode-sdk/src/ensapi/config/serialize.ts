@@ -7,9 +7,7 @@ import type { EnsApiPublicConfig } from "./types";
 export function serializeEnsApiPublicConfig(
   config: EnsApiPublicConfig,
 ): SerializedEnsApiPublicConfig {
-  return {
-    ...config,
-  };
+  return config;
 }
 
 /**
