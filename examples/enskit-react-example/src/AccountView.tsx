@@ -1,12 +1,9 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import {
-  beautifyInterpretedName,
-  isNormalizedAddress,
-  type NormalizedAddress,
-  toNormalizedAddress,
-} from "enssdk";
+import { isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
+
+import { accountPath, domainIdPath, useAppPath } from "./app-paths";
 
 const AccountDomainsQuery = graphql(`
   query AccountDomains($address: Address!, $first: Int!, $after: String) {
@@ -15,9 +12,7 @@ const AccountDomainsQuery = graphql(`
       domains(first: $first, after: $after) {
         totalCount
         edges {
-          # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-          # node { __typename id canonical { name { interpreted } } }
-          node { __typename id  name }
+          node { __typename id canonical { name { beautified } } }
         }
         pageInfo { hasNextPage endCursor }
       }
@@ -28,6 +23,7 @@ const AccountDomainsQuery = graphql(`
 const PAGE_SIZE = 20;
 
 function RenderAccount({ address }: { address: NormalizedAddress }) {
+  const appPath = useAppPath();
   const [after, setAfter] = useState<string | null>(null);
 
   const [result] = useOmnigraphQuery({
@@ -62,19 +58,9 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
           <ul>
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
-                {/*
-                TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-                {edge.node.canonical ? (
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
-                */}
-                {edge.node.name ? (
-                  <Link to={`/domain/${edge.node.name}`}>
-                    {beautifyInterpretedName(edge.node.name)}
-                  </Link>
-                ) : (
-                  <em>non-canonical domain</em>
-                )}{" "}
+                <Link to={appPath(domainIdPath(edge.node.id))}>
+                  {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
+                </Link>{" "}
                 ({edge.node.__typename})
               </li>
             ))}
@@ -96,6 +82,7 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
 }
 
 export function AccountView() {
+  const appPath = useAppPath();
   const params = useParams();
   const raw = params.address ?? "";
 
@@ -103,12 +90,12 @@ export function AccountView() {
     // try to coerce mixed-case / checksummed input to a NormalizedAddress and redirect
     try {
       const normalized = toNormalizedAddress(raw);
-      return <Navigate to={`/account/${normalized}`} replace />;
+      return <Navigate to={appPath(accountPath(normalized))} replace />;
     } catch {
       return (
         <div>
           <h2>Invalid address: '{raw}'</h2>
-          <Link to="/">Home</Link>
+          <Link to={appPath("/")}>Home</Link>
         </div>
       );
     }

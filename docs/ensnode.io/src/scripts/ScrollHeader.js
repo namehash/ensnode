@@ -4,6 +4,7 @@ export default function ScrollHeader() {
     const defaultImage = document.getElementsByClassName("defaultImage")[0];
     const onScrollImage = document.getElementsByClassName("onScrollImage")[0];
     const headerButtons = document.getElementsByClassName("onScrollElement");
+    const headerMobileNavigation = document.getElementsByClassName("onScrollContainer");
 
     const scrollWatcher = document.createElement("div");
 
@@ -19,8 +20,12 @@ export default function ScrollHeader() {
         for (const headerButton of headerButtons) {
           headerButton.classList.toggle("scrolled", !entries[0].isIntersecting);
         }
+
+        for (const mobileNav of headerMobileNavigation) {
+          mobileNav.classList.toggle("scrolled", !entries[0].isIntersecting);
+        }
       },
-      { rootMargin: "100px 0px 0px 0px" },
+      { rootMargin: "30px 0px 0px 0px" },
     );
 
     navObserver.observe(scrollWatcher);

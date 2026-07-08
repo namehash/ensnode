@@ -1,0 +1,126 @@
+---
+title: ENSNode Troubleshooting
+description: Common symptoms and resolutions for ENSNode deployments.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+This page lists common symptoms you might see while running ENSNode and how to resolve them.
+
+## Common symptoms
+
+### Indexing is slow
+
+Historical backfill is the most resource-intensive ENSNode workload. If indexing is slower than expected:
+
+- **Check RPC throughput.** Slow or rate-limited providers are the most common bottleneck. Use a high-throughput provider or multiple providers during backfill.
+- **Check CPU performance.** Indexing path for ENSIndexer is single-threaded, so a faster CPU directly improves throughput.
+- **Check network latency to ENSRainbow and ENSDb.** Co-locate all three services on the same local network, and if applicable, in the same availability zone to minimize latency.
+- **Consider applying an ENSDb snapshot.** Bootstrapping from an [ENSDb snapshot](/docs/integrate/integration-options/ensdb-cli#ensdb-snapshots) skips most of the historical backfill.
+
+### ENSApi returns stale data
+
+If ENSApi returns data that lags behind the latest onchain state:
+
+- **Check Indexing Status API response.** If the `worstCaseDistance` field keeps increasing, ENSIndexer is likely falling behind. Check ENSIndexer logs for RPC errors or event handler issues.
+- **Check ENSDb replication lag.** If ENSApi reads from a replica, asynchronous replication may lag behind the primary.
+- **Verify ENSApi is connected to the correct schema.** ENSApi and ENSIndexer must agree on the `ENSDB_URL` and `ENSINDEXER_SCHEMA_NAME`.
+
+### ENSDb errors on startup
+
+If ENSIndexer fails to start with a database error:
+
+- **Confirm the `pg_trgm` extension is available.** ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup. This extension must be installable in your PostgreSQL instance.
+- **Check connection string and credentials.** Ensure `ENSDB_URL` is reachable from the ENSIndexer container or host.
+- **Check database schema permissions.** ENSIndexer needs permission to create tables, indexes, and extensions in the [ENSDb Writer Schema](/docs/services/ensdb/concepts/glossary#ensdb-writer-schema).
+
+### Out of disk space
+
+Disk usage grows as you index more chains and events:
+
+- **ENSDb:** mainnet deployments can require 380 GB or more, and the database grows over time.
+- **ENSRainbow:** the searchlight label set can require at least 55 GB.
+- Monitor disk usage early and scale volumes before they fill.
+
+### ENSRainbow is not healing labels
+
+If unknown labels are not being resolved:
+
+- **Confirm ENSRainbow is running and reachable.** Check the network path between ENSIndexer and ENSRainbow.
+- **Verify the loaded label set.** Ensure the label set version matches what you configured.
+
+### RPC rate limits or timeouts
+
+If you see frequent RPC errors:
+
+- **Use a paid or high-throughput RPC plan.** Free tiers are usually insufficient for backfill.
+- **Spread load across providers.** [Configure multiple RPC endpoints](/docs/services/ensindexer/usage/configuration) for each indexed chain.
+- **Reduce the number of active plugins or chains.** Fewer plugins means fewer events to fetch.
+
+## ENSIndexer runtime tuning issues
+
+When your ENSIndexer instance has multiple plugins active, it may need extra runtime tuning.
+
+### Heap out of memory
+
+#### Issue
+
+Your ENSIndexer instance may run out of memory and crash with a message like:
+
+```log
+1: 0x744ae8 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [node]
+<--- Last few GCs --->
+[15:0x1a5ac000] 15584424 ms: Mark-Compact (reduce) 1984.5 (2054.3) -> 1954.0 (1988.5) MB, pooled: 0 MB, 97.37 / 0.21 ms  (+ 776.3 ms in 87 steps since start of marking, biggest step 54.4 ms, walltime since start of marking 999 ms) (average mu = 0.397, cur
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+[15:0x1a5ac000] 15583426 ms: Scavenge 1985.0 (2018.3) -> 1978.0 (2053.1) MB, pooled: 0 MB, 20.34 / 0.00 ms  (average mu = 0.366, current mu = 0.360) allocation failure;
+2: 0xc1a6f0  [node]
+3: 0xc1a7df  [node]
+4: 0xebdfe5  [node]
+5: 0xebe012  [node]
+6: 0xebe30a  [node]
+7: 0xecf00a  [node]
+8: 0xed33b0  [node]
+9: 0x1965811  [node]
+Aborted
+```
+
+#### Resolution
+
+Increase the Node.js heap size with the `NODE_OPTIONS` environment variable for your ENSIndexer instance.
+
+```bash
+NODE_OPTIONS=--max-old-space-size=4096
+```
+
+This is especially useful when running many plugins or chains and RPC retries temporarily spike memory usage.
+
+### Database statement timeout errors
+
+#### Issue
+
+Your ENSIndexer instance may fail to complete long-running internal Ponder queries, and you see errors like:
+
+```log
+error: canceling statement due to statement timeout
+```
+
+#### Resolution
+
+Extend Ponder's internal SQL statement timeout with the `PONDER_STATEMENT_TIMEOUT` environment variable (value in milliseconds) for your ENSIndexer instance.
+
+```bash
+PONDER_STATEMENT_TIMEOUT=600000
+```
+
+This gives enough time, up to 10 minutes, for long-running internal queries on large datasets.
+
+These overrides are typically only needed for ENSIndexer instances that are indexing multiple chains.
+
+## Next steps
+
+<LinkCard
+  title="ENSNode Deployment Options"
+  description="Compare Docker, Railway, and Terraform deployment options."
+  href="/docs/self-host/deployment-options"
+/>

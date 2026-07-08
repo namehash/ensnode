@@ -1,0 +1,52 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+import StaticExampleNote from "./StaticExampleNote.astro";
+import {
+  staticExampleHostedInstanceLinkClass,
+  staticExampleOutputCodeWrapClass,
+  staticExampleOutputMaxHeight,
+  staticExampleSectionXClass,
+} from "./constants";
+
+interface Props {
+  uid: string;
+  responseJson: string;
+  responseSourceLabel: string;
+  responseSourceDocUrl: string;
+  heading?: string;
+}
+
+const {
+  uid,
+  responseJson,
+  responseSourceLabel,
+  responseSourceDocUrl,
+  heading = "Output",
+} = Astro.props;
+
+const badgeClass =
+  "inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]";
+const headingId = `${uid}-output-heading`;
+---
+
+<section
+  class={`border-b border-black/[0.05] pb-5 pt-3 dark:border-white/[0.06] ${staticExampleSectionXClass}`}
+  aria-labelledby={headingId}>
+  <div class="mb-2.5">
+    <span id={headingId} class={badgeClass}>
+      {heading}
+    </span>
+  </div>
+  <div
+    class={staticExampleOutputCodeWrapClass}
+    style={`max-height: ${staticExampleOutputMaxHeight}`}>
+    <Code code={responseJson} lang="json" />
+  </div>
+  <StaticExampleNote class="pt-3">
+    Output matches a point in time snapshot GraphQL response from our{" "}
+    <a href={responseSourceDocUrl} class={staticExampleHostedInstanceLinkClass}
+      >{responseSourceLabel} ENSNode instance</a
+    >. Live output depends on the configuration of your ENSNode instance and ENS state updates.
+  </StaticExampleNote>
+</section>

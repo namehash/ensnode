@@ -37,9 +37,37 @@ export const omnigraphCacheExchange = cacheExchange({
       return typeof key === "string" ? key : null;
     },
 
+    // EfpLists are keyed by their `tokenId` (the list NFT id); there is no separate `id` field
+    EfpList: (data) => (data.tokenId != null ? String(data.tokenId) : null),
+
     // These entities are Embedded Data and don't have a relevant key
+    AccountEfp: EMBEDDED_DATA,
+    EfpQuery: EMBEDDED_DATA,
+    EfpListStorageLocation: EMBEDDED_DATA,
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
+    CanonicalName: EMBEDDED_DATA,
+    DomainCanonical: EMBEDDED_DATA,
+    DomainResolver: EMBEDDED_DATA,
+    ForwardResolve: EMBEDDED_DATA,
+    ReverseResolve: EMBEDDED_DATA,
+    ResolvedRecords: EMBEDDED_DATA,
+    ResolutionStatus: EMBEDDED_DATA,
+    PrimaryNameRecord: EMBEDDED_DATA,
+    AccelerationStatus: EMBEDDED_DATA,
+    // dont forget to add cache strategy when DomainProfile is wired
+    DomainProfile: EMBEDDED_DATA,
+    ProfileAvatar: EMBEDDED_DATA,
+    ProfileHeader: EMBEDDED_DATA,
+    ProfileWebsite: EMBEDDED_DATA,
+    ProfileAddresses: EMBEDDED_DATA,
+    ProfileSocials: EMBEDDED_DATA,
+    ProfileSocialAccount: EMBEDDED_DATA,
+    ResolvedAbiRecord: EMBEDDED_DATA,
+    ResolvedAddressRecord: EMBEDDED_DATA,
+    ResolvedInterfaceRecord: EMBEDDED_DATA,
+    ResolvedPubkeyRecord: EMBEDDED_DATA,
+    ResolvedRawTextRecord: EMBEDDED_DATA,
   },
   resolvers: mergeResolverMaps(
     // produce relayPagination() local resolvers for each t.connection in the schema

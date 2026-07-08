@@ -1,0 +1,49 @@
+---
+title: ENS Subgraph
+description: The ENS Subgraph quietly became critical infrastructure for ENS and the broader web3 ecosystem — and it cannot carry that ecosystem into ENSv2. Here's who depends on it, and what comes next.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+:::danger[🚨 The ENS Subgraph is not ENSv2 compatible]
+The ENS Subgraph **fundamentally fails as a source of ENS data as soon as ENSv2 launches.**
+
+<LinkCard
+  title="Keep ENS apps working 🚨"
+  href="/docs/integrate/why-ensnode/keep-ens-working"
+  description="See apps currently set to break when ENSv2 launches unless they upgrade to the new ENS Omnigraph API."
+/>
+<LinkCard
+  title="Key Limitations 🚨"
+  href="/docs/integrate/ens-subgraph/key-limitations"
+  description="See the full list of Key Subgraph Limitations and how the Omnigraph addresses them."
+/>
+:::
+
+:::tip[Start here instead: the ENS Omnigraph API]
+The [ENS Omnigraph API](/docs/integrate/omnigraph) is the ENSv2-ready replacement: one unified, typed GraphQL API over **both ENSv1 and ENSv2**, multichain by default, with protocol-correct [ENS Protocol Acceleration](/docs/integrate/omnigraph/protocol-acceleration) resolution built in.
+
+<LinkCard
+  href="/docs/integrate/omnigraph"
+  title="ENS Omnigraph API"
+  description="ENSv2-ready unified GraphQL API over both ENSv1 and ENSv2 — start here for new integrations."
+/>
+<LinkCard
+  href="/docs/integrate/unigraph"
+  title="ENS Unigraph SQL"
+  description="Direct SQL access to the unified, multichain ENS data model."
+/>
+:::
+
+## ENSNode Subgraph compatibility
+
+ENSNode maintains a verified Subgraph-compatible API for migrating existing integrations from The Graph, but it is **not** the path forward for ENSv2.
+
+<LinkCard
+  href="/docs/integrate/ens-subgraph/backwards-compatibility#ensnodes-backwards-compatibility-with-the-ens-subgraph"
+  title="ENSNode’s Backwards Compatibility with the ENS Subgraph"
+  description="A verified Subgraph-compatible GraphQL endpoint for migrating existing integrations to ENSNode."
+/>

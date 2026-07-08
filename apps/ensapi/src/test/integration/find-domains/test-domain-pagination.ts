@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { shouldUseNullsLast } from "@/omnigraph-api/lib/find-domains/find-domains-resolver-helpers";
 import type { DomainsOrderByValue, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirectionValue } from "@/omnigraph-api/schema/order-direction";
 import type { PaginatedDomainResult } from "@/test/integration/find-domains/domain-pagination-queries";
@@ -58,35 +59,56 @@ function assertOrdering(
 ) {
   const values = domains.map((n) => getSortValue(n, by));
 
+  // Registration orderings use SQL-default NULL placement (ASC → last, DESC → first); NAME/DEPTH
+  // keep NULLS LAST in both directions. See find-domains-resolver-helpers.ts.
+  const nullsFirst = !shouldUseNullsLast(by) && dir === "DESC";
+
   for (let i = 0; i < values.length - 1; i++) {
     const a = values[i];
     const b = values[i + 1];
 
-    // nulls sort last regardless of direction
-    if (a === null) {
-      // a is null => b must also be null (everything after should be null)
-      expect(
-        b,
-        `expected null at index ${i + 1} because index ${i} was null (nulls last)`,
-      ).toBeNull();
-      continue;
-    }
-    if (b === null) {
+    if (nullsFirst) {
+      // nulls first: a non-null must not be followed by a null
+      if (b === null) {
+        expect(
+          a,
+          `expected null at index ${i} because index ${i + 1} was null (nulls first)`,
+        ).toBeNull();
+        continue;
+      }
+      // a is null, b is non-null => fine (null sorts first)
+      if (a === null) continue;
+    } else {
+      // nulls last: a null must be followed only by nulls
+      if (a === null) {
+        expect(
+          b,
+          `expected null at index ${i + 1} because index ${i} was null (nulls last)`,
+        ).toBeNull();
+        continue;
+      }
       // a is non-null, b is null => fine (null sorts last)
-      continue;
+      if (b === null) continue;
     }
 
     if (by === "NAME") {
       const av = a as string;
       const bv = b as string;
+      // Use localeCompare with ignorePunctuation to match Postgres ICU collation, which treats
+      // punctuation (including ".") as variable/ignorable at the primary level. Without this,
+      // JS bytewise ordering disagrees with the DB for names like "onion3.x" vs "onion.x":
+      // Postgres sorts "onion3" before "onion." (digits < letters after stripping dots), while
+      // JS places "." (code 46) before "3" (code 51).
       if (dir === "ASC") {
-        expect(av <= bv, `expected "${av}" <= "${bv}" at indices ${i},${i + 1} (NAME ASC)`).toBe(
-          true,
-        );
+        expect(
+          av.localeCompare(bv, undefined, { ignorePunctuation: true }) <= 0,
+          `expected "${av}" <= "${bv}" at indices ${i},${i + 1} (NAME ASC)`,
+        ).toBe(true);
       } else {
-        expect(av >= bv, `expected "${av}" >= "${bv}" at indices ${i},${i + 1} (NAME DESC)`).toBe(
-          true,
-        );
+        expect(
+          av.localeCompare(bv, undefined, { ignorePunctuation: true }) >= 0,
+          `expected "${av}" >= "${bv}" at indices ${i},${i + 1} (NAME DESC)`,
+        ).toBe(true);
       }
     } else if (by === "DEPTH") {
       const av = a as number;

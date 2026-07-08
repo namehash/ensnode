@@ -39,12 +39,12 @@ export default createPlugin({
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               threednsOptimism.chain.id,
               threednsOptimism.contracts.ThreeDNSToken,
             ),
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               threednsBase.chain.id,
               threednsBase.contracts.ThreeDNSToken,
             ),
@@ -57,12 +57,12 @@ export default createPlugin({
           abi: ResolverABI,
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               threednsOptimism.chain.id,
               threednsOptimism.contracts.Resolver,
             ),
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               threednsBase.chain.id,
               threednsBase.contracts.Resolver,
             ),

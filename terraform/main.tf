@@ -28,6 +28,8 @@ locals {
       ensrainbow_label_set_id      = "subgraph"
       ensrainbow_label_set_version = "0"
       disk_size_gb                 = 50
+      render_instance_plan         = "starter"
+      subdomain_path               = "api"
     }
 
     # The Searchlight instance uses fixed label set ID "searchlight" and
@@ -36,6 +38,8 @@ locals {
       ensrainbow_label_set_id      = "searchlight"
       ensrainbow_label_set_version = var.ensrainbow_searchlight_label_set_version
       disk_size_gb                 = 100
+      render_instance_plan         = "standard"
+      subdomain_path               = "api.searchlight"
     }
   }
 
@@ -58,7 +62,7 @@ locals {
       ensnode_indexer_type         = "v2-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "v2SepoliaSchema-${var.ensnode_version}"
-      plugins                      = "unigraph,protocol-acceleration"
+      plugins                      = "subgraph,unigraph,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
@@ -77,12 +81,20 @@ locals {
       ensindexer_label_set_version = "0"
     }
     alpha = {
-      ensnode_indexer_type         = "alpha"
-      ensnode_environment_name     = var.render_environment
-      ensindexer_schema_name       = "alphaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,basenames,lineanames,threedns,unigraph,protocol-acceleration,registrars,tokenscope"
-      namespace                    = "mainnet"
-      referral_program_editions    = "https://ensawards.org/production-editions.json"
+      ensnode_indexer_type      = "alpha"
+      ensnode_environment_name  = var.render_environment
+      ensindexer_schema_name    = "alphaSchema-${var.ensnode_version}"
+      plugins                   = "subgraph,basenames,lineanames,threedns,unigraph,protocol-acceleration,registrars,tokenscope"
+      namespace                 = "mainnet"
+      referral_program_editions = "https://ensawards.org/production-editions.json"
+      # The default Node.js heap size is ~2GB and can be exceeded
+      # when processing RPC request retries across multiple chains. Therefore,
+      # we increase the heap size to ~4GB to accommodate this increased memory usage.
+      node_options = "--max-old-space-size=4096"
+      # Long-running internal Ponder queries may exceed the default SQL statement timeout
+      # of 2 minutes. Therefore, we extend the SQL statement timeout to 10 minutes to accommodate
+      # these long-running queries.
+      ponder_statement_timeout     = "600000"
       render_instance_plan         = "standard"
       subgraph_compat              = false
       ensindexer_label_set_id      = "searchlight"
@@ -120,7 +132,7 @@ module "ensdb" {
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
-  disk_size_gb          = 500
+  disk_size_gb          = 750
 }
 
 module "ensrainbow" {
@@ -128,10 +140,14 @@ module "ensrainbow" {
 
   for_each = local.ensrainbow_instances
 
-  render_environment_id = render_project.ensnode.environments["default"].id
-  render_region         = local.render_region
-  disk_size_gb          = each.value.disk_size_gb
-  ensnode_version       = var.ensnode_version
+  render_environment_id    = render_project.ensnode.environments["default"].id
+  render_region            = local.render_region
+  render_instance_plan     = each.value.render_instance_plan
+  hosted_zone_name         = local.hosted_zone_name
+  ensnode_environment_name = var.render_environment
+  ensnode_version          = var.ensnode_version
+  subdomain_path           = each.value.subdomain_path
+  disk_size_gb             = each.value.disk_size_gb
 
   # Label set that ENSRainbow will offer to its clients
   ensrainbow_label_set_id      = each.value.ensrainbow_label_set_id
@@ -179,6 +195,10 @@ module "ensindexer" {
   alchemy_api_key         = var.alchemy_api_key
   quicknode_api_key       = var.quicknode_api_key
   quicknode_endpoint_name = var.quicknode_endpoint_name
+
+  # Optional runtime tuning overrides
+  node_options             = try(each.value.node_options, null)
+  ponder_statement_timeout = try(each.value.ponder_statement_timeout, null)
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
   ensindexer_label_set_id      = each.value.ensindexer_label_set_id

@@ -1,8 +1,6 @@
-import config from "@/config";
-
 import { minutesToSeconds } from "date-fns";
 
-import { EnsNodeMetadataKeys } from "@ensnode/ensdb-sdk";
+import { type EnsDbReader, EnsNodeMetadataKeys } from "@ensnode/ensdb-sdk";
 import {
   buildEnsNodeStackInfo,
   type EnsNodeStackInfo,
@@ -11,19 +9,13 @@ import {
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
-import { buildEnsApiPublicConfig } from "@/config/config.schema";
-import { ensDbClient } from "@/lib/ensdb/singleton";
-import { lazyProxy } from "@/lib/lazy";
+import { buildEnsApiPublicConfig, type EnsApiConfig } from "@/config/config.schema";
 import logger from "@/lib/logger";
 
 export type EnsNodeStackInfoCache = SWRCache<EnsNodeStackInfo>;
 
-// lazyProxy defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-// SWRCache with proactivelyInitialize:true starts background polling immediately
-// on construction, which would trigger ensDbClient before env vars are available.
 /**
- * Cache for {@link EnsNodeStackInfo}, which is loaded from ENSDb on demand.
+ * Build SWR Cache for {@link EnsNodeStackInfo}, which is loaded from ENSDb on demand.
  * Once successfully loaded, the {@link EnsNodeStackInfo} is cached and kept up-to-date
  * by proactive revalidation, since the {@link EnsNodeStackInfo} might change during
  * the lifecycle of the ENSApi instance, for example, when
@@ -37,56 +29,56 @@ export type EnsNodeStackInfoCache = SWRCache<EnsNodeStackInfo>;
  * - ttl: 1 minute - Allow cached value to be fresh for up to 1 minute.
  * - errorTtl: 1 minute - If loading fails, retry on next access after 1 minute.
  * - proactiveRevalidationInterval: 5 minutes - Refresh the cached value every 5 minutes.
- * - proactivelyInitialize: true - Load immediately on startup
+ * - proactivelyInitialize: true - Load immediately when the cache is constructed
  */
-export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
-  () =>
-    new SWRCache<EnsNodeStackInfo>({
-      fn: async function loadEnsNodeStackInfo() {
-        try {
-          const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
+export function buildStackInfoCache(
+  ensDbClient: EnsDbReader,
+  ensApiConfig: EnsApiConfig,
+): EnsNodeStackInfoCache {
+  return new SWRCache<EnsNodeStackInfo>({
+    fn: async function loadEnsNodeStackInfo() {
+      try {
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
-          if (
-            indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized
-          ) {
-            // The IndexingMetadataContext has not been initialized in ENSDb yet.
-            // This might happen during application startup, i.e. when ENSDb
-            // has not yet been populated with the IndexingMetadataContext record.
-            // Therefore, throw an error to trigger the subsequent catch handler.
-            throw new Error("Indexing Metadata Context was uninitialized in ENSDb.");
-          }
-
-          const ensIndexerStackInfo = indexingMetadataContext.stackInfo;
-          const ensNodeStackInfo = buildEnsNodeStackInfo(
-            buildEnsApiPublicConfig(config, ensIndexerStackInfo.ensIndexer),
-            ensIndexerStackInfo.ensDb,
-            ensIndexerStackInfo.ensIndexer,
-            ensIndexerStackInfo.ensRainbow,
-          );
-
-          // The EnsNodeStackInfo has been successfully built for caching.
-          // Therefore, return it so that this current invocation of `readCache` will:
-          // - Replace the currently cached value (if any) with this new value.
-          // - Return this non-null value.
-          return ensNodeStackInfo;
-        } catch (error) {
-          // IndexingMetadataContext was uninitialized in ENSDb.
-          // Therefore, throw an error so that this current invocation of `readCache` will:
-          // - Reject the newly fetched response (if any) such that it won't be cached.
-          // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
-          logger.error(
-            error,
-            `Error occurred while loading Indexing Metadata Context record from ENSNode Metadata table in ENSDb. ` +
-              `Where clause applied: ("ensIndexerSchemaName" = "${ensDbClient.ensIndexerSchemaName}", "key" = "${EnsNodeMetadataKeys.IndexingMetadataContext}"). ` +
-              `The cached EnsNodeStackInfo object (if any) will not be updated.`,
-          );
-
-          throw error;
+        if (indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized) {
+          // The IndexingMetadataContext has not been initialized in ENSDb yet.
+          // This might happen during application startup, i.e. when ENSDb
+          // has not yet been populated with the IndexingMetadataContext record.
+          // Therefore, throw an error to trigger the subsequent catch handler.
+          throw new Error("Indexing Metadata Context was uninitialized in ENSDb.");
         }
-      },
-      ttl: minutesToSeconds(1),
-      errorTtl: minutesToSeconds(1),
-      proactiveRevalidationInterval: minutesToSeconds(5),
-      proactivelyInitialize: true,
-    }),
-);
+
+        const ensIndexerStackInfo = indexingMetadataContext.stackInfo;
+        const ensNodeStackInfo = buildEnsNodeStackInfo(
+          buildEnsApiPublicConfig(ensApiConfig, ensIndexerStackInfo.ensIndexer),
+          ensIndexerStackInfo.ensDb,
+          ensIndexerStackInfo.ensIndexer,
+          ensIndexerStackInfo.ensRainbow,
+        );
+
+        // The EnsNodeStackInfo has been successfully built for caching.
+        // Therefore, return it so that this current invocation of `readCache` will:
+        // - Replace the currently cached value (if any) with this new value.
+        // - Return this non-null value.
+        return ensNodeStackInfo;
+      } catch (error) {
+        // IndexingMetadataContext was uninitialized in ENSDb.
+        // Therefore, throw an error so that this current invocation of `readCache` will:
+        // - Reject the newly fetched response (if any) such that it won't be cached.
+        // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
+        logger.error(
+          error,
+          `Error occurred while loading Indexing Metadata Context record from ENSNode Metadata table in ENSDb. ` +
+            `Where clause applied: ("ensIndexerSchemaName" = "${ensDbClient.ensIndexerSchemaName}", "key" = "${EnsNodeMetadataKeys.IndexingMetadataContext}"). ` +
+            `The cached EnsNodeStackInfo object (if any) will not be updated.`,
+        );
+
+        throw error;
+      }
+    },
+    ttl: minutesToSeconds(1),
+    errorTtl: minutesToSeconds(1),
+    proactiveRevalidationInterval: minutesToSeconds(5),
+    proactivelyInitialize: true,
+  });
+}

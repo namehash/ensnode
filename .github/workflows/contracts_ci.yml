@@ -1,0 +1,74 @@
+name: "Contracts: CI"
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts_ci.yml"
+      - ".gitmodules"
+  pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts_ci.yml"
+      - ".gitmodules"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    name: "Discover contracts"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    outputs:
+      contracts: ${{ steps.find.outputs.contracts }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find Foundry projects
+        id: find
+        run: |
+          dirs=$(find contracts -name "foundry.toml" -not -path "*/lib/*" -exec dirname {} \; | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "contracts=$dirs" >> $GITHUB_OUTPUT
+
+  ci:
+    name: "CI (${{ matrix.contract }})"
+    needs: discover
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      matrix:
+        contract: ${{ fromJson(needs.discover.outputs.contracts) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Sync and init submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Format
+        working-directory: ${{ matrix.contract }}
+        run: forge fmt --check
+
+      - name: Build
+        working-directory: ${{ matrix.contract }}
+        run: forge build --sizes
+
+      - name: Test
+        working-directory: ${{ matrix.contract }}
+        run: forge test -vvv
+
+      - name: Gas snapshot
+        working-directory: ${{ matrix.contract }}
+        run: forge snapshot --check

@@ -1,10 +1,74 @@
 ---
 title: ENS Omnigraph API
-description: The ultimate ENSv2 API.
+description: The world's first and only API providing unified access to the full state of ENSv1 and ENSv2.
 ---
 
-:::caution[Coming Soon]
-We're actively working on this page right now. Check back by May 18th for full content!
-:::
+import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
 
-This page will introduce the ENS Omnigraph API — the ultimate ENSv2 API. Includes schema overview, mental model, and how it differs from the legacy ENS Subgraph schema.
+The **ENS Omnigraph API** is the world's first and only API providing unified access to the full state of ENSv1 and ENSv2. It's a single, polymorphic GraphQL API over **both ENSv1 and ENSv2** — write your query once and get correct, typed results regardless of which protocol version a given Domain lives in.
+
+<Aside type="caution" title="ENSv1 and ENSv2 will coexist">
+  Unlike traditional software, **ENSv2 does not replace ENSv1**. When ENSv2 launches, ENSv1 doesn't
+  stop existing — both protocols coexist onchain, at the same time, even though ENSv2 has a
+  substantially different onchain data model from ENSv1.
+
+That's exactly why developers building on ENS need ENSNode and the ENS Omnigraph API: it's the
+world's first and only service delivering the **unified ENSv1 + ENSv2 data access** that building on
+ENS requires.
+
+</Aside>
+
+![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
+
+The Omnigraph is delivered by [ENSApi](/docs/services/ensapi) on top of the indexed data in [ENSDb](/docs/services/ensdb). It follows the [Relay specification](https://relay.dev/graphql/connections.htm), abstracts away the most common ENS-protocol footguns, and exposes enough of the underlying protocol for builders who need to go deep.
+
+## One unified API over ENSv1 + ENSv2
+
+When ENSv2 launches in **Summer 2026**, the two protocol versions coexist — and the Omnigraph keeps your app working against both, at the same time, with no code changes. Both ENSv1 and ENSv2 Domains are indexed concurrently and exposed through a unified schema.
+
+Ask for a Domain by name (`domain(by: { name: "vitalik.eth" })`) and you get a typed result whether that name lives in ENSv1 or ENSv2 — your code doesn't have to know which at query time.
+
+## What you get
+
+- **Multichain in one query** — mainnet `.eth`, Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) all in a single unified schema.
+- **ENSv1 + ENSv2 + indexed data + resolutions, together** — the world's first and only API that gives you indexed ENS state _and_ live resolutions across both protocol versions, from a single query.
+- **A declarative, no-footguns data model** — the schema is semantically aligned and self-documenting: fields mean what you'd naturally assume them to mean, names and labels are normalized for you, and the surprising edge-cases of the raw protocol are handled at the schema layer instead of in your app. That least-surprise design is exactly what AI agents need too — they write correct ENS integrations when the surface behaves the way they'd assume by default.
+- **Both kinds of resolution** — "bare-metal" resolutions that give you the full expressive power of the ENS protocol, _and_ "interpreted" resolutions that hand you clean, display-ready records (`resolve.profile`) with no decoding on your end.
+- **The full ENS picture** — resolve records, search Domains, list what an address owns, read a complete history of onchain Events, inspect Permissions, and more.
+- **Type-safe and fully documented** — every type and field is documented in the schema, so `enssdk` and `enskit` give you end-to-end type safety and editor autocomplete. The same fully-typed, self-describing surface lets both human developers and AI agents build high-quality ENS integrations with confidence.
+- **Built-in pagination** — Relay-spec connections mean infinite scroll and stable pagination work out of the box.
+
+## Your first query
+
+<OmnigraphStaticExampleSet
+  id="hello-world"
+  hideBackToExamples
+/>
+
+Browse more patterns in [Examples](/docs/integrate/omnigraph/examples). When you're ready to understand the data model underneath, see [Core Concepts](/docs/integrate/omnigraph/concepts).
+
+## Next steps
+
+<CardGrid>
+  <LinkCard
+    title="Core Concepts"
+    description="The data model behind the Omnigraph — Namegraphs, canonicality, polymorphism, Events, and Permissions."
+    href="/docs/integrate/omnigraph/concepts"
+  />
+  <LinkCard
+    title="Examples"
+    description="Worked queries for the most common ENS access patterns — Domain by name, subdomains, events, permissions, and more."
+    href="/docs/integrate/omnigraph/examples"
+  />
+  <LinkCard
+    title="Schema Reference"
+    description="The full Omnigraph GraphQL schema, every type and field documented."
+    href="/docs/integrate/omnigraph/schema-reference"
+  />
+  <LinkCard
+    title="Integration Options"
+    description="enskit (React), enssdk (TypeScript), or raw GraphQL — pick the integration shape that fits your stack."
+    href="/docs/integrate/integration-options"
+  />
+</CardGrid>

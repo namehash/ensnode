@@ -1,5 +1,56 @@
 # @ensnode/ensdb-sdk
 
+## 1.16.0
+
+### Minor Changes
+
+- [#2292](https://github.com/namehash/ensnode/pull/2292) [`09b4aa5`](https://github.com/namehash/ensnode/commit/09b4aa5281875c7c3472358fa2bbb7f4991d9429) Thanks [@shrugs](https://github.com/shrugs)! - Add a `(value, coinType)` index on `resolver_address_records` to support reverse lookups of the Names whose `addr()` record points at a given address. Powers `Account.nameReferences` in the Omnigraph API.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.16.0
+  - enssdk@1.16.0
+
+## 1.15.2
+
+### Patch Changes
+
+- [#2259](https://github.com/namehash/ensnode/pull/2259) [`5f929d8`](https://github.com/namehash/ensnode/commit/5f929d858a21e935b4b62ce6f2cbccc273623f96) Thanks [@shrugs](https://github.com/shrugs)! - Index-accelerate `REGISTRATION_TIMESTAMP` / `REGISTRATION_EXPIRY`-ordered domain queries (e.g. `Domain.subdomains(order: { by: REGISTRATION_TIMESTAMP, dir: DESC })`). Previously these joined `domains → latest_registration_indexes → registrations` and sorted the full registry partition — ~55s for `.eth`'s subdomains. The latest registration's start/expiry is now mirrored onto the Domain row (`__latestRegistrationStart` / `__latestRegistrationExpiry`) with composite indexes `(registry_id, <col>, id)`, turning the query into an index-ordered scan. The sort columns are NOT NULL — an absent value (no registration, or a never-expiring registration) is materialized as a `+∞` sentinel — so a single plain composite per column serves both directions with a plain keyset tuple, and the sentinel sorts last for ASC and first for DESC.
+
+- [#2271](https://github.com/namehash/ensnode/pull/2271) [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523) Thanks [@shrugs](https://github.com/shrugs)! - The `resolvers` table gains an `is_extended` column — whether the Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`) — populated at index time via a single cached `supportsInterface` RPC. The Omnigraph API exposes it as a new `Resolver.extended: Boolean!` field.
+
+- [#2255](https://github.com/namehash/ensnode/pull/2255) [`c8267e4`](https://github.com/namehash/ensnode/commit/c8267e45099efd62e5690f19437c8aa242f77601) Thanks [@shrugs](https://github.com/shrugs)! - Add a materialized `domains.__canonical_name_prefix` column — the first 64 code points of `canonical_name` — to back left-anchored / substring search and NAME ordering. Direct-SQL consumers can now `WHERE __canonical_name_prefix LIKE 'vit%' ORDER BY __canonical_name_prefix` instead of replicating the previous `left(canonical_name, 256)` expression index. `canonical_name` is unchanged and remains the column for exact (`=` / `IN`) matches and display; the Omnigraph `name.starts_with` filter now targets the prefix column while continuing to return `canonical_name`.
+
+- Updated dependencies [[`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523), [`0eec193`](https://github.com/namehash/ensnode/commit/0eec19344e576db7021ab4f16c420477efe9cd54), [`83ed372`](https://github.com/namehash/ensnode/commit/83ed37246871caf30afca56a80c4613311f60523)]:
+  - @ensnode/ensnode-sdk@1.15.2
+  - enssdk@1.15.2
+
+## 1.15.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.15.1
+  - @ensnode/ensnode-sdk@1.15.1
+
+## 1.15.0
+
+### Minor Changes
+
+- [#2174](https://github.com/namehash/ensnode/pull/2174) [`bb0b244`](https://github.com/namehash/ensnode/commit/bb0b244e01b0ef7bba88c5ac5f9052fdddac4000) Thanks [@tk-o](https://github.com/tk-o)! - Added `destroy()` method to `EnsDbReader` class that allows cleaning up database connection resources when the connection is no longer needed.
+
+### Patch Changes
+
+- [#2155](https://github.com/namehash/ensnode/pull/2155) [`addfba6`](https://github.com/namehash/ensnode/commit/addfba696d5135a5433c471d2c9ce4575d165f71) Thanks [@shrugs](https://github.com/shrugs)! - Add three btree indexes to the indexer schema to fix slow `Domain.subdomains`, `get-domain-by-interpreted-name`, and `Query.domains` paths:
+  - `domain_resolver_relations(domain_id)` — secondary lookup off the PK so the namegraph-walk CTE can left-join by `domain_id` alone.
+  - `domains(registry_id, label_hash)` — composite (replaces the standalone `registry_id` index, which it subsumes via leading-column prefix).
+  - `domains(registry_id, left(canonical_name, 256), id)` — expression composite for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N` (the `Domain.subdomains` shape). The 256-char prefix bounds the index tuple under btree's per-tuple max; NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan.
+
+- Updated dependencies [[`9c40ef1`](https://github.com/namehash/ensnode/commit/9c40ef12b5c5e8a08aa1659b0626c0b87486a7d1), [`335f072`](https://github.com/namehash/ensnode/commit/335f0721459a883f9304a8d23ebc08503916f429)]:
+  - enssdk@1.15.0
+  - @ensnode/ensnode-sdk@1.15.0
+
 ## 1.14.0
 
 ### Minor Changes

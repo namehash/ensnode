@@ -6,6 +6,10 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for EFP Datasource
+import { AccountMetadata as efp_AccountMetadata } from "./abis/efp/AccountMetadata";
+import { ListRecords as efp_ListRecords } from "./abis/efp/ListRecords";
+import { ListRegistry as efp_ListRegistry } from "./abis/efp/ListRegistry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -17,12 +21,12 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
@@ -86,9 +90,9 @@ export default {
         startBlock: 16925608,
       },
       UniversalResolver: {
-        abi: UniversalResolverV1,
-        address: "0xabd80e8a13596feea40fd26fd6a24c3fe76f05fb",
-        startBlock: 22671701,
+        abi: UniversalResolverABI,
+        address: "0xeeeeeeee14d718c2b47d9923deab1335e144eeee",
+        startBlock: 23085558,
       },
       BasenamesL1Resolver: {
         abi: ResolverABI,
@@ -97,8 +101,13 @@ export default {
       },
       LineanamesL1Resolver: {
         abi: ResolverABI,
-        address: "0xde16ee87b0c019499cebdde29c9f7686560f679a",
-        startBlock: 20410692,
+        address: "0x1507ce9421232fdbd302f5ebe4590f8d77febbff",
+        startBlock: 24640923,
+      },
+      DotBoxL1Resolver: {
+        abi: ResolverABI,
+        address: "0xf97aac6c8dbaebcb54ff166d79706e3af7a813c8",
+        startBlock: 19128555,
       },
 
       // the Resolver for *.argent.xyz names
@@ -135,9 +144,6 @@ export default {
      *
      * The owner of 'base.eth' in the ENS Registry in the mainnet ENS namespace (e.g. Coinbase)
      * has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: base,
     contracts: {
@@ -214,9 +220,6 @@ export default {
      *
      * The owner of 'linea.eth' in the ENS Registry in the mainnet ENS namespace (e.g. Consensys)
      * has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: linea,
     contracts: {
@@ -500,6 +503,76 @@ export default {
         abi: Seaport1_5, // Seaport 1.5
         address: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
         startBlock: 17129405,
+      },
+    },
+  },
+
+  /**
+   * EFP (Ethereum Follow Protocol) Datasource on Base.
+   *
+   * The `ListRegistry` (list NFTs) and `AccountMetadata` contracts are deployed only on Base.
+   * The `ListRecords` contract is also deployed on Base (one of the three "list storage location"
+   * chains a list NFT may point at via `UpdateListStorageLocation`).
+   *
+   * Every address below is cross-checked against the official EFP deployments,
+   * https://docs.efp.app/production/deployments/ (and ethereumfollowprotocol/api-v2).
+   */
+  [DatasourceNames.EFPBase]: {
+    chain: base,
+    contracts: {
+      // EFPListRegistry, Base. (All three Base EFP contracts deployed in block 20197231.)
+      ListRegistry: {
+        abi: efp_ListRegistry,
+        address: "0x0e688f5dca4a0a4729946acbc44c792341714e08",
+        startBlock: 20197231,
+      },
+      // EFPAccountMetadata, Base. NOTE: this is the SAME address as EFPListRecords on Ethereum
+      // mainnet (see EFPEthereum below). EFP deploys via CREATE2, so one address can map to a
+      // different contract on each chain; this is not a copy-paste error.
+      AccountMetadata: {
+        abi: efp_AccountMetadata,
+        address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+        startBlock: 20197231,
+      },
+      // EFPListRecords, Base.
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33",
+        startBlock: 20197231,
+      },
+    },
+  },
+
+  /**
+   * EFP `ListRecords` Datasource on Optimism.
+   */
+  [DatasourceNames.EFPOptimism]: {
+    chain: optimism,
+    contracts: {
+      // EFPListRecords, Optimism.
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x4ca00413d850dcfa3516e14d21dae2772f2acb85",
+        startBlock: 125792735,
+      },
+    },
+  },
+
+  /**
+   * EFP `ListRecords` Datasource on Ethereum mainnet.
+   */
+  [DatasourceNames.EFPEthereum]: {
+    chain: mainnet,
+    contracts: {
+      // EFPListRecords, Ethereum mainnet. This shares the 0x5289…0F17EF address with
+      // EFPAccountMetadata on Base (above): EFP deploys via CREATE2, so the same address appears on
+      // multiple chains for different contracts. Confirmed as ListRecords on Ethereum mainnet at
+      // https://docs.efp.app/production/deployments/ (and ethereumfollowprotocol/api-v2); it is NOT
+      // a copy-paste of the Base AccountMetadata address.
+      ListRecords: {
+        abi: efp_ListRecords,
+        address: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+        startBlock: 20820743,
       },
     },
   },

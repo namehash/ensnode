@@ -28,6 +28,9 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
 
         const v2Key = cache.keyOfEntity({ __typename: "ENSv2Domain", id: by.id });
         if (v2Key && cache.resolve(v2Key, "id")) return v2Key;
+
+        const unindexedKey = cache.keyOfEntity({ __typename: "UnindexedDomain", id: by.id });
+        if (unindexedKey && cache.resolve(unindexedKey, "id")) return unindexedKey;
       }
 
       return passthrough(args, cache, info);
@@ -74,6 +77,16 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
 
       if (by.id) return { __typename: "Permissions", id: by.id };
       if (by.contract) return { __typename: "Permissions", id: makePermissionsId(by.contract) };
+
+      return passthrough(args, cache, info);
+    },
+  },
+  EfpQuery: {
+    list(parent, args, cache, info) {
+      const by = args.by as { tokenId?: string | bigint };
+
+      // EfpLists are keyed by `tokenId`; link to the cached entity so a repeat lookup is a cache hit.
+      if (by.tokenId != null) return { __typename: "EfpList", tokenId: String(by.tokenId) };
 
       return passthrough(args, cache, info);
     },

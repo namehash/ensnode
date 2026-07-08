@@ -1,0 +1,75 @@
+---
+title: ENS Protocol Acceleration
+description: How the ENS Omnigraph API accelerates ENS resolution by implementing the ENS Universal Resolver over indexed ENS data.
+sidebar:
+  label: Protocol Acceleration
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import FasterLookupImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/FasterLookupImage.astro";
+import ENSAdminImage from "@workspace/docs/ensnode.io/src/components/atoms/images/astro/ENSAdminImage.astro";
+import OmnigraphStaticExampleSet from "@components/organisms/OmnigraphStaticExampleSet.astro";
+
+The ENS Omnigraph API can resolve ENS records against ENSNode's indexed data instead of live RPC using **ENS Protocol Acceleration**. The Omnigraph effectively implements the ENS Universal Resolver on top of the indexed ENS data model in [ENSDb](/docs/services/ensdb), so most resolutions complete in a single API call — no RPC round trips and no CCIP-Read gateways for your app to orchestrate — while still returning results that follow the ENS resolution protocol exactly.
+
+<FasterLookupImage styles="w-full h-auto" />
+
+## The problem with RPC-based resolution
+
+Resolving an ENS name the traditional way means talking to an Ethereum node over RPC, and that path is slow and complex:
+
+- **Round trips and latency.** A single, simple resolution may be one RPC call to the UniversalResolver (_100ms_), but many names (like all `.base.eth` and `.linea.eth` names) result in CCIP-Reads to offchain gateways, providing highly variable request durations (_100-1000ms_).
+- **RPC resolutions produce 'raw' results.** When resolving records directly, your app receives the raw data stored onchain, which requires further interpretation to produce user-friendly and actionable values.
+- **Resolving records for an address doubles this cost.** Many apps start from an address → look up its primary name → forward-resolve the records on that name. Each stage stacks more round trips on top of the last.
+- **It happens at the last mile.** These round trips run on end-user devices, far from internet backbones — not on servers co-located in major data centers — so the latency hits exactly where it hurts UX most.
+- **Don't forget about batching!** Imagine loading the display names and avatars for a 100-person leaderboard — without extra work on your end, that's 100+ RPC requests (plus CCIP-Read requests for any offchain names!) just to show avatars, and you're looking at latencies in the 100-500ms range, sometimes up to multiple seconds depending on the speed of the offchain gateway in that moment.
+
+## The problem with existing tooling
+
+- **Thick clients are language-locked.** Libraries like viem, wagmi, and ensjs tie you to a single programming language. Building a protocol-compliant ENS client from raw RPC in another language is a serious effort: studying the ENSIPs, rigorous testing, and continuous maintenance as the protocol evolves.
+- **RPC access is rate-limited, paid, or self-hosted.** You either accept rate limits, pay for a provider, or take on the cost and complexity of running your own Ethereum node.
+- **Existing ENS APIs are constrained.** Some support only a handful of profile records; others use caching strategies that serve stale ENS data.
+
+## Why it matters
+
+- **Latency shapes ENS UX.** Slow resolution makes for bad UX, and apps with tens or hundreds of millions of users won't integrate ENS if it feels slow. This is especially acute for social apps rendering many user profiles at once.
+- **Complexity throttles growth.** Difficult resolution damages ENS's network effects.
+- **Stale records are dangerous.** Consider sending a high-value transaction to `yourname.eth` and having the funds go to the wrong address because resolution served stale data.
+
+## How it works
+
+The Omnigraph answers resolution requests by implementing the ENS Universal Resolver's Forward and Reverse Resolution logic directly over ENSNode's indexed data.
+
+For every record a resolution touches, ENSNode uses its indexed data to accelerate that record as much as possible — serving it straight from the index rather than making an RPC call. Acceleration is applied per record: each record in a resolution is independently accelerated wherever the indexed data makes it possible.
+
+When a particular record can't be accelerated from indexed data — for example a resolver with behaviour ENSNode can't reproduce from its index — ENSNode transparently falls back to RPC-based resolution, performing the lookup according to the ENS Forward Resolution protocol. That includes carrying out any CCIP-Read operations on your behalf for offchain names, so your app never has to orchestrate CCIP-Read itself. The result is identical to what a fully protocol-compliant resolution would return; acceleration only changes how fast you get there, never what you get.
+
+In general, a fully accelerated request can return in _~10ms_ rather than the standard _~100ms_ from an RPC.
+
+<OmnigraphStaticExampleSet
+  id="accelerate-resolve"
+  integrations={["omnigraph", "curl"]}
+  hideDescription
+  hideBackToExamples
+/>
+
+## Strengthen the decentralization and "unstoppability" of ENS
+
+By resolving against indexed ENS data, ENSNode removes the strict dependency on centralized offchain gateway servers whose downtime would otherwise shut down impacted multichain ENS names that are key to the future of ENSv2 — subnames of `base.eth`, `linea.eth`, tokenized DNS names like `.box`, and more.
+
+<ENSAdminImage styles="w-full h-auto rounded-2xl rotate-y-180" />
+
+## How it optimizes the developer experience
+
+Protocol Acceleration isn't only about speed — the Omnigraph also makes resolution easier to consume:
+
+- **Semantic query patterns.** Convenience patterns on top of raw resolutions — e.g. query by chain ID or a common chain name rather than computing a coin type.
+- **Interpreted responses.** Normalized and validated records rather than 'raw' onchain data.
+- **It's an API, not an RPC client.** Because resolution is exposed through the [ENS Omnigraph API](/docs/integrate/omnigraph), any app in any programming language can integrate in a type-safe way without a new language-specific client.
+- **Ready-to-go thin clients.** For TypeScript and React, `enssdk` and `enskit` give you a typed client on top of the Omnigraph API, including support for Protocol Accelerated Resolution.
+
+<LinkCard
+  title="Integrate with ENSNode"
+  description="Integrate the Omnigraph API to power record resolution in your app"
+  href="/docs/integrate/integration-options"
+/>

@@ -4,9 +4,10 @@
  * for ENSDb, which is then used to build the ENSDb Schema for a Drizzle client for ENSDb.
  */
 
-export * from "./ensv2.schema";
+export * from "./efp.schema";
 export * from "./migrated-nodes.schema";
 export * from "./protocol-acceleration.schema";
 export * from "./registrars.schema";
 export * from "./subgraph.schema";
 export * from "./tokenscope.schema";
+export * from "./unigraph.schema";

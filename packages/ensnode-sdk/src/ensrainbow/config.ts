@@ -5,6 +5,13 @@ import type { EnsRainbowServerLabelSet } from "./types";
  */
 export interface EnsRainbowVersionInfo {
   /**
+   * ENSRainbow codebase commit hash
+   *
+   * Optional, as it may not be available in all environments.
+   */
+  commit?: string;
+
+  /**
    * ENSRainbow service version
    *
    * @see https://ghcr.io/namehash/ensnode/ensrainbow

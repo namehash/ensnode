@@ -31,13 +31,21 @@ export async function ensureLabel(context: IndexingEngineContext, label: Literal
   // TODO: this re-implements labelExists, can likely DRY it up
   const prev = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
 
+  // Snapshot whether this upsert heals an existing (differently-interpreted) row BEFORE the write.
+  // `context.ensDb.find` returns a live reference to the in-memory buffered row, and the
+  // `onConflictDoUpdate` below mutates that same object's `interpreted` field in place — so checking
+  // `prev.interpreted !== interpreted` AFTER the upsert always reads the just-written value and is
+  // never true. That silently suppressed the heal cascade for every label healed after first sight
+  // (e.g. an ENSv1 Domain's `[labelHash]` label later healed via an ENSv2 subname sharing the label).
+  const isHeal = prev !== null && prev.interpreted !== interpreted;
+
   await context.ensDb
     .insert(ensIndexerSchema.label)
     .values({ labelHash, interpreted })
     .onConflictDoUpdate({ interpreted });
 
-  // if this was a heal (was previous seen, now updated), cascade the update to the materialized names
-  if (prev && prev.interpreted !== interpreted) await cascadeLabelHeal(context, labelHash);
+  // if this was a heal (previously seen, now upgraded), cascade the update to the materialized names
+  if (isHeal) await cascadeLabelHeal(context, labelHash);
 }
 
 /**

@@ -1,0 +1,40 @@
+---
+title: ENSNode Deployment Options
+description: Explore different deployment options for self-hosting ENSNode.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+ENSNode can be deployed in several ways. If you are just getting started, use the Docker Compose path below. It requires the least setup and works locally or on any server that can run containers.
+
+## Choose a deployment option
+
+| Option                                                    | Best for                                                                  | Effort   | Cost control | Notes                                                              |
+| --------------------------------------------------------- | ------------------------------------------------------------------------- | -------- | ------------ | ------------------------------------------------------------------ |
+| [Docker](/docs/self-host/deployment-options/docker)       | Local development, single-machine self-host, or custom cloud servers      | Low      | High         | Runs the full ENSNode stack with `docker compose`                  |
+| [Railway](/docs/self-host/deployment-options/railway)     | One-click managed cloud deployment from a template                        | Very low | Medium       | Deployed via the Railway Template                                  |
+| [Terraform](/docs/self-host/deployment-options/terraform) | Render-based production-grade deployment used internally by NameHash Labs | High     | Medium       | Reference config; currently tailored for NameHash Labs deployments |
+
+:::tip[Recommended starting point]
+Start with [Docker](/docs/self-host/deployment-options/docker). It runs the full ENSNode suite on a single machine and is the fastest way to validate your namespace, plugins, and RPC configuration before moving to managed infrastructure.
+:::
+
+## Next steps
+
+<LinkCard
+  title="Deploy with Docker"
+  description="Run the full ENSNode suite locally or on a server with Docker Compose."
+  href="/docs/self-host/deployment-options/docker"
+/>
+
+<LinkCard
+  title="Deploy to Railway"
+  description="Deploy the ENSNode Alpha instance on Railway using the Railway Template."
+  href="/docs/self-host/deployment-options/railway"
+/>
+
+<LinkCard
+  title="Deploy with Terraform"
+  description="Deploy ENSNode on Render with Terraform and AWS-managed DNS."
+  href="/docs/self-host/deployment-options/terraform"
+/>

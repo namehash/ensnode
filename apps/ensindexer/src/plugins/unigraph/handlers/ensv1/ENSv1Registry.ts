@@ -14,12 +14,14 @@ import {
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
+import { REGISTRATION_SORT_SENTINEL } from "@ensnode/ensdb-sdk/ensindexer-abstract";
 import {
   ENSNamespaceIds,
   getENSRootChainId,
   interpretAddress,
   PluginName,
 } from "@ensnode/ensnode-sdk";
+import { isBridgedOriginDomain, isBridgedTargetRegistry } from "@ensnode/ensnode-sdk/internal";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import {
@@ -30,6 +32,7 @@ import {
 } from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
+import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
 import { ensureRegistry } from "@/lib/ensv2/registry-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
@@ -115,24 +118,59 @@ export default function () {
     // this ENSv1Domain's (parent) Registry is either:
     // a) if this is a TLD, the (concrete) ENSv1Registry identified by (chainId, address), or
     // b) the ENSv1VirtualRegistry identified by (chainId, address, parentNode)
+    // so: ensure that the parent registry exists (this could be the first child)
     let parentRegistryId: RegistryId;
     if (isTLD) {
       parentRegistryId = makeENSv1RegistryId(registry);
       await ensureRegistry(context, parentRegistryId, { type: "ENSv1Registry", ...registry });
     } else {
       parentRegistryId = makeENSv1VirtualRegistryId(registry, parentNode);
-      await ensureRegistry(context, parentRegistryId, {
+      const created = await ensureRegistry(context, parentRegistryId, {
         type: "ENSv1VirtualRegistry",
         ...registry,
         node: parentNode,
       });
 
-      const parentDomainId = makeENSv1DomainId(registry, parentNode);
-      // route through handleSubregistryUpdated so any prior subregistry edge (e.g. a bridged
-      // attachment) is properly reconciled instead of orphaned by a blind overwrite.
-      await handleSubregistryUpdated(context, parentDomainId, parentRegistryId);
+      // only set Subregistry/Canonical Domain when a Registry is newly created (efficiency + clarity)
+      if (created) {
+        const parentDomainId = makeENSv1DomainId(registry, parentNode);
 
-      await handleRegistryCanonicalDomainUpdated(context, parentRegistryId, parentDomainId);
+        // Bridged Resolver's Origin Domain's Subregistry
+        //
+        // When a parent Domain's Registry is created, we need to avoid clobbering an existing
+        // Bridged Resolver's Origin Domain's Subregistry (which has been pointed at the Target
+        // Registry). So only update the Domain's Subregistry if it's not a Bridged Resolver Origin
+        //
+        // Concretely, this avoids the ENS Root Chain's bridge.linea.eth Domain's NewOwner event from
+        // re-setting the ENS Root Chain's linea.eth's Subregistry to the Root Chain's virtual Registry.
+        if (isBridgedOriginDomain(config.namespace, parentDomainId)) {
+          // no-op to avoid clobbering the Bridged Resolver-managed Subregistry reference
+        } else {
+          // set the parent Domain's Subregistry to the newly created Registry
+          await handleSubregistryUpdated(context, parentDomainId, parentRegistryId);
+        }
+
+        // Bridged Resolver's Target Registry's Canonical Domain
+        //
+        // When a parent Domain's Registry is created, it may be the Target Registry of a Bridged
+        // Resolver. If so, its Canonical Domain should be updated to point (uni-directionally) at the
+        // Origin Domain of the Bridged Resolver, _not_ at the parent Domain it would normally point at.
+        //
+        // To mimic the behavior of ENSv2, we handle an implicit ParentUpdated event for this registry.
+        const bridged = isBridgedTargetRegistry(config.namespace, parentRegistryId);
+        if (bridged) {
+          // if this is a Target Registry, its Canonical Domain should be updated to that of the bridge origin
+          // (which will then correctly cascade canonicality)
+          await handleRegistryCanonicalDomainUpdated(
+            context,
+            parentRegistryId,
+            bridged.originDomainId,
+          );
+        } else {
+          // otherwise its Canonical Domain is set to the parent as normal
+          await handleRegistryCanonicalDomainUpdated(context, parentRegistryId, parentDomainId);
+        }
+      }
     }
 
     const ownerId = interpretAddress(owner);
@@ -142,6 +180,10 @@ export default function () {
     // (BaseRegistrar, NameWrapper) because (a) the root Registry is the source of truth even when
     // no Registrar is in use, and (b) Registrar events fire _after_ Registry events, so they
     // re-materialize over the value we set here.
+    // a preminted name (BaseRegistrar `registerOnly`) has a Registration before its Domain exists, so
+    // materialize its sort keys here on creation; a normal name has none yet (its Registrar
+    // NameRegistered materializes them afterwards). Set on insert only so owner-changes don't clobber.
+    const registration = await getLatestRegistration(context, domainId);
     await context.ensDb
       .insert(ensIndexerSchema.domain)
       .values({
@@ -152,6 +194,12 @@ export default function () {
         labelHash,
         ownerId,
         rootRegistryOwnerId: ownerId,
+        ...(registration
+          ? {
+              __latestRegistrationStart: registration.start,
+              __latestRegistrationExpiry: registration.expiry ?? REGISTRATION_SORT_SENTINEL,
+            }
+          : {}),
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
 

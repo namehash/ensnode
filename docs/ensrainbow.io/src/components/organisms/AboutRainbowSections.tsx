@@ -1,9 +1,9 @@
 import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 import { Fragment } from "react";
 
+import ensNodeBannerBg from "../../assets/ENSNodeBannerBg.svg";
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
-import ensNode from "../../assets/Illustration.svg";
-import { ENSNodeSchema } from "../atoms/ENSNodeSchema.tsx";
+import { ENSNodeBanner } from "../atoms/ENSNodeBanner.tsx";
 import { ENSProfile } from "../atoms/ENSProfile.tsx";
 import { ENSProfileMobile } from "../atoms/ENSProfileMobile.tsx";
 import { LearnMoreButton } from "../atoms/LearnMoreButton.tsx";
@@ -95,7 +95,7 @@ const rainbowSections: AboutRainbowProps[] = [
         >
           ENSNode
         </a>
-        , the new multichain indexer for ENSv2.
+        , the full&#8288;&#8211;&#8288;stack development platform for ENSv2.
       </>
     ),
     descriptionExternalElements: (
@@ -104,16 +104,20 @@ const rainbowSections: AboutRainbowProps[] = [
     sectionBackgroundName: "",
     isTextOnTheLeft: true,
     mobileImageOnTop: true,
-    normalImage: {
-      source: ensNode.src,
-      tagWidth: 640,
-      tagHeight: 340,
-      alt: "ENSNode sidecar service ENSRainbow",
-    },
     svgImage: (
-      <>
-        <ENSNodeSchema styles="relative z-10 w-full h-full" />
-      </>
+      <div className="w-full flex flex-row justify-center items-center xl:justify-end pt-7 pb-5 sm:max-xl:pt-16 sm:max-xl:pb-8">
+        <div className="relative w-full max-w-[640px] aspect-[640/340] flex items-center justify-center">
+          <img
+            src={ensNodeBannerBg.src}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full rotate-180"
+          />
+          <div className="relative z-10 w-[68.75%] aspect-[11/6] flex items-center justify-center bg-white border border-gray-200 rounded-[20px]">
+            <ENSNodeBanner styles="w-[55%] max-w-[240px] h-auto" />
+          </div>
+        </div>
+      </div>
     ),
   },
 ];

@@ -1,6 +1,6 @@
 ---
 title: ENSEngine
-description: Coming soon - the ENSNode service for push-based, reactive ENS functionality. Watches your ENSDb for changes and turns them into ENS-aware webhooks.
+description: Coming soon - the ENSNode service for push-based, reactive ENS functionality. Watches your ENSDb for changes and turns them into ENS-aware live push notifications.
 sidebar:
   label: Overview
   order: 1
@@ -9,7 +9,7 @@ sidebar:
 import { LinkCard, Aside } from "@astrojs/starlight/components";
 
 <Aside type="caution" title="Coming soon">
-**ENSEngine** is a planned ENSNode service.
+  **ENSEngine** is a planned ENSNode service.
 </Aside>
 
 ## Vision
@@ -20,7 +20,7 @@ Today, building an app that reacts to ENS - when an avatar changes, when a name 
 
 ## What it is
 
-ENSEngine is the part of ENSNode that **watches your ENSDb for changes in real time and delivers ENS-aware events** - including webhooks - to any sink you configure.
+ENSEngine is the part of ENSNode that **watches your ENSDb for changes in real time and delivers ENS-aware events** to any sink you configure.
 
 It sits alongside [ENSIndexer](/docs/services/ensindexer), [ENSDb](/docs/services/ensdb), [ENSRainbow](/docs/services/ensrainbow), [ENSApi](/docs/services/ensapi), and [ENSAdmin](/docs/services/ensadmin) as the home for reactive / event-based functionality across the ENSNode stack.
 
@@ -63,7 +63,7 @@ Additional key use cases:
 - **Sync to alternative databases** - want to store alternative representations of ENSDb in databases that provide specialized benefits that Postgres doesn't offer, such as Elasticsearch, Typesense, Meilisearch, Redis, Kafka, Google BigQuery, and more? ENSEngine will ensure 100% delivery of database changes to sinks with strict ordering and exactly-once processing.
 - **Realtime dashboards** - surface ENS analytics and activity data as it happens.
 
-For a longer use-case-focused overview from the *integrate* perspective, see the [ENSEngine teaser](/docs/integrate/integration-options/ensengine).
+For a longer use-case-focused overview from the _integrate_ perspective, see the [ENSEngine teaser](/docs/integrate/integration-options/ensengine).
 
 ## Position in the ENSNode stack
 

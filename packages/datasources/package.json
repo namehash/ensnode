@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/datasources",
-  "version": "1.14.0",
+  "version": "1.16.0",
   "type": "module",
   "description": "Catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.",
   "license": "MIT",
@@ -35,13 +35,14 @@
       }
     },
     "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
+    "module": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
+    "typecheck": "tsgo --noEmit",
     "test": "vitest"
   },
   "peerDependencies": {

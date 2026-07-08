@@ -1,21 +1,38 @@
 import {
   ADDR_REVERSE_NODE,
   asInterpretedLabel,
+  type CoinType,
+  type ContentType,
   type DomainId,
+  ETH_COIN_TYPE,
   ETH_NODE,
+  type Hex,
   type InterpretedLabel,
   type InterpretedName,
   labelhashInterpretedLabel,
   makeENSv1DomainId,
   makeENSv1RegistryId,
+  makeENSv1VirtualRegistryId,
   makeENSv2DomainId,
   makeENSv2RegistryId,
   makeStorageId,
+  type NormalizedAddress,
+  type UrlString,
 } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
+import {
+  accounts,
+  additionallyRegisteredNames,
+  addresses,
+  contenthashFixtures,
+  contenthashSubnames,
+  fixtures,
+  type NameRecords,
+  testEthTextRecords,
+} from "@ensnode/integration-test-env/devnet";
 
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
@@ -170,12 +187,10 @@ describe("Domain.registry and Domain.subregistry", () => {
           __typename: "ENSv1Registry",
           id: makeENSv1RegistryId(v1RootRegistry),
         },
-        subregistry: null,
-        // TODO: The DevNet should in the future have some ENSv1 domains that are then migrated, and then the .eth ENSv1 domain will have a subregistry.
-        // subregistry: {
-        //   __typename: "ENSv1VirtualRegistry",
-        //   id: makeENSv1VirtualRegistryId(v1RootRegistry, ETH_NODE),
-        // },
+        subregistry: {
+          __typename: "ENSv1VirtualRegistry",
+          id: makeENSv1VirtualRegistryId(v1RootRegistry, ETH_NODE),
+        },
       },
     });
   });
@@ -482,5 +497,476 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     for (const event of events) {
       expect(event.timestamp).toBe(t);
     }
+  });
+});
+
+describe("Domain.records", () => {
+  type DomainRecordsResult = {
+    domain: {
+      resolve: {
+        records: {
+          addresses: Array<{ coinType: CoinType; address: Hex | null }>;
+          texts: Array<{ key: string; value: string | null }>;
+        } | null;
+      };
+    };
+  };
+
+  type DomainAllRecordsResult = {
+    domain: {
+      resolve: {
+        records: {
+          reverseName: string | null;
+          contenthash: string | null;
+          pubkey: { x: string; y: string } | null;
+          dnszonehash: string | null;
+          version: string | null;
+          abi: { contentType: ContentType; data: string } | null;
+          interfaces: Array<{ interfaceId: string; implementer: string | null }>;
+          addresses: Array<{ coinType: CoinType; address: Hex | null }>;
+          texts: Array<{ key: string; value: string | null }>;
+        } | null;
+      };
+    };
+  };
+
+  const DomainRecords = gql`
+    query DomainRecords($name: InterpretedName!, $addresses: [CoinType!]!, $texts: [String!]!) {
+      domain(by: { name: $name }) {
+        resolve {
+          records {
+            addresses(coinTypes: $addresses) { coinType address }
+            texts(keys: $texts) { key value }
+          }
+        }
+      }
+    }
+  `;
+
+  const DomainRecordsAll = gql`
+    query DomainRecordsAll(
+      $name: InterpretedName!
+      $addresses: [CoinType!]!
+      $texts: [String!]!
+      $contentTypeMask: BigInt!
+      $interfaceIds: [InterfaceId!]!
+    ) {
+      domain(by: { name: $name }) {
+        resolve {
+          records {
+            reverseName
+            contenthash
+            pubkey { x y }
+            dnszonehash
+            version
+            abi(contentTypeMask: $contentTypeMask) { contentType data }
+            interfaces(ids: $interfaceIds) { interfaceId implementer }
+            addresses(coinTypes: $addresses) { coinType address }
+            texts(keys: $texts) { key value }
+          }
+        }
+      }
+    }
+  `;
+
+  it("resolves address and text records for example.eth", async () => {
+    await expect(
+      request<DomainRecordsResult>(DomainRecords, {
+        name: "example.eth",
+        addresses: [ETH_COIN_TYPE],
+        texts: ["description"],
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            texts: [{ key: "description", value: "example.eth" }],
+            addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
+          },
+        },
+      },
+    });
+  });
+
+  it("resolves every supported record type for test.eth", async () => {
+    await expect(
+      request<DomainAllRecordsResult>(DomainRecordsAll, {
+        name: "test.eth",
+        addresses: [ETH_COIN_TYPE, 0, 2],
+        texts: [
+          testEthTextRecords.avatar.key,
+          testEthTextRecords.description.key,
+          testEthTextRecords.url.key,
+          testEthTextRecords.email.key,
+          testEthTextRecords.twitter.key,
+          testEthTextRecords.github.key,
+          testEthTextRecords.x.key,
+          testEthTextRecords.telegram.key,
+        ],
+        // BigInt GraphQL vars must be strings here — JSON.stringify (used by the test client) cannot serialize bigint
+        contentTypeMask: "1",
+        interfaceIds: [fixtures.fourBytesInterface],
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            contenthash: contenthashFixtures.ipfs.raw,
+            pubkey: { x: fixtures.publicKeyX, y: fixtures.publicKeyY },
+            dnszonehash: null,
+            version: expect.any(String),
+            abi: { contentType: "1", data: fixtures.abiBytes },
+            interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
+            addresses: [
+              { coinType: ETH_COIN_TYPE, address: accounts.owner.address },
+              {
+                coinType: fixtures.rawAddresses.bitcoin.coinType,
+                address: fixtures.rawAddresses.bitcoin.raw,
+              },
+              {
+                coinType: fixtures.rawAddresses.litecoin.coinType,
+                address: fixtures.rawAddresses.litecoin.raw,
+              },
+            ],
+            texts: [
+              testEthTextRecords.avatar,
+              testEthTextRecords.description,
+              testEthTextRecords.url,
+              testEthTextRecords.email,
+              testEthTextRecords.twitter,
+              testEthTextRecords.github,
+              testEthTextRecords.x,
+              testEthTextRecords.telegram,
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it.each(
+    additionallyRegisteredNames.flatMap((entry) =>
+      "subnames" in entry ? [...entry.subnames] : [],
+    ),
+  )("resolves the seeded records for subname '$name'", async ({ name, records }) => {
+    let expectedRecords: NameRecords = records;
+
+    // TODO: this is temp fix for empty contenthash records
+    // since right now we still perform small parsing in resolve.records
+    // and consider empty bytes as null
+    if (records.contenthash === "0x") {
+      expectedRecords = { ...records, contenthash: null };
+    }
+    await expect(
+      request<DomainAllRecordsResult>(DomainRecordsAll, {
+        name,
+        addresses: [],
+        texts: [],
+        contentTypeMask: "0",
+        interfaceIds: [],
+      }),
+    ).resolves.toMatchObject({
+      domain: { resolve: { records: expectedRecords } },
+    });
+  });
+
+  it("returns null for an unnormalized canonical name (e.g. with labelhash)", async () => {
+    // A name with a label that is an encoded labelhash is an InterpretedName but not a normalized name.
+    // Even if it exists in the DB, resolve should return null.
+    const unnormalizedName =
+      "[0000000000000000000000000000000000000000000000000000000000000000].eth";
+    await expect(
+      request<DomainRecordsResult>(DomainRecords, {
+        name: unnormalizedName,
+        addresses: [60],
+        texts: ["description"],
+      }),
+    ).resolves.toMatchObject({
+      domain: null,
+    });
+  });
+
+  it("returns null for an ABI alias that does not match the returned content type", async () => {
+    // test.eth has ABI with contentType 1 (JSON)
+    // If we ask for contentType 2 (zlib-JSON), it should return null
+    const DomainRecordsAbi = gql`
+      query DomainRecordsAbi($name: InterpretedName!, $mask1: BigInt!, $mask2: BigInt!) {
+        domain(by: { name: $name }) {
+          resolve {
+            records {
+              abi1: abi(contentTypeMask: $mask1) { contentType data }
+              abi2: abi(contentTypeMask: $mask2) { contentType data }
+            }
+          }
+        }
+      }
+    `;
+
+    await expect(
+      request<{
+        domain: {
+          resolve: {
+            records: {
+              abi1: { contentType: ContentType; data: string } | null;
+              abi2: { contentType: ContentType; data: string } | null;
+            };
+          };
+        };
+      }>(DomainRecordsAbi, {
+        name: "test.eth",
+        mask1: "1", // JSON
+        mask2: "2", // zlib-JSON
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          records: {
+            abi1: { contentType: "1", data: fixtures.abiBytes },
+            abi2: null,
+          },
+        },
+      },
+    });
+  });
+});
+
+describe("Domain.profile", () => {
+  type ResolveProfileResult = {
+    profile: {
+      description: string | null;
+      avatar: { httpUrl: UrlString | null } | null;
+      addresses: { ethereum: NormalizedAddress | null } | null;
+      socials: { github: { handle: string; httpUrl: UrlString } | null } | null;
+      contenthash: {
+        protocolType: string;
+        decoded: string;
+        uri: string;
+        httpUrl: UrlString | null;
+      } | null;
+    } | null;
+  };
+  type DomainProfileResult = {
+    domain: {
+      resolve: ResolveProfileResult;
+    };
+  };
+
+  const DomainProfile = gql`
+    query DomainProfile($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        resolve {
+          profile {
+            description
+            avatar { httpUrl }
+            header { httpUrl }
+            website { httpUrl }
+            email
+            contenthash { protocolType decoded uri httpUrl }
+            addresses { ethereum bitcoin litecoin solana }
+            socials {
+              github { httpUrl handle }
+              twitter { httpUrl handle }
+              telegram { httpUrl handle }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  type DomainProfilesResult = {
+    edges: {
+      node: {
+        resolve: ResolveProfileResult;
+      };
+    }[];
+  };
+
+  const DomainProfiles = gql`
+    query DomainProfiles($names: [InterpretedName!]!) {
+      domains(where: {name: {in: $names}}, order: {by: NAME, dir: ASC}) {
+        edges {
+          node {
+            resolve {
+              profile {
+                description
+                avatar {
+                  httpUrl
+                }
+                header {
+                  httpUrl
+                }
+                website {
+                  httpUrl
+                }
+                email
+                contenthash {
+                  protocolType
+                  decoded
+                  uri
+                  httpUrl
+                }
+                addresses {
+                  ethereum
+                  bitcoin
+                  litecoin
+                  solana
+                }
+                socials {
+                  github {
+                    httpUrl
+                    handle
+                  }
+                  twitter {
+                    httpUrl
+                    handle
+                  }
+                  telegram {
+                    httpUrl
+                    handle
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+`;
+
+  it("interprets profile fields for test.eth", async () => {
+    await expect(
+      request<DomainProfileResult>(DomainProfile, { name: "test.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          profile: {
+            description: testEthTextRecords.description.value,
+            avatar: { httpUrl: testEthTextRecords.avatar.value },
+            header: { httpUrl: testEthTextRecords.header.value },
+            website: { httpUrl: testEthTextRecords.url.value },
+            email: testEthTextRecords.email.value,
+            addresses: {
+              ethereum: accounts.owner.address,
+              bitcoin: fixtures.rawAddresses.bitcoin.address,
+              litecoin: fixtures.rawAddresses.litecoin.address,
+              solana: fixtures.rawAddresses.solana.address,
+            },
+            contenthash: {
+              protocolType: "IPFS",
+              decoded: contenthashFixtures.ipfs.decoded,
+              uri: `ipfs://${contenthashFixtures.ipfs.decoded}`,
+              httpUrl: `https://ipfs.io/ipfs/${contenthashFixtures.ipfs.decoded}`,
+            },
+            socials: {
+              github: {
+                handle: "ensdomains",
+                httpUrl: "https://github.com/ensdomains",
+              },
+              telegram: {
+                handle: "ensdomains",
+                httpUrl: "https://t.me/ensdomains",
+              },
+              twitter: {
+                handle: "this_is_real_ensdomains_not_twitter_but_x_haha",
+                httpUrl: "https://x.com/this_is_real_ensdomains_not_twitter_but_x_haha",
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("interprets contenthash for all contenthash fixtures", async () => {
+    const uriPrefixByLabel = {
+      ipfs: "ipfs://",
+      ipns: "ipns://",
+      swarm: "bzz://",
+      arweave: "ar://",
+      onion: "onion://",
+      onion3: "onion3://",
+      skynet: "sia://",
+    } as const satisfies Record<string, string>;
+
+    const httpUrlByLabel: Record<string, ((decoded: string) => string) | undefined> = {
+      ipfs: (decoded) => `https://ipfs.io/ipfs/${decoded}`,
+      ipns: (decoded) => `https://ipfs.io/ipns/${decoded}`,
+      swarm: (decoded) => `https://gateway.ethswarm.org/bzz/${decoded}`,
+      arweave: (decoded) => `https://arweave.net/${decoded}`,
+    };
+
+    const cases = contenthashSubnames.map(({ label, name }) => {
+      const fixture = contenthashFixtures[label as keyof typeof contenthashFixtures];
+
+      if (!fixture.decoded) return { name, expectedContenthash: null };
+
+      const decoded = fixture.decoded;
+      const httpUrlBuilder = httpUrlByLabel[label];
+
+      return {
+        name,
+        expectedContenthash: {
+          protocolType: label.toUpperCase(),
+          decoded,
+          uri: `${uriPrefixByLabel[label as keyof typeof uriPrefixByLabel]}${decoded}`,
+          httpUrl: httpUrlBuilder ? httpUrlBuilder(decoded) : null,
+        },
+      };
+    });
+
+    const inputNames = cases.map(({ name }) => name);
+    const edges = [...cases]
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { ignorePunctuation: true }))
+      .map(({ expectedContenthash }) => ({
+        node: {
+          resolve: { profile: { contenthash: expectedContenthash } },
+        },
+      }));
+
+    await expect(
+      request<{ domains: DomainProfilesResult }>(DomainProfiles, { names: inputNames }),
+    ).resolves.toMatchObject({
+      domains: { edges },
+    });
+  });
+
+  it("returns null contenthash when record is empty", async () => {
+    await expect(
+      request<DomainProfileResult>(DomainProfile, { name: "emptyrecords.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          profile: {
+            contenthash: null,
+          },
+        },
+      },
+    });
+  });
+
+  it("returns null when profile is not selected for resolution", async () => {
+    const DomainResolveWithoutProfile = gql`
+      query DomainResolveWithoutProfile($name: InterpretedName!) {
+        domain(by: { name: $name }) {
+          resolve {
+            acceleration { requested attempted }
+          }
+        }
+      }
+    `;
+
+    await expect(
+      request<{ domain: { resolve: { acceleration: { requested: boolean } } } }>(
+        DomainResolveWithoutProfile,
+        { name: "test.eth" },
+      ),
+    ).resolves.toMatchObject({
+      domain: {
+        resolve: {
+          acceleration: { requested: true },
+        },
+      },
+    });
   });
 });

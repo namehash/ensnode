@@ -12,7 +12,7 @@ import type {
   ResolverId,
   ResolverRecordsId,
 } from "enssdk";
-import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
+import { index, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 
 /**
  * Tracks an Account's ENSIP-19 Reverse Name Records by CoinType.
@@ -32,6 +32,8 @@ export const reverseNameRecord = onchainTable(
   (t) => ({
     // keyed by (address, coinType)
     address: t.hex().notNull().$type<Address>(),
+    // @TODO(cointype-bigint): store as `t.int8({ mode: "number" }).$type<CoinType>()` (like chainId
+    // elsewhere) so reads/writes use CoinType directly without bigint round-trips. See #2293.
     coinType: t.bigint().notNull(),
 
     /**
@@ -69,6 +71,7 @@ export const domainResolverRelation = onchainTable(
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.domainId] }),
+    byDomain: index().on(t.domainId),
   }),
 );
 
@@ -92,6 +95,13 @@ export const resolver = onchainTable(
 
     chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
+
+    /**
+     * Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`,
+     * interfaceId `0x9061b923`), determined via a single `supportsInterface` RPC the first
+     * time the Resolver is observed (see `upsertResolver`).
+     */
+    isExtended: t.boolean().notNull().default(false),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),
@@ -193,18 +203,25 @@ export const resolverAddressRecord = onchainTable(
     node: t.hex().notNull().$type<Node>(),
     // NOTE: all well-known CoinTypes fit into javascript number but NOT postgres .integer, must be
     // stored as BigInt
+    // @TODO(cointype-bigint): use `t.int8({ mode: "number" }).$type<CoinType>()` like `chainId` above
+    // to drop bigint round-trips at every read/write boundary. See #2293.
     coinType: t.bigint().notNull(),
 
     /**
-     * Represents the value of the Addresss Record specified by ((chainId, resolver, node), coinType).
+     * Represents the value of the Address Record specified by ((chainId, resolver, node), coinType).
      *
      * The value of this field is interpreted by `interpretAddressRecordValue` — see its implementation
      * for additional context and specific guarantees.
      */
-    value: t.text().notNull(),
+    value: t.hex().notNull(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
+    // supports the reverse lookup powering `Account.nameReferences`:
+    // `WHERE value = <address> [AND coin_type = <coinType>] ORDER BY (node, coinType, chainId, address)`.
+    // The `value` prefix seeks the filter; the remaining columns match the keyset ORDER BY tuple so
+    // rows are yielded already sorted, letting pagination range-scan to the cursor instead of sorting.
+    byValueKeyset: index().on(t.value, t.node, t.coinType, t.chainId, t.address),
   }),
 );
 

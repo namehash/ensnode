@@ -1,6 +1,7 @@
+import type { ChainId } from "enssdk";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { buildBlockNumberRange, PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   ENSNamespaceSchema,
@@ -19,7 +20,8 @@ import { applyDefaults, EnvironmentDefaults } from "@/config/environment-default
 import { derive_indexedChainIds } from "./derived-params";
 import type { EnsIndexerConfig } from "./types";
 import {
-  invariant_globalBlockrange,
+  invariant_chainEndBlocks,
+  invariant_efpRequiresUnigraph,
   invariant_requiredDatasources,
   invariant_requiredDatasourcesSubsetOfAll,
   invariant_rpcConfigsSpecifiedForIndexedChains,
@@ -38,24 +40,35 @@ const makeEnvStringBoolSchema = (envVarKey: string) =>
     )
     .transform((val) => val === "true");
 
-const makeBlockNumberSchema = (envVarKey: string) =>
-  z.coerce
-    .number({ error: `${envVarKey} must be a positive integer.` })
-    .int({ error: `${envVarKey} must be a positive integer.` })
-    .min(0, { error: `${envVarKey} must be a positive integer.` })
-    .optional();
+const ChainEndBlocksSchema = z.map(z.number().int().nonnegative(), z.number().int().nonnegative());
 
-const BlockrangeSchema = z
-  .object({
-    startBlock: makeBlockNumberSchema("START_BLOCK"),
-    endBlock: makeBlockNumberSchema("END_BLOCK"),
-  })
-  .refine(
-    (val) =>
-      val.startBlock === undefined || val.endBlock === undefined || val.startBlock <= val.endBlock,
-    { error: "START_BLOCK must be less than or equal to END_BLOCK." },
-  )
-  .transform(({ startBlock, endBlock }) => buildBlockNumberRange(startBlock, endBlock));
+/**
+ * Parses chain-specific end blocks from `END_BLOCK_<chainId>` environment variables into a map.
+ *
+ * Mirrors the `RPC_URL_<chainId>` convention. Pins a deterministic end block per chain (e.g. all
+ * chains stopping at blocks corresponding to a shared timestamp) for reproducible checkpoints; may
+ * be set across any number of indexed chains.
+ *
+ * @throws if any `END_BLOCK_<chainId>` value is not a non-negative integer
+ */
+export function buildChainEndBlocksFromEnv(env: ENSIndexerEnvironment): Map<ChainId, number> {
+  const chainEndBlocks = new Map<ChainId, number>();
+
+  for (const [key, value] of Object.entries(env)) {
+    const match = /^END_BLOCK_(\d+)$/.exec(key);
+    if (!match || value === undefined) continue;
+
+    // Require a base-10 non-negative integer; reject the lax inputs Number() would silently accept
+    // (e.g. "" -> 0, "1e2" -> 100, "0x10" -> 16).
+    if (!/^\d+$/.test(value)) {
+      throw new Error(`${key} must be a non-negative integer.`);
+    }
+
+    chainEndBlocks.set(Number(match[1]), Number(value));
+  }
+
+  return chainEndBlocks;
+}
 
 const PluginsSchema = z.coerce
   .string()
@@ -93,7 +106,7 @@ const ENSIndexerConfigSchema = z
     namespace: ENSNamespaceSchema,
     plugins: PluginsSchema,
     isSubgraphCompatible: IsSubgraphCompatibleSchema,
-    globalBlockrange: BlockrangeSchema,
+    chainEndBlocks: ChainEndBlocksSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     clientLabelSet: LabelSetSchema,
 
@@ -132,9 +145,10 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_validContractConfigs)
   .check(invariant_unigraphRequiresProtocolAcceleration)
+  .check(invariant_efpRequiresUnigraph)
   .check(invariant_isSubgraphCompatibleRequirements)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
-  .check(invariant_globalBlockrange);
+  .check(invariant_chainEndBlocks);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object.
@@ -174,10 +188,7 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
 
       plugins: env.PLUGINS,
       isSubgraphCompatible: env.SUBGRAPH_COMPAT,
-      globalBlockrange: {
-        startBlock: env.START_BLOCK,
-        endBlock: env.END_BLOCK,
-      },
+      chainEndBlocks: buildChainEndBlocksFromEnv(env),
       ensRainbowUrl: env.ENSRAINBOW_URL,
       clientLabelSet: {
         labelSetId: env.LABEL_SET_ID,

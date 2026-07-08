@@ -1,6 +1,6 @@
-import type { InterpretedName, LiteralName } from "enssdk";
-import { isInterpretedName, toNormalizedAddress } from "enssdk";
-import { isAddress, isAddressEqual, zeroAddress } from "viem";
+import type { Hex, InterpretedName, LiteralName } from "enssdk";
+import { isInterpretedName } from "enssdk";
+import { isHex, zeroAddress } from "viem";
 
 import { hasNullByte } from "../null-bytes";
 
@@ -29,39 +29,35 @@ export function interpretNameRecordValue(value: LiteralName): InterpretedName | 
 }
 
 /**
- * Interprets an address record value string and returns null if the value is interpreted as a deletion.
+ * Interprets an address record value and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
  * a) null, representing a non-existent or deletion of the record, or
- *   i. contains null bytes
- *   ii. empty string
- *   iii. empty hex (0x)
- *   iv. zeroAddress
- * b) an address record value that
- *   i. does not contain null bytes
- *   ii. (if is an EVM address) is lowercase
+ *   i. empty hex (0x)
+ *   ii. not valid hex
+ *   iii. zeroAddress
+ * b) the on-chain record bytes as hex
  *
  * @param value - The address record value to interpret.
- * @returns The interpreted address string or null if deleted.
+ * @returns The interpreted address bytes as hex or null if deleted.
  */
-export function interpretAddressRecordValue(value: string): string | null {
-  // TODO(null-bytes): store null bytes correctly — for now, interpret as deletion
-  if (hasNullByte(value)) return null;
-
-  // interpret empty string as deletion of address record
-  if (value === "") return null;
-
+export function interpretAddressRecordValue(value: Hex): Hex | null {
   // interpret empty bytes as deletion of address record
   if (value === "0x") return null;
 
-  // if it's not an EVM address, return as-is
-  if (!isAddress(value, { strict: false })) return value;
+  // interpret malformed hex as non-existence of address record
+  if (!isHex(value, { strict: true })) return null;
+
+  // normalize to lowercase
+  const normalized = value.toLowerCase() as Hex;
 
   // interpret zeroAddress as deletion
-  if (isAddressEqual(value, zeroAddress)) return null;
+  // NOTE: direct string compare is ok here because both zeroAddress and `normalized` are
+  // normalized to lowercase 0x-prefixed hex strings
+  if (normalized === zeroAddress) return null;
 
-  // otherwise normalize and return
-  return toNormalizedAddress(value);
+  // otherwise return the address record bytes as-is
+  return normalized;
 }
 
 /**
@@ -85,6 +81,23 @@ export function interpretTextRecordKey(key: string): string | null {
   if (key === "") return null;
 
   // otherwise return the key as-is
+  return key;
+}
+
+/**
+ * Interprets an EFP account-metadata key and returns null if the key should be rejected.
+ *
+ * The key is a free-form on-chain string used as a primary-key component. A NULL byte cannot be
+ * stored in a Postgres `text` column, so a key containing one is rejected (the metadata entry is
+ * skipped on write and never matches on read) rather than silently stripped — stripping would
+ * collapse distinct on-chain keys onto one stored key.
+ *
+ * @param key - The EFP account-metadata key to interpret.
+ * @returns The key as-is, or null if it must be rejected.
+ */
+export function interpretMetadataKey(key: string): string | null {
+  if (hasNullByte(key)) return null;
+
   return key;
 }
 

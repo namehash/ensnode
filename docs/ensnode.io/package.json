@@ -3,7 +3,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "version": "1.14.0",
+  "version": "1.16.0",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "astro dev",
@@ -14,24 +14,24 @@
     "lint": "biome check --write",
     "lint:ci": "biome ci",
     "omnigraph-examples:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-example-responses.mts",
+    "omnigraph:snapshot": "tsx --tsconfig tsconfig.json scripts/snapshot-omnigraph-version.mts",
     "test": "vitest",
     "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.6",
+    "@astrojs/mdx": "^6.0.3",
     "@astrojs/react": "catalog:",
     "@astrojs/sitemap": "^3.7.2",
-    "@astrojs/starlight": "^0.39.2",
+    "@astrojs/starlight": "^0.40.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
     "@fontsource/inter": "^5.2.5",
     "@headlessui/react": "^2.2.0",
     "@iconify-json/lucide": "^1.2.52",
     "@namehash/namehash-ui": "workspace:*",
     "@octokit/rest": "^20.1.2",
-    "@ensnode/ensnode-sdk": "0.0.0-preview-fix-sha-89c022b-20260519094840",
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@graphiql/plugin-doc-explorer": "0.4.1",
     "@graphiql/react": "0.37.1",
-    "enssdk": "0.0.0-preview-fix-sha-89c022b-20260519094840",
     "graphql": "^16.10.0",
     "@stackblitz/sdk": "^1.11.0",
     "@scalar/astro": "^0.2.16",
@@ -50,13 +50,17 @@
     "sharp": "^0.33.5",
     "yaml": "^2.8.3",
     "starlight-llms-txt": "^0.10.0",
-    "starlight-sidebar-topics": "^0.7.1",
+    "starlight-sidebar-topics": "^0.8.0",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "enssdk": "workspace:*",
+    "enskit": "workspace:*",
     "tsx": "^4.19.3",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

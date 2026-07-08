@@ -16,5 +16,7 @@ export const starlightLlmsTxtPlugin = starlightLlmsTxt({
     "docs/integrate/integration-options/enssdk/example",
     "docs/integrate/integration-options/enskit/example",
     "docs/integrate/omnigraph/schema-reference",
+    "docs/integrate/ens-subgraph/schema-reference",
+    "docs/integrate/why-ensnode/keep-ens-working",
   ],
 });

@@ -1,0 +1,80 @@
+---
+title: ENSNode Monitoring
+description: Practical monitoring guidance for ENSNode deployments.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+Monitoring is essential for operating an ENSNode deployment. This page covers what to monitor, why it matters, and how to get started with common tools.
+
+## What to monitor
+
+### ENSIndexer
+
+ENSIndexer is the write path of your ENSNode deployment. If it falls behind or fails, the indexed state becomes stale.
+
+- **Event Handler throughput**: watch how many events are processed per second (look for `eps` in the ENSIndexer logs).
+- **RPC error rate**: high rates of timeouts, rate limits, or connection errors from your RPC provider slow indexing and can cause retries to pile up.
+- **ENSRainbow request latency**: if label healing is slow, ENSIndexer waits. Co-locate ENSIndexer and ENSRainbow and watch the request duration between them.
+- **Memory and CPU**: historical backfill is CPU-bound and single-threaded so expect high CPU usage. Memory will also be heavily utilized to store intermediate data. After backfill, CPU and Memory usage drops significantly.
+
+### ENSApi
+
+ENSApi is the read path. Monitor it to ensure queries stay fast and available.
+
+- **Worst-case indexing distance**: use the Realtime API (`GET /api/realtime`) to monitor whether your ENSNode instance has indexed sufficient blocks to be within an acceptable distance from the current "tip" of all indexed chains.
+- **Request latency and error rate**: track p50, p95, and p99 response times for GraphQL and REST requests.
+- **Database connection pool health**: if connections are exhausted, requests queue or fail.
+- **Query complexity**: unusually expensive queries can overload the database. Log or alert on slow queries.
+- **Memory and CPU**: ENSApi is generally lightweight, but watch for spikes in usage that may indicate a runaway query or memory leak.
+
+### ENSDb (PostgreSQL)
+
+ENSDb is the shared state between ENSIndexer and ENSApi.
+
+- **Disk usage**: some ENSNode deployments can require hundreds of gigabytes and grow over time.
+- **Write throughput**: during backfill, the database must absorb a large volume of writes.
+- **Replication lag**: if you use read replicas for ENSApi, monitor how far behind the replicas are from the primary.
+- **Slow queries and lock contention**: use `pg_stat_statements` or your managed database's slow-query log.
+- **`pg_trgm` extension availability**: ENSIndexer requires this extension at startup. Verify it is installed or installable.
+
+### ENSRainbow
+
+ENSRainbow is a sidecar for label healing.
+
+- **Request latency**: ENSIndexer calls ENSRainbow frequently during indexing; slow responses bottleneck the whole pipeline.
+- **Disk usage**: the `searchlight` label set can require 55 GB or more during startup.
+
+## Monitoring tools
+
+You can monitor ENSNode with any stack that can scrape metrics or collect logs. Common choices include:
+
+- **Managed platform metrics**: Render, Railway, and most cloud providers expose CPU, memory, disk, and network metrics out of the box.
+- **PostgreSQL tooling**: `pg_stat_statements`, `pg_stat_activity`, and your managed provider's performance insights page.
+- **Log aggregation**: centralize logs from ENSIndexer, ENSApi, ENSRainbow, and Postgres so you can correlate errors across services.
+
+## Starter alert checklist
+
+Consider alerting on:
+
+1. ENSIndexer is down or has not processed events for more than X minutes.
+2. ENSIndexer RPC error rate spikes above baseline.
+3. ENSApi error rate or p95 latency exceeds your SLA threshold.
+4. ENSApi worst-case indexing distance exceeds your acceptable staleness window.
+5. ENSDb disk usage exceeds 80%.
+6. ENSDb replication lag exceeds your acceptable staleness window.
+7. ENSRainbow request latency exceeds a few hundred milliseconds.
+
+## Further reading
+
+<LinkCard
+  title="Key workloads"
+  description="Understand the resource demands behind each ENSNode workload."
+  href="/docs/self-host/operations/key-workloads"
+/>
+
+<LinkCard
+  title="ENSNode Scalability"
+  description="Learn how to scale reads and writes independently."
+  href="/docs/self-host/operations/scalability"
+/>

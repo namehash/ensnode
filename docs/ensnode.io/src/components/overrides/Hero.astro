@@ -1,28 +1,66 @@
 ---
 import { Image } from "astro:assets";
 import { Balancer } from "react-wrap-balancer";
-import skies_image from "@assets/hero_skies_image.png";
+import heroImage from "@assets/hero_image.png";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 ---
-<section class="bg-gradient-to-b from-[#4182B8] to-[#FEE7B7] w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-cover bg-center bg-no-repeat">
-    <Image src={skies_image} alt="background skies" class="absolute w-full h-screen z-0 object-center object-cover select-none" quality={100}/>
-    <div class="relative z-10 not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center text-center px-5 sm:px-0">
-        <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
-            <h1 class="max-w-[650px] w-full font-bold leading-10 sm:leading-[68px] text-4xl sm:text-6xl text-white">
-                The full-stack<br/>
-                development platform<br/>
-                for ENSv2
-            </h1>
-            <Balancer as="p" className="max-w-[650px] w-full text-base text-white leading-6 font-medium">
-                Achieve full ENSv2 readiness even before ENSv2 launches.
-            </Balancer>
+
+<section
+  class="w-full h-screen lg:max-[1850px]:h-fit min-[1850px]:h-[calc(100vh-420px)] flex flex-col flex-nowrap justify-center items-center bg-[#011A25] relative overflow-x-clip overflow-y-visible lg:pt-[110px] lg:pb-[50px]">
+  <div
+    class="w-full max-w-[1280px] flex flex-col lg:flex-row justify-center sm:justify-between items-center gap-10 px-5 sm:px-8 max-lg:pt-20 max-sm:pb-8">
+    <div
+      class="relative z-20 not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center lg:items-start">
+      <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
+        <h1
+          class="max-w-[650px] w-full font-bold leading-10 sm:leading-[68px] text-4xl sm:text-[52px] text-white max-lg:text-center">
+          The full-stack<br />
+          development platform<br />
+          for ENSv2
+        </h1>
+        <Balancer
+          as="p"
+          className="max-w-[650px] w-full text-base text-white leading-6 font-medium max-lg:text-center">
+          Achieve full ENSv2 readiness even before ENSv2 launches.
+        </Balancer>
+      </div>
+      <a
+        href="/docs/integrate"
+        class={legacyButtonVariants({
+          variant: "secondary",
+          size: "medium",
+          className: "hover:bg-gray-100 relative z-10",
+        })}>
+        Quickstart guide
+      </a>
+      <div class="sm:hidden relative w-full max-w-[300px] pt-2 flex items-center justify-center">
+        <div
+          aria-hidden="true"
+          class="absolute -translate-x-1/10 inset-0 -z-0 m-auto aspect-square w-[130%] rounded-full
+                           bg-[radial-gradient(circle,rgba(24,125,176,0.45)_0%,rgba(24,125,176,0.4)_40%,transparent_70%)]
+                           blur-3xl">
         </div>
-        <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center items-center gap-4 sm:gap-8">
-            <a
-                    href="/docs/integrate"
-                    class="h-[42px] box-border cursor-pointer transition-all duration-200 bg-black hover:bg-[#272727] button-as-child text-white rounded-lg font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-[9px] px-[17px] text-base leading-6"
-            >
-                    Quickstart guide
-            </a>
-        </div>
+        <Image
+          src={heroImage}
+          alt="ENSv2 badge"
+          class="relative z-10 w-full h-auto object-contain"
+          quality={100}
+        />
+      </div>
     </div>
+    <div class="relative shrink-0 hidden sm:flex items-center justify-center">
+      <div
+        aria-hidden="true"
+        class="absolute -translate-x-1/10 inset-0 z-10 m-auto aspect-square w-[130%] max-w-[700px] rounded-full
+           bg-[radial-gradient(circle,rgba(24,125,176,0.45)_0%,rgba(24,125,176,0.4)_40%,transparent_70%)]
+           blur-3xl">
+      </div>
+      <Image
+        src={heroImage}
+        alt="ENSv2 badge"
+        class="relative z-10 w-full max-w-[400px] lg:max-w-[490px] h-auto object-contain"
+        quality={100}
+      />
+    </div>
+  </div>
 </section>

@@ -1,41 +1,70 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
-import type { ChainId } from "enssdk";
+import type { Address, CoinType } from "enssdk";
 import { mainnet } from "viem/chains";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type MultichainPrimaryNameResolutionArgs,
   type MultichainPrimaryNameResolutionResult,
+  type ReverseResolutionResult,
   uniq,
 } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
-import { resolveReverse } from "@/lib/resolution/reverse-resolution";
+import { resolveReverse, resolveReverseByChainId } from "@/lib/resolution/reverse-resolution";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
-const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
-  // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
-  // regardless of the current namespace
-  mainnet.id,
+export const getENSIP19SupportedChainIds = () => {
+  return uniq([
+    // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
+    // regardless of the current namespace
+    mainnet.id,
 
-  // then include any ENSIP-19 Supported Chains defined in this namespace
-  ...uniq(
-    [
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverBase),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverLinea),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverOptimism),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverArbitrum),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverScroll),
+    // then include any ENSIP-19 Supported Chains defined in this namespace
+    ...[
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverRoot),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverBase),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverLinea),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverOptimism),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverArbitrum),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverScroll),
     ]
       .filter((ds) => ds !== undefined)
       .map((ds) => ds.chain.id),
-  ),
-]);
+  ]);
+};
+
+export type MultichainPrimaryNameByCoinTypeResolutionResult = Partial<
+  Record<CoinType, ReverseResolutionResult>
+>;
+
+type PrimaryNameResolutionOptions = Parameters<typeof resolveReverse>[2];
+
+/**
+ * Batch-resolves an address' primary name for each requested coin type.
+ *
+ * @see https://docs.ens.domains/ensip/19
+ */
+export async function resolvePrimaryNamesByCoinTypes(
+  address: Address,
+  coinTypes: CoinType[],
+  options: PrimaryNameResolutionOptions,
+): Promise<MultichainPrimaryNameByCoinTypeResolutionResult> {
+  const names = await withActiveSpanAsync(
+    tracer,
+    "resolvePrimaryNamesByCoinTypes",
+    { address },
+    () => Promise.all(coinTypes.map((coinType) => resolveReverse(address, coinType, options))),
+  );
+
+  return coinTypes.reduce((memo, coinType, i) => {
+    // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
+    memo[coinType] = names[i]!;
+    return memo;
+  }, {} as MultichainPrimaryNameByCoinTypeResolutionResult);
+}
 
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`.
@@ -49,17 +78,19 @@ const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
  * @param options.accelerate Whether acceleration is requested (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
-export async function resolvePrimaryNames(
+export async function resolvePrimaryNamesByChainIds(
   address: MultichainPrimaryNameResolutionArgs["address"],
   chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = getENSIP19SupportedChainIds(),
-  options: Parameters<typeof resolveReverse>[2],
+  options: Parameters<typeof resolveReverseByChainId>[2],
 ): Promise<MultichainPrimaryNameResolutionResult> {
-  // parallel reverseResolve
-  const names = await withActiveSpanAsync(tracer, "resolvePrimaryNames", { address }, () =>
-    Promise.all(chainIds.map((chainId) => resolveReverse(address, chainId, options))),
+  const names = await withActiveSpanAsync(
+    tracer,
+    "resolvePrimaryNamesByChainIds",
+    { address },
+    () =>
+      Promise.all(chainIds.map((chainId) => resolveReverseByChainId(address, chainId, options))),
   );
 
-  // key results by chainId
   return chainIds.reduce((memo, chainId, i) => {
     // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
     memo[chainId] = names[i]!;

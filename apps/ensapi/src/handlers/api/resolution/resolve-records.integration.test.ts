@@ -6,7 +6,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
+import {
+  accounts,
+  addresses,
+  contenthashFixtures,
+  fixtures,
+  testEthTextRecords,
+} from "@ensnode/integration-test-env/devnet";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -60,7 +66,9 @@ describe("GET /api/resolve/records/:name", () => {
       expected: {
         status: 200,
         body: {
-          records: { texts: { description: "test.eth" } },
+          records: {
+            texts: { [testEthTextRecords.description.key]: testEthTextRecords.description.value },
+          },
           accelerationRequested: false,
           accelerationAttempted: false,
         },
@@ -157,7 +165,7 @@ describe("GET /api/resolve/records/:name", () => {
       expected: {
         status: 200,
         body: {
-          records: { texts: { avatar: "https://example.com/avatar.png" } },
+          records: { texts: { [testEthTextRecords.avatar.key]: testEthTextRecords.avatar.value } },
           accelerationRequested: false,
           accelerationAttempted: false,
         },
@@ -187,8 +195,8 @@ describe("GET /api/resolve/records/:name", () => {
           records: {
             addresses: {
               60: accounts.owner.address,
-              0: fixtures.bitcoinAddress,
-              2: fixtures.litecoinAddress,
+              0: fixtures.rawAddresses.bitcoin.raw,
+              2: fixtures.rawAddresses.litecoin.raw,
               777777: null,
             },
           },
@@ -204,7 +212,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: [
         "name=true",
         "addresses=60,0,2",
-        "texts=avatar,description,url,email,com.twitter,com.github",
+        "texts=avatar,description,url,email,com.twitter,com.github,com.x,org.telegram",
         "contenthash=true",
         "pubkey=true",
         "version=true",
@@ -217,18 +225,20 @@ describe("GET /api/resolve/records/:name", () => {
           records: {
             addresses: {
               60: accounts.owner.address,
-              0: fixtures.bitcoinAddress,
-              2: fixtures.litecoinAddress,
+              0: fixtures.rawAddresses.bitcoin.raw,
+              2: fixtures.rawAddresses.litecoin.raw,
             },
             texts: {
-              avatar: "https://example.com/avatar.png",
-              description: "test.eth",
-              url: "https://ens.domains",
-              email: "test@ens.domains",
-              "com.twitter": "ensdomains",
-              "com.github": "ensdomains",
+              [testEthTextRecords.avatar.key]: testEthTextRecords.avatar.value,
+              [testEthTextRecords.description.key]: testEthTextRecords.description.value,
+              [testEthTextRecords.url.key]: testEthTextRecords.url.value,
+              [testEthTextRecords.email.key]: testEthTextRecords.email.value,
+              [testEthTextRecords.twitter.key]: testEthTextRecords.twitter.value,
+              [testEthTextRecords.github.key]: testEthTextRecords.github.value,
+              [testEthTextRecords.x.key]: testEthTextRecords.x.value,
+              [testEthTextRecords.telegram.key]: testEthTextRecords.telegram.value,
             },
-            contenthash: fixtures.contenthash,
+            contenthash: contenthashFixtures.ipfs.raw,
             pubkey: {
               x: fixtures.publicKeyX,
               y: fixtures.publicKeyY,

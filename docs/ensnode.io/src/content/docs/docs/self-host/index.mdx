@@ -1,51 +1,57 @@
 ---
 title: Self-host ENSNode
 description: Decide whether to self-host ENSNode and understand the architecture.
+sidebar:
+  label: Overview
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
-import EnsDbSnapshotsTeaser from "../../../../components/molecules/EnsDbSnapshotsTeaser.astro";
 
+Self-hosting gives you full control over how you index and serve ENS data. Compared to the public [Hosted Instances](/docs/hosted-instances), your own ENSNode instance lets you:
 
-This page will help you decide whether to self-host ENSNode or use the hosted instances. Includes architecture overview of the ENSNode stack (ENSIndexer, ENSDb, ENSRainbow, ENSApi).
+- **Select [ENS Namespace](/docs/hosted-instances#ens-namespaces)**: choose which ENS protocol deployment ENSNode will provide data for (ex: `mainnet` or `sepolia`). Great for testing and development.
+- **Activate [ENSNode Plugins](/docs/hosted-instances#ensnode-plugins)**: adjust indexed data model and indexed data records for your specific use case.
+- **Tune "name healing" coverage** — choose a [label set](/docs/services/ensrainbow/usage/available-label-sets#available-label-sets) that matches your requirements for [ENSRainbow](/docs/services/ensrainbow#how-ensrainbow-helps).
+- **Customize your data model** — implement an [ENSDb Writer](/docs/integrate/integration-options/ensdb-writers) to control how data is indexed into your own [ENSDb instance](/docs/integrate/integration-options/ensdb).
+- **Build your own APIs and pipelines** — implement an [ENSDb Reader](/docs/integrate/integration-options/ensdb-readers) to serve your apps directly from your ENSDb instance.
+- **Control versioning, updates, and uptime** — decide when to adopt new releases and apply your own high-availability strategy.
 
-:::note
-Follow these guides to deploy an ENSNode instance to the cloud.
+## High-level architecture
+
+Before diving into deployment details, it helps to understand how ENSNode's components work together.
+
+[![ENSNode High-Level Architecture](/ensnode-high-level-architecture.svg)](/ensnode-high-level-architecture.svg)
+
+## Quick start
+
+The fastest way to run ENSNode is with Docker Compose:
+
+```bash
+# 1. Copy and edit the environment file
+cp docker/envs/.env.docker.example docker/envs/.env.docker.local
+
+# 2. Set your namespace, plugins, and RPC endpoints in the file above
+
+# 3. Start the stack
+docker compose -f docker/docker-compose.yml up -d
+```
+
+For local development against a devnet, you can skip configuration and use `docker/docker-compose.devnet.yml` instead.
+
+:::tip[Skip the long backfill]
+You can avoid reindexing the entire ENS history from scratch by bootstrapping from an [ENSDb snapshot](/docs/integrate/integration-options/ensdb-cli#ensdb-snapshots). Snapshots include an indexed state and RPC cache, so you only need to catch up on events after the snapshot was taken.
 :::
 
-Running your own ENSNode instance is helpful for those that wish to:
-
-- Maintain control over their own infrastructure
-- Ensure control over their own availability and uptime guarantees
-- Customize ENSNode's behavior
-- Own the resulting Postgres index for custom queries or `JOIN`s
-
-:::note[Private Networking]
-Note that because ENSNode makes many label healing requests to ENSRainbow while indexing, it's _imperative_ that they be on the same local network to minimize request time.
-:::
-
-## Bootstrap from a snapshot (coming soon)
-
-Self-hosting today means standing up a fresh ENSNode instance from zero and waiting on an initial backfill - including the RPC bill that comes with it. **[ENSDb snapshots and `ensdb-cli`](/docs/integrate/integration-options/ensdb-cli)** flatten that ramp.
-
-The headline value props for self-hosters:
-
-<EnsDbSnapshotsTeaser />
+## Next steps
 
 <LinkCard
-  title="Read the full teaser"
-  description="Problem, outcomes, and who this is for — all in one page."
-  href="/docs/integrate/integration-options/ensdb-cli"
+  title="ENSNode Operations"
+  description="Understand workloads, requirements, scalability, monitoring, and troubleshooting."
+  href="/docs/self-host/operations"
 />
 
-### Deploying with Docker
-
-The Docker deployment option provides the easiest way to run the full ENSNode suite of services both locally and in the cloud.
-
-<LinkCard title="Deploy with Docker" href="/docs/deploying/docker" />
-
-### Deploying with Terraform
-
-An example Terraform deployment reference is available, showing an example of deploying the full ENSNode suite on Render with AWS managed domain names.
-
-<LinkCard title="Deploy with Terraform" href="/docs/deploying/terraform" />
+<LinkCard
+  title="ENSNode Deployment Options"
+  description="Compare Docker, Railway, and Terraform deployment options."
+  href="/docs/self-host/deployment-options"
+/>

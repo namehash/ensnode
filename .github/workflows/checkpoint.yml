@@ -1,0 +1,89 @@
+name: "[next] Checkpoint: produce a point-in-time dev checkpoint on Cherry"
+
+# Produce a resumable, sha-identified checkpoint of a specific commit/config at a specific chain-time,
+# uploaded to R2 for a developer to restore locally (`ensdb-cli load`) for debugging. No deploy, no
+# target DB, no images. Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit to index"
+        required: true
+        type: string
+      config:
+        description: "Named config to index"
+        required: true
+        type: choice
+        options:
+          - alpha
+          - mainnet
+      timestamp:
+        description: "Chain-time to index up to (unix seconds)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checkpoint-dev-${{ inputs.config }}-${{ inputs.commit }}-${{ inputs.timestamp }}
+  cancel-in-progress: false
+
+jobs:
+  checkpoint:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 600
+    env:
+      CHERRY_API_TOKEN: ${{ secrets.CHERRY_API_TOKEN }}
+      CHERRY_PROJECT_ID: ${{ secrets.CHERRY_PROJECT_ID }}
+      CHERRY_SSH_KEY_ID: ${{ secrets.CHERRY_SSH_KEY_ID }}
+      CHERRY_SSH_KEY: ${{ secrets.CHERRY_SSH_KEY }}
+      R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      R2_CHECKPOINTS_BUCKET: ensindexer-checkpoints
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Write SSH key
+        run: |
+          install -m600 /dev/null /tmp/cherry_key
+          printf '%s\n' "$CHERRY_SSH_KEY" > /tmp/cherry_key
+          echo "SSH_KEY=/tmp/cherry_key" >> "$GITHUB_ENV"
+
+      - name: Index config at commit to the requested chain-time
+        env:
+          CONFIGS: ${{ inputs.config }}
+          SHA: ${{ inputs.commit }}
+          MODE: end-block
+          TIMESTAMP: ${{ inputs.timestamp }}
+        run: bash packages/ensindexer-checkpoint/scripts/checkpoint.sh
+
+      - name: Report checkpoint R2 location
+        env:
+          CONFIG: ${{ inputs.config }}
+          COMMIT: ${{ inputs.commit }}
+          TIMESTAMP: ${{ inputs.timestamp }}
+        run: |
+          OBJ="${CONFIG}-${COMMIT}-t${TIMESTAMP}.dump"
+          {
+            echo "### Checkpoint ready"
+            echo ""
+            echo "- R2: \`${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ}\`"
+            echo "- metadata: \`${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ}.metadata.json\`"
+            echo ""
+            echo "Restore locally (the metadata sidecar must sit next to the dump; load reads it automatically):"
+            echo '```'
+            echo "rclone copy r2:${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ} ."
+            echo "rclone copy r2:${R2_CHECKPOINTS_BUCKET}/checkpoints/${OBJ}.metadata.json ."
+            echo "ensdb-cli load ${OBJ} --into \$LOCAL_ENSDB_URL --schema <your-ensIndexerSchemaName>"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tear down the Cherry box (always)
+        if: always()
+        run: bash packages/ensindexer-checkpoint/scripts/cherry-down.sh || true

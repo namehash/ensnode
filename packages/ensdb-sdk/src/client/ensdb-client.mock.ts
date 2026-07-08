@@ -25,15 +25,6 @@ export const ensIndexerSchemaName = "ensindexer_0";
 
 export const publicConfig = {
   ensIndexerSchemaName,
-  ensRainbowPublicConfig: {
-    serverLabelSet: {
-      labelSetId: "subgraph",
-      highestLabelSetVersion: 0,
-    },
-    versionInfo: {
-      ensRainbow: "0.32.0",
-    },
-  },
   clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,

@@ -8,12 +8,13 @@ This app is hosted at [https://enskit-react-example.ensnode.io/](https://enskit-
 
 ## Usage (with NameHash Hosted Instance)
 
+> **Schema version:** This example tracks the NameHash-hosted instances' version (`1.15.2`). If you query a different ENSNode version, you must match its ENSNode version with the same `enskit`/`enssdk` version.
+
 ```sh
 # from the ENSNode monorepo root
 pnpm install
 
-# set the VITE_ENSNODE_URL to a NameHash Hosted Instance and run this example in dev mode
-VITE_ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F enskit-react-example dev
+pnpm -F enskit-react-example dev
 ```
 
 ## Usage (with Local ENSNode)
@@ -24,6 +25,11 @@ First, follow the [ENSNode Contributing Documentation](https://ensnode.io/docs/c
 # from the ENSNode monorepo root
 pnpm install
 
-# run this example in dev mode, defaults to connecting to an ENSApi at http://localhost:4334
-pnpm -F enskit-react-example dev
+VITE_ENSNODE_URL=http://localhost:4334 pnpm -F enskit-react-example dev
 ```
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

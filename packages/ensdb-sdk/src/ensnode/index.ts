@@ -5,7 +5,7 @@ import { pgSchema, primaryKey } from "drizzle-orm/pg-core";
  *
  * The name of the ENSNode schema in an ENSDb.
  */
-const ENSNODE_SCHEMA_NAME = "ensnode";
+export const ENSNODE_SCHEMA_NAME = "ensnode";
 
 /**
  * ENSNode Schema

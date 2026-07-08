@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { eq } from "drizzle-orm/sql";
 import { type AccountId, asInterpretedName, type Node, type UnixTimestamp } from "enssdk";
 
@@ -13,12 +11,12 @@ import {
   type RegisteredNameTokens,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 
 interface FindRegisteredNameTokensForDomainRecord {
-  domains: typeof ensIndexerSchema.subgraph_domain.$inferSelect;
-  nameTokens: typeof ensIndexerSchema.nameTokens.$inferSelect;
-  registrationLifecycles: typeof ensIndexerSchema.registrationLifecycles.$inferSelect;
+  domains: typeof di.context.ensIndexerSchema.subgraph_domain.$inferSelect;
+  nameTokens: typeof di.context.ensIndexerSchema.nameTokens.$inferSelect;
+  registrationLifecycles: typeof di.context.ensIndexerSchema.registrationLifecycles.$inferSelect;
 }
 
 /**
@@ -28,6 +26,7 @@ interface FindRegisteredNameTokensForDomainRecord {
 async function _findRegisteredNameTokensForDomain(
   domainId: Node,
 ): Promise<FindRegisteredNameTokensForDomainRecord[]> {
+  const { ensDb, ensIndexerSchema } = di.context;
   const query = ensDb
     .select({
       nameTokens: ensIndexerSchema.nameTokens,
@@ -103,7 +102,7 @@ function _recordsToRegisteredNameTokens(
     } satisfies AccountId;
     // biome-ignore lint/style/noNonNullAssertion: domain.name guaranteed to exist
     const name = asInterpretedName(record.domains.name!);
-    const ownership = getNameTokenOwnership(config.namespace, name, owner);
+    const ownership = getNameTokenOwnership(di.context.namespace, name, owner);
     const token = _recordToNameToken(record, ownership);
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
 

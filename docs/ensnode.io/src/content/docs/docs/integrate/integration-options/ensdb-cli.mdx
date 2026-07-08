@@ -1,18 +1,18 @@
 ---
-title: ensdb-cli & ENSDb snapshots
+title: ensdb-cli (ENSDb Snapshots)
 description: Coming soon - publish, download, and diff snapshots of the live ENS state with the planned ensdb-cli.
 ---
 
 import { LinkCard, Aside } from "@astrojs/starlight/components";
-import EnsDbSnapshotsTeaser from "../../../../../components/molecules/EnsDbSnapshotsTeaser.astro";
+import EnsDbSnapshotsTeaser from "@components/molecules/EnsDbSnapshotsTeaser.astro";
 
 <Aside type="caution" title="Coming soon">
-**`ensdb-cli`** and **ENSDb snapshots** are planned capabilities that are coming soon.
+  **`ensdb-cli`** and **ENSDb snapshots** are planned capabilities that are coming soon.
 </Aside>
 
 ## The problem
 
-Completing a full historical indexing backfill of ENS from zero is **expensive on two axes: time and money**. A full historical indexing backfill of ENS across mainnet, Basenames, Lineanames, 3DNS, ENSv1, ENSv2, etc generally means days of indexing *and* a heavy RPC bill - every request to your RPC provider, multiplied by every chain, multiplied by every block of 9+ years of ENS history you have to index. That tax is painful for anyone building, prototyping, demoing, or testing.
+Completing a full historical indexing backfill of ENS from zero is **expensive on two axes: time and money**. A full historical indexing backfill of ENS across mainnet, Basenames, Lineanames, 3DNS, ENSv1, ENSv2, etc generally means days of indexing _and_ a heavy RPC bill - every request to your RPC provider, multiplied by every chain, multiplied by every block of 9+ years of ENS history you have to index. That tax is painful for anyone building, prototyping, demoing, or testing.
 
 [ENSDb](/docs/services/ensdb) already gives you the live, onchain state of ENS in a plain PostgreSQL database that any language with a Postgres driver can read. The next step is making it **trivial - and cheap - to bootstrap and operate** that database. That's what ENSDb snapshots and `ensdb-cli` are for.
 
@@ -34,10 +34,9 @@ ENSDb snapshots are **portable, versioned packages of an ENSDb instance** that a
 
 ## How this complements ENSDb
 
-Snapshots and the CLI sit *on top of* the [ENSDb open standard](/docs/services/ensdb). Because ENSDb is just Postgres governed by a well-defined schema, snapshots are portable: any [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) implementation can produce one, and any [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) (or your own code) can consume one.
+Snapshots and the CLI sit _on top of_ the [ENSDb open standard](/docs/services/ensdb). Because ENSDb is just Postgres governed by a well-defined schema, snapshots are portable: any [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) implementation can produce one, and any [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) (or your own code) can consume one.
 
 This is the same foundation that powers ENSNode's other planned ENSDb capabilities - including [ENSEngine](/docs/integrate/integration-options/ensengine), enabling you to react to changes in ENSDb through webhooks and other event-driven strategies without need for polling.
-
 
 ## Related
 

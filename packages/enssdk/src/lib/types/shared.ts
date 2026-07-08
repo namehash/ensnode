@@ -36,6 +36,17 @@ export type DatetimeISO8601 = string;
 export type UrlString = string;
 
 /**
+ * Any JSON-serializable value.
+ */
+export type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+/**
  * String representation of {@link AccountId}.
  *
  * Formatted as a fully lowercase CAIP-10 AccountId.

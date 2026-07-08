@@ -10,7 +10,13 @@ import { Fragment } from "react";
 
 import ENSNode2D from "@assets/dark-logo.svg";
 
-export default function HeaderMobileNavigation() {
+export interface HeaderMobileNavigationProps {
+  isScrollable?: boolean;
+}
+
+export default function HeaderMobileNavigation({
+  isScrollable = false,
+}: HeaderMobileNavigationProps) {
   const MobileNavigationLinks = [
     {
       text: "Docs",
@@ -39,7 +45,12 @@ export default function HeaderMobileNavigation() {
       <Popover className="relative">
         {({ open }) => (
           <>
-            <Popover.Button className="sm:hidden relative z-30 p-1 mt-1 focus:outline-none focus-visible:outline-2 focus-visible:outline-black">
+            <Popover.Button
+              className={cc([
+                "sm:hidden relative z-30 cursor-pointer rounded-lg transition-all duration-200 px-[11px] py-[13px] focus:outline-none focus-visible:outline-2",
+                isScrollable ? "onScrollContainer" : "hover:bg-black/5 focus-visible:outline-black",
+              ])}
+            >
               <span className="sr-only">Open menu</span>
               <MenuIcon className="w-5 stroke-current" aria-hidden="true" />
             </Popover.Button>
@@ -62,7 +73,7 @@ export default function HeaderMobileNavigation() {
                     >
                       <img src={ENSNode2D.src} className="h-8" alt="ENSNode" />
                     </a>
-                    <Popover.Button className="transition rounded-lg border-0 inline-flex items-center whitespace-nowrap underline-none bg-black hover:bg-black/5">
+                    <Popover.Button className="rounded-lg border-0 inline-flex items-center whitespace-nowrap underline-none hover:bg-[#272727] cursor-pointer transition-all duration-200 p-2">
                       {/*NOTE: this results in a browser error (not-breaking) but is directly copied from namekit.io solution*/}
                       <span className="sr-only">Close menu</span>
                       <XMarkIcon className="block h-6 w-6 text-white" aria-hidden="true" />

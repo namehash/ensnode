@@ -1,0 +1,792 @@
+import type {
+  ChainId,
+  DomainId,
+  InterpretedLabel,
+  InterpretedName,
+  LabelHash,
+  LabelHashPath,
+  Name,
+  Node,
+  NormalizedAddress,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
+  RegistrationId,
+  RegistryId,
+  RenewalId,
+  ResolverId,
+  TokenId,
+} from "enssdk";
+import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
+import type { BlockNumber, Hash } from "viem";
+
+import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
+
+/**
+ * The Unigraph Schema
+ *
+ * While the initial approach was a highly materialized view of the ENS protocol, abstracting away
+ * as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
+ * resolution-time—full materialization of resolution behavior is impractical. The canonical
+ * nametree, however, is materialized inline via synchronous handler-side cascades; see
+ * `Domain.canonical*` fields and `canonicality-db-helpers.ts`.
+ *
+ * As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
+ * with the obvious exception of materializing specific state that must trivially filterable. Then,
+ * resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
+ * behavior. This forces our implementation to match the protocol as closely as possible, with the
+ * obvious note that the performance tradeoffs of evm code and our app are different. For example,
+ * it's more expensive for us to recursively traverse the namegraph (like evm code does) because our
+ * individual roundtrips from the db are relatively more expensive.
+ *
+ * In general: the indexed schema should match on-chain state as closely as possible, and
+ * resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
+ * in ENSApi. The current obvious exception is that `domain.ownerId` for ENSv1 Domains is the
+ * _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
+ * including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
+ * within this Unigraph plugin materializes the effective owner to simplify this aspect of ENS and
+ * enable efficient queries against `domain.ownerId`.
+ *
+ * When necessary, all datamodels are shared or polymorphic between ENSv1 and ENSv2, including
+ * Domains, Registries, Registrations, Renewals, and Resolvers.
+ *
+ * Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
+ * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
+ * Registry Registrations do not).
+ *
+ * The `Label` entity (labelHash → InterpretedLabel) remains the source of truth for label values.
+ * Canonical-tree fields on `Domain` (`canonicalName`, `canonicalLabelHashPath`, `canonicalPath`,
+ * `canonicalDepth`, `canonicalNode`) are materialized inline by the handlers in
+ * `canonicality-db-helpers.ts`. Label heals propagate to `canonicalName` via a GIN-indexed bulk
+ * UPDATE outside Ponder's cache; cascade round-trips are bounded to events that already pay a
+ * flush (canonicality flip, heal of an unknown label).
+ *
+ * ENSv1 and ENSv2 both fit the Registry → Domain → (Sub)Registry → Domain → ... namegraph model.
+ * For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a row of type
+ * `ENSv1VirtualRegistry`) whose sole parent is that domain; children of the parent then point their
+ * `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
+ * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
+ * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
+ * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
+ * exception of the **Canonical Nametree** — the set of Domains that have an inferrable Canonical
+ * Name — which _is_ materialized inline: the `Registry.canonical` / `Domain.canonical` membership
+ * flags plus the `Domain.canonical*` name/path/depth fields on the rows themselves. The bidirectional canonical edge is
+ * NOT materialized in a parallel table; it is derived on demand by checking that the two
+ * unidirectional pointers agree (`Registry.canonicalDomainId = Domain.id`
+ * ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph
+ * run as either an in-memory PK update (when `Registry.__hasChildren = false`, the dominant case
+ * for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE
+ * otherwise (see `canonicality-db-helpers.ts`).
+ *
+ * Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
+ * allows us to rely on the shared logic for indexing:
+ *   a) ENSv1RegistryOld -> ENSv1Registry migration status
+ *   b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
+ * As such, none of that information is present in this unigraph.schema.ts file.
+ *
+ * In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
+ * allows us to trivially implement cursor-based pagination and allow consumers to reference these
+ * deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
+ * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
+ * then that information is, as well, included in the entity's columns, not just encoded in the id.
+ * Nowhere in this application, nor in user applications, should an entity's id be parsed for its
+ * constituent parts; all should be available, with their various type guarantees, on the entity
+ * itself.
+ *
+ * Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
+ * Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
+ * entity that has many events (Domain, Resolver) to the relevant set of Events.
+ *
+ * A Registration references the event that initiated the Registration. A Renewal, too, references
+ * the Event responsible for its existence.
+ */
+
+//////////
+// Events
+//////////
+
+export const event = onchainTable(
+  "events",
+  (t) => ({
+    // Ponder's event.id
+    id: t.text().primaryKey(),
+
+    // The HCA account address if used, otherwise Transaction.from.
+    sender: t.hex().notNull().$type<NormalizedAddress>(),
+
+    // Event Log Metadata
+
+    // chain
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+
+    // block
+    blockNumber: t.bigint().notNull().$type<BlockNumber>(),
+    blockHash: t.hex().notNull().$type<Hash>(),
+    timestamp: t.bigint().notNull(),
+
+    // transaction
+    transactionHash: t.hex().notNull().$type<Hash>(),
+    transactionIndex: t.integer().notNull(),
+    // `tx.from` — never HCA-aware. Always the EOA/relayer that submitted the transaction.
+    // Use `event.sender` for the HCA-aware actor.
+    from: t.hex().notNull().$type<NormalizedAddress>(),
+    to: t.hex().$type<NormalizedAddress>(), // NOTE: a null `to` means this was a tx that deployed a contract
+
+    // log
+    address: t.hex().notNull().$type<NormalizedAddress>(),
+    logIndex: t.integer().notNull().$type<number>(),
+    selector: t.hex().notNull().$type<Hash>(),
+    topics: t.hex().array().notNull().$type<[Hash, ...Hash[]]>(),
+    data: t.hex().notNull(),
+  }),
+  (t) => ({
+    bySelector: index().on(t.selector),
+    byFrom: index().on(t.from),
+    bySender: index().on(t.sender),
+    byTimestamp: index().on(t.timestamp),
+  }),
+);
+
+export const domainEvent = onchainTable(
+  "domain_events",
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
+);
+
+export const resolverEvent = onchainTable(
+  "resolver_events",
+  (t) => ({
+    resolverId: t.text().notNull().$type<ResolverId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.resolverId, t.eventId] }) }),
+);
+
+export const permissionsEvent = onchainTable(
+  "permissions_events",
+  (t) => ({
+    permissionsId: t.text().notNull().$type<PermissionsId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.permissionsId, t.eventId] }) }),
+);
+
+export const permissionsUserEvent = onchainTable(
+  "permissions_user_events",
+  (t) => ({
+    permissionsUserId: t.text().notNull().$type<PermissionsUserId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.permissionsUserId, t.eventId] }) }),
+);
+
+///////////
+// Account
+///////////
+
+export const account = onchainTable("accounts", (t) => ({
+  id: t.hex().primaryKey().$type<NormalizedAddress>(),
+}));
+
+export const account_relations = relations(account, ({ many }) => ({
+  registrations: many(registration, { relationName: "registrant" }),
+  domains: many(domain),
+  permissions: many(permissionsUser),
+}));
+
+////////////
+// Registry
+////////////
+
+export const registryType = onchainEnum("RegistryType", [
+  "ENSv1Registry",
+  "ENSv1VirtualRegistry",
+  "ENSv2Registry",
+]);
+
+export const registry = onchainTable(
+  "registries",
+  (t) => ({
+    // see RegistryId for guarantees
+    id: t.text().primaryKey().$type<RegistryId>(),
+
+    // has a type
+    type: registryType().notNull(),
+
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
+
+    // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
+    // owns it, otherwise null.
+    node: t.hex().$type<Node>(),
+
+    // the Registry's declared Canonical Domain (uni-directional)
+    canonicalDomainId: t.text().$type<DomainId>(),
+
+    // Whether this Registry is part of the canonical nametree. See canonicality-db-helpers.ts.
+    canonical: t.boolean().notNull().default(false),
+
+    // Synthetic monotonic sentinel: flipped to true the first time a child Domain is registered
+    // under this Registry (see `ensureDomainInRegistry`). Read by `cascadeCanonicality` to skip
+    // the raw-SQL recursive-CTE walk (and its associated Ponder cache flush) when the start
+    // registry provably has no descendants — the dominant case for fresh ENSv1 virtual
+    // registries on first wire-up. Double-underscore prefix marks it as an internal-only
+    // bookkeeping field, not part of the on-chain protocol surface.
+    __hasChildren: t.boolean().notNull().default(false),
+  }),
+  (t) => ({
+    // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
+    byChainAddress: index().on(t.chainId, t.address),
+  }),
+);
+
+export const relations_registry = relations(registry, ({ one, many }) => ({
+  // domains that declare this registry as their parent registry
+  domains: many(domain, { relationName: "registry" }),
+  // domains that declare this registry as their subregistry
+  domainsAsSubregistry: many(domain, { relationName: "subregistry" }),
+  permissions: one(permissions, {
+    relationName: "permissions",
+    fields: [registry.chainId, registry.address],
+    references: [permissions.chainId, permissions.address],
+  }),
+}));
+
+///////////
+// Domains
+///////////
+
+/**
+ * Sentinel "+∞" sort value materialized into `Domain.__latestRegistrationStart` /
+ * `__latestRegistrationExpiry` when the value is absent — a Domain with no Registration, or a
+ * Registration that never expires. Holding those sort columns NOT NULL (absent → this sentinel)
+ * lets REGISTRATION_*-ordered find-domains queries use a plain `(registry_id, col, id)` composite
+ * index in both directions with a plain keyset tuple, with no NULL-placement special casing.
+ *
+ * @dev uint256 max — larger than every real timestamp/expiry, including the uint64-max ENSv2
+ * "never expires" expiry. It sorts last for ASC ("oldest"/"expiring soonest") and first for DESC.
+ */
+export const REGISTRATION_SORT_SENTINEL = 2n ** 256n - 1n;
+
+export const domainType = onchainEnum("DomainType", ["ENSv1Domain", "ENSv2Domain"]);
+
+/**
+ * Length cap (in code points) of the materialized `domain.__canonicalNamePrefix`. Sized for
+ * typeahead and left-anchored search; longer (invariably spam) names truncate here and tie-break
+ * by `id` in NAME ordering. Kept small to bound the prefix indexes.
+ */
+export const CANONICAL_NAME_PREFIX_LENGTH = 64;
+
+/**
+ * Truncate a Canonical Name to {@link CANONICAL_NAME_PREFIX_LENGTH} for `domain.__canonicalNamePrefix`.
+ * Uses code-point iteration so the JS-side prefix is byte-identical to Postgres `left(text, N)`
+ * (which counts code points), keeping the materialized column consistent across the JS and raw-SQL
+ * write paths in `canonicality-db-helpers.ts`.
+ */
+export function truncateCanonicalNamePrefix(name: Name | null): Name | null {
+  if (name === null) return null;
+  // iterate code points and stop at the cap rather than spreading the whole string, which can be
+  // thousands of code points for spam names on a hot path (indexer writes + cursor encoding)
+  let prefix = "";
+  let count = 0;
+  for (const codePoint of name) {
+    prefix += codePoint;
+    if (++count >= CANONICAL_NAME_PREFIX_LENGTH) break;
+  }
+  return prefix;
+}
+
+export const domain = onchainTable(
+  "domains",
+  (t) => ({
+    // see DomainId for guarantees (ENSv1DomainId: `${ENSv1RegistryId}/${node}`, ENSv2DomainId: CAIP-19)
+    id: t.text().primaryKey().$type<DomainId>(),
+
+    // has a type
+    type: domainType().notNull(),
+
+    // belongs to a registry
+    registryId: t.text().notNull().$type<RegistryId>(),
+
+    // the Domain's declared Subregistry (uni-directional)
+    subregistryId: t.text().$type<RegistryId>(),
+
+    // If this is an ENSv2Domain, the TokenId within the ENSv2Registry, otherwise null.
+    tokenId: t.bigint().$type<TokenId>(),
+
+    // If this is an ENSv1Domain, The Domain's namehash, otherwise null.
+    node: t.hex().$type<Node>(),
+
+    // represents a labelHash
+    labelHash: t.hex().notNull().$type<LabelHash>(),
+
+    // If this is an ENSv1Domain, this is the effective owner of the Domain.
+    // If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+    ownerId: t.hex().$type<NormalizedAddress>(),
+
+    // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
+    rootRegistryOwnerId: t.hex().$type<NormalizedAddress>(),
+
+    // Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag.
+    canonical: t.boolean().notNull().default(false),
+
+    /**
+     * Materialized Canonical Name, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @example "vitalik.eth"
+     */
+    canonicalName: t.text().$type<InterpretedName>(),
+
+    /**
+     * Materialized prefix of `canonicalName` (first {@link CANONICAL_NAME_PREFIX_LENGTH} code
+     * points), NULL iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`.
+     *
+     * Powers left-anchored / substring search (`__canonical_name_prefix LIKE 'vit%'`) and NAME
+     * ordering without `canonical_name`'s full-length btree size hazard. The `__` prefix marks it
+     * an internal implementation detail (mirrors `Registry.__hasChildren`); query `canonical_name`
+     * for exact matches and display.
+     *
+     * @example "vitalik.eth"
+     */
+    __canonicalNamePrefix: t.text("__canonical_name_prefix").$type<Name>(),
+
+    /**
+     * Materialized Canonical LabelHashPath, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev Note that LabelHashPaths are in traversal-order (i.e. [labelhash("eth"), labelhash("vitalik")]).
+     */
+    canonicalLabelHashPath: t.hex().array().$type<LabelHashPath>(),
+
+    /**
+     * Materialized Canonical Domain Path, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev Note that canonicalPath is in traversal-order (i.e. ["eth"'s DomainId, "vitalik"'s DomainId]).
+     */
+    canonicalPath: t.text().array().$type<DomainId[]>(),
+
+    /**
+     * Materialized Canonical Depth, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev The depth of this Domain in the Canonical Nametree i.e. the number of Labels in its Canonical Name.
+     * @example "eth" depth 1, "vitalik.eth" depth 2, etc
+     */
+    canonicalDepth: t.integer(),
+
+    /**
+     * Materialized Canonical Node, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev the computed Node (via `namehash`) of this Domain's Canonical Name.
+     */
+    canonicalNode: t.hex().$type<Node>(),
+
+    /**
+     * Materialized `start` of this Domain's latest Registration, or {@link REGISTRATION_SORT_SENTINEL}
+     * when the Domain has no Registration. Mirror of the latest `registration.start` (see
+     * `latestRegistrationIndex`), maintained inline by `registration-db-helpers.ts`.
+     *
+     * @dev Exists purely so REGISTRATION_TIMESTAMP-ordered find-domains queries can use the
+     * `(registry_id, __latest_registration_start, id)` composite index instead of joining through
+     * `latest_registration_indexes` → `registrations` and sorting. Held NOT NULL (absent → sentinel)
+     * so the keyset stays a plain tuple compare with no NULL-placement special casing; see
+     * find-domains-resolver-helpers.ts. Double-underscore prefix marks it as an internal
+     * materialized mirror, not part of the on-chain protocol surface; the canonical (possibly null)
+     * value lives on the Registration entity.
+     */
+    __latestRegistrationStart: t
+      .bigint("__latest_registration_start")
+      .notNull()
+      .default(REGISTRATION_SORT_SENTINEL),
+
+    /**
+     * Materialized `expiry` of this Domain's latest Registration, or {@link REGISTRATION_SORT_SENTINEL}
+     * when the Domain has no Registration or its latest Registration never expires (effectively +∞).
+     * Mirror of the latest `registration.expiry`, maintained inline by `registration-db-helpers.ts`.
+     *
+     * @dev See `__latestRegistrationStart`. Backs REGISTRATION_EXPIRY-ordered queries.
+     */
+    __latestRegistrationExpiry: t
+      .bigint("__latest_registration_expiry")
+      .notNull()
+      .default(REGISTRATION_SORT_SENTINEL),
+
+    // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
+  }),
+  (t) => ({
+    byType: index().on(t.type),
+    bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
+    byOwner: index().on(t.ownerId),
+    byLabelHash: index().on(t.labelHash),
+    // Composite for `(registry_id, label_hash)` lookups (namegraph walk in
+    // get-domain-by-interpreted-name.ts). The leading `registry_id` column also serves
+    // `WHERE registry_id = X` lookups via prefix scan.
+    byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
+
+    // composite for `WHERE registry_id = X ORDER BY __canonical_name_prefix LIMIT N` (Domain.subdomains
+    // and other find-domains queries when ordering by NAME). The length-capped prefix keeps the
+    // index tuple under btree's per-tuple max (~2712 bytes); 64 code points × max 4-byte UTF-8 =
+    // 256 bytes, leaving ample room for the registry_id and id columns.
+    byRegistryAndCanonicalNamePrefix: index().on(t.registryId, t.__canonicalNamePrefix, t.id),
+
+    // hash index avoids the btree 8191-byte row-size hazard for spam names
+    byCanonicalNameExact: index().using("hash", t.canonicalName),
+    // GIN trigram on the length-capped prefix for left-anchored (`LIKE 'vit%'`) and substring
+    // search (inline `gin_trgm_ops` via `sql` because passing it through `.op()` gets dropped by
+    // Ponder)
+    byCanonicalNamePrefixFuzzy: index().using("gin", sql`${t.__canonicalNamePrefix} gin_trgm_ops`),
+    // GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup
+    byCanonicalLabelHashPath: index().using("gin", t.canonicalLabelHashPath),
+    // hash index for resolver-record → canonical-domain joins
+    byCanonicalNode: index().using("hash", t.canonicalNode),
+    // btree for ORDER BY canonical_depth (typeahead and DEPTH-ordered browse)
+    byCanonicalDepth: index().on(t.canonicalDepth),
+
+    // Composites for `WHERE registry_id = X ORDER BY <latest registration value> LIMIT N`
+    // (REGISTRATION_TIMESTAMP / REGISTRATION_EXPIRY ordering in find-domains queries). The latest
+    // registration's start/expiry is mirrored onto the Domain row (see `__latestRegistration*`) so
+    // the order is an index-ordered scan, not a join through `latest_registration_indexes` →
+    // `registrations` followed by a sort. The columns are NOT NULL (absent → `REGISTRATION_SORT_SENTINEL`),
+    // so a single plain composite per column serves both ASC and DESC (forward / backward scan) with
+    // a plain keyset tuple — see find-domains-resolver-helpers.ts.
+    byRegistryAndLatestRegistrationStart: index().on(
+      t.registryId,
+      t.__latestRegistrationStart,
+      t.id,
+    ),
+    byRegistryAndLatestRegistrationExpiry: index().on(
+      t.registryId,
+      t.__latestRegistrationExpiry,
+      t.id,
+    ),
+  }),
+);
+
+export const relations_domain = relations(domain, ({ one, many }) => ({
+  registry: one(registry, {
+    relationName: "registry",
+    fields: [domain.registryId],
+    references: [registry.id],
+  }),
+  subregistry: one(registry, {
+    relationName: "subregistry",
+    fields: [domain.subregistryId],
+    references: [registry.id],
+  }),
+  owner: one(account, {
+    relationName: "owner",
+    fields: [domain.ownerId],
+    references: [account.id],
+  }),
+  rootRegistryOwner: one(account, {
+    relationName: "rootRegistryOwner",
+    fields: [domain.rootRegistryOwnerId],
+    references: [account.id],
+  }),
+  label: one(label, {
+    relationName: "label",
+    fields: [domain.labelHash],
+    references: [label.labelHash],
+  }),
+  registrations: many(registration),
+}));
+
+/////////////////
+// Registrations
+/////////////////
+
+export const registrationType = onchainEnum("RegistrationType", [
+  // TODO: prefix these with ENSv1, maybe excluding ThreeDNS
+  "NameWrapper",
+  "BaseRegistrar",
+  "ThreeDNS",
+  "ENSv2RegistryRegistration",
+  "ENSv2RegistryReservation",
+]);
+
+export const registration = onchainTable(
+  "registrations",
+  (t) => ({
+    // keyed by (domainId, registrationIndex)
+    id: t.text().primaryKey().$type<RegistrationId>(),
+
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull(),
+
+    // has a type
+    type: registrationType().notNull(),
+
+    // has a start
+    start: t.bigint().notNull(),
+
+    // may have an expiry
+    expiry: t.bigint(),
+
+    // may have a grace period (BaseRegistrar)
+    gracePeriod: t.bigint(),
+
+    // registrar AccountId
+    registrarChainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+    registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
+
+    // may reference a registrant. If this is an ENSv2 Registration, the protocol-emitted
+    // registrant address (the HCA account address if used).
+    registrantId: t.hex().$type<NormalizedAddress>(),
+
+    // may reference an unregistrant. If this is an ENSv2 Registration, the protocol-emitted
+    // unregistrant address (the HCA account address if used).
+    unregistrantId: t.hex().$type<NormalizedAddress>(),
+
+    // may have referrer data
+    referrer: t.hex().$type<EncodedReferrer>(),
+
+    // may have fuses (NameWrapper, Wrapped BaseRegistrar)
+    fuses: t.integer(),
+
+    // TODO(paymentToken): add payment token tracking here
+
+    // may have base cost (BaseRegistrar, ENSv2Registrar)
+    base: t.bigint(),
+
+    // may have a premium (BaseRegistrar)
+    premium: t.bigint(),
+
+    // may be Wrapped (BaseRegistrar)
+    wrapped: t.boolean().default(false),
+
+    // has an event
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex),
+  }),
+);
+
+export const registration_relations = relations(registration, ({ one, many }) => ({
+  // belongs to a domain
+  domain: one(domain, {
+    fields: [registration.domainId],
+    references: [domain.id],
+  }),
+
+  // has one registrant
+  registrant: one(account, {
+    fields: [registration.registrantId],
+    references: [account.id],
+    relationName: "registrant",
+  }),
+
+  // has a latest registration index
+  latestRegistrationIndex: one(latestRegistrationIndex),
+
+  // has a latest renewal index
+  latestRenewalIndex: one(latestRenewalIndex),
+
+  // has one unregistrant
+  unregistrant: one(account, {
+    fields: [registration.unregistrantId],
+    references: [account.id],
+    relationName: "unregistrant",
+  }),
+
+  // has many renewals
+  renewals: many(renewal),
+
+  // has an event
+  event: one(event, {
+    fields: [registration.eventId],
+    references: [event.id],
+  }),
+}));
+
+export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  registrationIndex: t.integer().notNull(),
+}));
+
+export const latestRegistrationIndex_relations = relations(latestRegistrationIndex, ({ one }) => ({
+  // references domain
+  domain: one(domain, {
+    fields: [latestRegistrationIndex.domainId],
+    references: [domain.id],
+  }),
+}));
+
+////////////
+// Renewals
+////////////
+
+export const renewal = onchainTable(
+  "renewals",
+  (t) => ({
+    // keyed by (registrationId, index)
+    id: t.text().primaryKey().$type<RenewalId>(),
+
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
+
+    // all renewals have a duration
+    duration: t.bigint().notNull(),
+
+    // may have a referrer
+    referrer: t.hex().$type<EncodedReferrer>(),
+
+    // TODO(paymentToken): add payment token tracking here
+
+    // may have base cost
+    base: t.bigint(),
+
+    // may have a premium (ENSv1 RegistrarControllers)
+    premium: t.bigint(),
+
+    // has an event
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.renewalIndex),
+  }),
+);
+
+export const renewal_relations = relations(renewal, ({ one }) => ({
+  // belongs to registration
+  registration: one(registration, {
+    fields: [renewal.domainId, renewal.registrationIndex],
+    references: [registration.domainId, registration.registrationIndex],
+  }),
+
+  // has an event
+  event: one(event, {
+    fields: [renewal.eventId],
+    references: [event.id],
+  }),
+}));
+
+export const latestRenewalIndex = onchainTable(
+  "latest_renewal_indexes",
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
+);
+
+export const latestRenewalIndex_relations = relations(latestRenewalIndex, ({ one }) => ({
+  // references domain
+  domain: one(domain, {
+    fields: [latestRenewalIndex.domainId],
+    references: [domain.id],
+  }),
+}));
+
+///////////////
+// Permissions
+///////////////
+
+export const permissions = onchainTable(
+  "permissions",
+  (t) => ({
+    id: t.text().primaryKey().$type<PermissionsId>(),
+
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.chainId, t.address),
+  }),
+);
+
+export const relations_permissions = relations(permissions, ({ many }) => ({
+  resources: many(permissionsResource),
+  users: many(permissionsUser),
+}));
+
+export const permissionsResource = onchainTable(
+  "permissions_resources",
+  (t) => ({
+    id: t.text().primaryKey().$type<PermissionsResourceId>(),
+
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
+    resource: t.bigint().notNull(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.chainId, t.address, t.resource),
+  }),
+);
+
+export const relations_permissionsResource = relations(permissionsResource, ({ one }) => ({
+  permissions: one(permissions, {
+    fields: [permissionsResource.chainId, permissionsResource.address],
+    references: [permissions.chainId, permissions.address],
+  }),
+}));
+
+export const permissionsUser = onchainTable(
+  "permissions_users",
+  (t) => ({
+    id: t.text().primaryKey().$type<PermissionsUserId>(),
+
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
+    resource: t.bigint().notNull(),
+    // The user/grantee address this Permission is granted to (the HCA account address if used).
+    user: t.hex().notNull().$type<NormalizedAddress>(),
+
+    // has one roles bitmap
+    roles: t.bigint().notNull(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.chainId, t.address, t.resource, t.user),
+  }),
+);
+
+export const relations_permissionsUser = relations(permissionsUser, ({ one }) => ({
+  account: one(account, {
+    fields: [permissionsUser.user],
+    references: [account.id],
+  }),
+  permissions: one(permissions, {
+    fields: [permissionsUser.chainId, permissionsUser.address],
+    references: [permissions.chainId, permissions.address],
+  }),
+  resource: one(permissionsResource, {
+    fields: [permissionsUser.chainId, permissionsUser.address, permissionsUser.resource],
+    references: [
+      permissionsResource.chainId,
+      permissionsResource.address,
+      permissionsResource.resource,
+    ],
+  }),
+}));
+
+//////////
+// Labels
+//////////
+
+export const label = onchainTable(
+  "labels",
+  (t) => ({
+    labelHash: t.hex().primaryKey().$type<LabelHash>(),
+    interpreted: t.text().notNull().$type<InterpretedLabel>(),
+  }),
+  (t) => ({
+    // hash index avoids the btree 8191-byte row-size hazard for spam labels (a single label can
+    // exceed btree's leaf-size limit)
+    byInterpretedExact: index().using("hash", t.interpreted),
+    // GIN trigram index for substring / similarity queries (inline `gin_trgm_ops` via `sql`
+    // because passing it through `.op()` gets dropped by Ponder)
+    byInterpretedFuzzy: index().using("gin", sql`${t.interpreted} gin_trgm_ops`),
+  }),
+);
+
+export const label_relations = relations(label, ({ many }) => ({
+  domains: many(domain),
+}));

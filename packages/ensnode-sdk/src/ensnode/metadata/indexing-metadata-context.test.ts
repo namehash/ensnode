@@ -46,10 +46,6 @@ function makeMinimalStackInfo() {
       namespace: "mainnet",
       clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
       ensIndexerSchemaName: "test_schema",
-      ensRainbowPublicConfig: {
-        serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-        versionInfo: { ensRainbow: "1.0.0" },
-      },
       indexedChainIds: new Set([1]),
       isSubgraphCompatible: true,
       plugins: ["subgraph"],

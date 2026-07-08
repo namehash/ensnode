@@ -52,11 +52,12 @@ if (Astro.locals.starlightRoute.entry) {
 }
 ---
 
-
-{fileExists && (
-  <div>
+{
+  fileExists && (
+    <div>
       <PageAuthors repo={REPO} file={filePath} />
-  </div>
-)}
+    </div>
+  )
+}
 
 <Default><slot /></Default>

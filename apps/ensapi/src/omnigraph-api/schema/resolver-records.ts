@@ -1,12 +1,12 @@
 import { bigintToCoinType, type ResolverRecordsId } from "enssdk";
 
-import { ensDb } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 
 export const ResolverRecordsRef = builder.loadableObjectRef("ResolverRecords", {
   load: (ids: ResolverRecordsId[]) =>
-    ensDb.query.resolverRecords.findMany({
+    di.context.ensDb.query.resolverRecords.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { textRecords: true, addressRecords: true },
     }),
@@ -43,10 +43,11 @@ ResolverRecordsRef.implement({
     ////////////////////////
     // ResolverRecords.name
     ////////////////////////
-    name: t.expose("name", {
+    name: t.field({
       description: "The `name` record for this `node`, if any.",
       type: "String",
       nullable: true,
+      resolve: (parent) => parent.name,
     }),
 
     ////////////////////////
@@ -69,8 +70,11 @@ ResolverRecordsRef.implement({
       resolve: (parent) =>
         parent.addressRecords
           .map((r) => r.coinType)
+          // @TODO(cointype-bigint): drop `bigintToCoinType` once resolverAddressRecord.coinType is CoinType. See #2293.
           .map(bigintToCoinType)
-          .toSorted(),
+          // numeric comparator: CoinTypes are numbers, so a bare toSorted() would order them
+          // lexicographically (e.g. [137, 60] instead of [60, 137])
+          .toSorted((a, b) => a - b),
     }),
   }),
 });

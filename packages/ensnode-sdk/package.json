@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "1.14.0",
+  "version": "1.16.0",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
@@ -19,8 +19,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./internal": "./src/internal.ts",
-    "./omnigraph-api/example-queries": "./src/omnigraph-api/example-queries.ts"
+    "./internal": "./src/internal.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -62,6 +61,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@ensnode/integration-test-env": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "tsup": "^8.3.6",

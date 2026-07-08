@@ -2,8 +2,9 @@ import { type Address, type Hex, namehash, toHex } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
-import { addresses, contracts, fixtures } from "@ensnode/datasources/devnet";
+import { contracts } from "@ensnode/datasources/devnet";
 
+import { addresses, contenthashFixtures, fixtures } from "../devnet/fixtures";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 import { waitForTransactionReceipt } from "./index";
 
@@ -24,22 +25,17 @@ async function seedResolverRecordsForName(
     );
   }
 
-  // Text records
-  await setTextRecord(clients.owner, resolver, node, "avatar", "https://example.com/avatar.png");
-  await setTextRecord(clients.owner, resolver, node, "com.twitter", "ensdomains");
-  await setTextRecord(clients.owner, resolver, node, "com.github", "ensdomains");
-  await setTextRecord(clients.owner, resolver, node, "url", "https://ens.domains");
-  await setTextRecord(clients.owner, resolver, node, "email", "test@ens.domains");
-  await setTextRecord(clients.owner, resolver, node, "description", "test.eth");
+  for (const record of Object.values(fixtures.textRecords)) {
+    await setTextRecord(clients.owner, resolver, node, record.key, record.value);
+  }
 
   // Multi-coin addresses
-  // Coin 0 = Bitcoin
-  await setMulticoinAddress(clients.owner, resolver, node, 0n, fixtures.bitcoinAddress);
-  // Coin 2 = Litecoin
-  await setMulticoinAddress(clients.owner, resolver, node, 2n, fixtures.litecoinAddress);
+  for (const coin of Object.values(fixtures.rawAddresses)) {
+    await setMulticoinAddress(clients.owner, resolver, node, BigInt(coin.coinType), coin.raw);
+  }
 
   // Scalar resolver records
-  await setContenthash(clients.owner, resolver, node, fixtures.contenthash);
+  await setContenthash(clients.owner, resolver, node, contenthashFixtures.ipfs.raw);
   await setPubkey(clients.owner, resolver, node, fixtures.publicKeyX, fixtures.publicKeyY);
   await setAbi(clients.owner, resolver, node, 1n, fixtures.abiBytes);
   await setInterfaceImplementer(
@@ -53,7 +49,7 @@ async function seedResolverRecordsForName(
 
 async function findResolver(client: DevnetWalletClient, name: string): Promise<Address> {
   const [resolver] = await client.readContract({
-    address: contracts.UniversalResolverV2,
+    address: contracts.UpgradableUniversalResolverProxy,
     abi: UniversalResolverABI,
     functionName: "findResolver",
     args: [toHex(packetToBytes(name))],
@@ -61,7 +57,7 @@ async function findResolver(client: DevnetWalletClient, name: string): Promise<A
   return resolver;
 }
 
-async function setTextRecord(
+export async function setTextRecord(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -78,7 +74,7 @@ async function setTextRecord(
   console.log(`[seed] setText("${key}", "${value}") tx: ${hash}`);
 }
 
-async function setMulticoinAddress(
+export async function setMulticoinAddress(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -95,7 +91,7 @@ async function setMulticoinAddress(
   console.log(`[seed] setAddr(coinType=${coinType}) tx: ${hash}`);
 }
 
-async function setContenthash(
+export async function setContenthash(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -108,7 +104,7 @@ async function setContenthash(
     args: [node, hashValue],
   });
   await waitForTransactionReceipt(walletClient, hash);
-  console.log(`[seed] setContenthash() tx: ${hash}`);
+  console.log(`[seed] setContenthash(${node}) tx: ${hash}`);
 }
 
 async function setPubkey(
@@ -128,7 +124,7 @@ async function setPubkey(
   console.log(`[seed] setPubkey() tx: ${hash}`);
 }
 
-async function setAbi(
+export async function setAbi(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,
@@ -145,7 +141,7 @@ async function setAbi(
   console.log(`[seed] setABI(contentType=${contentType}) tx: ${hash}`);
 }
 
-async function setInterfaceImplementer(
+export async function setInterfaceImplementer(
   walletClient: DevnetWalletClient,
   resolver: Address,
   node: Hex,

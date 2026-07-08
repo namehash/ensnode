@@ -1,10 +1,26 @@
+"""Execution status metadata for a resolver strategy."""
+type AccelerationStatus {
+  """Whether protocol acceleration was attempted at runtime."""
+  attempted: Boolean!
+
+  """Whether protocol acceleration was requested by the caller."""
+  requested: Boolean!
+}
+
 """Represents an individual Account, keyed by its Address."""
 type Account {
   """An EVM Address that uniquely identifies this Account on-chain."""
   address: Address!
 
-  """The Domains that are owned by the Account."""
+  """
+  The Domains that are owned by the Account. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection
+
+  """
+  This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
+  """
+  efp: AccountEfp
 
   """
   All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
@@ -15,12 +31,26 @@ type Account {
   id: Address!
 
   """
+  The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.
+  """
+  nameReferences(after: String, before: String, first: Int, last: Int, where: AccountNameReferencesWhereInput): AccountNameReferencesConnection
+
+  """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
   """
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
 
   """The Permissions on Registries granted to this Account."""
   registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
+
+  """Resolve primary names for this Account."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ReverseResolve!
 
   """The Permissions on Resolvers granted to this Account."""
   resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
@@ -46,9 +76,9 @@ type AccountDomainsConnectionEdge {
 """Filter for Account.domains query."""
 input AccountDomainsWhereInput {
   """
-  Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).
+  If set, filters the set of Domains by canonicality (i.e. reachability by ENS Forward Resolution): `true` for Canonical only, `false` for non-Canonical only. If omitted, returns all Domains owned by the Account regardless of canonicality.
   """
-  canonical: Boolean = false
+  canonical: Boolean
 
   """If set, filters the set of Domains by name."""
   name: DomainsNameFilter
@@ -57,6 +87,81 @@ input AccountDomainsWhereInput {
   If set, filters the set of Domains to only those of the specified ENS protocol version.
   """
   version: ENSProtocolVersion
+}
+
+"""An account's Ethereum Follow Protocol (EFP) presence."""
+type AccountEfp {
+  """
+  The accounts that follow this account: those whose validated primary EFP list holds this account as a non-`block`/`mute` record.
+  """
+  followers(after: String, before: String, first: Int, last: Int): AccountEfpFollowersConnection
+
+  """
+  The accounts this account follows: the address records in its validated primary EFP list, excluding `block`/`mute`-tagged records. Empty when the account has no validated primary list.
+  """
+  following(after: String, before: String, first: Int, last: Int): AccountEfpFollowingConnection
+
+  """
+  The EFP lists this account is the `user` of (the lists representing it).
+  """
+  lists(after: String, before: String, first: Int, last: Int): AccountEfpListsConnection
+
+  """
+  Get one of this account's EFP account-metadata values by key (e.g. "primary-list").
+  """
+  metadata(key: String!): EfpAccountMetadata
+
+  """All of this account's EFP account-metadata entries."""
+  metadatas(after: String, before: String, first: Int, last: Int): AccountEfpMetadatasConnection
+
+  """
+  The account's validated primary EFP list: the list named by its `primary-list` metadata, returned only if that list's `user` role matches the account (the EFP two-step Primary List validation). Null if unset or unvalidated.
+  """
+  primaryList: EfpList
+}
+
+type AccountEfpFollowersConnection {
+  edges: [AccountEfpFollowersConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpFollowersConnectionEdge {
+  cursor: String!
+  node: Account!
+}
+
+type AccountEfpFollowingConnection {
+  edges: [AccountEfpFollowingConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpFollowingConnectionEdge {
+  cursor: String!
+  node: Account!
+}
+
+type AccountEfpListsConnection {
+  edges: [AccountEfpListsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpListsConnectionEdge {
+  cursor: String!
+  node: EfpList!
+}
+
+type AccountEfpMetadatasConnection {
+  edges: [AccountEfpMetadatasConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEfpMetadatasConnectionEdge {
+  cursor: String!
+  node: EfpAccountMetadata!
 }
 
 type AccountEventsConnection {
@@ -98,6 +203,25 @@ type AccountId {
 input AccountIdInput {
   address: Address!
   chainId: ChainId!
+}
+
+type AccountNameReferencesConnection {
+  edges: [AccountNameReferencesConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountNameReferencesConnectionEdge {
+  cursor: String!
+  node: NameReference!
+}
+
+"""Filter for Account.nameReferences."""
+input AccountNameReferencesWhereInput {
+  """
+  If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.
+  """
+  coinType: CoinType
 }
 
 type AccountPermissionsConnection {
@@ -196,6 +320,11 @@ type BaseRegistrarRegistration implements Registration {
   start: BigInt!
 
   """
+  The TokenId for this Domain in the BaseRegistrar. This is the bigint encoding of the Domain's LabelHash.
+  """
+  tokenId: BigInt!
+
+  """
   The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
@@ -206,22 +335,82 @@ type BaseRegistrarRegistration implements Registration {
   wrapped: WrappedBaseRegistrarRegistration
 }
 
+"""
+BeautifiedLabel represents an enssdk#BeautifiedLabel: an InterpretedLabel beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a lookup key.
+"""
+scalar BeautifiedLabel
+
+"""
+BeautifiedName represents an enssdk#BeautifiedName: an InterpretedName whose normalized labels have been beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a navigation target or lookup key.
+"""
+scalar BeautifiedName
+
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
+"""
+BinanceAddress represents a Bech32-encoded Binance Chain (BNB) address (coin type 714).
+"""
+scalar BinanceAddress
+
+"""
+BitcoinAddress represents a Base58Check-encoded Bitcoin address (coin type 0).
+"""
+scalar BitcoinAddress
+
+"""
+BitcoinCashAddress represents a CashAddr-encoded Bitcoin Cash address (coin type 145).
+"""
+scalar BitcoinCashAddress
+
 """A Canonical Name, exposed in each representation we support."""
 type CanonicalName {
+  """
+  The Canonical Name as a BeautifiedName: the InterpretedName with its normalized labels beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. Encoded LabelHash labels are preserved verbatim. Display-only; use `interpreted` for navigation targets and lookup keys.
+  """
+  beautified: BeautifiedName!
+
   """
   The Canonical Name as an InterpretedName: each label is either a normalized literal Label or an Encoded LabelHash.
   """
   interpreted: InterpretedName!
 }
 
-"""ChainId represents a enssdk#ChainId."""
+"""ChainId represents an enssdk#ChainId."""
 scalar ChainId
 
-"""CoinType represents a enssdk#CoinType."""
+"""
+The names of chains that the Omnigraph API supports identifying by name as a syntactic convenience. The Omnigraph API supports identification of additional chains beyond this list, but those chains must be identified through other mechanisms such as `coinType` or `chainId`.
+"""
+enum ChainName {
+  ARBITRUM_ONE
+  BASE
+  ETHEREUM
+  LINEA
+  OPTIMISM
+  SCROLL
+}
+
+"""CoinType represents an enssdk#CoinType."""
 scalar CoinType
+
+"""
+The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+"""
+enum ContenthashProtocol {
+  ARWEAVE
+  IPFS
+  IPNS
+  ONION
+  ONION3
+  SKYNET
+  SWARM
+}
+
+"""
+DogecoinAddress represents a Base58Check-encoded Dogecoin address (coin type 3).
+"""
+scalar DogecoinAddress
 
 """
 Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
@@ -242,12 +431,12 @@ interface Domain {
   label: Label!
 
   """
-  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
   """
-  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
   """
   parent: Domain
 
@@ -257,14 +446,25 @@ interface Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
   registry: Registry!
+
+  """Resolve protocol-level data for this Domain."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ForwardResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendents of this Domain in the namegraph.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -306,7 +506,7 @@ type DomainEventsConnectionEdge {
   node: Event!
 }
 
-"""DomainId represents a enssdk#DomainId."""
+"""DomainId represents an enssdk#DomainId."""
 scalar DomainId
 
 """Reference a specific Domain."""
@@ -334,6 +534,43 @@ input DomainPermissionsWhereInput {
   user: DomainPermissionsUserFilter
 }
 
+"""The interpreted profile of an ENS name."""
+type DomainProfile {
+  """The interpreted addresses on the profile of an ENS name."""
+  addresses: ProfileAddresses
+
+  """
+  Interpreted avatar metadata. Returns null when the raw avatar record is unset or empty.
+  """
+  avatar: ProfileAvatar
+
+  """
+  The interpreted ENSIP-7 contenthash on the profile of an ENS name. Returns null when the raw contenthash record is unset, empty, or cannot be decoded (unknown codec or malformed bytes). See https://docs.ens.domains/ensip/7.
+  """
+  contenthash: ProfileContenthash
+
+  """
+  The interpreted description on the profile of an ENS name, or null when unset.
+  """
+  description: String
+
+  """
+  The interpreted email address on the profile of an ENS name, or null when unset or invalid.
+  """
+  email: Email
+
+  """
+  Interpreted header metadata. Returns null when the raw header record is unset or empty.
+  """
+  header: ProfileHeader
+
+  """The interpreted social accounts on the profile of an ENS name."""
+  socials: ProfileSocials
+
+  """The interpreted website on the profile of an ENS name."""
+  website: ProfileWebsite
+}
+
 type DomainRegistrationsConnection {
   edges: [DomainRegistrationsConnectionEdge!]!
   pageInfo: PageInfo!
@@ -351,6 +588,11 @@ type DomainResolver {
   The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
   """
   assigned: Resolver
+
+  """
+  The Resolver that ENS Forward Resolution (ENSIP-10) lands on for this Domain — i.e. its _effective_ Resolver. Null when no active Resolver exists or the Domain is not in the Canonical Nametree.
+  """
+  effective: Resolver
 }
 
 type DomainSubdomainsConnection {
@@ -379,16 +621,29 @@ input DomainsNameFilter @oneOf {
   in: [InterpretedName!]
 
   """
-  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).
+  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized). Matched against the first 64 code points of the name; prefixes longer than 64 code points never match.
   """
   starts_with: String
 }
 
-"""Fields by which domains can be ordered"""
+"""Fields by which domains can be ordered."""
 enum DomainsOrderBy {
+  """
+  Order by Canonical Name depth (number of labels); e.g. `eth` < `vitalik.eth`.
+  """
   DEPTH
+
+  """Order by the Domain's Canonical Name, alphabetically."""
   NAME
+
+  """
+  Order by the expiry of the Domain's latest Registration. A Domain that never expires (or has no Registration) is treated as +∞: it sorts last when `dir: ASC` (“expiring soonest first”) and first when `dir: DESC` (“expiring latest first”).
+  """
   REGISTRATION_EXPIRY
+
+  """
+  Order by the start time of the Domain's latest Registration. A Domain with no Registration has no timestamp and sorts last when `dir: ASC` (“oldest registered first”) and first when `dir: DESC` (“most recently registered first”).
+  """
   REGISTRATION_TIMESTAMP
 }
 
@@ -437,12 +692,12 @@ type ENSv1Domain implements Domain {
   node: Node!
 
   """
-  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
   """
-  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
   """
   parent: Domain
 
@@ -452,8 +707,19 @@ type ENSv1Domain implements Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
   registry: Registry!
+
+  """Resolve protocol-level data for this Domain."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ForwardResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
@@ -464,7 +730,7 @@ type ENSv1Domain implements Domain {
   rootRegistryOwner: Account
 
   """
-  All Domains that are direct descendents of this Domain in the namegraph.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -484,7 +750,9 @@ type ENSv1Registry implements Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
+  """
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
   """A unique reference to this Registry."""
@@ -509,7 +777,9 @@ type ENSv1VirtualRegistry implements Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
+  """
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
   """A unique reference to this Registry."""
@@ -544,12 +814,12 @@ type ENSv2Domain implements Domain {
   label: Label!
 
   """
-  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
   """
-  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
   """
   parent: Domain
 
@@ -564,14 +834,25 @@ type ENSv2Domain implements Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this Domain exists."""
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
   registry: Registry!
+
+  """Resolve protocol-level data for this Domain."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ForwardResolve!
 
   """Resolver relationship metadata for this Domain."""
   resolver: DomainResolver!
 
   """
-  All Domains that are direct descendents of this Domain in the namegraph.
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
@@ -603,7 +884,9 @@ type ENSv2Registry implements Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
+  """
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
   """A unique reference to this Registry."""
@@ -707,6 +990,194 @@ type ENSv2RegistryReservation implements Registration {
   """
   unregistrant: Account
 }
+
+"""
+An EFP `(address, key) -> value` account-metadata entry (e.g. "primary-list").
+"""
+type EfpAccountMetadata {
+  """The account this metadata belongs to."""
+  address: Address!
+
+  """The CAIP-10 account id of the AccountMetadata contract."""
+  contract: AccountId!
+
+  """When this metadata entry was first indexed (Unix timestamp, seconds)."""
+  createdAt: BigInt!
+  id: ID!
+
+  """The metadata key (UTF-8 string)."""
+  key: String!
+
+  """When this metadata entry was last updated (Unix timestamp, seconds)."""
+  updatedAt: BigInt!
+
+  """The metadata value (raw bytes)."""
+  value: Hex!
+}
+
+"""An EFP list NFT (a ListRegistry token) and the records it holds."""
+type EfpList {
+  """When this list was first indexed (Unix timestamp, seconds)."""
+  createdAt: BigInt!
+
+  """The address allowed to administer this list."""
+  manager: Address
+
+  """The list NFT's AccountId."""
+  nft: AccountId!
+
+  """The current ERC-721 owner of the list NFT."""
+  owner: Address!
+
+  """The records currently in this list (the addresses it follows)."""
+  records(after: String, before: String, first: Int, last: Int): EfpListRecordsConnection
+
+  """
+  The decoded onchain location of this list's records, or null if not known.
+  """
+  storageLocation: EfpListStorageLocation
+
+  """The ERC-721 TokenId of the list NFT."""
+  tokenId: TokenId!
+
+  """When this list was last updated (Unix timestamp, seconds)."""
+  updatedAt: BigInt!
+
+  """The address allowed to post records to this list."""
+  user: Address
+}
+
+"""Identify an EFP list by its NFT token id."""
+input EfpListByInput {
+  """The ERC-721 token id of the list NFT."""
+  tokenId: TokenId!
+}
+
+"""
+A single record within an EFP list (an address it follows), with its tags.
+"""
+type EfpListRecord {
+  """
+  The Account this record points to (its `recordData`). Always resolvable: an Account exists for any address (see `query.account`), so a record's target can always be walked into its ENS names and own EFP presence.
+  """
+  account: Account!
+
+  """
+  The CAIP-10 account id of the ListRecords contract holding this record.
+  """
+  contract: AccountId!
+
+  """When this record was first indexed (Unix timestamp, seconds)."""
+  createdAt: BigInt!
+  id: ID!
+
+  """The EFP list this record belongs to."""
+  list: EfpList
+
+  """
+  Canonical record bytes (version | type | address), 0x-prefixed (exactly 22 bytes), with any trailing junk after the 20-byte address truncated.
+  """
+  record: Hex!
+
+  """
+  The followed/target address (the record's 20-byte payload). EFP indexes only address records (recordType 1).
+  """
+  recordData: Address!
+
+  """The EFP record type (1 = address)."""
+  recordType: Int!
+
+  """The list's storage slot (bytes32) within the ListRecords contract."""
+  slot: Hex!
+
+  """UTF-8 tags attached to this record (e.g. "close-friend", "block")."""
+  tags: [String!]!
+}
+
+type EfpListRecordsConnection {
+  edges: [EfpListRecordsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpListRecordsConnectionEdge {
+  cursor: String!
+  node: EfpListRecord!
+}
+
+"""Filter EFP list records."""
+input EfpListRecordsWhereInput {
+  """
+  The target address of an address record (recordType 1). Filtering by this answers 'which lists follow this address?'.
+  """
+  recordData: Address
+
+  """The EFP record type (1 = address)."""
+  recordType: Int
+}
+
+"""
+The decoded onchain location of a list's records: a (chainId, ListRecords contract address, slot) tuple.
+"""
+type EfpListStorageLocation {
+  """The ListRecords contract address holding the list's records."""
+  address: Address!
+  chainId: ChainId!
+
+  """The list's storage slot (bytes32) within the ListRecords contract."""
+  slot: Hex!
+}
+
+"""Filter EFP lists by their owner, user, or manager address."""
+input EfpListsWhereInput {
+  """The address allowed to administer the list."""
+  manager: Address
+
+  """The ERC-721 owner of the list NFT."""
+  owner: Address
+
+  """The address allowed to post records."""
+  user: Address
+}
+
+"""Queries for Ethereum Follow Protocol (EFP) data."""
+type EfpQuery {
+  """Get an EFP list by its NFT token id."""
+  list(by: EfpListByInput!): EfpList
+
+  """
+  Find EFP list records. Filter by `recordData` to answer 'which lists follow this address?'.
+  """
+  listRecords(after: String, before: String, first: Int, last: Int, where: EfpListRecordsWhereInput): EfpQueryListRecordsConnection
+
+  """Find EFP lists, optionally filtered by owner / user / manager."""
+  lists(after: String, before: String, first: Int, last: Int, where: EfpListsWhereInput): EfpQueryListsConnection
+}
+
+type EfpQueryListRecordsConnection {
+  edges: [EfpQueryListRecordsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListRecordsConnectionEdge {
+  cursor: String!
+  node: EfpListRecord!
+}
+
+type EfpQueryListsConnection {
+  edges: [EfpQueryListsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EfpQueryListsConnectionEdge {
+  cursor: String!
+  node: EfpList!
+}
+
+"""Email represents a validated contact email address."""
+scalar Email
 
 """
 An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.
@@ -838,19 +1309,56 @@ input EventsWhereInput {
   timestamp: EventsTimestampFilter
 }
 
+"""
+Nested domain resolution container exposing resolved data for the domain.
+"""
+type ForwardResolve {
+  """
+  Whether protocol acceleration was requested and attempted for this resolution.
+  """
+  acceleration: AccelerationStatus!
+
+  """
+  The interpreted profile of an ENS name. Returns null when the name is not resolvable (non-canonical, unnormalized, or no profile records were selected).
+  """
+  profile: DomainProfile
+
+  """
+  Resolved ENS records via the ENS protocol. Null when the name is not resolvable (non-canonical, unnormalized, or no records field was selected).
+  """
+  records: ResolvedRecords
+
+  """
+  Protocol trace tree emitted by resolution, represented as untyped JSON for schema stability. This data model should be expected to experience breaking changes.
+  """
+  trace: JSON
+}
+
 """Hex represents viem#Hex."""
 scalar Hex
 
-"""InterpretedLabel represents a enssdk#InterpretedLabel."""
+"""InterfaceId represents an ERC-165 interface id (4-byte hex selector)."""
+scalar InterfaceId
+
+"""InterpretedLabel represents an enssdk#InterpretedLabel."""
 scalar InterpretedLabel
 
-"""InterpretedName represents a enssdk#InterpretedName."""
+"""InterpretedName represents an enssdk#InterpretedName."""
 scalar InterpretedName
+
+"""JSON represents arbitrary JSON-serializable data."""
+scalar JSON
 
 """
 Represents a Label within ENS, providing its hash and interpreted representation.
 """
 type Label {
+  """
+  The Label as a BeautifiedLabel: the Interpreted Label beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. An Encoded LabelHash is preserved verbatim. Display-only; use `interpreted` for lookup keys. 
+  (@see https://ensnode.io/docs/reference/terminology#interpreted-label)
+  """
+  beautified: BeautifiedLabel!
+
   """
   The Label's LabelHash
   (@see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function)
@@ -864,10 +1372,39 @@ type Label {
   interpreted: InterpretedLabel!
 }
 
+"""
+LitecoinAddress represents a Base58Check-encoded Litecoin address (coin type 2).
+"""
+scalar LitecoinAddress
+
+"""
+MonacoinAddress represents a Base58Check-encoded Monacoin address (coin type 22).
+"""
+scalar MonacoinAddress
+
 """Constructs a reference to a specific Node via one of `name` or `node`."""
 input NameOrNodeInput @oneOf {
   name: InterpretedName
   node: Node
+}
+
+"""A Name whose indexed `addr()` record points at an Account."""
+type NameReference {
+  """The CoinType of the matching `addr()` record."""
+  coinType: CoinType!
+
+  """
+  The canonical Domain whose `addr(coinType)` record points at this Account.
+  """
+  domain: Domain!
+
+  """
+  Whether this name is the ENSIP-19 Primary Name of this Account for this `coinType`. i.e. whether reverse resolution of `(address, coinType)` resolves to this exact name. Protocol Accelerated when supported.
+  """
+  match: Boolean!
+
+  """The Resolver holding the matching `addr()` record."""
+  resolver: Resolver!
 }
 
 """
@@ -919,7 +1456,7 @@ type NameWrapperRegistration implements Registration {
   unregistrant: Account
 }
 
-"""Node represents a enssdk#Node."""
+"""Node represents an enssdk#Node."""
 scalar Node
 
 """Sort direction"""
@@ -964,7 +1501,7 @@ type PermissionsEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsId represents a enssdk#PermissionsId."""
+"""PermissionsId represents an enssdk#PermissionsId."""
 scalar PermissionsId
 
 """Address Permissions by ID or AccountId."""
@@ -991,7 +1528,7 @@ type PermissionsResource {
   users(after: String, before: String, first: Int, last: Int): PermissionsResourceUsersConnection
 }
 
-"""PermissionsResourceId represents a enssdk#PermissionsResourceId."""
+"""PermissionsResourceId represents an enssdk#PermissionsResourceId."""
 scalar PermissionsResourceId
 
 type PermissionsResourceUsersConnection {
@@ -1050,27 +1587,211 @@ type PermissionsUserEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsUserId represents a enssdk#PermissionsUserId."""
+"""PermissionsUserId represents an enssdk#PermissionsUserId."""
 scalar PermissionsUserId
+
+"""
+Select a primary name lookup target. Exactly one of `coinType` or `chainName` must be provided.
+"""
+input PrimaryNameByInput @oneOf {
+  """A `ChainName` to resolve the primary name for."""
+  chainName: ChainName
+
+  """The ENSIP-9 coin type to resolve the primary name for."""
+  coinType: CoinType
+}
+
+"""An ENSIP-19 primary name for an Account on a specific coin type."""
+type PrimaryNameRecord {
+  """
+  The chain corresponding to `coinType`, or null when `coinType` is not represented in `ChainName`.
+  """
+  chainName: ChainName
+
+  """The canonical ENSIP-9 coin type for this primary name lookup."""
+  coinType: CoinType!
+
+  """
+  The validated primary name for this Account on this coin type, or null if none is set.
+  """
+  name: CanonicalName
+
+  """Forward resolve data for this primary name."""
+  resolve: ForwardResolve!
+}
+
+"""
+Filter primary name lookups. Exactly one of `coinTypes` or `chainNames` must be provided.
+"""
+input PrimaryNamesWhereInput @oneOf {
+  """`ChainName` values to resolve primary names for."""
+  chainNames: [ChainName!]
+
+  """Coin types to resolve primary names for."""
+  coinTypes: [CoinType!]
+}
+
+"""The interpreted addresses on the profile of an ENS name."""
+type ProfileAddresses {
+  """
+  The interpreted Base address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  base: Address
+
+  """
+  The interpreted Binance Chain (BNB) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  binance: BinanceAddress
+
+  """
+  The interpreted Bitcoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  bitcoin: BitcoinAddress
+
+  """
+  The interpreted Bitcoin Cash address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  bitcoincash: BitcoinCashAddress
+
+  """
+  The interpreted Dogecoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  dogecoin: DogecoinAddress
+
+  """
+  The interpreted Ethereum address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  ethereum: Address
+
+  """
+  The interpreted Litecoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  litecoin: LitecoinAddress
+
+  """
+  The interpreted Monacoin address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  monacoin: MonacoinAddress
+
+  """
+  The interpreted Ripple (XRP) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  ripple: RippleAddress
+
+  """
+  The interpreted Rootstock (RBTC) address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  rootstock: RootstockAddress
+
+  """
+  The interpreted Solana address. Returns null when the raw address record is unset, empty (`0x`), all-zero, not valid hex, or cannot be decoded and encoded for this coin type per ENSIP-9.
+  """
+  solana: SolanaAddress
+}
+
+"""The interpreted avatar image on the profile of an ENS name."""
+type ProfileAvatar {
+  """
+  HTTP-compatible URL for fetching the avatar image in web browsers. Abstraction over the raw avatar record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
+  """
+  httpUrl: String
+}
+
+"""The interpreted ENSIP-7 contenthash on the profile of an ENS name."""
+type ProfileContenthash {
+  """
+  The decoded, human-readable content identifier (e.g. a CID for IPFS, transaction ID for Arweave).
+  """
+  decoded: String!
+
+  """
+  The default public HTTP gateway URL for fetching this content in a browser (e.g. https://ipfs.io/ipfs/…). Null for protocols with no well-known public gateway (onion, skynet).
+  """
+  httpUrl: String
+
+  """
+  The ENSIP-7 contenthash protocol type (e.g. IPFS, IPNS, Swarm, Arweave).
+  """
+  protocolType: ContenthashProtocol!
+
+  """
+  The canonical protocol-native URI (e.g. "ipfs://bafy…", "ar://…", "bzz://…").
+  """
+  uri: String!
+}
+
+"""The interpreted header image on the profile of an ENS name."""
+type ProfileHeader {
+  """
+  HTTP-compatible URL for fetching the header image in web browsers. Abstraction over the raw header record (IPFS, CAIP NFT references, etc.). Returns null when the raw value is not a direct http(s) URL and no fallback URL can be derived (including when the ENS Metadata Service is unavailable for this namespace). See https://docs.ens.domains/ensip/12.
+  """
+  httpUrl: String
+}
+
+"""An interpreted social account on the profile of an ENS name."""
+type ProfileSocialAccount {
+  """The handle of the social account."""
+  handle: String!
+
+  """The HTTP-compatible url to the social account."""
+  httpUrl: String!
+}
+
+"""The interpreted social accounts on the profile of an ENS name."""
+type ProfileSocials {
+  """
+  The interpreted GitHub account. Returns null when the raw record is unset, empty, or cannot be parsed as a GitHub handle or profile URL.
+  """
+  github: ProfileSocialAccount
+
+  """
+  The interpreted Keybase account. Returns null when the raw record is unset, empty, or cannot be parsed as a Keybase handle or profile URL.
+  """
+  keybase: ProfileSocialAccount
+
+  """
+  The interpreted LinkedIn account. Returns null when the raw record is unset, empty, or cannot be parsed as a LinkedIn handle or profile URL.
+  """
+  linkedin: ProfileSocialAccount
+
+  """
+  The interpreted Telegram account. Returns null when the raw record is unset, empty, or cannot be parsed as a Telegram handle or profile URL.
+  """
+  telegram: ProfileSocialAccount
+
+  """
+  The interpreted X (Twitter) account. Returns null when the raw record is unset, empty, or cannot be parsed as a X (Twitter) handle or profile URL.
+  """
+  twitter: ProfileSocialAccount
+}
+
+"""The interpreted website on the profile of an ENS name."""
+type ProfileWebsite {
+  """
+  The HTTP-compatible website URL. Returns null when the raw url record is unset, empty, not an http(s) URL, or cannot be parsed as a valid URL.
+  """
+  httpUrl: String
+}
 
 type Query {
   """Identify an Account by ID or Address."""
   account(by: AccountByInput!): Account
 
-  """TODO"""
-  allDomains(after: String, before: String, first: Int, last: Int): QueryAllDomainsConnection
-
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
-  """Find Canonical Domains by Name."""
+  """
+  Find Canonical Domains by Name. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
+
+  """
+  Ethereum Follow Protocol (EFP) queries. Null when the connected ENSIndexer does not have the `efp` plugin enabled.
+  """
+  efp: EfpQuery
 
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions
-
-  """TODO"""
-  registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
 
   """
   Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
@@ -1080,24 +1801,10 @@ type Query {
   """Identify a Resolver by ID or AccountId."""
   resolver(by: ResolverIdInput!): Resolver
 
-  """TODO"""
-  resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
-
   """
-  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.
+  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.
   """
   root: Registry!
-}
-
-type QueryAllDomainsConnection {
-  edges: [QueryAllDomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryAllDomainsConnectionEdge {
-  cursor: String!
-  node: Domain!
 }
 
 type QueryDomainsConnection {
@@ -1109,28 +1816,6 @@ type QueryDomainsConnection {
 type QueryDomainsConnectionEdge {
   cursor: String!
   node: Domain!
-}
-
-type QueryRegistrationsConnection {
-  edges: [QueryRegistrationsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryRegistrationsConnectionEdge {
-  cursor: String!
-  node: Registration!
-}
-
-type QueryResolversConnection {
-  edges: [QueryResolversConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryResolversConnectionEdge {
-  cursor: String!
-  node: Resolver!
 }
 
 """
@@ -1179,7 +1864,7 @@ interface Registration {
   unregistrant: Account
 }
 
-"""RegistrationId represents a enssdk#RegistrationId."""
+"""RegistrationId represents an enssdk#RegistrationId."""
 scalar RegistrationId
 
 type RegistrationRenewalsConnection {
@@ -1205,7 +1890,9 @@ interface Registry {
   """
   contract: AccountId!
 
-  """The Domains managed by this Registry."""
+  """
+  The Domains managed by this Registry. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
 
   """A unique reference to this Registry."""
@@ -1235,7 +1922,7 @@ input RegistryDomainsWhereInput {
   name: DomainsNameFilter
 }
 
-"""RegistryId represents a enssdk#RegistryId."""
+"""RegistryId represents an enssdk#RegistryId."""
 scalar RegistryId
 
 """Address a Registry by ID or AccountId."""
@@ -1295,8 +1982,98 @@ type Renewal {
   referrer: Hex
 }
 
-"""RenewalId represents a enssdk#RenewalId."""
+"""RenewalId represents an enssdk#RenewalId."""
 scalar RenewalId
+
+"""A resolved ABI record for an ENS name."""
+type ResolvedAbiRecord {
+  contentType: BigInt!
+  data: Hex!
+}
+
+"""A resolved address record for an ENS name."""
+type ResolvedAddressRecord {
+  """
+  The "raw" resolved address record as hex, or null if not set, empty ("0x"), or zeroAddress. Decode with ENSIP-9 (https://docs.ens.domains/ensip/9) and address-encoder (https://github.com/ensdomains/address-encoder) for the associated coin type. Guaranteed to be at least one byte of hex data. There is no guarantee that an EVM CoinType returns an address value of any particular byte length.
+  """
+  address: Hex
+
+  """The coin type for this address record."""
+  coinType: CoinType!
+}
+
+"""A resolved ERC-165 interface implementer record for an ENS name."""
+type ResolvedInterfaceRecord {
+  implementer: Address
+  interfaceId: InterfaceId!
+}
+
+"""A resolved PubkeyResolver (x, y) pair for an ENS name."""
+type ResolvedPubkeyRecord {
+  x: Hex!
+  y: Hex!
+}
+
+"""
+A resolved 'raw' text record for an ENS name. Value is any possible string and may require additional validation or preprocessing before use.
+"""
+type ResolvedRawTextRecord {
+  """The text record key."""
+  key: String!
+
+  """
+  The 'raw' text record value, or null if not set. Value is any possible string and may require additional validation or preprocessing before use.
+  """
+  value: String
+}
+
+"""Records resolved for a specific ENS name via the ENS protocol."""
+type ResolvedRecords {
+  """
+  The first stored ABI matching the requested content-type bitmask, or null if not set.
+  """
+  abi(
+    """
+    Content-type bitmask; the resolver returns the first stored ABI whose bit is set (lowest bit first).
+    """
+    contentTypeMask: BigInt!
+  ): ResolvedAbiRecord
+
+  """Resolved address records for the requested coin types."""
+  addresses(
+    """Coin types to resolve (e.g. `60` for ETH)."""
+    coinTypes: [CoinType!]!
+  ): [ResolvedAddressRecord!]!
+
+  """The ENSIP-7 contenthash record raw bytes, or null if not set."""
+  contenthash: Hex
+
+  """The IDNSZoneResolver zonehash raw bytes, or null if not set."""
+  dnszonehash: Hex
+
+  """Resolved ERC-165 interface implementer records for the requested ids."""
+  interfaces(
+    """ERC-165 interface ids to resolve (4-byte hex selectors)."""
+    ids: [InterfaceId!]!
+  ): [ResolvedInterfaceRecord!]!
+
+  """The PubkeyResolver (x, y) pair, or null if not set."""
+  pubkey: ResolvedPubkeyRecord
+
+  """
+  The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set. To reduce a common point of developer confusion the Omnigraph API represents this as the `reverseName` rather than the `name` record which is what this field actually resolves to onchain.
+  """
+  reverseName: String
+
+  """Resolved text records for the requested keys."""
+  texts(
+    """Text record keys to resolve (e.g. `avatar`, `description`)."""
+    keys: [String!]!
+  ): [ResolvedRawTextRecord!]!
+
+  """The IVersionableResolver version, or null if not set or unavailable."""
+  version: BigInt
+}
 
 """A Resolver represents a Resolver contract on-chain."""
 type Resolver {
@@ -1310,6 +2087,11 @@ type Resolver {
 
   """All Events associated with this Resolver."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): ResolverEventsConnection
+
+  """
+  Whether this Resolver implements ENSIP-10 wildcard resolution (`IExtendedResolver`, interfaceId `0x9061b923`), determined via a single cached `supportsInterface` RPC the first time the Resolver is observed.
+  """
+  extended: Boolean!
 
   """A unique reference to this Resolver."""
   id: ResolverId!
@@ -1335,7 +2117,7 @@ type ResolverEventsConnectionEdge {
   node: Event!
 }
 
-"""ResolverId represents a enssdk#ResolverId."""
+"""ResolverId represents an enssdk#ResolverId."""
 scalar ResolverId
 
 """Address a Resolver by ID or AccountId."""
@@ -1392,8 +2174,52 @@ type ResolverRecordsConnectionEdge {
   node: ResolverRecords!
 }
 
-"""ResolverRecordsId represents a enssdk#ResolverRecordsId."""
+"""ResolverRecordsId represents an enssdk#ResolverRecordsId."""
 scalar ResolverRecordsId
+
+"""Nested account resolution container exposing primary name resolution."""
+type ReverseResolve {
+  """
+  Whether protocol acceleration was requested and attempted for this reverse resolution.
+  """
+  acceleration: AccelerationStatus!
+
+  """
+  The primary name for this Account on a specific coin type or chain name.
+  """
+  primaryName(
+    """Select a coin type or chain name to resolve a primary name for."""
+    by: PrimaryNameByInput!
+  ): PrimaryNameRecord!
+
+  """
+  Primary names for this Account on the requested coin types or chain names.
+  """
+  primaryNames(
+    """Select coin types or chain names to resolve primary names for."""
+    where: PrimaryNamesWhereInput!
+  ): [PrimaryNameRecord!]!
+
+  """
+  Protocol trace tree emitted by reverse resolution, represented as JSON for schema stability. This data model should be expected to experience breaking changes.
+  """
+  trace: JSON!
+}
+
+"""
+RippleAddress represents a Base58Check-encoded Ripple (XRP) address (coin type 144).
+"""
+scalar RippleAddress
+
+"""
+RootstockAddress represents an EIP-55 checksummed Rootstock (RBTC) address (coin type 137).
+"""
+scalar RootstockAddress
+
+"""
+SolanaAddress represents a Base58-encoded Solana address (coin type 501).
+"""
+scalar SolanaAddress
 
 """Filter for Domain.subdomains query."""
 input SubdomainsWhereInput {
@@ -1445,6 +2271,69 @@ type ThreeDNSRegistration implements Registration {
   unregistrant: Account
 }
 
+"""TokenId represents an enssdk#TokenId."""
+scalar TokenId
+
+"""
+A resolvable-but-unindexed Domain: not present in the index, but resolvable because an ancestor in its namegraph path has an ENSIP-10 wildcard Resolver (e.g. off-chain / CCIP-Read names, unindexed 3DNS names, wildcard subnames).
+"""
+type UnindexedDomain implements Domain {
+  """
+  Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
+  """
+  canonical: DomainCanonical
+
+  """All Events associated with this Domain."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+
+  """A unique and stable reference to this Domain."""
+  id: DomainId!
+
+  """The Label associated with this Domain in the ENS Namegraph."""
+  label: Label!
+
+  """
+  If this is an ENSv1Domain, this is the effective owner of the Domain (derived from the Registry, the Registrar, or the NameWrapper, in that order). If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  """
+  owner: Account
+
+  """
+  The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain. For an UnindexedDomain (which has no Registry of its own), this reflects the wildcard-bearing ancestor's Registry — see `Domain.registry`.
+  """
+  parent: Domain
+
+  """The latest Registration for this Domain, if exists."""
+  registration: Registration
+
+  """All Registrations for a Domain, including the latest Registration."""
+  registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
+
+  """
+  The Registry under which this Domain exists. For an UnindexedDomain — a resolvable-but-unindexed Domain that has no Registry of its own — this is instead the Registry that manages the ancestor Domain bearing the wildcard Resolver (the same Registry encoded in its `id`).
+  """
+  registry: Registry!
+
+  """Resolve protocol-level data for this Domain."""
+  resolve(
+    """
+    When true (default), Protocol Acceleration will be conditionally used by the server to perform resolution when it is relevant. If false, Protocol Acceleration will be disabled.
+    @see https://ensnode.io/docs/integrate/omnigraph/protocol-acceleration
+    """
+    accelerate: Boolean = true
+  ): ForwardResolve!
+
+  """Resolver relationship metadata for this Domain."""
+  resolver: DomainResolver!
+
+  """
+  All Domains that are direct descendants of this Domain in the namegraph. Ordered by the `order` argument (default: NAME, ASC). When ordering by REGISTRATION_TIMESTAMP or REGISTRATION_EXPIRY, Domains lacking that value — no Registration for REGISTRATION_TIMESTAMP; no Registration or a never-expiring one (treated as +∞) for REGISTRATION_EXPIRY — sort last when `dir: ASC` and first when `dir: DESC`.
+  """
+  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+
+  """The Registry this Domain declares as its Subregistry, if exists."""
+  subregistry: Registry
+}
+
 """
 Additional metadata for BaseRegistrar Registrations wrapped by the NameWrapper (i.e. in the case of a wrapped .eth name)
 """
@@ -1452,6 +2341,8 @@ type WrappedBaseRegistrarRegistration {
   """The Fuses for this Registration's Domain in the NameWrapper."""
   fuses: Int!
 
-  """The TokenID for this Domain in the NameWrapper."""
+  """
+  The TokenId for this Domain in the NameWrapper. This is the bigint encoding of the Domain's Node.
+  """
   tokenId: BigInt!
 }

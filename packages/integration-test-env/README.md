@@ -14,24 +14,47 @@ via the `docker/docker-compose.orchestrator.yml` file.
 
 ## How It Works
 
-The orchestrator runs a 6-phase pipeline:
+The lifecycle runs a 6-phase bring-up:
 
 1. **Postgres + Devnet** — started in parallel via testcontainers
-2. **ENSRainbow database** — downloads pre-built LevelDB, extracts, starts ENSRainbow from source
-3. **ENSIndexer** — starts from source, waits for health
-4. **Indexing** — polls until omnichain status reaches "Following" or "Completed"
-5. **ENSApi** — starts from source, waits for health
-6. **Integration tests** — runs `pnpm test:integration`
+2. **Seed devnet** — primary names and resolver records
+3. **ENSRainbow database** — downloads pre-built LevelDB, extracts, starts ENSRainbow from source
+4. **ENSIndexer** — starts from source, waits for health
+5. **Indexing** — polls until omnichain status reaches "Following" or "Completed"
+6. **ENSApi** — starts from source, waits for health
+
+Two entrypoints share that bring-up:
+
+- `pnpm start` — bring up the stack and wait for Ctrl+C. Use this when you want to point `pnpm test:integration` (or anything else) at a long-lived stack.
+- `pnpm start:ci` — bring up the stack, run `pnpm test:integration` at the monorepo root, then tear everything down (CI flow).
 
 ## Usage
 
-### Automated
+### Bring up the stack (manual)
 
 ```sh
 pnpm start
 ```
 
-Works both in CI and locally — just make sure the required ports are available (8545, 8000, 3223, 42069, 4334).
+Brings up the full stack and blocks until Ctrl+C. The required ports must be available (8545, 5433, 3223, 42069, 4334). Once it's up, run integration tests from another terminal (`test:integration` is a monorepo-root script):
+
+```sh
+pnpm test:integration
+```
+
+To bring up only a subset of services, pass `--only` with a comma-separated list (valid: `devnet`, `ensrainbow`, `ensindexer`, `ensapi`). Omitted services aren't started, so their ports aren't required:
+
+```sh
+pnpm start --only devnet,ensrainbow
+```
+
+### Full CI pipeline (bring up + tests + tear down)
+
+```sh
+pnpm start:ci
+```
+
+Works both in CI and locally — just make sure the required ports are available.
 
 ### Manual (local development)
 

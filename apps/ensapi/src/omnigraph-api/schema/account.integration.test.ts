@@ -1,7 +1,14 @@
-import type { InterpretedName } from "enssdk";
+import {
+  ETH_COIN_TYPE,
+  evmChainIdToCoinType,
+  type Hex,
+  type InterpretedName,
+  type UrlString,
+} from "enssdk";
+import { base } from "viem/chains";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts, fixtures, testEthTextRecords } from "@ensnode/integration-test-env/devnet";
 
 import {
   AccountDomainsPaginated,
@@ -310,5 +317,473 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);
+  });
+});
+
+describe("Account.primaryName and Account.primaryNames", () => {
+  const BASE_COIN_TYPE = evmChainIdToCoinType(base.id);
+
+  type CanonicalNameResult = {
+    interpreted: string;
+    beautified: string;
+  } | null;
+
+  type PrimaryNameRecordResult = {
+    coinType: number;
+    chainName: string | null;
+    name: CanonicalNameResult;
+    resolve?: {
+      records?: { addresses: Array<{ coinType: number; address: Hex | null }> } | null;
+      profile?: {
+        description: string | null;
+        avatar: { httpUrl: UrlString | null } | null;
+      } | null;
+    } | null;
+  };
+
+  const TEST_ETH_NAME: CanonicalNameResult = {
+    interpreted: "test.eth",
+    beautified: "test.eth",
+  };
+
+  type AccountPrimaryNameResult = {
+    account: {
+      resolve: {
+        primaryName: PrimaryNameRecordResult;
+      };
+    };
+  };
+
+  type AccountPrimaryNamesResult = {
+    account: {
+      resolve: {
+        primaryNames: PrimaryNameRecordResult[];
+      };
+    };
+  };
+
+  const AccountPrimaryNameByCoinType = gql`
+    query AccountPrimaryNameByCoinType($address: Address!, $coinType: CoinType!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: $coinType }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameByChain = gql`
+    query AccountPrimaryNameByChain($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { chainName: ETHEREUM }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByCoinTypes = gql`
+    query AccountPrimaryNamesByCoinTypes($address: Address!, $coinTypes: [CoinType!]!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryNames(where: { coinTypes: $coinTypes }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesByChains = gql`
+    query AccountPrimaryNamesByChains($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryNames(where: { chainNames: [ETHEREUM, BASE] }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameNonEnsip19 = gql`
+    query AccountPrimaryNameNonEnsip19($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 0 }) {
+            coinType
+            chainName
+            name { interpreted beautified }
+            resolve {
+              records {
+                addresses(coinTypes: [60]) { address }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedRecords = gql`
+    query AccountPrimaryNameChainedRecords($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              records {
+                addresses(coinTypes: [60]) { coinType address }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNameChainedProfile = gql`
+    query AccountPrimaryNameChainedProfile($address: Address!) {
+      account(by: { address: $address }) {
+        resolve {
+          primaryName(by: { coinType: 60 }) {
+            name { interpreted beautified }
+            resolve {
+              profile {
+                description
+                avatar { httpUrl }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  it("resolves primary name by coinType for owner on Ethereum", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
+        address: accounts.owner.address,
+        coinType: ETH_COIN_TYPE,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+        },
+      },
+    });
+  });
+
+  it("resolves the same primary name by chainName as by coinType", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByChain, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+        },
+      },
+    });
+  });
+
+  it("returns null for user without a primary name", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameByCoinType, {
+        address: accounts.user.address,
+        coinType: ETH_COIN_TYPE,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: null },
+        },
+      },
+    });
+  });
+
+  it("resolves primary names for requested coin types", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByCoinTypes, {
+        address: accounts.owner.address,
+        coinTypes: [ETH_COIN_TYPE, BASE_COIN_TYPE],
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryNames: [
+            { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+            { coinType: BASE_COIN_TYPE, chainName: "BASE", name: null },
+          ],
+        },
+      },
+    });
+  });
+
+  it("resolves primary names for requested chainNames", async () => {
+    await expect(
+      request<AccountPrimaryNamesResult>(AccountPrimaryNamesByChains, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryNames: [
+            { coinType: ETH_COIN_TYPE, chainName: "ETHEREUM", name: TEST_ETH_NAME },
+            { coinType: BASE_COIN_TYPE, chainName: "BASE", name: null },
+          ],
+        },
+      },
+    });
+  });
+
+  it("returns null name and chainName for non-ENSIP-19 coin types", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameNonEnsip19, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toEqual({
+      account: {
+        resolve: {
+          primaryName: {
+            coinType: 0,
+            chainName: null,
+            name: null,
+            resolve: {
+              records: null,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("chains forward resolution through primaryName.records", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedRecords, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              records: {
+                addresses: [{ coinType: ETH_COIN_TYPE, address: accounts.owner.address }],
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("chains forward resolution through primaryName.profile", async () => {
+    await expect(
+      request<AccountPrimaryNameResult>(AccountPrimaryNameChainedProfile, {
+        address: accounts.owner.address,
+      }),
+    ).resolves.toMatchObject({
+      account: {
+        resolve: {
+          primaryName: {
+            name: TEST_ETH_NAME,
+            resolve: {
+              profile: {
+                description: testEthTextRecords.description.value,
+                avatar: { httpUrl: testEthTextRecords.avatar.value },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("rejects empty coinTypes at GraphQL validation", async () => {
+    await expect(
+      request(AccountPrimaryNamesByCoinTypes, {
+        address: accounts.owner.address,
+        coinTypes: [],
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects empty chainNames at GraphQL validation", async () => {
+    await expect(
+      request(
+        gql`
+          query AccountPrimaryNamesEmptyChainNames($address: Address!) {
+            account(by: { address: $address }) {
+              resolve {
+                primaryNames(where: { chainNames: [] }) { coinType }
+              }
+            }
+          }
+        `,
+        { address: accounts.owner.address },
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("does not null-propagate Account when only acceleration is queried (no primaryName selected)", async () => {
+    await expect(
+      request<{ account: { id: string; resolve: { acceleration: { requested: boolean } } } }>(
+        gql`
+          query AccountResolveAccelerationOnly($address: Address!) {
+            account(by: { address: $address }) {
+              id
+              resolve {
+                acceleration { requested }
+              }
+            }
+          }
+        `,
+        { address: accounts.owner.address },
+      ),
+    ).resolves.toMatchObject({
+      account: {
+        id: accounts.owner.address,
+        resolve: { acceleration: { requested: true } },
+      },
+    });
+  });
+});
+
+describe("Query.account (unindexed)", () => {
+  const AccountByAddress = gql`
+    query AccountByAddress($address: Address!) {
+      account(by: { address: $address }) {
+        id
+        address
+        domains { edges { node { id } } }
+      }
+    }
+  `;
+
+  it("returns a virtualized Account for an unindexed Address", async () => {
+    // an Address the indexer has never seen — Reverse Resolution is keyed by address and works
+    // regardless of whether the Account is indexed, so Query.account must not null-propagate.
+    const address = "0x00000000000000000000000000000000deadbeef";
+
+    const result = await request<{
+      account: { id: string; address: string; domains: GraphQLConnection<{ id: string }> } | null;
+    }>(AccountByAddress, { address });
+
+    expect(result.account).not.toBeNull();
+    expect(result.account?.id).toBe(address);
+    expect(result.account?.address).toBe(address);
+    // a synthesized Account owns no indexed Domains
+    expect(flattenConnection(result.account!.domains)).toHaveLength(0);
+  });
+});
+
+describe("Account.nameReferences", () => {
+  // `test.eth` (owned by `owner`) is seeded with a `rootstock` (rbtc) addr() record pointing at an
+  // EVM-shaped address — see `seedResolverRecords` / `fixtures.rawAddresses.rootstock`.
+  const { rootstock } = fixtures.rawAddresses;
+
+  type NameReferenceNode = {
+    domain: { canonical: { name: { interpreted: InterpretedName } } | null };
+    coinType: number;
+    resolver: { contract: { chainId: number; address: Hex } };
+    match: boolean;
+  };
+  type NameReferencesResult = {
+    account: { nameReferences: GraphQLConnection<NameReferenceNode> };
+  };
+
+  const NameReferences = gql`
+    query NameReferences($address: Address!, $coinType: CoinType) {
+      account(by: { address: $address }) {
+        nameReferences(where: { coinType: $coinType }) {
+          edges {
+            node {
+              domain { canonical { name { interpreted } } }
+              coinType
+              resolver { contract { chainId address } }
+              match
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  it("returns names whose addr() record points at the address, scoped to a coinType", async () => {
+    const result = await request<NameReferencesResult>(NameReferences, {
+      address: rootstock.address,
+      coinType: rootstock.coinType,
+    });
+    const refs = flattenConnection(result.account.nameReferences);
+
+    const testEth = refs.find((r) => r.domain.canonical?.name.interpreted === "test.eth");
+    expect(testEth, "expected 'test.eth' to reference the rootstock address").toBeDefined();
+    expect(testEth?.coinType).toBe(rootstock.coinType);
+    expect(testEth?.resolver.contract.address).toBeDefined();
+    // no ENSIP-19 reverse record is seeded for the rootstock address, so it is not a `match`
+    expect(testEth?.match).toBe(false);
+  });
+
+  it("reports match: true when the name is the account's ENSIP-19 Primary Name", async () => {
+    // `owner` set their Primary Name to `test.eth` (ETHReverseRegistrar), and `test.eth` has an
+    // indexed addr(60) record pointing back at `owner` — so reverse resolution of `(owner, ETH)`
+    // resolves to `test.eth` (forward-verified), making this NameReference a `match`.
+    const result = await request<NameReferencesResult>(NameReferences, {
+      address: accounts.owner.address,
+      coinType: ETH_COIN_TYPE,
+    });
+    const refs = flattenConnection(result.account.nameReferences);
+
+    const testEth = refs.find((r) => r.domain.canonical?.name.interpreted === "test.eth");
+    expect(testEth, "expected 'test.eth' to reference owner's address via addr(60)").toBeDefined();
+    expect(testEth?.coinType).toBe(ETH_COIN_TYPE);
+    expect(testEth?.match).toBe(true);
+  });
+
+  it("scopes matches to the requested coinType", async () => {
+    // `test.eth` has no ETH (coinType 60) addr() record pointing at the rootstock address
+    const result = await request<NameReferencesResult>(NameReferences, {
+      address: rootstock.address,
+      coinType: ETH_COIN_TYPE,
+    });
+    const names = flattenConnection(result.account.nameReferences).map(
+      (r) => r.domain.canonical?.name.interpreted,
+    );
+    expect(names).not.toContain("test.eth");
+  });
+
+  it("returns matches across all coinTypes when `where` is omitted", async () => {
+    const AllNameReferences = gql`
+      query AllNameReferences($address: Address!) {
+        account(by: { address: $address }) {
+          nameReferences {
+            edges { node { domain { canonical { name { interpreted } } } } }
+          }
+        }
+      }
+    `;
+    const result = await request<NameReferencesResult>(AllNameReferences, {
+      address: rootstock.address,
+    });
+    const names = flattenConnection(result.account.nameReferences).map(
+      (r) => r.domain.canonical?.name.interpreted,
+    );
+    expect(names).toContain("test.eth");
   });
 });

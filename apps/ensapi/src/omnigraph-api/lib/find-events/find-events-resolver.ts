@@ -15,7 +15,7 @@ import {
 } from "drizzle-orm";
 import type { Address, Hex } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
@@ -24,10 +24,10 @@ import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
  * A join table that relates some entity to events via an `eventId` column.
  */
 type EventJoinTable =
-  | typeof ensIndexerSchema.domainEvent
-  | typeof ensIndexerSchema.resolverEvent
-  | typeof ensIndexerSchema.permissionsEvent
-  | typeof ensIndexerSchema.permissionsUserEvent;
+  | typeof di.context.ensIndexerSchema.domainEvent
+  | typeof di.context.ensIndexerSchema.resolverEvent
+  | typeof di.context.ensIndexerSchema.permissionsEvent
+  | typeof di.context.ensIndexerSchema.permissionsUserEvent;
 
 /**
  * @oneOf set-membership filter shape: exactly one of `eq` or `in` is set.
@@ -85,6 +85,8 @@ function rangeFilterCondition<T>(
 function eventsWhereConditions(where?: EventsWhere | null): SQL | undefined {
   if (!where) return undefined;
 
+  const { ensIndexerSchema } = di.context;
+
   return and(
     setFilterCondition(ensIndexerSchema.event.selector, where.selector),
     rangeFilterCondition(ensIndexerSchema.event.timestamp, where.timestamp),
@@ -125,6 +127,7 @@ export function resolveFindEvents(
 
   return lazyConnection({
     totalCount: () => {
+      const { ensDb, ensIndexerSchema } = di.context;
       // note: not possible to dynamically change the .select() columns so we make a new query
       let query = ensDb.select({ count: count() }).from(ensIndexerSchema.event).$dynamic();
       if (through) {
@@ -143,6 +146,7 @@ export function resolveFindEvents(
           args,
         },
         ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+          const { ensDb, ensIndexerSchema } = di.context;
           // note: not possible to dynamically change the .select() columns so we make a new query
           let query = ensDb
             .select(getTableColumns(ensIndexerSchema.event))

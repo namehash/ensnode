@@ -3,22 +3,22 @@
   --font-primary: "Inter", sans-serif;
 
   /* Brand Colors */
-  --color-primary: #0080bc;
-  --color-primary-light: #cee1e8;
-  --color-primary-dark: #093c52;
+  --color-primary: #2563eb;
+  --color-primary-light: #9eb5e8;
+  --color-primary-dark: #1e40af;
 
   /* Neutral Colors */
   --color-background: #fff;
   --color-surface: #011a25;
   --color-border-light: #e5e5e5;
   --color-border: #c4c7c8;
-  --color-text-primary: #4a5c63;
+  --color-text-primary: #3f4140;
   --color-text-secondary: #c4c7c8;
 
   /* Status Colors */
-  --color-blue: #0080bc;
-  --color-blue-light: #cee1e8;
-  --color-blue-dark: #093c52;
+  --color-blue: #2563eb;
+  --color-blue-light: #9eb5e8;
+  --color-blue-dark: #1e40af;
   --color-orange: #673d49;
   --color-orange-light: #f8f6d6;
   --color-purple: #f53293;
@@ -96,8 +96,27 @@ div.header {
   }
 }
 
-.dialog-frame button {
-  visibility: hidden;
+.dialog-frame button.pagefind-ui__search-clear {
+  display: none;
+}
+
+.dialog-frame > button {
+  @media (min-width: 50rem) {
+    display: none;
+  }
+
+  border-radius: 8px;
+  background-color: black;
+  color: white;
+  padding: 6px 10px;
+  line-height: normal;
+  font-size: 16px;
+  height: fit-content;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #272727;
+  }
 }
 
 /* Home page search dialog styles */

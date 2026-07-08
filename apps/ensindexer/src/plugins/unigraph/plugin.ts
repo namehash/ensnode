@@ -17,6 +17,7 @@ import {
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
+  blockrangeForChain,
   chainConfigForContract,
   chainsConnectionConfigForDatasources,
   constrainBlockrange,
@@ -73,7 +74,7 @@ export default createPlugin({
             (memo, datasource) => ({
               ...memo,
               ...chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 datasource.chain.id,
                 datasource.contracts.Registry,
               ),
@@ -91,7 +92,7 @@ export default createPlugin({
             (memo, datasource) => ({
               ...memo,
               ...chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 datasource.chain.id,
                 datasource.contracts.EnhancedAccessControl,
               ),
@@ -108,7 +109,7 @@ export default createPlugin({
           chain: {
             ...(ENSv2Root &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 ENSv2Root.chain.id,
                 ENSv2Root.contracts.ETHRegistrar,
               )),
@@ -122,7 +123,7 @@ export default createPlugin({
           abi: ensroot.contracts.ENSv1RegistryOld.abi,
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.ENSv1RegistryOld,
             ),
@@ -140,21 +141,21 @@ export default createPlugin({
           chain: {
             // ENS Root Chain Registry
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.ENSv1Registry,
             ),
             // Basenames (shadow)Registry if defined
             ...(basenames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 basenames.chain.id,
                 basenames.contracts.Registry,
               )),
             // Lineanames (shadow)Registry if defined
             ...(lineanames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 lineanames.chain.id,
                 lineanames.contracts.Registry,
               )),
@@ -171,14 +172,14 @@ export default createPlugin({
           chain: {
             // ENS Root Chain NameWrapper
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.NameWrapper,
             ),
             // Lineanames NameWrapper if defined
             ...(lineanames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 lineanames.chain.id,
                 lineanames.contracts.NameWrapper,
               )),
@@ -193,21 +194,21 @@ export default createPlugin({
           chain: {
             // Ethnames BaseRegistrar
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.BaseRegistrar,
             ),
             // Basenames BaseRegistrar, if defined
             ...(basenames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 basenames.chain.id,
                 basenames.contracts.BaseRegistrar,
               )),
             // Lineanames BaseRegistrar, if defined
             ...(lineanames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 lineanames.chain.id,
                 lineanames.contracts.BaseRegistrar,
               )),
@@ -224,7 +225,7 @@ export default createPlugin({
             // Ethnames Registrar Controllers
             ///////////////////////////////////
             ...mergedChainConfigForContracts(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               pickContracts(ensroot.contracts, [
                 "LegacyEthRegistrarController",
@@ -238,7 +239,7 @@ export default createPlugin({
             ///////////////////////////////////
             ...(basenames &&
               mergedChainConfigForContracts(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 basenames.chain.id,
                 pickContracts(basenames.contracts, [
                   "EARegistrarController",
@@ -252,7 +253,7 @@ export default createPlugin({
             ////////////////////////////////////
             ...(lineanames &&
               mergedChainConfigForContracts(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 lineanames.chain.id,
                 pickContracts(lineanames.contracts, ["EthRegistrarController"]),
               )),
@@ -268,7 +269,7 @@ export default createPlugin({
             (memo, datasource) => ({
               ...memo,
               [datasource.chain.id.toString()]: constrainBlockrange(
-                config.globalBlockrange,
+                blockrangeForChain(config.chainEndBlocks, datasource.chain.id),
                 buildBlockNumberRange(
                   datasource.contracts.Resolver.startBlock,
                   datasource.contracts.Resolver.endBlock,

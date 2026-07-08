@@ -1,34 +1,34 @@
-import { OmnigraphProvider } from "enskit/react/omnigraph";
-import { createEnsNodeClient } from "enssdk/core";
-import { omnigraph } from "enssdk/omnigraph";
 import { StrictMode } from "react";
-import { HashRouter, Link, Outlet, Route, Routes } from "react-router";
+import { HashRouter, Link, Outlet, Route, Routes, useParams } from "react-router";
 
 import { AccountView } from "./AccountView";
-import { DomainView } from "./DomainView";
+import { accountPath, domainNamePath, useAppPath } from "./app-paths";
+import { DomainByIdView, DomainByNameView } from "./DomainView";
+import {
+  EnsnodeInstanceProvider,
+  InstanceSelector,
+  useEnsnodeInstance,
+} from "./EnsnodeInstanceProvider";
+import { NamegraphRootRedirect, NamegraphView } from "./NamegraphView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
 
-const EXAMPLE_ACCOUNT_ADDRESS = "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574";
-
-// you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
-const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
-
-console.log(`Connecting to ENSNode at ${ENSNODE_URL}`);
-
-/**
- * Constructs an EnsNodeClient and extends it with the Omnigraph module, for use with `enskit`.
- */
-const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
-
 function Layout() {
+  const { constants } = useEnsnodeInstance();
+  const appPath = useAppPath();
+
   return (
     <>
+      <p>
+        <InstanceSelector />
+      </p>
       <nav>
-        <Link to="/">Home</Link> | <Link to="/domain/eth">Domain Browser</Link> |{" "}
-        <Link to={`/account/${EXAMPLE_ACCOUNT_ADDRESS}`}>Account Browser</Link> |{" "}
-        <Link to="/registry">Registry Cache Demo</Link> | <Link to="/search">Search Demo</Link>
+        <Link to={appPath("/")}>Home</Link> |{" "}
+        <Link to={appPath(domainNamePath(constants.defaultDomainName))}>Domain Browser</Link> |{" "}
+        <Link to={appPath(accountPath(constants.defaultAddress))}>Account Browser</Link> |{" "}
+        <Link to={appPath("/registry")}>Registry Cache Demo</Link> |{" "}
+        <Link to={appPath("/search")}>Search Demo</Link> |{" "}
+        <Link to={appPath("/namegraph")}>Namegraph Explorer</Link>
       </nav>
       <hr />
       <Outlet />
@@ -36,11 +36,32 @@ function Layout() {
   );
 }
 
+/**
+ * Reads `:registryId` and renders the explorer keyed by it, so navigating
+ * between registries fully re-initializes the underlying file-tree model.
+ */
+function NamegraphRoute() {
+  const { registryId } = useParams<{ registryId: string }>();
+  const { ensnodeUrl } = useEnsnodeInstance();
+  if (!registryId) return <NamegraphRootRedirect />;
+  return <NamegraphView key={`${ensnodeUrl}:${registryId}`} registryId={registryId} />;
+}
+
 function Home() {
+  const { ensnodeUrl, instanceSelectionDisabled } = useEnsnodeInstance();
+
   return (
     <div>
       <p>Welcome — pick a demo above.</p>
-      <p>Connected to ENSNode at {ENSNODE_URL}</p>
+      <p>Connected to ENSNode at {ensnodeUrl}</p>
+      {instanceSelectionDisabled ? (
+        <p>
+          Instance selection is disabled because <code>VITE_ENSNODE_URL</code> is set in the
+          environment.
+        </p>
+      ) : (
+        <p>Use the ENSNode instance selector in the header to switch between hosted instances.</p>
+      )}
     </div>
   );
 }
@@ -48,22 +69,26 @@ function Home() {
 export function App() {
   return (
     <StrictMode>
-      <OmnigraphProvider client={client}>
-        <h1>
-          <code>enskit</code> Example App
-        </h1>
-        <HashRouter>
+      <HashRouter>
+        <EnsnodeInstanceProvider>
+          <h1>
+            <code>enskit</code> Example App
+          </h1>
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/domain/:name" element={<DomainView />} />
+              <Route path="/domain/name/:name" element={<DomainByNameView />} />
+              <Route path="/domain/id/:id" element={<DomainByIdView />} />
               <Route path="/account/:address" element={<AccountView />} />
               <Route path="/search" element={<SearchView />} />
               <Route path="/registry" element={<RegistryView />} />
+              <Route path="/namegraph" element={<NamegraphRootRedirect />} />
+              {/* keyed by registryId so the tree re-initializes for each registry */}
+              <Route path="/namegraph/:registryId" element={<NamegraphRoute />} />
             </Route>
           </Routes>
-        </HashRouter>
-      </OmnigraphProvider>
+        </EnsnodeInstanceProvider>
+      </HashRouter>
     </StrictMode>
   );
 }

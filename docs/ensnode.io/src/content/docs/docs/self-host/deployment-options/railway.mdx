@@ -1,0 +1,31 @@
+---
+title: Deploying ENSNode to Railway
+sidebar:
+  label: Railway
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+This guide provides an example of deploying your own ENSNode to [Railway](https://railway.app/), a popular cloud hosting provider. It uses the [Railway Templates](https://docs.railway.app/templates) approach, which allows you to apply a pre-configured infrastructure template to your Railway project with a single click.
+
+## Available Templates
+
+### ENSNode Alpha-Sepolia Quickstart Template
+
+This template deploys an ENSNode instance configured for the `sepolia` ENS Namespace. It is ideal for testing and development purposes, allowing you to quickly validate your configuration and experiment with ENSNode without the resource demands of indexing mainnet data.
+
+<LinkCard
+  title="Deploy ENSNode Alpha-Sepolia on Railway"
+  description="Start experimenting with your own ENSNode deployment quickly."
+  href="https://railway.com/deploy/ensnode-alpha-sepolia-quickstart"
+/>
+
+### ENSNode Alpha Quickstart Template
+
+This template deploys an ENSNode instance configured for the `mainnet` ENS Namespace. It is suitable for production use, but keep in mind that indexing mainnet data requires more resources and may take longer to complete the initial backfill.
+
+<LinkCard
+  title="Deploy ENSNode Alpha on Railway"
+  description="Explore a production-ready ENSNode deployment on Railway."
+  href="https://railway.com/deploy/ensnode-alpha-quickstart"
+/>

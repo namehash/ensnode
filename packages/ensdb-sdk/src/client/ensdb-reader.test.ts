@@ -16,7 +16,12 @@ const executeMock = vi.fn();
 const whereMock = vi.fn(async () => [] as Array<{ value: unknown }>);
 const fromMock = vi.fn(() => ({ where: whereMock }));
 const selectMock = vi.fn(() => ({ from: fromMock }));
-const drizzleClientMock = { select: selectMock, execute: executeMock } as any;
+const endMock = vi.fn().mockResolvedValue(undefined);
+const drizzleClientMock = {
+  select: selectMock,
+  execute: executeMock,
+  $client: { end: endMock },
+} as any;
 
 vi.mock("drizzle-orm/node-postgres", () => ({
   drizzle: vi.fn(() => drizzleClientMock),
@@ -35,6 +40,7 @@ describe("EnsDbReader", () => {
     fromMock.mockClear();
     selectMock.mockClear();
     executeMock.mockClear();
+    endMock.mockClear();
   });
 
   describe("getters", () => {
@@ -125,6 +131,10 @@ describe("EnsDbReader", () => {
   });
 
   describe("isReady", () => {
+    beforeEach(() => {
+      executeMock.mockResolvedValue({ rows: [{ exists: true }] });
+    });
+
     it("returns true when indexing metadata context is initialized", async () => {
       const indexingStatus = deserializeCrossChainIndexingStatusSnapshot(
         ensDbClientMock.serializedSnapshot,
@@ -151,6 +161,32 @@ describe("EnsDbReader", () => {
     });
 
     it("returns false when indexing metadata context is uninitialized", async () => {
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when the ENSNode schema does not exist", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [{ exists: false }] });
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when the ENSIndexer schema does not exist", async () => {
+      executeMock
+        .mockResolvedValueOnce({ rows: [{ exists: true }] })
+        .mockResolvedValueOnce({ rows: [{ exists: false }] });
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when schema existence check fails", async () => {
+      executeMock.mockRejectedValueOnce(new Error("Connection refused"));
+
       const result = await createEnsDbReader().isReady();
 
       expect(result).toBe(false);
@@ -204,6 +240,60 @@ describe("EnsDbReader", () => {
       await expect(createEnsDbReader().getIndexingMetadataContext()).rejects.toThrow(
         /There must be exactly one ENSNodeMetadata record/,
       );
+    });
+  });
+
+  describe("schemaExists", () => {
+    it("returns true when the schema exists", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [{ exists: 1 }] });
+
+      await expect(createEnsDbReader().schemaExists("ensnode")).resolves.toBe(true);
+    });
+
+    it("returns false when the schema does not exist", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [] });
+
+      await expect(createEnsDbReader().schemaExists("ensnode")).resolves.toBe(false);
+    });
+  });
+
+  describe("getEnsNodeMetadata", () => {
+    it("returns the full { key, value } record when one exists", async () => {
+      selectResult.current = [{ key: "indexing_metadata_context", value: { foo: "bar" } } as any];
+
+      await expect(
+        createEnsDbReader().getEnsNodeMetadata({ key: "indexing_metadata_context" as any }),
+      ).resolves.toStrictEqual({ key: "indexing_metadata_context", value: { foo: "bar" } });
+    });
+
+    it("returns undefined when no record exists", async () => {
+      await expect(
+        createEnsDbReader().getEnsNodeMetadata({ key: "indexing_metadata_context" as any }),
+      ).resolves.toBeUndefined();
+    });
+
+    it("throws when multiple records exist", async () => {
+      selectResult.current = [{ value: "a" }, { value: "b" }];
+
+      await expect(
+        createEnsDbReader().getEnsNodeMetadata({ key: "indexing_metadata_context" as any }),
+      ).rejects.toThrow(/There must be exactly one ENSNodeMetadata record/);
+    });
+  });
+
+  describe("destroy", () => {
+    it("calls $client.end() to close the connection pool", async () => {
+      const ensDbReader = createEnsDbReader();
+
+      await ensDbReader.destroy();
+
+      expect(endMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("propagates errors from $client.end()", async () => {
+      endMock.mockRejectedValueOnce(new Error("Connection already closed"));
+
+      await expect(createEnsDbReader().destroy()).rejects.toThrow("Connection already closed");
     });
   });
 });

@@ -13,20 +13,22 @@ catalog:
   "@types/node": 24.10.9
   "@types/react": 19.2.7
   "@types/react-dom": 19.2.3
-  astro: ^6.3.3
+  astro: ^6.4.7
   astro-font: ^1.1.0
   astro-seo: ^1.1.0
   caip: 1.1.1
   date-fns: 4.1.0
   drizzle-orm: 0.41.0
   "@hono/node-server": ^1.19.13
-  hono: ^4.12.18
+  hono: ^4.12.25
   lucide-react: ^0.548.0
   p-retry: 7.1.1
   pg-connection-string: ^2.9.1
   pino: 10.1.0
   ponder: 0.16.6
   postcss: 8.5.12
+  prettier: 3.6.2
+  prettier-plugin-astro: 0.14.1
   react: 19.2.1
   react-dom: 19.2.1
   tailwind-merge: ^3.4.0
@@ -35,6 +37,6 @@ catalog:
   tsup: ^8.3.6
   typescript: ^5.7.3
   viem: ^2.50.3
-  vite: ^7.3.2
-  vitest: ^4.0.2
+  vite: ^7.3.5
+  vitest: ^4.1.0
   zod: ^4.3.6

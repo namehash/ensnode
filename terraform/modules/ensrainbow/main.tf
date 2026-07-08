@@ -1,13 +1,14 @@
 locals {
   mount_path           = "/app/apps/ensrainbow/data"
   resource_name_suffix = var.ensrainbow_label_set_id
+  fqdn                 = "${var.subdomain_path}.${var.ensnode_environment_name}.${var.hosted_zone_name}"
 }
 
 # For details on "render_web_service", see:
 # https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensrainbow" {
   name           = "ensrainbow-${local.resource_name_suffix}"
-  plan           = "starter"
+  plan           = var.render_instance_plan
   region         = var.render_region
   environment_id = var.render_environment_id
 
@@ -32,4 +33,8 @@ resource "render_web_service" "ensrainbow" {
     "DB_SCHEMA_VERSION" = { value = var.db_schema_version }
   }
 
+  # See https://render.com/docs/custom-domains
+  custom_domains = [
+    { name : local.fqdn },
+  ]
 }

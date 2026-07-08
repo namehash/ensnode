@@ -1,0 +1,55 @@
+---
+title: ENSNode Scalability
+description: Understand how ENSNode's architecture enables horizontal scaling.
+sidebar:
+  label: Scalability
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+ENSNode's architecture achieves effectively limitless horizontal scalability, no matter how large your query demands might be. By separating read / write workloads and making use of PostgreSQL's async replication you can scale your ENSNode deployment to handle any request volumes while continuing to index the latest ENS data without impact to indexing performance.
+
+<LinkCard
+  title="ENSNode High-Level Architecture"
+  description="Understand the high-level architecture of ENSNode."
+  href="/docs/self-host#high-level-architecture"
+/>
+
+## Horizontally scale ENSApi
+
+The ENSNode architecture naturally separates writes from reads:
+
+- **ENSIndexer** is the sole writer to ENSDb. It processes blockchain events and updates the database with the latest ENS state.
+- **ENSApi** is a read-only service. It serves GraphQL and REST API requests by querying ENSDb, but never writes to it.
+
+This separation insulates ENSIndexer from high request volumes. Whether you serve 10 requests per second or 10,000, the indexing process remains unaffected because ENSApi does not compete with ENSIndexer for database write locks or indexer resources.
+
+## Horizontally Scale ENSDb
+
+ENSDb is built on PostgreSQL, which provides mature, production-proven mechanisms for horizontal scaling. The most common approach is **asynchronous replication**:
+
+1. **Primary ENSDb**: ENSIndexer writes to your single ENSDb primary instance. You can fully isolate this ENSDb primary instance from any incoming API requests coming through ENSApi.
+2. **Replica ENSDb**: Configure the asynchronous replication of your primary ENSDb instance to one or more ENSDb read replica instances.
+3. **Read scaling**: Connect your horizontally scaled ENSApi instances exclusively to your ENSDb read replica instances if you wish to fully isolate extreme levels of API request volumes from indexing.
+
+Because ENSApi is read-only, it can safely connect to an ENSDb replica without write-routing or write-conflict concerns. The tradeoff is that, with asynchronous replication, replica reads may briefly lag behind the primary. As your query load grows, you simply add more PostgreSQL replicas for the ENSDb primary instance and more ENSApi instances pointing to them.
+
+## Going Massive
+
+An ENSNode deployment with _massive_ horizontal scaling might look like this:
+
+![ENSNode Scalable Deployment Architecture](/ensnode-scalability.svg)
+
+- **One ENSIndexer instance** → writes to the ENSDb primary instance
+- **One ENSDb primary instance** → replicates asynchronously to `M` replicas
+- **Multiple ENSApi instances** → each of `N` instances connected to one of the ENSDb replicas (often load-balanced across replicas)
+- **One ENSRainbow instance** → co-located with ENSIndexer instance on the same local network for fast label healing
+
+Only the largest ENSNode deployments will need such a complex setup. Still, it's good to know that if you need massive scalability, we have you covered! The ENSNode architecture lets you scale reads independently of writes, matching your infrastructure to your actual traffic patterns.
+
+## Further Reading
+
+<LinkCard title="ENSApi Overview" href="/docs/services/ensapi" />
+<LinkCard title="ENSDb Overview" href="/docs/services/ensdb" />
+<LinkCard title="ENSIndexer Overview" href="/docs/services/ensindexer" />
+<LinkCard title="ENSRainbow Overview" href="/docs/services/ensrainbow" />

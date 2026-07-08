@@ -1,9 +1,8 @@
-import config from "@/config";
-
 import { proxy } from "hono/proxy";
 
 import { canFallbackToTheGraph } from "@ensnode/ensnode-sdk/internal";
 
+import di from "@/di";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 
@@ -26,9 +25,9 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   }
 
   const fallback = canFallbackToTheGraph({
-    namespace: config.namespace,
-    theGraphApiKey: config.theGraphApiKey,
-    isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+    namespace: di.context.namespace,
+    theGraphApiKey: di.context.ensApiConfig.theGraphApiKey,
+    isSubgraphCompatible: di.context.stackInfo.ensIndexer.isSubgraphCompatible,
   });
 
   // log one warning to the console if !canFallback
@@ -46,7 +45,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
       }
       case "no-subgraph-url": {
         logger.warn(
-          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${config.namespace}') is not supported by The Graph.`,
+          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${di.context.namespace}') is not supported by The Graph.`,
         );
         break;
       }

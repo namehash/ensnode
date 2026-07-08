@@ -1,0 +1,15 @@
+{
+  "name": "@ensnode/ensskills-example",
+  "private": true,
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "prepare": "skills-npm --cwd ."
+  },
+  "devDependencies": {
+    "enscli": "1.15.2",
+    "ensskills": "1.15.2",
+    "skills-npm": "^1"
+  }
+}

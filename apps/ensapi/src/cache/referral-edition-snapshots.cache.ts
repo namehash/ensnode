@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   hasEnsAnalyticsConfigSupport,
   hasEnsAnalyticsIndexingStatusSupport,
@@ -13,11 +11,10 @@ import { minutesToSeconds } from "date-fns";
 
 import { type CachedResult, getLatestIndexedBlockRef, SWRCache } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/referrer-leaderboard/closeout";
 import { getReferralEditionSnapshot } from "@/lib/ensanalytics/referrer-leaderboard/get-referral-edition-snapshot";
 import { makeLogger } from "@/lib/logger";
-
-import { indexingStatusCache } from "./indexing-status.cache";
 
 const logger = makeLogger("referral-edition-snapshots-cache");
 
@@ -73,13 +70,14 @@ function createEditionSnapshotBuilder(
     // the cache could capture a snapshot derived from a not-yet-final indexer state, or one with
     // silently dropped rows because a required namespace plugin is inactive, and serve it for the
     // rest of its (effectively infinite, for closed editions) TTL.
-    const configSupport = hasEnsAnalyticsConfigSupport(config.ensIndexerPublicConfig);
+    const configSupport = hasEnsAnalyticsConfigSupport(di.context.stackInfo.ensIndexer);
     if (!configSupport.supported) {
       throw new Error(
         `Unable to generate edition snapshot for ${editionSlug}. ${configSupport.reason}`,
       );
     }
 
+    const { indexingStatusCache } = di.context;
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       logger.error(

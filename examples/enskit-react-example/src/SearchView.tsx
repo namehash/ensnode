@@ -1,15 +1,15 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { beautifyInterpretedName } from "enssdk";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
+import { domainIdPath, useAppPath } from "./app-paths";
+import { useEnsnodeInstance } from "./EnsnodeInstanceProvider";
+
 const DomainsByNameQuery = graphql(`
-  query DomainsByName($name: String!, $first: Int!, $after: String) {
+  query DomainsByName($name: DomainsNameFilter!, $first: Int!, $after: String) {
     domains(where: { name: $name }, first: $first, after: $after) {
       edges {
-        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-        # node { __typename id canonical { name { interpreted } } }
-        node { __typename id name }
+        node { __typename id canonical { name { beautified } } }
       }
       pageInfo {
         hasNextPage
@@ -23,6 +23,8 @@ const PAGE_SIZE = 10;
 const DEBOUNCE_MS = 50;
 
 export function SearchView() {
+  const appPath = useAppPath();
+  const { constants } = useEnsnodeInstance();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("query") ?? "";
 
@@ -58,7 +60,11 @@ export function SearchView() {
 
   const [result] = useOmnigraphQuery({
     query: DomainsByNameQuery,
-    variables: { name: query, first: PAGE_SIZE, after },
+    variables: {
+      name: { starts_with: query },
+      first: PAGE_SIZE,
+      after,
+    },
     pause: query.length === 0,
   });
 
@@ -69,8 +75,9 @@ export function SearchView() {
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
-        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
+        Showcases live prefix search (typeahead) via <code>Query.domains</code> with a{" "}
+        <code>starts_with</code> name filter. Only <b>Canonical</b> Domains (those with an
+        inferrable Canonical Name) are searched. Input is debounced by {DEBOUNCE_MS}ms and synced to
         the URL as <code>?query=</code>.
       </p>
 
@@ -78,7 +85,7 @@ export function SearchView() {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="vitalik.eth"
+        placeholder={constants.defaultSearchLabel}
       />
 
       {query.length === 0 ? (
@@ -90,23 +97,17 @@ export function SearchView() {
           {fetching && <p>Loading...</p>}
           <ul>
             {data?.domains?.edges.map((edge) => {
-              if (!edge.node.name) return null;
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  <Link to={`/domain/${edge.node.name}`}>
-                    {beautifyInterpretedName(edge.node.name)}
-                    {/* 
-                  TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
-                    */}
+                  <Link to={appPath(domainIdPath(edge.node.id))}>
+                    {edge.node.canonical?.name.beautified ?? <em>non-canonical domain</em>}
                   </Link>
                 </li>
               );
             })}
           </ul>
-          {data?.domains && data.domains.edges.length === 0 && !fetching && <p>No matches.</p>}
+          {!fetching && data?.domains?.edges.length === 0 && <p>No matches.</p>}
           {data?.domains?.pageInfo.hasNextPage && (
             <button
               type="button"

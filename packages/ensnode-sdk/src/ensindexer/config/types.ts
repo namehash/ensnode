@@ -2,7 +2,7 @@ import type { ChainId } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
-import type { EnsRainbowClientLabelSet, EnsRainbowPublicConfig } from "../../ensrainbow";
+import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
 
 /**
  * A PluginName is a unique id for a 'plugin': we use the notion of
@@ -16,9 +16,8 @@ export enum PluginName {
   ProtocolAcceleration = "protocol-acceleration",
   Registrars = "registrars",
   TokenScope = "tokenscope",
-  /** @deprecated use {@link PluginName.Unigraph} instead */
-  ENSv2 = "ensv2",
   Unigraph = "unigraph",
+  EFP = "efp",
 }
 
 /**
@@ -31,6 +30,13 @@ export interface EnsIndexerVersionInfo {
    * @see https://www.npmjs.com/package/ponder
    **/
   ponder: string;
+
+  /**
+   * ENSIndexer codebase commit hash
+   *
+   * Optional, as it may not be available in all environments.
+   */
+  commit?: string;
 
   /**
    * ENSDb service version
@@ -91,13 +97,6 @@ export interface EnsIndexerPublicConfig {
    *   identifier.
    */
   ensIndexerSchemaName: string;
-
-  /**
-   * ENSRainbow public config
-   *
-   * Represents the public config of the connected ENSRainbow instance.
-   */
-  ensRainbowPublicConfig: EnsRainbowPublicConfig;
 
   /**
    * A set of strings referring to the names of plugins that are active.

@@ -1,43 +1,51 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { PluginName } from "@ensnode/ensnode-sdk";
+
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByCanonical,
-  filterByName,
-  filterByOwner,
-  filterByVersion,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
-import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { resolveAccountNameReferences } from "@/omnigraph-api/lib/find-name-references/find-name-references-resolver";
+import { isPluginEnabled } from "@/omnigraph-api/lib/is-plugin-enabled";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { buildAccountPrimaryNamesSelection } from "@/omnigraph-api/lib/resolution/account-primary-names-selection";
+import { resolvePrimaryNameRecords } from "@/omnigraph-api/lib/resolution/resolve-primary-name-records";
+import { AccountEfpRef } from "@/omnigraph-api/schema/account-efp";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import {
+  ID_PAGINATED_CONNECTION_ARGS,
+  RESOLVE_ACCELERATE_ARG,
+} from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
-import { AccountDomainsWhereInput, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
+import {
+  AccountDomainsWhereInput,
+  DOMAINS_ORDERING_DESCRIPTION,
+  DomainsOrderInput,
+} from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
+import { NameReferenceRef } from "@/omnigraph-api/schema/name-reference";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
+import {
+  type ReverseResolveModel,
+  ReverseResolveRef,
+} from "@/omnigraph-api/schema/reverse-resolve";
 
-export const AccountRef = builder.loadableObjectRef("Account", {
-  load: (ids: Address[]) =>
-    ensDb.query.account.findMany({
-      where: (t, { inArray }) => inArray(t.id, ids),
-    }),
-  toKey: getModelId,
-  cacheResolved: true,
-  sort: true,
-});
-
-export type Account = Exclude<typeof AccountRef.$inferType, Address>;
+/**
+ * An Account is modeled purely by its {@link NormalizedAddress} — the `account` table holds only an
+ * id, so there is nothing to load. Resolving `Query.account` to an address directly (rather than via
+ * a dataloader) means resolvable-but-unindexed Accounts (e.g. those with only an off-chain primary
+ * name) are supported automatically: Reverse Resolution (`Account.resolve`) is keyed by address and
+ * works independent of indexing, while indexed-only relations (`domains`, `events`, `permissions`)
+ * naturally return empty for an unindexed address.
+ */
+export const AccountRef = builder.objectRef<NormalizedAddress>("Account");
 
 ///////////
 // Account
@@ -52,7 +60,7 @@ AccountRef.implement({
       description: "A unique reference to this Account.",
       type: "Address",
       nullable: false,
-      resolve: (parent) => parent.id,
+      resolve: (parent) => parent,
     }),
 
     ///////////////////
@@ -62,28 +70,68 @@ AccountRef.implement({
       description: "An EVM Address that uniquely identifies this Account on-chain.",
       type: "Address",
       nullable: false,
-      resolve: (parent) => parent.id,
+      resolve: (parent) => parent,
+    }),
+
+    //////////////////
+    // Account.resolve
+    //////////////////
+    resolve: t.field({
+      description: "Resolve primary names for this Account.",
+      type: ReverseResolveRef,
+      nullable: false,
+      args: {
+        accelerate: t.arg.boolean(RESOLVE_ACCELERATE_ARG),
+      },
+      resolve: async (
+        account,
+        { accelerate: accelerateArg },
+        context,
+        info,
+      ): Promise<ReverseResolveModel> => {
+        const accelerate = accelerateArg ?? true;
+        const { canAccelerate } = context;
+        const coinTypes = buildAccountPrimaryNamesSelection(info);
+
+        // No primaryName/primaryNames fields selected (e.g. only acceleration/trace queried).
+        // Return an empty model rather than throwing so the non-nullable resolve field does not
+        // null-propagate the entire Account.
+        if (coinTypes === null) {
+          return {
+            address: account,
+            coinTypes: [],
+            accelerate,
+            canAccelerate,
+            trace: [],
+            records: [],
+          };
+        }
+
+        const { trace, records } = await resolvePrimaryNameRecords(account, coinTypes, {
+          accelerate,
+          canAccelerate,
+        });
+
+        return { address: account, coinTypes, accelerate, canAccelerate, trace, records };
+      },
     }),
 
     ////////////////////
     // Account.domains
     ////////////////////
     domains: t.connection({
-      description: "The Domains that are owned by the Account.",
+      description: `The Domains that are owned by the Account. ${DOMAINS_ORDERING_DESCRIPTION}`,
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: AccountDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = domainsBase();
-        const owned = filterByOwner(base, parent.id);
-        const { named, defaultOrder } = filterByName(owned, where?.name ?? null);
-        const canonical = where?.canonical === true ? filterByCanonical(named) : named;
-        const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
-        const domains = withOrderingMetadata(versioned);
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (parent, { where, order, ...connectionArgs }) =>
+        resolveFindDomains({
+          where: { ...where, ownerId: parent },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     //////////////////
@@ -99,7 +147,36 @@ AccountRef.implement({
       resolve: (parent, args) =>
         resolveFindEvents({
           ...args,
-          where: { ...args.where, sender: { eq: parent.id } },
+          where: { ...args.where, sender: { eq: parent } },
+        }),
+    }),
+
+    ///////////////
+    // Account.efp
+    ///////////////
+    efp: t.field({
+      description:
+        "This Account's Ethereum Follow Protocol (EFP) presence: its lists, validated primary list, and account metadata. Null when the connected ENSIndexer does not have the `efp` plugin enabled.",
+      type: AccountEfpRef,
+      nullable: true,
+      resolve: (parent) => (isPluginEnabled(PluginName.EFP) ? parent : null),
+    }),
+
+    //////////////////////////
+    // Account.nameReferences
+    //////////////////////////
+    nameReferences: t.connection({
+      description:
+        "The Names whose indexed `addr()` record points at this Account, optionally scoped to a single CoinType. Reflects literally-indexed, Canonical Domains only: records whose node has no Canonical Domain are omitted.",
+      type: NameReferenceRef,
+      args: {
+        where: t.arg({ type: AccountNameReferencesWhereInput }),
+      },
+      resolve: (parent, { where, ...connectionArgs }) =>
+        resolveAccountNameReferences({
+          account: parent,
+          coinType: where?.coinType,
+          ...connectionArgs,
         }),
     }),
 
@@ -115,9 +192,10 @@ AccountRef.implement({
       },
       resolve: (parent, args) => {
         const contract = args.where?.contract;
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           // this user's permissions
-          eq(ensIndexerSchema.permissionsUser.user, parent.id),
+          eq(ensIndexerSchema.permissionsUser.user, parent),
           // optionally filtered by contract
           contract
             ? and(
@@ -151,7 +229,8 @@ AccountRef.implement({
       description: "The Permissions on Registries granted to this Account.",
       type: RegistryPermissionsUserRef,
       resolve: (parent, args) => {
-        const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
+        const { ensDb, ensIndexerSchema } = di.context;
+        const scope = eq(ensIndexerSchema.permissionsUser.user, parent);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.registry.chainId),
           eq(ensIndexerSchema.permissionsUser.address, ensIndexerSchema.registry.address),
@@ -188,7 +267,8 @@ AccountRef.implement({
       description: "The Permissions on Resolvers granted to this Account.",
       type: ResolverPermissionsUserRef,
       resolve: (parent, args) => {
-        const scope = eq(ensIndexerSchema.permissionsUser.user, parent.id);
+        const { ensDb, ensIndexerSchema } = di.context;
+        const scope = eq(ensIndexerSchema.permissionsUser.user, parent);
         const join = and(
           eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.resolver.chainId),
           eq(ensIndexerSchema.permissionsUser.address, ensIndexerSchema.resolver.address),
@@ -232,6 +312,20 @@ export const AccountByInput = builder.inputType("AccountByInput", {
     address: t.field({ type: "Address" }),
   }),
 });
+
+export const AccountNameReferencesWhereInput = builder.inputType(
+  "AccountNameReferencesWhereInput",
+  {
+    description: "Filter for Account.nameReferences.",
+    fields: (t) => ({
+      coinType: t.field({
+        type: "CoinType",
+        description:
+          "If set, scopes matches to a single CoinType. When omitted, returns matches across all CoinTypes.",
+      }),
+    }),
+  },
+);
 
 export const AccountPermissionsWhereInput = builder.inputType("AccountPermissionsWhereInput", {
   description: "Filter for Account.permissions.",

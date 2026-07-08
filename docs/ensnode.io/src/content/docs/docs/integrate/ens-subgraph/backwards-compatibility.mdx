@@ -1,0 +1,197 @@
+---
+title: Backwards Compatibility
+description: How ENSNode provides a verified Subgraph-compatible API for migrating existing integrations, the ecosystem it grew out of, and how to query it correctly.
+sidebar:
+  order: 3
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+This page is background on the ENS Subgraph and the ecosystem ENSNode grew out of. ENSNode maintains a verified Subgraph-compatible API for migrating existing integrations, but it is **not** the path forward for ENSv2 — see [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) and the [ENS Omnigraph API](/docs/integrate/omnigraph) for what is.
+
+## The Graph & Graph Node
+
+[The Graph](https://thegraph.com/) leads development of [Graph Node](https://thegraph.com/docs/en/indexing/tooling/graph-node/), an [open source software application](https://github.com/graphprotocol/graph-node) for indexing blockchain data.
+
+## Subgraphs
+
+Each Graph Node server can run any number of "subgraphs". Each subgraph is essentially a plugin describing:
+
+1. A strategy for how the Graph Node should index blockchain data.
+2. A schema for a GraphQL API providing access to the indexed data.
+
+## ENS Subgraph
+
+[ENS Labs](https://www.enslabs.org/) has led development of the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph). In the past, this was the "official" strategy for indexing ENS data. Additional background info is available in [official ENS docs](https://docs.ens.domains/web/subgraph).
+
+## Graph Network
+
+Operating your own Graph Node server instance can be complex, expensive, and time consuming. An alternative is to use The Graph's semi-decentralized network of indexers operating Graph Node instances.
+
+This network provides access to a [semi-decentralized ENS Subgraph](https://thegraph.com/explorer/subgraphs/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH?view=Query&chain=arbitrum-one). Developers are welcome to use this rate limited API endpoint above for testing, but are highly encouraged to sign up for an account with The Graph to get their own (paid) API key.
+
+## ENSNode's Backwards Compatibility with the ENS Subgraph
+
+To support the ENS ecosystem's transition away from legacy ENS indexing strategies to ENSNode, ENSNode provides a verified backwards compatible ENS Subgraph GraphQL endpoint. This therefore also provides backwards compatibility with `ensjs`.
+
+1. For those that wish to host their own ENS indexer, it is faster and easier to deploy ENSNode than to run an ENS Subgraph instance.
+2. For those building an app that simply want to query the legacy ENS Subgraph API in the easiest way possible, we make this freely available through [our hosted ENSNode instances](/docs/hosted-instances).
+
+## Self-hosted ENSNode instance configuration for ENS Subgraph compatibility
+
+To enable full ENS Subgraph compatibility on a self-hosted ENSNode instance, configure ENSIndexer with `SUBGRAPH_COMPAT=true`. This single flag:
+
+1. **Applies Subgraph Indexing Behavior**: Uses Subgraph Interpreted Labels and Names, allowing unnormalized labels to be returned as they appear in the original ENS Subgraph
+2. **Sets Default Plugins & Label Set**: Defaults to `PLUGINS=subgraph`, `LABEL_SET_ID=subgraph` and `LABEL_SET_VERSION=0` to match subgraph indexing logic and label healing behavior
+
+When `SUBGRAPH_COMPAT=false` (default), ENSIndexer operates in enhanced mode with:
+
+- **Enhanced Indexing Behavior**: Uses Interpreted Labels and Names with improved security by encoding unnormalized labels as labelhashes
+- **Expanded Plugin Support**: Defaults to `PLUGINS=subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope` for multichain ENS indexing
+- **Reverse Address Healing**: Attempts to heal subnames of addr.reverse for enhanced reverse resolution support
+
+## Compatibility Tooling
+
+ENSNode has developed tooling to verify subgraph compatibility and ease migration from the ENS Subgraph. The tools in the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) repository help users verify ENSNode's subgraph-compatibility.
+
+- `snapshot-eq` — verify subgraph-equivalent data via snapshots at specific blockheights
+
+See the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) README for additional context and usage instructions.
+
+<LinkCard
+  title="ens-subgraph-transition-tools"
+  description="Tools for verifying ENSNode's subgraph compatibility"
+  href="https://github.com/namehash/ens-subgraph-transition-tools"
+/>
+
+## Querying the Subgraph-Compatible API correctly
+
+The care required to query the ENS Subgraph correctly is itself one of its [Key Limitations](/docs/integrate/ens-subgraph/key-limitations) — the guidance below exists because the Subgraph data model exposes raw protocol internals that every client has to handle carefully. If you are migrating an existing integration onto ENSNode's Subgraph-compatible API, the following patterns apply.
+
+:::note[Terminology]
+It may be helpful to refer to the [Terminology](/docs/reference/terminology) guide when reading this section.
+:::
+
+### Use the node as the stable identifier
+
+When querying for specific names or sets of names, it's crucial to understand that the representation of labels (both known and unknown) should not generally be assumed to be immutable identifiers. Here's why:
+
+**Label Mutability**
+
+- ENSNode indexes all onchain events where a subname is created in the ENS Registry. When these events are indexed, the labelhash of the subname is always known, however sometimes the label of the subname is unknown (strictly from indexed onchain data). When this happens ENSNode attempts to look up the label for the labelhash through an attached ENSRainbow server. If this lookup succeeds, ENSNode will represent the subname using its true label. If this lookup fails, some label to represent the subname is still required. Therefore, ENSNode will represent the "unknown label" using its labelhash in the format `[labelhash]`.
+- Changes in the set of healable labels maintained by an ENSRainbow instance can modify the resulting indexed state in attached ENSNode instances. For example, if at "time 1" ENSRainbow does not have knowledge to heal label X, but at "time 2" it does (from the perspective of an ENSNode client) a label represented as "unknown" at "time 1" could transition to become known at "time 2". Each ENSNode instance should ensure it is attached to an ENSRainbow instance that only grows its set of healable labels across time, such that from the perspective of an ENSNode client a "known label" should never transition back to its "unknown" representation. However, if an ENSNode instance is improperly operated, such a situation could occur.
+
+**ENS Normalization Standard Changes**
+
+The [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15) may change across time such that the set of normalizable names grows (thankfully it should never shrink). For example, consider a new Unicode release that standardizes new emoji. The ENS Normalize standard may subsequently change to expand support for those new emoji.
+
+Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying. The node of a name is immutable across time and works for all names, even if they are unknown, unnormalized, or subgraph-unindexable.
+
+#### Pattern 1: Names from User Input / Offchain Data
+
+When querying for names that originate from user input (e.g., search fields, user-entered addresses) or offchain data (e.g. traditional data sources), always apply the following procedure within your app:
+
+1. Normalize the name according to ENSIP-15.
+2. Calculate the `node` for the normalized name using the `namehash` function.
+3. Query the `id` field of domains using the `node` calculated in the previous step, rather than the name itself (for backwards compatibility with the ENS Subgraph, the field for the `node` of the name is actually the `id` field).
+
+Example:
+
+First, let's prepare the name for querying by normalizing it and calculating its node:
+
+```typescript title="prep-example.ts"
+import { namehashInterpretedName, normalizeName, asInterpretedName } from "enssdk";
+
+// 1. Normalize the user input according to ENSIP-15
+const userInput = "Vitalik.eth";
+const normalizedName = normalizeName(userInput);
+
+// 2. Calculate the node from the normalized name
+const node = namehashInterpretedName(asInterpretedName(normalizedName));
+```
+
+Now use this node to query the domain id:
+
+```graphql title="query.graphql"
+{
+  domain(id: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835") {
+    id
+    name
+    labelName
+    labelhash
+    createdAt
+  }
+}
+```
+
+The query will return the domain information:
+
+```json title="response.json"
+{
+  "data": {
+    "domain": {
+      "createdAt": "1497775154",
+      "id": "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
+      "labelName": "vitalik",
+      "labelhash": "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+      "name": "vitalik.eth"
+    }
+  }
+}
+```
+
+#### Pattern 2: Names from Onchain Data
+
+When querying for name values sourced directly from onchain data (e.g., ENS NFTs, contract events), you must:
+
+1. Skip any normalization step — the name value passed to namehash must be exactly as it appears onchain, even if unnormalized.
+2. Calculate the node by taking the namehash of the onchain name (without any normalization). Be warned however that unnormalized labels may contain "." characters within the label value which can confuse namehash if special precautions are not taken.
+3. Query the domain id using the node of the name.
+
+This pattern is crucial when dealing with unnormalized names that exist onchain. For example, if while examining onchain data you see a registration for "EXAMPLE.eth" (note the uppercase unnormalized characters), attempting to normalize this name in the process of querying for additional information about it would result in looking up details for a different node in the ENS Registry (in this case the node for "example.eth" rather than "EXAMPLE.eth").
+
+The query structure in Pattern 2 remains the same as Pattern 1, except the normalization step is skipped to ensure the node that you query data about is the intended node.
+
+### Never normalize labels returned by ENSNode
+
+:::note[Configuration Note]
+ENSNode's handling of unnormalized labels is controlled by the `SUBGRAPH_COMPAT` configuration option:
+
+- `SUBGRAPH_COMPAT=true` allows unnormalized labels to be returned as Subgraph Interpreted Labels (required for full ENS Subgraph compatibility)
+- `SUBGRAPH_COMPAT=false` (default) encodes unnormalized labels as Interpreted Labels, improving security
+
+:::
+
+When `SUBGRAPH_COMPAT=true`, ENSNode may return unnormalized labels as [Subgraph Interpreted Labels](/docs/reference/terminology#subgraph-interpreted-label) associated with indexed names. **ENSNode clients should never attempt to normalize labels returned by ENSNode.** This is because when ENSNode returns an unnormalized label, that label is associated with a specific node that has been indexed. Normalizing an unnormalized label in this context would represent a different node.
+
+An ENSNode client is permitted to validate that all labels returned by ENSNode are in normalized form, and to reject any names with unnormalized labels from further processing. However, the key principle is that an ENSNode client should never normalize returned labels, as normalization transforms the label and therefore also the node associated with the name the label is contained within.
+
+When `SUBGRAPH_COMPAT=false` (default), ENSNode uses [Interpreted Labels](/docs/reference/terminology#interpreted-label) instead of [Subgraph Interpreted Labels](/docs/reference/terminology#subgraph-interpreted-label), which helps avoid edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters. When names are returned from any of the ENSNode APIs, including the Subgraph-compatible GraphQL API, names will be [Interpreted Names](/docs/reference/terminology#interpreted-name).
+
+### Calculating the node for names that contain Encoded LabelHashes
+
+According to [ENSIP-1](https://docs.ens.domains/ensip/1#namehash-algorithm), the namehash algorithm makes no special consideration for Encoded LabelHashes, and therefore interprets Encoded-LabelHash-looking strings as Literal Label values. Due to this behavior, we recommend using an "Encoded-LabelHash-aware" namehash algorithm implementation such as the [viem namehash implementation](https://github.com/wevm/viem/blob/fe558fdef7e2e9cd5f3f57d8bdeae0c7ff67a1b0/src/utils/ens/namehash.ts#L36-L51).
+
+:::note[SUBGRAPH_COMPAT]
+The following is relevant when `SUBGRAPH_COMPAT=false` (default) and ENSNode is using Interpreted Labels for handling unknown labels.
+:::
+
+When an **Unknown** or `subgraph-unindexable` label is encountered, ENSNode represents it as an **Encoded LabelHash** in the format `[{labelhash}]`, where `{labelhash}` is the labelhash of the label in question. This representation creates an interesting edge case that must be handled carefully:
+
+Consider an unnormalized label that literally looks like `[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]`. Because this label contains square brackets (`subgraph-unindexable` characters), it will be represented as the unknown label:
+`[80968d00b78a91f47b233eaa213576293d16dadcbbdceb257bca94b08451ba7f]`
+
+Therefore, this represents the `subgraph-unindexable` label as an **Encoded LabelHash**, encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered `subgraph-unindexable` — they create ambiguity between literal labels and the representation of **Encoded LabelHashes**.
+
+When ENSNode encounters a `subgraph-unindexable` label, it will represent it as an **Encoded LabelHash** even if the actual label data is available.
+
+For more detailed information about `subgraph-unindexable` labels and their handling, please refer to the [ENSNode SDK implementation](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/src/lib/is-label-subgraph-indexable.ts).
+
+## Unplanned Features
+
+The following features of the subgraph GraphQL API are explicitly unsupported and are not planned.
+
+- [1-level-nested Entity `_orderBy` param](https://thegraph.com/docs/en/subgraphs/querying/graphql-api#nested-entity-sorting-example)
+- [time travel queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api#time-travel-queries-example)
+- [\_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api#block-based-filtering-example)
+- [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api#full-text-search-example)

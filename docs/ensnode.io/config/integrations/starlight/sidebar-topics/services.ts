@@ -5,6 +5,24 @@ export const servicesSidebarTopic = {
   items: [
     { label: "Overview", link: "/docs/services" },
     {
+      label: "ENSAdmin",
+      collapsed: true,
+      items: [
+        { label: "Overview", link: "/docs/services/ensadmin" },
+        {
+          label: "Contributing",
+          collapsed: true,
+          items: [
+            { label: "Overview", link: "/docs/services/ensadmin/contributing" },
+            {
+              label: "Using Docker",
+              link: "/docs/services/ensadmin/contributing/docker",
+            },
+          ],
+        },
+      ],
+    },
+    {
       label: "ENSApi",
       collapsed: true,
       items: [
@@ -15,9 +33,26 @@ export const servicesSidebarTopic = {
       ],
     },
     {
-      label: "ENSAnalytics",
+      label: "ENSDb",
       collapsed: true,
-      items: [{ label: "Overview", link: "/docs/services/ensanalytics" }],
+      items: [
+        { label: "Overview", link: "/docs/services/ensdb" },
+        {
+          label: "Concepts",
+          collapsed: true,
+          items: [
+            { label: "Overview", link: "/docs/services/ensdb/concepts" },
+            { label: "Glossary", link: "/docs/services/ensdb/concepts/glossary" },
+            { label: "Database Schemas", link: "/docs/services/ensdb/concepts/database-schemas" },
+          ],
+        },
+        { label: "Integrations", link: "/docs/services/ensdb/integrations" },
+
+        {
+          label: "Reference Implementation",
+          link: "/docs/services/ensdb/reference-implementation",
+        },
+      ],
     },
     {
       label: "ENSIndexer",
@@ -39,47 +74,8 @@ export const servicesSidebarTopic = {
           items: [
             { label: "Overview", link: "/docs/services/ensindexer/contributing" },
             {
-              label: "Creating a Plugin",
+              label: "ENSNode Plugins",
               link: "/docs/services/ensindexer/contributing/creating-a-plugin",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "ENSDb",
-      collapsed: true,
-      items: [
-        { label: "Overview", link: "/docs/services/ensdb" },
-        {
-          label: "Concepts",
-          collapsed: true,
-          items: [
-            { label: "Overview", link: "/docs/services/ensdb/concepts" },
-            { label: "Glossary", link: "/docs/services/ensdb/concepts/glossary" },
-            { label: "Database Schemas", link: "/docs/services/ensdb/concepts/database-schemas" },
-          ],
-        },
-        {
-          label: "Usage",
-          collapsed: true,
-          items: [
-            { label: "Overview", link: "/docs/services/ensdb/usage" },
-            { label: "ENSDb SDK", link: "/docs/services/ensdb/usage/sdk" },
-            { label: "ENSDb SQL", link: "/docs/services/ensdb/usage/sql" },
-          ],
-        },
-        {
-          label: "Integrations",
-          collapsed: true,
-          items: [
-            {
-              label: "ENSNode Reference Implementation",
-              link: "/docs/services/ensdb/integrations/ensnode",
-            },
-            {
-              label: "Future Possibilities",
-              link: "/docs/services/ensdb/integrations/future-possibilities",
             },
           ],
         },
@@ -174,22 +170,9 @@ export const servicesSidebarTopic = {
       ],
     },
     {
-      label: "ENSAdmin",
+      label: "ENSAnalytics",
       collapsed: true,
-      items: [
-        { label: "Overview", link: "/docs/services/ensadmin" },
-        {
-          label: "Contributing",
-          collapsed: true,
-          items: [
-            { label: "Overview", link: "/docs/services/ensadmin/contributing" },
-            {
-              label: "Using Docker",
-              link: "/docs/services/ensadmin/contributing/docker",
-            },
-          ],
-        },
-      ],
+      items: [{ label: "Overview", link: "/docs/services/ensanalytics" }],
     },
     {
       label: "ENSEngine",

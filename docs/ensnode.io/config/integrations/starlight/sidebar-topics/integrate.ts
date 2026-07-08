@@ -1,4 +1,7 @@
+import { OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS } from "../../../../src/data/omnigraph-examples/config.ts";
+
 export const integrateSidebarTopic = {
+  id: "integrate-with-ensv2",
   label: "Integrate with ENSv2",
   link: "/docs/integrate",
   icon: "rocket",
@@ -9,18 +12,76 @@ export const integrateSidebarTopic = {
     },
     {
       label: "Why ENSNode?",
-      link: "/docs/integrate/why-ensnode",
+      collapsed: false,
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/why-ensnode",
+        },
+        {
+          label: "Keep ENS apps working 🚨",
+          link: "/docs/integrate/why-ensnode/keep-ens-working",
+        },
+        {
+          label: "ENSv2 Readiness",
+          link: "/docs/integrate/why-ensnode/ensv2-readiness",
+        },
+      ],
     },
     {
-      label: "ENSv2 Readiness",
-      link: "/docs/integrate/ensv2-readiness",
+      label: "AI/LLM Tooling 🤖",
+      link: "/docs/integrate/ai-llm",
+    },
+    {
+      label: "ENS Subgraph",
+      collapsed: false,
+      badge: {
+        text: "LEGACY",
+        variant: "danger",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/ens-subgraph",
+        },
+        {
+          label: "Key Limitations 🚨",
+          link: "/docs/integrate/ens-subgraph/key-limitations",
+        },
+        {
+          label: "Backwards Compatibility",
+          link: "/docs/integrate/ens-subgraph/backwards-compatibility",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/ens-subgraph/examples",
+            },
+            {
+              label: "With ENSjs",
+              link: "/docs/integrate/ens-subgraph/examples/with-ensjs",
+            },
+            {
+              label: "With Viem",
+              link: "/docs/integrate/ens-subgraph/examples/with-viem",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/ens-subgraph/schema-reference",
+        },
+      ],
     },
     {
       label: "ENS Omnigraph API",
       collapsed: false,
       badge: {
         text: "NEW",
-        variant: "tip",
+        variant: "success",
       },
       items: [
         {
@@ -28,66 +89,97 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph",
         },
         {
+          label: "Core Concepts",
+          link: "/docs/integrate/omnigraph/concepts",
+        },
+        {
+          label: "ENS Resolution",
+          link: "/docs/integrate/omnigraph/ens-resolution",
+        },
+        {
+          label: "Protocol Acceleration",
+          link: "/docs/integrate/omnigraph/protocol-acceleration",
+        },
+        {
+          label: "FAQ",
+          link: "/docs/integrate/omnigraph/faq",
+        },
+        {
           label: "Examples",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/omnigraph/examples",
-            },
-            {
-              label: "Domain By Name",
-              link: "/docs/integrate/omnigraph/examples/domain-by-name",
-            },
-            {
-              label: "Find Domains",
-              link: "/docs/integrate/omnigraph/examples/find-domains",
-            },
-            {
-              label: "Domain Subdomains",
-              link: "/docs/integrate/omnigraph/examples/domain-subdomains",
-            },
-            {
-              label: "Domain Events",
-              link: "/docs/integrate/omnigraph/examples/domain-events",
-            },
-            {
-              label: "Account Domains",
-              link: "/docs/integrate/omnigraph/examples/domains-by-address",
-            },
-            {
-              label: "Account Events",
-              link: "/docs/integrate/omnigraph/examples/account-events",
-            },
-            {
-              label: "Registry Domains",
-              link: "/docs/integrate/omnigraph/examples/registry-domains",
-            },
-            {
-              label: "Permissions By Contract",
-              link: "/docs/integrate/omnigraph/examples/permissions-by-contract",
-            },
-            {
-              label: "Permissions By User",
-              link: "/docs/integrate/omnigraph/examples/permissions-by-user",
-            },
-            {
-              label: "Account Resolver Permissions",
-              link: "/docs/integrate/omnigraph/examples/account-resolver-permissions",
-            },
-            {
-              label: "Domain Resolver",
-              link: "/docs/integrate/omnigraph/examples/domain-resolver",
-            },
-            {
-              label: "Namegraph",
-              link: "/docs/integrate/omnigraph/examples/namegraph",
-            },
-          ],
+          collapsed: true,
+          items: OMNIGRAPH_EXAMPLES_SIDEBAR_ITEMS,
         },
         {
           label: "Schema Reference",
           link: "/docs/integrate/omnigraph/schema-reference",
+        },
+      ],
+    },
+    {
+      label: "ENS Unigraph SQL",
+      collapsed: false,
+      badge: {
+        text: "NEW",
+        variant: "success",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/unigraph",
+        },
+        {
+          label: "Core Concepts",
+          link: "/docs/integrate/unigraph/concepts",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Connect",
+              link: "/docs/integrate/unigraph/examples",
+            },
+            {
+              label: "Domain by Name",
+              link: "/docs/integrate/unigraph/examples/domain-by-name",
+            },
+            {
+              label: "Domain Fuzzy Search",
+              link: "/docs/integrate/unigraph/examples/domains-fuzzy-search-by-name",
+            },
+            {
+              label: "Domain Events",
+              link: "/docs/integrate/unigraph/examples/domain-events",
+            },
+            {
+              label: "Subdomains",
+              link: "/docs/integrate/unigraph/examples/subdomains-by-parent-name",
+            },
+            {
+              label: "Account Domains",
+              link: "/docs/integrate/unigraph/examples/account-domains",
+            },
+            {
+              label: "Latest Registrations",
+              link: "/docs/integrate/unigraph/examples/latest-registrations",
+            },
+            {
+              label: "Expiring Registrations",
+              link: "/docs/integrate/unigraph/examples/expiring-registrations",
+            },
+            {
+              label: "Indexing Status",
+              link: "/docs/integrate/unigraph/examples/indexing-status",
+            },
+          ],
+        },
+        {
+          label: "Interactive Playground",
+          link: "/docs/integrate/unigraph/interactive-playground",
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/unigraph/schema-reference",
         },
       ],
     },
@@ -100,40 +192,32 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options",
         },
         {
-          label: "enskit (React)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enskit",
-            },
-            {
-              label: "⚡ Interactive example",
-              link: "/docs/integrate/integration-options/enskit/example",
-            },
-          ],
+          label: "enssdk (TypeScript)",
+          link: "/docs/integrate/integration-options/enssdk",
         },
         {
-          label: "enssdk (TypeScript)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enssdk",
-            },
-            {
-              label: "⚡ Interactive example",
-              link: "/docs/integrate/integration-options/enssdk/example",
-            },
-          ],
+          label: "enskit (React)",
+          link: "/docs/integrate/integration-options/enskit",
         },
         {
           label: "ENS Omnigraph (GraphQL)",
           link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
-          label: "ENSDb Integration Quickstart",
+          label: "ENSDb (SQL)",
           link: "/docs/integrate/integration-options/ensdb",
+        },
+        {
+          label: "ENSDb Writers (Indexers)",
+          link: "/docs/integrate/integration-options/ensdb-writers",
+        },
+        {
+          label: "ENSDb Readers (Custom APIs)",
+          link: "/docs/integrate/integration-options/ensdb-readers",
+        },
+        {
+          label: "ENSNode Plugins (Data Models)",
+          link: "/docs/integrate/integration-options/ensnode-plugins",
         },
         {
           label: "enscli (CLI)",
@@ -148,22 +232,10 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
-          label: "ENSEngine (webhooks)",
+          label: "ENSEngine (Push notifications)",
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],
-    },
-    {
-      label: "Migrate from ENS Subgraph",
-      link: "/docs/integrate/migrate-from-subgraph",
-    },
-    {
-      label: "Hosted Instances",
-      link: "/docs/integrate/hosted-instances",
-    },
-    {
-      label: "AI / LLM Tooling",
-      link: "/docs/integrate/ai-llm",
     },
   ],
 };
