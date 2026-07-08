@@ -99,7 +99,7 @@ describe("PublicConfigBuilder", () => {
       const builder = new PublicConfigBuilder();
 
       // Act
-      const result = await builder.getPublicConfig();
+      const result = builder.getPublicConfig();
 
       // Assert
       expect(getEnsIndexerVersion).toHaveBeenCalledTimes(1);

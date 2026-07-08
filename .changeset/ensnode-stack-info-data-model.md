@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-BREAKING: Dropped both `ensRainbowPublicConfig`, and `ensIndexerPublicConfig` fields nested in the Indexing Status API data model.
+BREAKING: Indexing Status API's `stackInfo.ensApi` no longer includes `ensIndexerPublicConfig`, and `stackInfo.ensIndexer` no longer includes `ensRainbowPublicConfig`. Use `stackInfo.ensIndexer` and `stackInfo.ensRainbow`, respectively, instead.

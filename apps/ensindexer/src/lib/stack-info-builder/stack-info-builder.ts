@@ -30,13 +30,12 @@ export class StackInfoBuilder {
    */
   async getStackInfo(): Promise<EnsIndexerStackInfo> {
     if (typeof this.immutableStackInfo === "undefined") {
-      const [ensDbPublicConfig, ensIndexerPublicConfig, ensRainbowPublicConfig] = await Promise.all(
-        [
-          this.ensDbClient.buildEnsDbPublicConfig(),
-          this.publicConfigBuilder.getPublicConfig(),
-          this.ensRainbowClient.config(),
-        ],
-      );
+      const [ensDbPublicConfig, ensRainbowPublicConfig] = await Promise.all([
+        this.ensDbClient.buildEnsDbPublicConfig(),
+        this.ensRainbowClient.config(),
+      ]);
+
+      const ensIndexerPublicConfig = this.publicConfigBuilder.getPublicConfig();
 
       this.immutableStackInfo = buildEnsIndexerStackInfo(
         ensDbPublicConfig,
