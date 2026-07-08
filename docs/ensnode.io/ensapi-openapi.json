@@ -802,33 +802,6 @@
                           "type": "object",
                           "properties": {
                             "ensIndexerSchemaName": { "type": "string", "minLength": 1 },
-                            "ensRainbowPublicConfig": {
-                              "type": "object",
-                              "properties": {
-                                "serverLabelSet": {
-                                  "type": "object",
-                                  "properties": {
-                                    "labelSetId": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 50,
-                                      "pattern": "^[a-z-]+$"
-                                    },
-                                    "highestLabelSetVersion": { "type": "integer", "minimum": 0 }
-                                  },
-                                  "required": ["labelSetId", "highestLabelSetVersion"]
-                                },
-                                "versionInfo": {
-                                  "type": "object",
-                                  "properties": {
-                                    "commit": { "type": "string", "minLength": 1 },
-                                    "ensRainbow": { "type": "string", "minLength": 1 }
-                                  },
-                                  "required": ["ensRainbow"]
-                                }
-                              },
-                              "required": ["serverLabelSet", "versionInfo"]
-                            },
                             "indexedChainIds": {
                               "type": "array",
                               "items": { "type": "integer", "exclusiveMinimum": 0 },
@@ -871,7 +844,6 @@
                           },
                           "required": [
                             "ensIndexerSchemaName",
-                            "ensRainbowPublicConfig",
                             "indexedChainIds",
                             "isSubgraphCompatible",
                             "clientLabelSet",
@@ -910,91 +882,6 @@
                         "ensApi": {
                           "type": "object",
                           "properties": {
-                            "ensIndexerPublicConfig": {
-                              "type": "object",
-                              "properties": {
-                                "ensIndexerSchemaName": { "type": "string", "minLength": 1 },
-                                "ensRainbowPublicConfig": {
-                                  "type": "object",
-                                  "properties": {
-                                    "serverLabelSet": {
-                                      "type": "object",
-                                      "properties": {
-                                        "labelSetId": {
-                                          "type": "string",
-                                          "minLength": 1,
-                                          "maxLength": 50,
-                                          "pattern": "^[a-z-]+$"
-                                        },
-                                        "highestLabelSetVersion": {
-                                          "type": "integer",
-                                          "minimum": 0
-                                        }
-                                      },
-                                      "required": ["labelSetId", "highestLabelSetVersion"]
-                                    },
-                                    "versionInfo": {
-                                      "type": "object",
-                                      "properties": {
-                                        "commit": { "type": "string", "minLength": 1 },
-                                        "ensRainbow": { "type": "string", "minLength": 1 }
-                                      },
-                                      "required": ["ensRainbow"]
-                                    }
-                                  },
-                                  "required": ["serverLabelSet", "versionInfo"]
-                                },
-                                "indexedChainIds": {
-                                  "type": "array",
-                                  "items": { "type": "integer", "exclusiveMinimum": 0 },
-                                  "minItems": 1
-                                },
-                                "isSubgraphCompatible": { "type": "boolean" },
-                                "clientLabelSet": {
-                                  "type": "object",
-                                  "properties": {
-                                    "labelSetId": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 50,
-                                      "pattern": "^[a-z-]+$"
-                                    },
-                                    "labelSetVersion": { "type": ["number", "null"] }
-                                  },
-                                  "required": ["labelSetId", "labelSetVersion"]
-                                },
-                                "namespace": {
-                                  "type": "string",
-                                  "enum": ["mainnet", "sepolia", "sepolia-v2", "ens-test-env"]
-                                },
-                                "plugins": {
-                                  "type": "array",
-                                  "items": { "type": "string" },
-                                  "minItems": 1
-                                },
-                                "versionInfo": {
-                                  "type": "object",
-                                  "properties": {
-                                    "ponder": { "type": "string", "minLength": 1 },
-                                    "commit": { "type": "string", "minLength": 1 },
-                                    "ensDb": { "type": "string", "minLength": 1 },
-                                    "ensIndexer": { "type": "string", "minLength": 1 },
-                                    "ensNormalize": { "type": "string", "minLength": 1 }
-                                  },
-                                  "required": ["ponder", "ensDb", "ensIndexer", "ensNormalize"]
-                                }
-                              },
-                              "required": [
-                                "ensIndexerSchemaName",
-                                "ensRainbowPublicConfig",
-                                "indexedChainIds",
-                                "isSubgraphCompatible",
-                                "clientLabelSet",
-                                "namespace",
-                                "plugins",
-                                "versionInfo"
-                              ]
-                            },
                             "theGraphFallback": {
                               "oneOf": [
                                 {
@@ -1034,7 +921,7 @@
                               "required": ["ensApi", "ensNormalize"]
                             }
                           },
-                          "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
+                          "required": ["theGraphFallback", "versionInfo"]
                         }
                       },
                       "required": ["ensDb", "ensIndexer", "ensRainbow", "ensApi"]
