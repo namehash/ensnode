@@ -1,6 +1,6 @@
 ---
 title: ENSNode services
-description: Introduction to the services that make up the ENSNode stack, including ENSApi, ENSIndexer, ENSDb, ENSRainbow, ENSAdmin, the planned ENSEngine, and ENSAnalytics.
+description: Introduction to the services that make up the ENSNode stack, including ENSApi, ENSIndexer, ENSDb, ENSRainbow, ENSAdmin, including the planned ENSAnalytics and ENSEngine.
 sidebar:
   label: Overview
   order: 1
@@ -23,61 +23,61 @@ Each ENSNode instance is composed of **a set of services**. Each service has a c
     <img slot="icon" src={ENSAdmin3DImage.src} alt="" aria-hidden="true" class="scale-190 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden" />
   </ENSNodeServiceCard>
 
-<ENSNodeServiceCard
-  title="ENSApi"
-  href="/docs/services/ensapi"
-  description="APIs for building on ENS, including the ENS Omnigraph API."
->
-  <img
-    slot="icon"
-    src={ENSApi3DImage.src}
-    alt=""
-    aria-hidden="true"
-    class="scale-100 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
-  />
-</ENSNodeServiceCard>
+  <ENSNodeServiceCard
+    title="ENSApi"
+    href="/docs/services/ensapi"
+    description="APIs for building on ENS, including the ENS Omnigraph API."
+  >
+    <img
+      slot="icon"
+      src={ENSApi3DImage.src}
+      alt=""
+      aria-hidden="true"
+      class="scale-100 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
+    />
+  </ENSNodeServiceCard>
 
-<ENSNodeServiceCard
-  title="ENSDb"
-  href="/docs/services/ensdb"
-  description="The live, onchain state of ENS in your DB."
->
-  <img
-    slot="icon"
-    src={ENSDb3DImage.src}
-    alt=""
-    aria-hidden="true"
-    class="scale-100 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
-  />
-</ENSNodeServiceCard>
+  <ENSNodeServiceCard
+    title="ENSDb"
+    href="/docs/services/ensdb"
+    description="The live, onchain state of ENS in your DB."
+  >
+    <img
+      slot="icon"
+      src={ENSDb3DImage.src}
+      alt=""
+      aria-hidden="true"
+      class="scale-100 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
+    />
+  </ENSNodeServiceCard>
 
-<ENSNodeServiceCard
-  title="ENSIndexer"
-  href="/docs/services/ensindexer"
-  description='Multichain indexer based on Ponder that combines any number of ENSv1 "Nametables" and the ENSv2 "Namegraphs" into a single unified "ENS&nbsp;Unigraph" indexed data model inside your ENSDb.'
->
-  <img
-    slot="icon"
-    src={ENSIndexer3DImage.src}
-    alt=""
-    aria-hidden="true"
-    class="scale-190 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
-  />
-</ENSNodeServiceCard>
+  <ENSNodeServiceCard
+    title="ENSIndexer"
+    href="/docs/services/ensindexer"
+    description='Multichain indexer based on Ponder that combines any number of ENSv1 "Nametables" and the ENSv2 "Namegraphs" into a single unified "ENS&nbsp;Unigraph" indexed data model inside your ENSDb.'
+  >
+    <img
+      slot="icon"
+      src={ENSIndexer3DImage.src}
+      alt=""
+      aria-hidden="true"
+      class="scale-190 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
+    />
+  </ENSNodeServiceCard>
 
-<ENSNodeServiceCard
-  title="ENSRainbow"
-  href="/docs/services/ensrainbow"
-  description="Heals unknown ENS names."
->
-  <img
-    slot="icon"
-    src={ENSRainbow3DImage.src}
-    alt=""
-    aria-hidden="true"
-    class="scale-175 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
-  />
-</ENSNodeServiceCard>
+  <ENSNodeServiceCard
+    title="ENSRainbow"
+    href="/docs/services/ensrainbow"
+    description="Heals unknown ENS names."
+  >
+    <img
+      slot="icon"
+      src={ENSRainbow3DImage.src}
+      alt=""
+      aria-hidden="true"
+      class="scale-175 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden"
+    />
+  </ENSNodeServiceCard>
 
   <ENSNodeServiceCard title="ENSAnalytics" href="/docs/services/ensanalytics" description="Unlock strong data-based decision making in the ENS DAO about what's really driving ENS growth and engagement — cohorts, behavior, and policy insights on top of ENSDb." />
 
