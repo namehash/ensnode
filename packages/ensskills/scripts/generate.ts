@@ -27,15 +27,18 @@ import prettier from "prettier";
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const SDL_PATH = resolve(SCRIPT_DIR, "../../enssdk/src/omnigraph/generated/schema.graphql");
 const SKILL_PATH = resolve(SCRIPT_DIR, "../skills/omnigraph/SKILL.md");
+const EFP_SKILL_PATH = resolve(SCRIPT_DIR, "../skills/efp-protocol/SKILL.md");
 const EXAMPLE_QUERIES_PATH = resolve(
   SCRIPT_DIR,
   "../../ensnode-sdk/src/omnigraph-api/example-queries.ts",
 );
+const PLUGIN_TYPES_PATH = resolve(SCRIPT_DIR, "../../ensnode-sdk/src/ensindexer/config/types.ts");
 const ENSCLI_SKILL_PATH = resolve(SCRIPT_DIR, "../skills/enscli/SKILL.md");
 const ENSCLI_EXAMPLE_COMMANDS_PATH = resolve(SCRIPT_DIR, "../../enscli/src/example-commands.ts");
 
 interface ExampleQuery {
   id: string;
+  plugin: string;
   query: string;
   variables: { default: Record<string, unknown> };
 }
@@ -125,13 +128,20 @@ function buildSchemaReference(schema: GraphQLSchema): string {
   return sections.join("\n\n");
 }
 
-async function buildExamples(): Promise<string> {
+/**
+ * Renders the example queries tagged with `plugin` into a markdown block. The base `omnigraph` skill
+ * gets the `unigraph` queries; the `efp-protocol` skill gets the `efp` queries — so each skill ships
+ * only the examples that run against the plugin it documents.
+ */
+async function buildExamples(plugin: string): Promise<string> {
   // load dynamically to avoid tsconfig root error
   const { GRAPHQL_API_EXAMPLE_QUERIES } = (await import(EXAMPLE_QUERIES_PATH)) as {
     GRAPHQL_API_EXAMPLE_QUERIES: ExampleQuery[];
   };
   // Skip "hello-world": it's the playground welcome blurb, not a reusable query pattern.
-  return GRAPHQL_API_EXAMPLE_QUERIES.filter((example) => example.id !== "hello-world")
+  return GRAPHQL_API_EXAMPLE_QUERIES.filter(
+    (example) => example.plugin === plugin && example.id !== "hello-world",
+  )
     .map((example) => {
       const query = example.query.trim();
       const variables = JSON.stringify(example.variables.default, null, 2);
@@ -200,12 +210,32 @@ async function writeFormatted(path: string, content: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  // load dynamically to avoid tsconfig root error
+  const { PluginName } = (await import(PLUGIN_TYPES_PATH)) as {
+    PluginName: { Unigraph: string; EFP: string };
+  };
+
   const schema = buildSchema(readFileSync(SDL_PATH, "utf8"));
   let content = readFileSync(SKILL_PATH, "utf8");
   content = replaceRegion(content, "SCHEMA", buildSchemaReference(schema), SKILL_PATH);
-  content = replaceRegion(content, "EXAMPLES", await buildExamples(), SKILL_PATH);
+  content = replaceRegion(
+    content,
+    "EXAMPLES",
+    await buildExamples(PluginName.Unigraph),
+    SKILL_PATH,
+  );
   await writeFormatted(SKILL_PATH, content);
   console.log(`Updated ${SKILL_PATH}`);
+
+  let efpContent = readFileSync(EFP_SKILL_PATH, "utf8");
+  efpContent = replaceRegion(
+    efpContent,
+    "EXAMPLES",
+    await buildExamples(PluginName.EFP),
+    EFP_SKILL_PATH,
+  );
+  await writeFormatted(EFP_SKILL_PATH, efpContent);
+  console.log(`Updated ${EFP_SKILL_PATH}`);
 
   let enscliContent = readFileSync(ENSCLI_SKILL_PATH, "utf8");
   for (const [group, block] of await buildEnscliExamplesByGroup()) {

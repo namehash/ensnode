@@ -6466,5 +6466,569 @@
         }
       }
     }
+  },
+  "efp-follow-graph": {
+    "data": {
+      "account": {
+        "efp": {
+          "primaryList": {
+            "tokenId": "6509"
+          },
+          "following": {
+            "totalCount": 10,
+            "edges": [
+              {
+                "node": {
+                  "address": "0x1b63142628311395ceafeea5667e7c9026c862ca",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "tgerring.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0x2b888954421b424c5d3d9ce9bb67c9bd47537d12",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "lefteris.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0x50ec05ade8280758e2077fcbc08d878d4aef79c3",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "hayden.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0x54becc7560a7be76d72ed76a1f5fee6c5a2a7ab6",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "simona.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0x5b76f5b8fc9d700624f78208132f91ad4e61a1f0",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "barmstrong.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0x648aa14e4424e0825a5ce739c8c68610e143fb79",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "sassal.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0x983110309620d911731ac0932219af06091b6744",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "brantly.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0xb8c2c29ee19d8307cb7255e1cd9cbde883a267d5",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "nick.eth"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0xd7029bdea1c17493893aafe29aad69ef892b8ff2",
+                  "resolve": {
+                    "primaryName": {
+                      "name": null
+                    }
+                  }
+                }
+              },
+              {
+                "node": {
+                  "address": "0xf56345338cb4cddaf915ebef3bfde63e70fe3053",
+                  "resolve": {
+                    "primaryName": {
+                      "name": {
+                        "beautified": "bored.eth"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "followers": {
+            "edges": [
+              {
+                "node": {
+                  "address": "0x00000066ced4c62a0f740de74eb08bc2a1552764"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x000000dcf1190af44f7149b85299f18ce7221024"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x000066b5a8e1e35b7e2f64e24715829647f80000"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x00076993122809055293d8210a60d8265a7e17f3"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x000f16ca1e73a0b6b10e1ed4cc5f8232336c1482"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x0011e9582ac18d9b80204817eaa2e3b544e727aa"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x00173c4cb23e6d876fcb036ba954a2f9cfcafa19"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x00197ff7abdac8ad42152ff9d5bd9e521701a944"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x002153708f11f2651215059eea30820ee4d49ff3"
+                }
+              },
+              {
+                "node": {
+                  "address": "0x003e7b75ff09615ad4a6f763dc7d28e48ed513d9"
+                }
+              }
+            ],
+            "totalCount": 5338
+          }
+        }
+      }
+    }
+  },
+  "efp-who-follows": {
+    "data": {
+      "efp": {
+        "listRecords": {
+          "totalCount": 6085,
+          "edges": [
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": ["top8"],
+                "list": {
+                  "tokenId": "2400",
+                  "user": "0x9760721a78fcff74a61440a06dbcb2a0ab2e4f89"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "31294",
+                  "user": "0x3a4bbb42c18e1bb24edbd6e00aef4ea023da960c"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "39897",
+                  "user": "0x8e79ef9e545fa14e205d89970d50e7caa3456683"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "388",
+                  "user": "0xbe4f0cdf3834bd876813a1037137dcfad79acd99"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "55439",
+                  "user": "0xe4ab754481e555fdd76d93d85b42dcbf56a8ab1e"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "39191",
+                  "user": "0xff2d23446f7726da0512c19525262612c4e83d27"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "16149",
+                  "user": "0x225f137127d9067788314bc7fcc1f36746a3c3b5"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "33148",
+                  "user": "0x3ce7241a8c5c291e50a0d027dd9badff9db1fd7c"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "5056",
+                  "user": "0x52fc2a810b96b333c303e48f95f6f88a2acf5d69"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "52365",
+                  "user": "0xb5a9b9e2aec901d1b857138fc93c932f350a60ed"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "55011",
+                  "user": "0x2a811f1e11636c144a2a062d3d402245a43d4074"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "45610",
+                  "user": "0x7f7720bdb2cb5c13dd30a0c8ab8d0dd553b31caa"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "43738",
+                  "user": "0xdf095ca41af452ed9ed390d8fac260fbdad20976"
+                }
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": null
+              }
+            },
+            {
+              "node": {
+                "tags": [],
+                "list": {
+                  "tokenId": "45079",
+                  "user": "0x2e6728f76d949753f2e7dcee33f8136cf7e4e5f0"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "efp-list": {
+    "data": {
+      "efp": {
+        "list": {
+          "tokenId": "1",
+          "owner": "0xc983ebc9db969782d994627bdffec0ae6efee1b3",
+          "user": "0xc983ebc9db969782d994627bdffec0ae6efee1b3",
+          "manager": "0xc983ebc9db969782d994627bdffec0ae6efee1b3",
+          "storageLocation": {
+            "chainId": 8453,
+            "address": "0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33",
+            "slot": "0x5659892f4e1f565ebd9f7504a28177ca927325e4104d0c6787c7e8a00dcda60c"
+          },
+          "records": {
+            "totalCount": 452,
+            "edges": [
+              {
+                "node": {
+                  "recordData": "0x0000ce08fa224696a819877070bf378e8b131acf",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x000f16ca1e73a0b6b10e1ed4cc5f8232336c1482",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x009ae2d1a7240cfc89095fab06ed24f1641d9169",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x00c7ecc4187f239e09d4cfea5abe6d3c18f923bc",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x021021ccee934b346160342f8d7f59f514c08c56",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x025376e7e7f161a198fb5fc90a220a553836d11a",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x027fc636db3ced7342581baed6eee79f7d1123c3",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x02c5b7c40daaaf3aac3dd2ff39013cdd0f1fb4ae",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0331969e189d63fbc31d771bb04ab44227d748d8",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x035ebd096afa6b98372494c7f08f3402324117d3",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x041d311ac26e478ea6e1753ec354676c452db9d8",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0446bc2beabb16aa542cd99eaff3e63af37125b4",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x049569adb8a1e8a9349e9f1111c7b7993a4612eb",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x054becf10c79afa4e60f75b187837be9fb83867d",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x05977b2fb9b7ab3f3733b34350044a01a388579c",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x05a1ff0a32bc24265bcb39499d0c5d9a6cb2011c",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x06ce84f051ce93c2fe99344bc8c9d2bf92e64409",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x074470b9a32f68de86fac393a10d5cea01c54269",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0865c5de7fe349aa5b7f6ef721f8c2b9cfe5e40d",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x092ad3842dced68b5b6ef9cc602be66924baecdd",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x09a78e1abe7a893c43986dbf7864c79d03860bde",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0c077910e1dc0b5bea1054cce14143e0971f95ce",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0d1f2c041b7f9702903b89057c1f57f1f01a79af",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0d3f5a7a1ee78e743e25c18e66942fcbcd84ccad",
+                  "tags": []
+                }
+              },
+              {
+                "node": {
+                  "recordData": "0x0de5a5d50453e702ad66d3fcf7c986f408019ffd",
+                  "tags": []
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
   }
 }
