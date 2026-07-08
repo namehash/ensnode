@@ -27,10 +27,6 @@ const mockEnsDbPublicConfig = {
 
 const mockEnsIndexerPublicConfig = {
   ensIndexerSchemaName: "ensindexer_0",
-  ensRainbowPublicConfig: {
-    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    versionInfo: { ensRainbow: "1.9.0" },
-  },
   clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   indexedChainIds: new Set([1]),
   isSubgraphCompatible: true,
@@ -77,7 +73,7 @@ function createMockPublicConfigBuilder(
   overrides: Partial<Pick<PublicConfigBuilder, "getPublicConfig">> = {},
 ): PublicConfigBuilder {
   return {
-    getPublicConfig: vi.fn().mockResolvedValue(mockEnsIndexerPublicConfig),
+    getPublicConfig: vi.fn().mockReturnValue(mockEnsIndexerPublicConfig),
     ...overrides,
   } as unknown as PublicConfigBuilder;
 }
@@ -173,7 +169,9 @@ describe("StackInfoBuilder", () => {
 
     it("propagates errors from public config builder", async () => {
       const publicConfigBuilder = createMockPublicConfigBuilder({
-        getPublicConfig: vi.fn().mockRejectedValue(new Error("Config retrieval failed")),
+        getPublicConfig: vi.fn().mockImplementation(() => {
+          throw new Error("Config retrieval failed");
+        }),
       });
 
       const builder = new StackInfoBuilder(

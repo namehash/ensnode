@@ -30,12 +30,6 @@ export const ENSDB_PUBLIC_CONFIG = {
 export const ENSINDEXER_PUBLIC_CONFIG = {
   namespace: "mainnet",
   ensIndexerSchemaName: "ensindexer_0",
-  ensRainbowPublicConfig: {
-    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    versionInfo: {
-      ensRainbow: packageJson.version,
-    },
-  },
   indexedChainIds: [1],
   isSubgraphCompatible: false,
   clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },

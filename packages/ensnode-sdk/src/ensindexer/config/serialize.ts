@@ -21,7 +21,6 @@ export function serializeEnsIndexerPublicConfig(
 ): SerializedEnsIndexerPublicConfig {
   const {
     ensIndexerSchemaName,
-    ensRainbowPublicConfig,
     indexedChainIds,
     isSubgraphCompatible,
     clientLabelSet,
@@ -32,7 +31,6 @@ export function serializeEnsIndexerPublicConfig(
 
   return {
     ensIndexerSchemaName,
-    ensRainbowPublicConfig,
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     isSubgraphCompatible,
     clientLabelSet,

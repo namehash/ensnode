@@ -108,7 +108,6 @@ function createEnsIndexerConfig(
     namespace,
     plugins,
     versionInfo: { ...COMMON_ENSINDEXER_VERSION_INFO },
-    ensRainbowPublicConfig: createEnsRainbowConfig(),
   };
 }
 
@@ -123,15 +122,6 @@ function createEnsApiConfig(
   return {
     versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
     theGraphFallback,
-    ensIndexerPublicConfig: {
-      ...createEnsIndexerConfig(
-        namespace,
-        indexedChainIds,
-        plugins,
-        ensIndexerSchemaName,
-        isSubgraphCompatible,
-      ),
-    },
   };
 }
 function createAlphaEnsIndexerConfig(
@@ -198,32 +188,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
     ensApi: {
       versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
       theGraphFallback: { ...THE_GRAPH_FALLBACK_DISABLED },
-      ensIndexerPublicConfig: {
-        clientLabelSet: {
-          labelSetId: "",
-          labelSetVersion: 0,
-        },
-        versionInfo: {
-          ponder: "",
-          ensDb: "",
-          ensIndexer: "",
-          ensNormalize: "",
-        },
-        indexedChainIds: [11155111],
-        namespace: "sepolia",
-        plugins: ["subgraph"],
-        ensIndexerSchemaName: "DeserializationSchema1.9.0",
-        isSubgraphCompatible: true,
-        ensRainbowPublicConfig: {
-          serverLabelSet: {
-            labelSetId: "",
-            highestLabelSetVersion: -1,
-          },
-          versionInfo: {
-            ensRainbow: "",
-          },
-        },
-      },
     },
     ensDb: createEnsDbConfig(),
     ensIndexer: {
@@ -242,15 +206,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       plugins: ["subgraph"],
       ensIndexerSchemaName: "DeserializationSchema1.9.0",
       isSubgraphCompatible: true,
-      ensRainbowPublicConfig: {
-        versionInfo: {
-          ensRainbow: "",
-        },
-        serverLabelSet: {
-          labelSetId: "",
-          highestLabelSetVersion: -1,
-        },
-      },
     },
     ensRainbow: {
       versionInfo: {

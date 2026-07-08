@@ -18,7 +18,7 @@ import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 const app = new Hono();
 
 app.get("/config", async (c) => {
-  const ensIndexerPublicConfig = await publicConfigBuilder.getPublicConfig();
+  const ensIndexerPublicConfig = publicConfigBuilder.getPublicConfig();
 
   // respond with the serialized public config object
   return c.json(serializeEnsIndexerPublicConfig(ensIndexerPublicConfig));
