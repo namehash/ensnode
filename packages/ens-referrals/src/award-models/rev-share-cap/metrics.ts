@@ -1,6 +1,6 @@
-import type { NormalizedAddress } from "enssdk";
+import type { AccountId } from "enssdk";
 
-import { type PriceUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
+import { accountIdEqual, type PriceUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
@@ -106,11 +106,11 @@ export interface RankedReferrerMetricsRevShareCap extends ReferrerMetricsRevShar
  */
 const validateAdminActionConsistency = (
   metricsAdminAction: AdminAction | null,
-  referrer: NormalizedAddress,
+  referrer: AccountId,
   rules: ReferralProgramRulesRevShareCap,
   context: string,
 ): void => {
-  const expected = rules.adminActions.find((a) => a.referrer === referrer) ?? null;
+  const expected = rules.adminActions.find((a) => accountIdEqual(a.referrer, referrer)) ?? null;
 
   if (expected === null && metricsAdminAction !== null) {
     throw new Error(
@@ -122,7 +122,7 @@ const validateAdminActionConsistency = (
     if (
       metricsAdminAction === null ||
       metricsAdminAction.actionType !== expected.actionType ||
-      metricsAdminAction.referrer !== expected.referrer ||
+      !accountIdEqual(metricsAdminAction.referrer, expected.referrer) ||
       metricsAdminAction.reason !== expected.reason
     ) {
       throw new Error(`${context}: does not match expected action from rules.`);
@@ -161,7 +161,8 @@ export const buildRankedReferrerMetricsRevShareCap = (
   rank: ReferrerRank,
   rules: ReferralProgramRulesRevShareCap,
 ): RankedReferrerMetricsRevShareCap => {
-  const adminAction = rules.adminActions.find((a) => a.referrer === referrer.referrer) ?? null;
+  const adminAction =
+    rules.adminActions.find((a) => accountIdEqual(a.referrer, referrer.referrer)) ?? null;
 
   const result = {
     ...referrer,
@@ -349,15 +350,16 @@ export const validateUnrankedReferrerMetricsRevShareCap = (
 };
 
 /**
- * Build an unranked zero-metrics rev-share-cap referrer record for an address not on the leaderboard.
+ * Build an unranked zero-metrics rev-share-cap referrer record for a referrer not on the leaderboard.
  */
 export const buildUnrankedReferrerMetricsRevShareCap = (
-  referrer: NormalizedAddress,
+  referrer: AccountId,
   rules: ReferralProgramRulesRevShareCap,
 ): UnrankedReferrerMetricsRevShareCap => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
 
-  const adminAction = rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
+  const adminAction =
+    rules.adminActions.find((a) => accountIdEqual(a.referrer, metrics.referrer)) ?? null;
 
   const result = {
     ...metrics,

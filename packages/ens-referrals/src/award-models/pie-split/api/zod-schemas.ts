@@ -1,10 +1,10 @@
 import z from "zod/v4";
 
 import {
+  makeAccountIdSchema,
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
   makeNonNegativeIntegerSchema,
-  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makePriceEthSchema,
   makePriceUsdcSchema,
@@ -39,7 +39,7 @@ export const makeAwardedReferrerMetricsPieSplitSchema = (
   valueLabel: string = "AwardedReferrerMetricsPieSplit",
 ) =>
   z.object({
-    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeAccountIdSchema(`${valueLabel}.referrer`),
     totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
     totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
@@ -65,7 +65,7 @@ export const makeUnrankedReferrerMetricsPieSplitSchema = (
   valueLabel: string = "UnrankedReferrerMetricsPieSplit",
 ) =>
   z.object({
-    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeAccountIdSchema(`${valueLabel}.referrer`),
     totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
     totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),

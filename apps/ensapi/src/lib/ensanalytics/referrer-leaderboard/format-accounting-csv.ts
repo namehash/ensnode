@@ -2,6 +2,7 @@ import {
   type ReferralAccountingRecordRevShareCap,
   SECONDS_PER_YEAR,
 } from "@namehash/ens-referrals";
+import { stringifyAccountId } from "enssdk";
 import { formatUnits } from "viem";
 
 import { getCurrencyInfo, type Price } from "@ensnode/ensnode-sdk";
@@ -77,7 +78,7 @@ const CSV_COLUMNS: ReadonlyArray<{
     value: (r) => formatDurationYears(r.incrementalDuration),
   },
   { header: "Registrant", value: (r) => r.registrant },
-  { header: "Referrer", value: (r) => r.referrer },
+  { header: "Referrer", value: (r) => stringifyAccountId(r.referrer) },
   {
     header: "Incremental Revenue Contribution (Wei)",
     value: (r) => r.tentativeAward.incrementalRevenueContribution.amount.toString(),

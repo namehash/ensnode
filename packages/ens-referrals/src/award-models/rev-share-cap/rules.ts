@@ -1,9 +1,8 @@
-import type { AccountId, Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
+import { type AccountId, type Duration, stringifyAccountId, type UnixTimestamp } from "enssdk";
 
-import { type PriceUsdc, priceUsdc } from "@ensnode/ensnode-sdk";
-import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
+import { accountIdEqual, type PriceUsdc, priceUsdc } from "@ensnode/ensnode-sdk";
+import { makeAccountIdSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { validateNormalizedAddress } from "../../address";
 import { SECONDS_PER_YEAR } from "../../time";
 import {
   type BaseReferralProgramRules,
@@ -35,9 +34,9 @@ export interface AdminActionDisqualification {
   actionType: typeof AdminActionTypes.Disqualification;
 
   /**
-   * The Ethereum address of the affected referrer, as a {@link NormalizedAddress}.
+   * The {@link AccountId} of the affected referrer.
    */
-  referrer: NormalizedAddress;
+  referrer: AccountId;
 
   /**
    * A short message explaining the disqualification.
@@ -55,9 +54,9 @@ export interface AdminActionWarning {
   actionType: typeof AdminActionTypes.Warning;
 
   /**
-   * The Ethereum address of the affected referrer, as a {@link NormalizedAddress}.
+   * The {@link AccountId} of the affected referrer.
    */
-  referrer: NormalizedAddress;
+  referrer: AccountId;
 
   /**
    * A short message explaining the warning.
@@ -111,7 +110,7 @@ export interface ReferralProgramRulesRevShareCap extends BaseReferralProgramRule
   /**
    * Admin actions for this edition.
    *
-   * @invariant No duplicate referrer addresses (a referrer can have at most one admin action).
+   * @invariant No duplicate referrer AccountIds (a referrer can have at most one admin action).
    */
   adminActions: AdminAction[];
 }
@@ -145,8 +144,9 @@ export const validateReferralProgramRulesRevShareCap = (
     );
   }
 
+  const adminActionAccountIdSchema = makeAccountIdSchema("AdminAction.referrer");
   for (const action of rules.adminActions) {
-    validateNormalizedAddress(action.referrer);
+    adminActionAccountIdSchema.parse(action.referrer);
     if (action.reason.trim().length === 0 || action.reason !== action.reason.trim()) {
       throw new Error(
         "ReferralProgramRulesRevShareCap: admin action reason must be a trimmed, non-empty string.",
@@ -154,11 +154,11 @@ export const validateReferralProgramRulesRevShareCap = (
     }
   }
 
-  const adminActionAddresses = rules.adminActions.map((a) => a.referrer);
-  const uniqueAdminActionAddresses = new Set(adminActionAddresses);
-  if (uniqueAdminActionAddresses.size !== adminActionAddresses.length) {
+  const adminActionAccountIds = rules.adminActions.map((a) => stringifyAccountId(a.referrer));
+  const uniqueAdminActionAccountIds = new Set(adminActionAccountIds);
+  if (uniqueAdminActionAccountIds.size !== adminActionAccountIds.length) {
     throw new Error(
-      "ReferralProgramRulesRevShareCap: adminActions must not contain duplicate referrer addresses.",
+      "ReferralProgramRulesRevShareCap: adminActions must not contain duplicate referrer AccountIds.",
     );
   }
 
@@ -218,17 +218,18 @@ export function calcBaseRevenueContribution(
  *
  * A referrer is qualified if they meet the revenue threshold AND are not admin-disqualified.
  *
- * @param referrer - The referrer's address.
+ * @param referrer - The referrer's {@link AccountId}.
  * @param totalBaseRevenueContribution - The referrer's total base revenue contribution.
  * @param rules - The rev-share-cap rules of the referral program.
  */
 export function isReferrerQualifiedRevShareCap(
-  referrer: NormalizedAddress,
+  referrer: AccountId,
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareCap,
 ): boolean {
   const isAdminDisqualified = rules.adminActions.some(
-    (a) => a.referrer === referrer && a.actionType === AdminActionTypes.Disqualification,
+    (a) =>
+      accountIdEqual(a.referrer, referrer) && a.actionType === AdminActionTypes.Disqualification,
   );
   return (
     totalBaseRevenueContribution.amount >= rules.minBaseRevenueContribution.amount &&
