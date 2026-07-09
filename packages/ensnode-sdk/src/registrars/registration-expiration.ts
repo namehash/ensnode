@@ -23,8 +23,8 @@ export function isRegistrationFullyExpired(info: RegistrationExpiryInfo, now: bi
   // no expiry, never expired
   if (info.expiry == null) return false;
 
-  // otherwise it is expired if now >= expiry + grace
-  return now >= info.expiry + (info.gracePeriod ?? 0n);
+  // otherwise it is expired if now > expiry + grace
+  return now > info.expiry + (info.gracePeriod ?? 0n);
 }
 
 /**
