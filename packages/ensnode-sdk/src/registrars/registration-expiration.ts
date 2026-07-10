@@ -34,5 +34,5 @@ export function isRegistrationInGracePeriod(info: RegistrationExpiryInfo, now: b
   if (info.expiry == null) return false;
   if (info.gracePeriod == null) return false;
 
-  return info.expiry <= now && info.expiry + info.gracePeriod > now;
+  return info.expiry <= now && info.expiry + info.gracePeriod >= now;
 }

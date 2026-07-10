@@ -50,7 +50,7 @@ describe("registration expiration", () => {
       { now: 999n, expected: false, description: "before expiry" },
       { now: 1000n, expected: true, description: "at expiry" },
       { now: 1050n, expected: true, description: "during grace period" },
-      { now: 1100n, expected: false, description: "at expiry + grace period" },
+      { now: 1100n, expected: true, description: "at expiry + grace period" },
       { now: 1101n, expected: false, description: "after expiry + grace period" },
     ])("returns $expected when $description", ({ now, expected }) => {
       expect(isRegistrationInGracePeriod({ expiry, gracePeriod }, now)).toBe(expected);
