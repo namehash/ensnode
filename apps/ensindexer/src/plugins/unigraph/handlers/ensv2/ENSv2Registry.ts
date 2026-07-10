@@ -103,10 +103,15 @@ export default function () {
           `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration, { pretty: true })}`,
         );
       }
-    } else {
-      // Invariant: if this is a Registration, unless it is a Reservation, it should be fully expired
+    } else if (registration) {
+      // There's an existing Registration, so we need to handle it carefully.
+      // For a reverse name registration, the registrant ID value is guaranteed to end with the label value.
+      const isReverseNameRegistration =
+        registration?.registrantId && registration.registrantId === `0x${label}`;
+
+      // Invariant: if this is a Registration, unless it is a Reservation or a reverse name Registration, it should be fully expired
       if (
-        registration &&
+        !isReverseNameRegistration &&
         registration.type !== "ENSv2RegistryReservation" &&
         !isRegistrationFullyExpired(registration, event.block.timestamp)
       ) {
