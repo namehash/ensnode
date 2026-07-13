@@ -1,5 +1,11 @@
 # ensskills
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2325](https://github.com/namehash/ensnode/pull/2325) [`9fd6918`](https://github.com/namehash/ensnode/commit/9fd6918dcd1f54d8f5fa9686ce753f0f3cc5f3a1) Thanks [@shrugs](https://github.com/shrugs)! - Adds an `efp-protocol` skill orienting agents on the Ethereum Follow Protocol: the onchain social graph data model (lists, list records, tags, storage locations, account metadata), primary-list validation, `block`/`mute` follower semantics, and how EFP surfaces in the Omnigraph via `Query.efp` / `Account.efp`. The `omnigraph` skill now declares `efp-protocol` as a conditional dependency, to be loaded when a query touches EFP fields.
+
 ## 1.16.0
 
 ### Minor Changes

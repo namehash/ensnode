@@ -1,5 +1,21 @@
 # @ensnode/ensdb-sdk
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2296](https://github.com/namehash/ensnode/pull/2296) [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the `efp.schema.ts` EFP plugin tables to the Abstract ENSIndexer Schema.
+
+- [#2329](https://github.com/namehash/ensnode/pull/2329) [`eb33f1d`](https://github.com/namehash/ensnode/commit/eb33f1df137c00d17840bb99ecb072ced49259a6) Thanks [@shrugs](https://github.com/shrugs)! - Add public schema and ENSNode metadata helpers. `EnsDbReader` now exposes `schemaExists(schemaName)` and a public, typed `getEnsNodeMetadata({ key })` that returns the full `{ key, value }` record. `EnsDbWriter` now exposes `dropSchema(schemaName)`, `renameSchema(from, to)`, and a public `writeEnsNodeMetadata(metadata)` that re-keys a `SerializedEnsNodeMetadata` record to the writer's ENSIndexer schema. `SerializedEnsNodeMetadata` is now re-exported from the package entrypoint.
+
+- [#2346](https://github.com/namehash/ensnode/pull/2346) [`ac07f68`](https://github.com/namehash/ensnode/commit/ac07f6807030386b1a226c84d08523d41a0635e0) Thanks [@tk-o](https://github.com/tk-o)! - Updated `isReady()` method in `EnsDbReader` to check for relevant database schemas existence.
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`566cab2`](https://github.com/namehash/ensnode/commit/566cab2e064496c3f248c1f22056a7c7e89f5b14), [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc)]:
+  - enssdk@1.17.0
+  - @ensnode/ensnode-sdk@1.17.0
+
 ## 1.16.0
 
 ### Minor Changes
