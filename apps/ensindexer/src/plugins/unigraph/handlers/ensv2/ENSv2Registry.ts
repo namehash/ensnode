@@ -1,6 +1,7 @@
 import {
   type AccountId,
   asLiteralLabel,
+  isNormalizedAddress,
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
@@ -103,10 +104,21 @@ export default function () {
           `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration, { pretty: true })}`,
         );
       }
-    } else {
-      // Invariant: if this is a Registration, unless it is a Reservation, it should be fully expired
+    } else if (registration) {
+      // There's an existing Registration record, so we need to handle it carefully.
+      // Registrations for reverse names are a special case, since they can
+      // never expire. Therefore, we need to skip the expiration check for
+      // reverse name registrations and allow a new Registration record to be
+      // created for the same label.
+      // For a reverse name registration, the registrant ID is the label with `0x` prefix.
+      const maybeReverseNameLabel = `0x${label}`;
+      const isReverseNameRegistration =
+        isNormalizedAddress(maybeReverseNameLabel) &&
+        registration.registrantId === maybeReverseNameLabel;
+
+      // Invariant: if this is a Registration, unless it is a Reservation or a reverse name Registration, it should be fully expired
       if (
-        registration &&
+        !isReverseNameRegistration &&
         registration.type !== "ENSv2RegistryReservation" &&
         !isRegistrationFullyExpired(registration, event.block.timestamp)
       ) {
