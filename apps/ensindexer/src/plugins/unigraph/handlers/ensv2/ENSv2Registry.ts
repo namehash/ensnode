@@ -110,7 +110,7 @@ export default function () {
       // never expire. Therefore, we need to skip the expiration check for
       // reverse name registrations and allow a new Registration record to be
       // created for the same label.
-      // For a reverse name registration, the label matches the registrant ID.
+      // For a reverse name registration, the registrant ID is the label with `0x` prefix.
       const maybeReverseNameLabel = `0x${label}`;
       const isReverseNameRegistration =
         isNormalizedAddress(maybeReverseNameLabel) &&
