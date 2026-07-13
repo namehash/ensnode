@@ -16,6 +16,7 @@ export {
   type IndexingMetadataContextUninitialized,
 } from "@ensnode/ensnode-sdk";
 
+import { ENSNODE_SCHEMA_NAME } from "../ensnode";
 import {
   type AbstractEnsIndexerSchema,
   buildEnsDbDrizzleClient,
@@ -154,6 +155,17 @@ export class EnsDbReader<
    */
   async isReady(): Promise<boolean> {
     try {
+      const [ensNodeSchemaExists, ensDbWriterSchemaExists] = await Promise.all([
+        this.schemaExists(ENSNODE_SCHEMA_NAME),
+        this.schemaExists(this.ensIndexerSchemaName),
+      ]);
+
+      // If either the ENSNode Schema or the ENSIndexer Schema does not exist in
+      // the ENSDb instance then it is not ready to serve queries.
+      if (!ensNodeSchemaExists || !ensDbWriterSchemaExists) {
+        return false;
+      }
+
       const indexingMetadataContext = await this.getIndexingMetadataContext();
       return indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized;
     } catch {

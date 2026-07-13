@@ -6,10 +6,12 @@ vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   },
   makeLogger: vi.fn(() => ({
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   })),
 }));
 
@@ -25,6 +27,9 @@ vi.mock("@ensnode/ensdb-sdk", async (importOriginal) => {
     async isHealthy() {
       return true;
     }
+    async isReady() {
+      return true;
+    }
     async destroy() {}
   }
 
@@ -35,29 +40,38 @@ vi.mock("@ensnode/ensdb-sdk", async (importOriginal) => {
   };
 });
 
-vi.mock("@/cache/indexing-status.cache", () => ({
-  indexingStatusCache: {
+vi.mock("@/cache/indexing-status.cache", () => {
+  const indexingStatusCache = {
     read: vi.fn().mockResolvedValue({}),
     destroy: vi.fn(),
-  },
-}));
+  };
+  return {
+    buildIndexingStatusCache: vi.fn(() => indexingStatusCache),
+  };
+});
 
-vi.mock("@/cache/stack-info.cache", () => ({
-  stackInfoCache: {
+vi.mock("@/cache/stack-info.cache", () => {
+  const stackInfoCache = {
     read: vi.fn().mockResolvedValue({}),
     destroy: vi.fn(),
     peek: vi.fn().mockReturnValue({
       ensIndexer: { namespace: "mainnet" },
     }),
-  },
-}));
+  };
+  return {
+    buildStackInfoCache: vi.fn(() => stackInfoCache),
+  };
+});
 
-vi.mock("@/cache/referral-program-edition-set.cache", () => ({
-  referralProgramEditionConfigSetCache: {
+vi.mock("@/cache/referral-program-edition-set.cache", () => {
+  const referralProgramEditionConfigSetCache = {
     read: vi.fn().mockResolvedValue({}),
     destroy: vi.fn(),
-  },
-}));
+  };
+  return {
+    buildReferralProgramEditionConfigSetCache: vi.fn(() => referralProgramEditionConfigSetCache),
+  };
+});
 
 vi.mock("viem", async (importOriginal) => {
   const mod = await importOriginal<typeof import("viem")>();

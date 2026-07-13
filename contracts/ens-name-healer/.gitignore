@@ -1,0 +1,8 @@
+# Foundry build artifacts
+/out
+/cache
+
+# Deployment broadcast logs (contain tx hashes, gas costs, etc.)
+# Commit these deliberately when you want to record a deployment.
+/broadcast
+.env

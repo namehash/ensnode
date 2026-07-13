@@ -159,21 +159,7 @@ describe("buildEnsApiPublicConfig", () => {
         canFallback: false,
         reason: "not-subgraph-compatible",
       },
-      ensIndexerPublicConfig,
     });
-  });
-
-  it("preserves the complete ENSIndexer public config structure", () => {
-    const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
-    const ensApiConfig = {
-      port: ENSApi_DEFAULT_PORT,
-      theGraphApiKey: "my-api-key",
-      referralProgramEditionConfigSetUrl: undefined,
-    };
-
-    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
-
-    expect(result.ensIndexerPublicConfig).toStrictEqual(ensIndexerPublicConfig);
   });
 
   it("includes the theGraphFallback and redacts api key", () => {

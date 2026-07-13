@@ -14,6 +14,12 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 FROM deps AS runner
 WORKDIR /app/apps/ensapi
 ENV NODE_ENV=production
+# Read the build arg
+ARG GIT_COMMIT
+# Set the GIT_COMMIT as an environment variable for the app runtime.
+ENV GIT_COMMIT=$GIT_COMMIT
+# Attach the GIT_COMMIT as a label for the image, so it can be inspected later.
+LABEL org.opencontainers.image.revision=$GIT_COMMIT
 EXPOSE 4334
 
 CMD ["pnpm", "start"]

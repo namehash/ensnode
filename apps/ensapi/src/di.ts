@@ -6,17 +6,17 @@ import { type EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
-import { type IndexingStatusCache, indexingStatusCache } from "@/cache/indexing-status.cache";
+import { buildIndexingStatusCache, type IndexingStatusCache } from "@/cache/indexing-status.cache";
 import {
+  buildReferralProgramEditionConfigSetCache,
   type ReferralProgramEditionConfigSetCache,
-  referralProgramEditionConfigSetCache,
 } from "@/cache/referral-program-edition-set.cache";
-import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
-import { stackInfoCache } from "@/cache/stack-info.cache";
+import { buildStackInfoCache, type EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
 import type { EnsApiConfig } from "@/config/config.schema";
 import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
 import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
+import { waitForEnsDbToBeReady } from "@/lib/ensdb";
 import { makeLogger } from "@/lib/logger";
 import { buildRootChainPublicClient } from "@/lib/public-client";
 
@@ -164,7 +164,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get indexingStatusCache(): IndexingStatusCache {
       if (instances.indexingStatusCache === undefined) {
-        instances.indexingStatusCache = indexingStatusCache;
+        instances.indexingStatusCache = buildIndexingStatusCache(context.ensDbClient);
       }
 
       return instances.indexingStatusCache;
@@ -172,7 +172,9 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get referralProgramEditionConfigSetCache(): ReferralProgramEditionConfigSetCache {
       if (instances.referralProgramEditionConfigSetCache === undefined) {
-        instances.referralProgramEditionConfigSetCache = referralProgramEditionConfigSetCache;
+        instances.referralProgramEditionConfigSetCache = buildReferralProgramEditionConfigSetCache(
+          context.ensApiConfig.referralProgramEditionConfigSetUrl,
+        );
       }
 
       return instances.referralProgramEditionConfigSetCache;
@@ -180,7 +182,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get stackInfoCache(): EnsNodeStackInfoCache {
       if (instances.stackInfoCache === undefined) {
-        instances.stackInfoCache = stackInfoCache;
+        instances.stackInfoCache = buildStackInfoCache(context.ensDbClient, context.ensApiConfig);
       }
 
       return instances.stackInfoCache;
@@ -265,15 +267,16 @@ class EnsApiDiContainer {
         throw new Error("ENSDb health check failed");
       }
 
+      // Wait for ENSDb to be ready for handling queries before proceeding with further steps.
+      await waitForEnsDbToBeReady(this.context.ensDbClient);
+
       logger.info(
         { ensIndexerSchemaName: this.context.ensDbConfig.ensIndexerSchemaName },
         "Successfully connected to ENSDb",
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      throw new Error(
-        `DI container initialization failed: could not connect to ENSDb due to ${errorMessage}`,
-      );
+      throw new Error(`DI container initialization failed: ${errorMessage}`);
     }
 
     try {

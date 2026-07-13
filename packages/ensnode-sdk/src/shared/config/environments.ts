@@ -1,3 +1,12 @@
+export interface GitEnvironment {
+  /**
+   * A 40-character commit hash of the codebase.
+   *
+   * This can be used to identify the exact version of the code running in a particular environment.
+   */
+  GIT_COMMIT?: string;
+}
+
 /**
  * Environment variables for ENSDb configuration.
  */

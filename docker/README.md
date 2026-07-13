@@ -21,6 +21,24 @@ All commands are run from the **monorepo root**.
 > docker compose -f docker/docker-compose.yml config
 > ```
 
+## Build-time environment
+
+The ENSNode service images (`ensindexer`, `ensapi`, `ensrainbow`) bake a `GIT_COMMIT` value into their public config's `versionInfo.commit`. When building these docker images, you can pass the `GIT_COMMIT` build arg in order to "bake in" the commit reference into each docker image.
+
+### Docker compose
+
+```bash
+GIT_COMMIT=$(git rev-parse HEAD) docker compose -f docker/docker-compose.yml up --build
+```
+
+### Docker build
+
+```bash
+docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) -f apps/ensapi/Dockerfile -t ghcr.io/namehash/ensnode/ensapi:latest .
+docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .
+docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .
+```
+
 ## Use cases
 
 ### Mainnet / Sepolia
