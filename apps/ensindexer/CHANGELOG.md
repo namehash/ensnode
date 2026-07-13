@@ -1,5 +1,31 @@
 # ensindexer
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2296](https://github.com/namehash/ensnode/pull/2296) [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the EFP (Ethereum Follow Protocol) plugin (`efp`). Enabling it will index EFP list NFTs, records, tags, and account metadata into ENSDb's `efp_*` tables and will enable the `Query.efp` and `Account.efp` fields in the Omnigraph API.
+
+- [#2176](https://github.com/namehash/ensnode/pull/2176) [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af) Thanks [@shrugs](https://github.com/shrugs)! - Replace the global `START_BLOCK`/`END_BLOCK` indexing-range configuration with per-chain end blocks via `END_BLOCK_<chainId>` environment variables (e.g. `END_BLOCK_1`, `END_BLOCK_8453`). Each constrains the indexing end block of its chain independently and MAY be set across any number of indexed chains. This enables deterministic, reproducible multichain checkpoints where every indexed chain stops at a block corresponding to a shared timestamp.
+
+### Patch Changes
+
+- [#2339](https://github.com/namehash/ensnode/pull/2339) [`ffc2d49`](https://github.com/namehash/ensnode/commit/ffc2d49f346844bda73809b97c8908c6a6a662c2) Thanks [@shrugs](https://github.com/shrugs)! - Domains composed of Labels that are healed after discovery now have their Canonical Names correctly updated.
+
+- [#2219](https://github.com/namehash/ensnode/pull/2219) [`db70772`](https://github.com/namehash/ensnode/commit/db70772012aac420ab133dc954c3680d991958ef) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `PONDER_STATEMENT_TIMEOUT` setting to manage database timeouts more granularly.
+
+- [#2318](https://github.com/namehash/ensnode/pull/2318) [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3) Thanks [@shrugs](https://github.com/shrugs)! - Updates the `sepolia-v2` ENS Namespace with the latest deployment addresses.
+
+- [#2350](https://github.com/namehash/ensnode/pull/2350) [`566cab2`](https://github.com/namehash/ensnode/commit/566cab2e064496c3f248c1f22056a7c7e89f5b14) Thanks [@tk-o](https://github.com/tk-o)! - Updated ENSv2Registry handling for non-expiring reverse-name registrations.
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`eb33f1d`](https://github.com/namehash/ensnode/commit/eb33f1df137c00d17840bb99ecb072ced49259a6), [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`566cab2`](https://github.com/namehash/ensnode/commit/566cab2e064496c3f248c1f22056a7c7e89f5b14), [`ac07f68`](https://github.com/namehash/ensnode/commit/ac07f6807030386b1a226c84d08523d41a0635e0), [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc), [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3)]:
+  - @ensnode/datasources@1.17.0
+  - @ensnode/ensdb-sdk@1.17.0
+  - enssdk@1.17.0
+  - @ensnode/ensnode-sdk@1.17.0
+  - @ensnode/ensrainbow-sdk@1.17.0
+  - @ensnode/ponder-sdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

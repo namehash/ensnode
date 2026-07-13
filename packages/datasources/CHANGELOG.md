@@ -1,5 +1,18 @@
 # @ensnode/ens-deployments
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2296](https://github.com/namehash/ensnode/pull/2296) [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the `EFP*` Datasources on the `mainnet` and `ens-test-env` namespaces.
+
+### Patch Changes
+
+- [#2318](https://github.com/namehash/ensnode/pull/2318) [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3) Thanks [@shrugs](https://github.com/shrugs)! - Updates the `sepolia-v2` ENS Namespace with the latest deployment addresses.
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20)]:
+  - enssdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensdb-cli",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "private": true,
   "type": "module",
   "description": "Internal CLI to dump/load ENSIndexer schemas (plus their ENSNode metadata) between ENSDb instances.",

@@ -1,5 +1,25 @@
 # @ensnode/ensnode-sdk
 
+## 1.17.0
+
+### Minor Changes
+
+- [#2176](https://github.com/namehash/ensnode/pull/2176) [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af) Thanks [@shrugs](https://github.com/shrugs)! - `buildIndexedBlockranges` now accepts a `chainEndBlocks: ReadonlyMap<ChainId, number>` (per-chain end blocks via `END_BLOCK_<chainId>`) instead of a single `globalBlockrangeEndBlock: number | undefined`. The chain's end block now caps each contract's indexed range, mirroring the Ponder config path.
+
+- [#2347](https://github.com/namehash/ensnode/pull/2347) [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba) Thanks [@tk-o](https://github.com/tk-o)! - BREAKING: Dropped `ensRainbowPublicConfig` field from `EnsIndexerPublicConfig` data model, and `ensIndexerPublicConfig` from `EnsApiPublicConfig` data model.
+
+- [#2347](https://github.com/namehash/ensnode/pull/2347) [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba) Thanks [@tk-o](https://github.com/tk-o)! - BREAKING: Indexing Status API's `stackInfo.ensApi` no longer includes `ensIndexerPublicConfig`, and `stackInfo.ensIndexer` no longer includes `ensRainbowPublicConfig`. Use `stackInfo.ensIndexer` and `stackInfo.ensRainbow`, respectively, instead.
+
+- [#2344](https://github.com/namehash/ensnode/pull/2344) [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc) Thanks [@shrugs](https://github.com/shrugs)! - Removes the deprecated `PluginName.ENSv2` (`"ensv2"`) enum member. It was retained for one release as a backwards-compatible alias for `PluginName.Unigraph` and is now fully removed; use `PluginName.Unigraph` (`"unigraph"`) instead.
+
+### Patch Changes
+
+- [#2350](https://github.com/namehash/ensnode/pull/2350) [`566cab2`](https://github.com/namehash/ensnode/commit/566cab2e064496c3f248c1f22056a7c7e89f5b14) Thanks [@tk-o](https://github.com/tk-o)! - Aligned `isRegistrationFullyExpired` and `isRegistrationInGracePeriod` helpers with onchain logic.
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3)]:
+  - @ensnode/datasources@1.17.0
+  - enssdk@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

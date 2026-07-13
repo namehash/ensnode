@@ -1,5 +1,13 @@
 # @docs/ensnode
 
+## 1.17.0
+
+### Patch Changes
+
+- Updated dependencies [[`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`566cab2`](https://github.com/namehash/ensnode/commit/566cab2e064496c3f248c1f22056a7c7e89f5b14), [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc)]:
+  - @ensnode/ensnode-sdk@1.17.0
+  - @namehash/namehash-ui@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes

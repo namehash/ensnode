@@ -1,5 +1,16 @@
 # @ensnode/integration-test-env
 
+## 1.17.0
+
+### Patch Changes
+
+- Updated dependencies [[`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`6542c89`](https://github.com/namehash/ensnode/commit/6542c89569add9fd315bb1f10a9263f59d52da20), [`eb33f1d`](https://github.com/namehash/ensnode/commit/eb33f1df137c00d17840bb99ecb072ced49259a6), [`edf120e`](https://github.com/namehash/ensnode/commit/edf120e13980ceccf075dede9f8dbfd10c5353af), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`af444c3`](https://github.com/namehash/ensnode/commit/af444c32a9afa5ed741e8b6dbbeafdfadf90f2ba), [`566cab2`](https://github.com/namehash/ensnode/commit/566cab2e064496c3f248c1f22056a7c7e89f5b14), [`ac07f68`](https://github.com/namehash/ensnode/commit/ac07f6807030386b1a226c84d08523d41a0635e0), [`6abf99b`](https://github.com/namehash/ensnode/commit/6abf99b9bca9a54cef209e2ef32433397efa31dc), [`eaab1bf`](https://github.com/namehash/ensnode/commit/eaab1bffdc0db0f61ccdd06efe0f63aaddf709e3)]:
+  - @ensnode/datasources@1.17.0
+  - @ensnode/ensdb-sdk@1.17.0
+  - enssdk@1.17.0
+  - @ensnode/ensnode-sdk@1.17.0
+  - @ensnode/shared-configs@1.17.0
+
 ## 1.16.0
 
 ### Patch Changes
