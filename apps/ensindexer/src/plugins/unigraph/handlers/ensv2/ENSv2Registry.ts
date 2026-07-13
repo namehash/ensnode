@@ -1,6 +1,7 @@
 import {
   type AccountId,
   asLiteralLabel,
+  isNormalizedAddress,
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
@@ -109,9 +110,11 @@ export default function () {
       // never expire. Therefore, we need to skip the expiration check for
       // reverse name registrations and allow a new Registration record to be
       // created for the same label.
-      // For a reverse name registration, the registrant ID value is
-      // guaranteed to match the label value.
-      const isReverseNameRegistration = registration.registrantId === `0x${label}`;
+      // For a reverse name registration, the label matches the registrant ID.
+      const maybeReverseNameLabel = `0x${label}`;
+      const isReverseNameRegistration =
+        isNormalizedAddress(maybeReverseNameLabel) &&
+        registration.registrantId === maybeReverseNameLabel;
 
       // Invariant: if this is a Registration, unless it is a Reservation or a reverse name Registration, it should be fully expired
       if (
