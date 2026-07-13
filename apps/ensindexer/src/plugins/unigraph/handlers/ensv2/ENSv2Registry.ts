@@ -110,7 +110,7 @@ export default function () {
       // reverse name registrations and allow a new Registration record to be
       // created for the same label.
       // For a reverse name registration, the registrant ID value is
-      // guaranteed to end with the label value.
+      // guaranteed to match the label value.
       const isReverseNameRegistration = registration.registrantId === `0x${label}`;
 
       // Invariant: if this is a Registration, unless it is a Reservation or a reverse name Registration, it should be fully expired
