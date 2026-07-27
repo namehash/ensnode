@@ -3,6 +3,8 @@ packages:
   - docs/*
   - examples/*
   - packages/*
+  # TODO: remove once we can move into `examples` folder enskit-example
+  - packages/ensnode-react/example
 
 catalog:
   "@adraffy/ens-normalize": 1.11.1
