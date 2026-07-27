@@ -68,6 +68,7 @@ export default function CodePlayground({
         view: stackBlitzViewForPlayground(view),
         // embed project should use light theme because it's used in the docs
         theme: "light",
+        crossOriginIsolated: true,
       }) as EmbedOptions,
     [resolvedOpenFile, terminalHeight, height, view],
   );
