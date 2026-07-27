@@ -7,12 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "New main environment (green or blue)"
+        description: "New main environment"
         required: true
         type: choice
         options:
           - green
           - blue
+          - yellow
 
 jobs:
   switch-environment:
@@ -23,7 +24,6 @@ jobs:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -35,15 +35,18 @@ jobs:
         run: |
           case "$TARGET_ENVIRONMENT" in
             "green")
-              echo "SLACK_TITLE=:large_green_circle: GREEN Environment Activated" >> "$GITHUB_ENV"
-              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+              echo "SLACK_TITLE=:large_green_circle: ENSNode GREEN Environment Activated" >> "$GITHUB_ENV"
               ;;
             "blue")
-              echo "SLACK_TITLE=:large_blue_circle: BLUE Environment Activated" >> "$GITHUB_ENV"
-              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+              echo "SLACK_TITLE=:large_blue_circle: ENSNode BLUE Environment Activated" >> "$GITHUB_ENV"
+              ;;
+            "yellow")
+              echo "SLACK_TITLE=:large_yellow_circle: ENSNode YELLOW Environment Activated" >> "$GITHUB_ENV"
               ;;
             *)
-              echo "SLACK_TITLE=:large_red_circle: Unrecognized Environment Activated" >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=:large_red_circle: Unrecognized ENSNode Environment Activated" >> "$GITHUB_ENV"
+              exit 1
+              ;;
           esac
 
       - name: Switch Traefik Routing
@@ -86,9 +89,6 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
-          # ENSDB PLAYGROUND
-          redis-cli -u $REDIS_URL SET traefik/http/routers/ensdb-playground-router/service "${TARGET_ENVIRONMENT}-ensdb-playground"
-
           # ENSRAINBOW
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
 
@@ -101,8 +101,7 @@ jobs:
           vercel_team_slug: namehash
           vercel_project_id: prj_nKcHTO12hq9kcgascQMq4xokRhwp
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          railway_environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          ensnode_environment: ${{ inputs.target }}
 
       - name: Promote Example App Vercel Deployment
         uses: ./.github/actions/promote_vercel_deployment
@@ -110,8 +109,7 @@ jobs:
           vercel_team_slug: namehash
           vercel_project_id: prj_Ux80vjjNyDfXMNvPEQo4zlx6Eq6D
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          railway_environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+          ensnode_environment: ${{ inputs.target }}
 
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification

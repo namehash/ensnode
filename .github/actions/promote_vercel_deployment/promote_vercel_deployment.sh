@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Identifies the commit sha of the ENSIndexer image deployed to the active Railway environment
+# Identifies the commit sha of the ENSIndexer image deployed to the active ENSNode environment
 # and promotes the Vercel deployment with that sha to production for the given Vercel project.
 # Ensures exact version matching between the active ENSNode and the production Vercel deployment.
 
@@ -21,44 +21,43 @@ if [ -z "${VERCEL_TOKEN:-}" ]; then
   exit 1
 fi
 
-if [ -z "${RAILWAY_TOKEN:-}" ]; then
-  echo "Error: RAILWAY_TOKEN is not set or is empty"
+if [ -z "${ENSNODE_ENVIRONMENT:-}" ]; then
+  echo "Error: ENSNODE_ENVIRONMENT is not set or is empty"
   exit 1
 fi
 
-if [ -z "${RAILWAY_ENVIRONMENT_ID:-}" ]; then
-  echo "Error: RAILWAY_ENVIRONMENT_ID is not set or is empty"
-  exit 1
-fi
+case "$ENSNODE_ENVIRONMENT" in
+  green|blue|yellow)
+    ;;
+  *)
+    echo "Error: ENSNODE_ENVIRONMENT must be one of: green, blue, yellow (got: $ENSNODE_ENVIRONMENT)"
+    exit 1
+    ;;
+esac
 
-echo "Targeting Railway Environment: $RAILWAY_ENVIRONMENT_ID"
+echo "Targeting ENSNode Environment: $ENSNODE_ENVIRONMENT"
 echo "Targeting Vercel Project: $VERCEL_PROJECT_ID"
 
-# first, get deployed ENSIndexer image from Railway Environment
-RAILWAY_SERVICES_OUTPUT=$(curl \
-  --request POST \
+# first, get the deployed ENSNode version from the ENSApi indexing-status endpoint
+INDEXING_STATUS_URL="https://api.alpha.${ENSNODE_ENVIRONMENT}.ensnode.io/api/indexing-status"
+ENSNODE_VERSION=$(curl \
   --silent \
   --show-error \
-  --url https://backboard.railway.app/graphql/v2 \
-  --header "Authorization: Bearer $RAILWAY_TOKEN" \
-  --header 'Content-Type: application/json' \
-  --data "{\"query\": \"{ environment(id: \\\"$RAILWAY_ENVIRONMENT_ID\\\") { serviceInstances { edges { node { source { image } } } } } }\"}")
+  --fail \
+  --url "$INDEXING_STATUS_URL" | \
+  jq -r '.stackInfo.ensIndexer.versionInfo.ensIndexer')
 
-if [ $? -ne 0 ]; then
-  echo "Error: curl command failed. Output:"
-  echo "$RAILWAY_SERVICES_OUTPUT"
+echo "Found ENSNode version: $ENSNODE_VERSION"
+
+if [ -z "$ENSNODE_VERSION" ] || [ "$ENSNODE_VERSION" = "null" ]; then
+  echo "Error: Could not resolve ENSNode version from $INDEXING_STATUS_URL"
   exit 1
 fi
 
-# get the first ensindexer image
-ENSINDEXER_IMAGE=$(echo "$RAILWAY_SERVICES_OUTPUT" | jq -r '.data.environment.serviceInstances.edges[].node.source.image | select(type == "string" and startswith("ghcr.io/namehash/ensnode/ensindexer"))' | head -n1)
+# the version is the image tag for the deployed ENSNode images
+ENSINDEXER_IMAGE="ghcr.io/namehash/ensnode/ensindexer:${ENSNODE_VERSION}"
 
-echo "Found ENSIndexer image: $ENSINDEXER_IMAGE"
-
-if [ -z "$ENSINDEXER_IMAGE" ]; then
-  echo "Error: Could not find ENSIndexer image for the environment."
-  exit 1
-fi
+echo "Using ENSIndexer image: $ENSINDEXER_IMAGE"
 
 # get commit sha from labels of the docker image
 ENSINDEXER_COMMIT_SHA=$(skopeo inspect docker://$ENSINDEXER_IMAGE --override-arch amd64 --override-os linux | jq -r '.Labels."org.opencontainers.image.revision"')
