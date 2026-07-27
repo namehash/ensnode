@@ -9,7 +9,7 @@ import HostedInstanceVersionWarning from "@components/molecules/HostedInstanceVe
 
 We're building the infrastructure to make ENS a first-class citizen for AI agents.
 
-The foundation for how developers and their AI agents reach for ENS is [`ensskills`](/docs/integrate/integration-options/ensskills), that teach your AI assistant about ENS, ENSNode, the ENS Omnigraph, and how to drive [`enscli`](/docs/integrate/integration-options/enscli) — an agent- and human-friendly CLI — on your behalf.
+The foundation for how developers and their AI agents reach for ENS is [`ensskills`](/docs/integrate/integration-options/ensskills), which teach your AI assistant about ENS, ENSNode, the ENS Omnigraph, and how to drive [`enscli`](/docs/integrate/integration-options/enscli) — an agent- and human-friendly CLI — on your behalf.
 
 <HostedInstanceVersionWarning variant="skills" />
 
@@ -36,6 +36,8 @@ Add `ensskills` and [`skills-npm`](https://github.com/antfu/skills-npm) to your 
 npm install   # symlinks the skills for your detected agents
 ```
 
+Use this path when you're already in a Node project and want skills to stay synced automatically via `prepare`.
+
 ## Quickstart (`npx skills`)
 
 Not in a Node project? [`skills`](https://github.com/vercel-labs/skills) installs every ENS skill straight from the repo, pinned to the matching `v…` release tag:
@@ -45,9 +47,21 @@ Not in a Node project? [`skills`](https://github.com/vercel-labs/skills) install
   code={`npx skills add https://github.com/namehash/ensnode/tree/v${snapshot.sdkVersion}/packages/ensskills/skills --skill '*'`}
 />
 
+Use this path when you're not in a Node project or want to install skills directly without wiring package scripts.
+
+Pinning to the matching `v${snapshot.sdkVersion}` tag keeps your installed skills aligned with this docs/API version.
+
 ## Next Steps
 
 That's it — your AI agent now has all of [`ensskills`](/docs/integrate/integration-options/ensskills) at its disposal.
+
+## Verify Installation
+
+Before you continue, ask your assistant to confirm it can see the installed ENS skills:
+
+```md title="prompt.md"
+What ENS skills are available to you?
+```
 
 ```md title=prompt.md
 Which address currently owns vitalik.eth
@@ -72,6 +86,8 @@ If you aren't using `ensskills`, the entire documentation site is also published
 
 - [`/llms.txt`](https://ensnode.io/llms.txt) — a structured index of the documentation with links to every page.
 - [`/llms-full.txt`](https://ensnode.io/llms-full.txt) — the entire documentation concatenated into a single file, ready to drop into a model's context window.
+
+Use `/llms.txt` when context is limited, and `/llms-full.txt` when you want maximum coverage.
 
 Paste this at the top of a prompt to point your agent at the full documentation before asking your question:
 

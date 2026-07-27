@@ -1,0 +1,533 @@
+---
+import { ChevronDownIcon } from "../atoms/icons/ChevronDownIcon";
+import { ClaudeIcon } from "../atoms/icons/ClaudeIcon";
+import { CopyIcon } from "../atoms/icons/CopyIcon";
+import { FileTextIcon } from "../atoms/icons/FileTextIcon";
+import { LinkIcon } from "../atoms/icons/LinkIcon";
+import { MarkdownIcon } from "../atoms/icons/MarkdownIcon";
+import { SparklesIcon } from "../atoms/icons/SparklesIcon";
+
+const RAW_CONTENT_BASE_URL = "https://raw.githubusercontent.com/namehash/ensnode/main/";
+
+const entry = Astro.locals.starlightRoute.entry;
+const entryData = entry?.data;
+const entryDataFile =
+  entryData && typeof entryData === "object" && "file" in entryData ? entryData.file : undefined;
+
+const entryFilePath = `${entryDataFile ?? entry?.filePath ?? ""}`.replace(/^\.?\//, "");
+
+const sourceMarkdownUrl =
+  entryFilePath.length === 0
+    ? null
+    : new URL(
+        entryFilePath.startsWith("docs/ensnode.io/")
+          ? entryFilePath
+          : `docs/ensnode.io/${entryFilePath}`,
+        RAW_CONTENT_BASE_URL,
+      ).toString();
+---
+
+<aside
+  class="page-actions"
+  data-page-actions-root
+  data-menu-open="false"
+  data-source-markdown-url={sourceMarkdownUrl ?? ""}>
+  <div class="split-action">
+    <button
+      type="button"
+      class="split-main"
+      data-page-action="chatgpt"
+      aria-label="Ask ChatGPT about this page">
+      <span class="item-icon" aria-hidden="true">
+        <SparklesIcon />
+      </span>
+      <span class="split-main-label">Ask in ChatGPT</span>
+    </button>
+
+    <button
+      type="button"
+      class="split-toggle"
+      data-page-actions-toggle
+      aria-label="Open page actions menu"
+      aria-haspopup="menu"
+      aria-expanded="false">
+      <ChevronDownIcon />
+    </button>
+  </div>
+
+  <div class="action-menu" data-page-actions-menu hidden>
+    <ul>
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="claude"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <ClaudeIcon />
+          </span>
+          <span class="item-title">Ask in Claude</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="view-markdown"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <MarkdownIcon />
+          </span>
+          <span class="item-title">View page as Markdown</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="copy-markdown-url"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <LinkIcon />
+          </span>
+          <span class="item-title">Copy Markdown URL</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="copy-markdown"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <CopyIcon />
+          </span>
+          <span class="item-title">Copy page for LLMs</span>
+        </button>
+      </li>
+
+      <li>
+        <button
+          type="button"
+          class="action-menu-item"
+          data-page-action="llms-txt"
+          data-menu-item="true">
+          <span class="item-icon" aria-hidden="true">
+            <FileTextIcon />
+          </span>
+          <span class="item-title">llms.txt</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <p
+    class="action-feedback"
+    data-page-actions-feedback
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    hidden>
+  </p>
+</aside>
+
+<script is:inline>
+  const rootSelector = "[data-page-actions-root]";
+  const actionSuccessMessages = {
+    "copy-markdown": "Copied page for LLMs",
+    "copy-markdown-url": "Copied Markdown URL",
+  };
+
+  let resolvedMarkdownUrl;
+  const feedbackHideTimers = new WeakMap();
+
+  function getSourceMarkdownUrl(root) {
+    const value = root.dataset.sourceMarkdownUrl;
+    return value && value.length > 0 ? value : null;
+  }
+
+  function getRouteMarkdownUrl() {
+    return new URL("index.md", window.location.href.replace(/\/?$/, "/")).toString();
+  }
+
+  async function resolveMarkdownUrl(root) {
+    if (resolvedMarkdownUrl) {
+      return resolvedMarkdownUrl;
+    }
+
+    const routeMarkdownUrl = getRouteMarkdownUrl();
+
+    try {
+      const probeResponse = await fetch(routeMarkdownUrl, { method: "HEAD" });
+      if (probeResponse.ok || probeResponse.status === 405) {
+        resolvedMarkdownUrl = routeMarkdownUrl;
+        return resolvedMarkdownUrl;
+      }
+    } catch {
+      // Ignore probe failures and continue to the source fallback.
+    }
+
+    const sourceMarkdownUrl = getSourceMarkdownUrl(root);
+    if (sourceMarkdownUrl) {
+      resolvedMarkdownUrl = sourceMarkdownUrl;
+      return resolvedMarkdownUrl;
+    }
+
+    resolvedMarkdownUrl = routeMarkdownUrl;
+    return resolvedMarkdownUrl;
+  }
+
+  function assertClipboardAvailability() {
+    if (!navigator.clipboard?.writeText) {
+      throw new Error("Clipboard API unavailable");
+    }
+  }
+
+  async function getLlmPrompt(root) {
+    const markdownUrl = await resolveMarkdownUrl(root);
+    return `Read from ${markdownUrl} so I can ask questions about it.`;
+  }
+
+  function openChat(url) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  async function copyMarkdownUrl(root) {
+    assertClipboardAvailability();
+
+    const markdownUrl = await resolveMarkdownUrl(root);
+    await navigator.clipboard.writeText(markdownUrl);
+  }
+
+  async function copyMarkdown(root) {
+    assertClipboardAvailability();
+
+    const markdownUrl = await resolveMarkdownUrl(root);
+    const response = await fetch(markdownUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Markdown (${response.status})`);
+    }
+
+    const markdown = await response.text();
+    await navigator.clipboard.writeText(markdown);
+  }
+
+  async function openInChatGPT(root) {
+    const message = encodeURIComponent(await getLlmPrompt(root));
+    openChat(`https://chatgpt.com/?q=${message}`);
+  }
+
+  async function openInClaude(root) {
+    const message = encodeURIComponent(await getLlmPrompt(root));
+    openChat(`https://claude.ai/new?q=${message}`);
+  }
+
+  async function viewAsMarkdown(root) {
+    const markdownUrl = await resolveMarkdownUrl(root);
+    window.open(markdownUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function viewLlmsTxt() {
+    window.open(
+      new URL("/llms.txt", window.location.origin).toString(),
+      "_blank",
+      "noopener,noreferrer",
+    );
+  }
+
+  const handlers = {
+    "copy-markdown": copyMarkdown,
+    "copy-markdown-url": copyMarkdownUrl,
+    "view-markdown": viewAsMarkdown,
+    "llms-txt": viewLlmsTxt,
+    chatgpt: openInChatGPT,
+    claude: openInClaude,
+  };
+
+  function showActionFeedback(root, message, kind = "success") {
+    const feedback = root.querySelector("[data-page-actions-feedback]");
+
+    if (!feedback) {
+      return;
+    }
+
+    const existingTimer = feedbackHideTimers.get(root);
+    if (existingTimer) {
+      window.clearTimeout(existingTimer);
+    }
+
+    feedback.textContent = message;
+    feedback.hidden = false;
+    feedback.dataset.kind = kind;
+
+    const nextTimer = window.setTimeout(() => {
+      feedback.hidden = true;
+      feedback.textContent = "";
+      delete feedback.dataset.kind;
+      feedbackHideTimers.delete(root);
+    }, 2200);
+
+    feedbackHideTimers.set(root, nextTimer);
+  }
+
+  function setMenuOpen(root, isOpen) {
+    const menu = root.querySelector("[data-page-actions-menu]");
+    const toggle = root.querySelector("[data-page-actions-toggle]");
+
+    if (!menu || !toggle) {
+      return;
+    }
+
+    root.dataset.menuOpen = isOpen ? "true" : "false";
+    menu.hidden = !isOpen;
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+
+  function closeMenusExcept(exceptionRoot) {
+    document.querySelectorAll(rootSelector).forEach((root) => {
+      if (root !== exceptionRoot) {
+        setMenuOpen(root, false);
+      }
+    });
+  }
+
+  function bindGlobalHandlersOnce() {
+    if (window.__ensnodePageActionsGlobalHandlersBound === true) {
+      return;
+    }
+
+    document.addEventListener("click", (event) => {
+      document.querySelectorAll(rootSelector).forEach((root) => {
+        if (!root.contains(event.target)) {
+          setMenuOpen(root, false);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      document.querySelectorAll(rootSelector).forEach((root) => {
+        setMenuOpen(root, false);
+      });
+    });
+
+    window.__ensnodePageActionsGlobalHandlersBound = true;
+  }
+
+  function initPageActions(root) {
+    if (root.dataset.initialized === "true") {
+      return;
+    }
+
+    root.addEventListener("click", async (event) => {
+      const toggleButton = event.target.closest("button[data-page-actions-toggle]");
+      if (toggleButton && root.contains(toggleButton)) {
+        event.preventDefault();
+
+        const currentlyOpen = root.dataset.menuOpen === "true";
+        closeMenusExcept(root);
+        setMenuOpen(root, !currentlyOpen);
+        return;
+      }
+
+      const button = event.target.closest("button[data-page-action]");
+      if (!button || !root.contains(button)) {
+        return;
+      }
+
+      const action = button.dataset.pageAction;
+      const handler = action ? handlers[action] : undefined;
+
+      if (!handler) {
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        await handler(root);
+
+        const successMessage = actionSuccessMessages[action];
+        if (successMessage) {
+          showActionFeedback(root, successMessage);
+        }
+      } catch (error) {
+        console.error("Page action failed:", error);
+        showActionFeedback(root, "Could not complete that action", "error");
+      } finally {
+        button.disabled = false;
+      }
+
+      if (button.dataset.menuItem === "true") {
+        setMenuOpen(root, false);
+      }
+    });
+
+    setMenuOpen(root, false);
+    root.dataset.initialized = "true";
+  }
+
+  function initializeAllPageActions() {
+    bindGlobalHandlersOnce();
+
+    document.querySelectorAll(rootSelector).forEach((root) => {
+      initPageActions(root);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeAllPageActions, { once: true });
+  } else {
+    initializeAllPageActions();
+  }
+
+  document.addEventListener("astro:page-load", initializeAllPageActions);
+</script>
+
+<style>
+  .page-actions {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .split-action {
+    border: 1px solid var(--sl-color-hairline-shade);
+    border-radius: var(--radius-xl);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    overflow: hidden;
+    background: var(--sl-color-bg-nav);
+  }
+
+  .split-main,
+  .split-toggle {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--sl-color-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1rem;
+    cursor: pointer;
+    height: 2.625rem;
+  }
+
+  .split-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    text-align: left;
+  }
+
+  .split-toggle {
+    border-inline-start: 1px solid var(--sl-color-hairline-shade);
+    width: 2.875rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .split-toggle svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .split-main:hover,
+  .split-toggle:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .page-actions[data-menu-open="true"] .split-toggle {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .item-icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .item-icon :global(svg) {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .action-menu {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(100% + 0.2rem);
+    z-index: var(--sl-z-index-toc, 10);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--sl-color-hairline-shade);
+    background: var(--sl-color-bg-nav);
+    padding: 0.375rem;
+  }
+
+  .action-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .action-menu-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--sl-color-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1rem;
+    text-align: left;
+  }
+
+  .action-menu-item:hover:not(:disabled) {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .item-title {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    transition: color 0.15s ease;
+  }
+
+  .action-feedback {
+    margin: 0.5rem 0.2rem 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--sl-color-text-accent);
+  }
+
+  .action-feedback[data-kind="error"] {
+    color: var(--sl-color-red-high, var(--sl-color-text));
+  }
+
+  .split-main:disabled,
+  .split-toggle:disabled,
+  .action-menu-item:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+</style>
