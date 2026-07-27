@@ -35,6 +35,8 @@ export default defineConfig({
   redirects: {
     "/docs": "/docs/integrate",
     "/ensnode": "/docs/integrate",
+    // EFP page moved under the Complementary Protocols group
+    "/docs/integrate/omnigraph/efp": "/docs/integrate/omnigraph/complementary/efp",
     "/examples": "/docs/integrate/omnigraph/examples",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
     // ENS Subgraph docs moved from /docs/integrate/subgraph to /docs/integrate/ens-subgraph

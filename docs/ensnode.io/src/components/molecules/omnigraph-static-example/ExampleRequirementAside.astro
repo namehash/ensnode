@@ -1,0 +1,32 @@
+---
+// Renders a plugin-requirement Aside for an Omnigraph example, driven by the example's category.
+// Example pages pass their `id`; the component looks the example up and renders the matching aside
+// (or nothing) so requirement notices stay consistent and live next to the example definition.
+import { Aside } from "@astrojs/starlight/components";
+
+import { getOmnigraphExampleConfigById } from "@data/omnigraph-examples/config";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const category = getOmnigraphExampleConfigById(id)?.category;
+---
+
+{
+  category === "EFP" && (
+    <Aside type="tip" title="EFP plugin required">
+      <p>
+        These queries read{" "}
+        <a href="/docs/integrate/omnigraph/complementary/efp">Ethereum Follow Protocol (EFP)</a>{" "}
+        data, which requires the{" "}
+        <a href="/docs/integrate/omnigraph/complementary/efp">
+          <code>efp</code> plugin
+        </a>{" "}
+        to be enabled on the connected ENSIndexer. It is enabled on the hosted{" "}
+        <a href="/docs/hosted-instances#ensnode-alpha">ENSNode 'Alpha'</a> instance.
+      </p>
+    </Aside>
+  )
+}
