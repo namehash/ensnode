@@ -1,3 +1,5 @@
+import { stringifyAccountId } from "enssdk";
+
 import {
   deserializeReferralProgramEditionConfigSetArray,
   deserializeReferralProgramEditionSummariesResponse,
@@ -238,7 +240,7 @@ export class ENSReferralsClient {
    *
    * @see {@link https://www.npmjs.com/package/@namehash/ens-referrals|@namehash/ens-referrals} for calculation details
    *
-   * @param request The referrer address and edition slugs to query
+   * @param request The referrer {@link AccountId} and edition slugs to query
    * @returns {ReferrerMetricsEditionsResponse} Returns the referrer metrics for requested editions
    *
    * @remarks If the server returns metrics for an edition whose `awardModel` is not recognized by
@@ -253,7 +255,7 @@ export class ENSReferralsClient {
    * ```typescript
    * // Get referrer metrics for specific editions
    * const response = await client.getReferrerMetricsEditions({
-   *   referrer: "0x1234567890123456789012345678901234567890",
+   *   referrer: { chainId: 1, address: "0x1234567890123456789012345678901234567890" },
    *   editions: ["2025-12", "2026-01"]
    * });
    * if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
@@ -277,7 +279,7 @@ export class ENSReferralsClient {
    * ```typescript
    * // Access specific edition data directly (edition is guaranteed to exist when OK)
    * const response = await client.getReferrerMetricsEditions({
-   *   referrer: "0x1234567890123456789012345678901234567890",
+   *   referrer: { chainId: 1, address: "0x1234567890123456789012345678901234567890" },
    *   editions: ["2025-12"]
    * });
    * if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
@@ -296,7 +298,7 @@ export class ENSReferralsClient {
    * ```typescript
    * // Handle error response (e.g., unknown edition or data not available)
    * const response = await client.getReferrerMetricsEditions({
-   *   referrer: "0x1234567890123456789012345678901234567890",
+   *   referrer: { chainId: 1, address: "0x1234567890123456789012345678901234567890" },
    *   editions: ["2025-12", "invalid-edition"]
    * });
    *
@@ -310,7 +312,7 @@ export class ENSReferralsClient {
     request: ReferrerMetricsEditionsRequest,
   ): Promise<ReferrerMetricsEditionsResponse> {
     const url = new URL(
-      `/v1/ensanalytics/referrer/${encodeURIComponent(request.referrer)}`,
+      `/v1/ensanalytics/referrer/${encodeURIComponent(stringifyAccountId(request.referrer))}`,
       this.options.url,
     );
 

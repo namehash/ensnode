@@ -9,8 +9,6 @@
 
 import z from "zod/v4";
 
-import { makeNormalizedAddressSchema } from "@ensnode/ensnode-sdk/internal";
-
 import {
   makeReferralProgramEditionSummaryPieSplitSchema,
   makeReferralProgramRulesPieSplitSchema,
@@ -219,17 +217,6 @@ export const makeReferrerMetricsEditionsArraySchema = (
       },
       { message: `${valueLabel} must not contain duplicate edition slugs` },
     );
-
-/**
- * Schema for {@link ReferrerMetricsEditionsRequest}
- */
-export const makeReferrerMetricsEditionsRequestSchema = (
-  valueLabel: string = "ReferrerMetricsEditionsRequest",
-) =>
-  z.object({
-    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
-    editions: makeReferrerMetricsEditionsArraySchema(`${valueLabel}.editions`),
-  });
 
 /**
  * Schema for {@link ReferrerMetricsEditionsResponseOk}

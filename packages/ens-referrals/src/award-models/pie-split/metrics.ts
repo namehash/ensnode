@@ -1,4 +1,4 @@
-import type { NormalizedAddress } from "enssdk";
+import type { AccountId } from "enssdk";
 
 import { type PriceUsdc, priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
@@ -307,16 +307,16 @@ export const validateUnrankedReferrerMetricsPieSplit = (
 };
 
 /**
- * Build an unranked zero-score referrer record for a referrer address that is not in the leaderboard.
+ * Build an unranked zero-score referrer record for a referrer that is not on the leaderboard.
  *
- * This is useful when you want to return a referrer record for an address that has no referrals
+ * This is useful when you want to return a referrer record for an account that has no referrals
  * and is not qualified for the leaderboard.
  *
- * @param referrer - The referrer address
+ * @param referrer - The referrer {@link AccountId}
  * @returns An {@link UnrankedReferrerMetricsPieSplit} with zero values for all metrics and null rank
  */
 export const buildUnrankedReferrerMetricsPieSplit = (
-  referrer: NormalizedAddress,
+  referrer: AccountId,
 ): UnrankedReferrerMetricsPieSplit => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
   const scoredMetrics = buildScoredReferrerMetricsPieSplit(metrics);

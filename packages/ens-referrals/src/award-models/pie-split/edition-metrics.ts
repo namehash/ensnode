@@ -8,7 +8,7 @@ import type { AwardedReferrerMetricsPieSplit, UnrankedReferrerMetricsPieSplit } 
 import type { ReferralProgramRulesPieSplit } from "./rules";
 
 /**
- * Referrer edition metrics data for a specific referrer address on the pie-split leaderboard.
+ * Referrer edition metrics data for a specific referrer on the pie-split leaderboard.
  *
  * Includes the referrer's awarded metrics from the leaderboard plus timestamp.
  *
@@ -62,7 +62,7 @@ export interface ReferrerEditionMetricsRankedPieSplit {
 }
 
 /**
- * Referrer edition metrics data for a specific referrer address NOT on the pie-split leaderboard.
+ * Referrer edition metrics data for a specific referrer NOT on the pie-split leaderboard.
  *
  * Includes the referrer's unranked metrics (with null rank and isQualified: false) plus timestamp.
  *

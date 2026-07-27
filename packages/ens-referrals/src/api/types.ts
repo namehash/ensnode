@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { AccountId } from "enssdk";
 
 import type { ReferrerLeaderboardPageParams } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramEditionSlug } from "../edition";
@@ -71,8 +71,8 @@ export const MAX_EDITIONS_PER_REQUEST = 20;
  * Request parameters for referrer metrics query.
  */
 export interface ReferrerMetricsEditionsRequest {
-  /** The Ethereum address of the referrer to query */
-  referrer: Address;
+  /** The {@link AccountId} of the referrer to query */
+  referrer: AccountId;
   /** Array of edition slugs to query (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, must be distinct) */
   editions: ReferralProgramEditionSlug[];
 }

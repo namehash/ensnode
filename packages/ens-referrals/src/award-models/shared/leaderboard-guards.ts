@@ -1,4 +1,4 @@
-import type { UnixTimestamp } from "enssdk";
+import { stringifyAccountId, type UnixTimestamp } from "enssdk";
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import type { BaseReferralProgramRules } from "./rules";
@@ -11,7 +11,8 @@ export const assertLeaderboardInputs = (
   rules: BaseReferralProgramRules,
   accurateAsOf: UnixTimestamp,
 ): void => {
-  const uniqueReferrers = new Set(allReferrers.map((r) => r.referrer));
+  // Dedupe by stringified CAIP-10 — AccountId objects would otherwise be Set-compared by reference.
+  const uniqueReferrers = new Set(allReferrers.map((r) => stringifyAccountId(r.referrer)));
   if (uniqueReferrers.size !== allReferrers.length) {
     throw new Error(
       "ReferrerLeaderboard: Cannot build a leaderboard containing duplicate referrers",

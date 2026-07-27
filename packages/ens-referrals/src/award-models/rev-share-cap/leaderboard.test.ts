@@ -1,4 +1,10 @@
-import { type Address, asInterpretedName, type NormalizedAddress } from "enssdk";
+import {
+  type AccountId,
+  type Address,
+  asInterpretedName,
+  stringifyAccountId,
+  toNormalizedAddress,
+} from "enssdk";
 import type { Hash } from "viem";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -14,9 +20,20 @@ import { type AdminAction, AdminActionTypes, buildReferralProgramRulesRevShareCa
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
-const ADDR_A = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as const;
-const ADDR_B = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as const;
-const ADDR_C = "0xcccccccccccccccccccccccccccccccccccccccc" as const;
+const TEST_CHAIN_ID = 1;
+const acct = (address: Address): AccountId => ({
+  chainId: TEST_CHAIN_ID,
+  address: toNormalizedAddress(address),
+});
+
+const ADDR_A: AccountId = acct("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+const ADDR_B: AccountId = acct("0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+const ADDR_C: AccountId = acct("0xcccccccccccccccccccccccccccccccccccccccc");
+
+// CAIP-10 keys for Map.get lookups (the leaderboard's `referrers` map is keyed by AccountIdString).
+const KEY_A = stringifyAccountId(ADDR_A);
+const KEY_B = stringifyAccountId(ADDR_B);
+const KEY_C = stringifyAccountId(ADDR_C);
 
 const ZERO_ETH = priceEth(0n);
 
@@ -60,7 +77,7 @@ function buildTestRules(
     0.5, // maxBaseRevenueShare
     parseTimestamp("2026-01-01T00:00:00Z"),
     parseTimestamp("2026-12-31T23:59:59Z"),
-    { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
+    acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
     new URL("https://example.com/rules"),
     false,
     adminActions,
@@ -73,7 +90,7 @@ function buildTestRules(
 let eventIdCounter = 0;
 
 function makeEvent(
-  referrer: `0x${string}`,
+  referrer: AccountId,
   timestamp: number,
   incrementalDuration: number,
   opts: Partial<Pick<ReferralEvent, "id">> = {},
@@ -99,11 +116,11 @@ const accurateAsOf = parseTimestamp("2026-06-01T00:00:00Z");
 /** $2.50 USDC in raw amount (uncapped award for 1 year of duration at 50% share) */
 const UNCAPPED_AWARD_1Y = parseUsdc("2.5");
 
-function disqualification(referrer: NormalizedAddress, reason: string): AdminAction {
+function disqualification(referrer: AccountId, reason: string): AdminAction {
   return { actionType: AdminActionTypes.Disqualification, referrer, reason };
 }
 
-function warning(referrer: NormalizedAddress, reason: string): AdminAction {
+function warning(referrer: AccountId, reason: string): AdminAction {
   return { actionType: AdminActionTypes.Warning, referrer, reason };
 }
 
@@ -141,7 +158,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrer = result.referrers.get(ADDR_A)!;
+      const referrer = result.referrers.get(KEY_A)!;
 
       expect(referrer).toBeDefined();
       expect(referrer.isQualified).toBe(false);
@@ -170,7 +187,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrer = result.referrers.get(ADDR_A)!;
+      const referrer = result.referrers.get(KEY_A)!;
 
       expect(referrer.isQualified).toBe(true);
       expect(referrer.uncappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
@@ -194,7 +211,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrer = result.referrers.get(ADDR_A)!;
+      const referrer = result.referrers.get(KEY_A)!;
 
       expect(referrer.isQualified).toBe(true);
       // uncappedAward = $2.50 (uncapped)
@@ -222,7 +239,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrer = result.referrers.get(ADDR_A)!;
+      const referrer = result.referrers.get(KEY_A)!;
 
       expect(referrer.isQualified).toBe(true);
       // uncappedAward = 0.5 × (2 × $5) = $5.00
@@ -248,7 +265,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrer = result.referrers.get(ADDR_A)!;
+      const referrer = result.referrers.get(KEY_A)!;
 
       expect(referrer.isQualified).toBe(true);
       // uncappedAward = 0.5 × $10 = $5.00 (uncapped)
@@ -271,7 +288,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrer = result.referrers.get(ADDR_A)!;
+      const referrer = result.referrers.get(KEY_A)!;
 
       expect(referrer.isQualified).toBe(true);
       expect(referrer.uncappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
@@ -295,8 +312,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
 
       expect(referrerA.isQualified).toBe(true);
       expect(referrerA.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount); // $2.50
@@ -323,8 +340,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
 
       expect(referrerA.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount); // $2.50
       expect(referrerB.cappedAward.amount).toBe(0n); // $0 — pool empty
@@ -348,9 +365,9 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
-      const referrerC = result.referrers.get(ADDR_C)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
+      const referrerC = result.referrers.get(KEY_C)!;
 
       // Non-truncated: full uncapped award
       expect(referrerA.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
@@ -384,8 +401,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
       ).leaderboard;
 
       // ADDR_A has the lower (earlier) id, should claim the pool first
-      expect(result.referrers.get(ADDR_A)!.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
-      expect(result.referrers.get(ADDR_B)!.cappedAward.amount).toBe(0n);
+      expect(result.referrers.get(KEY_A)!.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
+      expect(result.referrers.get(KEY_B)!.cappedAward.amount).toBe(0n);
     });
   });
 
@@ -411,9 +428,9 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
       // ADDR_B: cappedAward $5.00 → rank 1 (highest pool claim)
       // ADDR_A: cappedAward $2.50 → rank 2
       // ADDR_C: cappedAward $0, uncappedAward $1.25 → rank 3 (unqualified)
-      expect(result.referrers.get(ADDR_B)!.rank).toBe(1);
-      expect(result.referrers.get(ADDR_A)!.rank).toBe(2);
-      expect(result.referrers.get(ADDR_C)!.rank).toBe(3);
+      expect(result.referrers.get(KEY_B)!.rank).toBe(1);
+      expect(result.referrers.get(KEY_A)!.rank).toBe(2);
+      expect(result.referrers.get(KEY_C)!.rank).toBe(3);
     });
 
     it("two fully-truncated referrers are ranked by uncappedAward desc", () => {
@@ -433,8 +450,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
       ).leaderboard;
 
       // Both have $0 cappedAward; ADDR_A has higher uncappedAward (longer duration) → rank 1
-      expect(result.referrers.get(ADDR_A)!.rank).toBe(1);
-      expect(result.referrers.get(ADDR_B)!.rank).toBe(2);
+      expect(result.referrers.get(KEY_A)!.rank).toBe(1);
+      expect(result.referrers.get(KEY_B)!.rank).toBe(2);
     });
 
     it("referrers map is ordered by rank ascending", () => {
@@ -499,8 +516,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
 
       // ADDR_A: 1 year at $10/yr → $10 base → uncapped = 0.5 × $10 = $5.00
       expect(referrerA.isQualified).toBe(true);
@@ -551,8 +568,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
 
       expect(referrerA.isQualified).toBe(true);
       expect(referrerA.adminAction).toBe(null);
@@ -578,8 +595,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
 
       expect(referrerA.adminAction).toEqual(disqualification(ADDR_A, "self-referral"));
       expect(referrerA.isQualified).toBe(false);
@@ -603,7 +620,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
+      const referrerA = result.referrers.get(KEY_A)!;
 
       expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
       expect(referrerA.adminAction?.reason).toBe("promoting discounts");
@@ -636,9 +653,9 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
-      const referrerC = result.referrers.get(ADDR_C)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
+      const referrerC = result.referrers.get(KEY_C)!;
 
       expect(referrerB.rank).toBe(1);
       expect(referrerB.isQualified).toBe(true);
@@ -673,9 +690,9 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
-      const referrerC = result.referrers.get(ADDR_C)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
+      const referrerC = result.referrers.get(KEY_C)!;
 
       expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
       expect(referrerA.adminAction?.reason).toBe("reason-a");
@@ -699,7 +716,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
           warning(ADDR_A, "duplicate"),
         ]),
       ).toThrow(
-        "ReferralProgramRulesRevShareCap: adminActions must not contain duplicate referrer addresses.",
+        "ReferralProgramRulesRevShareCap: adminActions must not contain duplicate referrer AccountIds.",
       );
     });
 
@@ -717,8 +734,8 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
-      const referrerB = result.referrers.get(ADDR_B)!;
+      const referrerA = result.referrers.get(KEY_A)!;
+      const referrerB = result.referrers.get(KEY_B)!;
 
       // Warned referrer is NOT disqualified — they still qualify and get awards
       expect(referrerA.adminAction).toEqual(warning(ADDR_A, "suspicious activity"));
@@ -740,7 +757,7 @@ describe("buildReferralEditionSnapshotRevShareCap", () => {
         rules,
         accurateAsOf,
       ).leaderboard;
-      const referrerA = result.referrers.get(ADDR_A)!;
+      const referrerA = result.referrers.get(KEY_A)!;
 
       expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Warning);
       expect(referrerA.isQualified).toBe(false); // below threshold, not because of warning

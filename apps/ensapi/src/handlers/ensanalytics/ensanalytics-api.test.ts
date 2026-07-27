@@ -48,7 +48,13 @@ import {
   ReferrerMetricsEditionsResponseCodes,
   type ReferrerMetricsEditionsResponseOk,
 } from "@namehash/ens-referrals";
-import { asInterpretedName, toNormalizedAddress } from "enssdk";
+import {
+  type AccountId,
+  type Address,
+  asInterpretedName,
+  stringifyAccountId,
+  toNormalizedAddress,
+} from "enssdk";
 
 import {
   parseEth,
@@ -65,6 +71,11 @@ import {
 } from "@/lib/ensanalytics/referrer-leaderboard/mocks";
 
 import app from "./ensanalytics-api";
+
+const acct = (address: Address): AccountId => ({
+  chainId: 1,
+  address: toNormalizedAddress(address),
+});
 
 describe("/v1/ensanalytics", () => {
   // Default: prerequisites pass for every test. Tests that exercise the 503 short-circuit
@@ -119,11 +130,12 @@ describe("/v1/ensanalytics", () => {
       }
     });
 
-    it("/referrer/:address returns 503 with serialized error when prerequisites fail", async () => {
+    it("/referrer/:referrer returns 503 with serialized error when prerequisites fail", async () => {
       setupPrerequisitesUnsupported();
 
+      const referrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
       const httpResponse = await app.request(
-        "/referrer/0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e?editions=any",
+        `/referrer/${encodeURIComponent(stringifyAccountId(referrer))}?editions=any`,
       );
       const response = deserializeReferrerMetricsEditionsResponse(await httpResponse.json());
 
@@ -461,14 +473,16 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use a referrer address that exists in the leaderboard (rank 1)
-      const existingReferrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
-      const expectedMetrics = populatedReferrerLeaderboard.referrers.get(existingReferrer)!;
+      // Arrange: use a referrer that exists in the leaderboard (rank 1)
+      const existingReferrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
+      const expectedMetrics = populatedReferrerLeaderboard.referrers.get(
+        stringifyAccountId(existingReferrer),
+      )!;
       const expectedAccurateAsOf = populatedReferrerLeaderboard.accurateAsOf;
 
       // Act: send test request to fetch referrer detail for requested editions
       const httpResponse = await app.request(
-        `/referrer/${existingReferrer}?editions=2025-12,2026-03`,
+        `/referrer/${encodeURIComponent(stringifyAccountId(existingReferrer))}?editions=2025-12,2026-03`,
       );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
@@ -499,6 +513,61 @@ describe("/v1/ensanalytics", () => {
       } satisfies ReferrerMetricsEditionsResponseOk;
 
       expect(response).toMatchObject(expectedResponse);
+    });
+
+    it("accepts a checksum-cased CAIP-10 referrer in the path and returns the same data as the lowercase form", async () => {
+      // Arrange: mock cache map with one edition
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
+        [
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
+
+      const mockEditionConfigSet = new Map([
+        ["2025-12", { slug: "2025-12", displayName: "Edition 1", rules: {} as any }],
+      ]);
+      vi.mocked(editionSetMiddleware.referralProgramEditionConfigSetMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralProgramEditionConfigSet", mockEditionConfigSet);
+          return await next();
+        },
+      );
+      vi.mocked(
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
+      ).mockImplementation(async (c, next) => {
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
+        return await next();
+      });
+
+      // The leaderboard fixture is keyed by the lowercase AccountIdString. Send a
+      // checksum-cased CAIP-10 in the URL path and confirm the route handler still
+      // matches the same leaderboard entry (i.e. the CAIP-10 parser normalizes the
+      // address case end-to-end).
+      const referrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
+      const checksumCasedCaip10 = "eip155:1:0x538e35B2888Ed5BC58CF2825D76cF6265Aa4E31e";
+
+      const httpResponse = await app.request(
+        `/referrer/${encodeURIComponent(checksumCasedCaip10)}?editions=2025-12`,
+      );
+      const response = deserializeReferrerMetricsEditionsResponse(await httpResponse.json());
+
+      expect(httpResponse.status).toBe(200);
+      expect(response.responseCode).toBe(ReferrerMetricsEditionsResponseCodes.Ok);
+      if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
+        const edition = response.data["2025-12"]!;
+        expect(edition.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+        if (edition.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
+        expect(edition.type).toBe(ReferrerEditionMetricsTypeIds.Ranked);
+        if (edition.type !== ReferrerEditionMetricsTypeIds.Ranked) throw new Error();
+        expect(edition.referrer.referrer).toEqual(referrer);
+        expect(edition.referrer.rank).toBe(1);
+      }
     });
 
     it("returns zero-score metrics for requested editions when referrer does not exist", async () => {
@@ -541,12 +610,12 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use a referrer address that does NOT exist in the leaderboard
-      const nonExistingReferrer = "0x0000000000000000000000000000000000000099";
+      // Arrange: use a referrer that does NOT exist in the leaderboard
+      const nonExistingReferrer = acct("0x0000000000000000000000000000000000000099");
 
       // Act: send test request to fetch referrer detail
       const httpResponse = await app.request(
-        `/referrer/${nonExistingReferrer}?editions=2025-12,2026-03`,
+        `/referrer/${encodeURIComponent(stringifyAccountId(nonExistingReferrer))}?editions=2025-12,2026-03`,
       );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
@@ -566,7 +635,7 @@ describe("/v1/ensanalytics", () => {
         if (edition1.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
         expect(edition1.rules).toEqual(populatedReferrerLeaderboard.rules);
         expect(edition1.aggregatedMetrics).toEqual(populatedReferrerLeaderboard.aggregatedMetrics);
-        expect(edition1.referrer.referrer).toBe(nonExistingReferrer);
+        expect(edition1.referrer.referrer).toEqual(nonExistingReferrer);
         expect(edition1.referrer.rank).toBe(null);
         expect(edition1.referrer.totalReferrals).toBe(0);
         expect(edition1.referrer.totalIncrementalDuration).toBe(0);
@@ -586,7 +655,7 @@ describe("/v1/ensanalytics", () => {
         if (edition2.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
         expect(edition2.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
         if (edition2.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
-        expect(edition2.referrer.referrer).toBe(nonExistingReferrer);
+        expect(edition2.referrer.referrer).toEqual(nonExistingReferrer);
         expect(edition2.referrer.rank).toBe(null);
       }
     });
@@ -631,11 +700,13 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use any referrer address
-      const referrer = "0x0000000000000000000000000000000000000001";
+      // Arrange: use any referrer
+      const referrer = acct("0x0000000000000000000000000000000000000001");
 
       // Act: send test request to fetch referrer detail
-      const httpResponse = await app.request(`/referrer/${referrer}?editions=2025-12,2026-03`);
+      const httpResponse = await app.request(
+        `/referrer/${encodeURIComponent(stringifyAccountId(referrer))}?editions=2025-12,2026-03`,
+      );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
 
@@ -654,7 +725,7 @@ describe("/v1/ensanalytics", () => {
         if (edition1.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
         expect(edition1.rules).toEqual(emptyReferralLeaderboard.rules);
         expect(edition1.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
-        expect(edition1.referrer.referrer).toBe(referrer);
+        expect(edition1.referrer.referrer).toEqual(referrer);
         expect(edition1.referrer.rank).toBe(null);
         expect(edition1.referrer.totalReferrals).toBe(0);
         expect(edition1.referrer.totalIncrementalDuration).toBe(0);
@@ -674,7 +745,7 @@ describe("/v1/ensanalytics", () => {
         if (edition2.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
         expect(edition2.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
         if (edition2.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
-        expect(edition2.referrer.referrer).toBe(referrer);
+        expect(edition2.referrer.referrer).toEqual(referrer);
         expect(edition2.referrer.rank).toBe(null);
       }
     });
@@ -719,11 +790,13 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use any referrer address
-      const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
+      // Arrange: use any referrer
+      const referrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
 
       // Act: send test request to fetch referrer detail for both editions
-      const httpResponse = await app.request(`/referrer/${referrer}?editions=2025-12,2026-03`);
+      const httpResponse = await app.request(
+        `/referrer/${encodeURIComponent(stringifyAccountId(referrer))}?editions=2025-12,2026-03`,
+      );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
 
@@ -779,11 +852,13 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use any referrer address
-      const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
+      // Arrange: use any referrer
+      const referrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
 
       // Act: send test request to fetch referrer detail
-      const httpResponse = await app.request(`/referrer/${referrer}?editions=2025-12,2026-03`);
+      const httpResponse = await app.request(
+        `/referrer/${encodeURIComponent(stringifyAccountId(referrer))}?editions=2025-12,2026-03`,
+      );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
 
@@ -840,12 +915,12 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use any referrer address
-      const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
+      // Arrange: use any referrer
+      const referrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
 
       // Act: send test request with one valid and one invalid edition
       const httpResponse = await app.request(
-        `/referrer/${referrer}?editions=2025-12,invalid-edition`,
+        `/referrer/${encodeURIComponent(stringifyAccountId(referrer))}?editions=2025-12,invalid-edition`,
       );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
@@ -909,12 +984,12 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: use a referrer address that exists in the leaderboard
-      const existingReferrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
+      // Arrange: use a referrer that exists in the leaderboard
+      const existingReferrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
 
       // Act: send test request requesting only 2 out of 3 editions
       const httpResponse = await app.request(
-        `/referrer/${existingReferrer}?editions=2025-12,2026-06`,
+        `/referrer/${encodeURIComponent(stringifyAccountId(existingReferrer))}?editions=2025-12,2026-06`,
       );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerMetricsEditionsResponse(responseData);
@@ -943,7 +1018,7 @@ describe("/v1/ensanalytics", () => {
               100,
               parseTimestamp("2025-12-01T00:00:00Z"),
               parseTimestamp("2025-12-31T23:59:59Z"),
-              { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
+              acct("0x0000000000000000000000000000000000000000"),
               new URL("https://example.com/rules"),
               false,
             ),
@@ -959,7 +1034,7 @@ describe("/v1/ensanalytics", () => {
               100,
               parseTimestamp("2026-03-01T00:00:00Z"),
               parseTimestamp("2026-03-31T23:59:59Z"),
-              { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
+              acct("0x0000000000000000000000000000000000000000"),
               new URL("https://example.com/rules"),
               false,
             ),
@@ -975,7 +1050,7 @@ describe("/v1/ensanalytics", () => {
               100,
               parseTimestamp("2026-06-01T00:00:00Z"),
               parseTimestamp("2026-06-30T23:59:59Z"),
-              { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
+              acct("0x0000000000000000000000000000000000000000"),
               new URL("https://example.com/rules"),
               false,
             ),
@@ -1155,7 +1230,7 @@ describe("/v1/ensanalytics", () => {
         actionType: RegistrarActionTypes.Registration,
         transactionHash: "0xabc",
         registrant: "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
-        referrer: toNormalizedAddress("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e"),
+        referrer: acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e"),
         incrementalDuration: 31536000,
         tentativeAward: {
           incrementalRevenueContribution: parseEth("0.01"),

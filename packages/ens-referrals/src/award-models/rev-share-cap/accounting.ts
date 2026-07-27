@@ -1,4 +1,4 @@
-import type { Address, Duration, InterpretedName, NormalizedAddress, UnixTimestamp } from "enssdk";
+import type { AccountId, Address, Duration, InterpretedName, UnixTimestamp } from "enssdk";
 import type { Hash } from "viem";
 
 import type { PriceEth, PriceUsdc, RegistrarActionType } from "@ensnode/ensnode-sdk";
@@ -115,9 +115,9 @@ export interface ReferralAccountingRecordRevShareCap {
   registrant: Address;
 
   /**
-   * Referrer that received credit.
+   * Referrer that received credit, as an {@link AccountId}.
    */
-  referrer: NormalizedAddress;
+  referrer: AccountId;
 
   /**
    * Incremental duration (seconds) contributed by this referral.

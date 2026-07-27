@@ -1,4 +1,10 @@
-import type { Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
+import {
+  type AccountId,
+  type AccountIdString,
+  type Duration,
+  stringifyAccountId,
+  type UnixTimestamp,
+} from "enssdk";
 
 import {
   addPrices,
@@ -60,16 +66,18 @@ export interface ReferrerLeaderboardRevShareCap {
    * Ordered map containing {@link AwardedReferrerMetricsRevShareCap} for all referrers with 1 or more
    * `totalReferrals` within the `rules` as of `accurateAsOf`.
    *
+   * Keys are CAIP-10 strings produced via {@link stringifyAccountId}.
+   *
    * @invariant Map entries are ordered by `rank` (ascending).
    * @invariant Map is empty if there are no referrers with 1 or more `totalReferrals`
    *            within the `rules` as of `accurateAsOf`.
-   * @invariant If a `NormalizedAddress` is not a key in this map then that `NormalizedAddress` had
+   * @invariant If an {@link AccountIdString} is not a key in this map then that referrer had
    *            0 `totalReferrals`, `totalIncrementalDuration`, and `totalRevenueContribution` within the
    *            `rules` as of `accurateAsOf`.
    * @invariant Each value in this map is guaranteed to have a non-zero
    *            `totalReferrals` and `totalIncrementalDuration`.
    */
-  referrers: Map<NormalizedAddress, AwardedReferrerMetricsRevShareCap>;
+  referrers: Map<AccountIdString, AwardedReferrerMetricsRevShareCap>;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardRevShareCap} was accurate as of.
@@ -105,6 +113,7 @@ export interface ReferralEditionSnapshotRevShareCap {
  * Per-referrer mutable state used during sequential race processing.
  */
 interface ReferrerRaceState {
+  referrer: AccountId;
   totalReferrals: number;
   totalIncrementalDuration: Duration;
   totalRevenueContribution: PriceEth;
@@ -140,29 +149,31 @@ export const buildReferralEditionSnapshotRevShareCap = (
   const sortedEvents = sortReferralEvents(events);
 
   // Index admin actions by referrer; `rules.adminActions` is validated to have at most one action per referrer.
-  const adminActionByReferrer = new Map<NormalizedAddress, AdminAction>();
+  const adminActionByReferrer = new Map<AccountIdString, AdminAction>();
   for (const action of rules.adminActions) {
-    adminActionByReferrer.set(action.referrer, action);
+    adminActionByReferrer.set(stringifyAccountId(action.referrer), action);
   }
 
   // 2. Process events sequentially to run the race.
-  const referrerStates = new Map<NormalizedAddress, ReferrerRaceState>();
+  const referrerStates = new Map<AccountIdString, ReferrerRaceState>();
   const accountingRecords: ReferralAccountingRecordRevShareCap[] = [];
   let awardPoolRemaining: PriceUsdc = rules.awardPool;
 
   for (const event of sortedEvents) {
     const referrerId = event.referrer;
+    const referrerKey = stringifyAccountId(referrerId);
 
-    let referrerState = referrerStates.get(referrerId);
+    let referrerState = referrerStates.get(referrerKey);
     if (!referrerState) {
       referrerState = {
+        referrer: referrerId,
         totalReferrals: 0,
         totalIncrementalDuration: 0,
         totalRevenueContribution: priceEth(0n),
         hasQualified: false,
         cappedAward: priceUsdc(0n),
       };
-      referrerStates.set(referrerId, referrerState);
+      referrerStates.set(referrerKey, referrerState);
     }
 
     // Update raw totals BEFORE computing the accounting record.
@@ -176,7 +187,7 @@ export const buildReferralEditionSnapshotRevShareCap = (
 
     const hasQualifiedBefore = referrerState.hasQualified;
     const awardPoolRemainingBefore = awardPoolRemaining;
-    const adminAction = adminActionByReferrer.get(referrerId);
+    const adminAction = adminActionByReferrer.get(referrerKey);
     const adminDisqualification =
       adminAction?.actionType === AdminActionTypes.Disqualification ? adminAction : null;
 
@@ -254,7 +265,7 @@ export const buildReferralEditionSnapshotRevShareCap = (
   // 3. Sort referrers to assign ranks:
   //    1. cappedAward desc — actual pool claims, race winners first
   //    2. totalIncrementalDuration desc — tie-break for pool-depleted referrers
-  //    3. referrer address desc — deterministic tie-break
+  //    3. referrer AccountIdString desc — deterministic tie-break
   const sortedEntries = [...referrerStates.entries()].sort(
     ([referrerIdA, referrerStateA], [referrerIdB, referrerStateB]) => {
       // Primary: cappedAward desc (bigint comparison)
@@ -267,7 +278,7 @@ export const buildReferralEditionSnapshotRevShareCap = (
         return referrerStateB.totalIncrementalDuration - referrerStateA.totalIncrementalDuration;
       }
 
-      // Tertiary: referrer address desc (lexicographic)
+      // Tertiary: referrer AccountIdString desc (lexicographic)
       if (referrerIdB > referrerIdA) return 1;
       if (referrerIdB < referrerIdA) return -1;
       return 0;
@@ -276,9 +287,9 @@ export const buildReferralEditionSnapshotRevShareCap = (
 
   // 4. Build AwardedReferrerMetricsRevShareCap for each referrer.
   const awardedReferrers: AwardedReferrerMetricsRevShareCap[] = sortedEntries.map(
-    ([referrerId, referrerState], index) => {
+    ([, referrerState], index) => {
       const baseMetrics = buildReferrerMetrics(
-        referrerId,
+        referrerState.referrer,
         referrerState.totalReferrals,
         referrerState.totalIncrementalDuration,
         referrerState.totalRevenueContribution,
@@ -311,7 +322,7 @@ export const buildReferralEditionSnapshotRevShareCap = (
     awardPoolRemaining,
   );
 
-  const referrers = new Map(awardedReferrers.map((r) => [r.referrer, r]));
+  const referrers = new Map(awardedReferrers.map((r) => [stringifyAccountId(r.referrer), r]));
 
   return {
     awardModel: rules.awardModel,

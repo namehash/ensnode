@@ -8,8 +8,23 @@ import {
   type ReferrerLeaderboardPieSplit,
   type ReferrerMetrics,
 } from "@namehash/ens-referrals";
+import {
+  type AccountId,
+  type AccountIdString,
+  type Address,
+  stringifyAccountId,
+  toNormalizedAddress,
+} from "enssdk";
 
 import { parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
+
+// All mocks live on the pieSplit edition's subregistry chain (Ethereum mainnet).
+const MOCK_CHAIN_ID = 1;
+const acct = (address: Address): AccountId => ({
+  chainId: MOCK_CHAIN_ID,
+  address: toNormalizedAddress(address),
+});
+const acctKey = (address: Address): AccountIdString => stringifyAccountId(acct(address));
 
 const pieSplitRules: ReferralProgramRulesPieSplit = {
   awardModel: ReferralProgramAwardModels.PieSplit,
@@ -17,173 +32,170 @@ const pieSplitRules: ReferralProgramRulesPieSplit = {
   maxQualifiedReferrers: 10,
   startTime: 1735689600,
   endTime: 1767225599,
-  subregistryId: {
-    chainId: 1,
-    address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-  },
+  subregistryId: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
   rulesUrl: new URL("https://example.com/rules"),
   areAwardsDistributed: false,
 };
 
 export const dbResultsReferrerLeaderboard: ReferrerMetrics[] = [
   {
-    referrer: "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
+    referrer: acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e"),
     totalReferrals: 3,
     totalIncrementalDuration: 94694400,
     totalRevenueContribution: parseEth("0.015"),
   },
   {
-    referrer: "0xcfa4f8192ad39d1ee09f473e88e79d267e09ddca",
+    referrer: acct("0xcfa4f8192ad39d1ee09f473e88e79d267e09ddca"),
     totalReferrals: 2,
     totalIncrementalDuration: 63072000,
     totalRevenueContribution: parseEth("0.01"),
   },
   {
-    referrer: "0x00000000000000000000000000000000000000f1",
+    referrer: acct("0x00000000000000000000000000000000000000f1"),
     totalReferrals: 3,
     totalIncrementalDuration: 39657600,
     totalRevenueContribution: parseEth("0.012"),
   },
   {
-    referrer: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+    referrer: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
     totalReferrals: 4,
     totalIncrementalDuration: 34214400,
     totalRevenueContribution: parseEth("0.018"),
   },
   {
-    referrer: "0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a",
+    referrer: acct("0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a"),
     totalReferrals: 7,
     totalIncrementalDuration: 15120000,
     totalRevenueContribution: parseEth("0.021"),
   },
   {
-    referrer: "0xffa596cdf9a69676e689b1a92e5e681711227d75",
+    referrer: acct("0xffa596cdf9a69676e689b1a92e5e681711227d75"),
     totalReferrals: 5,
     totalIncrementalDuration: 12960000,
     totalRevenueContribution: parseEth("0.016"),
   },
   {
-    referrer: "0x2a614b7984854177d22fa23a4034a13ea82e4f97",
+    referrer: acct("0x2a614b7984854177d22fa23a4034a13ea82e4f97"),
     totalReferrals: 5,
     totalIncrementalDuration: 12096000,
     totalRevenueContribution: parseEth("0.014"),
   },
   {
-    referrer: "0x2382a5878a44a6de5c3d91537d4132dc29e93c60",
+    referrer: acct("0x2382a5878a44a6de5c3d91537d4132dc29e93c60"),
     totalReferrals: 4,
     totalIncrementalDuration: 9676800,
     totalRevenueContribution: parseEth("0.013"),
   },
   {
-    referrer: "0x0000ffa596cdf9a69676e689b1a92e5e68171122",
+    referrer: acct("0x0000ffa596cdf9a69676e689b1a92e5e68171122"),
     totalReferrals: 1,
     totalIncrementalDuration: 7948800,
     totalRevenueContribution: parseEth("0.005"),
   },
   {
-    referrer: "0xc7190732aa0c3d523d945530bec6caeb8489b4a5",
+    referrer: acct("0xc7190732aa0c3d523d945530bec6caeb8489b4a5"),
     totalReferrals: 3,
     totalIncrementalDuration: 7257600,
     totalRevenueContribution: parseEth("0.009"),
   },
   {
-    referrer: "0x98c54f630c38c434cff2a1e3be9e095977cdc6af",
+    referrer: acct("0x98c54f630c38c434cff2a1e3be9e095977cdc6af"),
     totalReferrals: 3,
     totalIncrementalDuration: 7257600,
     totalRevenueContribution: parseEth("0.0095"),
   },
   {
-    referrer: "0x32eccaf03d59d87c8a164cffea7cb0c4b3b9d481",
+    referrer: acct("0x32eccaf03d59d87c8a164cffea7cb0c4b3b9d481"),
     totalReferrals: 2,
     totalIncrementalDuration: 4838400,
     totalRevenueContribution: parseEth("0.006"),
   },
   {
-    referrer: "0x58879236e40b73482f585a5f74766d6b99cb1057",
+    referrer: acct("0x58879236e40b73482f585a5f74766d6b99cb1057"),
     totalReferrals: 2,
     totalIncrementalDuration: 4838400,
     totalRevenueContribution: parseEth("0.007"),
   },
   {
-    referrer: "0x71afe4867bef795a686d13f4dc60bc8d3a4e70f6",
+    referrer: acct("0x71afe4867bef795a686d13f4dc60bc8d3a4e70f6"),
     totalReferrals: 2,
     totalIncrementalDuration: 4838400,
     totalRevenueContribution: parseEth("0.0065"),
   },
   {
-    referrer: "0x7e5d0cdd8144d0ec6ef7140e65714c011d462dbf",
+    referrer: acct("0x7e5d0cdd8144d0ec6ef7140e65714c011d462dbf"),
     totalReferrals: 2,
     totalIncrementalDuration: 4838400,
     totalRevenueContribution: parseEth("0.0075"),
   },
   {
-    referrer: "0xadc318567a4a16db3839208b435184ae86ba3e43",
+    referrer: acct("0xadc318567a4a16db3839208b435184ae86ba3e43"),
     totalReferrals: 2,
     totalIncrementalDuration: 4838400,
     totalRevenueContribution: parseEth("0.008"),
   },
   {
-    referrer: "0x2254f9bab9b3d56994504c46932289447a708529",
+    referrer: acct("0x2254f9bab9b3d56994504c46932289447a708529"),
     totalReferrals: 2,
     totalIncrementalDuration: 4838400,
     totalRevenueContribution: parseEth("0.0085"),
   },
   {
-    referrer: "0xce5ecf6d9e2181ad77b53305e2b1b6eca54728f0",
+    referrer: acct("0xce5ecf6d9e2181ad77b53305e2b1b6eca54728f0"),
     totalReferrals: 1,
     totalIncrementalDuration: 3628800,
     totalRevenueContribution: parseEth("0.004"),
   },
   {
-    referrer: "0x8354d821a89cc3c37902b60e9f30a15a6f810096",
+    referrer: acct("0x8354d821a89cc3c37902b60e9f30a15a6f810096"),
     totalReferrals: 2,
     totalIncrementalDuration: 2505600,
     totalRevenueContribution: parseEth("0.0055"),
   },
   {
-    referrer: "0x7bddd635be34bcf860d5f02ae53b16fcd17e8f6f",
+    referrer: acct("0x7bddd635be34bcf860d5f02ae53b16fcd17e8f6f"),
     totalReferrals: 3,
     totalIncrementalDuration: 2419203,
     totalRevenueContribution: parseEth("0.011"),
   },
   {
-    referrer: "0x3d93f8a930023263c17a639580525a561072458c",
+    referrer: acct("0x3d93f8a930023263c17a639580525a561072458c"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.003"),
   },
   {
-    referrer: "0x1779c4ad42cd07e437b6c6444b539ea1734fcaf4",
+    referrer: acct("0x1779c4ad42cd07e437b6c6444b539ea1734fcaf4"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.0035"),
   },
   {
-    referrer: "0xe45fb62899ccc74449923c7b34a91d7b9ee27d9f",
+    referrer: acct("0xe45fb62899ccc74449923c7b34a91d7b9ee27d9f"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.0032"),
   },
   {
-    referrer: "0xf35d9e265d20096af90a891205020ffab9291c8b",
+    referrer: acct("0xf35d9e265d20096af90a891205020ffab9291c8b"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.0045"),
   },
   {
-    referrer: "0x9b86be6324d8d56247c04b2ec7ea4d0149fb1f64",
+    referrer: acct("0x9b86be6324d8d56247c04b2ec7ea4d0149fb1f64"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.0028"),
   },
   {
-    referrer: "0xf5746ef53ed961afd3b2a6c6d13de65e1605d215",
+    referrer: acct("0xf5746ef53ed961afd3b2a6c6d13de65e1605d215"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.0025"),
   },
   {
-    referrer: "0x531a360408b69dcf325115921064c6e784cdc297",
+    referrer: acct("0x531a360408b69dcf325115921064c6e784cdc297"),
     totalReferrals: 1,
     totalIncrementalDuration: 2419200,
     totalRevenueContribution: parseEth("0.0033"),
@@ -216,9 +228,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
   },
   referrers: new Map([
     [
-      "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
+      acctKey("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e"),
       {
-        referrer: "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
+        referrer: acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e"),
         totalReferrals: 3,
         totalIncrementalDuration: 94694400,
         totalRevenueContribution: parseEth("0.015"),
@@ -232,9 +244,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xcfa4f8192ad39d1ee09f473e88e79d267e09ddca",
+      acctKey("0xcfa4f8192ad39d1ee09f473e88e79d267e09ddca"),
       {
-        referrer: "0xcfa4f8192ad39d1ee09f473e88e79d267e09ddca",
+        referrer: acct("0xcfa4f8192ad39d1ee09f473e88e79d267e09ddca"),
         totalReferrals: 2,
         totalIncrementalDuration: 63072000,
         totalRevenueContribution: parseEth("0.01"),
@@ -248,9 +260,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x00000000000000000000000000000000000000f1",
+      acctKey("0x00000000000000000000000000000000000000f1"),
       {
-        referrer: "0x00000000000000000000000000000000000000f1",
+        referrer: acct("0x00000000000000000000000000000000000000f1"),
         totalReferrals: 3,
         totalIncrementalDuration: 39657600,
         totalRevenueContribution: parseEth("0.012"),
@@ -264,9 +276,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+      acctKey("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
       {
-        referrer: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+        referrer: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
         totalReferrals: 4,
         totalIncrementalDuration: 34214400,
         totalRevenueContribution: parseEth("0.018"),
@@ -280,9 +292,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a",
+      acctKey("0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a"),
       {
-        referrer: "0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a",
+        referrer: acct("0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a"),
         totalReferrals: 7,
         totalIncrementalDuration: 15120000,
         totalRevenueContribution: parseEth("0.021"),
@@ -296,9 +308,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xffa596cdf9a69676e689b1a92e5e681711227d75",
+      acctKey("0xffa596cdf9a69676e689b1a92e5e681711227d75"),
       {
-        referrer: "0xffa596cdf9a69676e689b1a92e5e681711227d75",
+        referrer: acct("0xffa596cdf9a69676e689b1a92e5e681711227d75"),
         totalReferrals: 5,
         totalIncrementalDuration: 12960000,
         totalRevenueContribution: parseEth("0.016"),
@@ -312,9 +324,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x2a614b7984854177d22fa23a4034a13ea82e4f97",
+      acctKey("0x2a614b7984854177d22fa23a4034a13ea82e4f97"),
       {
-        referrer: "0x2a614b7984854177d22fa23a4034a13ea82e4f97",
+        referrer: acct("0x2a614b7984854177d22fa23a4034a13ea82e4f97"),
         totalReferrals: 5,
         totalIncrementalDuration: 12096000,
         totalRevenueContribution: parseEth("0.014"),
@@ -328,9 +340,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x2382a5878a44a6de5c3d91537d4132dc29e93c60",
+      acctKey("0x2382a5878a44a6de5c3d91537d4132dc29e93c60"),
       {
-        referrer: "0x2382a5878a44a6de5c3d91537d4132dc29e93c60",
+        referrer: acct("0x2382a5878a44a6de5c3d91537d4132dc29e93c60"),
         totalReferrals: 4,
         totalIncrementalDuration: 9676800,
         totalRevenueContribution: parseEth("0.013"),
@@ -344,9 +356,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x0000ffa596cdf9a69676e689b1a92e5e68171122",
+      acctKey("0x0000ffa596cdf9a69676e689b1a92e5e68171122"),
       {
-        referrer: "0x0000ffa596cdf9a69676e689b1a92e5e68171122",
+        referrer: acct("0x0000ffa596cdf9a69676e689b1a92e5e68171122"),
         totalReferrals: 1,
         totalIncrementalDuration: 7948800,
         totalRevenueContribution: parseEth("0.005"),
@@ -360,9 +372,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xc7190732aa0c3d523d945530bec6caeb8489b4a5",
+      acctKey("0xc7190732aa0c3d523d945530bec6caeb8489b4a5"),
       {
-        referrer: "0xc7190732aa0c3d523d945530bec6caeb8489b4a5",
+        referrer: acct("0xc7190732aa0c3d523d945530bec6caeb8489b4a5"),
         totalReferrals: 3,
         totalIncrementalDuration: 7257600,
         totalRevenueContribution: parseEth("0.009"),
@@ -376,9 +388,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x98c54f630c38c434cff2a1e3be9e095977cdc6af",
+      acctKey("0x98c54f630c38c434cff2a1e3be9e095977cdc6af"),
       {
-        referrer: "0x98c54f630c38c434cff2a1e3be9e095977cdc6af",
+        referrer: acct("0x98c54f630c38c434cff2a1e3be9e095977cdc6af"),
         totalReferrals: 3,
         totalIncrementalDuration: 7257600,
         totalRevenueContribution: parseEth("0.009"),
@@ -392,9 +404,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xadc318567a4a16db3839208b435184ae86ba3e43",
+      acctKey("0xadc318567a4a16db3839208b435184ae86ba3e43"),
       {
-        referrer: "0xadc318567a4a16db3839208b435184ae86ba3e43",
+        referrer: acct("0xadc318567a4a16db3839208b435184ae86ba3e43"),
         totalReferrals: 2,
         totalIncrementalDuration: 4838400,
         totalRevenueContribution: parseEth("0.006"),
@@ -408,9 +420,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x7e5d0cdd8144d0ec6ef7140e65714c011d462dbf",
+      acctKey("0x7e5d0cdd8144d0ec6ef7140e65714c011d462dbf"),
       {
-        referrer: "0x7e5d0cdd8144d0ec6ef7140e65714c011d462dbf",
+        referrer: acct("0x7e5d0cdd8144d0ec6ef7140e65714c011d462dbf"),
         totalReferrals: 2,
         totalIncrementalDuration: 4838400,
         totalRevenueContribution: parseEth("0.006"),
@@ -424,9 +436,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x71afe4867bef795a686d13f4dc60bc8d3a4e70f6",
+      acctKey("0x71afe4867bef795a686d13f4dc60bc8d3a4e70f6"),
       {
-        referrer: "0x71afe4867bef795a686d13f4dc60bc8d3a4e70f6",
+        referrer: acct("0x71afe4867bef795a686d13f4dc60bc8d3a4e70f6"),
         totalReferrals: 2,
         totalIncrementalDuration: 4838400,
         totalRevenueContribution: parseEth("0.006"),
@@ -440,9 +452,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x58879236e40b73482f585a5f74766d6b99cb1057",
+      acctKey("0x58879236e40b73482f585a5f74766d6b99cb1057"),
       {
-        referrer: "0x58879236e40b73482f585a5f74766d6b99cb1057",
+        referrer: acct("0x58879236e40b73482f585a5f74766d6b99cb1057"),
         totalReferrals: 2,
         totalIncrementalDuration: 4838400,
         totalRevenueContribution: parseEth("0.006"),
@@ -456,9 +468,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x32eccaf03d59d87c8a164cffea7cb0c4b3b9d481",
+      acctKey("0x32eccaf03d59d87c8a164cffea7cb0c4b3b9d481"),
       {
-        referrer: "0x32eccaf03d59d87c8a164cffea7cb0c4b3b9d481",
+        referrer: acct("0x32eccaf03d59d87c8a164cffea7cb0c4b3b9d481"),
         totalReferrals: 2,
         totalIncrementalDuration: 4838400,
         totalRevenueContribution: parseEth("0.006"),
@@ -472,9 +484,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x2254f9bab9b3d56994504c46932289447a708529",
+      acctKey("0x2254f9bab9b3d56994504c46932289447a708529"),
       {
-        referrer: "0x2254f9bab9b3d56994504c46932289447a708529",
+        referrer: acct("0x2254f9bab9b3d56994504c46932289447a708529"),
         totalReferrals: 2,
         totalIncrementalDuration: 4838400,
         totalRevenueContribution: parseEth("0.006"),
@@ -488,9 +500,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x54e7c79aceb6b736da4c29da088aae30991635bb",
+      acctKey("0x54e7c79aceb6b736da4c29da088aae30991635bb"),
       {
-        referrer: "0x54e7c79aceb6b736da4c29da088aae30991635bb",
+        referrer: acct("0x54e7c79aceb6b736da4c29da088aae30991635bb"),
         totalReferrals: 2,
         totalIncrementalDuration: 4579200,
         totalRevenueContribution: parseEth("0"),
@@ -504,9 +516,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xe3cc38fb4da8a96a6ab245022e6778a1ed32619c",
+      acctKey("0xe3cc38fb4da8a96a6ab245022e6778a1ed32619c"),
       {
-        referrer: "0xe3cc38fb4da8a96a6ab245022e6778a1ed32619c",
+        referrer: acct("0xe3cc38fb4da8a96a6ab245022e6778a1ed32619c"),
         totalReferrals: 1,
         totalIncrementalDuration: 3974400,
         totalRevenueContribution: parseEth("0"),
@@ -520,9 +532,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xce5ecf6d9e2181ad77b53305e2b1b6eca54728f0",
+      acctKey("0xce5ecf6d9e2181ad77b53305e2b1b6eca54728f0"),
       {
-        referrer: "0xce5ecf6d9e2181ad77b53305e2b1b6eca54728f0",
+        referrer: acct("0xce5ecf6d9e2181ad77b53305e2b1b6eca54728f0"),
         totalReferrals: 1,
         totalIncrementalDuration: 3628800,
         totalRevenueContribution: parseEth("0.004"),
@@ -536,9 +548,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x8354d821a89cc3c37902b60e9f30a15a6f810096",
+      acctKey("0x8354d821a89cc3c37902b60e9f30a15a6f810096"),
       {
-        referrer: "0x8354d821a89cc3c37902b60e9f30a15a6f810096",
+        referrer: acct("0x8354d821a89cc3c37902b60e9f30a15a6f810096"),
         totalReferrals: 2,
         totalIncrementalDuration: 2505600,
         totalRevenueContribution: parseEth("0.0055"),
@@ -552,9 +564,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x7bddd635be34bcf860d5f02ae53b16fcd17e8f6f",
+      acctKey("0x7bddd635be34bcf860d5f02ae53b16fcd17e8f6f"),
       {
-        referrer: "0x7bddd635be34bcf860d5f02ae53b16fcd17e8f6f",
+        referrer: acct("0x7bddd635be34bcf860d5f02ae53b16fcd17e8f6f"),
         totalReferrals: 3,
         totalIncrementalDuration: 2419203,
         totalRevenueContribution: parseEth("0.011"),
@@ -568,9 +580,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xf5746ef53ed961afd3b2a6c6d13de65e1605d215",
+      acctKey("0xf5746ef53ed961afd3b2a6c6d13de65e1605d215"),
       {
-        referrer: "0xf5746ef53ed961afd3b2a6c6d13de65e1605d215",
+        referrer: acct("0xf5746ef53ed961afd3b2a6c6d13de65e1605d215"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),
@@ -584,9 +596,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xf35d9e265d20096af90a891205020ffab9291c8b",
+      acctKey("0xf35d9e265d20096af90a891205020ffab9291c8b"),
       {
-        referrer: "0xf35d9e265d20096af90a891205020ffab9291c8b",
+        referrer: acct("0xf35d9e265d20096af90a891205020ffab9291c8b"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),
@@ -600,9 +612,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0xe45fb62899ccc74449923c7b34a91d7b9ee27d9f",
+      acctKey("0xe45fb62899ccc74449923c7b34a91d7b9ee27d9f"),
       {
-        referrer: "0xe45fb62899ccc74449923c7b34a91d7b9ee27d9f",
+        referrer: acct("0xe45fb62899ccc74449923c7b34a91d7b9ee27d9f"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),
@@ -616,9 +628,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x9b86be6324d8d56247c04b2ec7ea4d0149fb1f64",
+      acctKey("0x9b86be6324d8d56247c04b2ec7ea4d0149fb1f64"),
       {
-        referrer: "0x9b86be6324d8d56247c04b2ec7ea4d0149fb1f64",
+        referrer: acct("0x9b86be6324d8d56247c04b2ec7ea4d0149fb1f64"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),
@@ -632,9 +644,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x531a360408b69dcf325115921064c6e784cdc297",
+      acctKey("0x531a360408b69dcf325115921064c6e784cdc297"),
       {
-        referrer: "0x531a360408b69dcf325115921064c6e784cdc297",
+        referrer: acct("0x531a360408b69dcf325115921064c6e784cdc297"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),
@@ -648,9 +660,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x3d93f8a930023263c17a639580525a561072458c",
+      acctKey("0x3d93f8a930023263c17a639580525a561072458c"),
       {
-        referrer: "0x3d93f8a930023263c17a639580525a561072458c",
+        referrer: acct("0x3d93f8a930023263c17a639580525a561072458c"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),
@@ -664,9 +676,9 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       },
     ],
     [
-      "0x1779c4ad42cd07e437b6c6444b539ea1734fcaf4",
+      acctKey("0x1779c4ad42cd07e437b6c6444b539ea1734fcaf4"),
       {
-        referrer: "0x1779c4ad42cd07e437b6c6444b539ea1734fcaf4",
+        referrer: acct("0x1779c4ad42cd07e437b6c6444b539ea1734fcaf4"),
         totalReferrals: 1,
         totalIncrementalDuration: 2419200,
         totalRevenueContribution: parseEth("0.003"),

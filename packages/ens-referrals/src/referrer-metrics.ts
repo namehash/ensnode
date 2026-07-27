@@ -1,9 +1,8 @@
-import type { Duration, NormalizedAddress } from "enssdk";
+import type { AccountId, Duration } from "enssdk";
 
 import type { PriceEth } from "@ensnode/ensnode-sdk";
-import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeAccountIdSchema, makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { validateNormalizedAddress } from "./address";
 import { validateNonNegativeInteger } from "./number";
 import { ReferralProgramRules } from "./rules";
 import { validateDuration } from "./time";
@@ -14,9 +13,9 @@ import { validateDuration } from "./time";
  */
 export interface ReferrerMetrics {
   /**
-   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
+   * The {@link AccountId} of the referrer.
    */
-  referrer: NormalizedAddress;
+  referrer: AccountId;
 
   /**
    * The total number of referrals made by the referrer within the {@link ReferralProgramRules}.
@@ -43,7 +42,7 @@ export interface ReferrerMetrics {
 }
 
 export const buildReferrerMetrics = (
-  referrer: NormalizedAddress,
+  referrer: AccountId,
   totalReferrals: number,
   totalIncrementalDuration: Duration,
   totalRevenueContribution: PriceEth,
@@ -60,7 +59,7 @@ export const buildReferrerMetrics = (
 };
 
 export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
-  validateNormalizedAddress(metrics.referrer);
+  makeAccountIdSchema("ReferrerMetrics.referrer").parse(metrics.referrer);
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
 

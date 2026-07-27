@@ -1,4 +1,3 @@
-export * from "./address";
 export * from "./api";
 export * from "./award-models/pie-split/aggregations";
 export * from "./award-models/pie-split/api/serialized-types";
